@@ -2,6 +2,7 @@ package com.tailormyresume.feature.tailor.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.ContentReportRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
@@ -23,10 +24,14 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -53,6 +58,8 @@ internal class TailorViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val decisionMutex = Mutex()
+
+    private val acceptChanges = AcceptChangesUseCase(applicationRepository, clock)
 
     private val activeScenario = MutableStateFlow(scenario)
 

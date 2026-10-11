@@ -1,6 +1,8 @@
 package com.tailormyresume.feature.tailor.impl
 
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.domain.ExportCheck
+import com.tailormyresume.core.domain.ExportReadiness
 import com.tailormyresume.core.domain.UpdateBulletDecisionUseCase
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.DebugScenario
@@ -292,7 +294,7 @@ class TailorViewModelTest {
     }
 
     @Test
-    fun onAccept_marksTheBulletAcceptedAndCountsItAsReviewed() = runTest {
+    fun onUndoChange_marksTheBulletRejectedAndCountsItAsReviewed() = runTest {
         val viewModel = viewModel()
         collectUiState(viewModel)
         sendData(listOf(reviewable, unchanged))

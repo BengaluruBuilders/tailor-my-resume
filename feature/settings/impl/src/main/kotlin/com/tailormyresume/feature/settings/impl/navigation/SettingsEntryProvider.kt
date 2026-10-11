@@ -1,25 +1,17 @@
 package com.tailormyresume.feature.settings.impl.navigation
 
-import androidx.compose.foundation.text.BasicText
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.core.navigation.Navigator
-import com.tailormyresume.feature.settings.api.navigation.AccountDeletedNavKey
-import com.tailormyresume.feature.settings.api.navigation.DeleteAccountNavKey
+import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
+import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
-import com.tailormyresume.feature.settings.api.navigation.YourDataNavKey
+import com.tailormyresume.feature.settings.impl.credits.CreditsRoute
+import com.tailormyresume.feature.settings.impl.paywall.PaywallRoute
+import com.tailormyresume.feature.settings.impl.settings.SettingsRoute
 
 fun EntryProviderScope<NavKey>.settingsEntry(navigator: Navigator) {
-    entry<SettingsNavKey> { key ->
-        BasicText(text = key::class.simpleName.orEmpty())
-    }
-    entry<YourDataNavKey> { key ->
-        BasicText(text = key::class.simpleName.orEmpty())
-    }
-    entry<DeleteAccountNavKey> { key ->
-        BasicText(text = key::class.simpleName.orEmpty())
-    }
-    entry<AccountDeletedNavKey> { key ->
-        BasicText(text = key::class.simpleName.orEmpty())
-    }
+    entry<SettingsNavKey> { SettingsRoute(navigator) }
+    entry<CreditsNavKey> { CreditsRoute(navigator) }
+    entry<PaywallNavKey> { key -> PaywallRoute(navigator, key.returnToApplicationId) }
 }

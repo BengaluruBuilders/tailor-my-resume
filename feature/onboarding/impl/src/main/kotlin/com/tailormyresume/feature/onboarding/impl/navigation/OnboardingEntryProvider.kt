@@ -1,39 +1,30 @@
 package com.tailormyresume.feature.onboarding.impl.navigation
 
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.Composable
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.core.navigation.Navigator
-import com.tailormyresume.feature.onboarding.api.navigation.ConfirmFactsNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.ConsentNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.ImportResumeNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.PasteJobDescriptionNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.ManualProfileNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.PasteResumeNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.ReadingNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.ReviewProfileNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.WelcomeNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.UploadErrorNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
+import com.tailormyresume.feature.onboarding.impl.manual.ManualProfileRoute
+import com.tailormyresume.feature.onboarding.impl.paste.PasteResumeRoute
+import com.tailormyresume.feature.onboarding.impl.reading.ReadingRoute
+import com.tailormyresume.feature.onboarding.impl.review.ReviewRoute
+import com.tailormyresume.feature.onboarding.impl.signin.SignInRoute
+import com.tailormyresume.feature.onboarding.impl.upload.UnreadableRoute
+import com.tailormyresume.feature.onboarding.impl.upload.UploadRoute
 
 fun EntryProviderScope<NavKey>.onboardingEntry(navigator: Navigator) {
-    entry<WelcomeNavKey> { key ->
-        NavKeyPlaceholder(key)
-    }
-    entry<SignInNavKey> { key ->
-        NavKeyPlaceholder(key)
-    }
-    entry<ConsentNavKey> { key ->
-        NavKeyPlaceholder(key)
-    }
-    entry<ImportResumeNavKey> { key ->
-        NavKeyPlaceholder(key)
-    }
-    entry<ConfirmFactsNavKey> { key ->
-        NavKeyPlaceholder(key)
-    }
-    entry<PasteJobDescriptionNavKey> { key ->
-        NavKeyPlaceholder(key)
-    }
-}
-
-@Composable
-internal fun NavKeyPlaceholder(key: NavKey) {
-    BasicText(text = key::class.simpleName.orEmpty())
+    entry<SignInNavKey> { SignInRoute(hiltViewModel()) }
+    entry<UploadNavKey> { UploadRoute(hiltViewModel(), navigator) }
+    entry<UploadErrorNavKey> { UnreadableRoute(hiltViewModel(), navigator) }
+    entry<PasteResumeNavKey> { PasteResumeRoute(hiltViewModel(), navigator) }
+    entry<ManualProfileNavKey> { ManualProfileRoute(hiltViewModel(), navigator) }
+    entry<ReadingNavKey> { ReadingRoute(hiltViewModel(), navigator) }
+    entry<ReviewProfileNavKey> { ReviewRoute(hiltViewModel(), navigator) }
 }
