@@ -1,0 +1,547 @@
+{
+  "repo": "BengaluruBuilders/tailor-my-resume",
+  "base": "main@e387b855",
+  "scouted_at": "2026-10-10",
+  "sources": [
+    "docs/revamp/2026-10-10/PLAN.md sections 1, 5 (W1), 6",
+    "docs/revamp/2026-10-10/DECISIONS.md D1-D11",
+    "PR #255 head 21ee644d (worktree ../hirehop-wt/scout): docs/CONSTITUTION.md, docs/PRD.md 6.1.2, design/prototype-2026-10-10/",
+    "AGENTS.md, docs/CONSTITUTION.md (main), tools/ci/verify-local.sh, tools/ci/check-constitution.sh, tools/ci/pregate.py, .github/workflows/build.yml, delivery-gates.yml",
+    "build-logic/convention TailorMyResumeKoverPlugin.kt (80% LINE, core:domain + core:data), AndroidLint.kt (warningsAsErrors, abortOnError), AndroidFeatureImplConventionPlugin.kt",
+    "app/dependencies/{demo,prod}ReleaseRuntimeClasspath.txt (160 / 202 lines, external modules only)"
+  ],
+  "routing": {
+    "module_graph_order": [
+      "Wave 1a, parallel, file-disjoint: #257 (feature/tailor/impl), #258 (feature/onboarding/impl + feature/profile/impl), #259 (feature/analysis/impl + applications/impl + settings/impl). All three edit impl modules only; every NavKey in feature/*/api and every reference in :app stays, so :app keeps compiling. Each keeps the public entry function that :app/TmrApp.kt calls: tailorEntry, onboardingEntry, profileEntry, analysisEntry, applicationsEntry, applicationDetailEntry, settingsEntry, all `EntryProviderScope<NavKey>.xEntry(navigator: Navigator)`.",
+      "Wave 1b: #262 (delete core:ui) technically needs only #257 (tailor exported/ExportedScreen.kt imports core.ui) and #259 (analysis AnalysisSheets.kt, applications 4 files import core.ui). It does not need #260 or #261. Recommended: run #262 right after #257 and #259 merge, before #261.",
+      "Wave 1b: #260 (core + app + feature/*/api) after #257, #258, #259 merge. Parallel to #261 and #262 (no shared files).",
+      "Wave 1c: #261 (core/designsystem) after #257-#259, and preferably after #262. core:ui imports TmrConfirmDialog, TmrCoverageBlock, TmrProvenanceKind/TmrProvenanceChip, TmrStatusDisc, TmrStatusKind, TmrApplicationStatusChip/Kind, TmrBottomSheet, TmrFactId, TmrDestructiveButton/TmrOutlineButton/TmrPrimaryButton; if #262 has not merged at #261's base, #261 must keep those files.",
+      "#263 (docs/CONSTITUTION.md) and #285 (docs/BACKEND_CONTRACT.md) are independent docs lanes. #263 must be based on main after PR #255 merges (same file, adjacent ledger lines, and the path design/prototype-2026-10-10/ only exists after #255).",
+      "Constitution ordering: main's Constitution I.5 still says data leaves the device 'only after the candidate accepts consent screen S4'. PR #255 (open, BLOCKED on the delivery-gates/review status, owner blocker #256) amends that. #258 (deletes the consent screen), #259 (deletes the read-only consent row) and #260 (deletes ConsentUploader and the consent record) must not merge before #255 is on main. #257, #261, #262 and #285 have no such dependency."
+    ],
+    "file_overlap_pairs": [
+      {"pair": [257, 260], "files": ["feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/navigation/TailorEntryProvider.kt (#260 must remove the placeholder entries for the tailor NavKeys it deletes)", "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/TailorViewModel.kt + TailorViewModelTest.kt, only if #257 does not remove the ConnectivityMonitor dependency (criterion 257-c5 says it does)"], "mode": "sequential (#260 depends on #257)"},
+      {"pair": [258, 260], "files": ["feature/onboarding/impl/.../navigation/OnboardingEntryProvider.kt", "feature/profile/impl/.../navigation/ProfileEntryProvider.kt"], "mode": "sequential (#260 depends on #258)"},
+      {"pair": [259, 260], "files": ["feature/settings/impl/.../navigation/SettingsEntryProvider.kt (+ SettingsEntryProviderTest.kt)", "feature/analysis/impl/.../navigation/AnalysisEntryProvider.kt (+ AnalysisEntryProviderTest.kt), only if #259 keeps the OnboardingStep.Consent mapping"], "mode": "sequential (#260 depends on #259)"},
+      {"pair": [259, 262], "files": ["feature/settings/impl/build.gradle.kts (line 14 implementation(projects.core.ui))"], "mode": "sequential; let #262 own the line (no settings file imports core.ui today), #259 leaves it"},
+      {"pair": [263, 255], "files": ["docs/CONSTITUTION.md (PR #255 adds the 2026-10-10 I.5 ledger amendment next to the row #263 edits)"], "mode": "#263 waits for #255"}
+    ],
+    "contract_overlaps_without_shared_files": [
+      "#261 vs #262: core:ui consumes designsystem components (see module_graph_order).",
+      "#261 vs #260: :app (main + debug) imports TmrBackground (component/Background.kt), TmrCard, TmrDock*, TmrFilterChip, TmrInnerHeader, TmrOutlineButton, TmrPrimaryButton, TmrScreen, TmrSwitch, LocalTmrBottomInset, rememberTmrNavTransitions, TmrIcons, TmrTheme. #261 cannot touch :app, so it keeps every file :app imports at its base (and their in-module dependencies), even where the issue list names them (Background, TmrFilterChip, TmrInnerHeader).",
+      "#257/#258/#259 vs #261: the deleted feature screens are the consumers that make most components dead; #261 starts only after all three merge."
+    ],
+    "shared_persisted_state": "Only #260 writes or abandons persisted state; no two issues share state, so route should not stack on state.",
+    "max_active_note": "DECISIONS D11 allows 3 lanes across both repos (2 app + 1 backend). Gradle builds on this host must be serialised through one lock (memory: lockf -k <scratchpad>/gradle.lock ./gradlew ...); run ./gradlew --stop through the same lock."
+  },
+  "issues": [
+    {
+      "number": 257,
+      "title": "chore(tailor): delete cover letter, prep questions, DOCX, export preview, section regeneration and the old tailor screens",
+      "lane": "W1-A",
+      "status": "ready",
+      "tier": "ui",
+      "depends_on": [],
+      "criteria": [
+        {"id": "257-c1", "text": "Given the branch head, When `./gradlew :feature:tailor:impl:testDebugUnitTest :feature:tailor:impl:verifyRoborazziDebug :feature:tailor:impl:lintRelease assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true` runs, Then every task passes."},
+        {"id": "257-c2", "text": "Given the head, When `git ls-files feature/tailor/impl` is listed, Then coverletter/, prepquestions/, export/docx/, exportpreview/, packpurchase/, credits/, exported/ (all files except exported/ExportedFileStore.kt), ShareLastExport*, BulletReviewSheet.kt, RegenerateSectionUseCase.kt, AiNotice.kt, CanvasParts.kt, ReviewContent.kt, ReviewParts.kt, ReviewLabels.kt, JobLabels.kt, TailorScreen.kt and TailorRoute.kt are absent with their tests, and `git ls-files feature/tailor/impl/src/test/screenshots | wc -l` prints 0 (166 PNG baselines removed)."},
+        {"id": "257-c3", "text": "Given the head, When the keep list is checked, Then TailorViewModel.kt, HandEditBulletUseCase.kt, diff/WordDiff.kt, document/**, export/{AndroidPdfResumeRenderer,ResumePdfComposer,Pagination,PdfPageWriter,PdfResumeStyle,RenderedResume,ResumePdfRenderer,ExportDirectory,ExportFileName,ExportModule,PdfShareIntent,TailorFileProvider}.kt, exported/ExportedFileStore.kt, the FileProvider in src/main/AndroidManifest.xml and res/xml/feature_tailor_impl_file_paths.xml exist, and WordDiffTest, WordDiffPunctuationTest, ResumeDocumentAssemblerTest, ResumeDocumentContinuationTest, ExportDirectoryTest, ExportFileNameTest and PaginationTest exist and pass."},
+        {"id": "257-c4", "text": "Given the I.2 gate, When `./gradlew :feature:tailor:impl:testDebugUnitTest --tests '*TailorViewModelTest'` and `./gradlew :core:domain:testDebugUnitTest --tests '*UpdateBulletDecisionUseCaseTest'` run, Then both classes exist and pass, and TailorViewModelTest still asserts that a suggestion starts PENDING and that only an explicit accept or reject changes a decision (only the regenerate-section and offline-strip cases are removed)."},
+        {"id": "257-c5", "text": "Given TailorViewModel after the strip, When its constructor and imports are read, Then it has no RegenerateSectionUseCase and no core.data.connectivity.ConnectivityMonitor dependency (offline states are cut, PRD 6.1.2), so #260 can delete core/data/connectivity without editing feature/tailor/impl."},
+        {"id": "257-c6", "text": "Given the app navigates to TailorNavKey, BulletReviewNavKey, CoverLetterNavKey, PrepQuestionsNavKey, ExportPreviewNavKey, PackPurchaseNavKey, ExportedNavKey, ShareLastExportNavKey or CreditsNavKey, When the entry renders, Then it shows the NavKey's simple class name through androidx.compose.foundation.text.BasicText (no androidx.compose.material3 import), `tailorEntry(navigator: Navigator)` keeps its signature, and feature/tailor/api is unchanged."},
+        {"id": "257-c7", "text": "Given the head, When `grep -rlE 'CoverLetter|PrepQuestion|Docx|RegenerateSection' feature/tailor/impl` runs, Then the only match is navigation/TailorEntryProvider.kt, and only for the NavKey type names CoverLetterNavKey and PrepQuestionsNavKey and their imports (W1-D #260 deletes those keys)."},
+        {"id": "257-c8", "text": "Given BASE_REF=origin/main, When `tools/ci/check-constitution.sh` runs, Then it passes, which includes: feature/tailor/impl/lint-baseline.xml has no more `<issue` entries than its 3 on main, and no new raw Material import in feature/."},
+        {"id": "257-c9", "text": "Given lint with warningsAsErrors, When `:feature:tailor:impl:lintRelease` runs, Then no UnusedResources finding exists: every string, xml and drawable resource that no remaining file uses is deleted (strings_ai_notice, strings_bullet_review, strings_cover_letter, strings_credits, strings_export_preview, strings_exported, strings_pack_purchase, strings_prep_questions and unused entries of strings.xml)."},
+        {"id": "257-c10", "text": "Given the branch, When `tools/ci/verify-local.sh` runs, Then it exits 0."}
+      ],
+      "non_goals": [
+        "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX export, templates) being rebuilt.",
+        "Editing feature/tailor/api, core/*, :app or build-logic (W1-D #260 and W1-F #262 own them).",
+        "Deleting any NavKey (W1-D).",
+        "Building the new tailoring, tailored, edit or exported screens (W4-C1, W4-C2).",
+        "Adding AcceptChangesUseCase or the export guard (W2-G, D4).",
+        "Changing PDF rendering output or the export file name format (W2-F, W4-C2)."
+      ],
+      "gates": [
+        "./gradlew :feature:tailor:impl:testDebugUnitTest :feature:tailor:impl:verifyRoborazziDebug :feature:tailor:impl:lintRelease assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true",
+        "./gradlew :core:domain:testDebugUnitTest --tests '*UpdateBulletDecisionUseCaseTest' -PwarningsAsErrors=true",
+        "./gradlew spotlessCheck",
+        "BASE_REF=origin/main tools/ci/check-constitution.sh",
+        "grep -rlE 'CoverLetter|PrepQuestion|Docx|RegenerateSection' feature/tailor/impl  # only navigation/TailorEntryProvider.kt NavKey names",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt calls tailorEntry(navigator); keep the signature.",
+        "export/ExportModule.kt binds ResumeDocxRenderer -> remove that binding with export/docx.",
+        "export/PdfShareIntent.kt has createDocxShareIntent and a `when (ExportFormat)` over exportpreview/ExportFormat.kt -> drop the DOCX branch; ExportFormat is deleted with exportpreview/ or the switch is removed.",
+        "TailorViewModel constructor takes RegenerateSectionUseCase and ConnectivityMonitor; TailorViewModelTest builds RegenerateSectionUseCase (line ~124) and collects regenerateFailures (lines ~430-464)."
+      ],
+      "constraints": [
+        "Constitution VII.3 / PLAN 6.1: TailorViewModelTest and UpdateBulletDecisionUseCaseTest are the I.2 gate and must survive; deleting either needs a rule-text change, which is forbidden in this run.",
+        "Constitution III.3: feature/tailor/impl/lint-baseline.xml (3 issues today: PdfPageWriter.kt, strings.xml) may only shrink; a new baseline file is an amendment.",
+        "Constitution II.5 policy (forbid_new_violations on feature/): placeholders use androidx.compose.foundation.text.BasicText only; no androidx.compose.material3 component import and no MaterialTheme.* token read.",
+        "Constitution III.2: no new code comments without an external ground (policy scan on *.kt).",
+        "Lint runs with warningsAsErrors=true and abortOnError=true (build-logic AndroidLint.kt): orphaned resources fail as UnusedResources.",
+        "CI compiles Kotlin with -PwarningsAsErrors=true; run gates with that flag.",
+        "pregate --ci fails on every deleted file under src/test (each of the 166 PNGs and every deleted *.kt test or fixture counts as TEST_DELETED) and on net-removed assertions in TailorViewModelTest (ASSERT_REMOVED) unless the PR body has one `- <exact path>: <reason>` line per path under `## Pre-review gate`. No globs are accepted. Generate the list from `git diff --name-status --diff-filter=D origin/main`. Estimated body size ~25 KB (< 65 KB GitHub limit).",
+        "Deleting tests whose subject is deleted is in the issue scope (the owner cut the features, PRD 6.1.2); it is not a coverage-removal card. Removing assertions about surviving behaviour (PENDING start, accept/reject) is.",
+        "Stage files explicitly (`git add <paths>` / `git rm`); never `git add -A`: the stale nested worktree .claude/worktrees/sync holds old baseline copies (PLAN 6.3). No `git stash` (shared across worktrees).",
+        "Router (MiniMax) refuses briefs naming auth/token/secret/credential/password/migration/runner/keystore paths; none are in this lane.",
+        "Host: Gradle through the shared lock, org.gradle.workers.max=3 (V.4); copy local.properties into the worktree.",
+        "Main stays unreleasable for tailoring/export until W4-C; this is accepted by the plan (no public release during the revamp)."
+      ],
+      "state": [],
+      "files": [
+        "feature/tailor/impl/src/main/**",
+        "feature/tailor/impl/src/test/**",
+        "feature/tailor/impl/src/test/screenshots/** (166 PNG, all deleted)",
+        "feature/tailor/impl/src/main/res/**",
+        "feature/tailor/impl/lint-baseline.xml (may only shrink)"
+      ],
+      "tests_must_survive": [
+        "feature/tailor/impl: TailorViewModelTest (I.2), WordDiffTest, WordDiffPunctuationTest, ResumeDocumentAssemblerTest, ResumeDocumentContinuationTest, ExportDirectoryTest, ExportFileNameTest, PaginationTest",
+        "core/domain: UpdateBulletDecisionUseCaseTest (I.2, untouched)"
+      ],
+      "baselines_removed": "166 PNG under feature/tailor/impl/src/test/screenshots (BulletReview*, CoverLetter*, Credits*, ExportPreview*, Exported*, PackPurchase*, PrepQuestions*, TailoringReview*), with ReviewScreenshotTest, BulletReviewScreenshotTest and the per-package *ScreenshotTest classes.",
+      "scale": {"material": false, "note": "Deletion only; no runtime hot path changes. Fewer classes and resources; build and APK size go down. One-line rationale suffices."}
+    },
+    {
+      "number": 258,
+      "title": "chore(onboarding,profile): delete welcome, consent, fact-by-fact confirmation, guided form, evidence path and the old profile screens",
+      "lane": "W1-B",
+      "status": "ready",
+      "tier": "ui",
+      "depends_on": ["PR #255 merged (Constitution I.5 consent clause) before merge; code work can start now"],
+      "criteria": [
+        {"id": "258-c1", "text": "Given the branch head, When `./gradlew :feature:onboarding:impl:testDebugUnitTest :feature:profile:impl:testDebugUnitTest verifyRoborazziDebug :feature:onboarding:impl:lintRelease :feature:profile:impl:lintRelease assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true` runs, Then every task passes."},
+        {"id": "258-c2", "text": "Given the head, When `git ls-files feature/onboarding/impl` is listed, Then welcome/, consent/, confirmfacts/, pastejd/, common/ (if only deleted screens use it) and the UI, UiState, Actions, ViewModel and tests of signin/ and importresume/ are absent, the tracked stray file importresume/ImportResumeViewModel.kt-e is absent, and importresume/ContentResolverResumeTextSource.kt, importresume/ResumeTextSource.kt and di/OnboardingModule.kt exist unchanged with the ResumeTextSource Hilt binding."},
+        {"id": "258-c3", "text": "Given the head, When `git ls-files feature/profile/impl` is listed, Then evidencepath/, facteditor/, guidedform/ (except ContactFieldValidator.kt), common/, ProfileScreen*, ProfileOverview, ProfileSheetHost, ProfileHeader, ProfileCard, ProfileEmptyState, ProfileExit, ProfileSections, ProfileEditing, ProfileUiState, ProfileActions, ProfileViewModel and their tests are absent, and UserFactWriter.kt with UserFactWriterTest is absent (its only consumer, GuidedFormViewModel, is deleted)."},
+        {"id": "258-c4", "text": "Given ContactFieldValidator.kt is kept, When `./gradlew :feature:profile:impl:testDebugUnitTest` runs, Then a ContactFieldValidatorTest exists and passes with at least the email assertions now in GuidedFormContactValidationTest (a.b@c.in and o'brien@example.com valid, a@b invalid), moved out of the deleted GuidedFormContactValidationTest so the coverage is kept."},
+        {"id": "258-c5", "text": "Given ContentResolverResumeTextSource has no dedicated test on main (only ImportResumeViewModel tests use a fake ResumeTextSource), When the lane ends, Then ContentResolverResumeTextSource, ResumeTextSource and OnboardingModule compile, stay bound and are byte-identical to main; the PR body states that the issue's 'ContentResolverResumeTextSource tests' criterion has no existing test to keep."},
+        {"id": "258-c6", "text": "Given the app navigates to any onboarding or profile NavKey (WelcomeNavKey, SignInNavKey, ConsentNavKey, ImportResumeNavKey, ConfirmFactsNavKey, PasteJobDescriptionNavKey, ProfileNavKey, FactEditorNavKey, GuidedProfileFormNavKey, FactEvidenceNavKey), When the entry renders, Then it shows the NavKey's simple class name through androidx.compose.foundation.text.BasicText, and `onboardingEntry(navigator: Navigator)` and `profileEntry(navigator: Navigator)` keep their signatures."},
+        {"id": "258-c7", "text": "Given the head, When `grep -rlE 'Consent|Welcome|EvidencePath|GuidedForm|ConfirmFacts' feature/onboarding/impl feature/profile/impl` runs, Then the only matches are the NavKey type names (WelcomeNavKey, ConsentNavKey, ConfirmFactsNavKey) and their imports in navigation/OnboardingEntryProvider.kt and navigation/ProfileEntryProvider.kt."},
+        {"id": "258-c8", "text": "Given the head, When `git ls-files feature/onboarding/impl/src/test/screenshots feature/profile/impl/src/test/screenshots | wc -l` runs, Then it prints 0 (114 + 73 = 187 PNG baselines removed with their screenshot test classes)."},
+        {"id": "258-c9", "text": "Given BASE_REF=origin/main, When `tools/ci/check-constitution.sh` and `tools/ci/verify-local.sh` run, Then both exit 0 and lint reports no UnusedResources in either module."}
+      ],
+      "non_goals": [
+        "Rebuilding sign-in, upload, reading or review profile (W4-A1..A3) or the profile tab and editors (W4-E).",
+        "Editing feature/*/api, core/*, :app or build-logic (W1-D #260).",
+        "Deleting any NavKey (W1-D).",
+        "Adding a new test for ContentResolverResumeTextSource (no behaviour change; W4-A2 owns Upload tests).",
+        "Anything in PRD 6.1.2 'Not in the MVP'."
+      ],
+      "gates": [
+        "./gradlew :feature:onboarding:impl:testDebugUnitTest :feature:profile:impl:testDebugUnitTest verifyRoborazziDebug :feature:onboarding:impl:lintRelease :feature:profile:impl:lintRelease assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true",
+        "./gradlew spotlessCheck",
+        "BASE_REF=origin/main tools/ci/check-constitution.sh",
+        "grep -rlE 'Consent|Welcome|EvidencePath|GuidedForm|ConfirmFacts' feature/onboarding/impl feature/profile/impl  # only *EntryProvider.kt NavKey names",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt calls onboardingEntry(navigator) and profileEntry(navigator); keep both signatures.",
+        "UserFactWriter: only GuidedFormViewModel (main) and ProfileReturnTest, UserFactWriterTest, UserStatedSkillsTest, GuidedForm*Test (test) use it -> delete with them.",
+        "ContactFieldValidator: only GuidedFormViewModel and GuidedFormContactValidationTest use it -> kept for W4-E, test moved.",
+        "ResumeTextSource: bound in di/OnboardingModule.kt, consumed only by ImportResumeViewModel (deleted); keep the binding for W4-A2."
+      ],
+      "constraints": [
+        "Constitution I.5 on main still requires consent screen S4; PR #255 (open, BLOCKED on owner blocker #256) amends it. This PR deletes the consent screen, so it must merge after #255 is on main (Constitution wins every conflict).",
+        "Constitution II.5 policy: BasicText placeholders, no raw Material import in feature/.",
+        "Constitution III.2: no ungrounded comments. III.3: no new lint-baseline.xml file in these modules (neither has one today).",
+        "Lint warningsAsErrors: delete strings_confirm_facts, strings_consent, strings_paste_jd, strings_welcome, strings_sign_in, strings_import_resume and the profile string files once unused.",
+        "Ledger rule 'every ViewModel test class must exist for a ViewModel that exists': delete each ViewModel together with its tests (IV.1).",
+        "pregate --ci: ~187 PNG + ~85 test *.kt deletions each need an exact `- <path>: <reason>` line under `## Pre-review gate` (no globs). Estimated ~28 KB of PR body. Generate it from `git diff --name-status --diff-filter=D`.",
+        "Replacing GuidedFormContactValidationTest's validator assertions with ContactFieldValidatorTest keeps coverage; it is a test move, not a coverage-removal card. Name it in the PR body.",
+        "Stage paths explicitly; never `git add -A` (.claude/worktrees/sync). No git stash.",
+        "Router refuses briefs naming auth-like paths; signin/ is fine, but do not paste issue text into the brief.",
+        "After merge, the prod build has no sign-in UI until W4-A1: main is not releasable; accepted by the plan."
+      ],
+      "state": [],
+      "files": [
+        "feature/onboarding/impl/**",
+        "feature/profile/impl/**"
+      ],
+      "tests_must_survive": [
+        "feature/profile/impl: ContactFieldValidatorTest (new home of the existing validator assertions)",
+        "No I.1/I.2 gate lives in these modules."
+      ],
+      "baselines_removed": "114 PNG (feature/onboarding/impl: ConfirmFacts*, Consent*, ImportResume*, PasteJobDescription*, SignIn*, Welcome*) + 73 PNG (feature/profile/impl: EvidencePath*, GuidedForm*, ProfileOverview*, ProfileSection*, fact*), with every *ScreenshotTest class in both modules.",
+      "scale": {"material": false, "note": "Deletion only; no runtime path changes."}
+    },
+    {
+      "number": 259,
+      "title": "chore(analysis,applications,settings): delete the share card, requirement sheets, notes, Your data and Account deleted screens and the old screens",
+      "lane": "W1-C",
+      "status": "ready",
+      "tier": "ui",
+      "depends_on": ["PR #255 merged (it removes the read-only consent view required by main's I.5) before merge; code work can start now"],
+      "criteria": [
+        {"id": "259-c1", "text": "Given the branch head, When `./gradlew :feature:analysis:impl:testDebugUnitTest :feature:applications:impl:testDebugUnitTest :feature:settings:impl:testDebugUnitTest verifyRoborazziDebug :feature:analysis:impl:lintRelease :feature:applications:impl:lintRelease :feature:settings:impl:lintRelease assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true` runs, Then every task passes."},
+        {"id": "259-c2", "text": "Given the head, When `git ls-files feature/analysis/impl/src/main` is listed, Then only navigation/AnalysisEntryProvider.kt, AnalysisResultMapper.kt (only if it is pure mapping and keeps a passing unit test, else deleted) and the resources they use remain; ShareFitScreen.kt, AnalysisSheets.kt, AnalysisScreen.kt, AnalysisViewModel.kt and the other screen files are gone with their tests."},
+        {"id": "259-c3", "text": "Given the head, When `git ls-files feature/applications/impl/src/main` is listed, Then only navigation/ApplicationsEntryProvider.kt (with applicationsEntry and applicationDetailEntry) and the resources it uses remain; NotesAutosaver.kt, ApplicationWorkspace*, ApplicationsPreviewData/fixtures, ViewModels and screens are gone with their tests."},
+        {"id": "259-c4", "text": "Given the head, When `git ls-files feature/settings/impl/src/main` is listed, Then yourdata/, deleteaccount/ (screens, AccountDeleted*, ViewModel), settings/ screens and ViewModel and common/ are gone with their tests, and navigation/SettingsEntryProvider.kt, navigation/SettingsFileShare.kt (SettingsFileProvider + createSettingsShareIntent), the <provider> in src/main/AndroidManifest.xml and res/xml/feature_settings_impl_file_paths.xml remain (interim data-export share, PLAN R6)."},
+        {"id": "259-c5", "text": "Given the app navigates to AnalysisNavKey, ApplicationsNavKey, ApplicationDetailNavKey, SettingsNavKey, YourDataNavKey, DeleteAccountNavKey or AccountDeletedNavKey, When the entry renders, Then it shows the NavKey's simple class name through androidx.compose.foundation.text.BasicText, and analysisEntry, applicationsEntry, applicationDetailEntry and settingsEntry keep their `(navigator: Navigator)` signatures."},
+        {"id": "259-c6", "text": "Given the head, When `grep -rlE 'ShareFit|Notes|YourData|AccountDeleted|Consent' feature/analysis/impl feature/applications/impl feature/settings/impl` runs, Then the only matches are the NavKey type names YourDataNavKey and AccountDeletedNavKey and their imports in navigation/SettingsEntryProvider.kt; ConsentNavKey and OnboardingStep.Consent are no longer referenced by AnalysisEntryProvider.kt or SettingsEntryProvider.kt."},
+        {"id": "259-c7", "text": "Given the head, When `git ls-files feature/analysis/impl/src/test/screenshots feature/applications/impl/src/test/screenshots feature/settings/impl/src/test/screenshots | wc -l` runs, Then it prints 0 (42 + 48 + 54 = 144 PNG baselines removed)."},
+        {"id": "259-c8", "text": "Given the head, When `grep -rl 'import com.tailormyresume.core.ui' feature/analysis/impl feature/applications/impl feature/settings/impl` runs, Then nothing matches, so #262 can delete core:ui."},
+        {"id": "259-c9", "text": "Given BASE_REF=origin/main, When `tools/ci/check-constitution.sh` runs, Then it passes, including feature/analysis/impl/lint-baseline.xml having no more than its 1 entry on main; and `tools/ci/verify-local.sh` exits 0."}
+      ],
+      "non_goals": [
+        "Rebuilding Job, Job analyzed, Applications, Settings, Credits or Paywall (W4-B, W4-D, W4-F).",
+        "Editing feature/*/api, core/*, :app or build-logic.",
+        "Removing `implementation(projects.core.ui)` from feature/settings/impl/build.gradle.kts: leave it to #262 (no settings file imports core.ui today, and the feature-impl convention plugin adds core:ui to every feature impl anyway).",
+        "Deleting DeleteAccountUseCase, ExportAccountDataUseCase or any core account logic (W1-D keeps them).",
+        "Anything in PRD 6.1.2 'Not in the MVP'."
+      ],
+      "gates": [
+        "./gradlew :feature:analysis:impl:testDebugUnitTest :feature:applications:impl:testDebugUnitTest :feature:settings:impl:testDebugUnitTest verifyRoborazziDebug :feature:analysis:impl:lintRelease :feature:applications:impl:lintRelease :feature:settings:impl:lintRelease assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true",
+        "./gradlew spotlessCheck",
+        "BASE_REF=origin/main tools/ci/check-constitution.sh",
+        "grep -rlE 'ShareFit|Notes|YourData|AccountDeleted|Consent' feature/analysis/impl feature/applications/impl feature/settings/impl  # only SettingsEntryProvider.kt NavKey names",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt calls analysisEntry, applicationsEntry, applicationDetailEntry, settingsEntry; keep all four signatures.",
+        "AnalysisEntryProvider.kt maps OnboardingStep.Consent -> ConsentNavKey (line ~40); the placeholder drops the mapping.",
+        "SettingsEntryProvider.kt maps SettingsDestination.CONSENT_NOTICE -> ConsentNavKey(readOnly = true) (line ~73) and calls createSettingsShareIntent; the placeholder drops both calls, SettingsFileShare.kt stays (it becomes unused until W4-F1).",
+        "core.ui consumers removed here: analysis AnalysisSheets.kt; applications ApplicationsScreen.kt, ApplicationWorkspaceSections.kt, ApplicationWorkspaceRequirementSheet.kt, ApplicationDetailScreen.kt."
+      ],
+      "constraints": [
+        "Constitution I.5 on main still mentions consent screen S4; the settings read-only consent row goes here, so merge after PR #255.",
+        "Constitution II.5: BasicText placeholders only. III.2: no ungrounded comments. III.3: feature/analysis/impl/lint-baseline.xml (1 entry, strings.xml) may only shrink.",
+        "Lint warningsAsErrors: delete unused strings (strings_your_data, strings_delete_account, strings_loading, strings_steps, strings_settings, applications and analysis strings.xml entries) once unused; keep strings SettingsFileShare callers will need only if still referenced.",
+        "Removing Delete account and Download my data UI leaves no in-app account deletion until W4-F1; Google Play requires an in-app deletion path for apps with accounts, so no Play release may be cut from main between this merge and W4-F1. The plan accepts the gap (no release during the revamp).",
+        "pregate --ci: ~144 PNG + ~60 test *.kt deletions each need an exact `- <path>: <reason>` line under `## Pre-review gate` (~22 KB).",
+        "Deleting DeleteAccountViewModelTest, SettingsViewModelTest and YourData*Test is in scope (their ViewModels are deleted); core:domain DeleteAccountUseCaseTest and DeleteMyDataUseCaseTest keep the account-deletion logic covered.",
+        "Stage paths explicitly; no git add -A; no git stash.",
+        "Main not releasable until W4; accepted."
+      ],
+      "state": [],
+      "files": [
+        "feature/analysis/impl/**",
+        "feature/applications/impl/**",
+        "feature/settings/impl/** (not build.gradle.kts; #262 owns the core.ui line)"
+      ],
+      "tests_must_survive": [
+        "AnalysisResultMapper's unit test if the mapper is kept (decide by reading it: pure mapping + test -> keep both; else delete both).",
+        "No I.1/I.2 gate lives in these modules."
+      ],
+      "baselines_removed": "42 PNG (analysis: Analysis*), 48 PNG (applications: Applications*, Workspace*), 54 PNG (settings: DeleteAccount*, InnerHeader*, Settings*, YourData*), with every *ScreenshotTest class in the three modules.",
+      "scale": {"material": false, "note": "Deletion only; no runtime path changes."}
+    },
+    {
+      "number": 260,
+      "title": "chore(core,app): remove consent, cover letter, prep, connectivity and other dead features from the domain, data, network and app layers",
+      "lane": "W1-D",
+      "status": "ready",
+      "tier": "sensitive",
+      "depends_on": [257, 258, 259, "PR #255 merged", "apps-backend #87 (drop the consent gate) deployed to staging, or a lead decision that accepts a staging break for new users"],
+      "criteria": [
+        {"id": "260-c1", "text": "Given the branch head, When `./gradlew testDebugUnitTest :app:testDemoDebugUnitTest :app:testProdDebugUnitTest assembleDemoDebug assembleProdDebug lintRelease :app:lintDemoRelease :app:lintProdRelease :app:dependencyGuard -PwarningsAsErrors=true` runs, Then every task passes."},
+        {"id": "260-c2", "text": "Given Kover's 80% LINE bound (TailorMyResumeKoverPlugin), When `./gradlew :core:domain:koverVerify :core:data:koverVerify` runs, Then both pass; the PR body records `koverLog` line coverage for core:domain and core:data on the base and on the head."},
+        {"id": "260-c3", "text": "Given the I.1 and I.2 gates, When `./gradlew :core:domain:testDebugUnitTest --tests '*OfflineFabricationGuardTest' --tests '*TailorResumeUseCaseTest' --tests '*UpdateBulletDecisionUseCaseTest'` runs, Then all three classes exist, pass, and lose no assertion; FabricationGuard, OfflineFabricationGuard, its lexicons and claim checkers (NumberClaims, ScaleClaims, OwnershipVerbs, EvidenceIndex, TokenSubset, AliasRewriter), TailorResumeUseCase and UpdateBulletDecisionUseCase are unchanged."},
+        {"id": "260-c4", "text": "Given the head, When `grep -rnE 'Consent|CoverLetter|PrepQuestion|Connectivity' --include=*.kt core app feature` runs, Then it returns nothing except ContentReport item kinds (ReportedItemKind values, if any carry those words)."},
+        {"id": "260-c5", "text": "Given the head, When the deleted list is checked, Then ConsentUploader, ConsentRecord (+ ConsentPurpose), the consent DTOs and TailorMyResumeApi.recordConsent, ConsentRequiredInterceptor/ConsentRequiredListener and ApiError.ConsentRequired/AiFailure.ConsentRequired, ConsentRevoker (prod), core/domain/coverletter/**, core/domain/prep/**, CoverLetterRepository, StoredCoverLetterRepository, PrepPlanRepository, StoredPrepPlanRepository, WrittenCoverLetter, PrepPlanItem, dto/CoverLetter.kt, dto/Prep.kt, API methods prepQuestions and coverLetter, GuardedCoverLetterSource, GuardedPrepQuestionSource, RemoteCoverLetterSource, RemotePrepQuestionSource, core/data/connectivity/**, ConnectivityBindings (demo, prod), TestConnectivityMonitor, ConnectivityMonitorContractTest, CoverLetterRepositoryContractTest, PrepPlanRepositoryContractTest (if present), the debug 'switch offline' action, UpgradedMatch.kt, CareerStage.kt (+ session careerStage accessors) and the ImportRemovalNotice UI use are gone with their tests and fakes; KeptJobDescription stays because OnboardingStep.GapAnalysis still uses it."},
+        {"id": "260-c6", "text": "Given the head, When `grep -rhoE 'data (class|object) [A-Za-z]+NavKey' feature/*/api/src/main` runs, Then WelcomeNavKey, PasteJobDescriptionNavKey, ConsentNavKey, ConfirmFactsNavKey, FactEditorNavKey, GuidedProfileFormNavKey, FactEvidenceNavKey, YourDataNavKey, AccountDeletedNavKey, ExportPreviewNavKey, PackPurchaseNavKey, ShareLastExportNavKey, BulletReviewNavKey, CoverLetterNavKey and PrepQuestionsNavKey are absent, the other NavKeys (incl. DeleteAccountNavKey, CreditsNavKey, ExportedNavKey, TailorNavKey, SignInNavKey, ImportResumeNavKey) remain, and no file in :app (TopLevelNavItem, TmrApp, AppViewModel, debug targets and tests) or in feature/*/impl navigation/*EntryProvider.kt references a deleted key."},
+        {"id": "260-c7", "text": "Given a signed-in user whose onboarding is complete, When the app starts, Then the start destination is Applications; Given any other user, When the app starts, Then the start destination is the SignInNavKey placeholder (Welcome and Consent are gone). ObserveStartDestinationUseCase and NextOnboardingStepUseCase no longer read a consent record, OnboardingStep.Consent is removed, and their tests are updated to these cases."},
+        {"id": "260-c8", "text": "Given a device that stored data before this change, When the user signs out (SignOutCleaner / SessionRepository.signOut or clear), Then the legacy DataStore key `session.consent` is still removed; When an application is deleted (StoredApplicationCleanup.clearFor), Then the legacy keys `coverletter.<applicationId>` and `prep.plan.<applicationId>` are still removed from MockStateStore; When the account is wiped (LocalDataWiper.wipeAll), Then store.clear() and database.clearAllTables() still run. Each case has a unit test."},
+        {"id": "260-c9", "text": "Given CollectAccountDataUseCase, AccountData and AccountDataArchiveWriter, When an account data archive is written, Then it no longer has coverLetter, prepPlan or consent sections, every other section is byte-for-byte unchanged against the existing AccountDataArchiveWriterTest fixtures, and DeleteAccountUseCase, ExportAccountDataUseCase, DeleteMyDataUseCase keep passing tests."},
+        {"id": "260-c10", "text": "Given the prod flavour, When sign-in, Play Billing purchase, purchase restore and the remaining AI routes (parse, analysis, tailoring) run in :app:testProdDebugUnitTest, Then CredentialManagerGoogleSource, FirebaseAuthClient, RemoteSignInGateway, RemotePaymentGateway, PurchaseRestorer, ContentReportRepository/PendingReportQueue, Guarded job-analysis and resume-tailor sources and RemoteResumeTextParser still exist and their tests pass; the app sends no POST to /v1/me/consents, /prep-questions or /cover-letters."},
+        {"id": "260-c11", "text": "Given BASE_REF=origin/main, When `tools/ci/check-constitution.sh` runs, Then it passes: app/lint-baseline.xml (2) and core/navigation/lint-baseline.xml (4) do not grow, no new lint-baseline file appears; and if `:app:dependencyGuard` reports a removed library, app/dependencies/*.txt is regenerated with `./gradlew dependencyGuardBaseline` in this PR with the reason in the body."},
+        {"id": "260-c12", "text": "Given the Room schema, When the unit-core CI step 'Check Room schema is committed' runs, Then core/database/schemas has no change (no entity is edited)."},
+        {"id": "260-c13", "text": "Given the branch, When `tools/ci/verify-local.sh` runs, Then it exits 0."}
+      ],
+      "non_goals": [
+        "Room schema or entity changes (W2-E); the notes column and any cover-letter remnants in Room stay.",
+        "New features, new screens, the new start-destination/session gate (W3-B rewrites the gate).",
+        "Deleting DeleteAccountNavKey, CreditsNavKey, ExportedNavKey, TailorNavKey, AnalysisNavKey or any key not listed in the issue.",
+        "Changing FabricationGuard behaviour, the offline engine, Credential Manager/Firebase sign-in, Play Billing or purchase verification.",
+        "Deleting ContentReportRepository or PendingReportQueue (Play AI-content policy, PLAN R7).",
+        "Backend changes (apps-backend #87 drops the consent gate; #97 deletes the prep/cover-letter routes).",
+        "Deleting core:ui or editing build files (W1-F #262), or core/designsystem (W1-E #261)."
+      ],
+      "gates": [
+        "./gradlew testDebugUnitTest :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+        "./gradlew :core:domain:koverVerify :core:data:koverVerify :core:domain:koverLog :core:data:koverLog",
+        "./gradlew assembleDemoDebug assembleProdDebug lintRelease :app:lintDemoRelease :app:lintProdRelease :app:dependencyGuard -PwarningsAsErrors=true",
+        "./gradlew spotlessCheck",
+        "git status --porcelain -- core/database/schemas  # must be empty",
+        "BASE_REF=origin/main tools/ci/check-constitution.sh",
+        "grep -rnE 'Consent|CoverLetter|PrepQuestion|Connectivity' --include=*.kt core app feature  # only ContentReport item kinds",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "SessionRepository.observeConsent/recordConsent/clearConsent: ObserveStartDestinationUseCase, NextOnboardingStepUseCase, RemoteSignInGateway (prod, line ~68 clearConsent), SignOutCleaner (prod), ConsentUploader, ConsentRevoker, OfflineAccountServer, OfflineSampleDataController, StoredSessionRepositoryTest, TestSessionRepository, SessionRepositoryContractTest, AppViewModelConsentTest, RemoteSignInGatewayConsentTest, ObserveStartDestinationConsentTest.",
+        "StoredSessionRepository keys: session.consent, session.careerStage (CareerStage), session.keptJobDescription (KeptJobDescription, kept). clear() and signOut() list them.",
+        "CoverLetterRepository / PrepPlanRepository: DataModule bindings, StoredApplicationCleanup (core/data), DiscardJobDraftsUseCase (core/domain, prep), CollectAccountDataUseCase + AccountData + AccountDataArchiveWriter (core/domain/account), RemoteCoverLetterSource/GuardedCoverLetterSource/RemotePrepQuestionSource/GuardedPrepQuestionSource + AiBindings (prod), AiBindings (demo), core:testing Test* fakes and contract tests, TestFakesContractTest.",
+        "ConnectivityMonitor: DataModule, ConnectivityBindings (demo, prod), DebugOverridableConnectivityMonitor + debug menu (DebugMenuViewModel, DebugScenarioMenu), TestConnectivityMonitor, ConnectivityBindingsTest, DebugMenuViewModelTest, plus TailorViewModel (removed by #257-c5; if not, this lane edits feature/tailor/impl TailorViewModel.kt and its test).",
+        "Consent in core:network: TailorMyResumeApi.recordConsent, dto/Account.kt consent DTOs, RequestInterceptors ConsentRequiredInterceptor, TailorMyResumeHttp(consentListener), NetworkModule, ApiError.ConsentRequired ('CONSENT_REQUIRED'), AiFailure.ConsentRequired + prod AiFailureMapping, RemoteAccountServer; tests DtoRoundTripTest, TailorMyResumeApiTest, AiFailureMappingTest, RemoteAiRoutesTest, RemoteAccountServerTest.",
+        "OnboardingStep / StartDestination: AppViewModel (app main) maps them to NavKeys; OnboardingStep.Consent, Welcome and PasteJobDescription targets disappear.",
+        "Deleted NavKeys are referenced by: app TopLevelNavItem/TmrApp/debug DebugScenarioTarget/NavigationStateRestoreTest, and the placeholder entries in feature/{tailor,onboarding,profile,settings}/impl navigation/*EntryProvider.kt (+ SettingsEntryProviderTest, AnalysisEntryProviderTest)."
+      ],
+      "constraints": [
+        "Security review required (issue label; touches sign-out, account wipe, data export and sign-in wiring). Sensitive tier: in-harness Builder (sonnet), Reviewer B as security-reviewer on opus; router must not see app/src/prod/**/auth or billing paths.",
+        "Constitution I.1/I.2 gates (VII.3): OfflineFabricationGuardTest, TailorResumeUseCaseTest, UpdateBulletDecisionUseCaseTest must survive with no lost assertion.",
+        "Constitution ledger: :core:domain:koverVerify and :core:data:koverVerify need >= 80% LINE coverage. The scout did not measure the current margin (no report on disk; no Gradle run in a read-only scout). Deleting well-tested coverletter/prep/connectivity code with its tests can lower the ratio (PLAN 6.1). Measure koverLog on base and head; if a module falls below 80%, add tests for surviving code, never lower the bound (that is a Constitution amendment).",
+        "Constitution I.5 on main still requires consent S4: merge only after PR #255 is on main.",
+        "Cross-repo: the staging backend still enforces consents ai-processing and age-18-plus on AI routes (contract D9, PLAN 4 C14) until apps-backend #87 deploys. After this PR the prod app never posts consent, so a new staging user gets 403 CONSENT_REQUIRED on AI routes. Merge after #87 is deployed, or record a lead decision accepting the staging-only break (as D7 did for credits).",
+        "Persisted data: removing CONSENT_KEY, careerStage and the cover-letter/prep repositories must not orphan customer data. Keep removing the legacy keys on sign-out and application delete (criterion 260-c8); LocalDataWiper.wipeAll keeps store.clear(). The grep criterion is case-sensitive, so lowercase key strings like \"session.consent\" pass it.",
+        "No Room schema change (Constitution V.6; build.yml checks core/database/schemas).",
+        "Constitution III.3: app/lint-baseline.xml and core/navigation/lint-baseline.xml may only shrink. V.1: if a library leaves the classpath, update app/dependencies baselines in this PR with the reason (PLAN 6.4 expects no change; connectivity uses platform APIs).",
+        "Constitution II.1: core modules never depend on features; feature api keys use core:model types only.",
+        "Constitution II.3/II.4 policy scans apply to every edited file (no !!, GlobalScope, runBlocking, hard-coded Dispatchers).",
+        "Start destination: the issue leaves the post-consent start destination open; the conservative choice (criterion 260-c7) is SignIn unless signed-in and onboarding complete. W3-B (start destination and session gate) replaces it; list it under Decisions.",
+        "pregate --ci: every deleted test/fixture file under src/test, src/testProd, src/testDebug and core/testing needs an exact justified line; ASSERT_REMOVED in edited tests (StoredSessionRepositoryTest, AccountDataArchiveWriterTest, CollectAccountDataUseCaseTest, ObserveStartDestinationUseCaseTest, NextOnboardingStepUseCaseTest, DebugMenuViewModelTest, AppViewModelTest, SignOutCleanerTest, RemoteSignInGatewayTest) must be justified per path. Removing assertions about surviving behaviour (sign-out cleanup, wipe, archive sections that stay) is a coverage-removal card, not a justification.",
+        "Router refusal words: auth, token, secret, credential, password, migration, runner, keystore appear in app/src/prod/**/auth/**; this lane is written in-harness, never through delegate.",
+        "This lane also edits feature/*/impl navigation/*EntryProvider.kt files that #257-#259 own; it starts only after they merge (sequential, no conflict).",
+        "Host: one Gradle build at a time through the lock; workers.max=3."
+      ],
+      "state": [
+        "DataStore (MockStateStore) key session.consent: no longer written or read; still removed on sign-out/clear.",
+        "DataStore key session.careerStage: no longer written or read; still removed on clear.",
+        "DataStore keys coverletter.<applicationId>: no longer written; still removed on application delete; wiped by store.clear() on account wipe.",
+        "DataStore keys prep.plan.<applicationId>: no longer written; still removed on application delete and job-draft discard; wiped by store.clear().",
+        "Debug connectivity override value read by DebugOverridableConnectivityMonitor (debug builds only): abandoned.",
+        "Server state: the app stops calling POST /v1/me/consents; consent rows already on the server stay (PLAN 4 C14) and still appear in GET /me/export.",
+        "Account data archive format (ExportAccountDataUseCase / AccountDataArchiveWriter): coverLetter, prepPlan and consent sections removed."
+      ],
+      "files": [
+        "core/model/**",
+        "core/domain/**",
+        "core/data/**",
+        "core/network/**",
+        "core/testing/**",
+        "core/database/** (no schema change; expect no edit)",
+        "app/src/**",
+        "feature/*/api/**",
+        "feature/{tailor,onboarding,profile,settings,analysis}/impl/src/main/**/navigation/*EntryProvider.kt and their src/test navigation tests (placeholder removal for deleted keys)",
+        "app/lint-baseline.xml, core/navigation/lint-baseline.xml (may only shrink)",
+        "app/dependencies/* (only if a library disappears)"
+      ],
+      "tests_must_survive": [
+        "core/domain: OfflineFabricationGuardTest, TailorResumeUseCaseTest, UpdateBulletDecisionUseCaseTest (I.1, I.2), DeleteAccountUseCaseTest, DeleteMyDataUseCaseTest, AccountDataArchiveWriterTest, CollectAccountDataUseCaseTest (edited, not deleted)",
+        "core/data: StoredSessionRepositoryTest (edited), OfflineFirstApplicationRepositoryTest",
+        "app testProd: SignOutCleanerTest, RemoteSignInGatewayTest, AccountSwitchSignInTest, AccountSwitchBillingClearTest, FirebaseAuthClientExpiryTest, RemoteAccountServerTest, billing tests (PurchaseRestorer, RemotePaymentGateway)",
+        "Kover >= 80% LINE on core:domain and core:data"
+      ],
+      "baselines_removed": "none (no screenshot tests in core/domain, core/data, core/network, core/testing or :app).",
+      "scale": {"material": false, "note": "Deletion of dead paths; sign-out and application cleanup keep the same number of store removals (two legacy keys stay). No hot path or I/O added."}
+    },
+    {
+      "number": 261,
+      "title": "chore(designsystem): delete the Avvio components, the light theme and the Manrope and Archivo Black fonts",
+      "lane": "W1-E",
+      "status": "ready",
+      "tier": "ui",
+      "depends_on": [257, 258, 259, "preferably #262 first (see constraints)"],
+      "criteria": [
+        {"id": "261-c1", "text": "Given the branch head, When `./gradlew :core:designsystem:testDebugUnitTest :core:designsystem:verifyRoborazziDebug :core:designsystem:lintRelease assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true` runs, Then every task passes."},
+        {"id": "261-c2", "text": "Given the head, When `grep -rnE 'isSystemInDarkTheme|LightColors|Manrope|Archivo' core app feature` runs, Then nothing matches."},
+        {"id": "261-c3", "text": "Given TmrTheme, When it is called, Then it takes only `content` (no darkTheme parameter), always provides TmrDarkColors and the dark Material color scheme, and TmrLightColors, LightColorScheme and the light palette entries are deleted; :app's `TmrTheme { ... }` calls in MainActivity and DebugScenarioActivity compile unchanged."},
+        {"id": "261-c4", "text": "Given the head, When `git ls-files core/designsystem` is listed, Then res/font/core_designsystem_manrope.ttf, res/font/core_designsystem_archivo_black.ttf and fonts-licenses/*-OFL.txt are absent, and theme/Type.kt uses FontFamily.Default."},
+        {"id": "261-c5", "text": "Given the head, When `git ls-files core/designsystem/src/test/screenshots | wc -l` runs, Then it prints 0, and TmrComponentsScreenshotTest and TmrScreenLandscapeScreenshotTest are gone (14 PNG baselines removed)."},
+        {"id": "261-c6", "text": "Given the component files, When each remaining file under core/designsystem/src/main is checked, Then it is either on the keep list (TmrDock, icon/TmrIcons.kt, component/TmrMotion.kt, theme/**, TmrPreviewTheme) or imported (directly or through another kept file) by :app main/debug or by core:ui while core:ui exists at this PR's base; every other component file named in the issue (LoadingWheel, TmrBottomActionBar, TmrCheckbox, TmrDesignValues, TmrEvidenceMark, TmrHeaderBackdrop, TmrHeaderCollapseState, TmrHomeHeader, TmrIconConfirmDialog, TmrMetrics, TmrOfflineBanner, TmrPillRow, TmrPrimitives, TmrSnackbar, TmrSpotIllustration, TmrSpotKind, illustration/**, and TmrConfirmDialog/TmrCoverageBlock/TmrProvenanceKind/TmrStatusDisc/TmrStatusKind once core:ui is gone) is deleted with its tests."},
+        {"id": "261-c7", "text": "Given the motion rules (AGENTS.md), When `./gradlew :core:designsystem:testDebugUnitTest --tests '*TmrMotionReducedTest'` runs, Then it exists and passes; theme/Motion.kt and component/TmrMotion.kt are unchanged."},
+        {"id": "261-c8", "text": "Given BASE_REF=origin/main, When `tools/ci/check-constitution.sh` runs, Then it passes (II.5 scan, III.2), and `tools/ci/verify-local.sh` exits 0."}
+      ],
+      "non_goals": [
+        "Adding Paige tokens, Space Mono/Space Grotesk fonts or any new component (W2-A..D).",
+        "Editing :app, core:ui, feature modules or build files.",
+        "Deleting a component that :app or core:ui still imports at this PR's base, even if the issue lists it (Background/TmrBackground, TmrFilterChip, TmrInnerHeader, TmrScreen, TmrCard, TmrSwitch, buttons; core:ui's set if #262 has not merged). W1-F, W2 or W3 remove them later.",
+        "Changing the Android XML app theme (res/values*/themes.xml in :app).",
+        "Changing motion specs or adding an idle spec (W2-A)."
+      ],
+      "gates": [
+        "./gradlew :core:designsystem:testDebugUnitTest :core:designsystem:verifyRoborazziDebug :core:designsystem:lintRelease assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true",
+        "./gradlew :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+        "./gradlew spotlessCheck",
+        "grep -rnE 'isSystemInDarkTheme|LightColors|Manrope|Archivo' core app feature  # must print nothing",
+        "BASE_REF=origin/main tools/ci/check-constitution.sh",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        ":app main TmrApp.kt imports LocalTmrBottomInset, TmrDock, TmrDockDefaults, TmrDockIcon, TmrDockItem, rememberTmrNavTransitions, TmrIcons, TmrTheme; MainActivity calls TmrTheme { }.",
+        ":app debug DebugScenarioActivity.kt / DebugScenarioMenu.kt import TmrBackground (component/Background.kt), TmrCard, TmrFilterChip, TmrInnerHeader, TmrOutlineButton, TmrPrimaryButton, TmrScreen, TmrSwitch, TmrTheme.",
+        "core:ui (until #262) imports TmrApplicationStatusChip, TmrApplicationStatusKind, TmrBottomSheet, TmrConfirmDialog, TmrCoverageBlock, TmrDestructiveButton, TmrFactId, TmrOutlineButton, TmrPrimaryButton, TmrProvenanceChip, TmrProvenanceKind, TmrStatusDisc, TmrStatusKind, TmrTheme.",
+        "Feature screenshot tests that call TmrTheme(darkTheme = ...) are all deleted by #257-#259; if any survives at this base, this lane is blocked (it may not edit feature/)."
+      ],
+      "constraints": [
+        "Ordering: core:ui consumes 5 of the components the issue names (TmrConfirmDialog, TmrCoverageBlock, TmrProvenanceKind, TmrStatusDisc, TmrStatusKind). Either #262 merges first (recommended) or this lane keeps those files. :app consumes Background (TmrBackground), TmrFilterChip and TmrInnerHeader, which the issue also names; keep them (the issue's own rule is 'no consumer').",
+        "Designsystem tests that assert light colours or contrast for the light palette (TmrPaletteContrastTest, TmrBoundaryContrastTest, TmrStatusBarIconsTest, TmrA11ySemanticsTest, TmrApplicationStatusChipColorsTest, TmrDisabledButtonTest) lose only their light-theme cases; dark-theme assertions stay. pregate ASSERT_REMOVED needs a per-path justification ('light theme cut, PRD 6.1.2').",
+        "AGENTS.md motion: if TmrTheme.motion.reduced is true nothing moves; keep TmrMotionReducedTest and do not add a duration or easing scale.",
+        "Constitution II.5: core:designsystem is the only place raw Material is allowed; the scan covers feature/, app/, core/ui/.",
+        "Constitution III.2: no ungrounded comments. III.3: no lint baseline exists here; do not add one.",
+        "Removing res/font changes no dependency (bundled TTF only); dependencyGuard should not change.",
+        "The UI tier behaviour check: the demo app launches, renders dark at system light mode, and uses the default font.",
+        "pregate --ci: 14 PNG + deleted test classes need exact justified lines.",
+        "Stage paths explicitly; no git add -A; no git stash."
+      ],
+      "state": [],
+      "files": [
+        "core/designsystem/**"
+      ],
+      "tests_must_survive": [
+        "TmrMotionReducedTest, TmrDockDefaultsTest, and the dark-theme cases of the contrast and semantics tests"
+      ],
+      "baselines_removed": "14 PNG under core/designsystem/src/test/screenshots (TmrCompactButtons, TmrDock, TmrDockFont200, TmrIconActionBar, TmrPillRow, TmrScreenLandscapeForm, TmrScreenLandscapeFormInitial; light and dark), with TmrComponentsScreenshotTest and TmrScreenLandscapeScreenshotTest.",
+      "scale": {"material": false, "note": "Removes two bundled fonts (smaller APK) and theme branching; no runtime cost added."}
+    },
+    {
+      "number": 262,
+      "title": "build: delete the core:ui module",
+      "lane": "W1-F",
+      "status": "ready",
+      "tier": "sensitive",
+      "depends_on": [257, 259, "issue lists #259 #260 #261; technically #260 and #261 are not needed (see routing)"],
+      "criteria": [
+        {"id": "262-c1", "text": "Given the PR, When CI runs, Then the required check 'Build, lint, and unit tests' passes with all shards (static, unit-core, unit-feature, unit-app, screenshots, lint, assemble)."},
+        {"id": "262-c2", "text": "Given the head, When `./gradlew projects` runs, Then `:core:ui` is not listed; core/ui/ does not exist in `git ls-files`."},
+        {"id": "262-c3", "text": "Given the head, When `git grep -nE ':core:ui|projects\\.core\\.ui|project\\(\":core:ui\"\\)' -- '*.kts' '*.kt' .github` runs, Then nothing matches: settings.gradle.kts has no include(\":core:ui\"), app/build.gradle.kts and feature/settings/impl/build.gradle.kts have no projects.core.ui line, build-logic/convention/src/main/kotlin/AndroidFeatureImplConventionPlugin.kt no longer adds implementation(project(\":core:ui\")), and .github/workflows/build.yml unit-core no longer runs :core:ui:testDebugUnitTest."},
+        {"id": "262-c4", "text": "Given docs/ARCHITECTURE.md section 2 (Modules), When it is read, Then the `:core:ui` row is gone and no other section is edited."},
+        {"id": "262-c5", "text": "Given the configuration cache and isolated projects are on (V.4), When `./gradlew help --configuration-cache` and `./gradlew :build-logic:convention:check` run, Then both pass (no plugin or root build file names the deleted module)."},
+        {"id": "262-c6", "text": "Given the branch, When `tools/ci/verify-local.sh` runs, Then it exits 0."}
+      ],
+      "non_goals": [
+        "Any other module rename or removal (PLAN S1).",
+        "Editing other jobs or steps of build.yml, delivery-gates.yml, release.yml or android-test.yml.",
+        "Editing tools/ci/check-constitution.sh (its 'core/ui/' pathspec in design_system_consumers matches nothing once the module is gone and needs no change).",
+        "Updating docs/REDESIGN.md or other docs that mention core:ui (only ARCHITECTURE.md section 2).",
+        "Deleting designsystem components core:ui used (W1-E #261)."
+      ],
+      "gates": [
+        "./gradlew projects",
+        "./gradlew :build-logic:convention:check spotlessCheck -PwarningsAsErrors=true",
+        "./gradlew testDebugUnitTest assembleDemoDebug assembleProdDebug lintRelease -PwarningsAsErrors=true",
+        "git grep -nE ':core:ui|projects\\.core\\.ui' -- '*.kts' '*.kt' .github  # must print nothing",
+        "BASE_REF=origin/main tools/ci/check-constitution.sh",
+        "tools/ci/verify-local.sh",
+        "CI: 'Build, lint, and unit tests' green on the PR"
+      ],
+      "root_cause": null,
+      "callers": [
+        "settings.gradle.kts line 43 include(\":core:ui\").",
+        "app/build.gradle.kts line 165 implementation(projects.core.ui) (no :app source imports core.ui).",
+        "feature/settings/impl/build.gradle.kts line 14 implementation(projects.core.ui) (no settings source imports core.ui).",
+        "build-logic/convention/src/main/kotlin/AndroidFeatureImplConventionPlugin.kt line 23 \"implementation\"(project(\":core:ui\")) - added to every feature impl; NOT in the issue's file list but required by its scope 'every projects.core.ui dependency'.",
+        ".github/workflows/build.yml line 192 :core:ui:testDebugUnitTest (unit-core job).",
+        "Source imports of com.tailormyresume.core.ui today: feature/analysis/impl AnalysisSheets.kt, feature/tailor/impl exported/ExportedScreen.kt, feature/applications/impl (4 files) - all deleted by #257 and #259."
+      ],
+      "constraints": [
+        "Sensitive tier: .github/workflows/build.yml is CI config (tiers.json). In-harness Builder; the router refuses .github/workflows paths. Reviewer B with a security mandate; pull_request runs the PR's own build.yml, so review that file with extra care (Constitution note after VI.1).",
+        "Edit only the one task line in build.yml; a leftover or renamed task fails CI (PLAN 6.2).",
+        "Configuration cache problems fail the build and isolated projects are on (V.4); grep build-logic and the root build.gradle.kts for the module name.",
+        "Constitution III.5: build configuration lives in build-logic; removing the convention-plugin line is the right place, not per-module excludes.",
+        "pregate --ci: 7 deleted core/ui test classes need exact justified lines; NEW_DEPENDENCY warnings for edited build.gradle.kts files are informational.",
+        "Docs-only check skip in CI does not apply (code files change), so the full Gradle CI runs.",
+        "Run after #257 and #259 have merged (they remove the last core.ui imports); running before #261 lets #261 delete the five components only core:ui used."
+      ],
+      "state": [],
+      "files": [
+        "core/ui/**",
+        "settings.gradle.kts",
+        "app/build.gradle.kts",
+        "feature/settings/impl/build.gradle.kts",
+        "build-logic/convention/src/main/kotlin/AndroidFeatureImplConventionPlugin.kt",
+        ".github/workflows/build.yml",
+        "docs/ARCHITECTURE.md (section 2 module table only)"
+      ],
+      "tests_must_survive": [
+        "None in core:ui are gates; its 7 tests (ApplicationStatusKindMapperTest, FactSourceProvenanceTest, KeywordCoverageBarTest, MatchStatusKindMapperTest, ApplicationStatusOptionsTest, ApplicationStatusSheetTest, DeleteItemDialogTest) go with the module (old UI, W2 rebuilds equivalents)."
+      ],
+      "baselines_removed": "none (core:ui has no PNG baselines).",
+      "scale": {"material": false, "note": "One module fewer: shorter configuration and CI unit-core time; no runtime effect."}
+    },
+    {
+      "number": 263,
+      "title": "docs(constitution): point the screenshot ledger at the 2026-10-10 prototype",
+      "lane": "W1-G",
+      "status": "ready",
+      "tier": "docs",
+      "depends_on": ["PR #255 merged (same file; design/prototype-2026-10-10/ exists only after #255)"],
+      "criteria": [
+        {"id": "263-c1", "text": "Given docs/CONSTITUTION.md on main after #255, When the ledger amendment 'coverage and screenshot tests moved forward' is read, Then its Roborazzi row names `design/prototype-2026-10-10/` at 374 x 834 dp as the acceptance criterion instead of `design/claude-design`, and the rest of that row and its gate text are unchanged."},
+        {"id": "263-c2", "text": "Given the ledger, When it is read, Then a new amendment dated 2026-10-10 records D4 (one 'Accept changes' control on the Changes tab satisfies I.2; Export PDF stays disabled until the user takes it) and D5 (the prototype's match number is keyword coverage per PRD 4.2, labelled as such, I.3), each with Why and Gate columns naming the existing gates (UpdateBulletDecisionUseCaseTest, TailorViewModelTest; policy I.3)."},
+        {"id": "263-c3", "text": "Given the diff, When `git diff origin/main -- docs/CONSTITUTION.md` is read, Then no line of the rule or gate text of Articles I to VI changes, and only the ledger section changes."},
+        {"id": "263-c4", "text": "Given the PR, When CI runs, Then the 'Constitution policy' job passes (PR title `docs(constitution): ...` matches the VI.2 pattern) and the Gradle shards are skipped as docs-only."},
+        {"id": "263-c5", "text": "Given the PR body, When it is read, Then it cites Article VII.1 and decisions D4 and D5 from docs/revamp/2026-10-10/DECISIONS.md."}
+      ],
+      "non_goals": [
+        "Any change to the text or gate of Articles I to VI.",
+        "Restating the I.5 consent amendment (PR #255 adds it).",
+        "Editing any file other than docs/CONSTITUTION.md.",
+        "Adding the 374 x 834 Prototype test device (W2-A)."
+      ],
+      "gates": [
+        "BASE_REF=origin/main tools/ci/check-constitution.sh",
+        "git diff --stat origin/main  # only docs/CONSTITUTION.md",
+        "CI: 'Constitution policy' green; 'Build, lint, and unit tests' skipped as docs-only"
+      ],
+      "root_cause": null,
+      "callers": [],
+      "constraints": [
+        "Constitution VII.1: a rule changes only through a PR that edits this file; VII.3: a gate change needs the rule text in the same PR (no gate changes here).",
+        "PR #255 (head 21ee644d, OPEN, BLOCKED; owner blocker #256) edits the same ledger; if #263 merges first, #255 becomes out of date and loses its approved head. Base #263 on main after #255 merges.",
+        "Prose in ASD-STE100 Simplified Technical English (VI.4).",
+        "Docs tier: in-harness writer, Reviewer B only; no red commit."
+      ],
+      "state": [],
+      "files": [
+        "docs/CONSTITUTION.md"
+      ],
+      "tests_must_survive": [],
+      "baselines_removed": "none",
+      "scale": {"material": false, "note": "Docs only."}
+    },
+    {
+      "number": 285,
+      "title": "docs(contract): backend contract v2 for the simplified MVP",
+      "lane": "W5-DOC",
+      "status": "ready",
+      "tier": "docs",
+      "depends_on": [],
+      "criteria": [
+        {"id": "285-c1", "text": "Given docs/BACKEND_CONTRACT.md v2, When each live route of PLAN section 4 is looked up (GET /packs, POST /purchases, GET /purchases, GET /credits, GET /wallet, POST /tailorings, GET /tailorings/{id}, POST /analyses, POST /resume/parse, POST /job-imports, POST /me/data-export, DELETE /v1/me, plus the kept POST /content-reports and GET /me/export), Then each has a request table, a response table and an error table, with the shapes of C1-C4, C7-C12, C16 and C17."},
+        {"id": "285-c2", "text": "Given the decisions table, When it is read, Then D5 (unlock per application) and D9 (consent gate) are removed or marked dropped in v2, and D1, D2, D3, D6, D7, D8, D10, D11, D12 are kept."},
+        {"id": "285-c3", "text": "Given the v2 rules, When the document is read, Then it states: 1 credit reserved at tailoring start and debited only on SUCCEEDED with a TAILORING ledger row, released on FAILED or INTERRUPTED, 402 NO_CREDIT at 0, each new requestId costs 1 (C4); the ledger entry shape and kinds WELCOME, PURCHASE, TAILORING, REFUND, MIGRATION, newest first, at most 100 (C2); packs application_pack_5/15/40 (C1); the wallet shape {credits, freeCredits, purchasedCredits, analysesLeftToday, day, resetsAt} (C3); the analysis cap of 20 per day and no free daily tailoring (C6)."},
+        {"id": "285-c4", "text": "Given the AI route sections, When they are read, Then they define the quick question in POST /analyses (C7), the answer input and USER_ANSWER fact source in POST /tailorings with the PLAN 2.3 truth rule (C8), summary and skills in the tailoring result (C9), job.location, matches[].reason and 422 NOT_A_JOB_POST (C10), parse fields summary, location, links, entries[].current (C11), and POST /job-imports with https-only input, 422 JOB_IMPORT_FAILED and 20 per day (C12)."},
+        {"id": "285-c5", "text": "Given a 'Removed routes' section, When it is read, Then it lists POST /applications/{id}/unlock (C5), POST /prep-questions and POST /cover-letters (C15), the section regeneration parameter of /tailorings, and the consent requirement on AI routes (C14), each with the app side that stopped using it."},
+        {"id": "285-c6", "text": "Given the PR body, When it is read, Then it links each backend issue by title: apps-backend #87, #88, #89, #90, #91, #92, #93, #94, #95, #96, #97, #98, #99, #100."},
+        {"id": "285-c7", "text": "Given the PR, When CI runs, Then the 'Constitution policy' job passes and the Gradle shards are skipped as docs-only; only docs/BACKEND_CONTRACT.md changes."}
+      ],
+      "non_goals": [
+        "Code in the app or in apps-backend.",
+        "Changing the auth model (Firebase ID token + X-App-Id) or D1 data minimisation.",
+        "Choosing an email provider for POST /me/data-export (B12/#99 blocker, D8); document it as target with the on-device interim.",
+        "Defining a staging test identity bypass (D9; #98 is a script, not a route)."
+      ],
+      "gates": [
+        "BASE_REF=origin/main tools/ci/check-constitution.sh",
+        "git diff --stat origin/main  # only docs/BACKEND_CONTRACT.md",
+        "for r in '/packs' '/purchases' '/credits' '/wallet' '/tailorings' '/analyses' '/resume/parse' '/job-imports' '/me/data-export' 'NOT_A_JOB_POST' 'JOB_IMPORT_FAILED' 'NO_CREDIT'; do grep -q -- \"$r\" docs/BACKEND_CONTRACT.md || echo missing $r; done",
+        "CI: 'Constitution policy' green"
+      ],
+      "root_cause": null,
+      "callers": [],
+      "constraints": [
+        "PLAN section 4 (C1-C17) is the source; the doc may not invent routes, fields or limits beyond it.",
+        "D4 (server owns counts, incl. 'the daily free tailoring, unlocked applications') is in neither the keep nor the drop list; conservative choice: keep D4 and update its count list to the v2 counts (credits, ledger, daily analyses, purchases). D12 mentions DOCX and unlock; keep its rule and drop only those two references. Record both under Decisions in the PR body.",
+        "C16 POST /me/data-export is blocked (no email provider, apps-backend #99, D8); mark it as target and describe the interim on-device archive through the share sheet.",
+        "Contract D1 stands: the server stores no profile, application or JD; the ledger keeps applicationId and productId only (R15).",
+        "Prose in ASD-STE100 Simplified Technical English (VI.4).",
+        "No file overlap with any W1 issue. Every W5 backend issue (apps-backend #87-#97, #100) and app W5-N1/N2 build on this doc, so merge it early.",
+        "Docs tier: in-harness writer; Reviewer B only."
+      ],
+      "state": [],
+      "files": [
+        "docs/BACKEND_CONTRACT.md"
+      ],
+      "tests_must_survive": [],
+      "baselines_removed": "none",
+      "scale": {"material": false, "note": "Docs only."}
+    }
+  ]
+}

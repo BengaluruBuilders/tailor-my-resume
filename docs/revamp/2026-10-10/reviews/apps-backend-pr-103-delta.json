@@ -1,0 +1,65 @@
+{
+  "head_sha": "24cf2be12bcec093c784e0b31a1a0a37756cb621",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "c1",
+      "status": "met",
+      "evidence": "Ran the prototype RESUME_TXT through the route at 24cf2be: Infosys (Jul 2022 – now) gives current=true and endDate null. Tata Digital (Jun 2021 – ) gives endDate null and current=false. Location is Pune. Adding Bajaj Finserv (Jun 2020 – May 2021) keeps endDate May 2021 and current=false."
+    },
+    {
+      "id": "c2",
+      "status": "met",
+      "evidence": "The summary is kept only when it equals one whole non-empty line (resume-parse.ts:224-231). A whole line is kept as the model returned it, even with different case or spacing. A fragment of a line is null. So are 'certified in AWS' from 'I am not certified in AWS.' and 'hold an AWS certification' from 'I don't hold...'. A summary wrapped over two lines is null, which fails closed and is accepted by D26. The negated whole line 'I am not certified in AWS.' is kept verbatim, so its meaning is unchanged. The round-2 negation low is resolved."
+    },
+    {
+      "id": "c4",
+      "status": "partial",
+      "evidence": "Round-2 reproductions at head: (a) the 'Since Jun 2021 ... now lead reporting' summary line leaves Tata current=false. (b) Two roles with the same start date are both false. (c) A certification dated Jan 2023 makes the Jan 2023 job false as well, which fails closed under D26. (d) A '2023' project contained in 'Mar 2023 - Present' makes both false. (e) 'Jan 2019 - Jan 2021 (now LTIMindtree)' is false. These are current=true: model endDate Ongoing, Currently or Today; 'Mar 2023–Present'; '03/2023 - present'; 'Jan 2020 - Currently'; 'Jan 2020 - Till Date'; 'Jan 2020 to present'; 'Jan 2020 — Present'. The typical 'Infosys — Analyst — Jan 2021 – Present' is current=true whether the model endDate is null or Present. A start date that repeats on two identical lines stays current. Containment works: '2021' vs 'Jan 2021' and '2020' vs '2020-21' make both false, while 'Jan 2021' vs 'Jan 2022' does not. Not met: '2023 to date' and 'Jan 2020 till date' are now false (medium finding), and an earlier dropped entry turns off current (low finding)."
+    },
+    {
+      "id": "c5",
+      "status": "met",
+      "evidence": "Location is kept only at word boundaries in the first 6 non-empty lines (resume-parse.ts:211-223, 297-300). These are kept: 'Pune' and 'Pune, India' in the header, and Pune on the prototype contact line. These are null: 'Mumbai' only in the body, 'une', an empty string, and Pune on non-empty line 7. Residual, accepted by D26: the header rule has no negation or semantic check. 'Mumbai' from a header line 'Not relocating to Mumbai. Based in Pune.' is kept, and so is 'Tata Digital' when the model mislabels it as location in the prototype, because that line falls inside the first 6 lines. Both are verbatim text and need a model error, so they are not findings."
+    },
+    {
+      "id": "c6",
+      "status": "met",
+      "evidence": "At 24cf2be on a local Postgres, test/tailormyresume-resume-parse-fields.test.ts and test/tailormyresume-resume-parse.test.ts pass 49/49. tsc --noEmit is clean, and eslint and prettier are clean on the changed files. The fields test file was run with b278a47d:src/apps/tailormyresume/resume-parse.ts swapped in: all 7 new or changed tests fail and 25 pass. The 7 are the fragment/header, negated fragment, summary-line 'now', same start, certification, Ongoing/Currently/Today and contained start tests. The Fixer's claim holds. The changed whitespace test at :342 now puts the summary on one line, as D26 requires. The architecture.md:279 bullet matches the code."
+    },
+    {
+      "id": "c7",
+      "status": "partial",
+      "evidence": "Every round-2 path that invented a running role is closed. One narrow path remains, and it needs a model error. A closed role whose model endDate is null becomes current when a different line, not returned as an entry, has the same start date followed by '- Present'. The reproduction is 'Analyst, Infosys, Jan 2019 - Dec 2020' plus 'Freelance data consulting, Jan 2019 - Present', with the model returning only Infosys, startDate Jan 2019 and endDate null. The result is current=true (low finding). Summary and location can no longer be a recombined or negated fragment."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/resume-parse.ts",
+      "line": 36,
+      "rule": "Issue #93 c4 / D26: 'till date' and 'to date' are present-type words; fail closed must not lose common normal-resume wording",
+      "trigger": "openRangePattern requires '-' or 'to' before the present word. So '2023 to date' and 'Jan 2020 till date' never match, because 'to' is consumed as the separator and 'date' is not a present word. Both gave current=true at b278a47d, and both give current=false at 24cf2be: a regression on common Indian resume wording. The new test at test/tailormyresume-resume-parse-fields.test.ts:593 hides this. It builds 'Jan 2023 to ${word}', so the 'to date' case is the unnatural 'Jan 2023 to to date'. Fix: also accept a direct '(?:till|to)\\s+(?:date|now)' after the start date, e.g. ^\\s*(?:(?:-|to\\b)\\s*(?:words)|(?:till|to)\\s+(?:date|now)\\b). Then test 'Jan 2023 to date' and 'Jan 2023 till date' without the doubled 'to'.",
+      "title": "'2023 to date' and 'Jan 2020 till date' are no longer current, and the test masks it with 'to to date'",
+      "proof": "Route at 24cf2be, text 'Analyst, Infosys, 2023 to date' with model startDate '2023' and endDate null gives current=false. The same input at b278a47d gives current=true. 'Jan 2020 till date' gives the same pair of results."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/resume-parse.ts",
+      "line": 262,
+      "rule": "D26 as documented in architecture.md:279: current is off only when another entry shares the start date",
+      "trigger": "shared compares otherIndex over the unfiltered result.entries with entryIndex from the filtered array. When an earlier entry is dropped by the verbatim filter, the entry compares against itself, containsDate(start, start) is true, and every later entry is never current. One example is an Education entry first, with a reworded degree. Fail closed, so nothing is invented, but a real 'Jan 2021 - Present' role loses current. Fix: compute shared before the filter with the original index, or compare by object identity (other !== entry).",
+      "title": "An earlier dropped entry turns off current for every later entry (index mismatch)",
+      "proof": "Model entries [Education 'Bachelor of Technology'/Wipro (not in text, dropped), Infosys Jan 2021] on 'Analyst, Infosys, Jan 2021 - Present' give Infosys current=false. With the first entry verbatim, the same input gives current=true."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/resume-parse.ts",
+      "line": 167,
+      "rule": "Constitution I.1, fail closed: a closed role is never shown as running",
+      "trigger": "openRangeFrom accepts any line with the start date directly before '- Present'. It does not tie that line to the entry's title or organization. The shared check only sees entries the model returned. A closed role whose endDate the model left null therefore becomes current from an unreturned line with the same start date, such as a freelance or volunteer line. This is much narrower than round 2: it needs both a model endDate error and a same-month open range elsewhere. Optional hardening: also require the matching line to contain the entry's organization or title.",
+      "title": "A closed role with a model null endDate can still take current from an unreturned line with the same start date",
+      "proof": "Text 'Analyst, Infosys, Jan 2019 - Dec 2020' plus 'Freelance data consulting, Jan 2019 - Present', with the model returning only Infosys, startDate Jan 2019 and endDate null, gives current=true at 24cf2be."
+    }
+  ]
+}

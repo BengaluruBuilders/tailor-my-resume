@@ -1,0 +1,49 @@
+{
+  "head_sha": "351eebbfe801bb760891707111e3fb4a6cd43c1e",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "273-c1", "status": "met", "evidence": "SignInStories.kt specs blue/amber/lime with Signin1..3 poses; SignInScreenTest.storyContentPerIndex asserts headline, 'N of 3' and hint per index; baselines signin_story1/2/3_prototype_dark.png opened and match the drawn slides."},
+    {"id": "273-c2", "status": "met", "evidence": "SignInStoryState.tick wraps 2->0 (SignInStoryState.kt:578-584 in diff); SignInStoryStateTest.autoAdvancesAt5000AndWraps and SignInScreenTest.autoAdvanceUsesMainClock (5300 ms -> 2 of 3) drive it on the main clock, never wall time."},
+    {"id": "273-c3", "status": "met", "evidence": "SignInStoryGestures.kt: down pauses, up <250 ms steps by left third, cancel resumes; holdShowsPausedHint asserts 'Paused' then index 0 after release. be569725 added only move() at +400 ms so the up is a real hold; no assertion changed."},
+    {"id": "273-c4", "status": "met", "evidence": "idle.storyAutoAdvance is false under reduced (Motion.kt:122), the tick loop never starts and TmrStoryBars gets 1f (SignInScreen.kt:152). reducedMotionNeverAdvancesButTapsStep asserts 1 of 3 after 20 s before be569725 re-enables autoAdvance for the tap; the no-advance assertion is untouched. signing_in baseline shows the full active bar."},
+    {"id": "273-c5", "status": "met", "evidence": "Sticker string '92% keywords' (illustrative, per plan); SignInStringsTest regex rejects match/ATS score/guarantee/interview/hired; story3ShowsKeywordSticker asserts no 'match' node."},
+    {"id": "273-c6", "status": "met", "evidence": "SignInViewModel.kt:26 atomic getAndUpdate guard plus clickable(enabled = !signingIn); signInCalledOnceOnDoubleTap and realRouteWithViewModelContinueTapSignsInOnce assert one gateway call. Rotation keeps the VM (RootViewModelStores lives in the activity store); process death restarts at Ready with no stuck label."},
+    {"id": "273-c7", "status": "met", "evidence": "On SignedIn the VM stays SigningIn and never navigates. RemoteSignInGateway.kt:51-59 saves the account before returning, AppViewModel.kt:32-47 re-keys the root, and TmrApp.kt:78 keepOnly releases the signed-out root store, so the SigningIn VM is cleared and a later sign-out gets a fresh Ready VM. signedInLeavesRoutingToSessionGate covers Upload and Applications."},
+    {"id": "273-c8", "status": "met", "evidence": "The VM writes nothing. cancelKeepsNoData checks account, onboarding flag, kept JD, profile and start destination; the prod gateway returns Cancelled before any write (RemoteSignInGateway.kt:35-37). Toast with Retry asserted in cancelledShowsToastWithRetry; both toast baselines opened."},
+    {"id": "273-c9", "status": "met", "evidence": "TmrToastHost dismisses before action.onClick; retryCallsSignInAgain and retryTapCallsSignInTwiceTotal assert 2 calls. Under a synchronous failure no toast comes back after Retry (see finding 2)."},
+    {"id": "273-c10", "status": "met", "evidence": "SignInViewModel.kt:28-35 maps Failed and any non-cancellation Exception to Cancelled and rethrows CancellationException. Nothing is logged: the diff has no Log/println, and CredentialManagerGoogleSource and RemoteSignInGateway do not log the token or email. The uiState enum carries no PII."},
+    {"id": "273-c11", "status": "met", "evidence": "Footer LinkAnnotation spans show the 'Address not set in this build' toast (termsAndPrivacyShowAddressNotSet). No Apple button exists (strings test plus assertDoesNotExist)."},
+    {"id": "273-c12", "status": "partial", "evidence": "The screen scrolls and the narrow baselines show wrapping with no ellipsis. noEllipsisAtFont200 (SignInScreenTest.kt:164) runs at the prototype width, not 337dp, and checks only the headline, so the button and footer at 337dp have no assertion. signin_story3_narrow-337-font-200 shows the '1 page' sticker hidden under Paige (finding 3)."},
+    {"id": "273-c13", "status": "met", "evidence": "The story Column merges headline, subline and 'N of 3' into contentDescription, sets stateDescription 'Paused', and exposes Next/Previous custom actions; storyAreaAnnouncesAndExposesNextPreviousActions invokes Next."},
+    {"id": "273-c14", "status": "partial", "evidence": "The PR body reports verify-local exit 0. At review time CI had Constitution, pregate and Static checks green, and the unit, screenshot, lint and assemble jobs still pending. Not re-run here (read-only worktree)."},
+    {"id": "D55", "status": "unmet", "evidence": "ShellHarness blob 8486c1d9 matches 7aea0cc2, c4164a02 and origin/revamp/278-tailored byte for byte. No test renders the real onboardingEntry SignInNavKey entry with hiltViewModel() (finding 1)."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/navigation/OnboardingEntryProvider.kt",
+      "line": 17,
+      "rule": "D55/D57: each W4 PR adds a test that renders its REAL entry with its ViewModel (Hilt test setup) and exercises one action",
+      "trigger": "Revert line 17 to `entry<SignInNavKey> { key -> NavKeyPlaceholder(key) }`, or break the Hilt wiring of SignInViewModel. Every feature and app test still passes: SignInRouteTest.realRouteWithViewModelContinueTapSignsInOnce (SignInRouteTest.kt:31) hand-builds SignInViewModel(ScriptedSignInGateway) and calls SignInRoute directly, OnboardingEntryKeysTest no longer lists SignInNavKey (2d9d28d7), and ShellHarness renders placeholders for every key. The wiring changed in 351eebbf, the last commit, has no test. Sibling lanes meet D55 with a HiltAndroidRule test (origin/revamp/281-profile ProfileRealEntryWiringTest), but feature/onboarding/impl/build.gradle.kts has no hilt-android-testing/kspTest.",
+      "title": "D55 real-entry test missing: the onboardingEntry SignIn entry with hiltViewModel() is never rendered by any test",
+      "proof": "Add SignInRealEntryWiringTest (HiltAndroidTest + @AndroidEntryPoint host activity, as in ProfileRealEntryWiringTest). Render entryProvider { onboardingEntry(navigator) } for SignInNavKey(), tap 'Continue with Google', and assert 'Signing in…' is displayed or that the bound OfflineSignInGateway saved the account. The test fails if line 17 is reverted to NavKeyPlaceholder."
+    },
+    {
+      "severity": "low",
+      "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/signin/SignInScreen.kt",
+      "line": 75,
+      "rule": "D43 / 273-c8-c10: cancel and every failure show the cancelled toast with Retry, and only then",
+      "trigger": "The toast is driven by persistent state (LaunchedEffect(uiState)), not a one-shot event. (a) Synchronous failure: in a prod build with an incomplete FirebaseConfig, RemoteSignInGateway.kt:34 returns NotConfigured without suspending (also CredentialManagerGoogleSource.kt:30 when there is no foreground activity). Tap Continue: the toast shows. Tap Retry: TmrToastHost dismisses the toast, then onContinueWithGoogle runs Cancelled->SigningIn->Cancelled inline on Main.immediate (SignInViewModel.kt:26,35). The StateFlow collector only ever sees Cancelled, so the LaunchedEffect key never changes and no toast appears. The user sees nothing happen. The same applies to tapping Continue again after a cancel. (b) Config change: cancel, wait for the toast to time out, then rotate or change dark mode or font size. The new composition re-runs LaunchedEffect with the retained Cancelled state and shows 'Sign-in cancelled' again without a new attempt.",
+      "title": "Cancelled toast keyed on state: silent Retry on a synchronous failure, and the toast replays after rotation",
+      "proof": "In SignInRouteTest.retryTapCallsSignInTwiceTotal (synchronous ScriptedSignInGateway), add composeRule.onNodeWithText(\"Sign-in cancelled. Nothing was saved.\").assertIsDisplayed() after the Retry tap. It fails today because the toast was dismissed and never re-shown."
+    },
+    {
+      "severity": "low",
+      "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/signin/SignInStories.kt",
+      "line": 175,
+      "rule": "273-c12 / D40: at 337dp and font 2.0 nothing is clipped",
+      "trigger": "Sign in at 337dp, font 2.0, story 3. The recorded baseline signin_story3_narrow-337-font-200_dark.png shows the '1 page' sticker (BottomStart, offset y=-34dp) drawn under TmrPaige, with 'page' hidden. The art box stays at the 300dp minimum while the sticker text grows with the font scale. The prototype-width baseline is correct.",
+      "title": "Story 3 '1 page' sticker hidden under Paige at 337dp/font 2.0, and the baseline locks it in"
+    }
+  ]
+}

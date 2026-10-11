@@ -1,0 +1,80 @@
+{
+ "head_sha": "628129b08c9cd0bfa416b3034b6d705e34c3dd75",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "c1",
+   "status": "met",
+   "evidence": "tailorings 'answer with unknown requirementId, bad choice or 401-char detail is 400' (with valid control) and 'answer null or omitted' status checks; the no-ans prompt assertion is stale for the omitted case (finding 3)."
+  },
+  {
+   "id": "c2",
+   "status": "met",
+   "evidence": "answer-facts tests cover placeholders, blank, NOT_YET/SKIPPED/null; tailorings tests assert the generate payload carries ans-R1 and ans-R1-b1 and the detail, and none for NOT_YET/SKIPPED."
+  },
+  {
+   "id": "c3",
+   "status": "partial",
+   "evidence": "Prototype test fails if the rule is removed (bullet would be PASSED not REVERTED). No test for the title-naming branch, and the impl matches by substring (finding 2)."
+  },
+  {
+   "id": "c4",
+   "status": "met",
+   "evidence": "Infosys test asserts PASSED, sourceIds include ans-R1-b1 and the verifier prompt carries the detail; the requirement-only number '5 years' test asserts REVERTED with zero verifier calls."
+  },
+  {
+   "id": "c5",
+   "status": "met",
+   "evidence": "Entry source USER_ANSWER, entry id ans-x and bullet id ans-x-b1 each give 400 on tailorings; entry and bullet cases give 400 on POST /analyses. Summary id with ans- prefix not tested (not required)."
+  },
+  {
+   "id": "c6",
+   "status": "partial",
+   "evidence": "Unit tests cover blank, n/a, detail-stated, keyword absent from both, EXPERIENCE type and word boundary for letters. No test for symbol-joined short keywords (C in C++, R in R&D, Go in go-to-market) and the impl confirms them (finding 1, D41/D42)."
+  },
+  {
+   "id": "c7",
+   "status": "met",
+   "evidence": "Stored-row test asserts the detail text is absent and ans-R1-b1 is present."
+  },
+  {
+   "id": "c8",
+   "status": "partial",
+   "evidence": "Eval fixtures and paid run are skipped; PR body states this honestly (no spend, #106 open). No paid call added to tests: all new tests use scripted models. The criterion 'Eval: 0 critical fabrications' is not demonstrated."
+  },
+  {
+   "id": "c9",
+   "status": "partial",
+   "evidence": "Not run by me; PR body states one red existing test (analysesLeftToday 2 vs 19) fixed by the lead commit 628129b, which is out of my scope. Golden fixture test/fixtures/tailormyresume-prompts-main.json is unchanged in this diff."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "src/apps/tailormyresume/answer-facts.ts",
+   "line": 76,
+   "rule": "D41/D42: a short skill keyword is confirmed only when stated as a whole token, never inside a symbol-joined token",
+   "trigger": "SKILL requirement text 'Knowledge of C++ and R&D tooling, go-to-market' with keywords [C, R, Go] and a null detail: answerSkills returns ['C','R','Go'] (verified by running it). containsWord only guards letters and digits, so C matches in C++, R in R&D, Go in go-to-market and the skills.added list gains skills the user never saw.",
+   "title": "containsWord confirms C, R, Go inside C++, R&D, go-to-market",
+   "proof": "Add to test/tailormyresume-answer-facts.test.ts a case with text 'Knowledge of C++ and R&D tooling, go-to-market', keywords ['C','R','Go'], detail null, expecting []. It fails today."
+  },
+  {
+   "severity": "medium",
+   "file": "src/apps/tailormyresume/answer-facts.ts",
+   "line": 116,
+   "rule": "Issue 95: an answer bullet may be cited by an entry only when the detail names its organisation or title",
+   "trigger": "entriesNamedIn uses a raw substring test. Entry organization 'EY' and detail 'They led the key project' returns the entry (verified by running it), so an EY bullet may cite the answer bullet although the detail never names EY. No test covers whole-word naming or the title branch.",
+   "title": "Entry-name match is a substring, so short or common names attach the answer to the wrong entry",
+   "proof": "Unit test: entriesNamedIn('They led the key project', [{id:'E',organization:'EY',title:'Analyst'}]) must be []; and a title-only match test ('I worked as a Data Analyst') must return the entry."
+  },
+  {
+   "severity": "low",
+   "file": "test/tailormyresume-tailorings.test.ts",
+   "line": 1000,
+   "rule": "Golden prompt unchanged when no answer; tests must be able to fail",
+   "trigger": "The loop calls reset() once before it, so generatorPrompt() reads generator.doGenerateCalls[0], the first (null) iteration's call, in both iterations. The omitted-answer iteration never inspects its own prompt, and a leak of ans- text in that case would pass.",
+   "title": "'answer null or omitted' checks the stale first call for the omitted case",
+   "proof": "Move reset() and the grants inside the loop, then assert on the prompt of each iteration."
+  }
+ ]
+}

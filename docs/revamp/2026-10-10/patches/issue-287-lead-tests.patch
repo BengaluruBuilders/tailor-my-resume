@@ -1,0 +1,187 @@
+diff --git a/app/src/testProd/kotlin/com/tailormyresume/app/billing/RemotePaymentGatewayTest.kt b/app/src/testProd/kotlin/com/tailormyresume/app/billing/RemotePaymentGatewayTest.kt
+index 90372e55..9587bbcb 100644
+--- a/app/src/testProd/kotlin/com/tailormyresume/app/billing/RemotePaymentGatewayTest.kt
++++ b/app/src/testProd/kotlin/com/tailormyresume/app/billing/RemotePaymentGatewayTest.kt
+@@ -1,10 +1,8 @@
+ package com.tailormyresume.app.billing
+ 
+ import com.google.common.truth.Truth.assertThat
+-import com.tailormyresume.core.domain.CreditSpend
+ import com.tailormyresume.core.domain.PurchaseFailureReason
+ import com.tailormyresume.core.domain.PurchaseResult
+-import com.tailormyresume.core.model.CreditKind
+ import com.tailormyresume.core.network.TailorMyResumeApiConfig
+ import com.tailormyresume.core.network.tailormyresumeApi
+ import com.tailormyresume.core.network.tailormyresumeJson
+@@ -71,7 +69,6 @@ class RemotePaymentGatewayTest {
+         val entitlement = gateway().entitlement()
+ 
+         assertThat(entitlement.purchasedCredits).isEqualTo(4)
+-        assertThat(entitlement.unlockedApplicationIds).containsExactly("a1")
+         assertThat(server.takeRequest().path).isEqualTo("/v1/tailormyresume/wallet")
+     }
+ 
+@@ -90,27 +87,6 @@ class RemotePaymentGatewayTest {
+         assertThat(packs.single().credits).isEqualTo(5)
+     }
+ 
+-    @Test
+-    fun firstUnlockReportsTheCreditKindAndARepeatReportsNone() = runTest {
+-        val unlock = """{"unlock":{"applicationId":"a1","creditKind":"FREE","unlockedAt":"2026-10-07T09:00:00Z"},"wallet":${walletJson(free = 0, unlocked = "\"a1\"")}}"""
+-        reply(201, unlock)
+-        reply(200, unlock)
+-
+-        val first = gateway().unlock("a1") as CreditSpend.Spent
+-        val repeat = gateway().unlock("a1") as CreditSpend.Spent
+-
+-        assertThat(first.kind).isEqualTo(CreditKind.FREE)
+-        assertThat(repeat.kind).isNull()
+-        assertThat(server.takeRequest().path).isEqualTo("/v1/tailormyresume/applications/a1/unlock")
+-    }
+-
+-    @Test
+-    fun unlockWithNoCreditReportsNoCreditLeft() = runTest {
+-        reply(402, errorJson("NO_CREDIT"))
+-
+-        assertThat(gateway().unlock("a1")).isEqualTo(CreditSpend.NoCreditLeft)
+-    }
+-
+     @Test
+     fun aPurchasedTokenIsPostedWithTheHashedUidAndCompletes() = runTest {
+         donePurchase()
+@@ -432,22 +408,6 @@ class RemotePaymentGatewayTest {
+         assertThat(gateway.observeEntitlement().first().pendingPackIds).containsExactlyElementsIn(filler + extras)
+     }
+ 
+-    @Test
+-    fun anUnlockAnsweredAfterSignOutDoesNotRestoreTheOldWallet() = runTest {
+-        val unlock = """{"unlock":{"applicationId":"a1","creditKind":"PURCHASED","unlockedAt":"2026-10-07T09:00:00Z"},"wallet":${walletJson(free = 0, purchased = 4, unlocked = "\"a1\"")}}"""
+-        val held = HeldAnswer(MockResponse().setResponseCode(201).setBody(unlock)).also { server.dispatcher = it }
+-        val gateway = gateway()
+-        val spend = async(Dispatchers.Default) { gateway.unlock("a1") }
+-        held.awaitRequest()
+-
+-        gateway.clearCredits()
+-        held.release()
+-        spend.await()
+-
+-        assertThat(source.cached).isNull()
+-        assertThat(gateway.observeEntitlement().first().totalCredits).isEqualTo(0)
+-    }
+-
+     @Test
+     fun aWalletRefreshInFlightAtSignOutDoesNotRestoreTheOldWallet() = runTest {
+         val held = HeldAnswer(MockResponse().setResponseCode(200).setBody("""{"wallet":${walletJson(free = 0, purchased = 4)}}""")).also { server.dispatcher = it }
+diff --git a/core/network/src/test/kotlin/com/tailormyresume/core/network/DtoRoundTripTest.kt b/core/network/src/test/kotlin/com/tailormyresume/core/network/DtoRoundTripTest.kt
+index 8af9d4be..0b93b59b 100644
+--- a/core/network/src/test/kotlin/com/tailormyresume/core/network/DtoRoundTripTest.kt
++++ b/core/network/src/test/kotlin/com/tailormyresume/core/network/DtoRoundTripTest.kt
+@@ -5,6 +5,7 @@ import com.tailormyresume.core.network.dto.AnalysisRequest
+ import com.tailormyresume.core.network.dto.AnalysisResponse
+ import com.tailormyresume.core.network.dto.ContentReportRequest
+ import com.tailormyresume.core.network.dto.ContentReportResponse
++import com.tailormyresume.core.network.dto.CreditsResponse
+ import com.tailormyresume.core.network.dto.DeletionResponse
+ import com.tailormyresume.core.network.dto.JobDto
+ import com.tailormyresume.core.network.dto.MatchDto
+@@ -19,7 +20,6 @@ import com.tailormyresume.core.network.dto.ResumeParseResponse
+ import com.tailormyresume.core.network.dto.ServerExportResponse
+ import com.tailormyresume.core.network.dto.TailoringResponse
+ import com.tailormyresume.core.network.dto.TailoringStartRequest
+-import com.tailormyresume.core.network.dto.UnlockResponse
+ import com.tailormyresume.core.network.dto.WalletResponse
+ import kotlinx.serialization.KSerializer
+ import kotlinx.serialization.json.Json
+@@ -50,7 +50,7 @@ class DtoRoundTripTest {
+         roundTrip<TailoringResponse>("tailoring-start-response")
+         roundTrip<TailoringResponse>("tailoring-poll-response")
+         roundTrip<WalletResponse>("wallet-response")
+-        roundTrip<UnlockResponse>("unlock-response")
++        roundTrip<CreditsResponse>("credits-response")
+         roundTrip<PacksResponse>("packs-response")
+         roundTrip<PurchaseRequest>("purchase-request")
+         roundTrip<PurchaseResponse>("purchase-response")
+diff --git a/core/network/src/test/resources/contract/credits-response.json b/core/network/src/test/resources/contract/credits-response.json
+new file mode 100644
+index 00000000..060b0a2e
+--- /dev/null
++++ b/core/network/src/test/resources/contract/credits-response.json
+@@ -0,0 +1,23 @@
++{
++  "credits": {
++    "balance": 6,
++    "entries": [
++      {
++        "id": "7d1e",
++        "kind": "TAILORING",
++        "amount": -1,
++        "applicationId": "4f0c",
++        "productId": null,
++        "createdAt": "2026-10-11T09:00:00.000Z"
++      },
++      {
++        "id": "7d1d",
++        "kind": "PURCHASE",
++        "amount": 5,
++        "applicationId": null,
++        "productId": "application_pack_5",
++        "createdAt": "2026-10-10T09:00:00.000Z"
++      }
++    ]
++  }
++}
+diff --git a/core/network/src/test/resources/contract/purchase-response.json b/core/network/src/test/resources/contract/purchase-response.json
+index 2d9835ee..91a2d5e9 100644
+--- a/core/network/src/test/resources/contract/purchase-response.json
++++ b/core/network/src/test/resources/contract/purchase-response.json
+@@ -7,12 +7,11 @@
+     "state": "COMPLETED"
+   },
+   "wallet": {
++    "credits": 5,
+     "freeCredits": 0,
+     "purchasedCredits": 5,
+     "analysesLeftToday": 3,
+-    "freeTailoringsLeftToday": 1,
+     "day": "2026-10-07",
+-    "resetsAt": "2026-10-07T18:30:00Z",
+-    "unlockedApplicationIds": []
++    "resetsAt": "2026-10-07T18:30:00Z"
+   }
+ }
+diff --git a/core/network/src/test/resources/contract/unlock-response.json b/core/network/src/test/resources/contract/unlock-response.json
+deleted file mode 100644
+index 4388f58f..00000000
+--- a/core/network/src/test/resources/contract/unlock-response.json
++++ /dev/null
+@@ -1,12 +0,0 @@
+-{
+-  "unlock": { "applicationId": "4f0c", "creditKind": "FREE", "unlockedAt": "2026-10-07T09:00:00Z" },
+-  "wallet": {
+-    "freeCredits": 0,
+-    "purchasedCredits": 0,
+-    "analysesLeftToday": 3,
+-    "freeTailoringsLeftToday": 1,
+-    "day": "2026-10-07",
+-    "resetsAt": "2026-10-07T18:30:00Z",
+-    "unlockedApplicationIds": ["4f0c"]
+-  }
+-}
+diff --git a/core/network/src/test/resources/contract/wallet-response.json b/core/network/src/test/resources/contract/wallet-response.json
+index b7f041c9..414b2fb3 100644
+--- a/core/network/src/test/resources/contract/wallet-response.json
++++ b/core/network/src/test/resources/contract/wallet-response.json
+@@ -1,11 +1,10 @@
+ {
+   "wallet": {
++    "credits": 1,
+     "freeCredits": 1,
+     "purchasedCredits": 0,
+     "analysesLeftToday": 3,
+-    "freeTailoringsLeftToday": 1,
+     "day": "2026-10-07",
+-    "resetsAt": "2026-10-07T18:30:00Z",
+-    "unlockedApplicationIds": []
++    "resetsAt": "2026-10-07T18:30:00Z"
+   }
+ }

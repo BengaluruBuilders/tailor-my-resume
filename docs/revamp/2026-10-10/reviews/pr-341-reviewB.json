@@ -1,0 +1,114 @@
+{
+ "head_sha": "7362aab96073b7c10f5bdb70f3910cc5e603e934",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "282-c1",
+   "status": "met",
+   "evidence": "EditContactScreen is stateless: TmrTextField for Full name, Phone, City, LinkedIn (amber = draft.linkedin.isBlank()) and Portfolio, with a read-only 'Email · from Google' box that wraps after '@' and '.' through a ZWSP and keeps the real email as semantics text. Heading 'Contact'. The top bar comes from the unchanged ScreenChrome. EditorsScreenTest.rendersAllFieldsWithAmberLinkedInAndReadOnlyEmail. Both editors_contact_empty_linkedin baselines were read; at 337dp/font 2.0 the email wraps after '@' and the LinkedIn border is amber."
+  },
+  {
+   "id": "282-c2",
+   "status": "met",
+   "evidence": "The draft is set once with compareAndSet(null, ...) from the first non-null emission. save() is single-flight (busy plus finished). It re-reads the latest profile and copies only fullName, phone, city, linkedinUrl and portfolioUrl (trimmed) plus contactUserStated = true; email, entries, skills and reviewedAt are untouched. The route goes back and then shows 'Contact saved'. Covered by EditContactViewModelTest and ProfileRealEntryWiringTest.contactSave_storesFieldsAndGoesBack, which also asserts contactUserStated."
+  },
+  {
+   "id": "282-c3",
+   "status": "met",
+   "evidence": "isValid = name not blank, phone blank or ContactFieldValidator.isValidPhone, and every field <= MAX_TEXT_LENGTH. RegisterChromeAction.enabled = canSave. There is no error copy and no red state (D52/D75.1). LinkedIn and Portfolio are stored as typed. ProfileRealEntryWiringTest.contactSave_isDisabledUntilNameAndPhoneAreValid checks chromeActions.enabled in both directions."
+  },
+  {
+   "id": "282-c4",
+   "status": "met",
+   "evidence": "A plural count line, an Add field plus a feature-local Add pill (canAdd: trimmed, non-blank, <=60, < 100 skills, not a case-insensitive duplicate), new skills go first, and chips use FlowRow with a 48dp remove target and 'Remove <skill>'. Done is always enabled: write() applies withPendingSkillAdded, then writes skills and userStatedSkills = kept (still present) + added this session. Back discards the VM draft. The editors_skills narrow baseline was read: the field and button stack at font 2.0 and chips wrap at word boundaries."
+  },
+  {
+   "id": "282-c5",
+   "status": "met",
+   "evidence": "SUMMARY has the heading 'Summary', the prototype note, one TmrTextArea labelled 'Your summary', and no add button (canAdd is false for SUMMARY and onAdd ignores it). ListEditViewModelTest.summaryShowsNoteOneItemNoAdd; editors_list_summary baselines."
+  },
+  {
+   "id": "282-c6",
+   "status": "met",
+   "evidence": "EDUCATION has no note, one text area per EDUCATION entry (the fixture renders 'B.Com, Finance · Symbiosis College, Pune · 2020', which matches the prototype LISTS item), and DashedAddButton '+ Add education'. educationHasNoNoteAndAddLabel; editors_list_education baselines."
+  },
+  {
+   "id": "282-c7",
+   "status": "met",
+   "evidence": "ACHIEVEMENTS has the prototype note, six items on PrototypeFixtures and '+ Add achievement'. achievementsShowNoteSixItemsAndAddLabel. The narrow baseline was read: the note and items wrap at word boundaries with no ellipsis."
+  },
+  {
+   "id": "282-c8",
+   "status": "partial",
+   "evidence": "The D75.3 rules are implemented and tested. Unchanged items are untouched (unchangedItemKeepsImportedSourceBulletsAndId compares the full entries list). A changed item becomes the same id, USER_EDITED, confirmed, with organization, dates and bullets cleared. A blanked item is removed. A new item is USER_STATED, confirmed, gets neverUsedId over the original plus new entries, and goes after the last entry of its category. Nothing hidden is lost silently: toLine renders title · organization · start – end · every bullet, so the text area shows every field that an edit collapses, and ProfileEntry has no other content field. FactIdAllocator.kt is byte-identical to origin/revamp/274-upload (empty diff). EditRoleViewModel now calls FactIdAllocator().neverUsedId(EXPERIENCE, profile.entries, title), which keeps the same prefix and the '<prefix>-<8 hex>' format, and UNIQUE_SUFFIX_LENGTH is still used by randomBulletId. Partial because of finding 1: an unchanged imported (unconfirmed) achievement cannot be confirmed in this editor, which D74 requires #282 to offer."
+  },
+  {
+   "id": "282-c9",
+   "status": "met",
+   "evidence": "All five forms use Column + verticalScroll with no fixed heights. Chips use FlowRow. The skills Add row stacks above font 1.3. EditorsLayoutTest walks every editor state at 337dp/font 2 and asserts no truncation and no mid-word break through TextLayoutResult. The contact, skills and achievements narrow baselines were read with no ellipsis, clipping or mid-word break."
+  },
+  {
+   "id": "282-c10",
+   "status": "partial",
+   "evidence": "The PR body reports verify-local green. CI at 7362aab9: Constitution policy, Static checks, App unit tests, Core unit tests, Feature unit tests, Lint, Screenshot tests and delivery-gates-pregate pass. Assemble APKs was still pending at review time. The diff adds no '!!' and no comments. Strings are in strings_editors.xml with the feature_profile_impl_ prefix, with no ATS or guarantee wording."
+  },
+  {
+   "id": "282-x1",
+   "status": "partial",
+   "evidence": "Editors store only typed text, with no parsing or suggestions. New entries are USER_STATED and confirmed, edited ones USER_EDITED. Ids are never reused (neverUsedId over the original plus new ids, deletedThenAddedNeverReusesTheDeletedId). Each Save copies only the fields it owns (saveLeaves* tests). contactUserStated is set on the Edit contact save. Partial because of finding 2: a summary typed in the Summary editor does not set the identity flag, although D77 puts summary in the identity block."
+  },
+  {
+   "id": "282-x2",
+   "status": "met",
+   "evidence": "Skills: <=60 characters and <100 skills gate Add. List: changed or new items <=200, summary <=400, and Add only while entries + new < MAX_ENTRIES. Everything is enforced through canSave/canAdd with no message. Tests: overLengthItemDisablesSave, summaryOver400DisablesSave, addDisabledAtEntryLimit, saveWhileInvalidWritesNothing."
+  },
+  {
+   "id": "282-x3",
+   "status": "met",
+   "evidence": "ProfileEntryProvider maps EditContactNavKey, SkillsNavKey and ListEditNavKey(section) to the real routes, and NavKeyPlaceholder.kt is deleted (its only users are gone). ProfileRealEntryWiringTest adds five real-entry tests with Hilt ViewModels (contact save, contact validity, skills add + Done, education add, summary edit). Each invokes chromeActions.handler and asserts the repository and goBack. The lead deletion of ProfileEntryKeysTest (4d88e7b2) is disclosed and follows D55/D75.8."
+  },
+  {
+   "id": "282-x4",
+   "status": "partial",
+   "evidence": "No production change. ProfileRealEntryWiringTest.settingsGearTap_opensSettings is unchanged and asserts SettingsNavKey on top. The Verifier emulator walk (MainActivity > Profile > Settings, screenshot) is still outstanding per the PR body."
+  },
+  {
+   "id": "D76-migration",
+   "status": "met",
+   "evidence": "MIGRATION_3_4 is one statement, ALTER TABLE profile ADD COLUMN contactUserStated INTEGER NOT NULL DEFAULT 0. The column name follows the existing camelCase profile columns; D76's 'contact_user_stated' was illustrative. The entity has @ColumnInfo(defaultValue = \"0\"). 4.json differs from 3.json only in that column, the field entry and the identity hash. DatabaseModule registers 1_2, 2_3 and 3_4 with no destructive fallback. DatabaseModuleTest opens a v1 production DB with a row through the real provider and reaches v4 (main ships v2, so every shipped version chains). ContactFlagMigrationTest opens a real v3 DB with a profile row, runs runMigrationsAndValidate(4, validateDroppedTables = true) and reads 0. The schema-version test edits are only 3->4 plus a rename. No other open branch is above v3. The mappers round-trip the flag. AccountDataArchiveWriter not exporting the flag is acceptable: it is internal provenance state, not user content."
+  },
+  {
+   "id": "059c4f53-honesty",
+   "status": "met",
+   "evidence": "The red-commit assertion name.endsWith(\"A\") assumed a cursor position on a stateless field whose value never changes. The new assertion checks that a callback received text containing the typed 'A', which still fails if onFullNameChange is not wired. LinkedIn (empty field) keeps its exact isEqualTo(\"B\"). This is an honest correction, not a weakening. The same commit also carries the planned NavKeyPlaceholder.kt deletion, which its message does not mention; this is cosmetic."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "feature/profile/impl/src/main/kotlin/com/tailormyresume/feature/profile/impl/listedit/ListEditViewModel.kt",
+   "line": 178,
+   "rule": "D74 (achievements stay unconfirmed until confirmed in their editor; #282 must offer that), I.1",
+   "trigger": "A user imports a resume. EntrySectionParser and RemoteResumeTextParser create ACHIEVEMENT entries with isConfirmed=false, and #275's Review confirms only EXPERIENCE and EDUCATION (D74). The user opens Profile > Achievements, reads the six lines and taps Save without editing. Each item takes the '!item.isChanged -> result' branch, so every achievement stays isConfirmed=false. TailorResumeUseCase (entries.filter { isConfirmed }) and confirmedWithinLimits never use them. The only way to confirm an achievement is to rewrite its text, which flattens it into a USER_EDITED line. The prototype has no other confirm control, so the shown-and-saved list is the only place to confirm.",
+   "title": "The list editor offers no way to confirm imported achievements (D74); saving an unchanged list leaves them unconfirmed and out of tailoring",
+   "proof": "In ListEditViewModelTest, seed ach-1 as source=IMPORTED, isConfirmed=false, load ACHIEVEMENTS, call saveAndAwait() without edits, and expect the saved ach-1 to have isConfirmed == true with source IMPORTED, title and bullets unchanged. At 7362aab9 it stays false. Suggested fix: on Save, set isConfirmed=true on unchanged shown items and keep their source, bullets and id. This needs a lead decision, because plan 282-c8 says 'entry untouched'."
+  },
+  {
+   "severity": "medium",
+   "file": "feature/profile/impl/src/main/kotlin/com/tailormyresume/feature/profile/impl/listedit/ListEditViewModel.kt",
+   "line": 131,
+   "rule": "D77 (the identity block includes summary; never replaced when user-stated), D73, I.1; cross-lane with #333/#335",
+   "trigger": "On the integrated base with #333's SaveImportedProfileUseCase.chooseIdentity, a user has an all-imported profile, never opens Edit contact, and types a new summary in Profile > Summary. Save writes only summary, and contactUserStated stays false. The user then uploads a newer resume. chooseIdentity checks contactIsUserStated(): every entry is IMPORTED and there is a sourceFileName, so it returns false. The flag is false, and the imported name is non-empty, so it returns importedIdentity. saved.summary = parsed.summary, and the summary the user typed is silently replaced. D77 says the identity block is name, email, phone, city, LinkedIn, portfolio, headline and summary, and that a user-stated block is kept whole. Only Edit contact sets the flag in this diff.",
+   "title": "A summary typed in the Summary editor does not set contactUserStated, so a later re-import overwrites it",
+   "proof": "At integrate (#335): in SaveImportedProfileUseCaseTest, seed an all-imported profile, apply ListEditViewModel SUMMARY save with 'Mine', import a resume with a name and summary 'Theirs', and expect summary == 'Mine'. On this branch the precondition is a ListEditViewModelTest asserting that a changed-summary save sets contactUserStated == true; it fails at 7362aab9."
+  }
+ ],
+ "integrate_notes": [
+  "#333/#335: chooseIdentity must read CandidateProfile.contactUserStated first and OR it with the provenance proxy (D77). SaveImportedProfileUseCase on #333 builds the saved profile with existing.copy(...), so the flag carries forward. Keep it that way, and do not reset it on import.",
+  "#333/#335: FactIdAllocator.kt is byte-identical between 7362aab9 and origin/revamp/274-upload, so the merge is a no-op hunk. EditRoleViewModel's private neverUsedId is already gone here, which closes the #321 integrate note.",
+  "D76: this branch is the only one at Room v4, and every other open branch is at v3 or v2. Any later Room change takes version 5 and chains MIGRATION_4_5 after MIGRATION_3_4 in DatabaseModule.",
+  "D75.7/D77 also require SaveManualProfileUseCase to set contactUserStated. It does not exist on this base, so whichever lane lands the manual flow (#333/#275) must set the flag there.",
+  "#275 (Review mid-onboarding): the editors pop exactly one entry with navigator.goBack on save, the same as EditRoleRoute. If finding 1 is fixed by confirming on Save, #275's 'Looks right, continue' and the Achievements editor become the two confirm paths that D74 describes.",
+  "CI: only Assemble APKs was pending at review time; re-check it before merge. The Verifier emulator walk for 282-x4 is still outstanding."
+ ]
+}

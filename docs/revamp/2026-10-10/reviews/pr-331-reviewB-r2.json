@@ -1,0 +1,151 @@
+{
+ "head_sha": "8fccfbc8a8d7658d4f22f51858b7318fee572ee3",
+ "round": 2,
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "279-c1",
+   "status": "met",
+   "evidence": "Unchanged from round 1: EditResumeViewModelTest.readyStateShowsSummaryBulletsSourceTagsAndSkills and the export_edit baselines; the fixer diff adds only a contentDescription (no visual change)."
+  },
+  {
+   "id": "279-c2",
+   "status": "met",
+   "evidence": "Fit pass now waits 300 ms while drafts exist inside mapLatest (EditResumeViewModel.kt:104); a cancelled pass is a pure state build, so nothing is half-written, and AndroidPdfResumeRenderer.pageCount closes its pages inside the block. typingBurstRunsOneFitPassAfterTheLastKeystroke proves one pass per pause; overflowHidesStillFitsOnOnePage keeps its assertions after advanceTimeBy(400)."
+  },
+  {
+   "id": "279-c3",
+   "status": "met",
+   "evidence": "Unchanged: ExportResumeUseCase gates, names with core ExportFileName and renders at settings.pageSize; reexportPassesThePreviousFileNameToTheRenderer added. File-name collisions between applications are a finding (data integrity), not a naming defect."
+  },
+  {
+   "id": "279-c4",
+   "status": "partial",
+   "evidence": "Unchanged and accepted under D65: page count and fit proven through the PdfPages seam; selectable text and size stay on the D44 walk and the instrumented follow-up (A3)."
+  },
+  {
+   "id": "279-c5",
+   "status": "met",
+   "evidence": "refusesWhenNotAcceptedOrPending unchanged. The restore path shows only a file that was exported earlier for this application (ExportRecord with the same name); when the file or record is gone it falls back to exportResume, which still runs the ExportReadiness gate before any render."
+  },
+  {
+   "id": "279-c6",
+   "status": "met",
+   "evidence": "paidExportShowsCreditsLine unchanged; Close roots Applications."
+  },
+  {
+   "id": "279-c7",
+   "status": "partial",
+   "evidence": "spendWasFreeFor now uses this application's SPEND with a free-first walk; reexportOfTheFreeApplicationAfterAPurchaseStillShowsTheFreeLine and anotherApplicationsSpendDoesNotMakeThisOneFree pass. It latches on any earlier free SPEND of the application, so a later paid re-tailor of the same application still shows 'Nothing was charged' (finding)."
+  },
+  {
+   "id": "279-c8",
+   "status": "met",
+   "evidence": "Share/Open intents and FileProvider unchanged; FileMissing toast when the file is gone."
+  },
+  {
+   "id": "279-c9",
+   "status": "met",
+   "evidence": "Unchanged (SetApplicationStatusUseCase, markAppliedSetsStatusDateAndUndoRestores)."
+  },
+  {
+   "id": "279-c10",
+   "status": "met",
+   "evidence": "Unchanged (TmrStatusSheet, changeStatusSavesThroughSharedUseCase)."
+  },
+  {
+   "id": "279-c11",
+   "status": "met",
+   "evidence": "Unchanged (soonRowsOnlyEmitComingSoonToast, goToApplicationsRootsApplications)."
+  },
+  {
+   "id": "279-c12",
+   "status": "met",
+   "evidence": "No baseline re-recorded in the fixer diff; the new free_with_balance string has no baseline but uses the same Text slot as the existing free line."
+  },
+  {
+   "id": "279-c13",
+   "status": "partial",
+   "evidence": "Full Build run 38103819736 at 8fccfbc8: Feature, App and Core unit tests, Screenshot tests, Lint, Static checks, Assemble APKs and the 'Build, lint, and unit tests' aggregate all success (TailorRealEntryHiltTest now passes). The run shows 'cancelled' only because the title-only 'edited' run 38103828487 cancelled its Constitution policy job, and that run's policy job passed at the same head. Code CI is green. Partial only because the D44 walk evidence is still not in docs/revamp/2026-10-10/evidence."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/export/ExportDirectory.kt",
+   "line": 19,
+   "rule": "data integrity of exported files; round-1 ExportDirectory finding (one file per application); cross-lane #280 file card Share/Open and #283 file-name setting",
+   "trigger": "Files are keyed only by the ExportFileName string, which is not unique per application: NAME_RESUME gives every application 'Priya-Deshmukh_Resume.pdf' (and NAME_ROLE / NAME_COMPANY_ROLE collide for two jobs with the same title, or the same company and title). #283 Settings cycles to NAME_RESUME. (1) Overwrite: export A, then export B under NAME_RESUME; B's rename replaces A's PDF, and A.exportFileName still names it, so #280 Application detail Share for A (and ExportedViewModel.resolveFile / storedExport, which read by name) sends B's resume, tailored to another job, with A's page count. (2) Delete: then switch to NAME_ROLE and re-export A; previousFileName 'Priya-Deshmukh_Resume.pdf' != new name, so line 19 deletes B's current file and B's Share shows 'Couldn't find the PDF'. Smallest fix that keeps the visible file name: write each application's PDF in its own folder, exports/<applicationId>/<fileName> (cache-path exports/ already covers subfolders; sign-out deleteRecursively already removes them), and give ExportedFileStore.fileFor the applicationId. Adding an id suffix to the name would also work but changes the name the employer sees; 'never delete a name another application references' fixes only case 2.",
+   "title": "Applications that share an export file name overwrite or delete each other's PDF",
+   "proof": "ExportResumeUseCaseTest: settings NAME_RESUME, seed accepted applications app-1 and app-2 with different bullets, export app-1 then app-2; expect app-1's stored file to still hold app-1's render (fails at head: both resolve to the same path, last writer wins)."
+  },
+  {
+   "severity": "medium",
+   "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/exported/ExportedViewModel.kt",
+   "line": 189,
+   "rule": "279-c7 and round-1 credits finding: the credits line must describe the spend for this application; billing copy must be true",
+   "trigger": "fundedByFree is set true by any free SPEND of the application and never reset, so it describes the first tailoring, not the latest. Ledger FREE_GRANT +1, SPEND -1 (app X, free), PURCHASE +5, SPEND -1 (app X, a second run: #277 JobResult 'Tailor' calls navigateToTailoring with a new runId, and #280 adds 'Re-tailor with profile changes · 1 credit'). Export X: the walk returns true, the card shows the big 4 and 'Free resume used. Nothing was charged.' although this tailoring cost a paid credit. Fix: assign instead of latch, fundedByFree = (freeUsed == cost) for each SPEND of this application, so the last one wins. On w4-base this when statement also stops compiling (non-exhaustive over REFUND and MIGRATION, an error since Kotlin 1.7); add those branches (REFUND/MIGRATION -> Unit keeps the copy true: they never make a spend free).",
+   "title": "Free line latches on the application's first spend, so a paid re-tailor still says 'Nothing was charged'",
+   "proof": "ExportedViewModelTest: ledger FREE_GRANT 1, SPEND -1 app-1, PURCHASE 5, SPEND -1 app-1 (later createdAt); expect freeResumeUsed == false (fails at head)."
+  }
+ ],
+ "round1_adjudication": [
+  {
+   "finding": "R1 high TailorRealEntryHiltTest.kt:144 Edit resume asserts before Ready",
+   "decision": "fixed",
+   "reason": "waitFor on the title like the Exported test; the original assertions are kept and a new 'Edit bullet' content-description assertion is added. Feature unit tests pass in run 38103819736 at 8fccfbc8."
+  },
+  {
+   "finding": "R1 medium ExportedViewModel.kt:158 credits line counts every SPEND",
+   "decision": "partly fixed; residual raised as a new medium",
+   "reason": "The round-1 fixture now shows the free line and another application's spend no longer counts. The walk latches on the first free spend of the application (paid re-tailor shows 'Nothing was charged'), and the when statement breaks the w4-base compile. Both have a one-line fix."
+  },
+  {
+   "finding": "R1 medium ExportDirectory.kt:11 every export wipes other applications' PDFs",
+   "decision": "fixed for distinct names; residual on shared names raised as a new medium",
+   "reason": "No wipe; temp then rename; only this application's previous name is deleted after a successful rename; write_failureKeepsThePreviousFile proves the failure path. Files are still keyed by a name that applications can share, so the per-application guarantee holds only while names differ."
+  },
+  {
+   "finding": "R1 low EditResumeScreen.kt:131 bullet BasicTextField without an accessible name",
+   "decision": "fixed (accessible name); visual affordance accepted",
+   "reason": "contentDescription 'Edit bullet' is set and asserted in the real-entry test. The card styling matches the prototype frame; no baseline change needed."
+  },
+  {
+   "finding": "R1 low EditResumeViewModel.kt:125 fit pass on every keystroke",
+   "decision": "fixed",
+   "reason": "300 ms delay inside mapLatest while drafts exist; cancellation lands in delay or after a pure, self-closing pageCount pass, so no state is half-written and native pages are always closed. Save reads drafts directly and is not delayed."
+  },
+  {
+   "finding": "R1 low ExportedRoute.kt:63 debug Exported target bounces",
+   "decision": "fixed",
+   "reason": "OfflineSampleDataController sets changesAcceptedAt only for ReviewPlan.ALL; onlyTheFullyReviewedSampleApplicationIsAcceptedForExport asserts ALLOWED for Northwind and NOT_ACCEPTED for Sahyadri, so the I.2 gate is unchanged."
+  },
+  {
+   "finding": "Reviewer A A1 export in init duplicates ExportRecord on restore",
+   "decision": "fixed",
+   "reason": "SavedStateHandle 'exported' marker (NavigationState has both the SaveableStateHolder and ViewModelStore decorators, so it survives process death); restore reads the stored export without render or record; restoreAfterProcessDeathShowsTheStoredExportWithoutExportingAgain asserts renderCalls 1 and one ExportRecord. Fallback to a fresh, gated export only when the name, record, page count or file is missing (no test for that fallback; low risk, the branch is the original path)."
+  },
+  {
+   "finding": "Reviewer A A2 previous exports deleted before the new file is written",
+   "decision": "fixed",
+   "reason": "Delete now runs after the rename and only for this application's previous name."
+  },
+  {
+   "finding": "Reviewer A A3 line equality records input text",
+   "decision": "accepted under D65; follow-up kept in the PR body",
+   "reason": "Unchanged; the instrumented text-extraction test remains a listed follow-up."
+  }
+ ],
+ "test_edits": [
+  "ExportDirectoryTest.write_removesOlderExports -> write_keepsOtherApplicationsExports: the old test encoded the wipe that round 1 rejected; replacement is allowed and three new tests (previous-only delete, same-name keep, failure keeps previous) are stronger.",
+  "EditResumeViewModelTest: advanceTimeBy(400) before the unchanged assertions in overflowHidesStillFitsOnOnePage and fitUsesTheSettingsPageSize is required by the debounce, not a weakening.",
+  "TailorRealEntryHiltTest.editResumeEntryRendersAndSaves: adds a wait and one assertion; nothing removed.",
+  "ExportedViewModelTest and ExportedRouteTest: only the SavedStateHandle constructor argument added to existing tests; four new tests."
+ ],
+ "integrate_notes": [
+  "git merge-tree origin/revamp/w4-base 8fccfbc8: no textual conflicts.",
+  "Compile break on w4-base: ExportedViewModel.kt:182 when (entry.kind) has no REFUND or MIGRATION branch (CreditLedgerKind on w4-base); a non-exhaustive when statement over an enum is an error in Kotlin 2.4.",
+  "Round-1 notes still apply: TailorHiltTestBindings ResumeTailor.tailor signature (D62 answer: QuickAnswer?) and possible narrow-baseline re-record after the TmrFitText change.",
+  "CI: the PR-body edit started a title-only Build run (38103828487) whose aggregate 'Build, lint, and unit tests' passed with every job skipped, and its job-level policy concurrency cancelled the full run's Constitution policy job. Not caused by this PR; read the full run 38103819736 for the gate."
+ ]
+}

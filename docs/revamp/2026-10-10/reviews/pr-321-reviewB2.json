@@ -1,0 +1,67 @@
+{
+ "head_sha": "66649acd857f991466177213e62678711156ef64",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "281-c1",
+   "status": "met",
+   "evidence": "Round-1 M3 is fixed. yearsOfExperience now stores each span as start to end + 1, so the end month counts. mergedMonthSpan counts overlapping and adjacent roles once, and the total is floored by /12. Any start or end that cannot be computed, or an end before its start, returns null, so the years are omitted (D52). The tests prove it: janToDecOfOneYear_isOneYear (Jan-Dec 2024 = 1) and twelveCalendarMonthsAcrossTwoYears_isOneYear (Jun 2020-May 2021 = 1) both fail at 8751abc0. gapBetweenRoles (2), bareYearDates (2) and nonExperienceEntries (1) were corrected to the inclusive values, and lessThanTwelveMonths uses Jun 2020-Apr 2021 (11 months, 0). I checked disjoint (63 months, 5) and overlapping (81 months, 6) by hand against the 2026-09-30 clock. The other header fields are unchanged since round 1. One low edge is open: a dated end month in the future (finding 1)."
+  },
+  {
+   "id": "281-c2",
+   "status": "met",
+   "evidence": "Nothing in this delta touches navigation. Round-1 evidence stands: ProfileTarget.navKey covers every row, and ProfileRealEntryWiringTest renders the real entries (D55, D57)."
+  },
+  {
+   "id": "281-c3",
+   "status": "met",
+   "evidence": "ExperienceViewModel is unchanged in this delta, and round-1 evidence stands. Display order follows the stored entry order. No code sorts or parses entry ids (searched with git grep). FactDisplayIds keys on ^[A-Z]{1,2}-\\d{2,}$, but its displayId is only placed in TailoredBulletSource and is never rendered."
+  },
+  {
+   "id": "281-c4",
+   "status": "met",
+   "evidence": "toDraft now also fills bulletIds from the stored bullets, padded with [null] when there are none. The existing tests existingRole_loadsDraftFromEntry and laterProfileEmissions_doNotOverwriteTheDraft still cover loading."
+  },
+  {
+   "id": "281-c5",
+   "status": "met",
+   "evidence": "Add mode starts with bullets [\"\"] and bulletIds [null]. onAddBullet appends to both lists, and onBulletChange never changes their size, so the two lists stay aligned."
+  },
+  {
+   "id": "281-c6",
+   "status": "met",
+   "evidence": "The Current toggle is unchanged in this delta. Round-1 evidence stands (currentToggle_savesPresentAndClearsGap)."
+  },
+  {
+   "id": "281-c7",
+   "status": "met",
+   "evidence": "Round-1 M2 is fixed. A new role gets FactIdPrefix.of(EXPERIENCE, title) + '-' + 8 hex characters of a UUID, retried while the id is among the current entry ids. FactIdAllocator is untouched, and its only remaining production callers are RemoteResumeTextParser (ids for a fresh parse) and AddUserStatedFact(s)UseCase (U-NN ACHIEVEMENT entries, plus an uncalled W/I path), so no editor path fills a gap. A new role's bullets are <roleId>-bN under a fresh role id. An existing role's bullets keep their stored ids by index. A bullet added to an existing role gets <roleId>-b + 8 hex characters, checked against every id in the draft, including blanked ones. A deleted id is gone from storage, so reusing it would need a 32-bit random match. The ids fit the BACKEND_CONTRACT pattern ^[A-Za-z0-9:_.-]{1,64}$ at about 20 characters, using only hex digits and '-'. addAfterDelete_neverReusesTheDeletedRoleOrBulletIds fails with the old allocator, which would give W-02 and W-02-b1. editExisting_removedMiddleBulletIdIsNeverReusedAndKeptIdsStay proves b1 and b3 are kept, b2 is never reissued, and the second session keeps the added id."
+  },
+  {
+   "id": "281-c8",
+   "status": "met",
+   "evidence": "Round-1 M1 is fixed. save() and delete() both pass through singleFlight. Its synchronous `finished || busy` check is set before launch, so a second tap in the same frame is dropped. finished is set before the Room write in both write() and remove(), so a call after completion is also dropped. Three tests use a 10 ms observeProfile delay: doubleDelete_emitsOneDeletedEventAndWritesOnce, saveThenDelete_inTheSameWindow_doesNotResurrectTheRole and deleteThenSave_inTheSameWindow_doesNotResurrectTheRole. At 8751abc0 each one emits two events, and saveThenDelete also loses exp-bajaj. Without busy, both coroutines would pass the finished check before the delay, so the guard is what the tests exercise."
+  },
+  {
+   "id": "281-c9",
+   "status": "met",
+   "evidence": "No UI or baseline changes in this delta, so the 14 round-1 baselines stand."
+  },
+  {
+   "id": "281-c10",
+   "status": "partial",
+   "evidence": "At head 66649acd, Constitution policy, Static checks, delivery-gates-pregate and the Build summary pass. App unit tests, Core unit tests, Feature unit tests, Lint, Screenshot tests and Assemble APKs are still pending in run 38099710780. The PR body reports verify-local only for 1d68c572. The D44 walk is still pending."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "feature/profile/impl/src/main/kotlin/com/tailormyresume/feature/profile/impl/overview/ProfileViewModel.kt",
+   "line": 90,
+   "rule": "D52 'current role to today via the injected Clock' / Constitution I.1 (never overstate)",
+   "trigger": "A role with a dated end month after today, such as a fixed-term internship or contract. The clock is 2026-09-30. 'Jan 2026 – Dec 2026' gives the span [Jan 2026, Jan 2027) = 12 months, so the header reads '1 yrs' after 9 months of work. 'Jul 2024 – Jun 2027' reads 3 yrs instead of 2. endMonthIndex only uses the clock for Present/Now/Current. A dated end is never clamped to the clock month, so future months are counted. Making the end month inclusive in this delta moved the first case from 0 to 1.",
+   "title": "A dated end month in the future counts months not yet worked in 'N yrs'",
+   "proof": "YearsOfExperienceTest: yearsOfExperience(listOf(experience(\"Jan 2026\", \"Dec 2026\")), clock) == 0 with clock 2026-09-30. It returns 1 at this head. The fix clamps end to minOf(end, clockMonthIndex(clock))."
+  }
+ ]
+}

@@ -1,0 +1,75 @@
+{
+ "head_sha": "c98513c3f25f4590f48168c2cd39ffebd71de732",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "c1",
+   "status": "met",
+   "evidence": "Schema, prompt and response expose summary, location, links and entries[].current; test 'a current role stays current...' covers Infosys current/Tata closed/location Pune (own fixture, not the prototype RESUME_TXT)."
+  },
+  {
+   "id": "c2",
+   "status": "partial",
+   "evidence": "Summary kept/absent-word/null tested, but the check is a word-set membership test (resume-parse.ts:116-117), not a substring, so recombined known words pass (see finding)."
+  },
+  {
+   "id": "c3",
+   "status": "partial",
+   "evidence": "http(s) only, LINKEDIN host downgrade and absent-url drop are tested; the verbatim test is String.includes, so a truncated prefix of a real url passes and no test covers it."
+  },
+  {
+   "id": "c4",
+   "status": "partial",
+   "evidence": "Explicit end date wins and Present/till date map to endDate null, tested; but the present-word check is over the whole resume, not the entry, so a closed role can be marked current."
+  },
+  {
+   "id": "c5",
+   "status": "met",
+   "evidence": "Location with absent word is null; DOB-labelled summary is dropped and reported."
+  },
+  {
+   "id": "c6",
+   "status": "partial",
+   "evidence": "architecture.md bullet updated; CI on head c98513c is still QUEUED (Secret scan, delivery-gates-pregate), no result yet. PR body reports 2 lead-only failures before c98513c."
+  },
+  {
+   "id": "c7",
+   "status": "met",
+   "evidence": "Test 'a fabricated summary, location and link never reach the profile' covers fully invented values; recombination of in-text words is not covered (see finding)."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "src/apps/tailormyresume/resume-parse.ts",
+   "line": 144,
+   "rule": "c4 / Constitution I.1: current must follow the entry's own end date",
+   "trigger": "Resume has 'Data Analyst, Infosys, Jan 2023 - Present' and 'Tata Digital, Mar 2021 - Dec 2022'; the model returns Tata with endDate null and current true (as it already does in the test fixture for Infosys). textHasPresent is true from the Infosys line, so Tata is returned current true with endDate null: a past role shown as running and its real end date lost. The present test is over the whole text, not the entry.",
+   "title": "current is decided from a resume-wide present-word match, so one Present line validates every entry"
+  },
+  {
+   "severity": "medium",
+   "file": "src/apps/tailormyresume/resume-parse.ts",
+   "line": 135,
+   "rule": "c3 / Constitution I.1: link present verbatim",
+   "trigger": "Text contains 'https://www.linkedin.com/in/priya'; model returns 'https://www.linkedin.com/in/pri'. text.includes is true, host is linkedin.com, so a truncated, wrong url is kept as LINKEDIN. Same for 'https://priya.dev' against 'https://priya.dev.example.org/x'.",
+   "title": "Link verbatim test is a substring check, so a prefix of a real url passes as verbatim"
+  },
+  {
+   "severity": "medium",
+   "file": "src/apps/tailormyresume/resume-parse.ts",
+   "line": 128,
+   "rule": "c2 / Constitution I.1: summary and location verbatim",
+   "trigger": "Resume has 'Infosys', 'Pune', 'six years', 'Excel'; model summary 'Data analyst at Infosys with 40 years in Pune' contains only words found in the text and passes verbatim() (word-set, order and adjacency ignored), so a reworded false claim is returned as the candidate's summary. Same rule as bullets, and the plan asked for it, but summary is free prose where recombination is easy.",
+   "title": "Word-bag membership accepts recombined text; consider requiring the summary/location to be a case-insensitive whitespace-normalised substring of the input"
+  },
+  {
+   "severity": "low",
+   "file": "src/apps/tailormyresume/resume-parse.ts",
+   "line": 128,
+   "rule": "PII: summary/location cannot carry sensitive data",
+   "trigger": "Summary 'Born 14 March 1999, male, Aadhaar 1234 5678 9012' appears in the resume; sensitivePatterns need a label ('DOB', 'born on', 'gender:'), so none match and it passes verbatim, returned in profile.summary with droppedSensitive empty. Also summary '' returns '' not null (wordsOf is empty).",
+   "title": "safeText relies on the label-based sensitive patterns; an unlabelled birth date or ID number passes through summary and location"
+  }
+ ]
+}

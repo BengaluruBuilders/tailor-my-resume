@@ -1,0 +1,85 @@
+{
+  "head_sha": "a1a63e7878746860f8847d1690dd6428f3b1cd5b",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "c1",
+      "status": "partial",
+      "evidence": "Schema, prompt, response fields are present, and the per-entry rule gives Infosys current=true and endDate null, Tata Digital endDate null and current=false, and location Pune. Reviewer B confirmed this by running a copy of the post-processing on the prototype RESUME_TXT ('Business Analyst, Infosys (Jul 2022 – now)', 'Tata Digital (Jun 2021 – )'). The issue asks for a test with the prototype RESUME_TXT, but the PR tests a different fixture (see finding)."
+    },
+    {
+      "id": "c2",
+      "status": "met",
+      "evidence": "The summary must be a normalised substring of the input (resume-parse.ts:183-191). The tests cover kept, absent-word, recombined, case/whitespace, empty and null summaries. The match is not word-bounded (low finding)."
+    },
+    {
+      "id": "c3",
+      "status": "met",
+      "evidence": "The code keeps only http(s) urls that appear as whole tokens (isDelimitedUrl), and LINKEDIN only for a linkedin.com host or subdomain. Adversarial runs: a prefix, 'priya.dev?ref=cv', 'linkedin.com.evil.com' (becomes OTHER) and 'user@www.linkedin.com@evil.com' (becomes OTHER) are all handled. 'url|url' with no spaces is dropped (fails closed)."
+    },
+    {
+      "id": "c4",
+      "status": "partial",
+      "evidence": "An explicit end date with current=true from the model gives false and keeps the end date (tested). But a model endDate of 'Present' makes an entry current even when the input has no present-type word. sourceSpan also matches a neighbour's line (two medium findings). The 'decided per entry' test has Tata current=false from the model, so it would also pass if the fix were reverted to the resume-wide check."
+    },
+    {
+      "id": "c5",
+      "status": "met",
+      "evidence": "A location with an absent word or recombined words is null, and the sensitive filter applies to summary and location. Unlabelled-PII drop on the summary was checked by running it: '14 March 1999', '1999-03-14', '14/03/1999', 'March 14, 1999', Aadhaar '1234 5678 9012' and '1234-5678-9012', 'ABCDE1234F' and '+91 98200 41736' are all dropped. Ordinary text with '2019-2023', '1 200 000' and '120 000' is kept. Fail-closed false positives: 'certified on 12 March 2021' and '2016 - 2019 - 2023' drop the summary; lowercase PAN passes. Entries, refs and sensitive drop are unchanged apart from current."
+    },
+    {
+      "id": "c6",
+      "status": "partial",
+      "evidence": "CI Validation passed on a1a63e7 (run 38078503959). Secret scan and delivery-gates-pregate are still queued. The architecture.md /resume/parse bullet was updated, but it describes the pass-1 rules, not the code at head (low finding)."
+    },
+    {
+      "id": "c7",
+      "status": "met",
+      "evidence": "A fabricated summary, location and link are null or dropped (tested). Recombined summary and location are null. No value survives unless it occurs in the input. Truncation remains possible (low finding)."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/resume-parse.ts",
+      "line": 223,
+      "rule": "c4 / Constitution I.1: current follows the resume text, not the model alone",
+      "trigger": "Text 'Data Operations Associate, Tata Digital, Mar 2021 - Dec 2022' with no present-type word anywhere. The model returns endDate 'Present' (current true or false). isPresentWord(raw) short-circuits, so the output is current=true and endDate=null: a closed role becomes running and its real end date is lost. Fix: require presentPattern.test(sourceSpan(...)) for the raw-present branch too. The existing tests still pass with that change, because their text says Present on the entry line.",
+      "title": "A model endDate of Present marks the entry current without any check against the text",
+      "proof": "parse('...Tata Digital, Mar 2021 - Dec 2022...', entries:[{...tataDigital, endDate:'Present', current:false}]) expects current false; head returns true"
+    },
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/resume-parse.ts",
+      "line": 144,
+      "rule": "c4 / reviewA M1 disposition: a closed role is never current",
+      "trigger": "Reproduced with model current=true and endDate null for the past role. (a) Oldest-first resume 'Analyst, Tata Digital, 2021 - 2022' followed by 'Data Analyst, Infosys, Jan 2023 - Present': the span includes the next line, so Tata is current. (b) The bullet after the Tata line reads 'Rebuilt the current reporting stack': Tata is current. (c) The summary line 'Data Analyst at Infosys, now leading reporting; earlier Analyst at Tata Digital.' is matched first, so Tata is current. (d) Title 'Analyst' with the org on a separate line matches 'Data Analyst, Infosys, ... Present', so Tata is current. Fails the other way: 'Data Analyst\\nInfosys\\nJan 2023 - Present' (three-line header) gives current=false for the real running role.",
+      "title": "sourceSpan takes the first substring-matching line plus the next line, so a past role picks up another line's Present/current/now",
+      "proof": "No test covers it. The 'decided per entry' test passes tataDigital with current:false, so it also passes on the reverted resume-wide check."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/resume-parse.ts",
+      "line": 188,
+      "rule": "Constitution I.1: summary and location verbatim",
+      "trigger": "Input 'Led a team of 12 engineers.' with model summary '2 engineers' is returned (a mid-token start is accepted). Location 'une' from 'Pune' is returned. Input 'I am not certified in AWS.' with summary 'certified in AWS' is returned. The substring check has no word boundary, and the pass-2 change dropped the verbatim() word check that used to reject '2'.",
+      "title": "Normalised-substring check is not word-bounded, so a truncated fragment that changes a number or drops a negation passes"
+    },
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 279,
+      "rule": "c6 / rule 27: architecture bullet matches the code",
+      "trigger": "The bullet says summary and location 'pass the same word check' and that current needs a present-type word in 'the input'. At head they are a normalised-substring check plus a full-date, 10+ digit and PAN drop on the summary. Current is decided per entry from the raw endDate or sourceSpan, and links must be whole tokens.",
+      "title": "The /resume/parse bullet describes the coder-pass-1 rules, not the code at head"
+    },
+    {
+      "severity": "low",
+      "file": "test/tailormyresume-resume-parse-fields.test.ts",
+      "line": 119,
+      "rule": "Issue #93 acceptance criterion 1: test with the prototype RESUME_TXT",
+      "trigger": "The prototype text uses 'Jul 2022 – now' with an en dash in parentheses, and 'Jun 2021 – )' as an open end for Tata Digital. The PR fixture uses 'Jan 2023 - Present' and 'Mar 2021 - Dec 2022', so the stated acceptance test, covering the lowercase 'now' and the open-ended Tata line, is not in the suite. Reviewer B confirmed by hand that the head passes it.",
+      "title": "The acceptance test does not use the prototype RESUME_TXT that the issue names"
+    }
+  ]
+}

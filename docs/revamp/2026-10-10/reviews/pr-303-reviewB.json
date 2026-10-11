@@ -1,0 +1,25 @@
+{
+ "head_sha": "efedc042506f50cc2d759837ba2755594c716cf0",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "261-c1", "status": "partial", "evidence": "Every kept caller resolves: app/feature import only TmrBackground, TmrCard, TmrDock*, LocalTmrBottomInset, TmrFilterChip, TmrInnerHeader, TmrOutline/PrimaryButton, TmrScreen, TmrSwitch (moved verbatim to TmrSwitch.kt), rememberTmrNavTransitions, TmrIcons, TmrTheme; no use of LocalTmrDark/isDark/darkTheme remains. Core/feature/app unit tests, lint, screenshots, static checks pass on efedc042 (run 38080991046); Assemble APKs is still in progress there, so assembleDemoDebug/assembleProdDebug are not yet proven on the head."},
+  {"id": "261-c2", "status": "met", "evidence": "No light symbol remains in src/main of core, app or feature (scoped git grep prints nothing). The only literal hits are the banned list in TmrThemeDarkOnlyTest; I uphold D27 and Reviewer A finding 2's disposition: obfuscating the list would weaken the enforcing test. noLightSymbolsRemain fails on the red commit."},
+  {"id": "261-c3", "status": "met", "evidence": "TmrTheme(content) only; always provides TmrDarkColors, DarkColorScheme, TmrElevationDefaults.Dark, LocalTmrMotion. LocalTmrColors and LocalTmrElevation defaults moved to Dark. themeProvidesDarkColorsAtSystemLightMode runs at notnight. TmrCard border and TmrDock hairline now always take the former dark branch, which is identical dark output."},
+  {"id": "261-c4", "status": "met", "evidence": "Both TTFs and both fonts-licenses/*-OFL.txt deleted together in f46a1f88; src/main/res no longer exists; no build file, script or asset referenced the licence files. Type.kt uses FontFamily.Default for sans and display; typographyUsesDefaultFamily asserts it."},
+  {"id": "261-c5", "status": "met", "evidence": "All 14 PNGs and both screenshot test classes deleted; no other module has baselines and none were re-recorded."},
+  {"id": "261-c6", "status": "met", "evidence": "Deleted tests (TmrLiveRegionTest, TmrConfirmDialogLayoutTest, TmrHomeHeaderFontScaleTest, TmrApplicationStatusChipColorsTest, two A11y cases) target only deleted components (ErrorCallout, OfflineBanner, TextField, ConfirmPanel, LoadingWheel, HomeHeader, ApplicationStatusChip). Surviving a11y checks kept: InnerHeader heading and 2.0 font-scale wrap, FilterChip radio/checkbox roles and 2.0 wrap, Switch semantics unchanged. Contrast thresholds unchanged (4.5 text, 3.0 boundary). Dropping assertNotEquals(onSurfaceVariant, disabled) is acceptable until W2-A #264: dark disabledContent and onSurfaceVariant are both 0xFF8C918E, so the inequality cannot hold for this palette; disabled == disabledContent and >= 4.5:1 on card are still asserted. The test name's 'NorPlaceholder' now overclaims; #264 rewrites these tokens and tests."},
+  {"id": "261-c7", "status": "met", "evidence": "git diff base..head is empty for theme/Motion.kt and component/TmrMotion.kt; Theme.kt still provides LocalTmrMotion with the reduced switch."},
+  {"id": "261-c8", "status": "partial", "evidence": "No new comments, baselines or build-file edits; Constitution policy and delivery-gates-pregate pass on efedc042 (Reviewer A finding 1 fixed by the five Pre-review gate lines). Gate stays partial until Assemble APKs completes."}
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "app/src/main/kotlin/com/tailormyresume/app/MainActivity.kt",
+   "line": 23,
+   "rule": "Accessibility / dark-only theme (PRD 6.1.2, PLAN.md line 271 'The app is dark only'): system chrome must match the content TmrTheme now always renders",
+   "trigger": "On a device in system light mode (the default), TmrTheme now draws black (TmrDarkColors.background 0xFF000000) content, but MainActivity still uses SystemBarStyle.auto, which sets isAppearanceLightStatusBars=true (dark icons), and values/themes.xml still sets windowLightStatusBar=true and window_background #FFFFFF. No production screen calls TmrScreen (only the debug menu), so nothing overrides it: the clock and battery icons are black on black, the window flashes white before first frame, and the default nav-bar style draws a light scrim. On the base, TmrTheme followed isSystemInDarkTheme, so light mode got light content and the icons matched. The fix (SystemBarStyle.dark in MainActivity and DebugScenarioActivity, dark window theme and colour in values/) is in app/src/main, outside this lane's files; land it here with an OUT_OF_PLAN note or open a tracked follow-up before this reaches a release build.",
+   "title": "Dark-only TmrTheme leaves the app window and system bars in light mode, so status bar icons are invisible on light-mode devices",
+   "proof": "Robolectric @Config(qualifiers = \"notnight\") test launching MainActivity and asserting WindowCompat.getInsetsController(window, decorView).isAppearanceLightStatusBars is false; it fails at efedc042."
+  }
+ ]
+}

@@ -1,0 +1,52 @@
+{
+ "head_sha": "de3b9e701de1aa3685b0fdb7084c7cc97b6fca0e",
+ "verdict": "clean",
+ "findings": [],
+ "criteria": [
+  {
+   "id": "259-c1",
+   "status": "met",
+   "evidence": "CI on head de3b9e70, Build run 38076949471: Detect code changes, Static checks, Core unit tests, Feature unit tests, App unit tests, Screenshot tests, Lint, Assemble APKs and the aggregate 'Build, lint, and unit tests' all SUCCESS. The run concluded 'cancelled' only because its Constitution policy job was cancelled; that job re-ran SUCCESS in run 38076958645. delivery-gates pregate SUCCESS (both runs). PR body records gate 1 with -PwarningsAsErrors=true and verify-local green on head."
+  },
+  {
+   "id": "259-c2",
+   "status": "met",
+   "evidence": "git ls-files feature/analysis/impl/src/main at head lists only navigation/AnalysisEntryProvider.kt. AnalysisResultMapper.kt was correctly deleted: on main it maps to RequirementSection/RequirementItem/EvidenceResolver defined in deleted screen files and carries prep-plan/report flags, so it was not pure mapping with its own test. ShareFitScreen.kt, AnalysisSheets.kt, AnalysisScreen.kt, AnalysisViewModel.kt and their tests are gone."
+  },
+  {
+   "id": "259-c3",
+   "status": "met",
+   "evidence": "Only navigation/ApplicationsEntryProvider.kt (applicationsEntry and applicationDetailEntry) remains under applications impl main; NotesAutosaver, ApplicationWorkspace*, ApplicationsPreviewData, ViewModels, screens and strings.xml are deleted with their tests."
+  },
+  {
+   "id": "259-c4",
+   "status": "met",
+   "evidence": "Settings impl main holds SettingsEntryProvider.kt, SettingsFileShare.kt (SettingsFileProvider + createSettingsShareIntent, unchanged), AndroidManifest.xml provider and res/xml/feature_settings_impl_file_paths.xml; yourdata/, deleteaccount/, settings/, common/ and the five strings_*.xml are deleted. Core account paths survive untouched for W4-F1 and Constitution I.5: DeleteAccountUseCase, DeleteMyDataUseCase, ExportAccountDataUseCase, AccountDataArchiveWriter, FinishPendingAccountWipeUseCase, PendingAccountWipe and their core tests (DeleteAccount*Test, DeleteMyDataUseCaseTest, CollectAccountDataUseCaseTest, AccountDataArchiveWriterTest). The diff touches no file outside the three impl modules."
+  },
+  {
+   "id": "259-c5",
+   "status": "met",
+   "evidence": "All four entry functions keep (navigator: Navigator) and render BasicText(key::class.simpleName.orEmpty()) for AnalysisNavKey, ApplicationsNavKey, ApplicationDetailNavKey, SettingsNavKey, YourDataNavKey, DeleteAccountNavKey and AccountDeletedNavKey. The !! replacements are safe: orEmpty() in main never throws, and simpleName of these named classes is non-null even after R8 renaming; checkNotNull appears only in the three test files, so no user-reachable crash path exists. The entry tests are unchanged between red commit c833c676 and the implementation commit except for the !! swap; each asserts the class-name text is displayed and fails on main (real routes throw IllegalStateException without Hilt)."
+  },
+  {
+   "id": "259-c6",
+   "status": "met",
+   "evidence": "grep -rlE 'ShareFit|Notes|YourData|AccountDeleted|Consent' over tracked sources of the three modules matches only SettingsEntryProvider.kt and SettingsEntryProviderTest.kt, both NavKey type names and imports; ConsentNavKey and OnboardingStep are no longer referenced."
+  },
+  {
+   "id": "259-c7",
+   "status": "met",
+   "evidence": "No files remain under the three modules' src/test/screenshots; the 144 PNGs went with every *ScreenshotTest class, each listed under Pre-review gate."
+  },
+  {
+   "id": "259-c8",
+   "status": "met",
+   "evidence": "No tracked file in the three modules imports com.tailormyresume.core.ui; feature/settings/impl/build.gradle.kts is untouched, leaving the core.ui line to #262."
+  },
+  {
+   "id": "259-c9",
+   "status": "met",
+   "evidence": "feature/analysis/impl/lint-baseline.xml deleted (1 entry to 0); AndroidLint.kt uses file(\"lint-baseline.xml\").takeIf { it.exists() }, so a missing file does not regenerate a baseline. Added lines contain no tools:ignore, @Suppress, baseline or comment. Constitution policy check SUCCESS on head (run 38076958645). No open sibling PR (#255, #257/#295, #258/#294, #293) touches these modules, TmrApp.kt or the feature api NavKeys. Merge order after #255 is stated in the PR body and still applies (#255 is OPEN)."
+  }
+ ]
+}

@@ -1,0 +1,56 @@
+{
+  "head_sha": "eea51770b8f44d144bcd46fe8a4c1aee2577d1eb",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "partial", "evidence": "finish (tailoring.ts:150-176) updates RUNNING->SUCCEEDED and calls spendTailoringCredit (wallet.ts:159-175) in one transaction, free before purchased, one TAILORING -1 row with applicationId and tailoringId (ledger column tailoring_id exists, schema.ts:233). Proven by spend-per-tailoring.test.ts:344. Partial: under the F1 interleaving a second job SUCCEEDS with no debit and no ledger row (wallet.ts:168 silently returns)."},
+    {"id": "c2", "status": "met", "evidence": "FAILED branch never spends (tailoring.ts:169 requires succeeded); reconcileInterrupted only flips status, and the reservation is derived from RUNNING rows, so marking FAILED frees it. spend-per-tailoring.test.ts:371 covers provider failure and other-boot interruption with balance and ledger unchanged."},
+    {"id": "c3", "status": "partial", "evidence": "Two concurrent starts serialize on the per-user advisory lock in withLiveUser (core/accounts/service.ts:41-47); spend-per-tailoring.test.ts:398 proves [202,402]. Balance cannot go negative (spendCredit WHERE col > 0, wallet.ts:149-153). Partial: a start racing the finish of the reserved job is not serialized because finish does not take the user lock, so a second job runs on the same credit (F1, reproduced)."},
+    {"id": "c4", "status": "met", "evidence": "reserveCredit (tailoring.ts:93-107) reconciles each RUNNING reserved row before counting; live row blocks (spend-per-tailoring.test.ts:423 first half), other-boot row is reconciled and the new job starts (same test, second half). The age branch is the same reconcileInterrupted, covered for age at tailorings.test.ts:649."},
+    {"id": "c5", "status": "met", "evidence": "requestId lookup runs first in start (tailoring.ts:273-291) and begin (228-242) and returns the row with no model call; spend only on the RUNNING->SUCCEEDED transition, which happens once. spend-per-tailoring.test.ts:459."},
+    {"id": "c6", "status": "met", "evidence": "No unlock or same-application short-circuit remains in reserveCredit; spend-per-tailoring.test.ts:475 shows two runs of one application spend 2 and the third is 402."},
+    {"id": "c7", "status": "met", "evidence": "reserveCredit throws NO_CREDIT before the insert and before runJob; FREE_TAILORING claim code removed from tailoring.ts. spend-per-tailoring.test.ts:492 asserts no row, no model call, no ai_usage row, no claim."},
+    {"id": "c8", "status": "met", "evidence": "section: z.null().default(null) in a strictObject (tailoring.ts:32); spend-per-tailoring.test.ts:507 covers null, missing and EXPERIENCE -> 400 INVALID_INPUT. App on main sends section null for full tailorings (RemoteResumeTailor.kt:44)."},
+    {"id": "c9", "status": "partial", "evidence": "unlockApplication (wallet.ts:177-206) reads only (ensureWallet as GET /wallet does), no spend, no unlock or ledger write, 200 always; body and id validation kept (routes.ts:87-99). spend-per-tailoring.test.ts:525 and wallet tests cover it; app on main treats 200 as Spent with null kind (RemotePaymentGateway.kt:137). Partial: the stored-row branch (wallet.ts:199) has no test (F4)."},
+    {"id": "c10", "status": "met", "evidence": "config.ts:3 dailyAnalyses 20, dailyFreeTailorings removed, readWallet freeTailoringsLeftToday 0 (wallet.ts:120). The 20th/21st boundary is in the lead-adapted analyses and analyses-repeat tests. src/apps.ts:215-216 dailyCallQuota 50 and $5/day cap unchanged; the harness 6->25 change is test-only (test/tailormyresume-ai-harness.ts:63)."},
+    {"id": "c11", "status": "met", "evidence": "stop() aborts, the pipeline rejects, finish writes FAILED with no spend; spend-per-tailoring.test.ts:561 asserts FAILED, balance unchanged, no ledger row (in the new file, not shutdown.test.ts as planned)."},
+    {"id": "c12", "status": "met", "evidence": "drizzle/0010_equal_silk_fever.sql is one ADD COLUMN boolean DEFAULT false NOT NULL (metadata-only on PG11+); 0010 snapshot prevId equals the 0009 id; no existing migration edited. spend-per-tailoring.test.ts:577 checks the column. Rows RUNNING at deploy have credit_reserved false and live only in the old process, which aborts them on SIGTERM, so they are neither charged nor delivered by the new image; not exploitable beyond the accepted D12 transition."},
+    {"id": "c13", "status": "partial", "evidence": "Validation (npm run check) passes on eea5177 and docs/architecture.md is updated. delivery-gates-pregate fails on the head with ASSERT_REMOVED (ledger -1, tailorings -76, wallet -2) and the PR body's pre-review gate section still says there is no ASSERT_REMOVED and the replacement is pending (F3)."}
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "src/apps/tailormyresume/tailoring.ts",
+      "line": 93,
+      "rule": "c1/c3 money invariant: a successful tailoring always spends one credit; concurrent starts cannot overdraw (bright line: TOCTOU on read-then-act)",
+      "trigger": "User with 1 credit starts job A (202, credit_reserved). Near A's completion the user posts a new requestId B. B's begin, under the user advisory lock, reads the wallet (tailoring.ts:86, free=1). finish(A) runs in database.transaction WITHOUT the user lock (tailoring.ts:150), commits SUCCEEDED and free=0. B then reads RUNNING reserved rows (tailoring.ts:93) under READ COMMITTED and sees none, so 1 - 0 >= 1 and B is accepted (202). B succeeds, spendCredit finds 0 and spendTailoringCredit returns silently (wallet.ts:168): two SUCCEEDED tailorings, one TAILORING -1 row, wallet 0/0. Each losing attempt is a free 402, so an attacker can poll A and spam starts to win the window; one free tailoring per win, repeatable per credit.",
+      "title": "Start racing the reserved job's finish reads a stale wallet and runs a second tailoring for free",
+      "proof": "Reproduced on local Postgres 16 at eea5177: a node:test copy of test/tailormyresume-spend-per-tailoring.test.ts setup plus a pg.Client.prototype.query hook that only delays A's finish UPDATE until B's wallet SELECT has returned, and delays B's credit_reserved SELECT until A is SUCCEEDED. Result: second POST 202, rows [SUCCEEDED, SUCCEEDED], ledger [[TAILORING,-1,<A id>]], wallet [0,0]; assert 402 fails. Fix: take lockUser(transaction, row.userId) at the start of finish's transaction (or SELECT the wallet FOR UPDATE in reserveCredit), and make the unreachable no-credit branch in spendTailoringCredit throw or log instead of returning silently."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/config.ts",
+      "line": 3,
+      "rule": "Cross-lane shared state: dailyAnalyses is read by analyses tests in open sibling lanes",
+      "trigger": "Open PR #102 (base main; #105 stacks on it) adds 'a referral message is 422 NOT_A_JOB_POST...' in test/tailormyresume-analyses.test.ts asserting allowance.analysesLeftToday === 2 (limit 3) and also edits analyses.test.ts and analyses-repeat.test.ts, which eea5177 rewrites for limit 20. Whichever of #102 or this stack merges second goes red (19 !== 2) or merges on a stale green if CI is not re-run after the first merge.",
+      "title": "dailyAnalyses 20 breaks the new hard-coded analysesLeftToday 2 in sibling PR #102",
+      "proof": "With both merged, #102's test asserts analysesLeftToday 2 after one analysis; readWallet returns 20 - 1 = 19."
+    },
+    {
+      "severity": "low",
+      "file": "test/tailormyresume-tailorings.test.ts",
+      "line": 504,
+      "rule": "Review checklist 5: the pregate section must justify every weakened test; CI on the head must be green",
+      "trigger": "delivery-gates-pregate on eea5177 fails: ASSERT_REMOVED tailormyresume-ledger (-1), tailormyresume-tailorings (-76), tailormyresume-wallet (-2). The PR body still reports 'no TEST_DELETED, SKIP_ADDED or ASSERT_REMOVED' and 'Lead test replacements (pending)'. The removals themselves are justified (every deleted case encodes section regeneration, the free daily claim, claim release or unlock spending; issue-90-test-replacement.md), but the PR body does not record that and the required check is red.",
+      "title": "Pregate is red on the head and the PR body's pre-review gate section is stale"
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/wallet.ts",
+      "line": 199,
+      "rule": "c9: unlock returns the stored unlock row if one exists",
+      "trigger": "No test calls POST /applications/:id/unlock for an application that has a legacy tailormyresume_unlocks row (e.g. creditKind PURCHASED, unlockedAt in the past). Replacing `existing ?? {...}` with the fabricated FREE/now object passes every test; the case that pinned unlockedAt stability ('again.unlock.unlockedAt equals created.unlock.unlockedAt') was removed in eea5177.",
+      "title": "The stored-unlock branch of the compatibility read is untested",
+      "proof": "Insert an unlocks row {creditKind: PURCHASED, unlockedAt: T}, POST unlock: expect 200 with creditKind PURCHASED and unlockedAt T; wallet unchanged."
+    }
+  ]
+}

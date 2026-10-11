@@ -1,0 +1,44 @@
+{
+  "head_sha": "edd587d40b3f92a219ed2ae79e98d529733c5884",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "270-c1", "status": "partial", "evidence": "Blank detail now gives only named-skill keywords (AnswerFacts.kt:21-23; blankDetailAnswerDoesNotTurnRequirementWordsIntoFacts fails on 7ac6c094). Any non-blank detail still confirms every requirement keyword because the statement is requirement.text + detail (AnswerFacts.kt:24). Probe on a copy of the head confirmed it (finding 2)."},
+    {"id": "270-c2", "status": "met", "evidence": "NOT_YET/SKIPPED still give no keywords and no fact (AnswerFacts.kt:19, :31); notYetAndSkippedAnswersCreateNoFactAndAnsBulletFailsWithMissingSource."},
+    {"id": "270-c3", "status": "met", "evidence": "Attach rule unchanged since round 1 (TailorResumeUseCase.kt:66, :82-90); prototypeAnswerGivesThreeChanges green."},
+    {"id": "270-c4", "status": "partial", "evidence": "summaryViolations/sentenceViolations apply D36/D37: clauses at . ! ? ; : , and/or/with; numbers like 3.5 and 1,200 stay whole ([.,](?!\\d)); each clause is checked against one source; all clauses of a sentence must share an entry group or the answer fact (groupOf); no sources or no content clause gives MissingSource; the guard ignores the profile, so stated-skill labels supply nothing. The CFO-with-Power-BI case now fails (summaryClauseFromAnotherFactCannotRideOnAnAnswer). Honest one-fact and one-entry summaries pass (probe: 4/4). The prototype summary 'Finance analyst with 4 years turning SQL and Power BI work into ...' would fall back, which D37 accepts. Gap: contentClauses drops a clause whose only words are one letter, so 'with R' / 'and C++' skip the guard (finding 1)."},
+    {"id": "270-c5", "status": "partial", "evidence": "verifiedSkills allowlist unchanged; it inherits finding 2 through evidence.answerKeywords (probe: skills [SQL, Quarterly, Results] kept with no violation after detail 'Yes, a few times')."},
+    {"id": "270-c6", "status": "met", "evidence": "UpdateBulletDecisionUseCase.kt:28-30 sets the summary and skills decision for the fixed ids 'summary'/'skills'. Profile bullet ids are UUIDs or '<entry>-bN' (AddUserStatedFact*UseCase, EntrySectionParser.kt:60, SampleDataSet.kt:252) and answer ids start 'ans-', so no collision; a collision could only add a rejection (fail-safe). summaryAndSkillsCanBeUndoneAndAreNotAcceptedByAcceptChanges fails on 7ac6c094."},
+    {"id": "270-c7", "status": "met", "evidence": "withPendingAccepted (TailoredResume.kt:57-65) changes only PENDING, so REJECTED summary/skills/bullets stay REJECTED; same test as 270-c6."},
+    {"id": "270-c8", "status": "met", "evidence": "ExportReadiness counts summary and skills in resume.decisions (TailoredResume.kt:54-55); ExportReadinessTest pendingSummary case. The assembler prints the summary only when ACCEPTED and the tailored skills only when ACCEPTED, otherwise profile.skills (ResumeDocumentAssembler.kt:32-37); blank summary is skipped (ResumePdfComposer.kt:63). A REJECTED or PENDING summary never prints. Matches the prototype: the summary change is kind 'New' with no before, so Undo leaves no summary, as the export did before this PR."},
+    {"id": "270-c9", "status": "met", "evidence": "Unchanged since round 1; MockPackCatalogueTest green in CI."},
+    {"id": "270-c10", "status": "met", "evidence": "Unchanged since round 1; TailoringCreditSpendTest green in CI."},
+    {"id": "270-c11", "status": "met", "evidence": "Fixer commit only adds tests (TailorResumeUseCaseTest +89, UpdateBulletDecisionUseCaseTest +46, ResumeDocumentAssemblerTest +22); the only test edit is the new job parameter on the run() helper."},
+    {"id": "270-c12", "status": "met", "evidence": "Core unit tests (runs koverVerify) SUCCESS on run 38088160300 at edd587d4."},
+    {"id": "270-c13", "status": "met", "evidence": "All checks on edd587d4 pass (Static, Core/Feature/App unit, Screenshot, Lint, Assemble APKs, Build, pregate); one Constitution policy run was CANCELLED by a newer run that passed."},
+    {"id": "F1-disposition", "status": "partial", "evidence": "Fixed for blank detail only; see finding 2."},
+    {"id": "F2-disposition", "status": "partial", "evidence": "Fixed as D36/D37 require, except the one-letter clause bypass in finding 1, which the fix introduced (the whole-sentence check at 7ac6c094 flagged R: probe UnsupportedTerm(R))."},
+    {"id": "F3-disposition", "status": "met", "evidence": "See 270-c6, 270-c7, 270-c8."},
+    {"id": "F4-disposition", "status": "met", "evidence": "PrototypeFixtures.kt:62 stores YES_REGULARLY; prototypeAnswerChoiceBacksAFact returns null fact on 7ac6c094."},
+    {"id": "F5-disposition", "status": "met", "evidence": "With DecisionWriteLock.serialised replaced by block() on a copy, undoThenAcceptInQuickSuccessionNeverSavesTheUndoneChangeAsAccepted fails ([ACCEPTED, ACCEPTED]); with the lock it passes. The process-wide Mutex is not re-entered: only AcceptChangesUseCase and UpdateBulletDecisionUseCase take it, neither calls the other, and upsertApplication does not call back. TailorViewModel already serialises Undo and HandEditBulletUseCase under its own decisionMutex (TailorViewModel.kt:75, :106); when W4-C2 wires Accept it should go under that same VM mutex, so the lock order stays VM mutex then DecisionWriteLock."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/TailorResumeUseCase.kt",
+      "line": 123,
+      "rule": "Constitution I.1, D36 (every clause's content words from one cited fact), mandate (1)",
+      "trigger": "Summary 'Built Power BI dashboards for monthly finance reports with R.' citing exp-infosys-b1 (no fact mentions R) is kept with violations=[]; so is 'Wrote SQL pipelines over transaction data and C++.' citing exp-infosys-b2. CLAUSE_BREAK splits off 'R' / 'C++', contentClauses keeps a clause only if it has a word longer than one letter (TextTokens.words('C++') = ['c']), so the skill clause is dropped and never reaches guard.check. The old whole-sentence check flagged it (UnsupportedTerm(R)). R, C, C# and C++ are SkillLexicon terms (TechLexicon.kt:7-9, :24). Probe on a copy of the head confirmed both.",
+      "title": "A clause that names only a one-letter skill (R, C, C#, C++) is dropped before the guard runs",
+      "proof": "TailorResumeUseCaseTest: run(TailoredResume(emptyList(), summary = summary(\"Built Power BI dashboards for monthly finance reports with R.\", \"exp-infosys-b1\"))); expect violations non-empty and text == 'Analyst building dashboards.'. Fix sketch: drop a clause only when it has no word at all outside FUNCTION_WORDS and no SkillLexicon term (or check every non-empty clause and only use the content filter for the 'at least one content clause' rule)."
+    },
+    {
+      "severity": "medium",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/AnswerFacts.kt",
+      "line": 24,
+      "rule": "Constitution I.1, #296 and D38 (requirement words never become facts; only what the candidate said), round-1 F1",
+      "trigger": "JD line '- Experience presenting quarterly results to the board for 3+ years' (fallback keywords [presenting, quarterly, results]); answer A_FEW_TIMES with detail 'Yes, a few times'. keywordsStatedIn(requirement, requirement.text + detail) finds every keyword in the requirement text itself, so the fact is 'Yes, a few times\\npresenting, quarterly, results'. Summary 'Presenting quarterly results.' citing ans-<req> is kept with no violation, and the skills line [SQL, Quarterly, Results] is kept with no violation. The candidate never said 'quarterly'. Probe on a copy of the head confirmed it. The F1 fix covers only an empty detail.",
+      "title": "A non-blank answer detail still turns all requirement keywords into answer facts",
+      "proof": "TailorResumeUseCaseTest: presentingJob(), QuickAnswer(id, A_FEW_TIMES, \"Yes, a few times\"); expect AnswerFacts.keywords to exclude 'quarterly' and 'results', the summary to fall back with violations, and skills to drop Quarterly and Results. Fix sketch: named-skill keywords (isNamedSkillKeyword) from the requirement, plus other keywords only if keywordsStatedIn(requirement, answer.detail) finds them in the detail alone."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "head_sha": "7d8ff842b306e2715eafae8f79b4dc319633366a",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "partial", "evidence": "Selection and shape are right: quickQuestionFor takes the first MUST_HAVE EXPERIENCE/SOFT_SKILL with normalised GAP/PARTIAL and returns {requirementId, text, why, options[3]}; test 'the first qualifying must-have experience gap...' passes only because its requirement text was padded ('Weekly reports built for many stores for this job') to supply the tokens. The scout c1 / issue case (Northwind JD, Priya facts, presenting to senior stakeholders) is not tested, and the prototype's own copy 'Have you presented to senior leaders?' is nulled by the exact-token allowlist against a JD that says 'present ... to senior leaders' (finding 1)."},
+    {"id": "c2", "status": "met", "evidence": "find() returns undefined -> null; test 'question is null when every must-have is MET or the only gaps are skill, tool or education' covers both branches and fails on base (no question key)."},
+    {"id": "c3", "status": "met", "evidence": "Array.find in req-1..n order, one question at most, no fallback; test asserts req-1 with two qualifying and null when req-1 lacks wording while req-2 has it."},
+    {"id": "c4", "status": "partial", "evidence": "Trim (schema .trim() before .max(), zod 4 applies checks in order; boundary test pads 80/200-char values with whitespace and expects them kept), 81/201-char null, missing '?', empty why and bannedWords are enforced and tested. Not enforced: content (a question of only function words such as 'Have you?' is kept) and yes/no form (a 'Who ...?' question or a leading statement is kept) (finding 2)."},
+    {"id": "c5", "status": "met", "evidence": "quickQuestionFor reads match.status from the normalised map; test shows a model MET with no evidence id selected as req-2 and a MET with evidence skipped. In production the prompt tells the model to omit wording for MET, so a normalised MET->GAP gives null (fails closed, consistent with c3)."},
+    {"id": "c6", "status": "partial", "evidence": "docs/architecture.md /analyses bullet updated (rule, null cases, not stored, not logged); no log or insert of question/why in analyses.ts or core/ai/structured.ts. CI: Secret scan and pregate pass, Validation still pending at review time; the golden 'without userStatedSkills...' failure is expected and lead-only. Local run needs TEST_DATABASE_URL (not available here). Base has moved to a7f501f (D23); merge-tree shows conflicts in analyses.ts and docs/architecture.md, so a rebase and delta review are due."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 164,
+      "rule": "c1 (scout: the model's yes/no question about presenting to senior stakeholders is returned) and issue AC 'Northwind JD with Priya facts -> question about presenting to senior stakeholders'",
+      "trigger": "Requirement 'Present findings to senior leaders', JD '... You will present findings to senior leaders every month.', model question 'Have you presented findings to senior leaders?' (the prototype copy) -> null, because 'presented' is not an exact token of the source. Same for 'Do you present ...?' ('do' is not a function word), 'Have you built dashboards ...?' against 'build dashboards', 'stakeholders' against 'stakeholder', and any why starting 'The job ...' when the JD lacks 'job'. The candidate-leak protection (D6/D21) does not need exact inflections of JD words: employer names do not inflect.",
+      "title": "Exact-token JD allowlist nulls the natural yes/no wording, including the prototype's own question; c1's named case is untested",
+      "proof": "Test: requirement text 'Presenting to senior leaders', jobText containing 'present ... to senior leaders', model question 'Have you presented to senior leaders?', why 'Senior leaders want clear reports.' with those why words in the JD; expect the question kept. Fails at head. Fix sketch: for question/why only, accept a token whose -s/-es/-ed/-d/-ing stripped form matches a stripped source token, and add question auxiliaries (do, does, did, can, ever, been) to the allowed words; keep the Infosys test null."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 117,
+      "rule": "D23 (a reason with no content word falls back) applied to the question; c4 / issue 'text is a yes/no question in plain English'",
+      "trigger": "Model question 'Have you?' with why 'As shown.' (or question '?') -> kept: every token is a function word, so every() over the content tokens is vacuously true, and the user sees 'One quick question: Have you?'. The D23 fix on the base (a7f501f) adds needed.length > 0 inside reasonFor only, so after the rebase the question path still lacks it. Also kept: 'Who builds weekly reports for managers?' with the test jobText (not yes/no, so the three options do not answer it) and 'You have 5 years of Python. Have you present to senior leaders?' (a statement about the candidate before the question) when the JD has those words.",
+      "title": "Question wording with no content word, or not a single yes/no question, passes the filter",
+      "proof": "Test: GAP EXPERIENCE requirement with question 'Have you?' and why 'As shown.'; expect question null. Fails at head. Fix sketch: require at least one content token in text and why, a single sentence (no '.', '!' or ';' before the final '?' outside numbers), and a leading auxiliary (have, has, do, does, did, are, is, were, was, can, will)."
+    },
+    {
+      "severity": "low",
+      "file": "test/tailormyresume-analyses.test.ts",
+      "line": 1187,
+      "rule": "Checklist 5: assertions must prove the behaviour (Review disposition M: 'Candidate facts never feed it')",
+      "trigger": "'Besides your time at Infosys, have you presented to senior leaders?' already fails on 'besides', 'time' and 'presented', none of which is in the requirement or jobText. If the source were changed to include the cited facts (so 'Infosys' became allowed), the test would still return null and stay green.",
+      "title": "Infosys test does not isolate the employer name, so it cannot catch facts leaking into the allowlist",
+      "proof": "Use a question whose only outside token is the employer, e.g. requirement 'Presenting to senior leaders' and question 'Presenting to senior leaders at Infosys?' (all other tokens are requirement or function words); expect null, and confirm a copy without 'at Infosys' is kept."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 215,
+      "rule": "Checklist 7: unsupported efficiency claim (PR: about 3,200 tokens worst case 'against the 8,000-token output cap')",
+      "trigger": "The 3,200 figure ignores the existing output: 40 requirements each with text, type, priority, up to 10 keywords, status, evidence ids and a 100-char reason are roughly 100-140 tokens each, about 4,000-5,600 tokens. Adding 40 x about 80-100 tokens of question/why gives about 7,200-9,600, at or over maxOutputTokens 8,000; a truncated answer fails the whole analysis (claim released, ai_usage cost kept). Only the first qualifying wording is ever used, and since the prompt already omits wording for MET, asking only for the first MUST_HAVE EXPERIENCE/SOFT_SKILL the model marks GAP or PARTIAL gives the same result under c3's no-fallback rule at about 80 tokens.",
+      "title": "Worst-case output estimate omits the existing analysis output; wording is requested for up to 40 requirements while one is used"
+    }
+  ]
+}

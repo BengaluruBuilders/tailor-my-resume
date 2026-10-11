@@ -1,0 +1,76 @@
+diff --git a/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt b/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt
+index 788a9f74..6d36f83e 100644
+--- a/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt
++++ b/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt
+@@ -3,8 +3,14 @@ package com.tailormyresume.app.navigation
+ import android.app.Application
+ import android.content.ComponentName
+ import androidx.activity.ComponentActivity
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.CompositionLocalProvider
+ import androidx.compose.runtime.remember
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
+ import androidx.compose.ui.platform.LocalDensity
+ import androidx.compose.ui.test.assertCountEquals
+ import androidx.compose.ui.test.hasContentDescription
+@@ -15,6 +21,7 @@ import androidx.compose.ui.test.performClick
+ import androidx.compose.ui.unit.Density
+ import androidx.navigation3.runtime.NavEntry
+ import androidx.navigation3.runtime.NavKey
++import androidx.navigation3.runtime.entryProvider
+ import androidx.test.core.app.ApplicationProvider
+ import com.tailormyresume.app.ui.TmrShell
+ import com.tailormyresume.core.designsystem.component.chrome.TmrTopBarLeading
+@@ -22,8 +29,39 @@ import com.tailormyresume.core.designsystem.theme.TmrTheme
+ import com.tailormyresume.core.navigation.NavigationState
+ import com.tailormyresume.core.navigation.Navigator
+ import com.tailormyresume.core.navigation.rememberNavigationState
++import com.tailormyresume.feature.analysis.api.navigation.JobLinkNavKey
++import com.tailormyresume.feature.analysis.api.navigation.JobNavKey
++import com.tailormyresume.feature.analysis.api.navigation.JobResultNavKey
++import com.tailormyresume.feature.analysis.api.navigation.QuickQuestionNavKey
++import com.tailormyresume.feature.applications.impl.navigation.applicationDetailEntry
++import com.tailormyresume.feature.applications.impl.navigation.applicationsEntry
++import com.tailormyresume.feature.onboarding.impl.navigation.onboardingEntry
++import com.tailormyresume.feature.profile.impl.navigation.profileEntry
++import com.tailormyresume.feature.settings.impl.navigation.settingsEntry
++import com.tailormyresume.feature.tailor.impl.navigation.tailorEntry
+ import org.robolectric.Shadows.shadowOf
+ 
++private fun harnessEntries(navigator: Navigator): (NavKey) -> NavEntry<NavKey> =
++    entryProvider {
++        entry<JobNavKey> { key -> KeyLabel(key) }
++        entry<JobLinkNavKey> { key -> KeyLabel(key) }
++        entry<JobResultNavKey> { key -> KeyLabel(key) }
++        entry<QuickQuestionNavKey> { key -> KeyLabel(key) }
++        applicationsEntry(navigator)
++        applicationDetailEntry(navigator)
++        onboardingEntry(navigator)
++        profileEntry(navigator)
++        tailorEntry(navigator)
++        settingsEntry(navigator)
++    }
++
++@Composable
++private fun KeyLabel(key: NavKey) {
++    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
++        Text(text = key::class.simpleName.orEmpty(), style = TmrTheme.typography.body, color = TmrTheme.colors.text)
++    }
++}
++
+ private val STEP_DESCRIPTIONS = listOf("Step 1 of 3, Profile", "Step 2 of 3, Job", "Step 3 of 3, Tailor")
+ 
+ internal class ShellHarness(private val rule: ComposeContentTestRule) {
+@@ -52,7 +90,7 @@ internal class ShellHarness(private val rule: ComposeContentTestRule) {
+                     state = navigationState
+                     navigator = shellNavigator
+                     if (entries == null) {
+-                        TmrShell(navigationState, shellNavigator)
++                        TmrShell(navigationState, shellNavigator, entryProvider = remember(shellNavigator) { harnessEntries(shellNavigator) })
+                     } else {
+                         TmrShell(navigationState, shellNavigator, entryProvider = entries(shellNavigator))
+                     }

@@ -1,0 +1,21 @@
+diff --git a/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt b/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt
+index 788a9f74..6d3b1312 100644
+--- a/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt
++++ b/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt
+@@ -3,6 +3,7 @@ package com.tailormyresume.app.navigation
+ import android.app.Application
+ import android.content.ComponentName
+ import androidx.activity.ComponentActivity
++import androidx.compose.material3.Text
+ import androidx.compose.runtime.CompositionLocalProvider
+ import androidx.compose.runtime.remember
+ import androidx.compose.ui.platform.LocalDensity
+@@ -52,7 +53,7 @@ internal class ShellHarness(private val rule: ComposeContentTestRule) {
+                     state = navigationState
+                     navigator = shellNavigator
+                     if (entries == null) {
+-                        TmrShell(navigationState, shellNavigator)
++                        TmrShell(navigationState, shellNavigator, entryProvider = { key -> NavEntry(key) { Text(key::class.simpleName.orEmpty(), color = TmrTheme.colors.text) } })
+                     } else {
+                         TmrShell(navigationState, shellNavigator, entryProvider = entries(shellNavigator))
+                     }

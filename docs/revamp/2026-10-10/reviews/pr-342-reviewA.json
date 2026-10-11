@@ -1,0 +1,119 @@
+{
+ "head_sha": "790881769bc5aa0917baaf068be948a618aa4aa6",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "275-c1",
+   "status": "met",
+   "evidence": "ReviewScreen/ReviewMapper render all prototype strings; ReviewScreenshotTest.needsFix90, ReviewScreenTest.needsFixStateShowsEveryPrototypeString (assertions kept after performScrollTo edit), ReviewMapperTest."
+  },
+  {
+   "id": "275-c2",
+   "status": "met",
+   "evidence": "canContinue = gap == null from RequiredGaps; stateIn(WhileSubscribed(5000)) recomputes; 96/100 screenshot and VM tests."
+  },
+  {
+   "id": "275-c3",
+   "status": "met",
+   "evidence": "onContinue -> use case re-reads latest profile, RequiredGaps check, MissingEndDate event -> toast; domain refusal test writes nothing."
+  },
+  {
+   "id": "275-c4",
+   "status": "met",
+   "evidence": "ReviewRoute maps Add date/Contact/LinkedIn/Experience/Skills to the profile NavKeys; Education not tappable; ReviewRouteNavigationTest."
+  },
+  {
+   "id": "275-c5",
+   "status": "met",
+   "evidence": "MarkProfileReviewedUseCase sets reviewedAt from injected kotlin Clock; AtomicBoolean single-flight (doubleTap test holds a gate); NothingToReview replaces to Upload. Save failure is swallowed silently (finding 3)."
+  },
+  {
+   "id": "275-c6",
+   "status": "met",
+   "evidence": "reviewDates maps Present to Now, blank start to None; private PRESENT const."
+  },
+  {
+   "id": "275-c7",
+   "status": "partial",
+   "evidence": "Banner and role dates stack at fontScale >= 1.3 and the source line uses TmrFitText, but Contact name/email/phone, role title/org, education, chips and section labels are plain Text with no whole-word fit, and ReviewLayoutTest only asserts banner, Add date, source line and CTA (finding 1)."
+  },
+  {
+   "id": "275-c8",
+   "status": "met",
+   "evidence": "PR reports verify-local green except the removed OnboardingEntryKeysTest; lead deleted it at head (79088176). Baselines listed in pregate."
+  },
+  {
+   "id": "275-c9",
+   "status": "met",
+   "evidence": "Only EXPERIENCE and EDUCATION confirmed, achievements untouched, latest profile read at tap; opening Review writes nothing (test). D74 accepted. Experience bullets are confirmed without being shown (finding 2, low)."
+  },
+  {
+   "id": "275-c10",
+   "status": "met",
+   "evidence": "use case copies entries with isConfirmed only; no FactIdAllocator; entryAndBulletIdsUnchanged test."
+  },
+  {
+   "id": "275-c11",
+   "status": "met",
+   "evidence": "logicalEntries/countLogicalEntries in core:model used by ReadingViewModel (private countRoles removed) and ReviewMapper; CountLogicalEntriesTest."
+  },
+  {
+   "id": "275-c12",
+   "status": "met",
+   "evidence": "SaveManualProfileUseCase.isManualRole now also requires blank start/end, matching the ViewModel guard; base-fail test added."
+  },
+  {
+   "id": "275-c13",
+   "status": "met",
+   "evidence": "OnboardingRealEntryHiltTest renders the real entry with hiltViewModel over the real Room repository (no TestInstallIn exists) and the real Clock; asserts reviewedAt non-null only, so not time-dependent; waits pump the Robolectric looper, 10s timeout. Deviates from plan (TestProfileRepository, fixed Clock) but disclosed and acceptable."
+  },
+  {
+   "id": "275-c14",
+   "status": "met",
+   "evidence": "linkedinAdded100 screenshot; skillsOverFiveShowPlusN; manualProfileMapsWithoutEmptyCards."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/review/ReviewScreen.kt",
+   "line": 366,
+   "rule": "D40/D47 labels never break inside a word; 275-c7",
+   "trigger": "At 337dp and font scale 2.0 the Contact email (e.g. priya.deshmukh@gmail.com, 24 chars at bodySmall x2) is a single plain Text word wider than the ~277dp card content, so it breaks mid-word; the same applies to a long role title/organisation word, a long skill chip and an unbroken name. Only banner, Add date, source line and CTA use whole-word fitting or are asserted.",
+   "title": "Contact, role, education and chip text can still break mid-word at font 2.0",
+   "proof": "ReviewLayoutTest: at NARROW_DEVICE font scale with freshReviewProfile(), assert lines of the email text end at a word boundary (fails today)."
+  },
+  {
+   "severity": "low",
+   "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/onboarding/MarkProfileReviewedUseCase.kt",
+   "line": 35,
+   "rule": "I.1 / D74 never confirm unseen facts",
+   "trigger": "Review shows only title, organisation and dates of a role, yet isConfirmed = true is set on the whole EXPERIENCE entry, so its imported bullets (never displayed here) become sendable facts. D74 accepted entry-level confirm, so this is a residual risk to record, not a blocker.",
+   "title": "Confirming an experience entry also confirms bullets the user did not see"
+  },
+  {
+   "severity": "low",
+   "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/review/ReviewViewModel.kt",
+   "line": 66,
+   "rule": "Error handling that prevents silent failure",
+   "trigger": "saveProfile throws (disk full): the catch returns with no event, so tapping Looks right, continue does nothing and shows nothing; the unused failure variable also hides the cause.",
+   "title": "Save failure on continue is swallowed silently"
+  },
+  {
+   "severity": "low",
+   "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/navigation/NavKeyPlaceholder.kt",
+   "line": 1,
+   "rule": "Lead brief: delete unused placeholder; Ponytail deletion over addition",
+   "trigger": "onboardingEntry no longer references NavKeyPlaceholder (ReviewProfileNavKey was its last user), leaving dead code.",
+   "title": "Onboarding NavKeyPlaceholder.kt is now unused and should be deleted"
+  },
+  {
+   "severity": "low",
+   "file": "feature/onboarding/impl/src/test/kotlin/com/tailormyresume/feature/onboarding/impl/navigation/OnboardingRealEntryHiltTest.kt",
+   "line": 1,
+   "rule": "Pregate: every changed/removed test justified as '- <path>: <reason>'",
+   "trigger": "PR body Pre-review gate lists only the five PNG baselines. Missing lines: the lead's deletion of feature/onboarding/impl/src/test/.../navigation/OnboardingEntryKeysTest.kt (commit 79088176, mentioned only under Follow-ups), and the post-red edits to OnboardingRealEntryHiltTest.kt and ReviewScreenTest.kt (described in Decisions prose, not as '- path: reason' lines).",
+   "title": "PR pregate section omits the OnboardingEntryKeysTest deletion and two test edits"
+  }
+ ]
+}

@@ -1,0 +1,37 @@
+{
+  "head_sha": "46c7c96823720dc43c89621da5fbdace6c7241b3",
+  "verdict": "clean",
+  "criteria": [
+    {
+      "id": "262-c1",
+      "status": "partial",
+      "evidence": "Diff is 1156 deletions, 0 additions. core:ui exported only api(core.designsystem) and api(core.model); every feature impl still gets designsystem from AndroidFeatureImplConventionPlugin.kt:23 and core.model through core.domain api (core/domain/build.gradle.kts:13). No source imports com.tailormyresume.core.ui and no R.string reference to the 22 deleted core:ui strings. At 46c7c968, Constitution policy, Detect code changes and delivery-gates-pregate pass. static, unit-core, unit-feature, unit-app, screenshots, lint and assemble are still in progress, so the 'Build, lint, and unit tests' aggregate is not green yet."
+    },
+    {
+      "id": "262-c2",
+      "status": "met",
+      "evidence": "git ls-files core/ui prints 0 lines at head (HEAD~1 tracked 23 files, all 23 deleted by the PR). include(\":core:ui\") removed from settings.gradle.kts:43."
+    },
+    {
+      "id": "262-c3",
+      "status": "met",
+      "evidence": "git grep for core:ui|core/ui|core\\.ui outside docs/revamp and docs/qa matches only docs/REDESIGN.md:210 and tools/ci/check-constitution.sh:107. The scout lists both as non-goals. Removed lines: app/build.gradle.kts:165, feature/settings/impl/build.gradle.kts:14, AndroidFeatureImplConventionPlugin.kt:23 (other designsystem, screenshot, roborazzi, robolectric, lifecycle and navigation3 deps intact) and the :core:ui:testDebugUnitTest line in build.yml unit-core."
+    },
+    {
+      "id": "262-c4",
+      "status": "met",
+      "evidence": "docs/ARCHITECTURE.md diff is one removed row (`:core:ui` in the section 2 module table). No other section is edited."
+    },
+    {
+      "id": "262-c5",
+      "status": "met",
+      "evidence": "No build-logic, root or settings file names the module after the edit. The build-logic plugin change only removes the core:ui line. The PR reports :build-logic:convention:check passing inside verify-local, and the CI Static checks job is pending."
+    },
+    {
+      "id": "262-c6",
+      "status": "partial",
+      "evidence": "The PR body reports tools/ci/verify-local.sh exit 0. Not re-run here. I re-ran BASE_REF=origin/revamp/w1-base tools/ci/check-constitution.sh at head and it passed. The dead 'core/ui/' pathspec in design_system_consumers is harmless: git diff does not error on an unmatched pathspec, the deleted files contribute only '-' lines that the '^\\+' filter drops, and feature/ and app/ coverage is unchanged."
+    }
+  ],
+  "findings": []
+}

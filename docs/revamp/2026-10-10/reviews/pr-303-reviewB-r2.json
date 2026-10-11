@@ -1,0 +1,25 @@
+{
+ "head_sha": "eed859e902e7e1bf895cfda29fbb9d0fe174364a",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "261-c1", "status": "met", "evidence": "Kept callers still resolve (unchanged since efedc042). On eed859e9, run 38081918583 passes Core, Feature and App unit tests, Screenshot tests, Lint, Static checks and Assemble APKs (assembleDemoDebug and assembleProdDebug)."},
+  {"id": "261-c2", "status": "met", "evidence": "No light symbol in src/main of core, app or feature. The new commit also removes the last light chrome in the app: Theme.Material.Light parent, windowLightStatusBar=true, and window_background #FFFFFF. D27 still stands for the literals in TmrThemeDarkOnlyTest."},
+  {"id": "261-c3", "status": "met", "evidence": "TmrTheme always provides TmrDarkColors. The window now matches it: window_background #000000 equals Palette.kt background 0xFF000000 exactly, so no colour flash. MainActivity and DebugScenarioActivity use SystemBarStyle.dark(TRANSPARENT) for both bars. That sets light status and nav icons on every API from minSdk 26, and DebugScenarioActivity reapplies it on uiMode changes. The theme parent is the dark Theme.Material.NoActionBar, with windowLightStatusBar false and windowLightNavigationBar false (API 27+). Splash: on API 31+, windowSplashScreenBackground is black with the lime icon background; before 31, the starting window uses the black windowBackground. No values-v* or values-night directory remains, and no View-based dialog or ContextThemeWrapper reads the activity theme."},
+  {"id": "261-c4", "status": "met", "evidence": "Unchanged since round 1: both TTFs and OFL files are deleted together, and Type.kt uses FontFamily.Default."},
+  {"id": "261-c5", "status": "met", "evidence": "Unchanged since round 1: 14 PNGs and 2 screenshot test classes are deleted, nothing is re-recorded, and Screenshot tests pass on the head."},
+  {"id": "261-c6", "status": "met", "evidence": "eed859e9 renames TmrDisabledButtonTest to disabledTextButtonLabelUsesDisabledContentWithReadableContrast with the body unchanged, which resolves the round-1 overclaim note. The deleted values-night held only window_background #000000 and a theme without windowLightStatusBar. values/ now carries both, so no night-only resource is lost. LauncherIconResourcesTest keeps its containsExactly(@color/ic_launcher_background) assertion on the only themes.xml. TalkBack semantics and font-scale handling are untouched: the commit changes only resources, bar styles and a test name."},
+  {"id": "261-c7", "status": "met", "evidence": "Motion.kt and TmrMotion.kt are still identical to the base."},
+  {"id": "261-c8", "status": "met", "evidence": "The new XML adds no comments and no build-file edits. The PR body lists the app/src/main change under OUT_OF_PLAN and justifies the LauncherIconResourcesTest change. Constitution policy passes in run 38081943003. Its copy in run 38081918583 was cancelled as superseded, and every other job in that run passes. delivery-gates-pregate passes."}
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "app/src/main/res/values/themes.xml",
+   "line": 7,
+   "rule": "Review checklist 1 and 5: the round-1 fix needs a test that fails if the fix is reverted",
+   "trigger": "Revert any one of these: windowLightStatusBar back to true, window_background back to #FFFFFF, or the parent back to Theme.Material.Light. Every test still passes, and the light-mode device again gets black-on-black status icons and a white pre-draw flash. The Fixer skipped the Robolectric MainActivity test because no Hilt activity test pattern exists. LauncherIconResourcesTest already parses this file as XML, so a resource-level guard needs only a few lines and no new pattern.",
+   "title": "The dark window and status-bar fix from round 1 has no regression test",
+   "proof": "Add to LauncherIconResourcesTest: assert that the values/themes.xml items android:windowLightStatusBar and android:windowLightNavigationBar are 'false', and that values/colors.xml window_background is '#000000'. It fails at efedc042."
+  }
+ ]
+}

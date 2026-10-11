@@ -1,0 +1,490 @@
+{
+  "repo": "BengaluruBuilders/apps-backend",
+  "base": "origin/main",
+  "base_sha": "59a8abb2e44b9814ad49a699720801ee17e772f0",
+  "scouted_at": "2026-10-10",
+  "contract": "TailorMyResume contract v2 (hirehop docs/revamp/2026-10-10/PLAN.md section 4; app issue BengaluruBuilders/tailor-my-resume#285, still OPEN, so PLAN section 4 and each issue body are the interim spec)",
+  "excluded": [
+    {"number": 98, "reason": "owner blocker: staging test identity script; the owner must run it with the Firebase service account"},
+    {"number": 99, "reason": "owner blocker: no email provider or secret (D8)"}
+  ],
+  "shared_facts": [
+    "Deploy (.github/workflows/deploy.yml): every merge to main runs Validation, then `npm run db:migrate:all` against the TAILORMYRESUME Neon database, then `flyctl deploy --remote-only --ha=false`. The old image serves against the new schema for minutes, and rollback is `fly deploy --image <previous>` (docs/architecture.md, Deploy). No backup runs before the migration; the data rollback is the Neon restore history (6 h on Neon Free).",
+    "Constitution rule 15: schema changes only through drizzle-kit files; never edit a generated migration or one that has run. Rule 16: a migration must work with the code before and after it. There are no down migrations; a reversal is a new forward migration.",
+    "Constitution rule 22: a /v1 response never loses or renames a field. The app on main still parses today's shapes: core/network WalletDto has non-default `freeTailoringsLeftToday: Int` and `unlockedApplicationIds: List<String>`; TailoringStartRequest always sends `\"section\": null` (encodeDefaults=true); the app calls POST /applications/{id}/unlock, /prep-questions and /cover-letters. New response fields are safe (ignoreUnknownKeys=true).",
+    "Fly (fly.toml): one always-on shared-cpu-1x 512 MB machine in sin. In-process counters (rate limits, maxRunningTailorings 4) are exact only for one machine. Neon Free compute suspends after 5 minutes idle, so no new timer may query the database (docs/architecture.md, AI usage).",
+    "LLM cost controls (src/apps.ts): per-user dailyCallQuota 50 per UTC day and per-app dailyCostCapMicroUsd 5,000,000 ($5 per day). Changing quotas or cost caps needs explicit authorization (apps-backend AGENTS.md). `npm run eval:tailormyresume` is a paid run (EVAL_COST_CAP_USD default 20) and is not part of `npm run check`.",
+    "Post-deploy checks: every /v1 route sits behind Firebase token verification, and no staging test identity exists (#98 excluded). Without a token a probe cannot tell a mounted route from a missing one. The Verifier can confirm GET /health 200 and a green deploy run with the migrate step logging `migrated`. The authenticated route checks in the issues wait for the Phase 3 e2e run (owner token from #98, or the emulator's Google account).",
+    "Gates: `npm run check` needs TEST_DATABASE_URL pointing to a local Postgres 16+. On this host psql 16.13 (Homebrew) is installed but no server is running. CI starts one.",
+    "Golden prompt fixture test/fixtures/tailormyresume-prompts-main.json (keys analysis, prep, cover-write, cover-repair, tailoring-generate, tailoring-repair) is asserted by assertMatchesMain in the analyses, prep, cover-letter and tailorings tests. Any prompt change breaks it by design. Re-capturing it is a test replacement under the SKILL Review-rounds rule, so the lead makes and commits it."
+  ],
+  "staging_plan": {
+    "risk": "The app on main (until tailor-my-resume#260, W5-N1 and #287 are deployed) breaks on staging if: #89 drops the wallet fields (WalletDto parse failure on GET /wallet, POST /purchases and unlock); #90 drops `section` from the strict tailoring schema (every POST /tailorings becomes 400); #90 deletes the unlock route (export fails with 404); or #97 deletes prep and cover routes before #260 merges.",
+    "proposal": "Keep every old shape until the app moves. #89 adds `credits` and keeps `freeTailoringsLeftToday` (always 0 after #90) and `unlockedApplicationIds` (rule 22). #90 accepts `section` only as null and keeps POST /applications/:id/unlock as a no-spend compatibility route. #97 merges only after tailor-my-resume#260. After #287 is deployed, a follow-up issue removes the unlock route and the two deprecated wallet fields. That removal is a rule 22 break, so it needs owner acknowledgement. A later drop of tailormyresume_unlocks is irreversible and needs an owner card plus an export first.",
+    "alternative": "Take #90's literal scope and hold its merge until tailor-my-resume#287 is deployed (D7 back-to-back). This stalls #95 and #100 behind the app's W5-N chain."
+  },
+  "merge_order": [88, 89, 90, 87, 91, 92, 93, 94, 95, 96, 97, 100],
+  "merge_order_notes": [
+    "One backend lane at a time (D11), so the order follows the critical path: the money chain first (#287 on the app side and #95 depend on it), then the analysis chain, then the rest.",
+    "Migrations land in order #89 (table and backfill), #90 (credit_reserved), #96 (claims kind check). Each one regenerates on top of the merged predecessor. Never hand-edit drizzle/meta.",
+    "#97 is blocked until BengaluruBuilders/tailor-my-resume#260 is merged. #100 goes last."
+  ],
+  "expected_stacks": [
+    {"issues": [88, 89, 90, 94, 95, 96], "why": "Shared state: 88, 89 and 90 write tailormyresume_wallets; 89, 90 and 96 extend the drizzle migration chain; 94 and 95 change the stored tailormyresume_tailorings.result shape. 95 also changes tailoring.ts::tailoringRequestSchema after 90. Work order: 88, 89, 90, 94, 95, 96. 96 also waits for 91 and 87 (cross-lane blockers)."},
+    {"issues": [91, 92], "why": "Both change analyses.ts::analysesRoute and the analysis model schema and prompt."},
+    {"issues": [87], "why": "Alone. It shares files with 90, 96 and 97 (routes.ts) and with 93 (sync-ai.ts via openSyncRequest), but no function or state."},
+    {"issues": [93], "why": "Alone (resume-parse.ts)."},
+    {"issues": [97], "why": "Alone. Blocked on tailor-my-resume#260."},
+    {"issues": [100], "why": "Alone, docs tier, last."}
+  ],
+  "cards": [
+    {"kind": "cost", "issues": [91, 92, 93, 94, 95], "question": "Approve paid `npm run eval:tailormyresume` runs for the prompt and schema changes (the PR template requires a report; #94 and #95 criteria need 0 critical fabrications)?", "options": ["A: one capped run per PR, `--only` the touched sets, EVAL_COST_CAP_USD=5 (about $25 total at most)", "B: one full run after #95 merges, EVAL_COST_CAP_USD=20; earlier PRs attach no report", "C: no paid eval; #94 and #95 ship with their eval criterion unmet (Refs, not Closes)"], "recommendation": "A", "default_if_unanswered": "B"},
+    {"kind": "missing-authority", "issues": [87, 88, 89, 90, 91, 96], "question": "The post-deploy route checks need an authenticated staging call, and #98 (test identity) is excluded. Accept /health plus a green deploy run as the merge evidence, with the route checks deferred to the Phase 3 e2e?", "options": ["A: accept and defer", "B: owner runs the #98 script first"], "recommendation": "A", "default_if_unanswered": "A"}
+  ],
+  "issues": [
+    {
+      "number": 88,
+      "title": "feat(tailormyresume): credit packs of 5, 15 and 40",
+      "status": "ready",
+      "tier": "sensitive",
+      "criteria": [
+        {"id": "c1", "text": "Given config.packs, When GET /v1/tailormyresume/packs is called, Then it answers 200 with exactly [{productId:\"application_pack_5\",credits:5,creditsExpire:false},{productId:\"application_pack_15\",credits:15,creditsExpire:false},{productId:\"application_pack_40\",credits:40,creditsExpire:false}] in that order."},
+        {"id": "c2", "text": "Given a fake PlayClient that verifies a token for application_pack_5, application_pack_15 or application_pack_40, When POST /purchases is first called with that productId, Then it answers 201, creditsGranted equals 5, 15 or 40, and wallet.purchasedCredits rises by exactly that amount."},
+        {"id": "c3", "text": "Given a granted purchase of application_pack_15, When the same token is posted again, Then it answers 200 and grants nothing more."},
+        {"id": "c4", "text": "Given productId \"application_pack_99\", When POST /purchases is called, Then it answers 400 INVALID_INPUT, makes no Play call and writes no row."},
+        {"id": "c5", "text": "Given a Play answer whose productId differs from the requested one (e.g. a _5 token posted as _40), When POST /purchases is called, Then it answers 400 PURCHASE_INVALID and grants nothing."},
+        {"id": "c6", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": ["Prices (Play Console owns them; W5-PLAY is an owner step)", "Creating Play products", "Refunds or voided purchases (#55)", "Any change to purchase verification, consume or retry logic"],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-purchases.test.ts test/tailormyresume-wallet.test.ts"],
+      "root_cause": null,
+      "callers": ["src/apps/tailormyresume/purchases.ts::redeemPurchase reads tailormyresumeConfig.packs (pack lookup and credits)", "src/apps/tailormyresume/routes.ts GET /packs returns tailormyresumeConfig.packs", "test/tailormyresume-wallet.test.ts 'packs come from config'"],
+      "constraints": [
+        "Money: the grant amount comes only from config.packs, keyed by the verified productId. Never take a credit count from the request.",
+        "The existing productId equality check against Play's answer (purchases.ts verifiedPurchase) must stay, so a cheap pack token cannot be posted as a dear pack.",
+        "docs/architecture.md purchase notes name application_pack_5 only (including the promo-code warning). Update that bullet in the same PR (rule 27).",
+        "Additive response change: the app on main lists packs with ignoreUnknownKeys, so extra packs are safe on staging.",
+        "Deploy runs on merge (Fly.io, one 512 MB machine). No migration."
+      ],
+      "state": ["tailormyresume_wallets", "tailormyresume_purchases"],
+      "files": ["src/apps/tailormyresume/config.ts", "test/tailormyresume-purchases.test.ts", "docs/architecture.md"],
+      "overlaps": {"files": {"config.ts": [87, 90], "docs/architecture.md": "all"}, "state": {"tailormyresume_wallets": [89, 90], "tailormyresume_purchases": [89]}},
+      "depends_on": ["BengaluruBuilders/tailor-my-resume#285 (contract doc, open; the issue body is the spec)"],
+      "scale": {"material": false, "note": "Adds two config entries. The lookup is linear over 3 packs."}
+    },
+    {
+      "number": 89,
+      "title": "feat(tailormyresume): credit ledger table and GET /v1/tailormyresume/credits",
+      "status": "ready",
+      "tier": "sensitive",
+      "criteria": [
+        {"id": "c1", "text": "Given the migrations applied to an empty test database, When the schema-drift test runs, Then the latest snapshot matches schema.ts, and table tailormyresume_credit_ledger exists with id uuid pk, user_id text not null references users(user_id) on delete cascade, kind check in (WELCOME, PURCHASE, TAILORING, REFUND, MIGRATION), amount integer not null check amount <> 0, application_id text null, product_id text null, purchase_id uuid null, tailoring_id text null (no FK, because tailoring rows are purged 24 h after they finish), created_at timestamptz not null default now(), and an index on (user_id, created_at)."},
+        {"id": "c2", "text": "Given wallets seeded before the backfill migration with (free,purchased) = (1,0), (0,7), (2,5) and (0,0), When the backfill migration runs, Then each wallet with a non-zero balance has exactly one MIGRATION row whose amount equals free+purchased, the (0,0) wallet has none, and for every wallet free+purchased equals the sum of its ledger amounts."},
+        {"id": "c3", "text": "Given a user with no wallet, When GET /wallet (or any path that calls ensureWallet) creates the wallet, Then one WELCOME row with amount = startingFreeCredits is written in the same transaction, and a second call writes no second WELCOME row."},
+        {"id": "c4", "text": "Given a first-time grant of application_pack_5 through POST /purchases, When the grant transaction commits, Then exactly one PURCHASE row (amount 5, product_id application_pack_5, purchase_id = the purchase row id) exists; a repeat POST with the same token adds no ledger row; and two concurrent posts of one token add one row."},
+        {"id": "c5", "text": "Given a user with ledger rows, When GET /v1/tailormyresume/credits is called, Then it answers 200 {credits:{balance, entries:[{id, kind, amount, applicationId, productId, createdAt}]}}, entries newest first (ties broken by id), at most 100, balance = freeCredits + purchasedCredits from the wallet row, and createdAt is an ISO string."},
+        {"id": "c6", "text": "Given user A with ledger rows, When user B in the same app calls GET /credits, Then B sees none of A's rows. A token of another registered app gets 404, a missing token 401, an invalid token 401, and a deleted user 409 ACCOUNT_DELETED with no row created."},
+        {"id": "c7", "text": "Given any wallet read, When GET /wallet answers, Then the wallet object contains credits = freeCredits + purchasedCredits and still contains freeCredits, purchasedCredits, analysesLeftToday, freeTailoringsLeftToday, day, resetsAt and unlockedApplicationIds (rule 22; removal deferred, see non-goals). The same shape appears in the POST /purchases and unlock responses."},
+        {"id": "c8", "text": "Given a user with ledger rows, When GET /v1/tailormyresume/me/export is called, Then export.credits lists every ledger row of the user (not capped at 100) with kind, amount, applicationId, productId, createdAt, oldest first like the other export lists."},
+        {"id": "c9", "text": "Given a user with ledger rows, When DELETE /v1/me completes (including the partial-failure and retry path of the existing deletion test), Then no ledger row of that user remains, and another user's rows remain."},
+        {"id": "c10", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": [
+        "Removing freeTailoringsLeftToday or unlockedApplicationIds from the wallet (rule 22 and the app's WalletDto; follow-up after tailor-my-resume#287 is deployed, with owner acknowledgement)",
+        "Spending credits or TAILORING rows (#90)",
+        "REFUND rows (no refund flow; #55)",
+        "Job titles or company names on the server (data minimisation, contract D1)",
+        "Making the ledger the source of truth for the balance (wallet counters stay authoritative)"
+      ],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/schema-drift.test.ts test/schema-migration.test.ts test/tailormyresume-wallet.test.ts test/tailormyresume-purchases.test.ts test/tailormyresume-reports-export.test.ts"],
+      "root_cause": null,
+      "callers": [
+        "wallet.ts::ensureWallet is called by wallet.ts::getWallet and ::unlockApplication, tailoring.ts::creditCheck, purchases.ts::storedPurchase and ::redeemPurchase, and export.ts exportRoute. Every caller runs inside withLiveUser, so the WELCOME insert shares the caller's transaction and per-user advisory lock.",
+        "wallet.ts::readWallet is called by getWallet, unlockApplication, purchases.ts (storedPurchase, redeemPurchase) and export.ts. Adding `credits` changes all five responses additively.",
+        "wallet.ts::getWallet is called by routes.ts GET /wallet and analyses.ts (allowance block; reads only analysesLeftToday, day, resetsAt).",
+        "purchases.ts::redeemPurchase grant transaction: the PURCHASE row goes inside the `if (inserted)` branch so it shares the ON CONFLICT DO NOTHING decision.",
+        "routes.ts: there is no wallet sub-router; GET /credits is registered next to GET /wallet in tailormyresumeRoutes."
+      ],
+      "constraints": [
+        "Migration, money and data export: tier floor sensitive. The Builder writes in-harness (the router refuses `migration` paths).",
+        "Generate the table migration with `npm run db:generate` and never edit it (AGENTS.md, rule 15). The backfill is data SQL, so it goes in a separate custom migration from `npx drizzle-kit generate --custom --name=<name>` (drizzle-kit 0.31.11), next in the journal after 0007.",
+        "Additive and reversible: CREATE TABLE plus INSERT ... SELECT only; no existing row changes. Reversal is a later DROP TABLE migration, which loses only ledger history.",
+        "Backfill conflict found by the scout: the issue says one MIGRATION row per wallet, but `amount <> 0` forbids a row for a zero-balance wallet. Skip wallets where free+purchased = 0; the balance=sum invariant still holds.",
+        "Deploy window (rule 16): the migration runs before the new image starts. For a few minutes the old image can create wallets (no WELCOME row) or grant purchases (no PURCHASE row). That drift is accepted on staging. Because `balance` is read from the wallet counters, the drift affects history only. The PR must state this ceiling.",
+        "The old image must keep working with the new table present: the table is unused by old code. Rollback is `fly deploy --image <previous>`.",
+        "Rule 9 and AGENTS.md definition of done: a new user-data table needs DELETE /v1/me coverage with partial-failure and retry tests. The user_id FK cascade covers erasure; extend the existing deletion test. If purchase_id gets an FK to tailormyresume_purchases, it must not be RESTRICT. Both rows cascade from users in one statement, and the deletion test must prove it.",
+        "Rule 3: GET /credits filters by the verified token's user id only.",
+        "Rule 18: amount is an integer count of credits, not money; time is timestamptz UTC.",
+        "Rule 22: keep the wallet's freeTailoringsLeftToday and unlockedApplicationIds; the app on main deserializes them as non-default fields.",
+        "Data minimisation (PLAN R15): only applicationId and productId leave the server; tailoring_id and purchase_id are not in the GET /credits entry shape.",
+        "docs/compliance.md: ledger rows are kept until account deletion and appear in the export (#100 writes compliance.md; this PR updates the docs/architecture.md wallet and export bullets per rule 27).",
+        "GET /credits and export reads run in one withLiveUser transaction (pooled connection; no session state, rule 17)."
+      ],
+      "state": ["tailormyresume_credit_ledger", "tailormyresume_wallets", "tailormyresume_purchases", "drizzle migration chain"],
+      "files": ["drizzle/00NN_*.sql (two: table and custom backfill)", "drizzle/meta/**", "src/apps/tailormyresume/schema.ts", "src/apps/tailormyresume/ledger.ts (new)", "src/apps/tailormyresume/wallet.ts", "src/apps/tailormyresume/purchases.ts", "src/apps/tailormyresume/export.ts", "src/apps/tailormyresume/routes.ts", "test/tailormyresume-ledger.test.ts (new)", "test/schema-migration.test.ts", "docs/architecture.md"],
+      "overlaps": {"files": {"wallet.ts": [90], "routes.ts": [87, 90, 96, 97], "schema.ts": [90, 96], "drizzle/meta/**": [90, 96], "export.ts": [99]}, "functions": {"wallet.ts::ensureWallet": [90], "wallet.ts::readWallet": [90]}, "state": {"tailormyresume_wallets": [88, 90], "tailormyresume_credit_ledger": [90], "drizzle migration chain": [90, 96]}},
+      "depends_on": ["#88"],
+      "scale": {"material": true, "note": "GET /credits is one indexed range read (user_id, created_at desc) with LIMIT 100. The export reads all of a user's ledger rows: about one row per tailoring or purchase, unbounded per user over time (ceiling noted, fine at staging scale). The backfill is one INSERT ... SELECT over tailormyresume_wallets (staging: tens of rows) inside the deploy migration step. Neon Free storage is 1 GB; a row is about 150 bytes."}
+    },
+    {
+      "number": 90,
+      "title": "feat(tailormyresume): spend one credit per successful tailoring; drop unlock and the daily free tailoring",
+      "status": "ready",
+      "tier": "sensitive",
+      "criteria": [
+        {"id": "c1", "text": "Given a user with balance 1, When POST /tailorings starts a job (202) and the pipeline SUCCEEDS, Then in one transaction the wallet drops by 1 (free credit first, then purchased) and one TAILORING ledger row with amount -1, application_id and tailoring_id = the job id is written. GET /tailorings/{id} shows SUCCEEDED, and GET /wallet shows credits 0."},
+        {"id": "c2", "text": "Given a user with balance 1, When the job ends FAILED (provider error, QUOTA_EXCEEDED, BUDGET_EXCEEDED, shutdown abort) or is reconciled as INTERRUPTED (other boot id, or older than tailoringStaleMs), Then the balance stays 1 and no ledger row is written."},
+        {"id": "c3", "text": "Given a user with balance 1, When two POST /tailorings with different requestIds race, Then exactly one answers 202 and the other 402 NO_CREDIT; after the first succeeds the balance is 0 and never negative."},
+        {"id": "c4", "text": "Given a user with balance 1 and a RUNNING reserved job, When a second new requestId is posted, Then it answers 402 NO_CREDIT. If that RUNNING row belongs to another boot or is older than tailoringStaleMs, it is reconciled as INTERRUPTED first, its reservation is freed, and the new job starts (202)."},
+        {"id": "c5", "text": "Given a started job, When the same requestId is posted again (while RUNNING or after SUCCEEDED), Then it answers 200 with that job, makes no model call, and spends nothing more; the balance moves by exactly -1 in total."},
+        {"id": "c6", "text": "Given a SUCCEEDED tailoring for applicationId X, When a new requestId for X is posted (re-tailor) with balance >= 1, Then it starts (202), and on success the balance moves by -1 again; with balance 0 it answers 402 NO_CREDIT."},
+        {"id": "c7", "text": "Given balance 0, When POST /tailorings is posted, Then it answers 402 NO_CREDIT, inserts no tailoring row, makes no model call and no ai_usage row. There is no daily free tailoring: no FREE_TAILORING claim is created by any path."},
+        {"id": "c8", "text": "Given the app on main sends `section: null`, When POST /tailorings is posted with section null or without section, Then it is accepted; with a non-null section it answers 400 INVALID_INPUT (section regeneration is removed)."},
+        {"id": "c9", "text": "Given the app on main still calls POST /applications/:applicationId/unlock, When it is called (empty body, valid id), Then it answers 200 with {unlock:{applicationId, creditKind, unlockedAt}, wallet}: the stored unlock row if one exists, else creditKind \"FREE\" and unlockedAt now. It moves no credit and writes no row or ledger entry. Invalid ids or a body stay 400 INVALID_INPUT. (Compatibility route kept until tailor-my-resume#287 is deployed; see staging_plan.)"},
+        {"id": "c10", "text": "Given the new config, When analyses run, Then dailyAnalyses is 20: the 20th distinct analysis of the TailorMyResume day succeeds and the 21st answers 429 ALLOWANCE_EXHAUSTED with no model call. dailyFreeTailorings is gone from config, and the wallet's freeTailoringsLeftToday is always 0."},
+        {"id": "c11", "text": "Given a SIGTERM while a reserved job runs, When shutdown aborts and settles it, Then the job ends FAILED, the reservation is freed and no credit is spent (extend test/tailormyresume-shutdown.test.ts)."},
+        {"id": "c12", "text": "Given the migration, When the schema-drift and migration tests run, Then tailormyresume_tailorings has credit_reserved boolean NOT NULL DEFAULT false, and rows inserted without it (old image) read as false."},
+        {"id": "c13", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": [
+        "Refunds of voided Play purchases (#55)",
+        "Dropping tailormyresume_unlocks, the FREE_TAILORING claim kind, its check-constraint value or the section column (rule 16; a later drop of unlocks is irreversible and needs an owner card)",
+        "Removing the unlock compatibility route or the deprecated wallet fields (follow-up after tailor-my-resume#287 is deployed)",
+        "Changing dailyCallQuota or dailyCostCapMicroUsd in src/apps.ts",
+        "Showing reserved credits in the wallet: credits stays the settled balance"
+      ],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-tailorings.test.ts test/tailormyresume-wallet.test.ts test/tailormyresume-analyses-repeat.test.ts test/tailormyresume-shutdown.test.ts test/tailormyresume-shutdown-refuses.test.ts test/schema-drift.test.ts"],
+      "root_cause": null,
+      "callers": [
+        "tailoring.ts::creditCheck is called only by tailoring.ts::begin (twice: before and after reconciling an inflight row). Its FREE_TAILORING, unlock and section branches are removed; the reservation check replaces it.",
+        "tailoring.ts::begin is called by ::start (POST /tailorings in routes.ts).",
+        "tailoring.ts::finish is called by ::runJob for success and failure. The SUCCEEDED branch gains the debit and the ledger row in its existing transaction; the markUsed and releaseClaim calls for FREE_TAILORING go away.",
+        "tailoring.ts::reconcileInterrupted is called by begin, start and get. It must keep freeing the reservation: with the reservation derived from RUNNING rows, marking FAILED frees it.",
+        "tailoring.ts::tailoringRequestSchema is used by ::start and is the request contract that #95 extends.",
+        "routes.ts unlock handler calls wallet.ts::unlockApplication. It becomes a no-spend compatibility read.",
+        "wallet.ts::readWallet computes freeTailoringsLeftToday from dailyFreeTailorings. It becomes constant 0, called by getWallet, unlockApplication, purchases.ts and export.ts.",
+        "analyses.ts reads tailormyresumeConfig.dailyAnalyses in claimRun. wallet.ts::readWallet reads it for analysesLeftToday.",
+        "purge.ts keeps USED FREE_TAILORING claims; this is unchanged and harmless.",
+        "scripts/tailormyresume-eval/run.ts seeds wallets with 1,000 purchased credits, so the eval still runs under the new model."
+      ],
+      "constraints": [
+        "Migration and money: tier floor sensitive. The Builder writes in-harness.",
+        "Migration: ADD COLUMN credit_reserved boolean NOT NULL DEFAULT false (Postgres 11+ makes this a metadata-only change). It is additive, and the old image runs against it unchanged. Reversal is a later DROP COLUMN migration. Generate it with `npm run db:generate` after #89's migrations are on the branch base; never hand-edit drizzle/meta.",
+        "Reservation design: available = free + purchased - count(the user's RUNNING rows with credit_reserved = true, from this boot and younger than tailoringStaleMs). Compute it and insert the row inside withLiveUser, whose per-user pg_advisory_xact_lock serializes concurrent starts. No session locks (rule 17).",
+        "No timer may sweep reservations (Neon autosuspend). Stale reservations are freed lazily by reconcileInterrupted on the next start or GET, as today.",
+        "With the reservation in place, the only other spend path (unlock) must not spend, or the SUCCEEDED debit could find 0 and violate the wallet >= 0 check. That is why unlock becomes a no-spend compatibility route.",
+        "Rule 22 and the staging app: keep `section` accepted as null (the app sends it on every request) and keep the unlock route as a compatibility route until tailor-my-resume#287 is deployed. If the lead takes the issue's literal scope instead, hold the merge until #287 is deployed (D7).",
+        "dailyAnalyses 3 -> 20 changes an app quota. AGENTS.md needs explicit authorization for quota changes; the issue (owner revamp plan, PLAN R5) is that authorization. The per-user dailyCallQuota 50 and the $5 per day app cap in src/apps.ts stay and still bound LLM spend.",
+        "Test replacement (lead commits it, SKILL Review rounds): these existing tests encode the removed behaviour and must be replaced with equal or stronger coverage. test/tailormyresume-tailorings.test.ts: the FREE_TAILORING, section regeneration and unlock cases (e.g. '402 NO_CREDIT without unlock, credit, used free tailoring or a free tailoring left today', 't-section*', 'an unlocked application tailors with zero credits'). test/tailormyresume-wallet.test.ts: the unlock spending cases. test/tailormyresume-analyses-repeat.test.ts: the cases that hard-code 3 analyses. Wallet and export cases that assert freeTailoringsLeftToday 1.",
+        "The 4-job in-process cap and boot-id reconciliation are exact only for the single Fly machine (fly.toml).",
+        "Update the docs/architecture.md wallet, tailoring-jobs and allowance bullets in the same PR (rule 27).",
+        "The deploy runs migrate then flyctl deploy. During the window the old image may still run FREE_TAILORING and unlock spending; that is harmless because it writes no credit_reserved rows."
+      ],
+      "state": ["tailormyresume_wallets", "tailormyresume_credit_ledger", "tailormyresume_tailorings.credit_reserved", "tailormyresume_usage_claims kind ANALYSIS (limit 20) and FREE_TAILORING (no longer written)", "drizzle migration chain"],
+      "files": ["src/apps/tailormyresume/tailoring.ts (credit check, begin, finish)", "src/apps/tailormyresume/claims.ts (only if a helper is no longer used)", "src/apps/tailormyresume/wallet.ts", "src/apps/tailormyresume/routes.ts (unlock compatibility handler)", "src/apps/tailormyresume/config.ts", "src/apps/tailormyresume/schema.ts", "src/apps/tailormyresume/ledger.ts", "drizzle/00NN_*.sql", "drizzle/meta/**", "test/tailormyresume-tailorings.test.ts", "test/tailormyresume-wallet.test.ts", "test/tailormyresume-analyses-repeat.test.ts", "test/tailormyresume-shutdown.test.ts", "docs/architecture.md"],
+      "overlaps": {"files": {"tailoring.ts": [95], "routes.ts": [87, 89, 96, 97], "config.ts": [87, 88], "wallet.ts": [89], "schema.ts": [89, 96], "drizzle/meta/**": [89, 96]}, "functions": {"tailoring.ts::tailoringRequestSchema": [95], "wallet.ts::readWallet": [89]}, "state": {"tailormyresume_wallets": [88, 89], "tailormyresume_credit_ledger": [89], "drizzle migration chain": [89, 96]}},
+      "depends_on": ["#89"],
+      "scale": {"material": true, "note": "Each start adds one count over the user's RUNNING tailoring rows under the existing per-user lock. That is bounded by maxRunningTailorings (4 per machine) and indexed by the user_request unique index's user_id prefix. Success adds one UPDATE and one INSERT in the existing finish transaction. LLM spend per user can rise because analyses go from 3 to 20 per day, but dailyCallQuota 50 and the $5 per day app cap bound it."}
+    },
+    {
+      "number": 87,
+      "title": "feat(tailormyresume): drop the consent gate from the AI routes",
+      "status": "ready",
+      "tier": "sensitive",
+      "criteria": [
+        {"id": "c1", "text": "Given a user with no consents rows, When they call POST /resume/parse, POST /analyses (fake models), and POST /tailorings with credit, Then they answer 200, 200 and 202 with the normal model calls."},
+        {"id": "c2", "text": "Given a user whose newest ai-processing row is granted=false or on an old policyVersion, When they call an AI route, Then no TailorMyResume route answers 403 CONSENT_REQUIRED."},
+        {"id": "c3", "text": "Given a deleted account (tombstone present), When it calls each AI route, Then it still answers 409 ACCOUNT_DELETED with no model call and no ai_usage row. The gate's withLiveUser check is gone, so the claim, reservation and begin paths must still enforce this."},
+        {"id": "c4", "text": "Given the core consent route, When POST /v1/me/consents is called and then GET /v1/tailormyresume/me/export, Then the consent is stored (201) and listed in export.consents; the consents table is untouched."},
+        {"id": "c5", "text": "Given the source tree, When `git grep -n 'requireAiConsent\\|aiConsentGate' src` runs, Then nothing matches."},
+        {"id": "c6", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": ["Deleting consent rows, the consents table or POST /v1/me/consents", "Removing CONSENT_REQUIRED from src/core/errors.ts (other apps may use it)", "Removing noticeVersion: the issue's condition fails because test/tailormyresume-ai-harness.ts, the shutdown tests, test/tailormyresume-tailorings.test.ts and scripts/tailormyresume-eval/run.ts read it", "Updating docs/compliance.md (#100)"],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-module.test.ts test/tailormyresume-analyses.test.ts test/tailormyresume-resume-parse.test.ts test/tailormyresume-tailorings.test.ts"],
+      "root_cause": null,
+      "callers": ["consent.ts::requireAiConsent is called by sync-ai.ts::openSyncRequest (used by analyses.ts, resume-parse.ts, prep-questions.ts and cover-letters.ts) and by consent.ts::aiConsentGate (routes.ts POST /tailorings middleware), and directly by test/tailormyresume-module.test.ts", "sync-ai.ts::openSyncRequest stays the body-parse and AbortSignal entry point for the four sync routes"],
+      "constraints": [
+        "Privacy control removal: tier raised to sensitive by the scout. It removes the DPDP consent check, and AGENTS.md requires explicit reviewer approval for weakening a security or privacy control. Reviewer B (security mandate) records that approval against the owner decision (hirehop PRD 6.1.2, 2026-10-10).",
+        "docs/compliance.md still says the API stops processing on consent withdrawal. After this PR that is false until #100 rewrites it. The 18+ check also goes; DPDP Act section 9 (children's data) makes the age gate a launch-checklist item for the owner. Record it in the #100 PR, not as a blocker here.",
+        "Ordering: today openSyncRequest checks consent (403) before the claim. After removal, parse (400) then the live-user guard in claimRun / reserveAiCall / begin must still return 409 ACCOUNT_DELETED before any model call (rule 12 order unchanged).",
+        "Test replacement (lead commits it): the shared harness test 'a user without consent gets 403 CONSENT_REQUIRED and no model call' (test/tailormyresume-ai-harness.ts, run for analyses, resume-parse, prep and cover routes), the requireAiConsent table in test/tailormyresume-module.test.ts, and the CONSENT_REQUIRED case in test/tailormyresume-tailorings.test.ts encode the removed gate. Replace them with 'no consent rows -> success'.",
+        "Staging-safe: the app on main still posts consents and handles 403; removing the gate breaks nothing.",
+        "Update the docs/architecture.md TailorMyResume consent bullet and the sync-AI order bullet in the same PR (rule 27)."
+      ],
+      "state": [],
+      "files": ["src/apps/tailormyresume/consent.ts (delete or reduce)", "src/apps/tailormyresume/sync-ai.ts", "src/apps/tailormyresume/routes.ts", "test/tailormyresume-ai-harness.ts", "test/tailormyresume-module.test.ts", "test/tailormyresume-tailorings.test.ts", "docs/architecture.md"],
+      "overlaps": {"files": {"routes.ts": [89, 90, 96, 97], "sync-ai.ts": [91, 93], "test/tailormyresume-tailorings.test.ts": [90, 94, 95]}, "state": {}},
+      "depends_on": ["BengaluruBuilders/tailor-my-resume#285 (open; issue body is the spec)"],
+      "scale": {"material": false, "note": "Removes one or two consent SELECTs and one withLiveUser transaction per AI request; it only reduces database work."}
+    },
+    {
+      "number": 91,
+      "title": "feat(tailormyresume): must-have reasons, job location and NOT_A_JOB_POST in analyses",
+      "status": "ready",
+      "tier": "standard",
+      "criteria": [
+        {"id": "c1", "text": "Given src/core/errors.ts, When NOT_A_JOB_POST and JOB_IMPORT_FAILED are raised, Then each maps to HTTP 422 (ApiStatus gains 422) with body {error:{code,message}}."},
+        {"id": "c2", "text": "Given a referral message of at least 20 words (\"Hey Priya! Saw this role ...\") and a fake model that marks it not a job post or returns no requirement, When POST /analyses is called, Then it answers 422 NOT_A_JOB_POST, the ANALYSIS claim is released (analysesLeftToday unchanged), and the one ai_usage row of the call stays settled (the call was made)."},
+        {"id": "c3", "text": "Given the Northwind JD fixture and a fake model returning location \"Bengaluru · Hybrid\", When POST /analyses succeeds, Then job.location is \"Bengaluru · Hybrid\". A missing or blank location is null; a location is cut to at most 120 characters."},
+        {"id": "c4", "text": "Given a match with status GAP, When the answer is built, Then matches[].reason is the fixed phrase \"Not clear in your resume\" whatever the model said."},
+        {"id": "c5", "text": "Given a MET or PARTIAL match, When the model's reason is longer than 120 characters, empty, or contains a number that appears in none of the cited facts' texts (bullet text, entry title, organization, dates), Then the server replaces it with a fixed phrase for that status. Otherwise the reason is returned unchanged (each match always has a non-empty reason of at most 120 characters)."},
+        {"id": "c6", "text": "Given the existing analysis behaviour, When a valid JD is analysed, Then requirement ids, status normalisation, evidence filtering, the stated-skill PARTIAL cap and the allowance block are unchanged."},
+        {"id": "c7", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": ["Numeric scores (the app computes keyword coverage, D5)", "A second model call to classify the text", "Job imports (#96 uses JOB_IMPORT_FAILED)", "Storing the JD or the location"],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-analyses.test.ts test/tailormyresume-analyses-repeat.test.ts"],
+      "root_cause": null,
+      "callers": ["analyses.ts::analysesRoute is mounted at routes.ts /analyses; the eval runner scripts/tailormyresume-eval/run.ts calls POST /analyses and parses its body", "core/errors.ts statusByCode and ApiStatus are used by server.ts mapError and every ApiError; adding 422 must keep mapError's typed c.json(body, status) compiling", "analyses.ts modelOutputSchema is a non-strict z.object, so new optional model fields are additive"],
+      "constraints": [
+        "LLM cost: no extra model call. The classification, location and reasons come from the existing single extraction-tier call (maxOutputTokens 8,000). Check that 40 requirements with reasons still fit; otherwise bound the reason length in the prompt.",
+        "A refused (422) analysis still made a provider call: its ai_usage row counts against dailyCallQuota and the $5 per day cap. Only the app allowance claim is released, as the issue says.",
+        "Truth (hirehop Constitution I.1): reasons are built only from cited evidence. GAP uses the fixed phrase; the server-side number check is the deterministic guard.",
+        "The prompt change breaks the golden 'analysis' entry in test/fixtures/tailormyresume-prompts-main.json. The lead re-captures it (test replacement); keep the property that without stated skills no stated-skill rule appears.",
+        "The PR template needs an `npm run eval:tailormyresume` report for a prompt or schema change. That is a paid run, so it waits for the cost card; never run it from a gate.",
+        "Rule 14: model output passes Zod before use. Rule 8: never log jobText, reasons or model output.",
+        "Additive response fields are safe for the app on main (ignoreUnknownKeys). A 422 is a new error code the app maps to its generic toast until W5-N1.",
+        "Update the docs/architecture.md /analyses bullet in the same PR (rule 27)."
+      ],
+      "state": ["tailormyresume_usage_claims kind ANALYSIS (released on 422)"],
+      "files": ["src/apps/tailormyresume/analyses.ts", "src/core/errors.ts", "test/tailormyresume-analyses.test.ts", "test/fixtures/tailormyresume-prompts-main.json (lead only)", "docs/architecture.md"],
+      "overlaps": {"files": {"analyses.ts": [92], "src/core/errors.ts": [96], "test/fixtures/tailormyresume-prompts-main.json": [92, 94, 95, 97]}, "functions": {"analyses.ts::analysesRoute": [92]}, "state": {}},
+      "depends_on": ["BengaluruBuilders/tailor-my-resume#285 (open; issue body is the spec)"],
+      "scale": {"material": true, "note": "LLM output grows by one location string and up to 40 reasons of at most 120 characters (about 1.5k extra output tokens at most) on the existing call. No new call, no new query."}
+    },
+    {
+      "number": 92,
+      "title": "feat(tailormyresume): one quick question in the analysis answer",
+      "status": "ready",
+      "tier": "standard",
+      "criteria": [
+        {"id": "c1", "text": "Given the Northwind JD with Priya's facts and a fake model whose first MUST_HAVE of type EXPERIENCE or SOFT_SKILL with server-normalised status GAP or PARTIAL is 'presenting to senior stakeholders', When POST /analyses succeeds, Then question = {requirementId of that requirement, text, why, options:[\"YES_REGULARLY\",\"A_FEW_TIMES\",\"NOT_YET\"]}, and text is the model's yes/no question about presenting to senior stakeholders."},
+        {"id": "c2", "text": "Given a JD whose MUST_HAVE requirements are all MET, or whose GAP or PARTIAL must-haves are only SKILL, TOOL or EDUCATION, When POST /analyses succeeds, Then question is null."},
+        {"id": "c3", "text": "Given several qualifying requirements, When the answer is built, Then the question uses the first in requirement order (req-1..n) and there is at most one question."},
+        {"id": "c4", "text": "Given the chosen requirement's model question text is missing, longer than 80 characters, or not ending in '?', When the answer is built, Then question is null (no server-invented wording). `why` is a non-empty string of at most 200 characters, else question is null."},
+        {"id": "c5", "text": "Given status normalisation (a MET with no surviving evidence id becomes GAP), When selecting the requirement, Then the normalised status is used, not the raw model status."},
+        {"id": "c6", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": ["Several questions", "Storing the question or the answer (the answer arrives with POST /tailorings in #95)", "A second model call"],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-analyses.test.ts"],
+      "root_cause": null,
+      "callers": ["analyses.ts::analysesRoute (same function as #91); scripts/tailormyresume-eval/run.ts parses the analysis body"],
+      "constraints": [
+        "No extra model call: the question text and why come from the same extraction call as #91.",
+        "The selection is deterministic on the server (first MUST_HAVE, normalised status GAP or PARTIAL, type EXPERIENCE or SOFT_SKILL). The model only words it.",
+        "The prompt change re-breaks the golden 'analysis' fixture after #91. The lead re-captures it again.",
+        "The paid eval report needs the cost card (see cards).",
+        "Additive field (`question`); the app on main ignores it.",
+        "Rule 8: no question or why text in logs.",
+        "Update the /analyses bullet in docs/architecture.md (rule 27)."
+      ],
+      "state": [],
+      "files": ["src/apps/tailormyresume/analyses.ts", "test/tailormyresume-analyses.test.ts", "test/fixtures/tailormyresume-prompts-main.json (lead only)", "docs/architecture.md"],
+      "overlaps": {"files": {"analyses.ts": [91], "test/fixtures/tailormyresume-prompts-main.json": [91, 94, 95, 97]}, "functions": {"analyses.ts::analysesRoute": [91]}, "state": {}},
+      "depends_on": ["#91"],
+      "scale": {"material": false, "note": "One linear pass over at most 40 requirements, plus at most about 100 output tokens on the existing call."}
+    },
+    {
+      "number": 93,
+      "title": "feat(tailormyresume): summary, location, links and current-role flag in resume parse",
+      "status": "ready",
+      "tier": "standard",
+      "criteria": [
+        {"id": "c1", "text": "Given the prototype RESUME_TXT and a fake model, When POST /resume/parse succeeds, Then the Infosys entry has current=true and endDate null, the Tata Digital entry has endDate null and current=false, and profile.location is \"Pune\"."},
+        {"id": "c2", "text": "Given a resume with a summary paragraph, When parsed, Then profile.summary is that text. A summary with any word (letter or digit run, case-insensitive) not in the input is null, using the same word rule as bullets. No summary gives null."},
+        {"id": "c3", "text": "Given a resume containing a LinkedIn URL and a portfolio URL, When parsed, Then profile.links = [{kind:\"LINKEDIN\",url},{kind:\"PORTFOLIO\" or \"OTHER\",url}]. Each url appears verbatim in the input, otherwise it is dropped. kind LINKEDIN only for a linkedin.com host. Only http(s) urls are kept."},
+        {"id": "c4", "text": "Given an entry the model marks current=true while the input has no present-type word (Present, Current, Now, Till date, To date) and an explicit endDate, When parsed, Then current is false and the endDate is kept. current=true always comes with endDate null."},
+        {"id": "c5", "text": "Given location or summary text that fails the verbatim word check, When parsed, Then that field is null. Existing fields, the sensitive-field drop and ref numbering are unchanged."},
+        {"id": "c6", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": ["Uploading files to the server (contract D2)", "Storing the parsed profile (contract D1)", "The review-once flag (device only)", "Inferring a location from a phone code or company"],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-resume-parse.test.ts"],
+      "root_cause": null,
+      "callers": ["resume-parse.ts::resumeParseRoute is mounted at routes.ts /resume/parse; scripts/tailormyresume-eval/run.ts calls it for the resume sets (extraction F1)"],
+      "constraints": [
+        "Verbatim rule: the system prompt says never add, infer or summarize. The new fields are copied text, enforced by the same server word filter as bullets.",
+        "Personal data: location and links are personal data that pass through only and are never stored or logged (rule 8). The sensitive-field drop list stays as is.",
+        "No extra model call; extraction tier, 128 KB body limit unchanged.",
+        "The resume-parse prompt is not in the golden fixture, so there is no golden conflict.",
+        "The paid eval report needs the cost card (resume sets).",
+        "Additive response fields; the app on main ignores them.",
+        "Update the /resume/parse bullet in docs/architecture.md (rule 27)."
+      ],
+      "state": [],
+      "files": ["src/apps/tailormyresume/resume-parse.ts", "test/tailormyresume-resume-parse.test.ts", "docs/architecture.md"],
+      "overlaps": {"files": {"docs/architecture.md": "all"}, "state": {}},
+      "depends_on": ["BengaluruBuilders/tailor-my-resume#285 (open; issue body is the spec)"],
+      "scale": {"material": false, "note": "A few more verbatim checks, linear in the input size (30,000 characters at most), plus a small output-token increase on the existing call."}
+    },
+    {
+      "number": 94,
+      "title": "feat(tailormyresume): tailoring returns a verified summary and skills order",
+      "status": "ready",
+      "tier": "standard",
+      "criteria": [
+        {"id": "c1", "text": "Given a facts payload with optional profile.summary {id, text}, When POST /tailorings is posted, Then it is accepted (id unique among entry and bullet ids, text 1-1,000 characters). Without summary it behaves exactly as before."},
+        {"id": "c2", "text": "Given a generated summary whose sourceIds are all request fact ids and that passes the deterministic checks (every number in the text appears in a cited source) and the verifier, When the job SUCCEEDS, Then result.summary = {text, sourceIds, verification} with verification PASSED or REPAIRED."},
+        {"id": "c3", "text": "Given a generated summary that fails the checks or the verifier after the one repair, When the job SUCCEEDS, Then result.summary is null (no summary change), and the bullets are unaffected."},
+        {"id": "c4", "text": "Given profile.skills and userStatedSkills, When the job SUCCEEDS, Then result.skills.ordered contains only profile skills, each once, compared ignoring case; omitted profile skills are appended in their original order; and result.skills.added contains only entries of userStatedSkills, with every other model suggestion dropped."},
+        {"id": "c5", "text": "Given a stored SUCCEEDED row written before this change (result without summary or skills), When GET /tailorings/{id} reads it, Then it answers 200 with summary null and skills absent or empty. tailoringResultSchema must parse old rows, or asView would throw a 500."},
+        {"id": "c6", "text": "Given the pipeline call budget, When nothing fails, Then the job still makes exactly 2 model calls (generate, verify). The summary rides in the existing calls and the job never exceeds 4 calls."},
+        {"id": "c7", "text": "Given the eval set plus new summary cases (fixtures generated by make-fixtures.ts), When `npm run eval:tailormyresume` runs (paid; after the cost card), Then it reports 0 critical fabrications."},
+        {"id": "c8", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": ["Changing the bullet rules", "The quick-question answer as a source (#95)", "A third model call for the summary"],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-tailorings.test.ts test/tailormyresume-eval-fixtures.test.ts test/tailormyresume-eval-metrics.test.ts"],
+      "root_cause": null,
+      "callers": [
+        "tailoring-pipeline.ts::runTailoringPipeline is called by tailoring.ts::runJob, and passesChecks and verifyDrafts by scripts/tailormyresume-eval/run.ts (seeded set).",
+        "tailoring-pipeline.ts::tailoringResultSchema is used by tailoring.ts::asView (parses stored rows) and scripts/tailormyresume-eval/run.ts (response parse).",
+        "facts.ts::profileFactsSchema is used by analyses.ts, tailoring.ts, prep-questions.ts, cover-letters.ts and scripts/tailormyresume-eval/fixtures.ts. Adding optional summary must not change their behaviour; the analysis prompt receives factsForPrompt(profile), so check whether summary leaks into it."
+      ],
+      "constraints": [
+        "Persisted state: tailormyresume_tailorings.result (jsonb, kept 24 h) changes shape. New fields must be optional when parsing, because rows from the old image and the deploy window exist. Rollback-safe: the old image's non-strict z.object strips the new fields.",
+        "Truth (hirehop Constitution I.1): the summary is verified like the bullets; skills.added holds only user-stated skills (answer-grounded skills come in #95).",
+        "LLM cost: no new model call (2 calls normal, 4 at most, one 4-minute deadline). The token increase is one summary of at most about 100 words in generate, verify and repair. dailyCallQuota and the cost cap are unchanged.",
+        "The generate and repair prompts change, so the golden 'tailoring-generate' and 'tailoring-repair' entries break by design. The lead re-captures them.",
+        "The eval criterion is a paid run: it needs the cost card, and the Builder must never run it as a gate. ANTHROPIC_API_KEY and the four TAILORMYRESUME_AI_*_PRICE_* vars are needed locally (missing authority if absent).",
+        "Additive response and request fields; the app on main ignores them.",
+        "Update the pipeline bullet in docs/architecture.md (rule 27)."
+      ],
+      "state": ["tailormyresume_tailorings.result"],
+      "files": ["src/apps/tailormyresume/tailoring-pipeline.ts", "src/apps/tailormyresume/facts.ts", "src/apps/tailormyresume/fact-text.ts (only if summary must be excluded from or added to prompts)", "test/tailormyresume-tailorings.test.ts", "scripts/tailormyresume-eval/**", "test/fixtures/tailormyresume-eval/**", "test/fixtures/tailormyresume-prompts-main.json (lead only)", "docs/architecture.md"],
+      "overlaps": {"files": {"tailoring-pipeline.ts": [95], "facts.ts": [95], "scripts/tailormyresume-eval/**": [95, 97], "test/tailormyresume-tailorings.test.ts": [87, 90, 95]}, "functions": {"tailoring-pipeline.ts::runTailoringPipeline": [95], "facts.ts::profileFactsSchema": [95]}, "state": {"tailormyresume_tailorings.result": [95]}},
+      "depends_on": ["BengaluruBuilders/tailor-my-resume#285 (open; issue body is the spec)"],
+      "scale": {"material": true, "note": "The cost per tailoring rises by the summary tokens on 2 to 4 existing calls; there are no new calls. The Builder states before and after token bounds from maxOutputTokens, not invented numbers. The eval report gives cost per item."}
+    },
+    {
+      "number": 95,
+      "title": "feat(tailormyresume): the quick-question answer as a tailoring fact source",
+      "status": "ready",
+      "tier": "standard",
+      "criteria": [
+        {"id": "c1", "text": "Given POST /tailorings with answer {requirementId, choice, detail}, When requirementId is not one of job.requirements ids, choice is outside YES_REGULARLY|A_FEW_TIMES|NOT_YET|SKIPPED, or detail is over 400 characters, Then it answers 400 INVALID_INPUT. answer null or omitted behaves exactly as before."},
+        {"id": "c2", "text": "Given choice YES_REGULARLY or A_FEW_TIMES, When the job runs, Then the server adds a fact entry with id ans-<requirementId> and source USER_ANSWER. When detail is non-empty it adds one bullet ans-<requirementId>-b1 whose text is the detail. NOT_YET and SKIPPED add no fact."},
+        {"id": "c3", "text": "Given the prototype answer whose detail names no employer, When the job SUCCEEDS, Then result.summary may cite ans-..., and no bullet of the Infosys entry (or any other entry) cites ans-<requirementId>-b1 or ans-<requirementId>. A draft that does is dropped or reverted by the deterministic checks."},
+        {"id": "c4", "text": "Given an answer whose detail names \"Infosys\" (the organization or title of entry E, case-insensitive), When the job SUCCEEDS, Then a bullet of E may cite ans-<requirementId>-b1, and it still passes the number and verifier checks."},
+        {"id": "c5", "text": "Given a client-sent profile entry or bullet with source USER_ANSWER or an id starting with \"ans-\", When POST /tailorings is posted, Then it answers 400 INVALID_INPUT, so only the server can create answer provenance."},
+        {"id": "c6", "text": "Given skills.added from #94, When an answer is YES or A_FEW with detail, Then added may also hold a skill named verbatim in the detail; nothing else is added."},
+        {"id": "c7", "text": "Given a finished job, When the row is stored, Then the answer and detail are not persisted beyond the existing result (sourceIds only), and the 24 h purge is unchanged."},
+        {"id": "c8", "text": "Given the eval set plus answer cases, When `npm run eval:tailormyresume` runs (paid; after the cost card), Then it reports 0 critical fabrications."},
+        {"id": "c9", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": ["Storing the answer after the job ends (24 h rule stays)", "Several answers per request", "Letting an answer create an employer claim when the detail does not name the employer (hirehop D6, strict I.1)", "Billing changes (#90 owns the credit)"],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-tailorings.test.ts"],
+      "root_cause": null,
+      "callers": [
+        "tailoring.ts::tailoringRequestSchema is used by tailoring.ts::start, after #90's change to section.",
+        "tailoring-pipeline.ts::runTailoringPipeline, ::indexSources, ::passesChecks and ::verifyDrafts are called by tailoring.ts::runJob and the eval runner (seeded set). The isKept rule (sources from the draft's own entry) needs the answer exception. passesChecks callers in the eval runner must keep their semantics.",
+        "facts.ts entry source enum is used by profileFactsSchema (analyses, tailorings, prep and cover until #97, eval fixtures). USER_ANSWER is server-only."
+      ],
+      "constraints": [
+        "Truth rule (hirehop PLAN 2.3, D6, Constitution I.1): an answer bullet may support a bullet of entry E only when the detail names E's organization or title. Otherwise only the summary and skills may cite it. Enforce this in deterministic checks, not only in the prompt.",
+        "Persisted state: the result jsonb gains ans-* sourceIds only; the request body (answer and detail) lives in memory only (docs/architecture.md, tailoring jobs).",
+        "LLM cost: the input grows by at most 400 characters; no new model call.",
+        "The prompts change, so the golden tailoring fixture is re-captured by the lead.",
+        "The eval criterion is paid: it needs the cost card.",
+        "Rule 8: never log the detail. Rule 3: no user id from the body.",
+        "Request field is additive and optional; the app on main sends no answer.",
+        "Update the tailoring bullets in docs/architecture.md (rule 27)."
+      ],
+      "state": ["tailormyresume_tailorings.result"],
+      "files": ["src/apps/tailormyresume/tailoring.ts (request schema only)", "src/apps/tailormyresume/tailoring-pipeline.ts", "src/apps/tailormyresume/facts.ts", "test/tailormyresume-tailorings.test.ts", "test/fixtures/tailormyresume-eval/**", "scripts/tailormyresume-eval/**", "test/fixtures/tailormyresume-prompts-main.json (lead only)", "docs/architecture.md"],
+      "overlaps": {"files": {"tailoring.ts": [90], "tailoring-pipeline.ts": [94], "facts.ts": [94], "scripts/tailormyresume-eval/**": [94, 97]}, "functions": {"tailoring.ts::tailoringRequestSchema": [90], "tailoring-pipeline.ts::runTailoringPipeline": [94]}, "state": {"tailormyresume_tailorings.result": [94]}},
+      "depends_on": ["#90", "#94", "#92"],
+      "scale": {"material": false, "note": "At most one extra fact entry and one bullet per job; a string match of detail against entry names, linear in the number of entries (40 at most)."}
+    },
+    {
+      "number": 96,
+      "title": "feat(tailormyresume): import a job post from a link",
+      "status": "ready",
+      "tier": "sensitive",
+      "criteria": [
+        {"id": "c1", "text": "Given POST /v1/tailormyresume/job-imports with {url}, When url is not https, is longer than 2,048 characters, carries userinfo (user:pass@), uses a port other than 443, or the body has extra fields, Then it answers 400 INVALID_INPUT and makes no DNS lookup or fetch."},
+        {"id": "c2", "text": "Given a host that resolves (any A or AAAA record) to a refused address, When imported, Then it answers 422 JOB_IMPORT_FAILED with no connection made. Each class is tested: 127.0.0.0/8, 10/8, 172.16/12, 192.168/16, 169.254/16 (including 169.254.169.254), 100.64/10, 0.0.0.0/8, multicast and broadcast, ::1, fe80::/10, fc00::/7 (covers Fly 6PN fdaa::/16), ::ffff:a.b.c.d mapped forms of refused IPv4, 64:ff9b::/96 and an IP-literal host. Names localhost, *.internal and *.flycast are refused."},
+        {"id": "c3", "text": "Given a public host that redirects to http://169.254.169.254/ (or to any refused address, or to a non-https URL), When imported, Then it answers 422 JOB_IMPORT_FAILED. Every hop is re-validated, more than 3 redirects is 422, and the connection goes to the vetted address (no second DNS lookup between check and connect)."},
+        {"id": "c4", "text": "Given a response over 2 MB (counted after decompression), slower than 8 s in total across all hops, or with a Content-Type other than text/html, When imported, Then the fetch is aborted and the route answers 422 JOB_IMPORT_FAILED."},
+        {"id": "c5", "text": "Given a fixture careers page served by a local test server (through an injected resolver or fetcher), When imported, Then it answers 200 {jobText, sourceHost}. jobText is the visible text with script, style and other non-visible elements removed and whitespace collapsed, cut to 20,000 characters, and sourceHost is the final host. Visible text under 200 characters is 422 JOB_IMPORT_FAILED."},
+        {"id": "c6", "text": "Given a user who has made 20 import requests in the TailorMyResume day, When the 21st arrives, Then it answers 429 ALLOWANCE_EXHAUSTED with no fetch. Every accepted request counts, failed fetches included (conservative against probing), using claims kind JOB_IMPORT."},
+        {"id": "c7", "text": "Given the logs of every test, When an import succeeds or fails, Then no log line contains the URL path, query or the body; at most the event, the host class and the failure class appear."},
+        {"id": "c8", "text": "Given the route, When called without a token, with an invalid token, with another registered app's token, or as a deleted user, Then it answers 401, 401, 404 and 409 respectively."},
+        {"id": "c9", "text": "Given the claims migration, When the schema-drift and migration tests run, Then tailormyresume_usage_claims_kind_check allows ANALYSIS, FREE_TAILORING and JOB_IMPORT, and old rows are unaffected."},
+        {"id": "c10", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": ["Logged-in pages (the copy tells the user to paste instead)", "JavaScript rendering or a headless browser", "Any new dependency (no HTML parser, no undici import)", "Running an analysis on the imported text (the app posts it to /analyses)", "Storing the URL or the page"],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-job-imports.test.ts test/schema-drift.test.ts test/tailormyresume-wallet.test.ts"],
+      "root_cause": null,
+      "callers": ["new route mounted in routes.ts tailormyresumeRoutes", "claims.ts::claimAllowanceIn and ::claimRun (shared with analyses) are reused with kind JOB_IMPORT; schema.ts claimKinds gains JOB_IMPORT, which wallet.ts::liveClaimCount and purge.ts read (purge deletes JOB_IMPORT claims after 30 days like ANALYSIS)", "core/errors.ts JOB_IMPORT_FAILED (added by #91)"],
+      "constraints": [
+        "Tier sensitive: the claims kind check needs a migration (drizzle path), and the route is a server-side fetch of a user URL (SSRF, PLAN R4). The scout raises it to a security-mandate Reviewer B, as R4 recommends.",
+        "Migration: drizzle-kit regenerates the claims kind check as DROP CONSTRAINT plus ADD CONSTRAINT (in JOB_IMPORT added). It widens the constraint, and the old image never writes JOB_IMPORT. ADD CHECK scans the table under ACCESS EXCLUSIVE; the table is small and purged to 30 days. Reversal is a later migration that first deletes JOB_IMPORT rows, then narrows the check (a data step; flag in the PR). It must be generated after #90's migration (migration chain).",
+        "SSRF implementation without a new dependency (rule 23): use node:https request with a custom `lookup` that resolves with node:dns, rejects any refused address, and returns the vetted address, so the socket connects to the checked IP (no DNS-rebinding window). Global fetch cannot take a custom lookup without importing undici. Set `servername` and the Host header to the original host for TLS.",
+        "Bounds: 8 s overall deadline (AbortSignal across hops), 3 redirects, 2 MB decoded cap (send Accept-Encoding: identity, or count decompressed bytes), text/html only. Strip tags with linear-time code; no regex with nested quantifiers (ReDoS on 2 MB input).",
+        "Fly egress: imports leave from the sin machine; 20 per user per day times 2 MB bounds the bandwidth. Memory: the 512 MB machine holds at most (concurrent imports x 2 MB raw plus the text copy). The Planner states the concurrency bound; add a small in-process cap like maxRunningTailorings if needed, marked with a ponytail ceiling note.",
+        "Rule 8 plus the issue: never log the URL path, query or the body. Rule 19: Zod on the body. Rule 3: user from the token only.",
+        "No LLM call, so no ai_usage row; the cost is network only.",
+        "Compliance: the fetched site is not a data processor (no user data is sent beyond the URL request). #100 documents the fetch rule.",
+        "Update docs/architecture.md with a job-imports bullet in the same PR (rule 27)."
+      ],
+      "state": ["tailormyresume_usage_claims kind JOB_IMPORT and its kind check constraint", "drizzle migration chain"],
+      "files": ["src/apps/tailormyresume/job-imports.ts (new)", "src/apps/tailormyresume/routes.ts", "src/apps/tailormyresume/schema.ts", "drizzle/00NN_*.sql", "drizzle/meta/**", "test/tailormyresume-job-imports.test.ts (new)", "docs/architecture.md"],
+      "overlaps": {"files": {"routes.ts": [87, 89, 90, 97], "schema.ts": [89, 90], "drizzle/meta/**": [89, 90], "src/core/errors.ts": [91]}, "state": {"drizzle migration chain": [89, 90]}},
+      "depends_on": ["#91", "#87"],
+      "scale": {"material": true, "note": "Per request: up to 4 DNS lookups and 4 HTTPS connections, 8 s at most, 2 MB at most buffered, plus linear text extraction. Per user: 20 per day. The Planner gives the peak-memory bound for the 512 MB machine and the concurrency limit it relies on."}
+    },
+    {
+      "number": 97,
+      "title": "chore(tailormyresume): delete the prep-questions and cover-letters routes",
+      "status": "ready",
+      "tier": "standard",
+      "criteria": [
+        {"id": "c1", "text": "Given the change, When POST /v1/tailormyresume/prep-questions or /cover-letters is called with a valid token, Then it answers 404 NOT_FOUND and makes no model call."},
+        {"id": "c2", "text": "Given the source tree, When `git grep -n 'prep-questions\\|cover-letters\\|prepQuestionsRoute\\|coverLettersRoute' src scripts` runs, Then nothing matches; src/apps/tailormyresume/prep-questions.ts and cover-letters.ts are deleted, with their prompts and schemas."},
+        {"id": "c3", "text": "Given reportItemKinds, When an old content report of kind COVER_LETTER or PREP_QUESTION exists, Then GET /me/export still returns it and POST /content-reports still accepts those kinds (the kinds and check constraint stay)."},
+        {"id": "c4", "text": "Given the eval runner, When `npm run typecheck` runs, Then scripts/tailormyresume-eval no longer calls the deleted routes or their metrics, and test/tailormyresume-eval-metrics.test.ts passes."},
+        {"id": "c5", "text": "Given pregate, When it flags TEST_DELETED for test/tailormyresume-prep-questions.test.ts and test/tailormyresume-cover-letters.test.ts, Then the PR body lists each under '## Pre-review gate' with the reason 'route deleted by #97'."},
+        {"id": "c6", "text": "Given the change, When `npm run check` runs, Then it passes."}
+      ],
+      "non_goals": ["The content-reports route or its item kinds", "Deleting factTexts if the eval seeded-set verifier still uses it", "The golden fixture entries beyond removing prep and cover keys (lead edit)"],
+      "gates": ["npm ci --ignore-scripts", "npm run check", "node --test test/tailormyresume-reports-export.test.ts test/tailormyresume-eval-metrics.test.ts"],
+      "root_cause": null,
+      "callers": ["routes.ts mounts prepQuestionsRoute and coverLettersRoute", "scripts/tailormyresume-eval/run.ts calls POST /cover-letters and /prep-questions and imports prepInjectionReasons from metrics.ts", "fact-text.ts::factTexts is used by cover-letters.ts and scripts/tailormyresume-eval/run.ts (seeded set), so it stays", "test/tailormyresume-ai-harness.ts commonRouteTests is used by the deleted tests and by the analyses and resume-parse tests, so it stays"],
+      "constraints": [
+        "Blocked until BengaluruBuilders/tailor-my-resume#260 (app stops calling these routes) is merged. Otherwise the app on main gets 404 on staging.",
+        "Removing a route is a rule 22-class break, accepted because the app no longer calls it and there is no public release. The issue is the explicit scope.",
+        "Coverage removal of deleted code is not lost coverage. CI pregate fails on TEST_DELETED unless the PR body justifies it. Deleting the golden prep and cover keys is a lead edit.",
+        "Reduces LLM cost surface (prep and cover used up to 4 calls each).",
+        "Update docs/architecture.md (remove the prep and cover bullets) in the same PR (rule 27)."
+      ],
+      "state": [],
+      "files": ["src/apps/tailormyresume/prep-questions.ts", "src/apps/tailormyresume/cover-letters.ts", "src/apps/tailormyresume/routes.ts", "scripts/tailormyresume-eval/**", "test/tailormyresume-prep-questions.test.ts", "test/tailormyresume-cover-letters.test.ts", "test/fixtures/tailormyresume-prompts-main.json (lead only)", "docs/architecture.md"],
+      "overlaps": {"files": {"routes.ts": [87, 89, 90, 96], "scripts/tailormyresume-eval/**": [94, 95], "test/fixtures/tailormyresume-prompts-main.json": [91, 92, 94, 95]}, "state": {}},
+      "depends_on": ["#96 (routes.ts order)", "BengaluruBuilders/tailor-my-resume#260"],
+      "scale": {"material": false, "note": "Deletion only."}
+    },
+    {
+      "number": 100,
+      "title": "docs: TailorMyResume section of architecture.md and compliance.md for contract v2",
+      "status": "ready",
+      "tier": "docs",
+      "criteria": [
+        {"id": "c1", "text": "Given the merged code of #87-#97, When docs/architecture.md § TailorMyResume is read, Then it lists every mounted TMR route and its status codes (wallet with credits and the deprecated fields, GET /credits, packs 5/15/40, tailorings with the per-success credit and reservation, analyses with reason, location, question and 422, resume parse fields, job imports with the fetch rule, the unlock compatibility route), and no removed route (consent gate, prep-questions, cover-letters, daily free tailoring)."},
+        {"id": "c2", "text": "Given docs/compliance.md, When read, Then it states: the AI routes no longer require consent and the 18+ check is gone (owner decision, PRD 6.1.2), with the withdrawal duty rewritten to match; ledger rows (kind, amount, applicationId, productId) are kept until account deletion and appear in the export; job imports fetch a user URL server-side, keep nothing and log no path."},
+        {"id": "c3", "text": "Given each route named in the docs, When checked against src/apps/tailormyresume/routes.ts at the docs PR's base, Then names, methods and codes match."}
+      ],
+      "non_goals": ["Code", "docs/constitution.md (owner-only)", "The hirehop contract doc (tailor-my-resume#285)"],
+      "gates": ["npm run format:check"],
+      "root_cause": null,
+      "callers": [],
+      "constraints": [
+        "Changing the rules in docs/architecture.md (the Rules list) needs explicit authorization (AGENTS.md). Edit only the TailorMyResume, Deploy and compliance sections. Rule 27 means earlier PRs already updated their own bullets; this is the consistency pass.",
+        "Markdown is outside format enforcement; keep prose plain and factual. Legal statements cite the owner decision, not legal advice.",
+        "Record the DPDP section 9 (children's data) and consent-withdrawal implications of #87 as a launch-checklist item for the owner."
+      ],
+      "state": [],
+      "files": ["docs/architecture.md", "docs/compliance.md"],
+      "overlaps": {"files": {"docs/architecture.md": "all"}, "state": {}},
+      "depends_on": ["#87", "#90", "#95", "#93", "#96", "#97"],
+      "scale": {"material": false, "note": "Docs only."}
+    }
+  ]
+}

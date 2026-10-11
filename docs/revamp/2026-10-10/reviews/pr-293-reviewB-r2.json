@@ -1,0 +1,39 @@
+{
+  "head_sha": "00e99f41a71ff3d9c451917fc72c0b9e1daa3add",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "285-c1", "status": "met", "evidence": "Sections 4.2-4.11 cover every PLAN section 4 route with request, response and error tables (GET routes give their errors inline). 4.10 (lines 769-779) now adds export.credits (every ledger row, oldest first, no cap, #89 c8) and keeps `unlocks` and the deprecated wallet fields. Round-1 finding 2 is resolved. A low field-name drift on `unlocks` is finding 3."},
+    {"id": "285-c2", "status": "met", "evidence": "D5 and D9 are marked dropped with reasons (lines 21, 25). D4 lists credits, ledger, daily analyses, daily job imports and purchases. D12 keeps its rule. Lines 30-41 list the compatibility fields per revamp D12."},
+    {"id": "285-c3", "status": "met", "evidence": "4.4 credit rules 1-7 and 4.6 ledger kinds and packs _5/_15/_40 are unchanged from round 1. `balance` (line 595) now comes from the wallet counters, per #89 c5 and the scout non-goal. Round-1 finding 6 is resolved."},
+    {"id": "285-c4", "status": "partial", "evidence": "Round-1 findings 3 and 4 are resolved. Section 3 (lines 138-141) and check 2 (lines 483-485) now accept server-issued `ans-` ids. skills.added (line 472) is limited to YES_REGULARLY and A_FEW_TIMES, and a NOT_YET or SKIPPED detail is ignored (line 505). Partial because the fix's fallback fact text (line 504) turns JD requirement text into a candidate fact (finding 1). The co-citation clause on line 507 also narrows PLAN 2.3 (finding 2)."},
+    {"id": "285-c5", "status": "met", "evidence": "4.12 (line 793) now says that `unlock` and `section` stay as compatibility routes until the follow-up after app #287 (D12). The noticeVersion row says the setting stays (D15). The content-report kinds stay per #97 (line 712). Round-1 findings 1, 7 and 8 are resolved."},
+    {"id": "285-c6", "status": "met", "evidence": "The PR body lists apps-backend #87-#100, and each title matches `gh issue view -R BengaluruBuilders/apps-backend`."},
+    {"id": "285-c7", "status": "met", "evidence": "`git diff --stat e387b855 00e99f41` changes only docs/BACKEND_CONTRACT.md. On head 00e99f41, 'Constitution policy', 'delivery-gates-pregate' and 'Build, lint, and unit tests' succeed. Round-1 finding 5 is resolved: DECISIONS D16 holds #293 until #255 is on main, and the PR body states 'Merge after #255'."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 504,
+      "rule": "Constitution I.1 (only facts the candidate confirmed); PLAN 2.3; apps-backend #95 c8 (0 critical fabrications)",
+      "trigger": "Take requirement req-4 'Presented quarterly results to the board for 3+ years' and answer {choice: A_FEW_TIMES, detail: null}. Line 504 makes the text of fact ans-req-4 the requirement text. The summary 'Presented quarterly results to the board for 3+ years' then cites ans-req-4. Check 2 passes, because '3' is in a cited source, and the verifier sees a fact that supports every word. The candidate only said 'a few times', and the choice is not in the fact text. The JD's wording, scope and numbers become a candidate claim. The fix added this fallback. #95 c2 leaves the text open.",
+      "title": "Fallback fact text makes the JD requirement text a confirmed candidate fact"
+    },
+    {
+      "severity": "low",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 507,
+      "rule": "PLAN 2.3 truth rule; apps-backend #95 c4; contract 4.4 answer rule 4",
+      "trigger": "Take an answer with detail 'Presented the variance report to the CFO at Infosys' and an Infosys bullet {entryId: INF, sourceIds: [ans-req-4-b1]}. This is the 'Added' Infosys bullet that PLAN 2.3 allows when the detail names the employer. Line 507 says that the `ans-` source 'sits next to at least one source bullet of E', so the server drops the bullet. An entry E with no bullets can never take an answer bullet. Neither PLAN 2.3 nor #95 c4 has this co-citation condition. Rule 4 (line 514) still implies that a named entry gets a new bullet. The phrase 'sits next to' can also be read as position, so the device FabricationGuard (W2-G) and #95 may implement different rules.",
+      "title": "Answer rule 2 adds a co-citation condition that PLAN 2.3 and #95 lack"
+    },
+    {
+      "severity": "low",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 770,
+      "rule": "Run decision D12 (keep v1 shapes until app #287); backend rule 22 (no response field rename)",
+      "trigger": "The v2 export lists `unlocks` as {applicationId, creditKind, createdAt}. The v1 contract (e387b855 line 556) and apps-backend main export.ts (lines 38-40, 77-79) return `unlockedAt`. A #89 builder who follows this contract renames an existing export field. The app treats the field as opaque, so nothing breaks today, but the contract and the server disagree.",
+      "title": "Export `unlocks` renames `unlockedAt` to `createdAt`"
+    }
+  ]
+}

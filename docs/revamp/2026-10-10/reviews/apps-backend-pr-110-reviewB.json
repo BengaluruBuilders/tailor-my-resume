@@ -1,0 +1,71 @@
+{
+ "head_sha": "9ac6bfc2df9e3b63aa3310dce7ba5dfb78f110b0",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "c1",
+   "status": "met",
+   "evidence": "tailoring.ts adds answerSchema.nullish() plus a superRefine on requirementId; tailorings tests 'answer with unknown requirementId, bad choice or 401-char detail is 400' (with a valid control) and 'answer null or omitted behaves as before', which now resets and grants per iteration (Reviewer A L1 fixed). The no-answer generate/repair prompts and payload are byte-identical (answerClause and answer payload are only added when answerEntry exists); the golden fixture is unchanged."
+  },
+  {
+   "id": "c2",
+   "status": "met",
+   "evidence": "answerFact builds ans-<rid> (USER_ANSWER, 'Your answer', no organization) and ans-<rid>-b1 = trimmed detail only when answerBlank is false; NOT_YET/SKIPPED/null give undefined. The fact text is the user's detail, never requirement.text. Tests in answer-facts and tailorings cover YES/A_FEW, placeholders and NOT_YET/SKIPPED."
+  },
+  {
+   "id": "c3",
+   "status": "met",
+   "evidence": "passesChecks rejects ans-<rid>-b1 for an entry not in namedEntryIds, and isKept drops a first-pass draft citing only it; prototype test asserts the citing draft is REVERTED and the summary PASSED with ans-R1-b1. summaryPasses runs on factProfile, where ans-<rid> and its bullet form their own entry group (D36/D37), so an answer clause cannot recombine with a resume entry in one sentence."
+  },
+  {
+   "id": "c4",
+   "status": "partial",
+   "evidence": "Infosys-naming test: PASSED, sourceIds include ans-R1-b1, verifier prompt carries the detail; a requirement-only '5 years' is REVERTED with zero verifier calls (sourcesOf never includes requirement text). But a repaired candidate citing only ans-<rid>-b1 bypasses isKept (finding 1), against the contract rule that the ans- source sits next to a source bullet of E."
+  },
+  {
+   "id": "c5",
+   "status": "met",
+   "evidence": "profileFactsSchema superRefine rejects source USER_ANSWER and any entry, bullet or summary id starting 'ans-' for every route sharing the schema; tests on POST /tailorings and POST /analyses give 400. The server entry is appended after parsing and never re-parsed."
+  },
+  {
+   "id": "c6",
+   "status": "met",
+   "evidence": "answerSkills: detail-stated keywords (non-blank detail) or SKILL/TOOL keywords stated in requirement.text (D38/D39/D41); resolveSkills only widens the allowlist. Coder pass 2 containsToken blocks + # & / - and letter-dot joins, case-sensitive at <=2 chars; I ran it: 'C++, R&D, go-to-market' with [C,R,Go] -> [], 'C#'/'Node.js' -> [], 'Know C, R and Go.' -> [C,R,Go], matching D42. Reviewer A M1 disposition accepted. The server has no SkillLexicon, so it is stricter than the device (never looser)."
+  },
+  {
+   "id": "c7",
+   "status": "met",
+   "evidence": "The detail lives only in the parsed request and model payload; runStructuredCall passes input to generateObject and settles ai_usage with tokens and cost only; no log call in answer-facts.ts or the changed tailoring code; stored-row test asserts no detail text and ans- sourceIds. The 24 h purge is untouched."
+  },
+  {
+   "id": "c8",
+   "status": "unmet",
+   "evidence": "No eval answer fixtures and no paid eval:tailormyresume run, so '0 critical fabrications' is not demonstrated. The PR body states this honestly (no spend without owner approval, #106) and lists it under Follow-ups; no test makes a paid call."
+  },
+  {
+   "id": "c9",
+   "status": "partial",
+   "evidence": "Locally test/tailormyresume-answer-facts.test.ts passes 13/13; DB-backed suites need TEST_DATABASE_URL and CI Validation was still queued at this head. Lead commit 628129b (analysesLeftToday 2 -> 19) is correct per D31: dailyAnalyses is 20 in config.ts, and the 422 run releases its claim, so one counted analysis leaves 19 (18 would mean the claim leaked, so the assertion still guards the release). architecture.md bullet added but stale (finding 2)."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+   "line": 201,
+   "rule": "Issue 95 c4 / lane plan c4 ('still requires at least one own-entry source via isKept') and BACKEND_CONTRACT 4.4 rule 2: the ans- source sits next to at least one source bullet of E",
+   "trigger": "Answer detail 'At Infosys I presented dashboards to senior stakeholders'; generate returns an Infosys draft citing [EXP-01-2] that the verifier rejects; repair returns that bullet citing only ['ans-R1-b1']. Repaired candidates are never filtered by isKept, and passesChecks accepts a draft whose every source is the named answer bullet (I ran passesChecks on such a draft: true). The result gets a REPAIRED Infosys bullet resting only on the answer, and EXP-01-2 is added back as UNCHANGED, so the entry grows a bullet with no resume source. The first pass drops the same draft, so the rule depends on which call produced it.",
+   "title": "A repaired bullet may cite only the answer bullet; isKept is skipped on the repair path",
+   "proof": "tailorings test: infosysDetail answer, generatorScript [bullets(draft('EXP-01',['EXP-01-2'],'Built a Tableau dashboard.')), bullets(draft('EXP-01',['ans-R1-b1'],'Presented dashboards to senior stakeholders.'))], verifierScript [verdicts(false), verdicts(true)]; expect no bullet whose sourceIds are all ans- ids. Fails today. Fix once in passesChecks: also require sourceIds.some(id => bulletById.get(id)?.entryId === draft.entryId)."
+  },
+  {
+   "severity": "low",
+   "file": "docs/architecture.md",
+   "line": 286,
+   "rule": "Repo rule 27: architecture notes match the code",
+   "trigger": "The new bullet says the detail names E's organization or title as a 'case-insensitive substring'; after 9ac6bfc entriesNamedIn matches a whole token not joined by + # & / - or letter-dot, and names of 3 characters or fewer in all caps (EY, IBM) match case-sensitively, so 'They' no longer names EY and 'at ey' does not either.",
+   "title": "Architecture note still describes entry naming as a case-insensitive substring",
+   "proof": "None (docs); compare with entriesNamedIn in src/apps/tailormyresume/answer-facts.ts and its tests 'entriesNamedIn matches the organisation as a whole word'."
+  }
+ ]
+}

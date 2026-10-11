@@ -1,0 +1,52 @@
+{
+ "head_sha": "d3bb6d20338f5fa197b5423a58bd2bba1a3be55c",
+ "verdict": "clean",
+ "criteria": [
+  {
+   "id": "c1",
+   "status": "met",
+   "evidence": "Unchanged since round 1 (9ac6bfc2..d3bb6d20 touches only passesChecks, the architecture bullet and one test). answerSchema validation and the null/omitted path stay as reviewed; the no-answer prompts and payload are byte-identical and the golden fixture is unchanged."
+  },
+  {
+   "id": "c2",
+   "status": "met",
+   "evidence": "answer-facts.ts is not in this diff; ans-<rid> and ans-<rid>-b1 are built from the trimmed detail only for YES/A_FEW with a non-blank detail, as reviewed in round 1."
+  },
+  {
+   "id": "c3",
+   "status": "met",
+   "evidence": "passesChecks now also requires some sourceId whose bulletById entryId equals draft.entryId. bulletById is built by indexSources(entries) from resume entries only, so ans- ids never satisfy it. First-pass drafts were already filtered by isKept, so their outcome is unchanged; summaryPasses is a separate predicate and untouched."
+  },
+  {
+   "id": "c4",
+   "status": "met",
+   "evidence": "Round-1 finding 1 fixed once in the shared predicate. I ran passesChecks at the head: own+answer true; answer-only, cross-entry, cross-entry+answer, unknown id, own+unknown, empty, a draft for entry ans-R1, and own+answer on an entry the detail does not name all false. New test 'a repaired bullet citing only ans-<rid>-b1 is REVERTED' fails on 9ac6bfc2 (applied alone in a scratch worktree with a throwaway Postgres: 37/38 pass, this one fails because the answer-only repair reaches a second verifier call) and passes at the head; it asserts REVERTED, sourceIds [EXP-01-2] and one verifier call."
+  },
+  {
+   "id": "c5",
+   "status": "met",
+   "evidence": "profileFactsSchema ans-/USER_ANSWER rejection is unchanged in this diff; its tailorings and analyses tests pass at the head."
+  },
+  {
+   "id": "c6",
+   "status": "met",
+   "evidence": "answerSkills/containsToken are unchanged in this diff; round-1 evidence (whole-token, case-sensitive at <=2 chars) stands and the answer-facts tests pass at the head."
+  },
+  {
+   "id": "c7",
+   "status": "met",
+   "evidence": "No new logging or persistence; the stored-row test (no detail text, ans- sourceIds only) passes at the head."
+  },
+  {
+   "id": "c8",
+   "status": "unmet",
+   "evidence": "Still no eval answer fixtures and no paid eval:tailormyresume run, so '0 critical fabrications' is not demonstrated. The PR body defers it pending owner approval for spend (#106); this is an owner decision, not a code defect, and no test makes a paid call."
+  },
+  {
+   "id": "c9",
+   "status": "met",
+   "evidence": "Callers of passesChecks are only verifyBatch (first and repair verify; also behind the unused export verifyDrafts) and the repair 'reason' label; nothing relied on sourceless or answer-only drafts passing. All test/tailormyresume-*.test.ts pass at the head against a local Postgres (337/337). CI at d3bb6d20: Validation, Secret scan and delivery-gates-pregate all pass. Round-1 finding 2 fixed: architecture.md now describes whole-token matching with case-sensitive all-caps names of 3 characters or fewer, matching entriesNamedIn/isShortAllCaps."
+  }
+ ],
+ "findings": []
+}

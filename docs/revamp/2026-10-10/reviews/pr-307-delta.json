@@ -1,0 +1,28 @@
+{
+ "head_sha": "0205f503308b46030d96b89e388319273d6547ce",
+ "verdict": "findings",
+ "scope": "git diff 607d1503 0205f503 (round-2 Reviewer B findings and D40)",
+ "criteria": [
+  {"id": "265-c1", "status": "met", "evidence": "The step-bar whole-word test still passes at 0 frames after setContent. The FlowRow order and the pill semantics are unchanged in this delta."},
+  {"id": "265-c2", "status": "met", "evidence": "No change to touch targets or heightIn(min). All callers (tab item, top-bar title box, step pill) use only heightIn(min), so overflow = Clip never cuts lines vertically."},
+  {"id": "265-c3", "status": "met", "evidence": "Ran a mutation against the new tests: TmrChromeText restored to 607d1503 (the onTextLayout loop). tabBarLabelsKeepWholeWordsAtFontScale2 now fails at 0 frames, so the WholeWords tests prove the first composed frame. On the head they pass. The re-recorded tab-bar font-200 baselines show 'APPLICATIONS' and 'PROFILE' on one line each, and verifyRoborazziDebug passes locally."},
+  {"id": "265-c4", "status": "met", "evidence": "Toast timing is untouched in this delta."},
+  {"id": "265-c5", "status": "met", "evidence": "The action click still dismisses before it runs the callback."},
+  {"id": "265-c6", "status": "met", "evidence": "The toast Row now carries dismiss { state.dismiss(); true }. state.dismiss() only sets current = null, so the action's onClick does not run. dismissSemanticsActionClearsToastWithoutRunningAction passes. The Row was not focusable before. The action now makes it screen-reader focusable, so TalkBack lists Dismiss in its actions menu. This matches the M3 SnackbarHost pattern."},
+  {"id": "265-c7", "status": "met", "evidence": "TmrBottomSheet `title: String` is now required. The 'Sheet' string is removed and only test callers exist."},
+  {"id": "265-c8", "status": "met", "evidence": "The resize now runs inside measure (TextAutoSize.getFontSize), so no frame is drawn while the font shrinks, also under reduced motion. Loop: size drops by a factor of 0.9 with a floor clamp and the loop exits when size reaches the floor, so it terminates. From 2.0x that is at most 7 performLayout calls. equals and hashCode cover start and floor; remember(style.fontSize, fontScale) keeps one instance per scale, and equal instances do not re-run layout. Floor case: if even the 1x floor splits a word, softWrap plus unlimited lines wrap it visibly at 1x size and nothing is clipped. Semantics text keeps the full original-case label for TalkBack."},
+  {"id": "265-c9", "status": "met", "evidence": "Only the 2 tab-bar font-200 PNGs changed. The local verifyRoborazziDebug passes all 10 chrome screenshot tests (20 baselines), so the 1x baselines are unchanged. longTopBarTitleWrapsAtOneXInsteadOfClipping passes on the head and fails against the 607d1503 TmrChromeText."},
+  {"id": "265-c10", "status": "met", "evidence": "CI on 0205f503 is all green: App, Core and Feature unit tests, Lint, Assemble, Screenshot tests, Static checks, Constitution policy, delivery-gates-pregate. The delta adds no comments and no tween( or spring( calls."}
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrChromeFontScaleChangeTest.kt",
+   "line": 49,
+   "rule": "Ponytail: one runnable check that fails when the logic breaks; the PR claims a first-frame-after-fontScale-change test",
+   "title": "TmrChromeFontScaleChangeTest guards neither the key(fontScale) fix nor the single-pass shrink",
+   "trigger": "The test asserts lineCount == 1 exactly 1 frame after the 1x to 2x change. It passes in two mutated builds: (a) key(fontScale) replaced by run {}, and (b) TmrChromeText restored to the 607d1503 onTextLayout loop. Without the key, the label is correct on frame 1 and reverts to 2 lines ('APPLICAT/IONS' at full size) from frame 2. Only the tab-bar font-200 screenshot baselines catch that, because they capture after 2 frames. Probes with key removed found no defect at a stable 2.0 over 7 frames, after width changes 374/360/374dp, or after a tab-selection change. The defect therefore only hits an existing node that gains autoSize, which happens in foundation 1.10.0-alpha04 (compose-bom-alpha 2025.09.01). So key(fontScale) is a correctly scoped workaround, not a symptom patch hiding a broader bug. It keeps no state, focus or animation inside: layout[] is remembered outside the key. Its only cost is a new text semantics id on an in-place font change, which reaches only DebugScenarioActivity, because MainActivity has no configChanges and is recreated. Fix: assert lineCount == 1 on the first frame and again after several more frames, e.g. repeat(3) { advanceTimeBy(16); waitForIdle(); check }.",
+   "proof": "Scratch copy of 0205f503. key(fontScale) replaced by run {}: TmrChromeFontScaleChangeTest passes, and a 2-frame variant fails with 'expected:<1> but was:<2>'. 607d1503 TmrChromeText: TmrChromeFontScaleChangeTest passes, while tabBarLabelsKeepWholeWordsAtFontScale2 and longTopBarTitleWrapsAtOneXInsteadOfClipping fail."
+  }
+ ]
+}

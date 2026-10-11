@@ -1,0 +1,454 @@
+{
+ "repo": "BengaluruBuilders/tailor-my-resume",
+ "wave": "W5 (app side: W5-N1 #286, W5-N2 #287)",
+ "scouted_at": "2026-10-11",
+ "base": {
+  "state": "Nothing from the run is merged (#256). App integration branch revamp/w2-all ffb0752e (D43) = w1-all + the seven W2 tips; verify-local green at that head (w2-all.md). Newer W2 tips not yet in it: #308 2599ce39, #309 b41ab2c9, #310 ceb37b4a (lexicon and designsystem only). #271 Builder runs on w2-all.",
+  "contract_doc": "PR #293 revamp/285-contract-v2 00e99f41 (base main, open): docs/BACKEND_CONTRACT.md v2, the source of truth for #286/#287.",
+  "backend_heads": {
+   "#101 packs 5/15/40": "revamp/88-credit-packs 7096cf5 (base main)",
+   "#104 ledger + GET /credits": "revamp/89-credit-ledger 42ebac3 (on #101)",
+   "#108 spend per tailoring": "revamp/90-spend-per-tailoring 59adb70 (on #104)",
+   "#109 summary + skills": "revamp/94-verified-summary f646e06 (on #108)",
+   "#110 answer as fact source": "revamp/95-answer-facts d3bb6d2 (on #109, includes #105)",
+   "#102 reasons, location, NOT_A_JOB_POST": "revamp/91-analysis-reasons 27b1cc1 (base main)",
+   "#105 quick question": "revamp/92-quick-question 2e70050 (on #102)",
+   "#103 parse fields": "revamp/93-parse-fields fafb425 (base main)",
+   "#111 job imports": "revamp/96-job-link-import 3031e3e (on #102)"
+  }
+ },
+ "sources": [
+  "gh issue view 286, 287 (no comments); gh pr view 293 (files: docs/BACKEND_CONTRACT.md); gh pr list --repo BengaluruBuilders/apps-backend (open #101-#111 bodies; the GitHub API rate limit was hit after the bodies were saved)",
+  "docs/BACKEND_CONTRACT.md at origin/revamp/285-contract-v2 (all sections)",
+  "docs/revamp/2026-10-10/PLAN.md sections 0, 4 (C1-C17, 4.1), 5 (W5 lanes, ordered table), 6.1-6.6; DECISIONS.md D1-D47; GOAL.md; PROGRESS.md handoff and 03:06-05:08 log; w2-all.md",
+  "docs/CONSTITUTION.md Articles I-V at origin/revamp/w2-all; AGENTS.md flavours; scout/app-w3w4.json (#272, #276, #277, #284 contracts)",
+  "Code at origin/revamp/w2-all via git show: core/network (TailorMyResumeApi, ApiError, ApiCall, TailorMyResumeHttp, RequestInterceptors, NetworkModule, dto/*, mapper/Mappers), app/src/prod ai/* and billing/* and di/*, app/src/testProd file list, core/domain (PaymentGateway, ResumeTailor, ResumeTextParser, JobAnalysisSource, AiFailure, TailorResumeUseCase, TailoringCreditSpend, ApplicationPack, CreditSpend, PurchaseEntitlement, PurchaseResult, PurchaseRecord, MockPackCatalogue), core/data CreditsRepository + OfflineFirstCreditsRepository + DataModule, core/model (CandidateProfile, GapAnalysis, JobDescription, JobApplication, TailoredResume, ProfileEntry, CreditLedgerEntry), core/database CreditLedgerEntity, app/build.gradle.kts test deps, gradle/libs.versions.toml",
+  "apps-backend code via git show at origin/revamp/95-answer-facts (analyses.ts, tailoring.ts, tailoring-pipeline.ts, facts.ts, answer-facts.ts, wallet.ts, ledger.ts, routes.ts, config.ts, schema.ts) and origin/revamp/96-job-link-import (job-imports.ts, routes.ts)",
+  "~/.claude/skills/ship-queue SKILL.md, scripts/validate.py, tiers.json; example scout/app-w3w4.json"
+ ],
+ "contract_deltas": [
+  {
+   "id": "CD1",
+   "area": "POST /analyses and /tailorings request: Match.reason, Job.location",
+   "doc": "Contract 3: the server ignores location and reason in a request.",
+   "server": "facts.ts matchSchema is strictObject with reason: z.string().max(120).optional() (not nullable); job location z.string().max(120).nullish() (#102 27b1cc1, carried into #110).",
+   "app_impact": "A `\"reason\": null` from encodeDefaults is 400 INVALID_INPUT. #286 must omit reason (and, safest, location) from request bodies (286-c3)."
+  },
+  {
+   "id": "CD2",
+   "area": "POST /job-imports errors",
+   "doc": "Contract 4.5 lists 400 INVALID_INPUT (non-https, too long, unknown field), 422 JOB_IMPORT_FAILED, 429 ALLOWANCE_EXHAUSTED.",
+   "server": "#111 3031e3e also answers 429 RATE_LIMITED with Retry-After when 4 imports already run on the machine (no allowance used), 400 for userinfo or a non-443 port, and the core 401/403/404/409; every refusal or fetch failure is one generic 422.",
+   "app_impact": "Map RATE_LIMITED to the existing RateLimited failure (no auto retry); treat userinfo/port refusals as InvalidInput (286-c11). Doc follow-up on #285."
+  },
+  {
+   "id": "CD3",
+   "area": "Answer-derived skills and placeholder details",
+   "doc": "Contract 4.4: skills.added holds userStatedSkills or skills a YES_REGULARLY/A_FEW_TIMES answer names verbatim in its detail; a non-empty detail adds the ans-<rid>-b1 bullet.",
+   "server": "#110 d3bb6d2 (D38/D39/D41/D42): a SKILL/TOOL requirement keyword stated as a whole word in the requirement text also counts even with a blank detail; placeholder details (n/a, none, nil, no, nothing, skip, yes, idk, same as above, function words only) count as blank: no bullet, no detail skill.",
+   "app_impact": "None in the client mapping; the device AnswerFacts (#308) already follows the server rule. Doc is behind; follow-up on #285."
+  },
+  {
+   "id": "CD4",
+   "area": "USER_ANSWER source and ans- ids on POST /analyses",
+   "doc": "Contract 4.4 answer rule 3 states the 400 only for /tailorings.",
+   "server": "profileFactsSchema refine refuses USER_ANSWER entries and ans- ids on every route that takes ProfileFacts, including /analyses (#110 c5).",
+   "app_impact": "sendableFacts() already drops USER_ANSWER entries; keep the test (286-c2)."
+  },
+  {
+   "id": "CD5",
+   "area": "Tailoring result skills default",
+   "doc": "Contract 4.4: result.skills.ordered is the profile skills, each once, in job order.",
+   "server": "tailoringResultSchema skills defaults to {ordered: [], added: []} for rows stored before #109 and for a model reply without skills; summary defaults to null.",
+   "app_impact": "An empty ordered list must mean no change (286-c8), never an empty skills section."
+  },
+  {
+   "id": "CD6",
+   "area": "Quick question and location limits",
+   "doc": "Contract 4.3 gives no lengths for question text, why or location.",
+   "server": "#105 2e70050: question at most 80 characters, why at most 200, starts with Have/Has/Do/Does/Did/Are/Is/Were/Can/Could and ends with '?', worded only from requirement and job text (D25); job.location cut to 120 characters (#102).",
+   "app_impact": "UI sizing in #277 (one-line question fits 80 chars at font 2.0 at 337 dp). No client validation needed."
+  },
+  {
+   "id": "CD7",
+   "area": "Ledger rows",
+   "doc": "Contract 4.6: WELCOME +1 on first wallet read; MIGRATION one row per wallet that had credits.",
+   "server": "#104 42ebac3: WELCOME is skipped when a wallet starts with 0 credits; MIGRATION skips zero-balance wallets; created_at uses clock_timestamp() so same-transaction rows order deterministically; balance comes from the wallet counters. #104 briefly wrote a TAILORING -1 row on unlock; #108 59adb70 removed it (unlock spends nothing), merged back to back per D31.",
+   "app_impact": "Balance from wallet.credits, never the row sum (287-c9); unknown kinds skipped (287-c8)."
+  },
+  {
+   "id": "CD8",
+   "area": "Unknown enum values in responses",
+   "doc": "Contract 2: a response can get new fields; the app ignores unknown fields.",
+   "server": "New values already exist across versions (ledger REFUND/MIGRATION, a FAILED job whose failureCode the app does not know).",
+   "app_impact": "kotlinx.serialization fails on an unknown enum value even with ignoreUnknownKeys; today that becomes ApiError.Unknown(0) for the whole answer. Response enums must decode leniently and fail closed per item (common constraint)."
+  },
+  {
+   "id": "CD9",
+   "area": "Deployment state",
+   "doc": "Contract 1 compatibility fields stay until the follow-up after #287 deploys.",
+   "server": "None of #101-#111 is merged or deployed (merges blocked #256; #87 parked). Staging still serves v1 shapes.",
+   "app_impact": "Test against MockWebServer only; Phase 3 needs the backend deploy first. Merge order hazard R13: the staging app breaks between backend #108 deploy and app #287."
+  }
+ ],
+ "routing": {
+  "bases": {
+   "286": "revamp/w2-all (refreshed by merge with the newer W2 tips first); branch revamp/286-contract-v2-client",
+   "287": "stacked on #286's branch; branch revamp/287-billing-v2"
+  },
+  "why": "#286 needs #270 (#308) and #268 (#305), both in w2-all, and reads #285's doc without merging it (doc-only, no shared file). #287 needs #286's TailorMyResumeApi and DTO changes and #268's CreditsRepository/credit_ledger, so it stacks on #286 (PLAN W5-N is one lane: W5-N1 -> W5-N2).",
+  "merge_order": "#293 (doc) and the W2 PRs land first; then #286, then #287. Backend: #101 -> #104 -> #108 -> #109 -> #110, and #102 -> #105, #103, #111 (D31). App #287 should deploy close to backend #108 (R13).",
+  "tiers": {
+   "286": "sensitive (raised: customer data over the network with auth headers; pass --floor sensitive)",
+   "287": "sensitive (payments; computed from billing/ paths)"
+  },
+  "overlap_pairs": [
+   "286 -> 287: same lane, stacked; both edit core/network TailorMyResumeApi.kt and the contract fixtures.",
+   "286 | 276/277 (W4-B): shared core contract (QuickQuestion, RequirementMatch.reason, GapAnalysis.question, JobDescription.location, AiFailure.NotAJobPost/JobImportFailed, JobImporter). D43 gave it to #276/#277; scout default lets the first Builder land it and the other copy byte-identical (needs_info). lane.py does not see this (different state strings) because the files overlap only under the default.",
+   "286 | 278 (W4-C): ResumeTailor signature (answer in, section out) and TailorResumeUseCase call site; #278 must base on or copy it.",
+   "287 | 284 (W4-F): PaymentGateway and CreditsRepository semantics (balance from wallet, ledger kinds, no local SPEND in prod); #284 is UI only against the demo fakes. Distinct state strings so they stay parallel; the contract is the shared_contracts block of #287.",
+   "287 | 272 (W3-A): CreditsRepository.refresh() after sign-in reads GET /wallet (+ /credits) in prod.",
+   "287 | 278: TailoringCreditSpend.forSuccess must not double-count in prod."
+  ],
+  "max_active": "2 implementation lanes (skill default; D11 allows 3 when host load is under about 12, D22/D35). #286 can run beside #271; #287 waits for the #286 PR.",
+  "lead_actions": [
+   "Refresh revamp/w2-all by merging #308 2599ce39, #309 b41ab2c9, #310 ceb37b4a, #307 0205f503 (merge --no-ff, never rebase), run verify-local, before the #286 Planner.",
+   "Decide the core contract owner (scout default: first Builder lands it with the names in #286 shared_contracts; record as a DECISIONS row).",
+   "Record the tier raise of #286 to sensitive (security review: customer data and auth headers).",
+   "Pick the #287 CreditsRepository approach (scout default: remote ledger seam in core:data, prod-bound) and the REFUND/MIGRATION device kinds (default: add both).",
+   "File doc follow-ups on #285 for contract deltas CD1-CD3, CD5, CD6 (doc only; no server change needed).",
+   "Security reviews: #286 (customer data, auth headers), #287 (money)."
+  ]
+ },
+ "needs_info": [
+  "Lead, non-blocking (#286): owner of the v2 core contract types (QuickQuestion, reason, location, NotAJobPost, JobImportFailed, JobImporter). D43 gave them to #276/#277; #286 starts first. Default: the first Builder lands them with the names in issues[0].shared_contracts; the other lane copies byte-identical.",
+  "Lead, non-blocking (#286): ResumeTailor.tailor gains answer: QuickAnswer? and loses section. Default: #286 owns the change; #278 bases on it.",
+  "Lead, non-blocking (#287): CreditsRepository prod binding. Default: remote ledger seam in OfflineFirstCreditsRepository.refresh(), prod-bound, demo no-op.",
+  "Lead copy, non-blocking (#287/#284): REFUND and MIGRATION ledger rows have no drawn label. Default: add the two device kinds; #284 labels them with plain copy ('Credits returned', 'Earlier balance'); copy is the lead's.",
+  "Owner, already filed, non-blocking for code: #288 (Play products 15/40) and apps-backend#55 (refunds) gate going live, not this code; the client degrades by hiding missing products."
+ ],
+ "issues": [
+  {
+   "number": 286,
+   "title": "feat(network): contract v2 DTOs and remote sources for parse, analysis, quick question, tailoring and link import",
+   "lane": "W5-N",
+   "status": "ready",
+   "tier": "sensitive",
+   "tier_note": "Raised from the issue's 'Security review: no' (the scout may raise, never lower). The lane sends confirmed candidate facts, the quick-question answer, resume text, JD text and job URLs over the network with the Firebase bearer token: customer data plus auth headers. Paths alone compute standard (ai/, dto/), so the floor must be passed as --floor sensitive. Routing stays in-harness sonnet (issue routing in-harness-sonnet); Reviewer B with a security mandate; the job-import client side carries the SSRF-adjacent input rule (https only).",
+   "base": "revamp/w2-all (ffb0752e). Refresh it first by merging the newer W2 tips (#308 2599ce39, #309 b41ab2c9, #310 ceb37b4a, #307 0205f503) with merge --no-ff, never rebase (D43 refresh rule); the drift is lexicon/designsystem only and touches no file of this lane. Do not merge revamp/285-contract-v2: the doc is read-only input.",
+   "depends_on": [
+    285,
+    270,
+    268
+   ],
+   "blocked_by_open_prs": [
+    "#293 (285 contract doc; read-only input, merge before #286 lands on main)",
+    "#308 (270, in w2-all)",
+    "#305 (268, in w2-all)",
+    "#256 (all merges blocked)"
+   ],
+   "parallel_with": "W3-A #271 (file-disjoint: app/src/main, feature/*); not with W4-B #276/#277 or W4-C #278 without the shared-contract rule below.",
+   "shared_contracts": {
+    "core_contract_v2_types": "Domain types the v2 shapes need and w2-all lacks: QuickQuestion(requirementId, text, why) in core:model; RequirementMatch.reason: String? = null; GapAnalysis.question: QuickQuestion? = null; JobDescription.location: String? = null; AiFailure.NotAJobPost and AiFailure.JobImportFailed; interface JobImporter { suspend fun import(url: String): ImportedJob } with ImportedJob(jobText, sourceHost) in core:domain. D43 gave them to #276/#277 (additively). Scout default (needs_info, lead): whichever lane's Builder starts first lands them additively with exactly these names and default values; the other takes the files byte-identical (D42/D47 precedent). #286 can start now; #276 waits on #271.",
+    "ResumeTailor_signature": "ResumeTailor.tailor(profile, job, gap, applicationId, section) has no answer, so the remote cannot send `answer` (TailorResumeUseCase already receives quickAnswer). Change to tailor(profile, job, gap, applicationId, answer: QuickAnswer?) and drop section (contract 4.12; section regeneration deleted in #257). Callers: TailorResumeUseCase (core/domain), OfflineResumeTailor (core/domain/offline), GuardedResumeTailor and RemoteResumeTailor (app/src/prod), demo AiBindings target, their tests. W4-C #278 consumes TailorResumeUseCase only; it must base on a branch with this change or take it byte-identical.",
+    "pending_requestId_store": "PendingTailoringIds keys 'tailoring.request.<applicationId>.<section|all>' in MockStateStore; with section gone the key becomes 'tailoring.request.<applicationId>'. Old keys from a staging install are ignored (no migration needed; they only hold UUIDs)."
+   },
+   "criteria": [
+    {
+     "id": "286-c1",
+     "text": "Given a MockWebServer parse response with profile.summary, profile.location, profile.links [LINKEDIN, PORTFOLIO, OTHER] and entries with current true (endDate null) and current false, When RemoteResumeTextParser parses it, Then the CandidateProfile has summary = the summary, city = the location, linkedinUrl = the first LINKEDIN url, portfolioUrl = the first PORTFOLIO url (OTHER ignored), a current entry has endDate 'Present' (the fixture convention, app-w3w4 needs_info), a non-current entry with endDate null keeps endDate '' (the device required-gap rule then asks), null summary/location map to '', every entry is IMPORTED and unconfirmed with FactIdAllocator ids, and droppedSensitive still reaches the caller."
+    },
+    {
+     "id": "286-c2",
+     "text": "Given a profile with a non-blank summary, When the facts payload is built for POST /analyses and POST /tailorings, Then it carries summary {id, text} with an id that matches ^[A-Za-z0-9:_.-]{1,64}$, does not start with ans-, and collides with no entry or bullet id; a blank or over-1,000-character summary is omitted; the payload never carries fullName, email, phone, headline, city or links, never a USER_ANSWER entry, never an ans- id, and userStatedSkills keeps its current rule (omitted when empty)."
+    },
+    {
+     "id": "286-c3",
+     "text": "Given the serialized JSON bodies of POST /analyses and POST /tailorings built from a GapAnalysis that holds reasons, a job location and a question, When they are inspected in a MockWebServer test, Then no match carries a 'reason' key and the job carries no 'location' key (the server's strict matchSchema rejects reason: null, contract delta 1), 'section' is absent or null, 'answer' is absent or null when there is no answer, and no other key outside contract v2 section 3/4.4 appears."
+    },
+    {
+     "id": "286-c4",
+     "text": "Given a MockWebServer analysis response with job.location, a reason on each match and a question for a GAP/PARTIAL must-have, When RemoteJobAnalysisSource analyses, Then the JobAnalysisResult has job.location, each RequirementMatch.reason, and GapAnalysis.question with requirementId, text and why; given question null, Then question is null; given a question whose requirementId is not in the job or whose requirement is MET after the device evidence filter, Then question is null."
+    },
+    {
+     "id": "286-c5",
+     "text": "Given a server match whose status the device changes (evidence ids dropped by the sendable-facts filter, MET/PARTIAL turned GAP, or a local rematch upgrade after a profile edit), When the analysis or its cached rematch is returned, Then that match's server reason is removed (null), so a reason is never shown for a status the server did not give (I.1, D21/D23)."
+    },
+    {
+     "id": "286-c6",
+     "text": "Given POST /analyses answers 422 NOT_A_JOB_POST, When the analysis runs, Then the caller gets AiException(AiFailure.NotAJobPost) (not InvalidInput, not Unavailable), nothing is cached for that JD, and no retry is made; and Given 429 ALLOWANCE_EXHAUSTED or 409 ANALYSIS_IN_PROGRESS, Then the existing AllowanceExhausted / AnalysisInProgress failures still come back with no retry."
+    },
+    {
+     "id": "286-c7",
+     "text": "Given an application with a QuickAnswer (choice YES_REGULARLY, A_FEW_TIMES, NOT_YET or SKIPPED) whose requirementId is in the job, When the tailoring starts, Then the request carries answer {requirementId, choice, detail} with a blank detail sent as null and a detail never over 400 characters; given no answer, an unknown choice string or a requirementId not in the job, Then answer is null (never a 400)."
+    },
+    {
+     "id": "286-c8",
+     "text": "Given a SUCCEEDED tailoring result with summary {text, sourceIds, verification} and skills {ordered, added}, When RemoteResumeTailor maps it, Then TailoredResume.summary and TailoredResume.skills are set (original = the profile summary and profile skills) and still pass through TailorResumeUseCase; given summary null, Then summary is null (no change); given skills.ordered empty or skills missing (rows stored before apps-backend #109), Then skills is null and the profile skills are untouched (contract delta 5); given a summary citing an id the device cannot resolve, Then the guard keeps the original summary (fail closed) and a test proves it."
+    },
+    {
+     "id": "286-c9",
+     "text": "Given POST /tailorings answers 402 NO_CREDIT, When tailoring starts, Then the caller gets AiFailure.NoCredit, the pending requestId is cleared and no poll is made; given a job that ends FAILED with any failureCode (including INTERRUPTED or a code the app does not know), Then the caller gets a failure, the requestId is cleared so the next attempt sends a new requestId (contract 4.4 rule 5), and the bullets of the old result are never shown."
+    },
+    {
+     "id": "286-c10",
+     "text": "Given a network drop or the 330 s poll give-up after a 202, When tailoring is retried for the same application, Then the same requestId is sent (the server answers 200 with the same job and charges nothing more), and the request body carries no 'section'."
+    },
+    {
+     "id": "286-c11",
+     "text": "Given RemoteJobImporter, When import(url) is called with an https URL, Then it POSTs {url} to v1/tailormyresume/job-imports and returns jobText and sourceHost; given a non-https or over-2,048-character URL, Then it fails with AiFailure.InvalidInput and no request is sent; given 422 JOB_IMPORT_FAILED, Then AiFailure.JobImportFailed; given 429 ALLOWANCE_EXHAUSTED, Then AllowanceExhausted; given 429 RATE_LIMITED with Retry-After, Then RateLimited with retryAfterSeconds and no automatic retry (contract delta 2)."
+    },
+    {
+     "id": "286-c12",
+     "text": "Given ApiError, When the body code is NOT_A_JOB_POST or JOB_IMPORT_FAILED (422), Then apiErrorOf maps them to new ApiError.NotAJobPost and ApiError.JobImportFailed, and an unknown 422 code still maps to Unknown(422); a MockWebServer test covers every new field and every new error code (issue acceptance criterion 1)."
+    },
+    {
+     "id": "286-c13",
+     "text": "Given the prod Hilt graph, When AiBindingsTest resolves the bindings, Then JobAnalysisSource, ResumeTailor and ResumeTextParser bind the guarded/remote prod classes and JobImporter binds RemoteJobImporter; and Given the demo graph, Then the demo bindings are unchanged (or gain only an offline JobImporter fake if the core contract lands here), and :app:assembleDemoDebug merges a manifest with no INTERNET permission."
+    },
+    {
+     "id": "286-c14",
+     "text": "Given the analysis and tailoring results, When they are stored by the caller, Then generationId is kept on GapAnalysis and on every TailoredBullet (contract 3 generationId, 8.1) exactly as today."
+    },
+    {
+     "id": "286-c15",
+     "text": "Given core/network/src/main and app/src/prod sources, When they are searched, Then there is no Log., Timber, println or HttpLoggingInterceptor, and no test or source writes a body, URL, token or answer detail to a log."
+    },
+    {
+     "id": "286-c16",
+     "text": "Given the branch head, When `./gradlew :app:testProdDebugUnitTest`, `./gradlew dependencyGuard` and `tools/ci/verify-local.sh` run, Then all pass and both dependencyGuard baselines are unchanged (issue acceptance criteria 2-4)."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates).",
+    "Screens and ViewModels: JobLink, Job, JobResult, QuickQuestion and Tailoring UI belong to W4 (#276, #277, #278); this lane only supplies the prod sources behind the domain interfaces.",
+    "Billing, wallet, credits ledger and packs (#287); the unlock removal is #287's.",
+    "Demo offline fakes for v2 (W6-A); the demo keeps its current offline sources.",
+    "Server-side work and the contract doc text (#285/#293, apps-backend #87-#100).",
+    "POST /me/data-export (blocked, contract 4.9) and content-report UI (R7).",
+    "A WorkManager background poll and notification for tailoring (contract 4.4 rule 7); not in the issue scope, follow-up if W4 needs it."
+   ],
+   "gates": [
+    "./gradlew :core:network:testDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew :app:testProdDebugUnitTest :app:testDemoDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew :core:domain:testDebugUnitTest :core:model:test -PwarningsAsErrors=true  # if the shared core contract or ResumeTailor change lands here; includes TailorResumeUseCaseTest and OfflineFabricationGuardTest (I.1)",
+    "./gradlew :app:lintProdRelease :app:lintDemoRelease",
+    "./gradlew assembleDemoDebug assembleProdDebug",
+    "./gradlew dependencyGuard",
+    "./gradlew spotlessCheck",
+    "BASE_REF=revamp/w2-all tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh"
+   ],
+   "root_cause": null,
+   "callers": [
+    "core/network TailorMyResumeApi: parseResume, analyse, startTailoring, tailoring (add jobImport); dto/Shared.kt ProfileFactsDto, JobDto, MatchDto are shared by analyses and tailorings requests and responses (split request vs response shapes or use @EncodeDefault(NEVER) so reason/location never encode).",
+    "core/network mapper/Mappers.kt: CandidateProfile.toFactsDto (summary added), JobDescription.toDto, JobDto.toJobDescription, RequirementMatch.toDto, TailoredBulletDto.toTailoredBullet; tests MappersTest, DtoRoundTripTest, UserAnswerFactsTest, UserStatedSkillsPayloadTest and resources/contract/*.json fixtures.",
+    "core/network ApiError.kt apiErrorOf (new codes); app/src/prod ai/AiFailureMapping.kt toAiFailure (new failures).",
+    "app/src/prod ai/RemoteResumeTextParser.kt (parse mapping), RemoteJobAnalysisSource.kt (matchesOf, rematch, cache), RemoteResumeTailor.kt (request, poll, result mapping), PendingTailoringIds.kt (key), GuardedJobAnalysisSource.kt, GuardedResumeTailor.kt (preview-mode switch).",
+    "core/domain ResumeTailor.tailor callers: TailorResumeUseCase (passes quickAnswer), OfflineResumeTailor, GuardedResumeTailor, RemoteResumeTailor; tests TailorResumeUseCaseTest, RemoteResumeTailorTest, RemoteResumeTailorRetryAfterTest, RemoteAiRoutesTest.",
+    "app/src/prod di/AiBindings.kt and app/src/testProd di/AiBindingsTest.kt; demo app/src/demo/kotlin/.../di/AiBindings.kt only if JobImporter is added here.",
+    "W4 consumers (future): JobLinkViewModel (#276) uses JobImporter and NotAJobPost; JobResult/QuickQuestion (#277) read reason, location, question; Tailoring (#278) reads summary/skills and the NoCredit failure."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent screen, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed). Undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5, R10).",
+    "I.5 / AGENTS.md flavours: candidate data leaves the device only to apps-backend, only in the prod flavour. The demo flavour keeps no INTERNET permission (only app/src/prod/AndroidManifest.xml declares it), its bindings (app/src/demo/kotlin/.../di/*Bindings.kt) and offline sources stay unchanged, and nothing from core:network or Play Billing reaches the demo classpath. Network libraries only in core:network or prodImplementation in :app. One HTTP stack (OkHttp, Retrofit, kotlinx.serialization). The consent precondition in I.5 is struck by #255 (settled list): no consent call.",
+    "Contract v2 (docs/BACKEND_CONTRACT.md on PR #293 head revamp/285-contract-v2 00e99f41) is the shape source of truth; read it with `git show origin/revamp/285-contract-v2:docs/BACKEND_CONTRACT.md`. Where the deployed server PRs differ, follow the stricter of the two and record the delta in the PR body under Decisions (see contract_deltas in this file). Never edit docs/BACKEND_CONTRACT.md in this lane; a needed doc change is a follow-up on #285.",
+    "Requests: every request keeps X-App-Id and the Firebase bearer through the existing AppIdInterceptor/AuthInterceptor (one forced refresh on 401). Server bodies are strict: an unknown or null-for-optional field is 400 INVALID_INPUT, so tailormyresumeJson() (encodeDefaults = true, explicitNulls default) must not emit keys the server schema lacks. Responses: ignoreUnknownKeys stays on; a new or unknown enum value in a response (failureCode, verification, ledger kind, link kind, editType) must not crash decoding: decode it as nullable/unknown and fail closed (drop the item or treat as a generic failure).",
+    "Timeouts and retries: keep the existing OkHttp connect 15 s / read 60 s / call 75 s (contract 2: sync AI routes stop at 45 s on the server, app waits 60 s). No automatic retry of a sync AI call (analyses count every run; ANALYSIS_IN_PROGRESS is shown, not retried). Tailoring start keeps the bounded RATE_LIMITED retry (3 attempts, Retry-After honoured up to 60 s) and polling with backoff (2 s first, max 5 s, give up at 330 s per contract 4.4 rule 5). Background reposts stay bounded (5 tries, 2-32 s). No unbounded loop.",
+    "Privacy: never log a request or response body, resume text, JD text, job URL, fact, answer detail, purchase token, order id, uid or ID token (contract 2, 4.5 rule 4). No OkHttp logging interceptor, no Log/Timber/println in core/network or app/src/prod.",
+    "Truth (I.1): the on-device FabricationGuard via TailorResumeUseCase stays the last gate after the server checks (contract D7). The prod path must not bypass or loosen it; I.1 gate tests OfflineFabricationGuardTest and TailorResumeUseCaseTest keep every assertion. When the device cannot resolve a cited id it fails closed (the original text stays). Answer facts: only the server issues ans- ids; the app never sends USER_ANSWER entries or ans- ids (sendableFacts already filters them; keep the test).",
+    "II.6: each AI step stays behind its core:domain interface with a Hilt binding per flavour; core:network depends only on core:model (no core:domain import there); prod mapping from DTO to domain lives in app/src/prod or core:network mappers to core:model types.",
+    "IV.2/IV.3: fakes only (FakePlayBilling, FixedIds, MockWebServer); no mocking library; runTest and virtual time, no Thread.sleep. MockWebServer and Robolectric are already testProdImplementation / core:network testImplementation, so no new dependency; dependencyGuard baselines (app/dependencies/demoReleaseRuntimeClasspath.txt, prodReleaseRuntimeClasspath.txt) stay unchanged (PLAN 6.4).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); worktree with `git worktree add -b <branch> <path> <base>`; no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2: cite the contract section line); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35 (2 lanes when load is over about 12); stage paths explicitly (no git add -A).",
+    "Staging: backend PRs apps-backend #101-#111 are open, not deployed (merges blocked, #256). Tests run against MockWebServer only; no call to the Fly.io app from tests. A live check belongs to Phase 3 after deploy.",
+    "Issue file set plus required extras (record each in the PR under Decisions): core/network/src/main/**/ApiError.kt (two new codes), core/network/src/test/resources/contract/*.json (v2 fixtures), and, only under the shared-contract default, core/model GapAnalysis.kt/JobDescription.kt/new QuickQuestion.kt, core/domain AiFailure.kt, ResumeTailor.kt, new JobImporter.kt, offline/OfflineResumeTailor.kt, TailorResumeUseCase.kt (call site only) and app/src/prod ai/GuardedResumeTailor.kt. Every core addition is additive with a default value so existing callers compile; enum additions to AiFailure need no exhaustive-when change outside AiFailureMapping (only prod maps it today).",
+    "Request DTO hazard (contract delta 1): with encodeDefaults = true a nullable `reason` or `location` default would be sent as null and the server answers 400. Requests must omit them. Tests assert on the raw request JSON.",
+    "Answer mapping: QuickAnswer.choice is a String holding enum names (D38: YES_REGULARLY, A_FEW_TIMES, NOT_YET); map known names, SKIPPED included, and send null for anything else. Detail: blank -> null; never more than 400 characters (the #277 input caps it; the mapper is a defence and must not split a surrogate pair). The server alone decides placeholder details and answer skills (contract delta 3); the device AnswerFacts (#308) stays the parity rule for the guard.",
+    "Job import (contract 4.5, R4): the app only validates scheme https and length 2,048 before sending; the SSRF checks are the server's (apps-backend #111). The app never fetches the URL itself and never logs it. A JOB_IMPORT_FAILED maps to the drawn 'Not a job post' state at the UI (R5), which is W4's.",
+    "Truth on skills (contract delta 5): an empty `ordered` list means no change, never an empty skills section. added must stay within userStatedSkills and answer-named skills; TailorResumeUseCase.verifiedSkills remains the device check.",
+    "Rate and cost: no client retry of POST /analyses or /job-imports (each run counts: 20 analyses and 20 imports per Asia/Kolkata day); the in-memory analysis cache (8 JDs, SHA-256 of normalised text) keeps the first result per session as contract 4.3 rule 3 requires.",
+    "Sign-out/account switch: RemoteJobAnalysisSource.clear() and PendingTailoringIds keep their existing wipe hooks (SignOutCleaner, LocalDataWiper); any new prod cache (job import) holds nothing beyond the call."
+   ],
+   "state": [
+    "prod pending tailoring requestId (MockStateStore key tailoring.request.<applicationId>, was .<section|all>)",
+    "prod in-memory analysis cache (RemoteJobAnalysisSource, 8 entries, cleared on sign-out)"
+   ],
+   "files": [
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Analysis.kt",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Resume.kt",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Tailoring.kt",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Shared.kt",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/JobImport.kt (new)",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/TailorMyResumeApi.kt",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/ApiError.kt (extra: NOT_A_JOB_POST, JOB_IMPORT_FAILED)",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/mapper/**",
+    "core/network/src/test/** (incl. resources/contract/*.json)",
+    "app/src/prod/kotlin/com/tailormyresume/app/ai/**",
+    "app/src/prod/kotlin/com/tailormyresume/app/di/AiBindings.kt",
+    "app/src/testProd/kotlin/com/tailormyresume/app/ai/**",
+    "app/src/testProd/kotlin/com/tailormyresume/app/di/AiBindingsTest.kt",
+    "shared-contract default only: core/model/src/main/kotlin/com/tailormyresume/core/model/{GapAnalysis,JobDescription,QuickQuestion}.kt; core/domain/src/main/kotlin/com/tailormyresume/core/domain/{AiFailure,ResumeTailor,JobImporter,TailorResumeUseCase}.kt; core/domain/src/main/kotlin/com/tailormyresume/core/domain/offline/OfflineResumeTailor.kt; app/src/demo/kotlin/com/tailormyresume/app/di/AiBindings.kt (JobImporter offline fake binding only)"
+   ],
+   "scale": {
+    "material": false,
+    "note": "Bounded by the contract limits: bodies up to 256 KB (40 entries, 200 bullets, 40 requirements), one question, at most 100 skills; decode on the injected IO dispatcher. Polling: at most ~70 GETs over 330 s per tailoring with 2-5 s backoff. Analysis cache 8 entries. No list grows with history."
+   }
+  },
+  {
+   "number": 287,
+   "title": "feat(billing): three packs, the credit ledger and spend-per-tailoring in the prod flavour",
+   "lane": "W5-N",
+   "status": "ready",
+   "tier": "sensitive",
+   "tier_note": "Payments (billing/ paths compute sensitive) and the issue asks for a security review (money). In-harness sonnet; Reviewer B with a security mandate; the repository has no mutation tool for Kotlin.",
+   "base": "Stack on #286's branch (W5-N1 -> W5-N2 in one lane, PLAN 5 W5); start after the #286 PR is open. #268 (#305) comes in through revamp/w2-all.",
+   "depends_on": [
+    286,
+    268
+   ],
+   "blocked_by_open_prs": [
+    "#286 (not yet opened)",
+    "#305 (268, in w2-all)",
+    "#256 (all merges blocked)"
+   ],
+   "owner_items": [
+    "#288 (W5-PLAY): application_pack_15 and application_pack_40 do not exist in Play Console yet; the 15 and 40 packs must degrade safely (hidden, never failing the paywall).",
+    "apps-backend#55 (voided/refunded purchases) is open: with the 40 pack a buy-then-refund keeps up to 40 credits. Listed in PROGRESS for the owner; the 15/40 products must not go live in Play before it lands. No code change here."
+   ],
+   "shared_contracts": {
+    "CreditsRepository_binding": "CreditsRepository is bound once in core:data DataModule to the internal OfflineFirstCreditsRepository (Room credit_ledger, refresh() = Unit). A prod implementation needs either (a) a per-flavour binding (move the @Binds out of DataModule into app demo/prod bindings and make the demo class reachable) or (b) a sync seam: OfflineFirstCreditsRepository.refresh() delegates to an injected remote ledger source that the prod flavour binds and demo binds to a no-op. Both touch core/data (outside the issue file list). Scout default: (b), because it keeps the Room flows that #284's Credits screen observes and the D34 wipe paths (DeleteAccountUseCase, DeleteMyDataUseCase clear credit_ledger) unchanged.",
+    "balance_and_spend": "#272 calls CreditsRepository.refresh() after sign-in (wallet read); #284 shows balance and ledger; #278 uses TailoringCreditSpend.forSuccess which records a local SPEND. In prod the server writes TAILORING, so the prod record path must not add a second -1 (record() no-op in prod or the sync replaces rows on refresh), and balance comes from wallet.credits, not from summing rows (GET /credits caps at 100 entries).",
+    "PaymentGateway_unlock": "PaymentGateway.unlock(applicationId) stays in core:domain for OfflineSampleDataController (demo). In prod it must make no network call (contract 4.12). TailorMyResumeApi.unlock and UnlockResponse/UnlockDto/CreditKind DTOs are removed."
+   },
+   "criteria": [
+    {
+     "id": "287-c1",
+     "text": "Given GET /packs lists application_pack_5, _15 and _40 and a fake Play client returns ProductDetails for all three, When RemotePaymentGateway.packs() runs, Then three ApplicationPacks come back in server order with credits from the server and name, priceInPaise and currency from Play (no hard-coded rupee price in prod code); and Given Play returns details only for application_pack_5 (#288 not done), Then only the 5 pack comes back and nothing throws; and Given Play returns none, Then an empty list comes back (the paywall's drawn payment-failed path), not a crash."
+    },
+    {
+     "id": "287-c2",
+     "text": "Given a signed-in uid, When purchase(packId) runs for each of the three packs, Then Play is launched with that product and obfuscatedAccountId = the lower-case hex SHA-256 of the uid (64 characters), and after Play reports PURCHASED the app POSTs {productId, purchaseToken} once and returns Completed with the entitlement from the server wallet; given a packId that GET /packs did not list, Then Play is not launched and the result is Failed."
+    },
+    {
+     "id": "287-c3",
+     "text": "Given Play reports PENDING, When purchase runs, Then the result is Pending with the pack id in pendingPackIds, nothing is POSTed, and no credit is added; and Given the server answers 409 PURCHASE_PENDING or 502 PLAY_UNAVAILABLE or the network fails, Then the result is Pending, the token is kept, and a bounded background repost (5 tries, 2-32 s) settles it later."
+    },
+    {
+     "id": "287-c4",
+     "text": "Given the server answers 400 PURCHASE_INVALID or 403 FORBIDDEN, When the purchase settles, Then the result is Failed(PaymentUnconfirmed), the pack leaves pendingPackIds, no credit is shown, and no repost loops; given Play reports a failure, Then Failed(PaymentUnavailable); given the user cancels, Then Cancelled and nothing is shown (R10). The client never grants credits on its own: every credit number comes from a server wallet."
+    },
+    {
+     "id": "287-c5",
+     "text": "Given queryPurchasesAsync returns three owned tokens (one per pack), When restore runs at app start or on an account change, Then each token is re-POSTed (the server answers 200 for a stored token and grants nothing twice), restore failures are swallowed without a crash, a token from another account (403) is dropped, and after an account switch no repost from the old account continues (generation guard kept)."
+    },
+    {
+     "id": "287-c6",
+     "text": "Given a v2 wallet {credits, freeCredits, purchasedCredits, analysesLeftToday, day, resetsAt} with or without the deprecated freeTailoringsLeftToday and unlockedApplicationIds, When WalletSource decodes it, Then decoding succeeds, the entitlement total equals `credits`, and no app code reads or sends the deprecated fields (contract 1 compatibility table)."
+    },
+    {
+     "id": "287-c7",
+     "text": "Given the prod flavour, When a tailoring, an export or a restore runs in a MockWebServer test, Then no request goes to /applications/{id}/unlock, TailorMyResumeApi has no unlock method, and prod PaymentGateway.unlock returns without a network call."
+    },
+    {
+     "id": "287-c8",
+     "text": "Given GET /credits returns entries of kinds WELCOME, PURCHASE (+5/+15/+40 with productId), TAILORING (-1 with applicationId), REFUND and MIGRATION, newest first, When the prod CreditsRepository refreshes, Then observeLedger emits them newest first with WELCOME -> FREE_GRANT, PURCHASE -> PURCHASE, TAILORING -> SPEND (D33), REFUND and MIGRATION -> the additive device kinds REFUND and MIGRATION (default, needs_info), signed amounts kept; and Given an entry with an unknown kind, Then that entry is skipped and the rest still emit."
+    },
+    {
+     "id": "287-c9",
+     "text": "Given the server wallet credits = 6 and a ledger page whose rows sum to something else (capped at 100, or a pre-ledger wallet), When the balance is observed in prod, Then it is 6 (wallet.credits), never the row sum."
+    },
+    {
+     "id": "287-c10",
+     "text": "Given a successful prod tailoring, When the credit spend is recorded, Then no local SPEND row is added on top of the server's TAILORING row (the balance drops by exactly 1 after refresh); given 402 NO_CREDIT at start or a FAILED/INTERRUPTED job, Then after refresh the balance is unchanged (contract 4.4 credit rules 2 and 4). The demo flavour still records its local SPEND."
+    },
+    {
+     "id": "287-c11",
+     "text": "Given refresh() fails (offline, 5xx, 429), When the Credits screen observes, Then the last values owned by the current uid stay and nothing is wiped; given sign-out or an account switch, Then the prod wallet and ledger cache are cleared and a late answer for the old account is dropped; Delete account and Delete my data still clear the local ledger (D34)."
+    },
+    {
+     "id": "287-c12",
+     "text": "Given the demo flavour, When it builds and its tests run, Then OfflinePaymentGateway and MockPackCatalogue (D33 prices) are unchanged, the merged demo manifest has no INTERNET permission, and Play Billing is not on the demo runtime classpath (dependencyGuard demo baseline unchanged)."
+    },
+    {
+     "id": "287-c13",
+     "text": "Given app/src/prod/kotlin/**/billing/** and the credits sources, When they are searched, Then no purchase token, order id, uid, obfuscatedAccountId or ID token is logged or put in an exception message."
+    },
+    {
+     "id": "287-c14",
+     "text": "Given the branch head, When tests with the fake Play client (3 products, pending, failure, restore), `./gradlew dependencyGuard` and `tools/ci/verify-local.sh` run, Then all pass with both baselines unchanged (issue acceptance criteria 1-3)."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates).",
+    "Credits, Paywall and payment-failed UI (W4-F #284); this lane only supplies prod data behind PaymentGateway and CreditsRepository.",
+    "Creating the 15/40 products or setting prices in Play Console (#288, owner).",
+    "Refund and voided-purchase handling on the server (apps-backend #55) and any client refund flow.",
+    "Calling consumeAsync or acknowledge on the device: the server consumes (contract 4.7).",
+    "Removing the deprecated wallet fields on the server (follow-up after #287 deploys, contract 1).",
+    "UsageAllowance as a new interface: analysesLeftToday stays on the wallet/analysis answer; no new domain interface unless a W4 screen needs it."
+   ],
+   "gates": [
+    "./gradlew :app:testProdDebugUnitTest :app:testDemoDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew :core:network:testDebugUnitTest :core:data:testDebugUnitTest :core:model:test -PwarningsAsErrors=true",
+    "./gradlew :core:domain:testDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew :app:lintProdRelease :app:lintDemoRelease",
+    "./gradlew assembleDemoDebug assembleProdDebug",
+    "./gradlew dependencyGuard",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#286 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh"
+   ],
+   "root_cause": null,
+   "callers": [
+    "app/src/prod billing/RemotePaymentGateway.kt: packs, purchase, settle/post/repost, restorePurchases, unlock, clearCredits; billing/WalletSource.kt; billing/WalletMapping.kt toEntitlement (unlockedApplicationIds); billing/PurchaseRestorer.kt (AppStartTask); billing/GooglePlayBilling.kt productDetails (one product per query) and ownedPurchases; billing/ObfuscatedAccountId.kt.",
+    "app/src/prod di/PaymentBindings.kt; app/src/demo di/PaymentBindings.kt (unchanged).",
+    "core/network TailorMyResumeApi (add credits(), remove unlock), dto/Wallet.kt (WalletDto v2, PackDto; UnlockDto/UnlockResponse/CreditKind removed), dto/Purchases.kt (PurchaseResponse.wallet), new ledger DTO; fixtures wallet-response.json, unlock-response.json (delete), purchase-response.json.",
+    "core/data CreditsRepository (observeBalance, observeLedger, record, refresh, clear, removeForApplication) and DataModule binding; core/model CreditLedgerKind (FREE_GRANT, SPEND, PURCHASE) and CreditLedgerEntry; core/database CreditLedgerEntity stores the kind by enum name (TEXT), so new kinds need no schema change.",
+    "core/domain users: TailoringCreditSpend.forSuccess (local SPEND), DeleteAccountUseCase and DeleteMyDataUseCase (clear), CollectAccountDataUseCase and AccountDataArchiveWriter (ledger and unlockedApplicationIds in the archive), OfflineSampleDataController (PaymentGateway.unlock, demo).",
+    "testProd: BillingFixtures (FakePlayBilling, FakeUid, SwitchableUid), RemotePaymentGatewayTest, RemotePaymentGatewayAccountSwitchTest, RemotePaymentGatewayHistoryCacheTest, PurchaseRestorerTest, PurchaseRestorerSameAccountTest, PurchaseSettleTest, PlayBillingMappingTest, WalletSourceTest, WalletSourceAccountSwitchTest, ObfuscatedAccountIdTest, AccountSwitchBillingClearTest."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent screen, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed). Undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5, R10).",
+    "I.5 / AGENTS.md flavours: candidate data leaves the device only to apps-backend, only in the prod flavour. The demo flavour keeps no INTERNET permission (only app/src/prod/AndroidManifest.xml declares it), its bindings (app/src/demo/kotlin/.../di/*Bindings.kt) and offline sources stay unchanged, and nothing from core:network or Play Billing reaches the demo classpath. Network libraries only in core:network or prodImplementation in :app. One HTTP stack (OkHttp, Retrofit, kotlinx.serialization). The consent precondition in I.5 is struck by #255 (settled list): no consent call.",
+    "Contract v2 (docs/BACKEND_CONTRACT.md on PR #293 head revamp/285-contract-v2 00e99f41) is the shape source of truth; read it with `git show origin/revamp/285-contract-v2:docs/BACKEND_CONTRACT.md`. Where the deployed server PRs differ, follow the stricter of the two and record the delta in the PR body under Decisions (see contract_deltas in this file). Never edit docs/BACKEND_CONTRACT.md in this lane; a needed doc change is a follow-up on #285.",
+    "Requests: every request keeps X-App-Id and the Firebase bearer through the existing AppIdInterceptor/AuthInterceptor (one forced refresh on 401). Server bodies are strict: an unknown or null-for-optional field is 400 INVALID_INPUT, so tailormyresumeJson() (encodeDefaults = true, explicitNulls default) must not emit keys the server schema lacks. Responses: ignoreUnknownKeys stays on; a new or unknown enum value in a response (failureCode, verification, ledger kind, link kind, editType) must not crash decoding: decode it as nullable/unknown and fail closed (drop the item or treat as a generic failure).",
+    "Timeouts and retries: keep the existing OkHttp connect 15 s / read 60 s / call 75 s (contract 2: sync AI routes stop at 45 s on the server, app waits 60 s). No automatic retry of a sync AI call (analyses count every run; ANALYSIS_IN_PROGRESS is shown, not retried). Tailoring start keeps the bounded RATE_LIMITED retry (3 attempts, Retry-After honoured up to 60 s) and polling with backoff (2 s first, max 5 s, give up at 330 s per contract 4.4 rule 5). Background reposts stay bounded (5 tries, 2-32 s). No unbounded loop.",
+    "Privacy: never log a request or response body, resume text, JD text, job URL, fact, answer detail, purchase token, order id, uid or ID token (contract 2, 4.5 rule 4). No OkHttp logging interceptor, no Log/Timber/println in core/network or app/src/prod.",
+    "Truth (I.1): the on-device FabricationGuard via TailorResumeUseCase stays the last gate after the server checks (contract D7). The prod path must not bypass or loosen it; I.1 gate tests OfflineFabricationGuardTest and TailorResumeUseCaseTest keep every assertion. When the device cannot resolve a cited id it fails closed (the original text stays). Answer facts: only the server issues ans- ids; the app never sends USER_ANSWER entries or ans- ids (sendableFacts already filters them; keep the test).",
+    "II.6: each AI step stays behind its core:domain interface with a Hilt binding per flavour; core:network depends only on core:model (no core:domain import there); prod mapping from DTO to domain lives in app/src/prod or core:network mappers to core:model types.",
+    "IV.2/IV.3: fakes only (FakePlayBilling, FixedIds, MockWebServer); no mocking library; runTest and virtual time, no Thread.sleep. MockWebServer and Robolectric are already testProdImplementation / core:network testImplementation, so no new dependency; dependencyGuard baselines (app/dependencies/demoReleaseRuntimeClasspath.txt, prodReleaseRuntimeClasspath.txt) stay unchanged (PLAN 6.4).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); worktree with `git worktree add -b <branch> <path> <base>`; no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2: cite the contract section line); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35 (2 lanes when load is over about 12); stage paths explicitly (no git add -A).",
+    "Staging: backend PRs apps-backend #101-#111 are open, not deployed (merges blocked, #256). Tests run against MockWebServer only; no call to the Fly.io app from tests. A live check belongs to Phase 3 after deploy.",
+    "Play Billing test purchases only: unit tests use FakePlayBilling; any device check uses licence testers or test cards on the closed track; never a real purchase, never a live key. No consumeAsync on the device (the server consumes, contract 4.7 step 6).",
+    "Safe degrade for #288: a pack with no Play ProductDetails is hidden (mapNotNull, keep it); never show a price that did not come from Play; never launch a purchase for a product Play did not return. GooglePlayBilling queries one product per call today; keep it or batch, but a missing product must not fail the other two.",
+    "Money: the client never grants credits; every credit value comes from GET /wallet, the purchase answer's wallet, or GET /credits. obfuscatedAccountId stays the lower-case hex SHA-256 of the Firebase uid (ObfuscatedAccountIdTest unchanged). A purchase token stays until the server confirms (Pending), so a lost connection never loses a paid purchase.",
+    "apps-backend#55 refunds are open: the client must not show refunds it does not get; REFUND rows appear only when the server writes them. Owner gate: 15/40 products go live in Play only after #55 (PROGRESS owner list).",
+    "Ledger mapping default (needs_info, lead): add REFUND and MIGRATION to core:model CreditLedgerKind (additive; Room stores the name as TEXT, no migration, no schema bump; V.6 unaffected). Labels for them are #284's (copy is a lead choice). The demo never writes them.",
+    "CreditsRepository default (shared_contracts): keep the core:data binding and add a remote ledger seam that prod binds; files core/data/src/main/**/repository/{CreditsRepository,OfflineFirstCreditsRepository}.kt and DataModule.kt are extras to record in the PR. Balance in prod = wallet.credits. The Room ledger in prod is a cache that a refresh replaces, owned by the current uid; Delete account/Delete my data keep clearing it (D34).",
+    "Spend per tailoring: no unlock route (contract 4.12, D7). The device SPEND write (TailoringCreditSpend) must not double-count in prod: prod record() is a no-op followed by refresh(), or refresh replaces rows. Decide once in this lane; #278 calls TailoringCreditSpend and must not care which flavour runs.",
+    "Wallet DTO: drop freeTailoringsLeftToday and unlockedApplicationIds from WalletDto (ignoreUnknownKeys keeps v1 answers decodable); PurchaseEntitlement.unlockedApplicationIds stays empty in prod (field kept in core:domain for the demo and the archive until a follow-up).",
+    "Session/account switch: keep the generation and uid guards of WalletSource and RemotePaymentGateway; the new ledger cache gets the same guard (late answers for another uid are dropped)."
+   ],
+   "state": [
+    "prod server wallet + credit ledger cache keyed by uid (GET /wallet, GET /credits; Room credit_ledger only as a refresh-replaced mirror under the default seam)",
+    "prod pending Play purchase tokens and pending pack ids (RemotePaymentGateway reposts)"
+   ],
+   "files": [
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Wallet.kt",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Purchases.kt",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Credits.kt (new, ledger DTO; or inside Wallet.kt)",
+    "core/network/src/main/kotlin/com/tailormyresume/core/network/TailorMyResumeApi.kt (extra: add credits(), remove unlock; #286 also edits it, same stack)",
+    "core/network/src/test/** (wallet/credits/purchase fixtures; delete unlock-response.json)",
+    "app/src/prod/kotlin/com/tailormyresume/app/billing/**",
+    "app/src/prod/kotlin/com/tailormyresume/app/di/PaymentBindings.kt",
+    "app/src/prod/kotlin/com/tailormyresume/app/credits/** (new prod ledger source, or under billing/)",
+    "app/src/testProd/kotlin/com/tailormyresume/app/billing/**",
+    "extras under the default: core/model/src/main/kotlin/com/tailormyresume/core/model/CreditLedgerEntry.kt (REFUND, MIGRATION); core/data/src/main/kotlin/com/tailormyresume/core/data/repository/{CreditsRepository,OfflineFirstCreditsRepository}.kt and core/data/src/main/kotlin/com/tailormyresume/core/data/di/DataModule.kt (remote ledger seam); app/src/demo/kotlin/com/tailormyresume/app/di/PaymentBindings.kt (no-op seam binding only)"
+   ],
+   "scale": {
+    "material": false,
+    "note": "Three packs, three Play product queries, at most 100 ledger entries per GET /credits, one wallet read per refresh; reposts bounded at 5 tries per token. No unbounded list or loop."
+   }
+  }
+ ]
+}

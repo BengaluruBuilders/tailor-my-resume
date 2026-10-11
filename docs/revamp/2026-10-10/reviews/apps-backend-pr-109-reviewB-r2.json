@@ -1,0 +1,33 @@
+{
+  "head_sha": "dcc25ee40901b14ccece56967e43209d9353d426",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "Unchanged since round 1 (facts.ts summary schema, uniqueness, 1000-char cap); test 'a summary id equal to an entry or bullet id ... 400' passes at dcc25ee (local Postgres 16, full suite)."},
+    {"id": "c2", "status": "met", "evidence": "Summary rides the same verify and repair calls; tests 'first verify call ... PASSED with no extra call' and 'repair call ... REPAIRED' pass. Both prompts now state the word rule and one source per phrase (D36); they do not say that skill ids supply no words (low finding)."},
+    {"id": "c3", "status": "partial", "evidence": "A copy of summaryPasses at dcc25ee returns false for every round-1 case ('The and of in.', 'Used Excel at Initech' citing skill:Excel+EXP-01, 'Built a revenue dashboard for 40 stores' from two bullets, 'Verified Rust experience.' citing stated skill:Rust), for Globex, Kubernetes, blank, dashes, 4 vs Q4, 2024 vs FY2024, 400, 40.5, no id and unknown id, and for splits by but/while/dash/em dash (unsplit, so stricter). A function-word-only clause next to a real one ('Of the. Built a revenue dashboard.') passes correctly. A skill-only summary ('Excel, SQL.' citing skill ids) is null because all skill ids, not only stated ones, supply no words. Positives kept: 'Cleaned sales data and built a revenue dashboard.', 'Cleaned data for 40 stores.', 'Data Analyst, Initech.', own summary id. Still true: a clause that is only a tool name, split off by with/and/', ', rides on a clause from another entry (medium finding)."},
+    {"id": "c4", "status": "met", "evidence": "resolveSkills unchanged since round 1; test 'skills keep the profile spelling ...' passes."},
+    {"id": "c5", "status": "met", "evidence": "Unchanged since round 1; test 'a stored SUCCEEDED row without summary or skills reads as 200' passes."},
+    {"id": "c6", "status": "met", "evidence": "dcc25ee changes only the deterministic check and prompt text, no call paths; call-count tests (2 normal, 4 max) pass."},
+    {"id": "c7", "status": "met", "evidence": "Unchanged since round 1. Survival on the 100-item normal set with a copy of summaryPasses: 'Title at Org.' 100/100, 'Title at Org.' plus verbatim bullets 100/100, 'Title at Org, <bullet shortened>' 100/100, 'Title at Org with MH1 and MH2' 73/73, 'Skilled in <must-haves>' 43/68; free-form styles ('Title at Org who <bullet>', 'Title with experience in X and Y', 'Title skilled in X') 0/100. The feature is live when the model follows the prompt rule; free-form wording is nulled."},
+    {"id": "c8", "status": "met", "evidence": "docs/architecture.md:285 now states the clause rule, whole numbers and skill ids supplying no words, matching the code. Local at dcc25ee: typecheck, eslint, prettier pass; node --test 569/571, the two failures are the lead-only replacements named in the PR body ('the stored row holds no profile or job text', 'without userStatedSkills the generate and repair prompts equal those on main'). GitHub checks were queued or in progress when read. Follow-up note (dedupe functionWords with #91, whose 357894b is on revamp/91 and revamp/92 only) is accurate."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "line": 206,
+      "rule": "c3 / Constitution I.1; D36 purpose (round-1 'Used Python at Saffron Retail' recombination)",
+      "trigger": "Splitting at with/and/', ' lets a bare tool clause from another entry attach to an employer or bullet: 'Data Analyst at Initech with Kotlin.' citing EXP-01 and PRJ-01-1 (Kotlin is a personal project) passes the copy; 'Compiled 460 pull requests in Jenkins and Kubernetes.' citing EXP-01-1 and SUM-01 (normal-001) passes; on the normal set 336/336 '<title> at <org> with <tool from another entry or the own summary>' pass, leaving only the verifier. Candidate fix tested on a copy: keep the clause rule, and also require all clauses of one sentence (split at . ! ? ; :) to rest on facts of one entry (the entry id and its bullet ids) or on the summary. It rejects 336/336 and every round-1 negative, keeps every positive in the test file, and lowers 'Title at Org with MH1 and MH2' from 73/73 to 12/73 and 'Skilled in <must-haves>' from 43/68 to 17/68. The lead may instead accept this as verifier-gated, since bullets have no tool check either.",
+      "title": "A tool-only clause split off by with/and/comma recombines a tool from another entry with an employer",
+      "proof": "Summary 'Data Analyst at Initech with Kotlin.' citing EXP-01 and PRJ-01-1, verifier supported for all; expect result.summary null."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "line": 92,
+      "rule": "D36: the generate and repair prompts state the rule; D36 removes words only from stated-skill labels",
+      "trigger": "summaryClause invites 'skill ids' as sources and says to use only words from the cited sources, and the repair item lists skill texts as sources, but summaryPasses drops every skill: id (not only stated ones). 'Skilled in Excel and SQL.' or 'Excel, SQL.' citing skill:Excel and skill:SQL fails both the first check and the repair, so the summary is null. Either say in both prompts that skill names count only when a cited entry, bullet or the summary holds them, or let a non-stated skill id supply its bare name as D36 states.",
+      "title": "Prompts offer skill ids as word sources that the check never accepts"
+    }
+  ]
+}

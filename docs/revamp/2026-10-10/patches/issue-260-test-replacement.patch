@@ -1,0 +1,844 @@
+diff --git a/app/src/test/kotlin/com/tailormyresume/app/navigation/TopLevelDestinationTest.kt b/app/src/test/kotlin/com/tailormyresume/app/navigation/TopLevelDestinationTest.kt
+index b48ffc75..736c76f3 100644
+--- a/app/src/test/kotlin/com/tailormyresume/app/navigation/TopLevelDestinationTest.kt
++++ b/app/src/test/kotlin/com/tailormyresume/app/navigation/TopLevelDestinationTest.kt
+@@ -7,10 +7,10 @@ import com.tailormyresume.feature.analysis.api.navigation.DefaultAnalysisNavKey
+ import com.tailormyresume.feature.applications.api.navigation.ApplicationDetailNavKey
+ import com.tailormyresume.feature.applications.api.navigation.ApplicationsNavKey
+ import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
+-import com.tailormyresume.feature.onboarding.api.navigation.DefaultWelcomeNavKey
++import com.tailormyresume.feature.onboarding.api.navigation.DefaultSignInNavKey
+ import com.tailormyresume.feature.profile.api.navigation.DefaultProfileNavKey
+ import com.tailormyresume.feature.settings.api.navigation.DefaultSettingsNavKey
+-import com.tailormyresume.feature.settings.api.navigation.YourDataNavKey
++import com.tailormyresume.feature.settings.api.navigation.DeleteAccountNavKey
+ import org.junit.Test
+ 
+ class TopLevelDestinationTest {
+@@ -29,10 +29,10 @@ class TopLevelDestinationTest {
+     @Test
+     fun pushedAndFirstRunKeysAreNotTopLevel() {
+         listOf<NavKey>(
+-            DefaultWelcomeNavKey,
++            DefaultSignInNavKey,
+             DefaultAnalysisNavKey,
+             ApplicationDetailNavKey(applicationId = "a-1"),
+-            YourDataNavKey(),
++            DeleteAccountNavKey(),
+         ).forEach { key -> assertThat(key.isTopLevelDestination()).isFalse() }
+     }
+ }
+diff --git a/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt b/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt
+index def1141d..75b596d9 100644
+--- a/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt
++++ b/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt
+@@ -5,8 +5,6 @@ import com.google.common.truth.Truth.assertThat
+ import com.tailormyresume.core.data.mock.NoMockLatency
+ import com.tailormyresume.core.domain.offline.OfflineSignInGateway
+ import com.tailormyresume.core.domain.onboarding.ObserveStartDestinationUseCase
+-import com.tailormyresume.core.model.ConsentPurpose
+-import com.tailormyresume.core.model.ConsentRecord
+ import com.tailormyresume.core.model.SignInAccount
+ import com.tailormyresume.core.testing.mock.TestMockStateStore
+ import com.tailormyresume.core.testing.repository.TestSessionRepository
+@@ -15,7 +13,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
+ import kotlinx.coroutines.test.runTest
+ import org.junit.Rule
+ import org.junit.Test
+-import kotlin.time.Instant
+ 
+ class AppViewModelTest {
+ 
+@@ -23,7 +20,6 @@ class AppViewModelTest {
+     val mainDispatcherRule = MainDispatcherRule(StandardTestDispatcher())
+ 
+     private val sessionRepository = TestSessionRepository()
+-    private val consent = ConsentRecord(setOf(ConsentPurpose.AI_PROCESSING), Instant.fromEpochMilliseconds(1), "2026-10-b")
+ 
+     private fun viewModel() = AppViewModel(ObserveStartDestinationUseCase(sessionRepository))
+ 
+@@ -45,7 +41,6 @@ class AppViewModelTest {
+     fun rootState_whenOnboardingIsComplete_isMainWithoutShowingFirstRun() = runTest {
+         sessionRepository.sendAccount(SignInAccount.localAccount)
+         sessionRepository.sendOnboardingComplete(true)
+-        sessionRepository.sendConsent(consent)
+ 
+         viewModel().rootState.test {
+             assertThat(awaitItem()).isEqualTo(AppRootState.Loading)
+@@ -62,7 +57,6 @@ class AppViewModelTest {
+ 
+             sessionRepository.saveAccount(SignInAccount.localAccount)
+             sessionRepository.markOnboardingComplete()
+-            sessionRepository.recordConsent(consent)
+             assertThat(awaitItem()).isEqualTo(AppRootState.Main)
+ 
+             sessionRepository.signOut()
+@@ -79,7 +73,6 @@ class AppViewModelTest {
+         val gateway = OfflineSignInGateway(sessionRepository, NoMockLatency, TestMockStateStore())
+         gateway.signIn()
+         sessionRepository.markOnboardingComplete()
+-        sessionRepository.recordConsent(consent)
+ 
+         viewModel().rootState.test {
+             assertThat(awaitItem()).isEqualTo(AppRootState.Loading)
+@@ -99,7 +92,6 @@ class AppViewModelTest {
+         val gateway = OfflineSignInGateway(sessionRepository, NoMockLatency, store)
+         gateway.signIn()
+         sessionRepository.markOnboardingComplete()
+-        sessionRepository.recordConsent(consent)
+ 
+         viewModel().rootState.test {
+             assertThat(awaitItem()).isEqualTo(AppRootState.Loading)
+diff --git a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugMenuViewModelTest.kt b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugMenuViewModelTest.kt
+index 83aae683..7c0ac4dd 100644
+--- a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugMenuViewModelTest.kt
++++ b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugMenuViewModelTest.kt
+@@ -2,8 +2,6 @@ package com.tailormyresume.app.debug
+ 
+ import app.cash.turbine.test
+ import com.google.common.truth.Truth.assertThat
+-import com.tailormyresume.app.R
+-import com.tailormyresume.core.testing.connectivity.TestConnectivityMonitor
+ import com.tailormyresume.core.testing.sample.TestSampleDataController
+ import com.tailormyresume.core.testing.util.MainDispatcherRule
+ import kotlinx.coroutines.test.runTest
+@@ -16,9 +14,8 @@ class DebugMenuViewModelTest {
+     val mainDispatcherRule = MainDispatcherRule()
+ 
+     private val sampleData = TestSampleDataController()
+-    private val connectivity = TestConnectivityMonitor()
+ 
+-    private fun viewModel() = DebugMenuViewModel(sampleData, connectivity, connectivity)
++    private fun viewModel() = DebugMenuViewModel(sampleData)
+ 
+     @Test
+     fun loadSampleData_callsTheControllerAndReportsIt() = runTest {
+@@ -42,28 +39,6 @@ class DebugMenuViewModelTest {
+         assertThat(sampleData.resetCount).isEqualTo(1)
+     }
+ 
+-    @Test
+-    fun setOnline_reachesTheConnectivityControlAndTheState() = runTest {
+-        val viewModel = viewModel()
+-        viewModel.uiState.test {
+-            assertThat(awaitItem().online).isTrue()
+-            viewModel.setOnline(false)
+-            assertThat(awaitItem().online).isFalse()
+-        }
+-    }
+-
+-    @Test
+-    fun setOnline_changesTheConnectivityLabel() = runTest {
+-        val viewModel = viewModel()
+-        viewModel.uiState.test {
+-            assertThat(awaitItem().connectivityLabel).isEqualTo(R.string.debug_connectivity_online)
+-            viewModel.setOnline(false)
+-            assertThat(awaitItem().connectivityLabel).isEqualTo(R.string.debug_connectivity_offline)
+-            viewModel.setOnline(true)
+-            assertThat(awaitItem().connectivityLabel).isEqualTo(R.string.debug_connectivity_online)
+-        }
+-    }
+-
+     @Test
+     fun openPreview_ofGapAnalysis_keepsTheSampleJobBeforeItOpens() = runTest {
+         var opened = false
+diff --git a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/NavigationStateRestoreTest.kt b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/NavigationStateRestoreTest.kt
+index 1784cdd2..7f3f56ea 100644
+--- a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/NavigationStateRestoreTest.kt
++++ b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/NavigationStateRestoreTest.kt
+@@ -15,8 +15,8 @@ import com.tailormyresume.core.model.DebugScenario
+ import com.tailormyresume.core.navigation.NavigationState
+ import com.tailormyresume.core.navigation.rememberNavigationState
+ import com.tailormyresume.core.navigation.toEntries
+-import com.tailormyresume.feature.onboarding.api.navigation.ConfirmFactsNavKey
+-import com.tailormyresume.feature.onboarding.api.navigation.ConsentNavKey
++import com.tailormyresume.feature.onboarding.api.navigation.ImportResumeNavKey
++import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
+ import org.junit.Rule
+ import org.junit.Test
+ import org.junit.runner.RunWith
+@@ -34,8 +34,8 @@ class NavigationStateRestoreTest {
+     @get:Rule
+     val composeRule = createComposeRule()
+ 
+-    private val firstKey: NavKey = ConfirmFactsNavKey(scenario = DebugScenario.defaultValue)
+-    private val otherKey: NavKey = ConsentNavKey(scenario = DebugScenario.defaultValue)
++    private val firstKey: NavKey = SignInNavKey(scenario = DebugScenario.defaultValue)
++    private val otherKey: NavKey = ImportResumeNavKey(scenario = DebugScenario.defaultValue)
+     private var startKey: NavKey = firstKey
+     private lateinit var state: NavigationState
+     private var entryCount = 0
+diff --git a/app/src/testProd/kotlin/com/tailormyresume/app/auth/RemoteSignInGatewayTest.kt b/app/src/testProd/kotlin/com/tailormyresume/app/auth/RemoteSignInGatewayTest.kt
+index bf1a29bf..e92ce95b 100644
+--- a/app/src/testProd/kotlin/com/tailormyresume/app/auth/RemoteSignInGatewayTest.kt
++++ b/app/src/testProd/kotlin/com/tailormyresume/app/auth/RemoteSignInGatewayTest.kt
+@@ -4,8 +4,6 @@ import com.google.common.truth.Truth.assertThat
+ import com.tailormyresume.app.billing.signOutCleaner
+ import com.tailormyresume.core.domain.SignInFailureReason
+ import com.tailormyresume.core.domain.SignInResult
+-import com.tailormyresume.core.model.ConsentPurpose
+-import com.tailormyresume.core.model.ConsentRecord
+ import com.tailormyresume.core.testing.repository.TestSessionRepository
+ import kotlinx.coroutines.flow.first
+ import kotlinx.coroutines.test.runTest
+@@ -14,14 +12,13 @@ import org.junit.After
+ import org.junit.Test
+ import java.io.ByteArrayOutputStream
+ import java.io.PrintStream
+-import kotlin.time.Instant
+ 
+ class RemoteSignInGatewayTest {
+     private val server = MockWebServer().apply { start() }
+     private val credentials = ScriptedCredentials()
+     private val firebase = ScriptedFirebase()
+     private val session = TestSessionRepository()
+-    private val cleaner = server.signOutCleaner(session)
++    private val cleaner = server.signOutCleaner()
+ 
+     @After
+     fun tearDown() = runCatching { server.shutdown() }.let { }
+@@ -128,14 +125,12 @@ class RemoteSignInGatewayTest {
+         server.enqueue(jsonResponse(200, ME_BODY))
+         val gateway = gateway()
+         gateway.signIn()
+-        session.recordConsent(ConsentRecord(setOf(ConsentPurpose.AI_PROCESSING), Instant.fromEpochMilliseconds(1), "2026-10-b"))
+ 
+         gateway.signOut()
+ 
+         assertThat(firebase.signedOut).isTrue()
+         assertThat(credentials.cleared).isTrue()
+         assertThat(gateway.currentAccount()).isNull()
+-        assertThat(session.observeConsent().first()).isNull()
+     }
+ 
+     @Test
+diff --git a/app/src/testProd/kotlin/com/tailormyresume/app/auth/SignOutCleanerTest.kt b/app/src/testProd/kotlin/com/tailormyresume/app/auth/SignOutCleanerTest.kt
+index 044fac5a..f891cd66 100644
+--- a/app/src/testProd/kotlin/com/tailormyresume/app/auth/SignOutCleanerTest.kt
++++ b/app/src/testProd/kotlin/com/tailormyresume/app/auth/SignOutCleanerTest.kt
+@@ -14,13 +14,9 @@ import com.tailormyresume.app.billing.WalletSource
+ import com.tailormyresume.app.billing.idleScope
+ import com.tailormyresume.app.billing.walletJson
+ import com.tailormyresume.core.data.repository.PendingReportQueue
+-import com.tailormyresume.core.model.ConsentPurpose
+-import com.tailormyresume.core.model.ConsentRecord
+ import com.tailormyresume.core.model.ContentReport
+ import com.tailormyresume.core.model.ReportedItemKind
+ import com.tailormyresume.core.testing.mock.TestMockStateStore
+-import com.tailormyresume.core.testing.repository.TestSessionRepository
+-import kotlinx.coroutines.flow.first
+ import kotlinx.coroutines.runBlocking
+ import org.junit.After
+ import org.junit.Test
+@@ -29,12 +25,11 @@ import kotlin.time.Instant
+ class SignOutCleanerTest {
+     private val backend = FakeBackend()
+     private val store = TestMockStateStore()
+-    private val session = TestSessionRepository()
+     private val wallet = WalletSource(backend.api)
+     private val payments = RemotePaymentGateway(backend.api, wallet, FakePlayBilling(), FakeUid("uid-1"), idleScope())
+     private val analysis = RemoteJobAnalysisSource(backend.api, NoMatcher)
+     private val reports = PendingReportQueue(store)
+-    private val cleaner = SignOutCleaner(payments, analysis, reports, store, session)
++    private val cleaner = SignOutCleaner(payments, analysis, reports, store)
+ 
+     @After
+     fun tearDown() = backend.shutdown()
+@@ -48,14 +43,12 @@ class SignOutCleanerTest {
+         reports.add(ContentReport("app-1", ReportedItemKind.REQUIREMENT, "req-1", "text", Instant.fromEpochMilliseconds(1), null))
+         val tailoringIds = PendingTailoringIds(store, FixedIds)
+         val firstId = tailoringIds.idFor("app-1", null)
+-        session.recordConsent(ConsentRecord(setOf(ConsentPurpose.AI_PROCESSING), Instant.fromEpochMilliseconds(1), "2026-10-b"))
+ 
+         cleaner.clear()
+ 
+         assertThat(wallet.cached).isNull()
+         assertThat(reports.pending()).isEmpty()
+         assertThat(tailoringIds.idFor("app-1", null)).isNotEqualTo(firstId)
+-        assertThat(session.observeConsent().first()).isNull()
+         backend.reply(200, ANALYSIS_RESPONSE)
+         analysis.analyse(candidate, "the raw job text")
+         assertThat(backend.server.requestCount).isEqualTo(3)
+diff --git a/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/StoredSessionRepositoryTest.kt b/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/StoredSessionRepositoryTest.kt
+index 234b3b87..29dc85f8 100644
+--- a/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/StoredSessionRepositoryTest.kt
++++ b/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/StoredSessionRepositoryTest.kt
+@@ -1,8 +1,6 @@
+ package com.tailormyresume.core.data.repository
+ 
+ import com.google.common.truth.Truth.assertThat
+-import com.tailormyresume.core.model.ConsentPurpose
+-import com.tailormyresume.core.model.ConsentRecord
+ import com.tailormyresume.core.model.KeptJobDescription
+ import com.tailormyresume.core.model.SignInAccount
+ import com.tailormyresume.core.testing.mock.TestMockStateStore
+@@ -10,7 +8,6 @@ import com.tailormyresume.core.testing.repository.SessionRepositoryContractTest
+ import kotlinx.coroutines.flow.first
+ import kotlinx.coroutines.test.runTest
+ import org.junit.Test
+-import kotlin.time.Instant
+ 
+ class StoredSessionRepositoryTest : SessionRepositoryContractTest() {
+ 
+@@ -19,15 +16,9 @@ class StoredSessionRepositoryTest : SessionRepositoryContractTest() {
+     @Test
+     fun theWholeSessionSurvivesARestartOfTheRepository() = runTest {
+         val store = TestMockStateStore()
+-        val consent = ConsentRecord(
+-            purposes = setOf(ConsentPurpose.AI_PROCESSING),
+-            acceptedAt = Instant.fromEpochMilliseconds(1_790_000_123_000),
+-            noticeVersion = "2026-10",
+-        )
+         val job = KeptJobDescription(text = "line one\nline two", company = "Northwind GCC", role = "Analyst")
+         StoredSessionRepository(store).apply {
+             saveAccount(SignInAccount.localAccount)
+-            recordConsent(consent)
+             markOnboardingComplete()
+             keepJobDescription(job)
+         }
+@@ -35,18 +26,27 @@ class StoredSessionRepositoryTest : SessionRepositoryContractTest() {
+         val restarted = StoredSessionRepository(store)
+ 
+         assertThat(restarted.observeAccount().first()).isEqualTo(SignInAccount.localAccount)
+-        assertThat(restarted.observeConsent().first()).isEqualTo(consent)
+         assertThat(restarted.observeOnboardingComplete().first()).isTrue()
+         assertThat(restarted.observeKeptJobDescription().first()).isEqualTo(job)
+     }
+ 
+     @Test
+-    fun anUnknownConsentPurposeInStoredStateIsDropped() = runTest {
++    fun signOut_removesLegacyConsentKey() = runTest {
+         val store = TestMockStateStore()
+-        store.write("session.consent", """{"purposes":["READ_AND_BUILD","FUTURE_PURPOSE"],"acceptedAtMillis":1,"noticeVersion":"1"}""")
++        store.write("session.consent", "{}")
+ 
+-        val consent = StoredSessionRepository(store).observeConsent().first()
++        StoredSessionRepository(store).signOut()
+ 
+-        assertThat(consent?.purposes).containsExactly(ConsentPurpose.READ_AND_BUILD)
++        assertThat(store.read("session.consent")).isNull()
++    }
++
++    @Test
++    fun clear_removesLegacyConsentKey() = runTest {
++        val store = TestMockStateStore()
++        store.write("session.consent", "{}")
++
++        StoredSessionRepository(store).clear()
++
++        assertThat(store.read("session.consent")).isNull()
+     }
+ }
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/AccountDataArchiveWriterTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/AccountDataArchiveWriterTest.kt
+index 972a4ab8..6d609885 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/AccountDataArchiveWriterTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/AccountDataArchiveWriterTest.kt
+@@ -5,29 +5,23 @@ import com.tailormyresume.core.domain.PurchaseEntitlement
+ import com.tailormyresume.core.domain.PurchaseRecord
+ import com.tailormyresume.core.domain.PurchaseState
+ import com.tailormyresume.core.model.BulletDecision
+-import com.tailormyresume.core.model.ConsentPurpose
+-import com.tailormyresume.core.model.ConsentRecord
+ import com.tailormyresume.core.model.CreditKind
+ import com.tailormyresume.core.model.EditType
+ import com.tailormyresume.core.model.ExportFormat
+ import com.tailormyresume.core.model.ExportRecord
+ import com.tailormyresume.core.model.GuardrailViolation
+ import com.tailormyresume.core.model.JobRequirement
+-import com.tailormyresume.core.model.PrepPlanItem
+ import com.tailormyresume.core.model.RequirementPriority
+ import com.tailormyresume.core.model.RequirementType
+ import com.tailormyresume.core.model.SignInAccount
+ import com.tailormyresume.core.model.TailoredBullet
+ import com.tailormyresume.core.model.TailoredResume
+-import com.tailormyresume.core.model.WrittenCoverLetter
+-import com.tailormyresume.core.model.WrittenParagraph
+ import com.tailormyresume.core.testing.data.canonicalCandidateProfile
+ import com.tailormyresume.core.testing.data.sampleApplication
+ import kotlinx.serialization.json.Json
+ import kotlinx.serialization.json.JsonArray
+ import kotlinx.serialization.json.JsonElement
+ import kotlinx.serialization.json.JsonObject
+-import kotlinx.serialization.json.boolean
+ import kotlinx.serialization.json.int
+ import kotlinx.serialization.json.jsonArray
+ import kotlinx.serialization.json.jsonObject
+@@ -92,7 +86,6 @@ class AccountDataArchiveWriterTest {
+     private val data = AccountData(
+         generatedAt = now,
+         account = SignInAccount.localAccount.copy(id = PLANTED_UID),
+-        consent = ConsentRecord(setOf(ConsentPurpose.AI_PROCESSING), now, ConsentRecord.CURRENT_NOTICE_VERSION),
+         profile = canonicalCandidateProfile,
+         applications = listOf(application),
+         entitlement = PurchaseEntitlement(
+@@ -103,14 +96,6 @@ class AccountDataArchiveWriterTest {
+         ),
+         purchases = listOf(PurchaseRecord("application_pack_5", "order-1", now, PurchaseState.COMPLETED)),
+         exports = listOf(ExportRecord(application.id, ExportFormat.PDF, "resume.pdf", now, CreditKind.PURCHASED, 2, "Classic")),
+-        coverLetters = mapOf(
+-            application.id to WrittenCoverLetter(
+-                listOf(WrittenParagraph("Dear Example Corp team"), WrittenParagraph("Line one\nLine two")),
+-                now,
+-                citedFactIds = listOf("bullet-project-1"),
+-            ),
+-        ),
+-        prepPlans = mapOf(application.id to listOf(PrepPlanItem("prep-1", "Revise coroutines", done = true))),
+     )
+ 
+     private companion object {
+@@ -169,12 +154,6 @@ class AccountDataArchiveWriterTest {
+         val resume = entry.getValue("tailoredResume").jsonObject
+         assertThat(resume.array("entryIds").map { it.jsonPrimitive.content }).containsExactly("entry-1", "entry-2").inOrder()
+ 
+-        val letter = entry.getValue("coverLetter").jsonObject
+-        assertThat(letter.array("citedFactIds").map { it.jsonPrimitive.content }).containsExactly("bullet-project-1")
+-        val paragraph = letter.array("paragraphs").first().jsonObject
+-        assertThat(paragraph.getValue("text").jsonPrimitive.content).isEqualTo("Dear Example Corp team")
+-        val prep = entry.array("prepPlan").single().jsonObject
+-        assertThat(prep.getValue("done").jsonPrimitive.boolean).isTrue()
+         val export = entry.array("exports").single().jsonObject
+         assertThat(export.getValue("fileName").jsonPrimitive.content).isEqualTo("resume.pdf")
+         assertThat(export.getValue("creditKind").jsonPrimitive.content).isEqualTo("PURCHASED")
+@@ -183,17 +162,13 @@ class AccountDataArchiveWriterTest {
+     }
+ 
+     @Test
+-    fun myDataJsonHoldsAccountConsentProfileAndPurchases() {
++    fun myDataJsonHoldsAccountProfileAndPurchases() {
+         val root = myData()
+ 
+         val account = root.getValue("account").jsonObject
+         assertThat(account.getValue("email").jsonPrimitive.content).isEqualTo(SignInAccount.localAccount.email)
+         assertThat(account.getValue("displayName").jsonPrimitive.content).isEqualTo(SignInAccount.localAccount.displayName)
+ 
+-        val consent = root.getValue("consent").jsonObject
+-        assertThat(consent.array("purposes").map { it.jsonPrimitive.content }).containsExactly("AI_PROCESSING")
+-        assertThat(consent.getValue("noticeVersion").jsonPrimitive.content).isEqualTo(ConsentRecord.CURRENT_NOTICE_VERSION)
+-
+         val profile = root.getValue("profile").jsonObject
+         assertThat(profile.getValue("fullName").jsonPrimitive.content).isEqualTo(canonicalCandidateProfile.fullName)
+         assertThat(profile.array("skills")).hasSize(canonicalCandidateProfile.skills.size)
+@@ -259,8 +234,6 @@ class AccountDataArchiveWriterTest {
+         assertThat(text).contains("MET")
+         assertThat(text).contains("Built a Kotlin Android app")
+         assertThat(text).contains("Call the recruiter on Tuesday")
+-        assertThat(text).contains("Dear Example Corp team")
+-        assertThat(text).contains("Revise coroutines")
+     }
+ 
+     @Test
+@@ -273,7 +246,6 @@ class AccountDataArchiveWriterTest {
+         assertThat(lines).contains("  jobDescription: Senior Engineer | Bengaluru | Full-time")
+         assertThat(lines).contains("    Responsibilities:")
+         assertThat(lines).contains("    Ask about the 2nd round")
+-        assertThat(lines).contains("    Line two")
+         assertThat(lines).contains("    Cut cost 30% (was: Moved services)")
+     }
+ 
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/CollectAccountDataUseCaseTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/CollectAccountDataUseCaseTest.kt
+index 527f66c2..6ba7fdae 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/CollectAccountDataUseCaseTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/CollectAccountDataUseCaseTest.kt
+@@ -4,17 +4,12 @@ import com.google.common.truth.Truth.assertThat
+ import com.tailormyresume.core.domain.ApplicationPack
+ import com.tailormyresume.core.domain.FakeApplicationRepository
+ import com.tailormyresume.core.domain.FakeProfileRepository
+-import com.tailormyresume.core.model.PrepPlanItem
+ import com.tailormyresume.core.model.SignInAccount
+-import com.tailormyresume.core.model.WrittenCoverLetter
+-import com.tailormyresume.core.model.WrittenParagraph
+ import com.tailormyresume.core.testing.account.TestAccountDataExporter
+ import com.tailormyresume.core.testing.data.canonicalCandidateProfile
+ import com.tailormyresume.core.testing.data.sampleApplication
+ import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+-import com.tailormyresume.core.testing.repository.TestCoverLetterRepository
+ import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
+-import com.tailormyresume.core.testing.repository.TestPrepPlanRepository
+ import com.tailormyresume.core.testing.repository.TestSessionRepository
+ import com.tailormyresume.core.testing.util.TestClock
+ import kotlinx.coroutines.test.runTest
+@@ -26,11 +21,9 @@ class CollectAccountDataUseCaseTest {
+     private val profiles = FakeProfileRepository(canonicalCandidateProfile)
+     private val applications = FakeApplicationRepository()
+     private val exports = TestExportHistoryRepository()
+-    private val coverLetters = TestCoverLetterRepository()
+-    private val prepPlans = TestPrepPlanRepository()
+     private val payments = TestPaymentGateway()
+     private val clock = TestClock()
+-    private val collect = CollectAccountDataUseCase(session, profiles, applications, exports, coverLetters, prepPlans, payments, clock)
++    private val collect = CollectAccountDataUseCase(session, profiles, applications, exports, payments, clock)
+ 
+     @Test
+     fun theSnapshotHoldsEverythingTheAccountOwns() = runTest {
+@@ -57,20 +50,4 @@ class CollectAccountDataUseCaseTest {
+         assertThat(exporter.exported).hasSize(1)
+         assertThat(archive.file.isFile).isTrue()
+     }
+-
+-    @Test
+-    fun theSnapshotHoldsCoverLettersAndPrepPlansForEveryApplication() = runTest {
+-        val second = sampleApplication.copy(id = "application-2")
+-        applications.upsertApplication(sampleApplication)
+-        applications.upsertApplication(second)
+-        val letter = WrittenCoverLetter(listOf(WrittenParagraph("Dear team")), clock.now())
+-        coverLetters.save(sampleApplication.id, letter)
+-        prepPlans.add(second.id, PrepPlanItem("prep-1", "Read the product blog"))
+-
+-        val data = collect()
+-
+-        assertThat(data.coverLetters).containsExactly(sampleApplication.id, letter)
+-        assertThat(data.prepPlans).containsKey(second.id)
+-        assertThat(data.prepPlans.getValue(second.id)).containsExactly(PrepPlanItem("prep-1", "Read the product blog"))
+-    }
+ }
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/NextOnboardingStepUseCaseTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/NextOnboardingStepUseCaseTest.kt
+index 59e9cb7e..5ec45260 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/NextOnboardingStepUseCaseTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/NextOnboardingStepUseCaseTest.kt
+@@ -4,8 +4,6 @@ import app.cash.turbine.test
+ import com.google.common.truth.Truth.assertThat
+ import com.tailormyresume.core.domain.FakeProfileRepository
+ import com.tailormyresume.core.model.CandidateProfile
+-import com.tailormyresume.core.model.ConsentPurpose
+-import com.tailormyresume.core.model.ConsentRecord
+ import com.tailormyresume.core.model.KeptJobDescription
+ import com.tailormyresume.core.model.SignInAccount
+ import com.tailormyresume.core.testing.data.canonicalCandidateProfile
+@@ -13,7 +11,6 @@ import com.tailormyresume.core.testing.data.canonicalProfileWithoutEntries
+ import com.tailormyresume.core.testing.repository.TestSessionRepository
+ import kotlinx.coroutines.test.runTest
+ import org.junit.Test
+-import kotlin.time.Instant
+ 
+ class NextOnboardingStepUseCaseTest {
+ 
+@@ -22,9 +19,8 @@ class NextOnboardingStepUseCaseTest {
+     private val useCase = NextOnboardingStepUseCase(session, profile)
+     private val job = KeptJobDescription(text = "Analyst\nSQL", company = "Northwind GCC", role = "Analyst")
+ 
+-    private suspend fun signedInWithConsent() {
++    private suspend fun signedIn() {
+         session.saveAccount(SignInAccount.localAccount)
+-        session.recordConsent(ConsentRecord(setOf(ConsentPurpose.READ_AND_BUILD), Instant.fromEpochSeconds(1), ConsentRecord.CURRENT_NOTICE_VERSION))
+     }
+ 
+     private fun unconfirmed(): CandidateProfile = canonicalCandidateProfile.copy(
+@@ -36,23 +32,16 @@ class NextOnboardingStepUseCaseTest {
+         assertThat(useCase()).isEqualTo(OnboardingStep.SignIn)
+     }
+ 
+-    @Test
+-    fun aSignedInCandidateWithNoConsentGoesToConsent() = runTest {
+-        session.saveAccount(SignInAccount.localAccount)
+-
+-        assertThat(useCase()).isEqualTo(OnboardingStep.Consent)
+-    }
+-
+     @Test
+     fun aCandidateWithNoProfileGoesToImportResume() = runTest {
+-        signedInWithConsent()
++        signedIn()
+ 
+         assertThat(useCase()).isEqualTo(OnboardingStep.ImportResume)
+     }
+ 
+     @Test
+     fun aProfileWithNoEntriesGoesToImportResume() = runTest {
+-        signedInWithConsent()
++        signedIn()
+         profile.saveProfile(canonicalProfileWithoutEntries)
+ 
+         assertThat(useCase()).isEqualTo(OnboardingStep.ImportResume)
+@@ -60,7 +49,7 @@ class NextOnboardingStepUseCaseTest {
+ 
+     @Test
+     fun aProfileWithNoConfirmedFactGoesToConfirmFacts() = runTest {
+-        signedInWithConsent()
++        signedIn()
+         profile.saveProfile(unconfirmed())
+ 
+         assertThat(useCase()).isEqualTo(OnboardingStep.ConfirmFacts)
+@@ -68,7 +57,7 @@ class NextOnboardingStepUseCaseTest {
+ 
+     @Test
+     fun aKeptJobDescriptionGoesToGapAnalysisWithThatJob() = runTest {
+-        signedInWithConsent()
++        signedIn()
+         profile.saveProfile(canonicalCandidateProfile)
+         session.keepJobDescription(job)
+ 
+@@ -77,7 +66,7 @@ class NextOnboardingStepUseCaseTest {
+ 
+     @Test
+     fun withNoKeptJobDescriptionTheFirstRunGoesToPasteJobDescription() = runTest {
+-        signedInWithConsent()
++        signedIn()
+         profile.saveProfile(canonicalCandidateProfile)
+ 
+         assertThat(useCase()).isEqualTo(OnboardingStep.PasteJobDescription)
+@@ -85,7 +74,7 @@ class NextOnboardingStepUseCaseTest {
+ 
+     @Test
+     fun withOnboardingCompleteAndNoKeptJobDescriptionTheNextStepIsApplications() = runTest {
+-        signedInWithConsent()
++        signedIn()
+         profile.saveProfile(canonicalCandidateProfile)
+         session.markOnboardingComplete()
+ 
+@@ -108,8 +97,6 @@ class NextOnboardingStepUseCaseTest {
+         useCase.observe().test {
+             assertThat(awaitItem()).isEqualTo(OnboardingStep.SignIn)
+             session.saveAccount(SignInAccount.localAccount)
+-            assertThat(awaitItem()).isEqualTo(OnboardingStep.Consent)
+-            session.recordConsent(ConsentRecord(setOf(ConsentPurpose.READ_AND_BUILD), Instant.fromEpochSeconds(1), ConsentRecord.CURRENT_NOTICE_VERSION))
+             assertThat(awaitItem()).isEqualTo(OnboardingStep.PasteJobDescription)
+         }
+     }
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/ObserveStartDestinationUseCaseTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/ObserveStartDestinationUseCaseTest.kt
+index 8f6cbc8a..80d4f91a 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/ObserveStartDestinationUseCaseTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/ObserveStartDestinationUseCaseTest.kt
+@@ -2,24 +2,20 @@ package com.tailormyresume.core.domain.onboarding
+ 
+ import app.cash.turbine.test
+ import com.google.common.truth.Truth.assertThat
+-import com.tailormyresume.core.model.ConsentPurpose
+-import com.tailormyresume.core.model.ConsentRecord
+ import com.tailormyresume.core.model.SignInAccount
+ import com.tailormyresume.core.testing.repository.TestSessionRepository
+ import kotlinx.coroutines.test.runTest
+ import org.junit.Test
+-import kotlin.time.Instant
+ 
+ class ObserveStartDestinationUseCaseTest {
+ 
+     private val session = TestSessionRepository()
+     private val useCase = ObserveStartDestinationUseCase(session)
+-    private val consent = ConsentRecord(setOf(ConsentPurpose.AI_PROCESSING), Instant.fromEpochMilliseconds(1), "2026-10-b")
+ 
+     @Test
+-    fun withOnboardingIncompleteTheStartIsWelcome() = runTest {
++    fun withOnboardingIncompleteTheStartIsSignIn() = runTest {
+         useCase().test {
+-            assertThat(awaitItem()).isEqualTo(StartDestination.Welcome)
++            assertThat(awaitItem()).isEqualTo(StartDestination.SignIn)
+         }
+     }
+ 
+@@ -27,7 +23,6 @@ class ObserveStartDestinationUseCaseTest {
+     fun withOnboardingCompleteTheStartIsApplications() = runTest {
+         session.saveAccount(SignInAccount.localAccount)
+         session.markOnboardingComplete()
+-        session.recordConsent(consent)
+ 
+         useCase().test {
+             assertThat(awaitItem()).isEqualTo(StartDestination.Applications)
+@@ -35,15 +30,14 @@ class ObserveStartDestinationUseCaseTest {
+     }
+ 
+     @Test
+-    fun signingOutReturnsTheStartToWelcome() = runTest {
++    fun signingOutReturnsTheStartToSignIn() = runTest {
+         session.saveAccount(SignInAccount.localAccount)
+         session.markOnboardingComplete()
+-        session.recordConsent(consent)
+ 
+         useCase().test {
+             assertThat(awaitItem()).isEqualTo(StartDestination.Applications)
+             session.signOut()
+-            assertThat(awaitItem()).isEqualTo(StartDestination.Welcome)
++            assertThat(awaitItem()).isEqualTo(StartDestination.SignIn)
+         }
+     }
+ 
+@@ -51,35 +45,33 @@ class ObserveStartDestinationUseCaseTest {
+     fun signingInAgainAfterSignOutReturnsTheStartToApplications() = runTest {
+         session.saveAccount(SignInAccount.localAccount)
+         session.markOnboardingComplete()
+-        session.recordConsent(consent)
+         session.signOut()
+ 
+         useCase().test {
+-            assertThat(awaitItem()).isEqualTo(StartDestination.Welcome)
++            assertThat(awaitItem()).isEqualTo(StartDestination.SignIn)
+             session.saveAccount(SignInAccount.localAccount)
+             assertThat(awaitItem()).isEqualTo(StartDestination.Applications)
+         }
+     }
+ 
+     @Test
+-    fun withOnboardingCompleteAndNoAccountTheStartIsWelcome() = runTest {
++    fun withOnboardingCompleteAndNoAccountTheStartIsSignIn() = runTest {
+         session.markOnboardingComplete()
+ 
+         useCase().test {
+-            assertThat(awaitItem()).isEqualTo(StartDestination.Welcome)
++            assertThat(awaitItem()).isEqualTo(StartDestination.SignIn)
+         }
+     }
+ 
+     @Test
+-    fun clearingTheSessionReturnsTheStartToWelcome() = runTest {
++    fun clearingTheSessionReturnsTheStartToSignIn() = runTest {
+         session.saveAccount(SignInAccount.localAccount)
+         session.markOnboardingComplete()
+-        session.recordConsent(consent)
+ 
+         useCase().test {
+             assertThat(awaitItem()).isEqualTo(StartDestination.Applications)
+             session.clear()
+-            assertThat(awaitItem()).isEqualTo(StartDestination.Welcome)
++            assertThat(awaitItem()).isEqualTo(StartDestination.SignIn)
+         }
+     }
+ }
+diff --git a/feature/onboarding/impl/src/test/kotlin/com/tailormyresume/feature/onboarding/impl/navigation/NavKeyPlaceholderEntryTest.kt b/feature/onboarding/impl/src/test/kotlin/com/tailormyresume/feature/onboarding/impl/navigation/NavKeyPlaceholderEntryTest.kt
+index a045e643..cc0b82af 100644
+--- a/feature/onboarding/impl/src/test/kotlin/com/tailormyresume/feature/onboarding/impl/navigation/NavKeyPlaceholderEntryTest.kt
++++ b/feature/onboarding/impl/src/test/kotlin/com/tailormyresume/feature/onboarding/impl/navigation/NavKeyPlaceholderEntryTest.kt
+@@ -11,12 +11,8 @@ import androidx.navigation3.runtime.entryProvider
+ import androidx.test.ext.junit.runners.AndroidJUnit4
+ import com.tailormyresume.core.navigation.NavigationState
+ import com.tailormyresume.core.navigation.Navigator
+-import com.tailormyresume.feature.onboarding.api.navigation.ConfirmFactsNavKey
+-import com.tailormyresume.feature.onboarding.api.navigation.ConsentNavKey
+ import com.tailormyresume.feature.onboarding.api.navigation.ImportResumeNavKey
+-import com.tailormyresume.feature.onboarding.api.navigation.PasteJobDescriptionNavKey
+ import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
+-import com.tailormyresume.feature.onboarding.api.navigation.WelcomeNavKey
+ import org.junit.Rule
+ import org.junit.Test
+ import org.junit.runner.RunWith
+@@ -39,16 +35,6 @@ class NavKeyPlaceholderEntryTest {
+         ),
+     )
+ 
+-    @Test
+-    fun welcomeNavKeyShowsItsName() {
+-        val key: NavKey = WelcomeNavKey()
+-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { onboardingEntry(navigator) }
+-
+-        composeRule.setContent { provider(key).Content() }
+-
+-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+-    }
+-
+     @Test
+     fun signInNavKeyShowsItsName() {
+         val key: NavKey = SignInNavKey()
+@@ -59,16 +45,6 @@ class NavKeyPlaceholderEntryTest {
+         composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+     }
+ 
+-    @Test
+-    fun consentNavKeyShowsItsName() {
+-        val key: NavKey = ConsentNavKey()
+-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { onboardingEntry(navigator) }
+-
+-        composeRule.setContent { provider(key).Content() }
+-
+-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+-    }
+-
+     @Test
+     fun importResumeNavKeyShowsItsName() {
+         val key: NavKey = ImportResumeNavKey()
+@@ -78,24 +54,4 @@ class NavKeyPlaceholderEntryTest {
+ 
+         composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+     }
+-
+-    @Test
+-    fun confirmFactsNavKeyShowsItsName() {
+-        val key: NavKey = ConfirmFactsNavKey()
+-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { onboardingEntry(navigator) }
+-
+-        composeRule.setContent { provider(key).Content() }
+-
+-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+-    }
+-
+-    @Test
+-    fun pasteJobDescriptionNavKeyShowsItsName() {
+-        val key: NavKey = PasteJobDescriptionNavKey()
+-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { onboardingEntry(navigator) }
+-
+-        composeRule.setContent { provider(key).Content() }
+-
+-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+-    }
+ }
+diff --git a/feature/profile/impl/src/test/kotlin/com/tailormyresume/feature/profile/impl/navigation/NavKeyPlaceholderEntryTest.kt b/feature/profile/impl/src/test/kotlin/com/tailormyresume/feature/profile/impl/navigation/NavKeyPlaceholderEntryTest.kt
+index da7ccf9b..80292f6c 100644
+--- a/feature/profile/impl/src/test/kotlin/com/tailormyresume/feature/profile/impl/navigation/NavKeyPlaceholderEntryTest.kt
++++ b/feature/profile/impl/src/test/kotlin/com/tailormyresume/feature/profile/impl/navigation/NavKeyPlaceholderEntryTest.kt
+@@ -11,9 +11,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
+ import com.tailormyresume.core.navigation.NavigationState
+ import com.tailormyresume.core.navigation.Navigator
+ import com.tailormyresume.core.screenshot.TmrTestDevices
+-import com.tailormyresume.feature.profile.api.navigation.FactEditorNavKey
+-import com.tailormyresume.feature.profile.api.navigation.FactEvidenceNavKey
+-import com.tailormyresume.feature.profile.api.navigation.GuidedProfileFormNavKey
+ import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
+ import org.junit.Rule
+ import org.junit.Test
+@@ -46,34 +43,4 @@ class NavKeyPlaceholderEntryTest {
+ 
+         composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+     }
+-
+-    @Test
+-    fun factEditorNavKeyRendersKeySimpleName() {
+-        val key: NavKey = FactEditorNavKey(entryId = null)
+-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { profileEntry(navigator) }
+-
+-        composeRule.setContent { provider(key).Content() }
+-
+-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+-    }
+-
+-    @Test
+-    fun guidedProfileFormNavKeyRendersKeySimpleName() {
+-        val key: NavKey = GuidedProfileFormNavKey()
+-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { profileEntry(navigator) }
+-
+-        composeRule.setContent { provider(key).Content() }
+-
+-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+-    }
+-
+-    @Test
+-    fun factEvidenceNavKeyRendersKeySimpleName() {
+-        val key: NavKey = FactEvidenceNavKey()
+-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { profileEntry(navigator) }
+-
+-        composeRule.setContent { provider(key).Content() }
+-
+-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
+-    }
+ }
+diff --git a/feature/settings/impl/src/test/kotlin/com/tailormyresume/feature/settings/impl/navigation/SettingsEntryProviderTest.kt b/feature/settings/impl/src/test/kotlin/com/tailormyresume/feature/settings/impl/navigation/SettingsEntryProviderTest.kt
+index a8934300..0c6ea0af 100644
+--- a/feature/settings/impl/src/test/kotlin/com/tailormyresume/feature/settings/impl/navigation/SettingsEntryProviderTest.kt
++++ b/feature/settings/impl/src/test/kotlin/com/tailormyresume/feature/settings/impl/navigation/SettingsEntryProviderTest.kt
+@@ -13,10 +13,8 @@ import com.tailormyresume.core.designsystem.theme.TmrTheme
+ import com.tailormyresume.core.navigation.NavigationState
+ import com.tailormyresume.core.navigation.Navigator
+ import com.tailormyresume.core.screenshot.TmrTestDevices
+-import com.tailormyresume.feature.settings.api.navigation.AccountDeletedNavKey
+ import com.tailormyresume.feature.settings.api.navigation.DeleteAccountNavKey
+ import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
+-import com.tailormyresume.feature.settings.api.navigation.YourDataNavKey
+ import org.junit.Rule
+ import org.junit.Test
+ import org.junit.runner.RunWith
+@@ -42,9 +40,7 @@ class SettingsEntryProviderTest {
+         val provider = entryProvider { settingsEntry(navigator) }
+         val keys = listOf<NavKey>(
+             SettingsNavKey(),
+-            YourDataNavKey(),
+             DeleteAccountNavKey(),
+-            AccountDeletedNavKey,
+         )
+ 
+         composeRule.setContent {

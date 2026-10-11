@@ -1,0 +1,67 @@
+{
+  "head_sha": "3691af871a00d82eeee1c1b96e08c3e6befc0b57",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "errors.ts adds 422 to ApiStatus and maps NOT_A_JOB_POST and JOB_IMPORT_FAILED to 422 in the exhaustive Record; errorResponseBody returns the real message for non-500. Test 'NOT_A_JOB_POST and JOB_IMPORT_FAILED are 422 with the error body' covers both codes; typecheck passes at head."},
+    {"id": "c2", "status": "met", "evidence": "analyses.ts 232-243 runs after runStructuredCall settled the ai_usage row (structured.ts 157-165) and before markUsed, so the claim is released and no allowance is spent; the row counts toward the per-user dailyCallQuota 50 and the app-wide $5 cap (service.ts 96-110), so it is no quota dodge (routes without an allowance already allow 50 calls). Test asserts 422, zero claims, one ai_usage row and analysesLeftToday 2 after, for the flagged and empty cases."},
+    {"id": "c3", "status": "met", "evidence": "locationOf trims, nulls blank and cuts to 120; the prompt (line 170) now asks for the location as written with work mode, example 'Bengaluru · Hybrid'. Tests cover trimmed, blank, missing, 300 chars and a 'Bengaluru · Hybrid' fake answer. The real model is covered only by the paid eval (D13)."},
+    {"id": "c4", "status": "met", "evidence": "reasonFor returns 'Not clear in your resume' for GAP before reading the model reason, including a MET downgraded to GAP by unknown ids; the test fails if reverted."},
+    {"id": "c5", "status": "partial", "evidence": "The literal checks (over 120, empty, uncited number, now whole-token) fall back and are tested, and every match carries a 1-120 char reason. But reasons can still assert facts absent from the cited facts (findings 1-3: first-word and number-word gaps, numbers taken from inside 'Q4' or 'S3', stated-skill reasons that claim verified experience), so the 'built only from cited evidence' scope and Constitution I.1 are not fully met."},
+    {"id": "c6", "status": "met", "evidence": "Id numbering, status normalisation, evidence filtering and the stated-skill PARTIAL cap are unchanged (keptIds is the old expression); jobSchema and matchSchema stay strictObject with optional location and reason, tested in tailormyresume-module.test.ts. Lead replacement 18980df only gives the repeat fixture one GAP requirement (an empty list is now NOT_A_JOB_POST) and adds expected reasons; no assertion removed, justified in the PR body."},
+    {"id": "c7", "status": "partial", "evidence": "npm run typecheck passes locally at head; no local Postgres, so the test suite was not rerun here. The PR reports 535 pass and 1 expected golden failure (lead-only fixture replacement); CI Validation was still queued at review time."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 112,
+      "rule": "Constitution I.1; issue scope: reason built only from cited evidence; Reviewer A M2 disposition",
+      "trigger": "Cited text 'Cleaned weekly sales data for 40 stores.' with MET reasons 'Tableau dashboards built weekly', 'Infosys work cleaning sales data', 'Led a team of thirty', 'Handled thousands of tickets', 'Used at infosys for sales data': all five are returned unchanged (verified by running reasonFor). The first word is never checked, number words stop at twenty and miss plurals (thousands, hundreds), dozen, lakh and crore, and a lowercase name is never checked.",
+      "title": "A tool, employer or number word in the first position, above twenty, plural, or lowercase passes the cited-text check",
+      "proof": "Add these five reasons to the 'a proper noun or a number word that is not in the cited text falls back' test citing EXP-01-1; expected 'Shown in your resume' for each, actual reason kept."
+    },
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 98,
+      "rule": "Constitution I.1; Reviewer A M1 disposition (numbers as whole tokens)",
+      "trigger": "numberTokens on the cited side has no word boundary, so cited 'Built Q4 reports' yields '4' and cited 'Stored files in AWS S3' yields '3'; MET reasons '4 years of reporting' and '3 years of AWS work' are returned unchanged, inventing a duration. A cited number can also be moved to a new noun: '40 people managed in sales' is kept against '40 stores'.",
+      "title": "Cited numbers are taken from inside words like Q4 and S3, so invented durations pass",
+      "proof": "MET citing a bullet 'Built Q4 reports' with reason '4 years of reporting'; expected 'Shown in your resume', actual reason kept. Fix: extract cited numbers with (?<![\\p{L}\\d])\\d+(?:[.,]\\d+)*(?![\\p{L}\\d]) (u flag)."
+    },
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 281,
+      "rule": "Constitution I.1 and the stated-skill rule (hirehop#222): a stated skill is never presented as verified or professional experience",
+      "trigger": "Profile with userStatedSkills ['SQL']; model answers MET citing only skill:SQL with reason 'Professional SQL experience, verified'. The status is capped to PARTIAL, but the cited text is 'SQL (stated by the candidate, not verified experience)', so 'SQL' and even 'verified' are cited words and the reason is returned, claiming verified experience for a self-stated skill.",
+      "title": "A reason for a match backed only by stated skills can call the skill verified or professional experience",
+      "proof": "Stated-skill test: MET with evidenceIds ['skill:SQL'] (stated) and reason 'Professional SQL experience, verified'; expected 'Partly shown in your resume', actual reason kept. Fix: when every kept id is a stated skill, use the fixed PARTIAL phrase."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 90,
+      "rule": "Constitution I.3: no ATS pass or interview guarantee claim; Reviewer A L (I.3) disposition",
+      "trigger": "'Passes applicant tracking systems', 'Great chances of an interview', 'Matching sales data experience' are kept: the regex lists closed suffixes, so chances, guarantees, scores, matching, fitting, perfectly pass, and the spelled-out 'applicant tracking' is not listed.",
+      "title": "Wording filter misses inflections and the spelled-out ATS phrase",
+      "proof": "Add the three reasons to the 'fit wording falls back' test; expected 'Shown in your resume', actual reason kept."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 171,
+      "rule": "Scale constraint: reasons must fit the existing call budget (maxOutputTokens 8000, 45 s syncDeadlineMs)",
+      "trigger": "The prompt says 'a GAP may carry any short reason', so the model spends about 25 output tokens per GAP on text the server always replaces with the fixed phrase; on a 40-requirement JD with many gaps that is up to about 1k wasted output tokens and generation time inside the 45 s deadline.",
+      "title": "The prompt invites GAP reasons that the server always discards"
+    },
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 280,
+      "rule": "Rule 27: docs updated in the same PR; plan c7",
+      "trigger": "The /analyses bullet says a MET or PARTIAL reason is kept only if every number appears in the cited text; after coder pass 2 the code also rejects uncited capitalised words and number words, the listed fit/ATS wording, and an over-120 model reason no longer fails the call (.catch). The doc describes the pass-1 rule.",
+      "title": "Architecture doc describes only the number rule for reasons"
+    }
+  ]
+}

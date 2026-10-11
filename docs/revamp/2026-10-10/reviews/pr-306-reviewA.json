@@ -1,0 +1,93 @@
+{
+ "head_sha": "58a311910a8b4d41ba91bbc248eac49dc829b7d5",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "266-c1",
+   "status": "met",
+   "evidence": "everyPoseHasSpec checks values for 3 poses; the other 8 rely on hero_paige_* baselines (assertNotNull on a non-null spec is vacuous)."
+  },
+  {
+   "id": "266-c2",
+   "status": "partial",
+   "evidence": "reducedClockStaysZero fails if the loop runs under reduced; reducedHasZeroTimeTransformAtAllTimes only calls the pure functions with the Reduced token set (amplitudes 0), not TmrPaige's graphicsLayer."
+  },
+  {
+   "id": "266-c3",
+   "status": "met",
+   "evidence": "translationYIs5dpAtQuarterPeriod asserts 5 dp from paigeTranslationYDp; fails if amplitude or period changes. graphicsLayer-only use is not asserted but is visible in code."
+  },
+  {
+   "id": "266-c4",
+   "status": "met",
+   "evidence": "paigeIsNotATalkBackStop fails if a contentDescription or focusable is added; it would not fail if clearAndSetSemantics were removed, since a bare Canvas has no semantics. Adequate guard for the stated regressions."
+  },
+  {
+   "id": "266-c5",
+   "status": "met",
+   "evidence": "headlineTwoLines fails if maxLines=2 is removed (long headline at 300 dp) or font sizes change; radius, padding and colour covered by hero_card_* baselines."
+  },
+  {
+   "id": "266-c6",
+   "status": "met",
+   "evidence": "disabledTapRunsOnDisabledClickOnly and disabledReportsButtonWithStateDescription can fail; fill #222222 is only screenshot-covered."
+  },
+  {
+   "id": "266-c7",
+   "status": "met",
+   "evidence": "enabledColoursAndMinHeight asserts label colour and 56 dp min height; lime fill and font 2.0 clipping are screenshot-covered."
+  },
+  {
+   "id": "266-c8",
+   "status": "met",
+   "evidence": "Screenshot-only by design; not in my review scope."
+  },
+  {
+   "id": "266-c9",
+   "status": "met",
+   "evidence": "Role.RadioButton and Selected asserted for both states and click; colours via baselines."
+  },
+  {
+   "id": "266-c10",
+   "status": "met",
+   "evidence": "Role.Switch, ToggleableState and callback asserted; toggleable passes the new value natively."
+  },
+  {
+   "id": "266-c11",
+   "status": "met",
+   "evidence": "Label as accessible name and readOnly (SetText absent) asserted; amber, fill and TextArea/LabeledField covered by baselines only."
+  },
+  {
+   "id": "266-c12",
+   "status": "met",
+   "evidence": "PR body reports verify-local.sh pass; not re-run by me."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/hero/TmrHeroTest.kt",
+   "line": 99,
+   "rule": "266-c2 / issue AC: a test asserts that under reduced Paige's offset is 0 at any frame time",
+   "trigger": "If TmrPaige's graphicsLayer were changed to call paigeTranslationYDp(TmrMotionDefaults.Default, ...) or read the motion from elsewhere, so Paige bobs under reduced motion, every test still passes: this test only calls the pure functions with the Reduced token set, and the clock test only covers rememberPaigeTimeMs.",
+   "title": "Reduced-motion test never measures the composable",
+   "proof": "Render TmrPaige(Tailoring) under LocalTmrMotion=Reduced with mainClock advanced, and assert the graphicsLayer translationY and rotationZ stay at the static pose values; the test fails if the graphicsLayer used non-reduced motion."
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/hero/TmrHeroTest.kt",
+   "line": 46,
+   "rule": "266-c1",
+   "trigger": "assertNotNull on pose.spec(), a non-null Kotlin return, always passes, so a wrong spec for any of the 8 poses without value assertions (e.g. Upload eyeWidth) is not caught by this test.",
+   "title": "everyPoseHasSpec is vacuous for 8 of 11 poses"
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/input/TmrInputTest.kt",
+   "line": 94,
+   "rule": "266-c6, c7",
+   "trigger": "Changing the disabled fill from #222222 or the enabled fill from lime changes no assertion; only the label colour and height are checked, so the fill relies on the baselines alone.",
+   "title": "Button fill colours are not asserted outside screenshots"
+  }
+ ]
+}

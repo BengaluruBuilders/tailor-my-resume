@@ -1,0 +1,45 @@
+{
+  "head_sha": "561b6f2b19992bd37c9a90a67bd7f1fe4ff3ba99",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "drizzle/0008_credit_ledger.sql is the generated CREATE TABLE plus the cascade FK and the (user_id, created_at) index, with no existing migration edited. test/tailormyresume-ledger.test.ts:188 pins the columns, nullability, the single CASCADE FK, both checks (23514 for BONUS and for 0) and the index. The schema-drift test passes in CI Validation."},
+    {"id": "c2", "status": "met", "evidence": "drizzle/0009_credit_ledger_backfill.sql inserts one MIGRATION row per wallet where free+purchased <> 0, which matches the amount <> 0 check. ledger test:250 seeds (1,0), (0,7), (2,5) and (0,0) and gets [1,1], [1,7], [1,7] and [0,0]. The test re-applies the SQL text on a fully migrated DB, not through the migrator on a DB stopped at 0008. The SQL is the same file, so this is accepted. Drizzle runs all pending migrations in one transaction (node_modules/drizzle-orm/pg-core/dialect.js:60). Re-runs are guarded only by __drizzle_migrations, and the backfill has no NOT EXISTS guard."},
+    {"id": "c3", "status": "met", "evidence": "wallet.ts:45-58 uses insert ... onConflictDoNothing().returning() and writes WELCOME only when a row was inserted, in the caller's withLiveUser transaction. Every ensureWallet caller (wallet.ts:142,175, routes.ts:67, export.ts:25, purchases.ts:217,258, tailoring.ts:105) runs inside withLiveUser. ledger test:284 shows two calls give one row."},
+    {"id": "c4", "status": "met", "evidence": "purchases.ts:288 calls recordLedger inside `if (inserted)` in the same transaction as the counter update. The amount and productId come from config `pack`, never from the request. ledger test:294 covers the first grant, a repeat with the same token, and two concurrent posts, each with exactly one PURCHASE row whose purchase_id equals the purchase id."},
+    {"id": "c5", "status": "met", "evidence": "ledger.ts:47-61 filters by userId, orders by created_at desc then id desc, and has a fixed limit of 100. The client controls no pagination parameter. routes.ts:61-86 reads balance from the wallet counters. ledger test:332 uses 120 rows with tied timestamps and checks 100 entries, the order, the tie-break and ISO createdAt. A strictObject check confirms that purchase_id and tailoring_id are not exposed."},
+    {"id": "c6", "status": "met", "evidence": "userId comes only from requireAppUser (src/core/auth/middleware.ts:22-33), and routes.ts:51 returns 404 for other apps. withLiveUser (src/core/accounts/service.ts:41-60) checks the tombstone before ensureWallet runs. ledger test:359 covers B not seeing A's rows, 404, 401 for a missing token, 401 for an invalid token, and 409 ACCOUNT_DELETED with no rows."},
+    {"id": "c7", "status": "met", "evidence": "wallet.ts:119 adds credits and keeps every old field. walletBody spreads it into the wallet, purchase and unlock responses. The ledger test's walletShape (test/tailormyresume-ledger.test.ts:114-120) requires credits: z.number() and asserts 6 and 5 on the purchase and unlock responses (lines 398-425), and that test would fail on a revert. The planned lead-only edits to test/tailormyresume-wallet.test.ts:93 are therefore redundant and not required. That walletShape strips credits, so a credits: 1 there would only duplicate this coverage. The schema-migration.test.ts edit is justified: it asserts the exact public table list (lines 13-28), and the new table must be named there. The edit adds coverage and weakens nothing."},
+    {"id": "c8", "status": "met", "evidence": "export.ts:60 calls readAllLedger (ledger.ts:63-73), which has no limit and sorts asc by created_at, then id, in the same withLiveUser transaction. The 106-row strictObject case at ledger test:427 proves the export is not capped at 100, keeps oldest-first order and leaks no purchase_id or tailoring_id."},
+    {"id": "c9", "status": "met", "evidence": "The FK is ON DELETE cascade (0008:15), and the rows step deletes users in its transaction (src/core/accounts/service.ts:167-174). test/accounts-deletion.test.ts adds a case that keeps the ledger for alice and bob through a Firebase failure and the retry. A second cascade case is at ledger test:465."},
+    {"id": "c10", "status": "met", "evidence": "At 561b6f2, CI Validation (npm run check) passes. Secret scan and delivery-gates-pregate were still queued at review time. The issue's post-deploy check that GET /credits answers on Fly is outside this PR (Refs #89)."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/wallet.ts",
+      "line": 196,
+      "rule": "Ledger integrity: every credit movement writes one ledger row in the counter's transaction (issue AC: balance equals the sum of ledger amounts)",
+      "trigger": "#89 is deployed without #90. A new user calls GET /wallet (WELCOME +1), then the app on main calls POST /applications/X/unlock (D12 keeps that route spending). spendCredit decrements free_credits to 0 and writes no ledger row. GET /credits then answers balance 0 with entries [WELCOME +1]. The gap is permanent, because #90 makes unlock non-spending and backfills nothing. Any purchase before an unlock drifts the same way. This is not the accepted deploy-window drift: that drift is a few minutes of old-image writes, but this one is new-image writes for as long as #89 runs ahead of #90.",
+      "title": "Unlock still spends credits with no ledger row, so GET /credits history disagrees with the balance until #90 lands",
+      "proof": "Extend ledger test:398: after the unlock, assert sum(amount) for 'shape' equals unlocked.credits (it is 6 and should be 5). Fix: in the spend branch of unlockApplication, call recordLedger(transaction, userId, {kind: 'TAILORING', amount: -1, applicationId}). Alternatively, merge #90 right after #89, so the deploy job skips #89's commit because it is not the main tip."
+    },
+    {
+      "severity": "low",
+      "file": "test/tailormyresume-ledger.test.ts",
+      "line": 503,
+      "rule": "Down path: the reversal must be safe in the deploy window (migrate runs before the new image, deploy.yml:56-74)",
+      "trigger": "The rollback test drops the table and re-reads only an existing wallet ('dropper'). The PR's planned forward DROP migration would run while this image still serves traffic, because deploy.yml migrates before flyctl deploy. During that window a new user's GET /wallet calls ensureWallet, then recordLedger, and fails with 42P01, so the request answers 500. A first purchase grant rolls back the same way. The test cannot catch this.",
+      "title": "The drop rollback test misses the new-wallet path; the documented reversal breaks wallet creation for the deploy window",
+      "proof": "Add walletOf('fresh-after-drop') after the DROP at line 490; it answers 500. Record in the PR that the reversal takes two deploys: first ship code that stops writing the ledger, then drop the table."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/wallet.ts",
+      "line": 54,
+      "rule": "Check constraint amount <> 0 (0008:12). The backfill guards the zero case but ensureWallet does not.",
+      "trigger": "If tailormyresumeConfig.startingFreeCredits is set to 0 (config.ts:5, for example to remove the welcome credit), every first wallet creation inserts WELCOME with amount 0 and violates the check (23514). That makes GET /wallet, /credits, /purchases, unlock, /tailorings and /me/export answer 500 for every new user.",
+      "title": "A WELCOME row is written even when startingFreeCredits is 0, which the amount check rejects",
+      "proof": "Change the condition to `created.length > 0 && tailormyresumeConfig.startingFreeCredits !== 0`. A unit test can stub the config to 0 and assert that GET /wallet answers 200 with no ledger row."
+    }
+  ]
+}

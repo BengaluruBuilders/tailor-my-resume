@@ -1,0 +1,50 @@
+{
+ "head_sha": "b14dbe9858062ffc47c42b896bd0274cbf2a5121",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "276-c1", "status": "met", "evidence": "JobViewModelTest.emptyStateHasNoTextAndAnalyzeDisabled; job_empty 1x and font-200 baselines opened: hero, text area, Paste/Use a link stacked at 2.0, hint wraps whole words; step bar and back come from the shell"},
+  {"id": "276-c2", "status": "met", "evidence": "transformLatest with a 300 ms delay, flowOn(Default), only at >= 200 trimmed chars; JobViewModelTest detected-label tests; Reviewer A low 1 adjudicated below"},
+  {"id": "276-c3", "status": "met", "evidence": "JobRoute reads the clipboard only inside the onPaste tap lambda; paste/clear/typing tests"},
+  {"id": "276-c4", "status": "met", "evidence": "isPlausibleJobPost trims, MIN 200, MAX 20,000 cited to BACKEND_CONTRACT.md:237; onAnalyze returns before any use-case call; boundary and padding tests"},
+  {"id": "276-c5", "status": "met", "evidence": "AiFailure.NotAJobPost sets the flag, no upsert; backendNotAJobPostShowsSameStateAndCreatesNothing"},
+  {"id": "276-c6", "status": "met", "evidence": "Analyze -> ticker (5..95, capped) -> AnalyzeJobUseCase -> JobApplication(SAVED, tailoredResume = null, coverage now/upTo) upserted -> draftStore.clear() -> JobEvent.Analyzed -> navigator.navigateToJobResult; no credit or tailor call (noCreditOrTailorCallOnAnalyze; AnalyzeJobUseCase only calls JobAnalysisSource)"},
+  {"id": "276-c7", "status": "met", "evidence": "every other AiException/Exception (Network, RateLimited, AllowanceExhausted, missing profile) -> the drawn Retry toast, text kept; CancellationException rethrown; no new error state"},
+  {"id": "276-c8", "status": "met", "evidence": "joblink baselines opened at 1x and font-200; AnalysisEntryWiringTest renders the real entry; plan's URL keyboard is missing (finding 2)"},
+  {"id": "276-c9", "status": "partial", "evidence": "VM checks https prefix, non-blank and <= 2048 before calling the importer; RemoteJobImporter sends only JobImportRequest(url) and re-checks https; no retry anywhere on 429 (remoteAi maps once, importer called exactly once); no Log/println in feature code; every failure -> markNotAJobPost + goBack. The landing state after a failed import has a dead Analyze button and hides Paste/Use a link (finding 1)"},
+  {"id": "276-c10", "status": "met", "evidence": "hint is 'for the most accurate analysis' (D51); JobCopyTest regex covers match/fit/ATS; Constitution policy check green"},
+  {"id": "276-c11", "status": "met", "evidence": "all five font-200 baselines opened: content sits in verticalScroll, so the not-a-job-post card and Analyze below the fold are reachable, not clipped; the baseline gap is Reviewer A low 3"},
+  {"id": "276-c12", "status": "partial", "evidence": "CI on b14dbe98: Constitution, pregate, Static, Core/Feature/App unit, Screenshot, Lint SUCCESS; Assemble APKs IN_PROGRESS at review time"},
+  {"id": "276-x1", "status": "met", "evidence": "10 baselines present; opened job_empty, job_notAJobPost and joblink_default at font-200 and job_notAJobPost at 1x (matches the prototype layout and copy)"},
+  {"id": "276-x2", "status": "met", "evidence": "retryToastStaysWithScreenReader; assertNoTruncatedText runs on every captured state"},
+  {"id": "276-x3", "status": "met", "evidence": "no tween/spring/animate* in feature code; Paige still; delay(300) and the 200 ms ticker are logic cadence; the reduced-motion test is vacuous (Reviewer A low 2) but the rule is enforced by check-constitution"},
+  {"id": "276-x4", "status": "unmet", "evidence": "D44 emulator walk pending (stage 12)"},
+  {"id": "D51", "status": "met", "evidence": "tailoredResume = null, CreateApplicationUseCase not used; JobDraftStore cleared after analysis and on every account-id change (observeAccount().map{id}.distinctUntilChanged)"},
+  {"id": "I.5", "status": "met", "evidence": "draft held only in a @Singleton MutableStateFlow, never persisted or logged; sign-out removes ACCOUNT_KEY so observeAccount emits null and the store clears; the JobViewModel text dies with the Main root ViewModelStore (TmrApp keepOnly(FirstRun)); JobDraftStoreTest.accountChangeClearsTheDraft"},
+  {"id": "D55", "status": "met", "evidence": "ShellHarness byte-identical shared harness (c4164a02). AnalysisEntryWiringTest reasoned: VMs are pre-installed under the default key, so hiltViewModel() in JobRoute/JobLinkRoute returns them; a placeholder entry fails fetchSemanticsNode/onNodeWithText('Import job'); an unwired onTextChange leaves the 'Not available yet' stateDescription (asserted non-null first); an unwired onLinkChange or onImport leaves importer.urls empty. It does not exercise the Hilt graph, which D55 allows and Dagger checks at compile time"}
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "feature/analysis/impl/src/main/kotlin/com/tailormyresume/feature/analysis/impl/job/JobScreen.kt",
+   "line": 137,
+   "rule": "276-c9 / D51 (failed import lands on a usable not-a-job-post state)",
+   "title": "After a failed or non-https link import, Add job shows an enabled Analyze button that does nothing and hides Paste from clipboard and Use a link",
+   "trigger": "Use a link -> Import job with any link in demo (OfflineJobImporter always fails, R4), an http link, a blank field, or a prod 429: applyDraft sets text = \"\" and notAJobPost = true, so uiState is HasText(\"\", notAJobPost = true). JobScreen draws 'Job description' + Clear, '0 characters', the amber card and Analyze with enabled = true; onAnalyze returns on empty text, so the tap does nothing and has no 'Not available yet' state. JobPasteActions render only for Empty, so the card asks the user to paste while the Paste button is gone until they tap Clear.",
+   "proof": "JobScreenTest: setScreen(JobUiState.HasText(text = \"\", notAJobPost = true)); assert 'Paste from clipboard' exists and 'Analyze job' carries the 'Not available yet' stateDescription. Fails at this head. Fix: show JobPasteActions and disable Analyze while text is blank."
+  },
+  {
+   "severity": "low",
+   "file": "feature/analysis/impl/src/main/kotlin/com/tailormyresume/feature/analysis/impl/joblink/JobLinkScreen.kt",
+   "line": 66,
+   "rule": "lane plan 276-c8 (Job link field: URL keyboard, single line)",
+   "title": "Job link field opens the text keyboard, not the URL keyboard",
+   "trigger": "Tap the Job link field: TmrTextField exposes no keyboardOptions, so KeyboardType.Uri is never set and the user gets the default text keyboard without '/' or '.com' keys. Fixing it needs a designsystem parameter, so a follow-up is fine."
+  }
+ ],
+ "dispositions": [
+  {"reviewer_a": 1, "severity": "low", "decision": "follow-up", "reason": "Real but short (300 ms, only when one 200+ post replaces another). Emitting null before the delay would blank the label on every keystroke while typing, so it is not obviously better; not a merge blocker."},
+  {"reviewer_a": 2, "severity": "low", "decision": "accept, no action", "reason": "The test is vacuous because the screen has no motion by design (plan c6). x3 is enforced by check-constitution, and deleting the test would trip pregate TEST_DELETED."},
+  {"reviewer_a": 3, "severity": "low", "decision": "follow-up (already listed in the PR)", "reason": "Content is in verticalScroll, so nothing is clipped for the user. The baseline captures only the viewport; the card copy is asserted by JobScreenTest.notAJobPostShowsAmberCard."},
+  {"reviewer_a": 4, "severity": "low", "decision": "fix in-PR", "reason": "JobLinkScreen is the only feature file on the legacy component.TmrPrimaryButton. Swap to component.input.TmrPrimaryButton (gains the disabled stateDescription while importing) and re-record the two joblink baselines."}
+ ]
+}

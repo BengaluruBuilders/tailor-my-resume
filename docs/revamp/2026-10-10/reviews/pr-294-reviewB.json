@@ -1,0 +1,80 @@
+{
+ "head_sha": "db40ccf2bfffbcfa449400f9334813ccaa4245e6",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "258-c1",
+   "status": "met",
+   "evidence": "Run 38076661531 (pull_request, head db40ccf2) finished every code job green: Static checks, Core, Feature and App unit tests, Screenshot tests, Lint and Assemble APKs. Its only failure is Constitution policy at the 'Check PR title' step (the old title); the later run 38076764324 on the same head SHA passed Constitution policy with every step run (title, secret scan, constitution rules)."
+  },
+  {
+   "id": "258-c2",
+   "status": "met",
+   "evidence": "git ls-files feature/onboarding/impl at head lists only build.gradle.kts, OnboardingModule.kt, ContentResolverResumeTextSource.kt, ResumeTextSource.kt, OnboardingEntryProvider.kt, NavKeyPlaceholderEntryTest, StartOverNavigationTest and robolectric.properties. ImportResumeViewModel.kt-e is deleted. The three kept files are not in the diff."
+  },
+  {
+   "id": "258-c3",
+   "status": "met",
+   "evidence": "git ls-files feature/profile/impl lists only build.gradle.kts, guidedform/ContactFieldValidator.kt, ProfileEntryProvider.kt, ContactFieldValidatorTest, NavKeyPlaceholderEntryTest and robolectric.properties. UserFactWriter is gone. Its skills and userStatedSkills bookkeeping survives in core/domain AddUserStatedFactUseCase (line 34), so the W4-E2 skills editor loses no domain logic."
+  },
+  {
+   "id": "258-c4",
+   "status": "met",
+   "evidence": "ContactFieldValidatorTest holds the 4 email and 8 phone assertions from the deleted GuidedFormContactValidationTest, including a.b@c.in, o'brien@example.com and a@b."
+  },
+  {
+   "id": "258-c5",
+   "status": "met",
+   "evidence": "The diff changes only 5 non-deleted files (2 entry providers and 3 tests). ContentResolverResumeTextSource, ResumeTextSource and OnboardingModule are byte-identical to main. The PR body says no ContentResolverResumeTextSource test exists to keep."
+  },
+  {
+   "id": "258-c6",
+   "status": "partial",
+   "evidence": "Code: all 6 onboarding keys and all 4 profile keys are registered and render NavKeyPlaceholder, which is BasicText(key::class.simpleName.orEmpty()). onboardingEntry(navigator: Navigator) and profileEntry(navigator: Navigator) keep their signatures, and assembleDemoDebug/assembleProdDebug compile TmrApp. Test: the NavKeyPlaceholderEntryTest classes call the internal composable directly for 2 keys per module. They never resolve an entry through entryProvider, so they do not prove registration (Reviewer A low 1, upheld)."
+  },
+  {
+   "id": "258-c7",
+   "status": "partial",
+   "evidence": "In tracked sources, grep -rlE 'Consent|Welcome|EvidencePath|GuidedForm|ConfirmFacts' matches OnboardingEntryProvider.kt, which is allowed, and StartOverNavigationTest.kt, which this PR does not touch. That test covers the surviving onboarding-api function navigateToWelcome. Deleting it would remove coverage of code that still exists, and moving it would mean editing feature/onboarding/api, which is out of scope. The PR body discloses the exception. #260 deletes WelcomeNavKey and must rewrite or delete this test there (Reviewer A low 2: accept the deviation, no change needed in this PR)."
+  },
+  {
+   "id": "258-c8",
+   "status": "met",
+   "evidence": "No PNG is tracked under either src/test/screenshots after the change, and the 187 deleted baselines go with their ScreenshotTest classes. The 273 TEST_DELETED lines in the pre-review gate each name a screen, ViewModel or writer that this PR deletes."
+  },
+  {
+   "id": "258-c9",
+   "status": "met",
+   "evidence": "Constitution policy is green on the head (job 114285260970). The PR body reports verify-local exit 0. The CI Lint job passed, which shows no UnusedResources. Added lines contain no comments, no tools:ignore and no lint-baseline file."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/navigation/OnboardingEntryProvider.kt",
+   "line": 26,
+   "rule": "Reviewer B brief: nothing that a W4 screen would reuse may be deleted. PLAN.md section 2 rewrites ImportResumeNavKey as Reading (W4-A2), and fix #241/#246 (PR #251) lives in the deleted code.",
+   "trigger": "The deleted ImportResumeViewModel.onParsed/withFreshFactIds/userFacts was the only code that saves a parsed resume. It re-ids every parsed entry through FactIdAllocator against the kept facts, marks entries IMPORTED and unconfirmed, keeps non-IMPORTED user facts and replaces earlier imported ones. ImportResumeIdCollisionTest, ImportResumeKeptEntriesTest and ImportedContinuationTest go with it, and no core/domain use case does this job (FactIdAllocator is used only by AddUserStatedFact(s)UseCase). The W4-A2 issue names only ResumeTextParser. A Reading screen built from that brief that saves parser output directly brings back #241 (parsed ids collide with user-stated fact ids), and a re-upload drops the user's own facts.",
+   "title": "The parse-and-save rules for imported resumes (#241 ids, kept user facts) have no surviving home or test, and W4-A2 does not carry them",
+   "proof": "Port ImportResumeIdCollisionTest and ImportResumeKeptEntriesTest (from main) to the W4-A2 Reading ViewModel or to a new core/domain import use case. Disposition: add these rules and the two tests to the W4-A2 issue. A code change in this PR is not needed, because the issue requires deleting the ViewModel."
+  }
+ ],
+ "adjudication": [
+  {
+   "reviewer_a_finding": "low: placeholder tests do not verify that each NavKey has a registered entry (profile NavKeyPlaceholderEntryTest.kt:21)",
+   "decision": "upheld",
+   "reason": "Both NavKeyPlaceholderEntryTest classes call NavKeyPlaceholder directly. If an entry<...> block is deleted, every test still passes. Sibling PR #299 (AnalysisEntryProviderTest) resolves keys through entryProvider { analysisEntry(navigator) }, so the same lane wave has a cheap pattern for this. Fix: resolve all 6 onboarding keys and all 4 profile keys through entryProvider { onboardingEntry(navigator) } / { profileEntry(navigator) } and assert each simple name."
+  },
+  {
+   "reviewer_a_finding": "low: StartOverNavigationTest.kt still mentions Welcome",
+   "decision": "accept the deviation, no code change",
+   "reason": "The test covers the onboarding-api function navigateToWelcome, which still exists. Deleting it would remove coverage of surviving code, and moving it is out of scope (feature/*/api). The PR body discloses it. #260 deletes WelcomeNavKey and PasteJobDescriptionNavKey, its compile breaks this test and the onboarding NavKeyPlaceholderEntryTest (PasteJobDescriptionNavKey), and its scope already covers navigation tests."
+  }
+ ],
+ "notes": [
+  "Sonnet-written stub lines (OnboardingEntryProvider.kt 16-38, ProfileEntryProvider.kt 14-30) and the onboarding test key rename (Welcome/Consent to SignIn/PasteJobDescription) are correct. All 10 keys are registered, the parameter types are unchanged, and the rename keeps 258-c7. Two of the sample keys (PasteJobDescriptionNavKey, FactEvidenceNavKey) are deleted by #260, which already plans to edit these tests.",
+  "Consent cleanup for #260 is not affected. The diff touches only feature/onboarding/impl and feature/profile/impl. StoredSessionRepository.clear()/clearConsent (CONSENT_KEY session.consent), SignOutCleaner.clearConsent, ConsentRevoker and RemoteSignInGateway.clearConsent are unchanged at head.",
+  "No added line contains a comment, so the grounding test has nothing to check.",
+  "W4-A1 keeps SignInGateway (core/domain), and W4-E2 keeps AddUserStatedFactUseCase (skills and userStatedSkills) and ContactFieldValidator."
+ ]
+}

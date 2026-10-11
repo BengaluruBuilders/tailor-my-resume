@@ -1,0 +1,103 @@
+{
+  "head_sha": "9b5c52dafe19e8c560cbf3094af655d825a2d4ee",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "264-c1",
+      "status": "met",
+      "evidence": "Palette.kt sets all 30 PLAN 3.1 values plus scrim 0xA6000000. Each one matches the README Look table, except textDisabled, which is #7D7D7D under D32. TmrPaigeColorValuesTest pins every hex value. The legacy members are computed aliases in Color.kt."
+    },
+    {
+      "id": "264-c2",
+      "status": "met",
+      "evidence": "Type.kt defines Space Mono 400 and 700, and Space Grotesk as one variable file with four Font entries that set FontVariation.weight to 400, 500, 600 and 700. minSdk is 26, so the variation settings apply. The fvar default is 300, so each entry has to set its weight explicitly, and each one does. The specimen baseline shows strongLarge and strongSmall bolder than body. TmrPaigeTypographyTest asserts size, line height, tracking and weight for all 16 styles."
+    },
+    {
+      "id": "264-c3",
+      "status": "met",
+      "evidence": "Shape.kt adds hero 32, cardLarge 24, cardSmall 16, toast 18, paperCorner 12 and bar 2. Spacing.kt adds the 10 Paige sizes and sets gutter to 14. TmrPaigeShapesAndSpacingTest asserts each value against PLAN 3.3 and 3.4."
+    },
+    {
+      "id": "264-c4",
+      "status": "met",
+      "evidence": "disabledContent is textDisabled (#7D7D7D) and onSurfaceVariant is textMuted (#A6A6A6). TmrPaigeColorValuesTest.disabledAndSecondaryTextAreDistinct asserts that they differ. TmrDisabledButtonTest passes unchanged: #7D7D7D on card #111111 is 4.59."
+    },
+    {
+      "id": "264-c5",
+      "status": "met",
+      "evidence": "Theme.kt has a single toDarkScheme path that maps Paige values. The lead commit 9b5c52da changes TmrThemeDarkOnlyTest to assert exactly the three TTFs and the mono/grotesk families, and keeps the banned-symbol check."
+    },
+    {
+      "id": "264-c6",
+      "status": "met",
+      "evidence": "res/font holds exactly three TTFs: 99356, 98232 and 136676 B. Their name tables read Space Mono Regular 1.003, Space Mono Bold 1.003 and Space Grotesk variable 2.000 with wght 300-700, which matches the google/fonts files. Both OFL texts carry the correct project copyright lines. The LF-normalised SHA-256 of each is pinned in TmrFontResourcesTest. No other file was fetched, so the download stayed within D30 and the owner's authorisation."
+    },
+    {
+      "id": "264-c7",
+      "status": "met",
+      "evidence": "The diff has no change under app/dependencies or to any Gradle file. Font(resId, weight, style, variationSettings) comes from compose ui-text, which is already on the classpath."
+    },
+    {
+      "id": "264-c8",
+      "status": "met",
+      "evidence": "TmrIdleSpecs adds named ambient constants only (420, 300, 210, 5000, 900). It adds no tween, spring or easing scale. In Reduced, the amplitudes are 0 and storyAutoAdvance and spinnerAnimated are false, and the proof and hop specs are unchanged. TmrIdleMotionTest checks both cases and the bob formula."
+    },
+    {
+      "id": "264-c9",
+      "status": "met",
+      "evidence": "TmrIcons adds ChevronRight, Gear, Plus, File and Open. TmrGoogleG is a 48x48 ImageVector with the four brand fills. TmrIconsTest asserts the fills in order. The icon has no semantics of its own, so TalkBack is unaffected."
+    },
+    {
+      "id": "264-c10",
+      "status": "met",
+      "evidence": "TmrTestDevices adds PROTOTYPE_QUALIFIERS (w374dp-h834dp, 480dpi) with prototype and prototypeLargeFont at the head of all. captureForDevice, captureForDevices and captureMultiTheme now default to prototype and dark. captureScreenHh is unchanged. The repo holds no other baselines and the four feature navigation tests do not capture, so no existing baseline name moves."
+    },
+    {
+      "id": "264-c11",
+      "status": "met",
+      "evidence": "theme_type_specimen_prototype_dark.png and theme_colour_swatches_prototype_dark.png are recorded at 1122x2502 (374x834 dp at 3x). I inspected both: the specimen fits without scrolling and the 31 swatches are distinct. The re-record in 0d32ccf6 changes only the textDisabled swatch. Screenshot tests pass in CI on the head."
+    },
+    {
+      "id": "264-c12",
+      "status": "partial",
+      "evidence": "The DESIGN_SYSTEM.md Tokens section and the AGENTS.md Design source and Motion sections are rewritten, and TmrDocsValuesTest passes. Two problems remain. The contrast sentence at DESIGN_SYSTEM.md:86 still states the pre-D32 #7A7A7A ratios. AGENTS.md:24 and DESIGN_SYSTEM.md:44 cite docs/revamp/2026-10-10/PLAN.md, which is in no committed branch. See the findings."
+    },
+    {
+      "id": "264-c13",
+      "status": "met",
+      "evidence": "No app or feature file changed, and TmrColors is constructed only in Palette.kt. I spot-checked legacy callers. Primary buttons use brand/onBrand (#A3F43F/#0A0A0A). The outline button border uses boundary (#7D7D7D, 5.10 on black). The FilterChip border is outlineVariant (line). TmrDock uses outlineSoft (line). DebugScenarioMenu's bodyL, bodyM and titleM resolve to Grotesk 16, 15 and 15 SemiBold. numeralM and numeralHero have no main callers. The exception is TmrSwitch's unchecked state; see the findings. Assemble APKs and the app tests were still running on the head."
+    },
+    {
+      "id": "264-c14",
+      "status": "partial",
+      "evidence": "The lead commit 9b5c52da re-pins only the values: #2A2A2A and #7D7D7D, the Paige brand and card, and the three TTFs. It adds four contrast pairs and keeps the 4.5 and 3.0 thresholds. At review time, Constitution, pregate, Static checks, Core unit tests and Screenshot tests had passed; Feature unit tests, App unit tests, Lint and Assemble APKs were still in progress."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/theme/Color.kt",
+      "line": 59,
+      "rule": "D32 (interactive outlines such as toggles must reach 3:1); the legacy aliases must stay visually sane",
+      "trigger": "TmrSwitch(checked = false) draws uncheckedThumbColor and uncheckedBorderColor = colors.outline. Before this PR that was #E4E5E1; it is now line #2A2A2A on the uncheckedTrackColor ground #000000, which is 1.46:1, so the off thumb is close to invisible. The Material scheme outline (Theme.kt:74) is also line, so any default Material outlined field or switch gets the same border. D32 moved only `boundary` to textDisabled, and TmrSwitch reads `outline`. TmrSwitch has no caller yet; W2 component lanes inherit it.",
+      "title": "Legacy `outline` alias resolves to decorative line #2A2A2A, so TmrSwitch's off state is 1.46:1",
+      "proof": "Add Triple(\"switch off thumb\", outline, ground) to TmrBoundaryContrastTest at >= 3.0; it fails at 1.46. Aliasing outline to textDisabled makes it pass, and outlineVariant stays line."
+    },
+    {
+      "severity": "low",
+      "file": "docs/DESIGN_SYSTEM.md",
+      "line": 86,
+      "rule": "264-c12 docs match the values; D32",
+      "trigger": "The table row above says textDisabled is #7D7D7D, but the sentence says it is 4.40:1 on surface and 3.62:1 on fill. Those are the #7A7A7A figures. The correct figures are 4.59 and 3.77. The section also never says that `boundary` now aliases textDisabled, which is the D32 rule that component lanes need.",
+      "title": "DESIGN_SYSTEM.md keeps pre-D32 contrast figures and omits the boundary = textDisabled rule"
+    },
+    {
+      "severity": "low",
+      "file": "AGENTS.md",
+      "line": 24,
+      "rule": "Docs pointers must resolve in the repository",
+      "trigger": "AGENTS.md:24 and DESIGN_SYSTEM.md:44 send readers to docs/revamp/2026-10-10/PLAN.md section 3. That file is in no commit on any origin branch; it exists only in the owner's untracked checkout. An agent following AGENTS.md finds nothing. The design/prototype-2026-10-10 pointer is disclosed in the PR body and exists on origin/docs/prototype-2026-10-10-mvp-simplification; PLAN.md is not disclosed.",
+      "title": "AGENTS.md and DESIGN_SYSTEM.md cite an uncommitted PLAN.md"
+    }
+  ]
+}

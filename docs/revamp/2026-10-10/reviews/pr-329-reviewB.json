@@ -1,0 +1,50 @@
+{
+ "head_sha": "b362b0232b5c95818f5312da673bbd0e517670af",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "AC1-screenshots", "status": "met", "evidence": "Eight new baselines (credits, nocredits, question none, question picked with detail; prototype and narrow-337-font-200, dark); JobResultScreenshotTest and QuickQuestionScreenshotTest assert content and no truncation before capture."},
+  {"id": "AC2-copy-check", "status": "met", "evidence": "ResultCopyTest.noStringUsesMatchFitAtsOrScoreAsLabel scans strings_result.xml. The new descriptions 'Partly in your resume' and 'Not clear yet' are status words, not scores; 'Keywords matched' comes from TmrCoverageDelta (D5)."},
+  {"id": "AC3-verify-local", "status": "partial", "evidence": "Read-only review: verify-local not run. At b362b023 the Constitution policy, static checks and pregate jobs pass; 'Build, lint, and unit tests' is still pending."},
+  {"id": "277-c1", "status": "met", "evidence": "JobResultViewModel.toUiState uses KeywordCoverageCalculator and ScreenForKeywords (not hard-coded); ScreenChrome maps JobResultNavKey to step 2; readyStateHasComputedCoverageAndKeywordScreen."},
+  {"id": "277-c2", "status": "partial", "evidence": "Reasons are shown only through keepReason (GAP, or a cited non-GAP). The marker comes from status (D61), so GAP never shows a check (gapWithReasonShowsGapMarkerNotCheck). But the unclear row ignores a stored answer (finding 1)."},
+  {"id": "277-c3", "status": "met", "evidence": "The credit note follows CreditsRepository.observeBalance (@Singleton OfflineFirstCreditsRepository via DataModule @Binds); balanceDrivesCreditNote; credits and nocredits screenshots."},
+  {"id": "277-c4", "status": "met", "evidence": "onTailor picks Paywall (credits <= 0), QuickQuestion or Tailor from the Ready state; tailorRoutesToPaywallQuestionOrTailoring; JobResultRealEntryTest covers question and paywall through the Hilt entry. Returning after a purchase belongs to #284 (Paywall is still a placeholder)."},
+  {"id": "277-c5", "status": "met", "evidence": "startsWithNothingPicked and the none-picked screenshots; ScreenChrome maps QuickQuestionNavKey to step 3. Paige is hidden above font scale 1.3 by design."},
+  {"id": "277-c6", "status": "met", "evidence": "continueWithoutPickShowsToastAndStoresNothing; Continue uses onDisabledClick to show the toast."},
+  {"id": "277-c7", "status": "met", "evidence": "detailOnlyForYesAndFewAndCappedAt400 and the picked-with-detail screenshots."},
+  {"id": "277-c8", "status": "met", "evidence": "continueStoresAnswerAndForwards, skipStoresNoAnswerAndForwards, skipOnQuickQuestionForwardsToTailoring (real Hilt entry). Single-flight is covered by doubleTapOnContinueEmitsOneForward, doubleTapOnSkipEmitsOneForward and continueThenSkipEmitsOneForward."},
+  {"id": "277-c9", "status": "partial", "evidence": "upTo is recomputed through KeywordCoverageCalculator, so D38/D39/D41 apply (storedAnswerRecomputesUpToViaCalculator). The same recompute drops 'final' for an application that is already tailored (finding 2)."},
+  {"id": "277-c10", "status": "met", "evidence": "ResultCopyTest."},
+  {"id": "277-c11", "status": "met", "evidence": "TmrWholeWordText is used for the title, subtitle, requirement text, reasons and the why line. longWordNeverBreaksInsideAWordAtFont200At337dp (both screens) and noClippedLabelsAtFont200."},
+  {"id": "277-c12", "status": "partial", "evidence": "D55: JobResultRealEntryTest renders the real Hilt entries and performs an action. The NoRemoteLedger test binding matches the demo app binding (app/src/demo PaymentBindings). The full gate at this head is pending in CI."}
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "feature/analysis/impl/src/main/kotlin/com/tailormyresume/feature/analysis/impl/result/JobResultViewModel.kt",
+   "line": 87,
+   "rule": "277-c2 and honest copy (I.1): the '!' row means the requirement we will ask about next",
+   "trigger": "Answer the quick question ('Not yet', or 'Yes, regularly' with detail), let Tailoring finish, then press Back from Tailored to Job analyzed. The stakeholder row still shows the amber '!' marker, 'Not clear yet' and 'Not clear in your resume. We'll ask you next.'. But asksQuestion is false, so 'Tailor my resume' goes straight to Tailoring and no question is asked. The row keeps unclear = (requirement id == gap.question.requirementId) and never checks application.quickAnswer.",
+   "title": "Unclear row still promises the quick question after the user has answered it",
+   "proof": "JobResultViewModelTest: seed ResultTestData.application(quickAnswer = QuickAnswer(STAKEHOLDER_ID, \"NOT_YET\", \"\")) and assert that no row has unclear, and that the stakeholder marker is GAP."
+  },
+  {
+   "severity": "low",
+   "file": "feature/analysis/impl/src/main/kotlin/com/tailormyresume/feature/analysis/impl/question/QuickQuestionViewModel.kt",
+   "line": 96,
+   "rule": "277-c9 and data integrity: the stored keywordCoverage must stay consistent with the stored tailoredResume",
+   "trigger": "On an application that already has a tailoredResume (tailored once after Skip this, then Back from Tailored to Job analyzed, then Tailor my resume, then Quick question), Continue or Skip calls KeywordCoverageCalculator.compute(gap.matches, answer, null). That writes keywordCoverage.final = null (the coverageFinal column) while tailoredResume is still stored. If the new run then fails or the user backs out of Tailoring, the application keeps a tailored resume with no final coverage. Passing current.tailoredResume keeps 'final' unchanged.",
+   "title": "Storing the quick answer clears the final coverage of an already tailored application",
+   "proof": "QuickQuestionViewModelTest: seed an application with a non-null tailoredResume, onPick(A_FEW_TIMES) then onContinue(), and assert that stored().keywordCoverage?.final equals KeywordCoverageCalculator.compute(matches, answer, tailoredResume).final (it is currently null)."
+  },
+  {
+   "severity": "low",
+   "file": "core/data/src/test/kotlin/com/tailormyresume/core/data/model/GapAnalysisReasonAndQuestionMapperTest.kt",
+   "line": 25,
+   "rule": "D61 'old rows still decode'; review checklist item 5 (assertions check behaviour)",
+   "trigger": "analysisStoredBeforeTheFieldsExistedStillReads only round-trips a model with question = null through asDto/asExternalModel. It never decodes stored JSON that lacks the 'reason' and 'question' keys. If the '= null' defaults on RequirementMatchDto.reason or GapAnalysisDto.question were removed, the test would still pass, while every row saved before this PR would fail to decode (MissingFieldException in TmrJson).",
+   "title": "The 'old rows still decode' test does not decode an old row",
+   "proof": "In core/database JsonConvertersTest, decode a GapAnalysisDto JSON string without 'reason' and 'question' keys and assert that both are null."
+  }
+ ]
+}

@@ -1,0 +1,38 @@
+{
+ "head_sha": "c291999ff6b23626620abd4691d934d9a9c6f997",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "269-c1", "status": "met", "evidence": "Unchanged by the Fixer diff: 'coverage' naming only, half-up percent, prototype literals 63/75/63 still asserted."},
+  {"id": "269-c2", "status": "met", "evidence": "keywordOf = displayName(k).lowercase() still collapses case for now/final; total 0 -> 0."},
+  {"id": "269-c3", "status": "partial", "evidence": "Per D39/D41 answerKeywords = isNamedSkillKeyword keywords + keywordsStatedIn(requirement, detail); requirement text no longer confirms anything. placeholderDetailDoesNotLetRequirementTextConfirmKeyword (n/a -> 50) and skillKeywordAbsentFromRequirementTextIsNotConfirmedByAnyAnswer (blank -> 50) both fail on 9be87224 (100). Partial: the answer path now passes keywords raw into keywordsStatedIn, whose isStated uses isKnown (exact lowercase canonical), so display-cased multi-word keywords the prod backend LLM emits ('Power BI', 'Google Sheets') are never confirmed; the Fixer's test pins that (medium finding)."},
+  {"id": "269-c4", "status": "met", "evidence": "final unchanged (ACCEPTED proposedText else originalText). Summary/skills deferral is acceptable: TailoredResume at this head is (bullets, entryIds) only, and the PR Follow-ups now track it for whichever lane merges second."},
+  {"id": "269-c5", "status": "met", "evidence": "ScreenForKeywordsTest unchanged by the Fixer diff."},
+  {"id": "269-c6", "status": "met", "evidence": "ProfileCompleteness unchanged."},
+  {"id": "269-c7", "status": "met", "evidence": "RequiredGaps unchanged."},
+  {"id": "269-c8", "status": "met", "evidence": "New AppViewModelTest.rootState_whenSignedInWithoutCompletedOnboarding_isFirstRunNotMain expects Loading then FirstRun; mapping Upload -> Main would make the second awaitItem Main and fail it. Round-1 finding 5 closed."},
+  {"id": "269-c9", "status": "met", "evidence": "Literal Priya Deshmukh names still asserted."},
+  {"id": "269-c10", "status": "met", "evidence": "nonWord is now [^\\p{L}\\p{M}\\p{N}]+; combiningMarksSurviveInIndicAndLatinNames asserts the Devanagari and decomposed 'Zoe\\u0308' names and fails on the old class. Marks are not separators, so separator safety is unchanged. Round-1 finding 4 closed."},
+  {"id": "269-c11", "status": "partial", "evidence": "Core unit tests (runs :core:domain koverVerify) was IN_PROGRESS on c291999f (run 38089147974) at review time; Feature unit tests, Static checks, pregate passed."},
+  {"id": "269-c12", "status": "partial", "evidence": "App unit tests, Lint, Screenshot tests and Assemble APKs IN_PROGRESS on c291999f; no verify-local.sh result for this head."}
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/KeywordsStatedIn.kt",
+   "line": 17,
+   "rule": "D39/D41 intent (confirm named skills the user saw and answered); c3; shared rule must not regress #308",
+   "trigger": "Not a displayName comparison bug: both sides of line 24 use displayName(raw keyword), so they agree. The root cause is isStated: isKnown(keyword) is an exact lowercase-canonical lookup, so a display-cased or alias lexicon keyword falls to TextTokens.stem, which only matches single words. The prod backend passes LLM keywords through uncased (apps-backend analyses.ts:132), so 'Power BI' / 'Google Sheets' / 'Stakeholder Management' are never stated in the requirement text or the detail. SKILL 'Power BI or Tableau', keywords ['Power BI'], YES_REGULARLY 'built Power BI dashboards' -> upTo 50 (was 100 at 9be87224, whose stated() lowercased first). Lowercase canonicals ('power bi') work; lowercase multi-word or non-token aliases ('ms excel', 'microsoft power bi', 'powerbi') fail the same way. The stem fallback also skips the lexicon's word-boundary guards: keywordsStatedIn(requirement('C'), 'Wrote C++ code') returns ['C'] (words() yields 'c'), while requirement('c') is empty, so a display-cased short skill (C, R via 'R&D', Go via 'go-to-market') is over-confirmed, a D41 bypass. After #308 merges, its blank-detail AnswerFacts path inherits this and loses the display-cased named skills it confirms today via normalise. Fix once here: `SkillLexicon.normalise(keyword)?.let { it in statedTerms } ?: (TextTokens.stem(keyword) in statedStems)`. Then change the third assertion of powerBiIsConfirmedAsCanonicalAndMatchesAnswerFactsWhenDisplayCased to 100 and drop the stated() lowercasing workaround in KeywordCoverageCalculator. Existing AddUserStatedFactUseCaseTest cases use canonicals and are unaffected.",
+   "proof": "AddUserStatedFactUseCaseTest: keywordsStatedIn(requirement(\"Power BI\"), \"Built Power BI dashboards\") -> expect [\"Power BI\"], currently []; keywordsStatedIn(requirement(\"C\"), \"Wrote C++ code\") -> expect [], currently [\"C\"]; KeywordCoverageCalculatorTest upToWithAnswer(displayCased, \"built Power BI dashboards\") -> expect 100, currently 50",
+   "title": "Display-cased and alias lexicon keywords bypass the lexicon in isStated: 'Power BI' never confirmed, 'C' confirmed by 'C++'"
+  },
+  {
+   "severity": "low",
+   "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/coverage/KeywordCoverageCalculator.kt",
+   "line": 62,
+   "rule": "D39: one shared answer rule; a cross-lane test pins #308 AnswerFacts and #309 to the same output until #309 calls AnswerFacts",
+   "trigger": "#308 at edd587d4 still returns keywordsStatedIn(requirement, requirement.text + \"\\n\" + detail) for non-blank detail. After both merge, EXPERIENCE 'Experience presenting to senior stakeholders', keywords ['stakeholders'], YES_REGULARLY 'n/a': here upTo excludes stakeholders, but AnswerFacts.keywords returns ['stakeholders'] and factOf writes 'n/a\\nstakeholders' as an answer fact that tailoring may cite (I.1). The blank-detail path agrees after merge because both call isNamedSkillKeyword. The PR Follow-ups track the #308 change, but the D39 pinning test does not exist in either lane. The test named 'MatchesAnswerFacts' does not call AnswerFacts. Fix in #308 (or in whichever lane merges second): AnswerFacts.keywords = named + keywordsStatedIn(requirement, answer.detail), and have KeywordCoverageCalculator.answerKeywords call AnswerFacts.keywords. Add the parity test.",
+   "proof": "After both merge: assertThat(KeywordCoverageCalculator answer keywords for the case above).isEqualTo(AnswerFacts.keywords(answer, job).map { it.lowercase() }) -> fails while #308 keeps requirement.text in the statement",
+   "title": "#308 AnswerFacts still reads requirement text for non-blank detail; D39 parity test missing"
+  }
+ ]
+}

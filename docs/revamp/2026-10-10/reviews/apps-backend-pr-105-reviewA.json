@@ -1,0 +1,39 @@
+{
+  "head_sha": "fcbc130173842735531a4c007e728223af945c1e",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "quickQuestionFor picks the first MUST_HAVE EXPERIENCE/SOFT_SKILL with normalised GAP/PARTIAL; test 'the first qualifying must-have experience gap is asked with the three fixed options' asserts req-3, trimmed model wording and the three options."},
+    {"id": "c2", "status": "met", "evidence": "find() returns undefined -> null; test covers all-MET and SKILL/TOOL/EDUCATION-only gaps."},
+    {"id": "c3", "status": "met", "evidence": "Array.find returns the first in req order; test asserts req-1 with two qualifying and null (no fall-through) when the first has no wording. Matches the plan and issue wording ('at most one, for the first'); no fall-through is the right call under I.1 (never ask a lesser requirement because the model failed)."},
+    {"id": "c4", "status": "partial", "evidence": "Length, trailing '?', empty why, 200-char why and bannedWords are enforced and tested (boundary inclusive). The wording is otherwise unconstrained, so it can embed an unsupported claim or employer name (see finding 1)."},
+    {"id": "c5", "status": "met", "evidence": "quickQuestionFor reads match.status from the normalised requirements map; test 'a normalised gap or partial status...' shows MET with no evidence selected and MET with evidence skipped."},
+    {"id": "c6", "status": "partial", "evidence": "docs/architecture.md /analyses bullet updated; check evidence: 549 pass, 1 known golden failure (lead-only); CI still queued/in progress at review time. Not-stored and not-logged holds: no log call in analyses.ts touches question or why."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 140,
+      "rule": "Constitution I.1 / D6 / D21: question and why must never assert a fact about the candidate",
+      "trigger": "The model sees the candidate facts and returns question 'Besides your time at Infosys, have you presented to senior leaders?' (or why 'You led a team at Acme, so ...') for a PARTIAL must-have. It is under 80/200 chars, ends in '?' and has no banned word, so it is returned verbatim, asserting an employer the posting may not mention. Only the bannedWords blocklist applies; reason got the D21 allowlist but question and why get none.",
+      "title": "Question text and why are filtered by the blocklist only; no allowlist (D21) stops an embedded employer name or candidate claim",
+      "proof": "Test: facts with employer 'Infosys', model question 'Besides your time at Infosys, have you presented to senior leaders?' and a PARTIAL SOFT_SKILL requirement; expect question null. Suggested fix: require every content token of text and why to appear in the requirement text (or job text) or a short function-word list, else null; and tell the prompt to word the question only from the requirement."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 194,
+      "rule": "Scale / constraint: output tokens bounded (PR claims about 100 tokens)",
+      "trigger": "The prompt asks for a question (80 chars) and questionWhy (200 chars) for every qualifying must-have, up to 40 requirements, but only the first is used. A 40-requirement posting adds up to about 11000 characters (roughly 2800 tokens) to an output capped at 8000 tokens, not about 100; truncation would fail the whole analysis.",
+      "title": "Prompt requests wording for every qualifying requirement; the PR's 100-token estimate is unsupported"
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 194,
+      "rule": "Constitution I.1: prompt does not forbid candidate claims in the wording",
+      "trigger": "The prompt says 'asking whether the candidate has done it' and 'why the job asks for it' but never says to avoid naming the candidate's employers, titles or facts; the allowed-source rule given for reason ('only words from the cited facts') has no counterpart here.",
+      "title": "Prompt gives no instruction to keep the question free of candidate facts"
+    }
+  ]
+}

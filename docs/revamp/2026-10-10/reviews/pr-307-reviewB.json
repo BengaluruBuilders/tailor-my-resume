@@ -1,0 +1,103 @@
+{
+ "head_sha": "c2f22b16038c798930c3c57d61ac80518c0388a1",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "265-c1",
+   "status": "met",
+   "evidence": "pillStylesMatchPrototypeSteps covers done/current/later colours; stepTextsAndDescription covers labels and 'Step n of 3'. Large-text truncation of the done pill is finding 1."
+  },
+  {
+   "id": "265-c2",
+   "status": "met",
+   "evidence": "Back, close and action targets asserted at 48dp (TmrChromeTest 118-181). Bar is 54dp at 1x because the 48dp target no longer fits the 44dp content. Prototype top bar is content-box height 50 + padding-top 6 = 56px (no box-sizing on that div; support.js only has .bbox). So 54 is closer to the prototype than the old 50. Button top moves 6dp to 8dp; the prototype has 9. Re-record justified."
+  },
+  {
+   "id": "265-c3",
+   "status": "met",
+   "evidence": "selectedExposesSelectedAndCallbacksFire, tabItemKeepsMinimumHeight (>=54dp), tabsAnnouncePosition (CollectionItemInfo 0/1), disc 56dp; divider colour in screenshots."
+  },
+  {
+   "id": "265-c4",
+   "status": "met",
+   "evidence": "toastIsVisibleAt3199AndGoneAt3200 uses the paused Compose main clock."
+  },
+  {
+   "id": "265-c5",
+   "status": "met",
+   "evidence": "secondToastReplacesFirstAndRestartsTimer, actionRunsOnce, and actionDismissesBeforeCallback: dismiss now runs before onClick, and a toast shown by the callback survives. Reverting the order fails the test."
+  },
+  {
+   "id": "265-c6",
+   "status": "met",
+   "evidence": "Polite live region, 48dp action target and gutter insets asserted. The card with an action is 64dp at 1x: 48dp target plus 8/8 padding. The prototype is 60 (content-box min-height 44 + 16). Accepted as the cost of the 48dp target. Re-record justified."
+  },
+  {
+   "id": "265-c7",
+   "status": "met",
+   "evidence": "Handle 44x4, 18dp side padding and the 12dp handle offset asserted. Scrim, sheet colour and the 32dp radius are covered by the chrome_sheet baselines."
+  },
+  {
+   "id": "265-c8",
+   "status": "partial",
+   "evidence": "Code is correct: toast and sheet start at 1f under reduced, and no tween/spring/numeric duration appears in chrome. The toast reduced-motion test cannot fail for the mutation Reviewer A named (finding 2)."
+  },
+  {
+   "id": "265-c9",
+   "status": "met",
+   "evidence": "20 chrome_* baselines. Of the 10 re-recorded: 3 top bar (2dp shift for the 48dp target), toast_action 1x (48dp target), and 6 at 2.0 (cap removed). All are explained, but the step-bar 2.0 baselines record 'PROFI…' (finding 1)."
+  },
+  {
+   "id": "265-c10",
+   "status": "partial",
+   "evidence": "Head checks: Constitution policy and delivery-gates-pregate pass. Static, Core/Feature/App unit, Screenshot, Lint and Assemble jobs show 'skipping' on this stacked PR, and no Kover result is visible. Reviewer B did not re-run verify-local.sh. activity-compose 1.12.0 is already on the demo/prod release classpaths, so the dependencyGuard baseline needs no change. The build.gradle.kts edit is outside the lane file globs; pregate flagged it as NEW_DEPENDENCY."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrChromeText.kt",
+   "line": 28,
+   "rule": "Accessibility WCAG 1.4.4 and issue constraint 'layouts must not clip at font scale 2.0'; Reviewer A M1 disposition 'fixed'",
+   "trigger": "At font scale 2.0, even at the 374dp prototype width, the done step renders '✓' / 'PROFI…'. Baselines chrome_stepbar_2/3_prototype-font-200_dark.png at c2f22b16 show this. Cause: maxLines=2 plus Ellipsis, and the weight(1f, fill=false) pills in TmrStepBar.kt:51 cap each pill at a third of the row while the short '2 JOB' pill leaves its share unused. At 337dp 'TAILOR' is also at risk. In W3-A the step bar sits between a 44dp back button and the action, which is narrower still. The tab label 'APPLICATIONS' breaks mid-word as 'APPLICAT'/'IONS'. A low-vision user who enlarged text loses visible content; the full text exists only in semantics. Prefer whole words: no ellipsis for chrome labels, step pills that wrap to a second row when enlarged (FlowRow), or tighter padding and letter-spacing. stepBarStaysInsideParentAtFontScale2 checks only bounds, so it passes with the ellipsis.",
+   "title": "Large text still truncates the done step label to 'PROFI…' and splits tab labels mid-word",
+   "proof": "At fontScale 2f and 337dp, capture onTextLayout for every step pill and tab label and assert !hasVisualOverflow. It fails at head on the '✓ Profile' pill."
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrChromeA11yTest.kt",
+   "line": 283,
+   "rule": "Criterion 265-c8 (first frame at final position, asserted by a test); Reviewer A M6 disposition 'test added'",
+   "trigger": "Mutation: TmrToast.kt:96 Animatable(0f) regardless of motion.reduced. The animateTo branch is skipped under reduced, so the toast stays at alpha 0 and +12dp forever, which means it is invisible. toastReducedMotionFirstFrameIsFinal compares two reads (after 32 ms and after 2032 ms) that are identical under the mutation, so it passes. toastSitsAtGutterAndToastTop uses '>= toastTop' and ignores alpha, so it passes too. No test fails when reduced-motion toasts never appear.",
+   "title": "Toast reduced-motion test cannot fail for the mutation it was added for",
+   "proof": "Under Reduced, after the first frame assert toast.top == toastTop + 8dp (±0.5) or equal to the motion-enabled settled top. Also assert the layer alpha is 1, e.g. compare captureToImage against the settled frame."
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrToast.kt",
+   "line": 90,
+   "rule": "Accessibility WCAG 2.2.1 Timing Adjustable; Reviewer A M5 disposition (recommended timeout)",
+   "trigger": "minSdk is 26. On API 26-28 with TalkBack on, the 'Applied, marked today' + Undo toast still disappears at a fixed 3200 ms. Both the default provider (line 46) and this host guard skip the recommended timeout below Q. The guard also ignores an injected provider below Q, so a caller cannot supply a fallback. Compose M3 SnackbarHost (calculateRecommendedTimeoutMillis) and MDC Snackbar make an actionable message indefinite when touch exploration is enabled below API 29. No non-timed path exists here.",
+   "title": "Actionable toast has no non-timed path below API 29 with TalkBack",
+   "proof": "Robolectric @Config(sdk = [28]) with touch exploration enabled: show a toast with an action, advance 3200 ms, assert state.current is not null."
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrChromeA11yTest.kt",
+   "line": 128,
+   "rule": "Review checklist 5: a test must fail if the fix is reverted (Reviewer A M2/M3 'no clipping, tested')",
+   "trigger": "topBarStaysInsideParentAtFontScale2 and toastActionHasNoClippingAtFontScale2 assert that the 'Save'/'Undo' Text bounds lie inside the target bounds. A Text measured under a fixed parent height is coerced to that height, so containment holds even when glyphs clip. Also, 13sp Space Mono at 2.0 (about 38.5dp line) fits the old fixed height(44)/height(40). Reverting heightIn to height passes both tests.",
+   "title": "Large-text 'no clipping' tests check bounds containment, which cannot detect clipping",
+   "proof": "Capture onTextLayout on the action labels (or use a two-line label at 2.0) and assert !didOverflowHeight. It fails with height(40.dp) restored."
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrBottomSheet.kt",
+   "line": 49,
+   "rule": "Android accessibility: paneTitle names the pane that appeared (Reviewer A L1)",
+   "trigger": "Every sheet, whether 'Change status', the delete-account confirmation or payment failed, announces the fixed pane title 'Sheet'. TmrBottomSheet takes no title, so W3-A callers cannot give TalkBack a meaningful announcement.",
+   "title": "Sheet pane title is the generic string 'Sheet' and cannot be set by the caller",
+   "proof": "TmrBottomSheet(title = \"Change status\", ...) exposes SemanticsProperties.PaneTitle == \"Change status\""
+  }
+ ]
+}

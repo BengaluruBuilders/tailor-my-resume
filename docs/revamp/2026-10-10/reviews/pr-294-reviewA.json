@@ -1,0 +1,70 @@
+{
+ "head_sha": "db40ccf2bfffbcfa449400f9334813ccaa4245e6",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "258-c1",
+   "status": "met",
+   "evidence": "PR body reports gate BUILD SUCCESSFUL; latest CI run 38076764324 on head: Static, Core, Feature, App, Screenshot, Lint, Build/lint/unit all success. Assemble APKs was skipped there and in_progress on the sibling run 38076661531, whose Constitution policy job failed on the same head but passed in 38076764324; I ran tools/ci/check-constitution.sh locally on the head and it passed."
+  },
+  {
+   "id": "258-c2",
+   "status": "met",
+   "evidence": "git ls-files feature/onboarding/impl (non-PNG) lists only build.gradle.kts, OnboardingModule, ContentResolverResumeTextSource, ResumeTextSource, OnboardingEntryProvider, NavKeyPlaceholderEntryTest, StartOverNavigationTest, robolectric.properties. The three kept files are absent from git diff --name-status vs base; the stray ImportResumeViewModel.kt-e is deleted. No test in the set asserts the surviving Hilt binding, but it was untested on base too."
+  },
+  {
+   "id": "258-c3",
+   "status": "met",
+   "evidence": "git ls-files feature/profile/impl lists only build.gradle.kts, ContactFieldValidator.kt, ProfileEntryProvider, ContactFieldValidatorTest, NavKeyPlaceholderEntryTest, robolectric.properties. UserFactWriter and its tests are gone; its only consumer was GuidedFormViewModel. Grep of HEAD shows no import of feature.onboarding.impl or feature.profile.impl outside TmrApp (entry providers only), so no surviving module lost a symbol."
+  },
+  {
+   "id": "258-c4",
+   "status": "met",
+   "evidence": "ContactFieldValidatorTest has 12 assertions (4 email, 8 phone) identical line for line to contactFieldValidator_acceptsOnlyWellFormedEmailsAndPhones in the deleted GuidedFormContactValidationTest (base lines 104-120). The other tests in that file exercised GuidedFormViewModel, which is deleted."
+  },
+  {
+   "id": "258-c5",
+   "status": "met",
+   "evidence": "The three kept files are unchanged. ContentResolverResumeTextSource has no test on base (git grep on base finds only OnboardingModule and the class itself), and the PR body says so."
+  },
+  {
+   "id": "258-c6",
+   "status": "partial",
+   "evidence": "All 10 NavKeys are registered with NavKeyPlaceholder and the signatures are unchanged, and assembleDemoDebug compiles TmrApp. The tests exercise only the NavKeyPlaceholder composable for 2 keys per module, not onboardingEntry or profileEntry registration (see finding). The sonnet-written stub lines are covered by Reviewer B."
+  },
+  {
+   "id": "258-c7",
+   "status": "partial",
+   "evidence": "grep -rlE over src finds OnboardingEntryProvider.kt and StartOverNavigationTest.kt (imports DefaultWelcomeNavKey and navigateToWelcome from the onboarding api). The scout text allows only the two entry providers. The PR body discloses this and the kept test is not deletable under the issue's KEEP rules, but the criterion is not literally met. ProfileEntryProvider.kt has no match."
+  },
+  {
+   "id": "258-c8",
+   "status": "met",
+   "evidence": "The diff deletes 187 PNGs; no tracked PNG remains under the two screenshots dirs. The ScreenshotTest classes that produced them are deleted. The 273 TEST_DELETED entries (86 sources plus 187 PNGs) all map to deleted screens: welcome, consent, confirmfacts, pastejd, signin, importresume, largefont, common, evidencepath, facteditor, guidedform, Profile*, UserFactWriter, UserStatedSkills. None covers a surviving feature."
+  },
+  {
+   "id": "258-c9",
+   "status": "met",
+   "evidence": "The PR body reports verify-local.sh exit 0. The diff adds no comments, tools:ignore or baseline files (added lines grepped), and no lint-baseline is touched. tools/ci/check-constitution.sh passes locally on the head."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "feature/profile/impl/src/test/kotlin/com/tailormyresume/feature/profile/impl/navigation/NavKeyPlaceholderEntryTest.kt",
+   "line": 21,
+   "rule": "258-c6 test proves entries render",
+   "trigger": "Delete the entry<FactEditorNavKey> block from profileEntry (or entry<ConsentNavKey> from onboardingEntry): every unit test still passes because they call the internal NavKeyPlaceholder composable directly, and navigating to that key at runtime then fails with no entry. Only 2 of 4 profile keys and 2 of 6 onboarding keys are touched, and registration is never exercised.",
+   "title": "Placeholder tests do not verify that each NavKey has a registered entry",
+   "proof": "Test that builds entryProvider { profileEntry(navigator) } and resolves each of the 4 profile keys (6 onboarding keys likewise) and asserts the simple class name is shown."
+  },
+  {
+   "severity": "low",
+   "file": "feature/onboarding/impl/src/test/kotlin/com/tailormyresume/feature/onboarding/impl/navigation/StartOverNavigationTest.kt",
+   "line": 8,
+   "rule": "Issue 258 criterion 2: no file in these modules mentions Welcome",
+   "trigger": "grep -rlE 'Welcome' feature/onboarding/impl/src returns StartOverNavigationTest.kt (DefaultWelcomeNavKey, navigateToWelcome); this file is not in the diff.",
+   "title": "Surviving test still mentions Welcome; the issue criterion needs an explicit disposition"
+  }
+ ]
+}

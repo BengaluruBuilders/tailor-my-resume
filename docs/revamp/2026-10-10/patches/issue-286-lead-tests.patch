@@ -1,0 +1,143 @@
+diff --git a/app/src/testProd/kotlin/com/tailormyresume/app/ai/RemoteResumeTailorTest.kt b/app/src/testProd/kotlin/com/tailormyresume/app/ai/RemoteResumeTailorTest.kt
+index 616819aa..8b209ec4 100644
+--- a/app/src/testProd/kotlin/com/tailormyresume/app/ai/RemoteResumeTailorTest.kt
++++ b/app/src/testProd/kotlin/com/tailormyresume/app/ai/RemoteResumeTailorTest.kt
+@@ -5,7 +5,6 @@ import com.tailormyresume.core.domain.AiException
+ import com.tailormyresume.core.domain.AiFailure
+ import com.tailormyresume.core.domain.FabricationGuard
+ import com.tailormyresume.core.domain.TailorResumeUseCase
+-import com.tailormyresume.core.model.EntryCategory
+ import com.tailormyresume.core.model.EvidenceBullet
+ import com.tailormyresume.core.model.GapAnalysis
+ import com.tailormyresume.core.model.GuardrailViolation
+@@ -64,12 +63,12 @@ class RemoteResumeTailorTest {
+     }
+ 
+     @Test
+-    fun aSectionRegenerationSendsTheSection() = runTest {
++    fun aTailoringRequestNeverSendsASection() = runTest {
+         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
+ 
+-        tailor.tailor(candidate, job, gap, "app-1", EntryCategory.EXPERIENCE)
++        tailor.tailor(candidate, job, gap, "app-1", null)
+ 
+-        assertThat(backend.server.takeRequest().body.readUtf8()).contains(""""section":"EXPERIENCE"""")
++        assertThat(backend.server.takeRequest().body.readUtf8()).doesNotContain("section")
+     }
+ 
+     @Test
+@@ -164,7 +163,7 @@ class RemoteResumeTailorTest {
+         val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
+ 
+         assertThat((failure as AiException).failure).isEqualTo(AiFailure.NoCredit)
+-        assertThat(store.read("tailoring.request.app-1.all")).isNull()
++        assertThat(store.read("tailoring.request.app-1")).isNull()
+     }
+ 
+     @Test
+@@ -190,7 +189,7 @@ class RemoteResumeTailorTest {
+ 
+         assertThat((failure as AiException).failure).isEqualTo(AiFailure.Timeout)
+         assertThat(currentTime).isAtLeast(330_000L)
+-        assertThat(store.read("tailoring.request.app-1.all")).isNotNull()
++        assertThat(store.read("tailoring.request.app-1")).isNotNull()
+     }
+ 
+     @Test
+diff --git a/app/src/testProd/kotlin/com/tailormyresume/app/auth/SignOutCleanerTest.kt b/app/src/testProd/kotlin/com/tailormyresume/app/auth/SignOutCleanerTest.kt
+index f891cd66..36404c35 100644
+--- a/app/src/testProd/kotlin/com/tailormyresume/app/auth/SignOutCleanerTest.kt
++++ b/app/src/testProd/kotlin/com/tailormyresume/app/auth/SignOutCleanerTest.kt
+@@ -42,13 +42,13 @@ class SignOutCleanerTest {
+         analysis.analyse(candidate, "the raw job text")
+         reports.add(ContentReport("app-1", ReportedItemKind.REQUIREMENT, "req-1", "text", Instant.fromEpochMilliseconds(1), null))
+         val tailoringIds = PendingTailoringIds(store, FixedIds)
+-        val firstId = tailoringIds.idFor("app-1", null)
++        val firstId = tailoringIds.idFor("app-1")
+ 
+         cleaner.clear()
+ 
+         assertThat(wallet.cached).isNull()
+         assertThat(reports.pending()).isEmpty()
+-        assertThat(tailoringIds.idFor("app-1", null)).isNotEqualTo(firstId)
++        assertThat(tailoringIds.idFor("app-1")).isNotEqualTo(firstId)
+         backend.reply(200, ANALYSIS_RESPONSE)
+         analysis.analyse(candidate, "the raw job text")
+         assertThat(backend.server.requestCount).isEqualTo(3)
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/CreateApplicationUseCaseTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/CreateApplicationUseCaseTest.kt
+index c67b3112..74b43876 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/CreateApplicationUseCaseTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/CreateApplicationUseCaseTest.kt
+@@ -10,10 +10,10 @@ import com.tailormyresume.core.domain.offline.resourceText
+ import com.tailormyresume.core.domain.offline.sampleProfile
+ import com.tailormyresume.core.model.ApplicationStatus
+ import com.tailormyresume.core.model.CandidateProfile
+-import com.tailormyresume.core.model.EntryCategory
+ import com.tailormyresume.core.model.GapAnalysis
+ import com.tailormyresume.core.model.JobDescription
+ import com.tailormyresume.core.model.KeptJobDescription
++import com.tailormyresume.core.model.QuickAnswer
+ import com.tailormyresume.core.model.TailoredResume
+ import kotlinx.coroutines.runBlocking
+ import kotlinx.coroutines.test.runTest
+@@ -59,7 +59,7 @@ class CreateApplicationUseCaseTest {
+     @Test
+     fun whenTheTailorFails_savesNothingAndRethrowsTheTypedFailure() = runTest {
+         val failing = object : ResumeTailor {
+-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, section: EntryCategory?): TailoredResume =
++            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?): TailoredResume =
+                 throw AiException(AiFailure.NoCredit)
+         }
+         val failingUseCase = CreateApplicationUseCase(
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/TailorResumeUseCaseTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/TailorResumeUseCaseTest.kt
+index 6de63a84..ecc5afbe 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/TailorResumeUseCaseTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/TailorResumeUseCaseTest.kt
+@@ -55,7 +55,7 @@ class TailorResumeUseCaseTest {
+ 
+     private suspend fun useCaseReturning(vararg bullets: TailoredBullet): TailorResumeUseCase {
+         val tailor = object : ResumeTailor {
+-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, section: EntryCategory?) =
++            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?) =
+                 TailoredResume(bullets.toList())
+         }
+         return TailorResumeUseCase(tailor, OfflineFabricationGuard())
+@@ -188,7 +188,7 @@ class TailorResumeUseCaseTest {
+                 emptyList<GuardrailViolation>().also { calls += proposedText to sources }
+         }
+         val tailor = object : ResumeTailor {
+-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, section: EntryCategory?) = TailoredResume(
++            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?) = TailoredResume(
+                 listOf(
+                     bullet("t1", "exp-1-b2", "a", "a1"),
+                     bullet("t2", "proj-1-b2", "b", "b1"),
+@@ -255,7 +255,7 @@ class TailorResumeUseCaseTest {
+         job: JobDescription = analystJob,
+     ): TailoredResume {
+         val tailor = object : ResumeTailor {
+-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, section: EntryCategory?) = proposed
++            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?) = proposed
+         }
+         return TailorResumeUseCase(tailor, OfflineFabricationGuard())(analystProfile, job, emptyGap, "app-1", quickAnswer = quickAnswer)
+     }
+diff --git a/core/network/src/test/kotlin/com/tailormyresume/core/network/DtoRoundTripTest.kt b/core/network/src/test/kotlin/com/tailormyresume/core/network/DtoRoundTripTest.kt
+index 8e1e9de1..8af9d4be 100644
+--- a/core/network/src/test/kotlin/com/tailormyresume/core/network/DtoRoundTripTest.kt
++++ b/core/network/src/test/kotlin/com/tailormyresume/core/network/DtoRoundTripTest.kt
+@@ -61,10 +61,13 @@ class DtoRoundTripTest {
+     }
+ 
+     @Test
+-    fun nullFieldsAreSentOnTheWireBecauseTheBackendRequiresThem() {
++    fun tailoringRequestsOmitNullOptionalFieldsAndNeverSendSection() {
+         val request = decode<TailoringStartRequest>("tailoring-start-request")
+-        assertThat(request.section).isNull()
+-        assertThat(json.encodeToString(TailoringStartRequest.serializer(), request)).contains("\"section\":null")
++        val wire = json.encodeToString(TailoringStartRequest.serializer(), request)
++        assertThat(request.answer).isNull()
++        assertThat(wire).doesNotContain("section")
++        assertThat(wire).doesNotContain("answer")
++        assertThat(wire).doesNotContain("null")
+     }
+ 
+     private inline fun <reified T> roundTrip(name: String) {

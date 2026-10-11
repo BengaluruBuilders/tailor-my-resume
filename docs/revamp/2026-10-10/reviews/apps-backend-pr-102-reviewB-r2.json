@@ -1,0 +1,33 @@
+{
+  "head_sha": "357894b7af223134e94d57447d0366b939c9d624",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "errors.ts unchanged since round 1: 422 in ApiStatus, NOT_A_JOB_POST and JOB_IMPORT_FAILED mapped to 422; test 'NOT_A_JOB_POST and JOB_IMPORT_FAILED are 422 with the error body' passes at head."},
+    {"id": "c2", "status": "met", "evidence": "The isJobPost/no-requirement check runs after runStructuredCall and before markUsed (analyses.ts 195-206), releasing the claim; the referral test passes at head with a local Postgres 16."},
+    {"id": "c3", "status": "met", "evidence": "locationOf trims, nulls blank, cuts to 120; prompt asks for the location as written with work mode. Location tests pass. Real model output is covered only by the paid eval (D13)."},
+    {"id": "c4", "status": "met", "evidence": "reasonFor returns the fixed GAP phrase first; the prompt now asks for reasons on MET and PARTIAL only, so round-1 L2 (wasted GAP output tokens) is resolved."},
+    {"id": "c5", "status": "partial", "evidence": "Ran an exact copy of reasonFor/citedText against all round-1 strings: every one now falls back (Tableau/Infosys first word, thirty, thousands, lowercase infosys, '4 years' vs Q4, '3 years' vs S3, '40 people', 'Professional SQL experience, verified', the three I.3 phrases). New strings also fall back: forty, plural/singular drift, Arabic-Indic digits, İnfosys, 'since 2021-03', stated note words in a mixed citation. Positive reasons survive ('Cleaned weekly sales data for 40 stores', 'Built Q4 reports', 'Data Operations Associate at Saffron Retail from 2021 to 2024'), so the feature keeps value. Two leaks remain (findings 1-2): numbers with a thousands or decimal separator are split, and a reason with no content token passes, including for stated-only matches. Known ceiling accepted by D21: cited tokens can be recombined ('Used Python at Saffron Retail' from skill:Python plus EXP-01)."},
+    {"id": "c6", "status": "met", "evidence": "Id numbering, status normalisation, evidence filtering and the stated-skill PARTIAL cap are unchanged; keptIds is the old expression. Test edits in 68e0abe/357894b only reword two expected reasons to cited words; no assertion removed."},
+    {"id": "c7", "status": "met", "evidence": "At head with a local Postgres 16: typecheck, lint, format:check, boundaries pass; full suite 545 tests, 544 pass, 1 fail (the lead-only golden 'without userStatedSkills the analysis prompt equals the one on main', D13). architecture.md now describes the allowlist; its 'always for a match backed only by stated skills' sentence is not fully true (finding 2). GitHub checks were still QUEUED at review time."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 76,
+      "rule": "Constitution I.1; Reviewer A M1 disposition (numbers compared as whole tokens, /\\d+(?:[.,]\\d+)*/)",
+      "trigger": "tokens() splits on every non-letter/digit, so cited bullet 'Managed 1,200 accounts and cut costs by 2.5 crore' yields tokens 1, 200, 2, 5. MET reasons 'Managed 200 accounts', 'Managed 1 accounts' and 'Cut costs by 5 crore' are returned unchanged (verified with a copy of reasonFor/citedText), inventing a number. The allowlist rewrite dropped the whole-number handling of 3691af8.",
+      "title": "Numbers with a thousands or decimal separator are split, so a fragment like 200 or 5 passes as cited",
+      "proof": "Allowlist test: bullet 'Managed 1,200 accounts and cut costs by 2.5 crore', reasons 'Managed 200 accounts' and 'Cut costs by 5 crore'; expected 'Shown in your resume', actual reason kept. Fix: tokens = text.toLowerCase().match(/[\\p{L}\\p{N}]+(?:[.,]\\p{N}+)*/gu) ?? []."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 90,
+      "rule": "Lead ruling D21 (stated-skill-only matches always get the fixed PARTIAL phrase); docs/architecture.md /analyses bullet; stated-skill rule hirehop#222",
+      "trigger": "every() is true for an empty token list and for function words alone, and citedText is empty for a stated-only match. With userStatedSkills ['SQL'] and a match citing only skill:SQL, reasons 'You have used', 'Used' and '...' are returned instead of 'Partly shown in your resume'; '...' or '—' is also kept for any MET or PARTIAL.",
+      "title": "A reason with no content token passes, so a stated-only match can still say 'You have used'",
+      "proof": "Stated-skill test with reason 'You have used' (and '...'); expected 'Partly shown in your resume', actual reason kept. Fix: fall back when the cited set is empty or the reason has no token outside functionWords."
+    }
+  ]
+}

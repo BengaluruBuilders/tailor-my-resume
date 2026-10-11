@@ -1,0 +1,65 @@
+{
+ "head_sha": "9be8722466e65ddba77fdbfb9d9aae481197a21c",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "269-c1", "status": "met", "evidence": "KeywordCoverageCalculator / ApplicationKeywordCoverage use 'coverage' only; no match/fit/ATS in new names or copy (D5). percent = (200c+t)/(2t) is half-up: 5/8 -> 63, 6/8 -> 75. prototypeJdAnsweredYesPlusDetailAssertsLiteralPercents asserts (63, 75, 63); finalWithAnswerExceedsFinalWithout asserts 75 > 63; PR body lists the computed values (D29)."},
+  {"id": "269-c2", "status": "met", "evidence": "keywordOf = SkillLexicon.displayName(k).lowercase() collapses SQL/sql/Sql; total 0 returns 0 without dividing. repeatedKeywordsDifferingInCaseCountOnce and noKeywordsGivesZeroPercents would fail if either broke."},
+  {"id": "269-c3", "status": "met", "evidence": "Only YES_REGULARLY and A_FEW_TIMES count (notYetAndSkippedAddNothing); non-blank detail uses keywordsStatedIn(req, text + newline + detail) as the criterion states; blank detail uses isNamedSkillKeyword per D38 (two blank-detail tests). Requirement numbers never reach the count: only requirement.keywords can be returned. D38-intent hole for vague non-blank detail recorded as a low finding."},
+  {"id": "269-c4", "status": "met", "evidence": "final joins ACCEPTED proposedText, otherwise originalText; requirement text is not part of the final statement. finalCountsAcceptedTextOnly, rejectedChangeContributesOriginalText, pendingChangeContributesOriginalText each assert 25 and would fail if PENDING/REJECTED used proposedText. Summary/skills deferred (low finding)."},
+  {"id": "269-c5", "status": "met", "evidence": "ScreenForKeywordsTest asserts have [SQL, Excel, Power BI, Python, Forecasting] inOrder, missing [financial reporting, variance analysis, Stakeholder Management] inOrder, count 8; display names come from the lexicon (PR body explains 'Stakeholder Management' vs the mock-up's 'Stakeholder mgmt')."},
+  {"id": "269-c6", "status": "met", "evidence": "100 - 4 (blank LinkedIn) - 6 per RequiredGap, coerceAtLeast(0): fresh 90, fixed 96, fixed+LinkedIn 100, many gaps 0, whitespace LinkedIn absent. Tests assert literals."},
+  {"id": "269-c7", "status": "met", "evidence": "Gap = EXPERIENCE with non-blank start and blank end; any non-blank end (Present included) is not a gap. ProfileEntry has no separate current flag and D24 sends unsupported Present as a blank end, so dropping isOpenEnded is sound. RequiredGapsTest covers fresh (one Data Analyst Intern gap), returning, current, non-experience and dated entries."},
+  {"id": "269-c8", "status": "met", "evidence": "null account -> SignIn; onboardingComplete || reviewedAt -> Applications; else Upload. Lead test replacement 9be87224 adjudicated: constructor-only, TestProfileRepository is a MutableStateFlow(null) so combine emits at once and all six original assertions run unchanged; ObserveStartDestinationUploadTest adds five cases (Upload with/without profile, reviewedAt, legacy flag, no account). Coverage is stronger than before. The AppViewModel Upload -> FirstRun branch has no test (low finding). Nothing in main sets reviewedAt yet, so app behaviour is unchanged."},
+  {"id": "269-c9", "status": "met", "evidence": "Builder-written ExportFileNameTest.nameCompanyRoleNameRoleNameResumeForPriyaDeshmukh asserts the three literal names."},
+  {"id": "269-c10", "status": "met", "evidence": "nonWord [^\\p{L}\\p{N}]+ -> '-', parts joined '_', empty parts dropped, Resume fallback, 100-char base cap + .pdf. Tests assert separators, reserved chars, NUL/TAB/ESC/BEL, '..', leading dots, emoji, repeated spaces, fallback and length 104. Combining-mark scripts are mangled (low finding)."},
+  {"id": "269-c11", "status": "met", "evidence": "CI 'Core unit tests' runs :core:domain:testDebugUnitTest and :core:domain:koverVerify with -PwarningsAsErrors=true; it passed at head 9be87224 (run 38088168831)."},
+  {"id": "269-c12", "status": "partial", "evidence": "At review: Static checks, Constitution policy, Core/Feature/App unit tests, Lint, Screenshot tests and delivery-gates-pregate pass on 9be87224; Assemble APKs still pending. No verify-local.sh result for this head."}
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/coverage/KeywordCoverageCalculator.kt",
+   "line": 64,
+   "rule": "D38 intent / Constitution I.1: an answer must not turn the requirement's own words into a confirmed keyword; Reviewer A finding adjudicated",
+   "trigger": "Reviewer A's finding stands, but its trigger is wrong: for 'Python and SQL' a blank detail also confirms python and sql (isNamedSkillKeyword: lexicon canonicals named in requirement.text), so 'n/a' adds nothing there. The real hole is non-lexicon keywords matched by stem. EXPERIENCE requirement 'Experience presenting to senior stakeholders', keywords ['stakeholders'], GAP: QuickAnswer(YES_REGULARLY, '') gives upTo == now (normalise('stakeholders') is null), but QuickAnswer(YES_REGULARLY, 'n/a') gives upTo +1 because stem 'stakeholder' is found in requirement.text. Stays low here: it inflates only the projected upTo, final reads accepted text, and it matches the written shared contract. The same expression is in #308 AnswerFacts.keywords, where it creates fact keywords, so fix it once in both lanes (e.g. named-skill keywords plus keywordsStatedIn(requirement, detail) only).",
+   "proof": "KeywordCoverageCalculatorTest: matches [MET 'Strong SQL' (sql), GAP EXPERIENCE 'Experience presenting to senior stakeholders' (stakeholders)], QuickAnswer('x', 'YES_REGULARLY', 'n/a') -> expect upTo == 50, currently 100",
+   "title": "Vague non-blank detail lets requirement text confirm non-lexicon keywords (A's low confirmed, trigger corrected)"
+  },
+  {
+   "severity": "low",
+   "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/coverage/KeywordCoverageCalculator.kt",
+   "line": 51,
+   "rule": "Shared contract #269/#270: answer-confirmed keywords must be computed the same way in both lanes",
+   "trigger": "The answer rule is duplicated, and the copies already disagree. This file lowercases keywords before keywordsStatedIn; #308 AnswerFacts.keywords passes them raw. c2 says keywords can arrive display-cased. GAP requirement 'Power BI or Tableau', keywords ['Power BI'], QuickAnswer(YES_REGULARLY, 'built Power BI dashboards'): here 'power bi' is a lexicon canonical and counts toward upTo. In #308 isKnown('Power BI') is false and stem('Power BI') = 'power bi' is not a single-word stem, so AnswerFacts.keywords returns [] and no answer fact carries it. upTo then promises a keyword that tailoring cannot add. The PR only plans to dedupe the choice constants, not the whole function.",
+   "proof": "Cross-lane check after both merge: for the requirement and answer above, assert KeywordCoverageCalculator answer keywords equal AnswerFacts.keywords(answer, job) lowercased; fails today",
+   "title": "Answer-keyword logic duplicated with #308 AnswerFacts and already diverges on display-cased keywords"
+  },
+  {
+   "severity": "low",
+   "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/coverage/KeywordCoverageCalculator.kt",
+   "line": 34,
+   "rule": "Shared contract #269/#270: final reads accepted text 'plus summary/skills text only as accepted'",
+   "trigger": "final reads bullets only. #308 adds TailoredResume.summary (TailoredText) and skills (TailoredSkills), which merge cleanly as text and are silently ignored here. Resume whose bullets never name Power BI but whose skills (ACCEPTED or original) list Power BI: now counts Power BI (MET) but final omits it, so final < now on an exported resume that contains the keyword. The PR body defers this to #270's model but the Follow-ups section does not track it.",
+   "proof": "After #308 merges: compute(prototypeMatches, null, TailoredResume(bullets without Power BI, skills = TailoredSkills(listOf(\"Power BI\"), listOf(\"Power BI\"), decision = ACCEPTED))) -> expect final to count power bi",
+   "title": "final ignores tailored summary and skills; no tracked follow-up for whichever lane merges second"
+  },
+  {
+   "severity": "low",
+   "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/export/ExportFileName.kt",
+   "line": 12,
+   "rule": "269-c10: words joined with '-' (each word kept intact)",
+   "trigger": "[^\\p{L}\\p{N}] also strips combining marks (\\p{M}), which Indic scripts need. Measured with java.util.regex: fullName 'प्रिया देशमुख' -> 'प-र-य-द-शम-ख', and a decomposed 'Zoe\\u0308' -> 'Zoe'. Allowing \\p{M} in the class keeps the names readable and is still separator-safe.",
+   "proof": "ExportFileNameTest: build('प्रिया देशमुख', '', '', NAME_RESUME) -> expect 'प्रिया-देशमुख_Resume.pdf', currently 'प-र-य-द-शम-ख_Resume.pdf'",
+   "title": "File names mangle Devanagari and other combining-mark names"
+  },
+  {
+   "severity": "low",
+   "file": "app/src/main/kotlin/com/tailormyresume/app/ui/AppViewModel.kt",
+   "line": 22,
+   "rule": "Checklist: every changed behaviour has a test that can fail (plan c8: AppViewModel maps Upload -> FirstRun)",
+   "trigger": "No AppViewModelTest reaches a signed-in, onboarding-incomplete state, so the new Upload branch never runs in a test. Changing it to 'StartDestination.Upload -> AppRootState.Main' passes every test, and a signed-in user without a reviewed profile would then skip first run.",
+   "proof": "AppViewModelTest: sessionRepository.sendAccount(SignInAccount.localAccount) with onboarding incomplete -> expect Loading then FirstRun",
+   "title": "Upload -> FirstRun mapping in AppViewModel is untested"
+  }
+ ]
+}

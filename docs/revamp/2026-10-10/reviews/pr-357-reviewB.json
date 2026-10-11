@@ -1,0 +1,64 @@
+{
+  "head_sha": "e63baf1acf6d5a489a17c2921cb071804c26b877",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "350-no-dead-end",
+      "status": "partial",
+      "evidence": "The spinner is now bounded (SignInNeverStuckTest: 30 s timeout -> Cancelled, success without hand-over -> Ready after 5 s), but on the most likely F2 path (dev-entry preview root, see finding 2) the sign-in succeeds and nothing navigates; the button returns to 'Continue with Google' and every tap repeats a successful sign-in. AppViewModelDeleteThenSignInTest proves only the MainActivity root, which already worked. Issue stays open (Refs #350), consistent with this."
+    },
+    {
+      "id": "350-spinner-bounded",
+      "status": "met",
+      "evidence": "SignInViewModel.kt:39 withTimeout(30_000) and :51 delay(5_000) -> Ready; SignInNeverStuckTest covers both and would fail if reverted. Retry (toast action -> onContinueWithGoogle) cannot overlap an earlier attempt: state is SigningIn until the earlier coroutine finishes, and withTimeout returns only after the cancelled block completes."
+    },
+    {
+      "id": "354-contact-label",
+      "status": "met",
+      "evidence": "EditContactViewModel.kt emailFromGoogle = account != null && profile.email.equals(account.email, ignoreCase = true); tests emailFromTheResumeIsNotLabelledAsGoogle and emailEqualToTheSignedInAccountIsLabelledGoogle (mixed case) plus EditorsScreenTest.resumeEmailIsLabelledFromTheResume. Both would fail on revert."
+    },
+    {
+      "id": "354-google-copy-shows-account-email",
+      "status": "met",
+      "evidence": "CreditsViewModel receiptEmail = account?.email.orEmpty(), rendered under 'Receipts go to your Google email' only when non-blank; CreditsViewModelTest.receiptEmailIsTheSignedInAccountEmail. Settings row already read the session account (unchanged). No screen test asserts the rendered receipt line (VM-level only). See finding 3 on whether that address is where Play receipts actually go."
+    },
+    {
+      "id": "test-edits-constructor-only",
+      "status": "met",
+      "evidence": "EditContactViewModelTest and CreditsViewModelTest existing tests change only the constructor call (added TestSessionRepository); no assertion changed. No !!, no new WhileSubscribed (the existing WhileSubscribed(5_000) is D53/II.2), no comments, no logging of email/PII. SessionRepository is the @Singleton core:data binding injected into @HiltViewModel classes, correct scope."
+    },
+    {
+      "id": "ci",
+      "status": "partial",
+      "evidence": "gh pr checks shows 'Build, lint, and unit tests' pass in 3 s from run 38117544590, which is the PR-body 'edited' run where every shard is skipped. The real run 38117506169 at the same head: unit (core, feature, app), screenshots, lint, static all success; Assemble APKs still in progress; its Constitution policy job was cancelled (passes in the edited run). Do not merge on the 3 s green alone."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/signin/SignInViewModel.kt",
+      "line": 39,
+      "rule": "350 / Constitution I.1 (no untrue claim): a sign-in the user did not cancel must not be reported as cancelled",
+      "trigger": "Prod: the 30 s budget covers the whole RemoteSignInGateway.signIn(), including the interactive Credential Manager sheet (account choice, consent, add-account or 2-step flow) plus Firebase and GET /me. A user (e.g. TalkBack, or adding an account) who takes 25 s in the picker and then has a 6 s cold-start /me gets the picker torn down or the result dropped at 30 s, state Cancelled and the toast 'sign-in cancelled · Retry'. The late success is never applied: withTimeout cancels the block. If the timeout lands after firebase.signInWithCredential has completed (the Task is not cancelled by coroutine cancellation) or during api.me() (apiResult rethrows CancellationException, so the firebase.signOut() cleanup on line 44 of RemoteSignInGateway is skipped), FirebaseAuth.currentUser stays signed in as that user while SessionRepository has no account: a half-signed-in state, and the server may already have created the account. Retry then signs in again (idempotent /me), so no duplicate account, but the user saw a false 'cancelled'. Narrow edge: a timeout firing inside the NonCancellable save block saves the account and still reports Cancelled.",
+      "title": "30 s sign-in timeout includes interactive picker time; a slow but successful sign-in is reported as cancelled and can leave Firebase signed in with no session",
+      "proof": "SignInNeverStuckTest-style: ScriptedSignInGateway { delay(35_000); SignInResult.SignedIn(account) }, onContinueWithGoogle(), advanceTimeBy(36_000) -> expected not Cancelled and no cancelled event; at e63baf1a it is Cancelled. Fix direction: time only the non-interactive part (after idToken()), or sign Firebase out on cancellation in RemoteSignInGateway."
+    },
+    {
+      "severity": "medium",
+      "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/signin/SignInViewModel.kt",
+      "line": 51,
+      "rule": "350 acceptance: after Delete account, Continue with Google reaches the next screen (no dead end); review checklist 1 (would the test fail on the real path)",
+      "trigger": "Most likely F2 root cause is the debug preview root, not the session/marker/DataStore path. The QA walk deleted from the dev entry (F1 cites '5 unused credits' in sample data on shot 66; F10 shows the dev Settings preview). In DebugScenarioActivity, seenMain is true (sample data was Ready(Applications)); after delete rootState = Ready(SignIn, null) -> FirstRun root with SignInNavKey. Sign in (demo gateway: 900 ms, saveAccount) -> rootState = Ready(Upload, accountId) because delete cleared onboardingComplete; previewShowsWelcome (DebugScenarioActivity.kt:228-229: seenMain && start != Applications) stays true, so the fixed PreviewRoot.FirstRun with SignInNavKey is kept, no re-key, and SignInRoute has no navigation of its own. Before this PR: 'Signing in...' forever (state never left SigningIn on success). With this PR: after 5 s the button returns to 'Continue with Google'; each tap repeats a successful sign-in and stays put: the dead end remains, now without a spinner. MainActivity (TmrAccountRoot key(accountId)) already routes correctly, as AppViewModelDeleteThenSignInTest shows, so that test does not cover the failing path. The 5 s fallback also hides any future hand-over bug in prod.",
+      "title": "#350 not fixed on its likely path: debug preview root never leaves SignIn after a post-delete sign-in; the 5 s fallback turns the spinner into a silent loop",
+      "proof": "testDebug: previewNavigationRoot(opensFirstRunRoot = false, seenMain = true, rootState = AppRootState.Ready(StartDestination.Upload, \"local\"), seenAccount = true, hasAccount = true) returns PreviewRoot.FirstRun (shown root stays on SignInNavKey); expected a root that shows Upload. Confirm on the emulator by repeating dev entry -> Settings -> Delete account -> Continue with Google, versus the same from MainActivity."
+    },
+    {
+      "severity": "low",
+      "file": "feature/settings/impl/src/main/kotlin/com/tailormyresume/feature/settings/impl/credits/CreditsViewModel.kt",
+      "line": 33,
+      "rule": "354 / Constitution I.1: a named address must be where receipts actually go",
+      "trigger": "Prod purchases go through Google Play Billing (GooglePlayBilling.kt); Play emails the order receipt to the Google account signed in to the Play Store that made the purchase, which on a multi-account device can differ from the account picked in Credential Manager. Credits then shows 'Receipts go to your Google email' followed by the sign-in address, e.g. work@company.com, while the receipt goes to personal@gmail.com. Before this PR the copy was generic; the PR makes it a specific, possibly wrong claim. Follows the issue text literally, so this is a product call for the lead.",
+      "title": "Receipt line names the sign-in account email, but Play receipts go to the Play Store account, which can differ"
+    }
+  ]
+}

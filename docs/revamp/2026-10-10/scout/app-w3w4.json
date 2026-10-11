@@ -1,0 +1,1859 @@
+{
+ "repo": "BengaluruBuilders/tailor-my-resume",
+ "wave": "W3+W4",
+ "scouted_at": "2026-10-11",
+ "base": {
+  "state": "Nothing from the run is merged (merge blocker #256). W1 lives on revamp/w1-all 9a1c4f56 (#303 + #302 merge, D28). W2 is open PRs on top of it.",
+  "w2_heads": {
+   "#304 (264 tokens)": "revamp/264-paige-tokens 72f84dcd, base revamp/w1-all",
+   "#307 (265 chrome)": "revamp/265-chrome-bars c2f22b16, base 264",
+   "#306 (266 hero/inputs)": "revamp/266-hero-inputs 78a562ba, base 264",
+   "#310 (267 content)": "revamp/267-content-rows 4a5202de, base 264",
+   "#305 (268 Room v3)": "revamp/268-simplified-data b247a3f3, base revamp/w1-all",
+   "#309 (269 coverage/domain)": "revamp/269-coverage-ui-domain 9be87224, base 268",
+   "#308 (270 guard/accept)": "revamp/270-answer-guard-accept edd587d4, base 268"
+  },
+  "prototype": "../hirehop-wt/scout at 21ee644d (PR #255 head, not merged): design/prototype-2026-10-10/README.md, Prototype.dc.html (logic lines 967-1382: fresh/returning 988-1005, go/swap/back/root/toast 1039-1043, index 1089-1131, T 1171-1183, steps 1189-1192, tabs 1362-1363)"
+ },
+ "sources": [
+  "gh issue view 271..284 (title, body, comments: #271 placeholder colour, #274 ImportResumeViewModel rules)",
+  "docs/revamp/2026-10-10/PLAN.md sections 0, 1.2, 1.4, 1.5, 2.1-2.3, 4 (C4, C7-C12), 5 (W3/W4 lanes, ordered table), 6 (R1-R15, hot files); issues.json (W2-E/F/G, W5-N1, W6-A scopes); issues-filed.md",
+  "docs/revamp/2026-10-10/DECISIONS.md D1-D41, GOAL.md, PROGRESS.md, w1-all.md",
+  "docs/CONSTITUTION.md and docs/PRD.md 6.1.2 at PR #255 head; AGENTS.md Commands and Motion; tools/ci/verify-local.sh; docs/MVP_PLAN.md C10 (support email, legal URLs owner-supplied)",
+  "Code read with git show / git grep at origin/revamp/w1-all and the seven W2 heads: NavKeys, entry providers, TmrApp, Navigator/NavigationState, AppViewModel (#309 version), SessionExpiryHandler, DebugScenarioTarget, chrome/hero/input/content component APIs, CreditsRepository, ResumeSettingsRepository, ApplicationRepository, JobApplication, CandidateProfile, ProfileEntry, TailoredResume, GapAnalysis, PaymentGateway, PurchaseResult, SignInGateway, AiFailure, RequiredGaps, ProfileCompleteness, ExportFileName, KeywordCoverageCalculator, PrototypeFixtures",
+  "Dry-run merge with git merge-tree of the five W2 tips (265, 266, 267, 269, 270): no conflicts; not compiled",
+  "~/.claude/skills/ship-queue SKILL.md, scripts/validate.py, scripts/lane.py route (state strings stack issues on exact match), tiers.json"
+ ],
+ "routing": {
+  "integration_base": {
+   "name": "revamp/w2-all",
+   "recipe": "git worktree add -b revamp/w2-all <path> origin/revamp/w1-all, then git merge --no-ff in order: origin/revamp/265-chrome-bars, origin/revamp/266-hero-inputs, origin/revamp/267-content-rows, origin/revamp/269-coverage-ui-domain, origin/revamp/270-answer-guard-accept (264 and 268 come in as ancestors). Same method as D20/D28. Record parents and head in docs/revamp/2026-10-10/w2-all.md; run tools/ci/verify-local.sh once before any W3 Planner.",
+   "dry_run": "git merge-tree of the five tips at c2f22b16, 78a562ba, 4a5202de, 9be87224, edd587d4: clean, no conflicting paths. Design-side and data-side file sets are disjoint; the three component branches are pairwise disjoint. Only #307 edits core/designsystem/build.gradle.kts; only #309 edits app/src/main AppViewModel.kt.",
+   "why": "#271 needs #265, #266, #267 and #269 together; #269 sits on #268; #278 and #284 need #270. No single existing branch contains both stacks.",
+   "risks": [
+    "W2 tips still move (#309 Fixer for D39/D41, #308 round 2 + D39, #306/#307 fixers). Refresh revamp/w2-all by merging the new tips (never rebase, never force-push) and then merge w2-all into the W3/W4 branches; a public-API change in a W2 fix (TmrToastState, TmrTopBar params, ObserveStartDestinationUseCase, AnswerFacts) forces W3/W4 rework.",
+    "A textual merge is not a compile: verify-local must pass on w2-all before W3 starts (semantic breaks between the tokens stack and the data stack are possible, e.g. #309 AppViewModel vs W3 TmrApp).",
+    "W2 PRs squash-merge to main, so their commits never become ancestors of the W3 branches. When they land, retarget W3/W4 PRs to main and gh pr update-branch: identical hunks merge cleanly, but any W2 change made after the w2-all snapshot conflicts. Keep w2-all current until the last W2 merge.",
+    "Stacked PRs skip the Gradle CI jobs ('Detect code changes' skipped, PROGRESS 03:15): real CI evidence exists only after retargeting to main; local verify-local is the gate until then.",
+    "Reviews must diff each W3/W4 PR against its stated base (w2-all or the parent lane branch), or reviewers see the whole W2 diff.",
+    "Merges stay blocked by #256, so stacks deepen (W3 adds two levels, W4 up to three more); each extra level multiplies update-branch churn."
+   ],
+   "fallback": "If w2-all is rejected: base #271 on #309's branch and merge the three component tips into the #271 branch itself (same content, but the W3 PR diff then includes W2 code)."
+  },
+  "bases": {
+   "271": "revamp/w2-all",
+   "272": "#271's branch (stack, W3-A), after the #271 PR is open",
+   "273": "#272's branch (W3 tip)",
+   "274": "#273's branch (stack W4-A)",
+   "275": "#274's branch (stack W4-A)",
+   "276": "#271's branch (needs-info: core contract)",
+   "277": "#276's branch (stack W4-B; needs-info: core contract)",
+   "278": "#271's branch",
+   "279": "#278's branch (stack W4-C)",
+   "280": "#271's branch, or #279's branch when lane.py stacks them on the shared status state",
+   "281": "#271's branch",
+   "282": "#281's branch (stack W4-E)",
+   "283": "#272's branch (W3 tip)",
+   "284": "#283's branch (stack W4-F)",
+   "simplification": "Basing every W4 lane on the #272 head (W3 tip) costs only the wait for #272 and gives one shared W4 base; recommended if #272 is quick."
+  },
+  "depends_on_w2": {
+   "271": "#307, #306, #310, #309 (+#305, #304 as ancestors)",
+   "272": "#309 (ObserveStartDestinationUseCase with Upload), #305 (CreditsRepository.refresh)",
+   "273": "#306, #310 (TmrStoryBars), #307 (toast)",
+   "274": "#306, #310, #305",
+   "275": "#309 (ProfileCompleteness, RequiredGaps), #310",
+   "276": "#306, #309 (KeywordCoverageCalculator) + missing core contract",
+   "277": "#309, #308 (AnswerFacts), #310 (TmrCoverageDelta) + missing core contract",
+   "278": "#308 (AcceptChanges, ExportReadiness, TailoredText/Skills, ResumeDocument), #310, #306",
+   "279": "#309 (ExportFileName), #305 (ResumeSettings), #310",
+   "280": "#305, #310, #307, #306",
+   "281": "#305, #309, #310, #306",
+   "282": "#305, #306, #310",
+   "283": "#305 (ResumeSettingsRepository, D34 wipe), #307, #306",
+   "284": "#305 (CreditsRepository), #308 (packs, MockPackCatalogue, PaymentGateway)"
+  },
+  "tiers": {
+   "271": "ui",
+   "272": "sensitive",
+   "273": "sensitive",
+   "274": "ui",
+   "275": "ui",
+   "276": "ui",
+   "277": "ui",
+   "278": "ui",
+   "279": "ui",
+   "280": "ui",
+   "281": "ui",
+   "282": "ui",
+   "283": "sensitive",
+   "284": "sensitive"
+  },
+  "tier_notes": "#272 and #273 are raised to sensitive (accounts; both labelled security-review in the issue routing). The caller listed only #283/#284; the scout may raise, never lower.",
+  "overlap_pairs": [
+   "271 -> 272: same lane, sequential; 272 also edits TmrApp root wiring owned by W3-A.",
+   "271 -> every W4 issue: dependency (NavKeys, entry providers, toast/sheet hosts). W4 lanes edit only their own *EntryProvider.kt to swap placeholders; W3-A must be merged into their base first.",
+   "279 | 280: shared persisted state 'room:job_applications.status+applied_on' and one shared status use case; lane.py stacks them (W4-C and W4-D become one stack 278 -> 279 -> 280). Alternative: the lead lands the status use case first, then unstack.",
+   "274 | 281 | 282: all write the profile through ProfileRepository and FactIdAllocator but different fields at different times (import vs editors); listed with distinct state strings so they stay parallel; the shared contract is the core FactIdAllocator and FactSource rules.",
+   "275 -> 281: functional dependency (Add date opens #281's EditRole); no file overlap.",
+   "277 -> 284: PaywallNavKey(returnToApplicationId) contract defined in #271; #284 implements the return.",
+   "274 adds one core/domain file (import-save use case); 279 adds one core/domain file (status use case); 276/277 may add core contract files (needs-info). No two W4 lanes touch the same core file.",
+   "Hot files: app/src/main/** only W3-A (#271, #272); feature/*/api/** only #271; each W4 lane only feature/<own>/impl/**."
+  ],
+  "max_active": "2 implementation lanes (skill default; D11 allows 3 when host load < ~12, D22/D35).",
+  "lead_actions": [
+   "Create revamp/w2-all (recipe above), run verify-local on it, record w2-all.md, before the #271 Planner.",
+   "Decide the #276/#277 core-contract owner (scout default: additive core contract inside #276/#277).",
+   "Pick the copy for a non-cancel sign-in failure (#273 c10) and whether the job hint keeps 'for the best match' (#276 c10).",
+   "Accept or override the shared status use case placement (#279 creates it; #280 reuses; router stacks them).",
+   "Security reviews: #272, #273, #283, #284 (accounts, deletion, data export, money)."
+  ]
+ },
+ "needs_info": [
+  "#276, #277 (needs-info, lead not owner): the core contract for job-link import (JobImporter), NOT_A_JOB_POST, the analysis question, per-match reasons and job location is owned by no issue before W4 (W5-N1 lists only network/prod files, W6-A only offline fakes). Default: add it additively inside #276/#277.",
+  "Owner-supplied, non-blocking: Terms and Privacy URLs (#273 footer, #283 footer) and the support email (#283 Help & feedback) are not in the code (MVP_PLAN C10). Default: keep the 'Address not set in this build' precedent.",
+  "Lead copy choices, non-blocking: #273 toast text for a non-cancel sign-in failure (default: drawn toast pattern with Retry, copy 'Sign-in didn't finish. Nothing was saved.'); #276 job hint 'for the best match' (default: keep as drawn, it is not a score; copy tests target score phrasing only).",
+  "Design gap, non-blocking: no TmrSegmentedTabs in core:designsystem for the Resume/Changes switch (#278) and no shared status sheet (#279/#280); defaults recorded in those issues' constraints.",
+  "Current-role convention: ProfileEntry has no current flag; the fixtures store endDate 'Present'. #275/#281 follow it; RequiredGaps then treats it as filled."
+ ],
+ "issues": [
+  {
+   "number": 271,
+   "title": "feat(app): navigation shell — setup flow with step bar, Applications/+/Profile tabs, back and close rules from T",
+   "lane": "W3-A",
+   "status": "ready",
+   "tier": "ui",
+   "base": "revamp/w2-all (proposed integration branch, see routing.integration_base)",
+   "depends_on": [
+    265,
+    266,
+    267,
+    269,
+    268
+   ],
+   "blocked_by_open_prs": [
+    "#307 (265)",
+    "#306 (266)",
+    "#310 (267)",
+    "#309 (269)",
+    "#305 (268, via #309)",
+    "#304 (264, via the component PRs)"
+   ],
+   "navkeys": {
+    "feature/onboarding/api": [
+     "SignInNavKey",
+     "UploadNavKey",
+     "UploadErrorNavKey",
+     "PasteResumeNavKey",
+     "ManualProfileNavKey",
+     "ReadingNavKey",
+     "ReviewProfileNavKey"
+    ],
+    "feature/analysis/api": [
+     "JobNavKey",
+     "JobLinkNavKey",
+     "JobResultNavKey(applicationId: String)",
+     "QuickQuestionNavKey(applicationId: String)"
+    ],
+    "feature/tailor/api": [
+     "TailoringNavKey(applicationId: String)",
+     "TailorFailedNavKey(applicationId: String)",
+     "TailoredNavKey(applicationId: String)",
+     "EditResumeNavKey(applicationId: String)",
+     "ExportedNavKey(applicationId: String)"
+    ],
+    "feature/applications/api": [
+     "ApplicationsNavKey",
+     "ApplicationDetailNavKey(applicationId: String)"
+    ],
+    "feature/profile/api": [
+     "ProfileNavKey",
+     "ExperienceNavKey",
+     "EditRoleNavKey(entryId: String?)  # null = Add role",
+     "EditContactNavKey",
+     "SkillsNavKey",
+     "ListEditNavKey(section: ProfileListSection)  # @Serializable enum SUMMARY, EDUCATION, ACHIEVEMENTS declared in feature/profile/api"
+    ],
+    "feature/settings/api": [
+     "SettingsNavKey",
+     "CreditsNavKey  # moved here from feature/tailor/api",
+     "PaywallNavKey(returnToApplicationId: String?)  # non-null = after a purchase replace the paywall with QuickQuestionNavKey(id) (payReturn); null = back"
+    ],
+    "deleted": [
+     "ImportResumeNavKey",
+     "AnalysisNavKey",
+     "TailorNavKey",
+     "DeleteAccountNavKey",
+     "feature/tailor/api CreditsNavKey",
+     "TopLevelNavItem SETTINGS tab"
+    ],
+    "count": "27 keys = the 27 prototype screens in renderVals() `is` (signin .. paywall)",
+    "scenario_param": "Keep the existing `scenario: DebugScenario = DebugScenario.defaultValue` parameter on every key so app/src/debug keeps compiling until W6-C rewrites the menu."
+   },
+   "entry_providers": {
+    "feature/onboarding/impl/.../navigation/OnboardingEntryProvider.kt": "onboardingEntry(navigator): SignIn, Upload, UploadError, PasteResume, ManualProfile, Reading, ReviewProfile",
+    "feature/analysis/impl/.../navigation/AnalysisEntryProvider.kt": "analysisEntry(navigator): Job, JobLink, JobResult, QuickQuestion",
+    "feature/tailor/impl/.../navigation/TailorEntryProvider.kt": "tailorEntry(navigator): Tailoring, TailorFailed, Tailored, EditResume, Exported",
+    "feature/applications/impl/.../navigation/ApplicationsEntryProvider.kt": "applicationsEntry(navigator) + applicationDetailEntry(navigator) (or one function): Applications, ApplicationDetail",
+    "feature/profile/impl/.../navigation/ProfileEntryProvider.kt": "profileEntry(navigator): Profile, Experience, EditRole, EditContact, Skills, ListEdit",
+    "feature/settings/impl/.../navigation/SettingsEntryProvider.kt": "settingsEntry(navigator): Settings, Credits, Paywall",
+    "placeholder": "Each placeholder renders the screen name with TmrTheme typography and TmrTheme.colors.text (comment on #271: BasicText default black is invisible on the black window)."
+   },
+   "criteria": [
+    {
+     "id": "271-c1",
+     "text": "Given the six feature api modules, When the sources are listed, Then exactly the 27 NavKeys in navkeys exist (one per prototype screen in renderVals() `is`), each @Serializable with only core:model or same-module types, and ImportResumeNavKey, AnalysisNavKey, TailorNavKey, DeleteAccountNavKey and feature/tailor/api CreditsNavKey no longer exist in any src/main or src/debug source."
+    },
+    {
+     "id": "271-c2",
+     "text": "Given each feature impl entry provider, When an entry test resolves every NavKey of that module, Then each key has an entry whose placeholder shows the screen name in TmrTheme.colors.text (not default black), and no key throws 'no entry'."
+    },
+    {
+     "id": "271-c3",
+     "text": "Given a Robolectric walk test on the demo shell, When it goes Sign in -> Upload -> Review profile -> Add job -> Job analyzed -> Quick question -> Tailoring -> Tailored resume -> Exported -> Applications, Then on every screen the chrome matches T: step bar 1 on upload/review, 2 on job/jobResult, 3 on question/tailoring/tailored; back hidden on reading and tailoring; close on exported; no top bar on signin and applications (issue acceptance criterion 1)."
+    },
+    {
+     "id": "271-c4",
+     "text": "Given a parameterised chrome test over all 27 keys, When each is rendered with a non-empty stack, Then step bar, leading control (Back, Close or None), title and right action equal PLAN 2.2 / logic T: editResume 'Resume' + Save; editRole 'Experience' + Save; experience/editContact/skills/listEdit 'Profile' (editContact Save, skills Done, listEdit Save); settings 'Profile'; credits 'Settings'; appDetail 'Application'; exported and paywall Close; reading and tailoring no back; signin, home and profile no top bar."
+    },
+    {
+     "id": "271-c5",
+     "text": "Given upload or job is the first screen of an empty stack, When it renders, Then no back control shows; and Given the same screen pushed on a non-empty stack, Then back shows (T: back if stack.length > 0)."
+    },
+    {
+     "id": "271-c6",
+     "text": "Given any screen with back, When back (top bar or system back) is pressed with entries below, Then the top entry pops; and When the stack is empty, Then the app shows Applications if the user has at least one application or a reviewed profile (reviewedAt set), else Upload (logic back()). A unit test covers both fallback branches with fakes."
+    },
+    {
+     "id": "271-c7",
+     "text": "Given root semantics, When a tab is tapped, Exported Close or 'Go to Applications' is used, the Applications avatar opens Profile, or a sign-out/delete-account completion calls root(SignIn), Then the stack holds only the target and back from it does not return to the previous flow (logic root())."
+    },
+    {
+     "id": "271-c8",
+     "text": "Given the bottom TmrTabBar, When the current screen is Applications or Profile, Then it shows Applications, centre + and Profile with the current tab selected; and on every other screen no tab bar shows (showTabs = home || profile)."
+    },
+    {
+     "id": "271-c9",
+     "text": "Given Applications or Profile, When the centre + is tapped, Then Add job opens pushed on the stack with empty job text (logic newApp go('job', {jd:''}))."
+    },
+    {
+     "id": "271-c10",
+     "text": "Given Exported, When Close is tapped, Then Applications shows with an empty stack (issue acceptance criterion 3); and Given the Paywall, When Close is tapped, Then the previous screen shows (back)."
+    },
+    {
+     "id": "271-c11",
+     "text": "Given the app root, When the composition is inspected, Then exactly one TmrToastHost and one bottom-sheet host exist above NavDisplay, a CompositionLocal (or equivalent) lets any entry show a toast with an optional action, and showing a second toast replaces the first (one toast at a time)."
+    },
+    {
+     "id": "271-c12",
+     "text": "Given the old dock, When the sources are listed, Then core/designsystem/.../component/TmrDock.kt and TmrDockDefaultsTest are deleted, TOP_LEVEL_NAV_ITEMS (or its replacement) has no Settings entry, Settings opens only from the Profile gear, and no remaining source references TmrDock, TmrDockItem or TmrDockDefaults."
+    },
+    {
+     "id": "271-c13",
+     "text": "Given TmrTheme.motion.reduced is true, When any navigation happens, Then screens switch without movement (the proof transition snaps) and the tab bar appears without sliding."
+    },
+    {
+     "id": "271-c14",
+     "text": "Given a process-death restore test (NavigationStateRestoreTest or its successor), When the activity is recreated mid-flow, Then the same stack and current screen come back."
+    },
+    {
+     "id": "271-c15",
+     "text": "Given the shell at 337 dp width and font scale 2.0, When the walk screenshots/semantics are taken for a step screen (upload) and a tab screen (Applications), Then the top bar, step bar and tab bar labels are fully visible (D40) and the placeholder text is readable."
+    },
+    {
+     "id": "271-c16",
+     "text": "Given docs/ARCHITECTURE.md section 6, When it is read, Then it lists every NavKey with its owning module and the back, root, close and tab rules above; no other section changes."
+    },
+    {
+     "id": "271-c17",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes (issue acceptance criterion 4)."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Real screens: W4 replaces every placeholder.",
+    "Start destination logic, session expiry and the wallet refresh (#272).",
+    "New design-system components beyond a toast/sheet CompositionLocal; the chrome components come from #265.",
+    "The debug menu rewrite (W6-C); only the minimum DebugScenarioTarget edit to compile against the new keys.",
+    "Multi-frame motion sequences from the board."
+   ],
+   "gates": [
+    "./gradlew :app:testDemoDebugUnitTest :app:testProdDebugUnitTest :app:lintDemoRelease :app:lintProdRelease -PwarningsAsErrors=true",
+    "./gradlew testDebugUnitTest -PwarningsAsErrors=true  # every feature entry-provider test",
+    "./gradlew :core:navigation:testDebugUnitTest :core:designsystem:testDebugUnitTest :core:designsystem:verifyRoborazziDebug",
+    "./gradlew assembleDemoDebug assembleProdDebug",
+    "./gradlew dependencyGuard",
+    "./gradlew spotlessCheck",
+    "BASE_REF=revamp/w2-all tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh"
+   ],
+   "root_cause": null,
+   "callers": [
+    "app/src/main/.../ui/TmrApp.kt: TmrFirstRunRoot / TmrMainRoot / TmrNavDisplay / withDockInset / sharedEntryProvider are rewritten; LocalTmrBottomInset consumers must get the tab-bar inset instead of TmrDockDefaults.inset.",
+    "app/src/main/.../navigation/TopLevelNavItem.kt (APPLICATIONS, PROFILE, SETTINGS, START_NAV_KEY, isTopLevelDestination) and its tests app/src/test/.../navigation/TopLevelDestinationTest.kt, TopLevelNavItemTest.kt.",
+    "core/navigation Navigator (navigate, openInOwnTab, returnToTopLevel, replace, navigateAll, goBack) and NavigationState (two-level top-level + sub-stack model); PendingNavigation.consume() used by the debug launcher.",
+    "app/src/debug/.../DebugScenarioTarget.kt maps targets to ImportResumeNavKey, AnalysisNavKey, TailorNavKey, CreditsNavKey, DeleteAccountNavKey: must compile against the new keys.",
+    "app/src/testDebug/.../NavigationStateRestoreTest.kt, DebugPreviewNavigationRootTest.kt, DebugPreviewRootTest.kt; app/src/test/.../RootViewModelStoresTest.kt.",
+    "feature/*/impl/src/test/.../navigation/*EntryProviderTest.kt, NavKeyPlaceholderEntryTest.kt, onboarding StartOverNavigationTest.kt.",
+    "core/designsystem component/TmrDock.kt, TmrMetrics.kt (dock metrics), TmrDockDefaultsTest.kt.",
+    "#309 changed AppViewModel to map StartDestination.Upload to AppRootState.FirstRun; #272 builds on it."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "File set (PLAN 5 W3 + 6.6): app/src/main/**, core/navigation/**, feature/*/api/**, feature/*/impl/**/navigation/*EntryProvider.kt and their navigation tests, TmrDock.kt delete, docs/ARCHITECTURE.md section 6. Needed extras the issue omits, kept minimal: app/src/debug/.../DebugScenarioTarget.kt (compile only), app/src/test*/** navigation tests, core/designsystem TmrMetrics.kt/TmrDockDefaultsTest.kt (dock removal), and one toast/sheet CompositionLocal next to TmrToastState in component/chrome/TmrToast.kt (or in core/navigation). No W4 lane edits these files afterwards.",
+    "The prototype model is one stack plus root(); the current Navigator keeps per-tab sub-stacks. Either is acceptable if the T/back/root/tab criteria hold; do not keep a Settings top-level tab.",
+    "Root switching hazard for #272: AppRootState FirstRun/Main switch on every StartDestination emission; the shell must allow the setup flow to continue from Review to Add job without being reset (see #272 c4).",
+    "II.1: NavKey arguments use core:model types or enums declared in the same api module; an api module never depends on an impl module.",
+    "PLAN 6.2: configuration cache and isolated projects are on; no module is added, removed or renamed (S1), so .github/workflows/build.yml stays untouched.",
+    "Lint baselines in app and core/navigation may only shrink (III.3)."
+   ],
+   "state": [
+    "navigation back stack (rememberNavBackStack saved state, restored after process death)"
+   ],
+   "files": [
+    "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt",
+    "app/src/main/kotlin/com/tailormyresume/app/navigation/**",
+    "app/src/main/kotlin/com/tailormyresume/app/MainActivity.kt",
+    "app/src/debug/kotlin/com/tailormyresume/app/debug/DebugScenarioTarget.kt (compile-only edit)",
+    "app/src/test/kotlin/com/tailormyresume/app/navigation/**",
+    "app/src/testDebug/kotlin/com/tailormyresume/app/debug/NavigationStateRestoreTest.kt",
+    "core/navigation/**",
+    "feature/*/api/**",
+    "feature/*/impl/src/main/**/navigation/*EntryProvider.kt",
+    "feature/*/impl/src/test/**/navigation/**",
+    "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/TmrDock.kt (delete)",
+    "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/TmrMetrics.kt (dock metrics only)",
+    "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrDockDefaultsTest.kt (delete)",
+    "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrToast.kt (add the toast CompositionLocal only, if placed there)",
+    "docs/ARCHITECTURE.md (section 6 only)"
+   ],
+   "scale": {
+    "material": false,
+    "note": "27 small keys and one shell; back stack depth is bounded by the flow (under ~12). No lists, no I/O on the main thread; the back fallback reads two Flows (applications non-empty, profile reviewedAt) already exposed by repositories."
+   }
+  },
+  {
+   "number": 272,
+   "title": "feat(app): start destination and session gate",
+   "lane": "W3-A",
+   "status": "ready",
+   "tier": "sensitive",
+   "tier_reason": "Raised from ui: accounts (session gate, sign-out clearing, labelled security-review). tiers.json also matches app/src/prod/**/auth/ if SessionExpiryHandler is touched.",
+   "base": "#271's branch (stack on W3-A), after the #271 PR is open",
+   "depends_on": [
+    271,
+    269,
+    268
+   ],
+   "blocked_by_open_prs": [
+    "#271 PR (not yet opened)",
+    "#309 (269 ObserveStartDestinationUseCase)",
+    "#305 (268 CreditsRepository.refresh)"
+   ],
+   "criteria": [
+    {
+     "id": "272-c1",
+     "text": "Given no signed-in account (fake SessionRepository.observeAccount emits null), When AppViewModel starts (Turbine), Then the root state is the setup root starting at Sign in with an empty stack."
+    },
+    {
+     "id": "272-c2",
+     "text": "Given a signed-in account and a profile with reviewedAt null and onboarding not complete, When AppViewModel starts, Then the root starts at Upload with an empty stack (no back control on Upload)."
+    },
+    {
+     "id": "272-c3",
+     "text": "Given a signed-in account and (reviewedAt set or onboarding complete), When AppViewModel starts, Then the root starts at Applications."
+    },
+    {
+     "id": "272-c4",
+     "text": "Given the user is in the setup flow on Review profile, When Continue sets reviewedAt and pushes Add job, Then the app stays on Add job (step 2) and is not reset to Applications; the start destination is applied only at launch and when the signed-in account changes, never on a profile change."
+    },
+    {
+     "id": "272-c5",
+     "text": "Given a signed-in user anywhere in the app, When SessionExpiryHandler.onSessionExpired (or the accountGone path) signs out, Then the app shows Sign in with an empty stack, back cannot return to a signed-in screen, and the ViewModel stores of the previous root are cleared (RootViewModelStores.keepOnly or equivalent) so no previous user's state survives."
+    },
+    {
+     "id": "272-c6",
+     "text": "Given a successful sign-in, When the account appears, Then CreditsRepository.refresh() is called exactly once (fake counts calls) so the free credit shows on later screens; and When refresh throws, Then navigation still proceeds and no error state is shown (no new error state, R5)."
+    },
+    {
+     "id": "272-c7",
+     "text": "Given the app is starting, When the first StartDestination has not been emitted, Then the root shows nothing (Loading) and never flashes Sign in for a signed-in user."
+    },
+    {
+     "id": "272-c8",
+     "text": "Given ViewModel tests with fakes and Turbine, When they run, Then they cover the three start destinations, session expiry and the one-shot rule of c4 (issue acceptance criterion 1)."
+    },
+    {
+     "id": "272-c9",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "The sign-in screen itself (#273).",
+    "Changing ObserveStartDestinationUseCase rules (#269 owns them) beyond what c4 needs at the app layer.",
+    "Server-side session or token changes; any auth bypass or test identity (D9)."
+   ],
+   "gates": [
+    "./gradlew :app:testDemoDebugUnitTest :app:testProdDebugUnitTest :app:lintDemoRelease :app:lintProdRelease -PwarningsAsErrors=true",
+    "./gradlew :core:domain:testDebugUnitTest :core:domain:koverVerify",
+    "./gradlew assembleDemoDebug assembleProdDebug",
+    "./gradlew dependencyGuard",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#271 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh"
+   ],
+   "root_cause": null,
+   "callers": [
+    "MainActivity collects AppViewModel.rootState and passes it to TmrApp.",
+    "TmrApp LaunchedEffect(rootState) -> RootViewModelStores.keepOnly(NavigationRoot.*).",
+    "app/src/prod/.../auth/SessionExpiryHandler (SessionExpiredListener, AppStartTask) signs out through SignInGateway; SignOutCleaner and LocalDataWiper run on sign-out.",
+    "core/domain ObserveStartDestinationUseCase (from #309) combines SessionRepository.observeAccount, observeOnboardingComplete and ProfileRepository.observeProfile.",
+    "app/src/test/.../ui/AppViewModelTest.kt, RootViewModelStoresTest.kt."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "Security review required (accounts). No auth bypass, no hard-coded token, no disabled check (GOAL 'Never get blocked'). Never log account ids, emails or tokens.",
+    "I.5: the wallet refresh calls the backend only in prod; demo uses the offline fake. No new network library; dependencyGuard baselines unchanged.",
+    "II.2: AppViewModel keeps one StateFlow via stateIn(WhileSubscribed(5_000)) with Loading as the initial value.",
+    "Sign-out and session expiry must leave no previous user's data reachable (local wipe stays the job of SignOutCleaner / LocalDataWiper; this issue only resets navigation and root ViewModel stores)."
+   ],
+   "state": [
+    "app root ViewModelStores (cleared on account change)",
+    "credit balance cache via CreditsRepository.refresh (wallet read after sign-in)"
+   ],
+   "files": [
+    "app/src/main/kotlin/com/tailormyresume/app/ui/AppViewModel.kt",
+    "app/src/main/kotlin/com/tailormyresume/app/ui/AppRootState.kt",
+    "app/src/main/kotlin/com/tailormyresume/app/ui/RootViewModelStores.kt",
+    "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt (root wiring only, owned by the same lane)",
+    "app/src/test/kotlin/com/tailormyresume/app/ui/**"
+   ],
+   "scale": {
+    "material": false,
+    "note": "Single combine of three Flows; distinctUntilChanged; no polling. Wallet refresh once per sign-in."
+   }
+  },
+  {
+   "number": 273,
+   "title": "feat(onboarding): sign-in stories, Google sign-in and the sign-in cancelled toast",
+   "lane": "W4-A",
+   "status": "ready",
+   "tier": "sensitive",
+   "tier_reason": "Raised from ui: accounts (Google sign-in through SignInGateway), labelled security-review.",
+   "base": "#272's branch (W3 tip), after the #272 PR is open",
+   "depends_on": [
+    272,
+    271
+   ],
+   "blocked_by_open_prs": [
+    "#271 and #272 PRs",
+    "#306 (TmrPaige, TmrPrimaryButton, TmrSticker)",
+    "#310 (TmrStoryBars)",
+    "#307 (TmrToastHost)"
+   ],
+   "criteria": [
+    {
+     "id": "273-c1",
+     "text": "Given Sign in at story index 0, 1 and 2, When it renders, Then the full-bleed background is blue #5AA9F8, amber #F7A940 and lime #A3F43F respectively, the headline is 'Upload your resume' / 'Paste the job you want' / 'Get a resume made for it' with the drawn sublines, the label reads 'Paige · N of 3', three TmrStoryBars show past bars full and future bars empty, and the hint reads 'Tap · hold' (screenshots story 1, 2, 3)."
+    },
+    {
+     "id": "273-c2",
+     "text": "Given story index 0 and motion not reduced, When virtual time advances 5000 ms (TmrTheme.motion idle story duration), Then the index is 1; after another 10000 ms it wraps to 0."
+    },
+    {
+     "id": "273-c3",
+     "text": "Given the story area, When the user taps (press under 250 ms) in the left third, Then the previous story shows (0 wraps to 2); When they tap elsewhere, Then the next story shows; When they hold longer than 250 ms, Then progress pauses, the hint reads 'Paused', and release resumes without stepping; leaving the area while paused resumes."
+    },
+    {
+     "id": "273-c4",
+     "text": "Given TmrTheme.motion.reduced is true, When Sign in shows, Then stories never auto-advance, bars do not animate, Paige is still, and taps still step between stories."
+    },
+    {
+     "id": "273-c5",
+     "text": "Given story 3, When the sticker renders, Then it shows a keyword-coverage value (for example '92% keywords') and no string on the screen uses 'match' as a score (D5, I.3)."
+    },
+    {
+     "id": "273-c6",
+     "text": "Given Continue with Google, When tapped, Then the label becomes 'Signing in…', a second tap does nothing, and SignInGateway.signIn() is called exactly once (screenshot signing in)."
+    },
+    {
+     "id": "273-c7",
+     "text": "Given signIn returns SignedIn for a new user (no reviewed profile, no applications), Then Upload shows as root with an empty stack; and for a returning user, Then Applications shows as root (ViewModel test: success routes by start destination)."
+    },
+    {
+     "id": "273-c8",
+     "text": "Given signIn returns Cancelled, When the result arrives, Then the toast 'Sign-in cancelled. Nothing was saved.' shows with Retry, the button label returns to 'Continue with Google', and no session, profile, application or ledger row is written (ViewModel test: cancel keeps no data; screenshot cancelled toast)."
+    },
+    {
+     "id": "273-c9",
+     "text": "Given the cancelled toast, When Retry is tapped, Then the toast closes and signIn is called again."
+    },
+    {
+     "id": "273-c10",
+     "text": "Given signIn returns Failed (not a cancel), When the result arrives, Then the same drawn toast pattern with Retry shows (no new screen or error state, R5); the exact copy is the lead's choice recorded in needs_info."
+    },
+    {
+     "id": "273-c11",
+     "text": "Given the footer, When it renders, Then it shows Terms and Privacy links and 'Your first tailored resume is free.'; no 'Continue with Apple' button exists anywhere."
+    },
+    {
+     "id": "273-c12",
+     "text": "Given Sign in at 337 dp width and font scale 2.0, When it renders, Then the headline, the Google button and the footer are fully visible with no ellipsis."
+    },
+    {
+     "id": "273-c13",
+     "text": "Given a screen reader, When focus enters the story area, Then it announces the story text and 'N of 3', and next/previous are reachable as accessibility actions."
+    },
+    {
+     "id": "273-c14",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Apple sign-in.",
+    "Consent, 18+ or any notice step before or after sign-in.",
+    "Changing SignInGateway, Credential Manager or Firebase wiring in app/src/prod."
+   ],
+   "gates": [
+    "./gradlew :feature:onboarding:impl:testDebugUnitTest :feature:onboarding:impl:verifyRoborazziDebug :feature:onboarding:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:onboarding:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#272 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh"
+   ],
+   "root_cause": null,
+   "callers": [
+    "core/domain SignInGateway.signIn() -> SignInResult.SignedIn | Cancelled | Failed(reason); prod RemoteSignInGateway (Credential Manager + Firebase), demo offline fake.",
+    "SignInNavKey entry in OnboardingEntryProvider (#271 placeholder replaced here).",
+    "AppViewModel root switch (#272) performs the post-sign-in routing and the wallet refresh; the screen must not duplicate them."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "Security review required (accounts). No credential, token or email in logs or UiState toString.",
+    "I.5: no new network path; sign-in goes only through SignInGateway; demo flavour has no INTERNET.",
+    "Story timing from TmrTheme.motion idle (story 5000 ms) and the tap/hold rules from logic st (250 ms hold threshold, left third = previous).",
+    "Terms and Privacy addresses are owner-supplied (MVP_PLAN C10) and not in the code; follow the existing precedent ('Address not set in this build') until the owner provides them.",
+    "Only the files of this issue: feature/onboarding/impl signin/**, its tests, strings_signin.xml, signin_* baselines."
+   ],
+   "state": [
+    "signed-in session (SessionRepository via SignInGateway; nothing on cancel)"
+   ],
+   "files": [
+    "feature/onboarding/impl/src/main/**/signin/**",
+    "feature/onboarding/impl/src/main/**/navigation/OnboardingEntryProvider.kt (swap the SignIn placeholder)",
+    "feature/onboarding/impl/src/test/**/signin/**",
+    "feature/onboarding/impl/src/main/res/values/strings_signin.xml",
+    "feature/onboarding/impl/src/test/screenshots/signin_*"
+   ],
+   "scale": {
+    "material": false,
+    "note": "One screen; one frame-clock driven progress value; no I/O on main."
+   }
+  },
+  {
+   "number": 274,
+   "title": "feat(onboarding): upload, unreadable file, paste resume, fill in myself and reading",
+   "lane": "W4-A",
+   "status": "ready",
+   "tier": "ui",
+   "base": "#273's branch (stack on W4-A)",
+   "depends_on": [
+    273,
+    271,
+    268
+   ],
+   "blocked_by_open_prs": [
+    "#273 PR",
+    "#306 (TmrHeroCard, TmrSticker, TmrUploadCard, TmrTextArea, TmrLabeledField)",
+    "#310 (TmrProgressRows, TmrFileCard)",
+    "#305 (profile fields)"
+   ],
+   "criteria": [
+    {
+     "id": "274-c1",
+     "text": "Given Upload, When it renders, Then it shows step bar 1, the blue hero 'Paige builds your profile' / 'Start with your resume' with PDF and DOCX stickers and Paige, the line 'We read it and fill in your profile. You check it and fix anything we got wrong.', the upload card 'Upload resume' / 'PDF or DOCX · up to 5 MB', 'Paste as text', 'Fill in myself' and 'Your resume is only used to build your applications. Never shared.' (screenshot upload)."
+    },
+    {
+     "id": "274-c2",
+     "text": "Given Upload resume, When tapped, Then the system document picker opens for application/pdf and the DOCX MIME type, and the merged manifest declares no storage permission."
+    },
+    {
+     "id": "274-c3",
+     "text": "Given a picked readable PDF or DOCX, When reading starts, Then Reading shows with step bar 1, no back control, the file line (name, type, pages or size), 'Reading your resume', a percent, 'Takes about 20 seconds', and rows Contact details, Work experience, Education, Skills, Achievements that move pending -> 'Reading…' -> done with counts from the parsed profile ('Found', 'N roles', 'N degree', 'N found') (screenshots reading 0%, 40%, 100% with virtual time)."
+    },
+    {
+     "id": "274-c4",
+     "text": "Given reading reaches 100%, When it completes, Then Review profile replaces Reading (Reading is not left on the stack; back from Review goes to Upload)."
+    },
+    {
+     "id": "274-c5",
+     "text": "Given a picked PDF with no text layer (NoTextLayer), or a parse failure, or a file over 5 MB, When reading fails, Then Unreadable file shows: 'We couldn't read that file', a file card with the file name and 'image only', the explanation line, 'Try one of these' with the three drawn tips, Choose another file and Paste as text (screenshot uploadError; PLAN R5 maps parse failure here)."
+    },
+    {
+     "id": "274-c6",
+     "text": "Given Unreadable file, When Choose another file picks a readable file, Then Reading replaces Unreadable file; When Paste as text is tapped, Then Paste resume replaces it."
+    },
+    {
+     "id": "274-c7",
+     "text": "Given Paste resume, When it renders, Then it shows 'Paste your resume', the line 'Copy everything from your resume file and paste it here.', a text area and Read text (disabled while the text is blank); When Read text is tapped, Then Reading replaces Paste resume (screenshot pasteResume)."
+    },
+    {
+     "id": "274-c8",
+     "text": "Given Fill in myself, When it renders, Then it shows 'Tell us about you', six fields Full name, Email (read-only, from the Google account), Phone (+91 hint), City, Current or last job title, Company, and Continue; When Continue is tapped, Then the profile is saved with these facts as USER_STATED and Review profile opens (screenshot manual)."
+    },
+    {
+     "id": "274-c9",
+     "text": "Given a parsed resume, When it is saved, Then a core use case (not the screen) applies the deleted ImportResumeViewModel rules with ported tests: fresh entry ids from FactIdAllocator (the #241 fix: unique imported ids, linked continuations), the user's own stated facts are kept and never overwritten, imported entries are marked IMPORTED, and sourceFileName is recorded (comment on #274)."
+    },
+    {
+     "id": "274-c10",
+     "text": "Given the prod flavour, When text is parsed, Then it goes through ResumeTextParser (POST /resume/parse) only; and Given the demo flavour, Then the offline parser runs with no network (I.5)."
+    },
+    {
+     "id": "274-c11",
+     "text": "Given Upload, Unreadable file, Paste resume, Fill in myself and Reading at 337 dp and font scale 2.0, When rendered, Then nothing is clipped."
+    },
+    {
+     "id": "274-c12",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Error states other than Unreadable file.",
+    "Profile review (#275) and the editors (#281, #282).",
+    "Server parse fields (B7/#93, W5-N1)."
+   ],
+   "gates": [
+    "./gradlew :feature:onboarding:impl:testDebugUnitTest :feature:onboarding:impl:verifyRoborazziDebug :feature:onboarding:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:onboarding:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#273 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh",
+    "./gradlew :core:domain:testDebugUnitTest :core:domain:koverVerify  # the import-save use case"
+   ],
+   "root_cause": null,
+   "callers": [
+    "feature/onboarding/impl importresume/ResumeTextSource.kt and ContentResolverResumeTextSource.kt (kept; produce text or NoTextLayer).",
+    "core/domain ResumeTextParser.parse(rawText) / parse(rawText, keptEntries); prod RemoteResumeTextParser; demo offline parser.",
+    "core/domain fact/FactIdAllocator (used by AddUserStatedFact(s)UseCase) for unique ids.",
+    "ProfileRepository (Room) writes; ObserveStartDestinationUseCase reads the profile afterwards.",
+    "Deleted reference: git show origin/main:feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/importresume/ImportResumeViewModel.kt and its tests."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "Comment on #274: the save rules live in a core:domain use case (for example core/domain/.../onboarding/SaveImportedProfileUseCase.kt) so the screen stays thin. This file is outside feature/onboarding/impl; no other W4 lane edits that package, so the lane stays disjoint. Record the extra path in the plan.",
+    "I.1: import never invents facts; only parser output and the user's typed fields are saved.",
+    "No storage permission; SAF picker only; reading and parsing run off the main thread (II.4, II.7 StrictMode).",
+    "Customer data: the parsed profile is customer data; it stays on device in demo and goes only to apps-backend in prod (I.5). Never log resume text.",
+    "Over-5-MB files are not a drawn state: map them to Unreadable file (R5 precedent) rather than adding an error state."
+   ],
+   "state": [
+    "room:profile import (entries with FactSource IMPORTED/USER_STATED, ids via FactIdAllocator, sourceFileName)"
+   ],
+   "files": [
+    "feature/onboarding/impl/src/main/**/upload/**",
+    "feature/onboarding/impl/src/main/**/importresume/**",
+    "feature/onboarding/impl/src/main/**/navigation/OnboardingEntryProvider.kt (swap placeholders)",
+    "feature/onboarding/impl/src/test/**",
+    "feature/onboarding/impl/src/main/res/values/strings_upload.xml",
+    "feature/onboarding/impl/src/test/screenshots/upload_*",
+    "core/domain/src/main/kotlin/com/tailormyresume/core/domain/onboarding/<SaveImportedProfile>UseCase.kt (new) and its test"
+   ],
+   "scale": {
+    "material": true,
+    "note": "Files up to 5 MB are read and parsed off the main thread; ProfileLimits caps entries (40), bullets (200 total) and skills (100) before saving. Progress rows are 5 fixed rows."
+   }
+  },
+  {
+   "number": 275,
+   "title": "feat(onboarding): review profile once — required fix, LinkedIn and completeness",
+   "lane": "W4-A",
+   "status": "ready",
+   "tier": "ui",
+   "base": "#274's branch (stack on W4-A)",
+   "depends_on": [
+    274,
+    269,
+    271
+   ],
+   "blocked_by_open_prs": [
+    "#274 PR",
+    "#309 (ProfileCompleteness, RequiredGaps)",
+    "#310 (TmrCard, TmrKeywordChip)"
+   ],
+   "criteria": [
+    {
+     "id": "275-c1",
+     "text": "Given the fresh prototype profile (Tata Digital intern with no end date, no LinkedIn), When Review profile renders, Then it shows step bar 1 with back, 'Your profile', 'From Priya_Deshmukh_Resume.pdf. Tap anything to edit.', 'Profile complete' 90% from ProfileCompleteness, the Required banner 'End date missing for Data Analyst Intern' with Add date, the Optional 'Add your LinkedIn' row, cards Contact, Experience · 3 (the intern dates read 'Jun 2021 – end date?' in amber), Skills · 18 (5 chips + '+13'), Education, and a disabled 'Looks right, continue' (screenshot needs fix 90%)."
+    },
+    {
+     "id": "275-c2",
+     "text": "Given the same profile with the end date fixed, When Review renders, Then the banner reads 'All required info is done', completeness is 96%, and the CTA is enabled lime (screenshot fixed 96%); with LinkedIn added it reads 100%."
+    },
+    {
+     "id": "275-c3",
+     "text": "Given a required gap, When the disabled CTA is tapped, Then the toast 'Add the missing end date first' shows and nothing is saved (ViewModel test: continue refused with a required gap)."
+    },
+    {
+     "id": "275-c4",
+     "text": "Given the Required banner, When Add date is tapped, Then EditRoleNavKey(entryId of the gap entry) is pushed; When 'Add your LinkedIn' or the Contact card is tapped, Then EditContactNavKey is pushed; Experience opens ExperienceNavKey; Skills opens SkillsNavKey."
+    },
+    {
+     "id": "275-c5",
+     "text": "Given no required gap, When 'Looks right, continue' is tapped, Then profile.reviewedAt is set to the injected clock time and Add job (JobNavKey) is pushed with empty text (ViewModel test: reviewedAt set on success)."
+    },
+    {
+     "id": "275-c6",
+     "text": "Given a role marked current (endDate 'Present', the PrototypeFixtures convention), When Review renders, Then it shows 'Start – Now' and it is not a required gap."
+    },
+    {
+     "id": "275-c7",
+     "text": "Given Review at 337 dp and font scale 2.0, When rendered, Then the banner, cards and CTA are not clipped and chips wrap."
+    },
+    {
+     "id": "275-c8",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "The role and contact editors themselves (#281, #282); this screen only opens them.",
+    "Fact-by-fact confirmation (deleted)."
+   ],
+   "gates": [
+    "./gradlew :feature:onboarding:impl:testDebugUnitTest :feature:onboarding:impl:verifyRoborazziDebug :feature:onboarding:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:onboarding:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#274 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh"
+   ],
+   "root_cause": null,
+   "callers": [
+    "core/domain profile/ProfileCompleteness.percent and profile/RequiredGaps.of (#309): 100 - 6 per gap - 4 without LinkedIn; a gap is an EXPERIENCE entry with a start date and a blank end date.",
+    "ObserveStartDestinationUseCase reads reviewedAt; #272 c4 keeps the user in the flow after reviewedAt is set.",
+    "EditRoleNavKey / EditContactNavKey / ExperienceNavKey / SkillsNavKey from feature/profile/api (#271)."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "The end-to-end fix (Add date -> save) needs #281's role editor; until #281 lands the criterion is the navigation to EditRoleNavKey(entryId) plus the recomputed state when the profile changes.",
+    "Current-role convention: a current role stores endDate 'Present' (PrototypeFixtures, D24); there is no current flag in ProfileEntry.",
+    "Completeness copy is 'Profile complete' (a profile percent, not a job score; I.3 does not apply but never call it a match)."
+   ],
+   "state": [
+    "room:profile.reviewedAt"
+   ],
+   "files": [
+    "feature/onboarding/impl/src/main/**/review/**",
+    "feature/onboarding/impl/src/main/**/navigation/OnboardingEntryProvider.kt (swap the placeholder)",
+    "feature/onboarding/impl/src/test/**/review/**",
+    "feature/onboarding/impl/src/main/res/values/strings_review.xml",
+    "feature/onboarding/impl/src/test/screenshots/review_*"
+   ],
+   "scale": {
+    "material": false,
+    "note": "One profile; chips capped at 5 visible plus '+N'; ProfileLimits bounds the cards."
+   }
+  },
+  {
+   "number": 276,
+   "title": "feat(job): add job, not a job post, analyzing and import from a link",
+   "lane": "W4-B",
+   "status": "needs-info",
+   "missing": "Core contract gap (not cost/product/irreversible; lead decides, no owner card): core:domain has no job-link import interface (no JobImporter, no OfflineJobImporter yet; W6-A #289 and W5-N1 #286 implement it later) and no NOT_A_JOB_POST outcome (AiFailure has no such value; the 422 mapping is W5-N1). W4 lanes may only touch their impl module, and no issue before W4 owns these core additions. Scout default: let #276 add the additive contract itself (core/domain JobImporter interface + result type, an AiFailure.NotAJobPost or analysis outcome value, a temporary offline binding returning the Northwind JD for https URLs), with W5-N1 and W6-A then implementing/replacing it. Alternative: add the contract to #286 and make #276 depend on it (delays W4-B behind #285/#293).",
+   "tier": "ui",
+   "base": "#271's branch (W3-A tip)",
+   "depends_on": [
+    271,
+    269
+   ],
+   "blocked_by_open_prs": [
+    "#271 PR",
+    "#306 (TmrHeroCard, TmrTextArea, TmrLabeledField)",
+    "core JobImporter / NotAJobPost contract (see missing)"
+   ],
+   "criteria": [
+    {
+     "id": "276-c1",
+     "text": "Given Add job with empty text, When it renders, Then it shows step bar 2 (back only if the stack is not empty), the amber hero 'Paige reads it for you' / 'Paste the job you want' with Paige, a text area, Paste from clipboard, Use a link, the hint line, and Analyze job disabled (screenshot empty)."
+    },
+    {
+     "id": "276-c2",
+     "text": "Given text of at least 200 characters, When it renders, Then the 'Job description' header with Clear, the character count ('1,234 characters' style) and the detected '<title> · <company>' from the local ProposeJobLabelUseCase show (screenshot has text, detected 'Associate Analyst · Northwind GCC')."
+    },
+    {
+     "id": "276-c3",
+     "text": "Given Paste from clipboard, When tapped with text on the clipboard, Then the text area holds it; Clear empties it and hides the error."
+    },
+    {
+     "id": "276-c4",
+     "text": "Given text under 200 characters (trimmed), When Analyze job is tapped, Then 'This doesn't look like a job post' with 'Paste the full listing, including responsibilities and requirements.' shows and no analysis request is made (ViewModel test for the 200-character rule; screenshot not a job post with the drawn referral text)."
+    },
+    {
+     "id": "276-c5",
+     "text": "Given the backend answers NOT_A_JOB_POST, When analysis ends, Then the same not-a-job-post state shows and no credit or application is created."
+    },
+    {
+     "id": "276-c6",
+     "text": "Given valid text, When Analyze job is tapped, Then the screen shows 'Reading the job… N%' (screenshot analyzing at a fixed percent), and on success Job analyzed (JobResultNavKey(applicationId)) is pushed after the application is created with the job, gap analysis and keyword coverage (now, upTo)."
+    },
+    {
+     "id": "276-c7",
+     "text": "Given any other analysis failure, When analysis ends, Then a toast with Retry shows on Add job and the text stays (PLAN R5; no new error state)."
+    },
+    {
+     "id": "276-c8",
+     "text": "Given Use a link, When tapped, Then Import from a link opens (step bar 2, back) with 'Import from a link', the line about careers pages and LinkedIn, a Job link field, 'If a page is behind a login, copy the text and paste it instead.' and Import job (screenshot import link)."
+    },
+    {
+     "id": "276-c9",
+     "text": "Given an https link that imports, When Import job is tapped, Then the app returns to Add job (Import link popped) with the imported text and the toast 'Imported from <host>'; Given a failed import or a non-https link, Then the app returns to Add job in the not-a-job-post state (ViewModel test for the import result)."
+    },
+    {
+     "id": "276-c10",
+     "text": "Given the analysis module strings, When the I.3 policy and a copy test run, Then no string uses 'match' as a score; the drawn hint 'Include requirements and responsibilities for the best match' is allowed only if the lead keeps it (see needs_info)."
+    },
+    {
+     "id": "276-c11",
+     "text": "Given Add job and Import link at 337 dp and font scale 2.0, When rendered, Then nothing is clipped."
+    },
+    {
+     "id": "276-c12",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Job analyzed and the quick question (#277).",
+    "Backend /job-imports and its SSRF guards (B9/#96).",
+    "Network DTOs (W5-N1)."
+   ],
+   "gates": [
+    "./gradlew :feature:analysis:impl:testDebugUnitTest :feature:analysis:impl:verifyRoborazziDebug :feature:analysis:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:analysis:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#271 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh",
+    "./gradlew :core:domain:testDebugUnitTest :core:domain:koverVerify  # only if the core contract is added here"
+   ],
+   "root_cause": null,
+   "callers": [
+    "core/domain AnalyzeJobUseCase(profile, rawJobText) -> JobAnalysisSource.analyse; CreateApplicationUseCase creates the application.",
+    "core/domain ProposeJobLabelUseCase (detected title · company).",
+    "core/domain coverage/KeywordCoverageCalculator.compute (#309) for now/upTo.",
+    "AiFailure / AiException (InvalidInput, AllowanceExhausted, Network...) mapped from prod AiFailureMapping.",
+    "Newer: JobNavKey is opened by Review Continue (#275), the tab bar + (#271) and re-tailor is not involved."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "PLAN R4: the link fetch happens on the server (prod) only; the app sends only the URL; https only on the client too. Demo uses an offline fake (no INTERNET).",
+    "I.5: candidate data goes only to apps-backend in prod.",
+    "R5: analysis failure -> toast with Retry; import failure -> not a job post.",
+    "Clipboard read only on the user's tap (Android 12+ shows the paste notice)."
+   ],
+   "state": [
+    "room:job_applications create (job, gapAnalysis, location, keywordCoverage now/upTo)"
+   ],
+   "files": [
+    "feature/analysis/impl/src/main/**/job/**",
+    "feature/analysis/impl/src/main/**/joblink/**",
+    "feature/analysis/impl/src/main/**/navigation/AnalysisEntryProvider.kt (swap placeholders)",
+    "feature/analysis/impl/src/test/**",
+    "feature/analysis/impl/src/main/res/values/strings_job.xml",
+    "feature/analysis/impl/src/test/screenshots/job_*",
+    "core/domain JobImporter contract + NotAJobPost outcome (only if the lead takes the scout default)"
+   ],
+   "scale": {
+    "material": true,
+    "note": "Job text can be long (cap input at a sane length, e.g. the backend's limit); character count and label detection must not run a heavy parse on every keystroke on the main thread."
+   }
+  },
+  {
+   "number": 277,
+   "title": "feat(job): job analysis with keyword coverage and the quick question",
+   "lane": "W4-B",
+   "status": "needs-info",
+   "missing": "Core contract gap (lead decides, no owner card): core:model has no analysis question (C7: requirementId, text, why, options YES_REGULARLY/A_FEW_TIMES/NOT_YET), no per-match reason (C10 matches[].reason) and no job location on the analysis result; nothing before W4 owns these model fields (W5-N1 #286 lists only network/prod files; W6-A only offline fakes). Without them the must-have reasons, the '!' unclear row and Quick question cannot be built from real data. Scout default: #277 adds the additive core:model fields (GapAnalysis.question: JobQuestion?, RequirementMatch.reason: String?, location on the result) and the offline source returns the prototype question and reasons; W5-N1 maps the DTOs onto them. Alternative: move them into #286 and make #277 depend on it.",
+   "tier": "ui",
+   "base": "#276's branch (stack on W4-B)",
+   "depends_on": [
+    276,
+    269,
+    270,
+    271
+   ],
+   "blocked_by_open_prs": [
+    "#276 PR",
+    "#309 (KeywordCoverageCalculator, ScreenForKeywords)",
+    "#308 (AnswerFacts / D38-D41 answer rule)",
+    "#310 (TmrCoverageDelta, TmrKeywordChip)",
+    "core question/reason contract (see missing)"
+   ],
+   "criteria": [
+    {
+     "id": "277-c1",
+     "text": "Given the returning prototype application, When Job analyzed renders, Then it shows step bar 2 with back, 'Associate Analyst', 'Northwind GCC · Bengaluru · Hybrid', TmrCoverageDelta labelled 'Keywords matched' with now -> 'Up to, after tailoring' values from KeywordCoverageCalculator (D5/D29 computed values, not 61/92 hard-coded), 'We only use what's backed by your experience.', 'What they screen for · N' with have chips (lime dot) and missing chips (amber outline) from ScreenForKeywords, and 'Missing skills are only added if you confirm you have them.'"
+    },
+    {
+     "id": "277-c2",
+     "text": "Given the must-haves, When they render, Then each shows its requirement and reason; the unclear one (the requirement the quick question asks about) shows '!' with 'Not clear in your resume. We'll ask you next.'"
+    },
+    {
+     "id": "277-c3",
+     "text": "Given a balance of N > 0, When Job analyzed renders, Then the CTA 'Tailor my resume' shows with 'Uses 1 credit · you have N' (screenshot with credits); Given 0 credits, Then the note reads 'No credits left · get more to continue' (screenshot no credits)."
+    },
+    {
+     "id": "277-c4",
+     "text": "Given credits > 0 and the analysis has a question, When Tailor my resume is tapped, Then QuickQuestionNavKey(applicationId) is pushed; Given no question, Then TailoringNavKey(applicationId) is pushed directly; Given 0 credits, Then PaywallNavKey(returnToApplicationId = id) is pushed and after a purchase the app lands on Quick question (logic startTailor / payReturn)."
+    },
+    {
+     "id": "277-c5",
+     "text": "Given Quick question with nothing picked, When it renders, Then it shows step bar 3, 'One quick question', the question ('Have you presented to senior leaders?'), the why line, Paige (still under reduced), options Yes, regularly / A few times / Not yet, a disabled Continue and Skip this (screenshot none picked)."
+    },
+    {
+     "id": "277-c6",
+     "text": "Given nothing picked, When Continue is tapped, Then the toast 'Pick an answer, or skip' shows and nothing is stored."
+    },
+    {
+     "id": "277-c7",
+     "text": "Given Yes, regularly or A few times, When picked, Then an optional detail field shows (max 400 characters, C8) and Continue enables (screenshot picked with detail); Given Not yet, Then no detail field shows."
+    },
+    {
+     "id": "277-c8",
+     "text": "Given a pick, When Continue is tapped, Then JobApplication.quickAnswer is stored (requirementId, choice YES_REGULARLY | A_FEW_TIMES | NOT_YET, detail) and Tailoring is pushed; Given Skip this, Then no answer (or SKIPPED) is stored and Tailoring is pushed."
+    },
+    {
+     "id": "277-c9",
+     "text": "Given the stored answer, When keyword coverage upTo is recomputed, Then it follows D38/D39/D41: an answer confirms only the requirement's named-skill keywords that the requirement text states plus keywords stated in the detail; requirement text alone never confirms a keyword."
+    },
+    {
+     "id": "277-c10",
+     "text": "Given the analysis module strings, When a copy test runs, Then no string uses 'match', 'fit', 'ATS' or 'score' as a score label (issue acceptance criterion 2, I.3, D5)."
+    },
+    {
+     "id": "277-c11",
+     "text": "Given both screens at 337 dp and font scale 2.0, When rendered, Then chips wrap and nothing is clipped."
+    },
+    {
+     "id": "277-c12",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "The words match, fit, ATS or score as a label (I.3, D5).",
+    "Tailoring itself (#278).",
+    "Server question generation (B5a/#92)."
+   ],
+   "gates": [
+    "./gradlew :feature:analysis:impl:testDebugUnitTest :feature:analysis:impl:verifyRoborazziDebug :feature:analysis:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:analysis:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#276 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh",
+    "./gradlew :core:model:test :core:domain:testDebugUnitTest :core:domain:koverVerify  # only if the core contract is added here"
+   ],
+   "root_cause": null,
+   "callers": [
+    "core/domain coverage/KeywordCoverageCalculator.compute(matches, quickAnswer, tailoredResume) and ScreenForKeywords (#309).",
+    "core/domain AnswerFacts (#308) and KeywordsStatedIn (D41) - the single answer rule; do not re-implement it in the feature.",
+    "CreditsRepository.observeBalance (#305) for the credit note.",
+    "ApplicationRepository.upsertApplication for quickAnswer; #278 reads it to tailor (TailorResumeUseCase quickAnswer param).",
+    "PaywallNavKey(returnToApplicationId) handled by #284."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "D5/D29: show computed keyword-coverage percents with the label 'Keywords matched'; never 'Your match'.",
+    "S4 / D6: the answer never becomes an employer claim; the screen only stores the answer, the guard (#308) decides where it may be cited.",
+    "No credit is spent here; one credit is spent only on a successful tailoring (#278, TailoringCreditSpend)."
+   ],
+   "state": [
+    "room:job_applications.quickAnswer",
+    "room:job_applications.keywordCoverage (upTo recompute)"
+   ],
+   "files": [
+    "feature/analysis/impl/src/main/**/result/**",
+    "feature/analysis/impl/src/main/**/question/**",
+    "feature/analysis/impl/src/main/**/navigation/AnalysisEntryProvider.kt (swap placeholders)",
+    "feature/analysis/impl/src/test/**",
+    "feature/analysis/impl/src/main/res/values/strings_result.xml",
+    "feature/analysis/impl/src/test/screenshots/result_*",
+    "core/model GapAnalysis/RequirementMatch question, reason, location fields (only if the lead takes the scout default)"
+   ],
+   "scale": {
+    "material": false,
+    "note": "A job has tens of requirements at most; chips wrap in a flow row; no list virtualisation needed."
+   }
+  },
+  {
+   "number": 278,
+   "title": "feat(tailor): tailoring, tailoring failed, and the tailored resume with Changes, Undo and Accept changes",
+   "lane": "W4-C",
+   "status": "ready",
+   "tier": "ui",
+   "base": "#271's branch (W3-A tip; contains #308 through revamp/w2-all)",
+   "depends_on": [
+    271,
+    270,
+    269
+   ],
+   "blocked_by_open_prs": [
+    "#271 PR",
+    "#308 (AcceptChangesUseCase, ExportReadiness, TailoredText/TailoredSkills, AnswerFacts, ResumeDocument changes)",
+    "#310 (TmrResumePaper, TmrSourceChip, TmrTagChip, TmrProgressRows)",
+    "#306 (TmrPaige tailoring wobble, TmrHeroCard Lime)"
+   ],
+   "criteria": [
+    {
+     "id": "278-c1",
+     "text": "Given Tailoring at 0%, 50% and 100% (virtual time), When it renders, Then it shows step bar 3, no back, the lime hero 'Tailoring your resume' with the percent and keyword stickers, rows 'Matching N keywords', 'Rewriting bullets', 'Adding your example' (answer yes/few) or 'Checking must-haves' (otherwise), 'Fitting to 1 page' moving pending -> active -> done by quarter, and Paige wobbling (still at phase 0 under reduced motion) (screenshots tailoring 0/50/100)."
+    },
+    {
+     "id": "278-c2",
+     "text": "Given tailoring succeeds, When it finishes, Then Tailored resume replaces Tailoring, exactly one SPEND ledger row is recorded through TailoringCreditSpend.forSuccess, and keywordCoverage.final is stored."
+    },
+    {
+     "id": "278-c3",
+     "text": "Given tailoring fails, When it finishes, Then Tailoring failed replaces Tailoring with sad Paige, 'Tailoring didn't finish', 'Something went wrong on our side. Your credit wasn't used.', Try again (replaces itself with Tailoring) and Go back (pops to the previous screen); no SPEND row is recorded (screenshot failed)."
+    },
+    {
+     "id": "278-c4",
+     "text": "Given the Tailored resume with the answer, When the Resume tab renders, Then it shows step bar 3, 'Your resume is ready', 'For Associate Analyst · Northwind GCC', tabs 'Resume' / 'Changes · N', a one-page TmrResumePaper with keyword highlights (lime) and answer highlights (amber), a coverage badge in keyword-coverage wording (D5, e.g. '92% keywords'), the legend From your resume / From your answer, and Edit + Export PDF (screenshot Resume tab with answer); without the answer the summary and badge use the without-answer values (screenshot without answer)."
+    },
+    {
+     "id": "278-c5",
+     "text": "Given the prototype answer that does not name Infosys, When Changes renders, Then there is no 'Infosys · Added' card and the count is 3 (D6, PLAN 2.3, S4); each card shows area · kind (New, Rewritten, Added, Reordered), a source chip 'Your resume' (lime) or 'Your answer' (amber), the before text struck through when present, the after text, and an Undo per change (screenshot Changes before accept)."
+    },
+    {
+     "id": "278-c6",
+     "text": "Given a change, When Undo is tapped, Then that change's decision becomes REJECTED and its original text is shown and used (TailorViewModelTest: Undo -> REJECTED; screenshot after one Undo)."
+    },
+    {
+     "id": "278-c7",
+     "text": "Given the Changes or Resume tab, When the one 'Accept changes' control (D4, R2: full-width secondary pill above Edit/Export on both tabs) is tapped, Then AcceptChangesUseCase sets every PENDING change to ACCEPTED and records changesAcceptedAt, and Export PDF enables (TailorViewModelTest: Accept -> ACCEPTED; screenshot after accept)."
+    },
+    {
+     "id": "278-c8",
+     "text": "Given changes not yet accepted, When the disabled Export PDF is tapped, Then the toast 'Accept the changes first' shows and no export runs; ExportReadiness.check is the guard (TailorViewModelTest: export refused before accept, I.2)."
+    },
+    {
+     "id": "278-c9",
+     "text": "Given the Tailored screen, Then there are no per-bullet accept or reject toggles (D4)."
+    },
+    {
+     "id": "278-c10",
+     "text": "Given summary and skills changes, When shown, Then each has its own Undo, and Accept and Undo never interleave (DecisionWriteLock / one transaction, D38)."
+    },
+    {
+     "id": "278-c11",
+     "text": "Given Edit, When tapped, Then EditResumeNavKey(applicationId) is pushed; Given Export PDF enabled, When tapped, Then the export flow of #279 starts (placeholder navigation to ExportedNavKey until #279)."
+    },
+    {
+     "id": "278-c12",
+     "text": "Given the tailor module strings, When the copy test runs, Then no string uses 'match' as a score."
+    },
+    {
+     "id": "278-c13",
+     "text": "Given all three screens at 337 dp and font scale 2.0, When rendered, Then nothing is clipped and the tab labels do not ellipsize."
+    },
+    {
+     "id": "278-c14",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes, including the I.1 and I.2 gates TailorResumeUseCaseTest, OfflineFabricationGuardTest, UpdateBulletDecisionUseCaseTest and TailorViewModelTest."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Per-bullet accept or reject toggles (D4).",
+    "Edit resume, PDF export and Exported (#279).",
+    "Changing the guard or the answer truth rule (#308 owns them)."
+   ],
+   "gates": [
+    "./gradlew :feature:tailor:impl:testDebugUnitTest :feature:tailor:impl:verifyRoborazziDebug :feature:tailor:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:tailor:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#271 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh",
+    "./gradlew :core:domain:testDebugUnitTest --tests '*TailorResumeUseCaseTest' --tests '*UpdateBulletDecisionUseCaseTest' --tests '*OfflineFabricationGuardTest'"
+   ],
+   "root_cause": null,
+   "callers": [
+    "feature/tailor/impl TailorViewModel, TailorUiState, TailorUiStateBuilder, HandEditBulletUseCase, document/ResumeDocument*, diff/WordDiff (kept by W1-A on purpose; TailorViewModelTest is an I.2 gate).",
+    "core/domain TailorResumeUseCase(profile, job, gap, applicationId, section?, quickAnswer), UpdateBulletDecisionUseCase, AcceptChangesUseCase(applicationId), ExportReadiness.check, TailoringCreditSpend.forSuccess, DecisionWriteLock (#308).",
+    "core/model TailoredResume (bullets, summary: TailoredText?, skills: TailoredSkills?, changeCount, decisions).",
+    "TailoringNavKey is pushed by #277 (Quick question / no question) and re-tailor in #280."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "I.1 / I.2 gates must keep passing; never delete or weaken TailorViewModelTest or UpdateBulletDecisionUseCaseTest (VII.3).",
+    "D4: one Accept changes control is the only accept; Export disabled until changesAcceptedAt is set; disabled-tap toast 'Accept the changes first' (R2).",
+    "D6/S4: no answer-backed employer claim; Changes count 3 with the prototype answer.",
+    "No segmented-tabs component exists in core:designsystem (#265-#267 ship none); build the Resume/Changes switch from Tmr tokens inside feature/tailor/impl or reuse TmrChoiceRow/TmrTagChip; do not edit core:designsystem in this lane.",
+    "Tailoring progress is time-based until the result arrives; it never shows 100% before success.",
+    "System back during Tailoring: no back control is drawn; the planner decides consume-vs-cancel, but a cancelled tailoring must not spend a credit."
+   ],
+   "state": [
+    "room:job_applications.tailoredResume decisions + changesAcceptedAt",
+    "room:credit_ledger SPEND row (via TailoringCreditSpend)",
+    "room:job_applications.keywordCoverage.final"
+   ],
+   "files": [
+    "feature/tailor/impl/src/main/**/tailoring/**",
+    "feature/tailor/impl/src/main/**/result/**",
+    "feature/tailor/impl/src/main/**/TailorViewModel.kt",
+    "feature/tailor/impl/src/main/**/TailorUiState*.kt",
+    "feature/tailor/impl/src/main/**/navigation/TailorEntryProvider.kt (swap placeholders)",
+    "feature/tailor/impl/src/test/**",
+    "feature/tailor/impl/src/main/res/values/strings_result.xml",
+    "feature/tailor/impl/src/test/screenshots/result_*"
+   ],
+   "scale": {
+    "material": false,
+    "note": "A one-page resume (tens of bullets, ProfileLimits caps 200); the Changes list is a LazyColumn; the tailoring request runs off main with injected dispatchers."
+   }
+  },
+  {
+   "number": 279,
+   "title": "feat(tailor): edit resume, one-page PDF export with page size and file-name format, and the exported screen",
+   "lane": "W4-C",
+   "status": "ready",
+   "tier": "ui",
+   "base": "#278's branch (stack on W4-C)",
+   "depends_on": [
+    278,
+    269,
+    268
+   ],
+   "blocked_by_open_prs": [
+    "#278 PR",
+    "#309 (ExportFileName)",
+    "#305 (ResumeSettings, ApplicationRepository.updateStatus)",
+    "#310 (TmrFileCard, TmrStatusChip, TmrSoonRow)"
+   ],
+   "criteria": [
+    {
+     "id": "279-c1",
+     "text": "Given Edit resume, When it renders, Then it shows the top bar 'Resume' with back and Save, 'Still fits on 1 page', the summary, bullets per role with source tags 'From your resume' (lime) / 'From your answer' (amber) and the skills line (screenshot edit)."
+    },
+    {
+     "id": "279-c2",
+     "text": "Given an edited bullet, When Save is tapped, Then the edit is stored as USER_EDITED through HandEditBulletUseCase (PRD 6.4 item 5), the app returns to Tailored and the toast 'Changes saved' shows; and When the edit would overflow one page, Then 'Still fits on 1 page' hides (R9)."
+    },
+    {
+     "id": "279-c3",
+     "text": "Given accepted changes and ResumeSettings pageSize A4 or LETTER, When Export PDF runs, Then a single-column PDF with selectable text is written at that page size, named by core ExportFileName.build with the stored FileNameFormat (default Name_Company_Role, e.g. 'Priya-Deshmukh_Northwind-GCC_Associate-Analyst.pdf'), and exportFileName is stored on the application."
+    },
+    {
+     "id": "279-c4",
+     "text": "Given the prototype data, When the PDF test renders A4 and Letter, Then each is exactly one page (stepping the body size 10.5 -> 9.5 pt and line spacing, R9) and the text in the rendered document equals the accepted document (rejected changes show original text, accepted show proposed) (issue acceptance criterion 2)."
+    },
+    {
+     "id": "279-c5",
+     "text": "Given changes not accepted, When export is attempted by any path, Then it is refused by ExportReadiness (I.2)."
+    },
+    {
+     "id": "279-c6",
+     "text": "Given export succeeds after a paid credit, When Exported renders, Then it shows Close (to Applications root), the check badge, 'Resume exported', a file card with the file name and Share / Open, the credits line 'N left, was N+1. Credits never expire.' and 'Saved to Applications: <role>, <company>' (screenshot exported paid)."
+    },
+    {
+     "id": "279-c7",
+     "text": "Given the spent credit was the free grant and nothing was bought, When Exported renders, Then the line reads 'Free resume used. 0 credits left. Nothing was charged.' (screenshot exported free)."
+    },
+    {
+     "id": "279-c8",
+     "text": "Given Share, When tapped, Then the system share sheet opens with the PDF through a FileProvider URI; Given Open, Then an ACTION_VIEW intent for the PDF opens (no 'Opening…' stand-in toasts)."
+    },
+    {
+     "id": "279-c9",
+     "text": "Given status Saved, When 'Did you apply? ✓ Mark as Applied' is tapped, Then the status becomes APPLIED with appliedOn = today and the toast 'Applied, marked on <date>' with Undo shows; Undo restores the previous status and date (screenshot marked Applied with Undo toast)."
+    },
+    {
+     "id": "279-c10",
+     "text": "Given status not Saved, When Exported renders, Then a status chip, 'Marked on <date>' and Change show; Change opens the status sheet (five options, Save status -> toast 'Status set to <status>'; Saved clears the date)."
+    },
+    {
+     "id": "279-c11",
+     "text": "Given the Soon rows 'Get prep questions' and 'Write a cover letter', When tapped, Then the toast 'Coming soon' shows and no screen opens; Given Go to Applications, Then Applications shows as root."
+    },
+    {
+     "id": "279-c12",
+     "text": "Given Edit resume and Exported at 337 dp and font scale 2.0, When rendered, Then nothing is clipped."
+    },
+    {
+     "id": "279-c13",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "DOCX, templates, share card.",
+    "Settings UI for page size and file name (#283 writes ResumeSettings; this issue only reads it)."
+   ],
+   "gates": [
+    "./gradlew :feature:tailor:impl:testDebugUnitTest :feature:tailor:impl:verifyRoborazziDebug :feature:tailor:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:tailor:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#278 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh",
+    "./gradlew :core:domain:testDebugUnitTest :core:domain:koverVerify  # the shared status use case"
+   ],
+   "root_cause": null,
+   "callers": [
+    "feature/tailor/impl export/ResumePdfComposer, AndroidPdfResumeRenderer, Pagination, PdfResumeStyle, PdfPageWriter, RenderedResume, ExportDirectory, TailorFileProvider, PdfShareIntent, exported/ExportedFileStore (kept by W1-A).",
+    "feature/tailor/impl export/ExportFileName.kt duplicates core/domain export/ExportFileName (#309): use the core one and delete the feature copy and its test (map core:model FileNameFormat -> ExportFileNameFormat).",
+    "core/data ResumeSettingsRepository.observeSettings (#305); ApplicationRepository.updateStatus (sets status only, not appliedOn).",
+    "ExportHistoryRepository (exports) and CreditsRepository.observeLedger (free vs paid line).",
+    "The status sheet is also needed by #280 (Application detail)."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "I.2: export only through ExportReadiness ALLOWED.",
+    "Shared status rule: ApplicationRepository.updateStatus does not set appliedOn. Put the rule (APPLIED/INTERVIEW/OFFER/REJECTED set appliedOn = today if unset or on change, SAVED clears it, Undo restores the previous status and date) in one core:domain use case (for example SetApplicationStatusUseCase) used by both #279 and #280; never duplicate it in two feature modules. The state entry below is shared with #280 so lane.py stacks them.",
+    "II.1: the status sheet cannot be shared from feature/applications/impl; build it from TmrBottomSheet + TmrChoiceRow + TmrStatusChip with one shared copy source, or the lead places one sheet composable in core:designsystem.",
+    "Test-only PDF text extraction must not enter the release classpath (dependencyGuard); prefer asserting the composer's RenderedResume lines.",
+    "The PDF is written to app-private storage and shared through FileProvider only; delete account (#283) must wipe it (ExportedFileStore / CacheExportedFiles)."
+   ],
+   "state": [
+    "room:job_applications.status+applied_on",
+    "room:job_applications.exportFileName + exported PDF file",
+    "room:tailored bullet hand edits (USER_EDITED)"
+   ],
+   "files": [
+    "feature/tailor/impl/src/main/**/edit/**",
+    "feature/tailor/impl/src/main/**/export/**",
+    "feature/tailor/impl/src/main/**/exported/**",
+    "feature/tailor/impl/src/main/**/navigation/TailorEntryProvider.kt (swap placeholders)",
+    "feature/tailor/impl/src/test/**",
+    "feature/tailor/impl/src/main/res/values/strings_export.xml",
+    "feature/tailor/impl/src/test/screenshots/export_*",
+    "core/domain/src/main/kotlin/com/tailormyresume/core/domain/<SetApplicationStatus>UseCase.kt (new, shared with #280) and its test"
+   ],
+   "scale": {
+    "material": true,
+    "note": "PDF rendering is CPU-bound: run it on the injected Default dispatcher, at most two fit passes per page size; file under ~200 KB for one page."
+   }
+  },
+  {
+   "number": 280,
+   "title": "feat(applications): Applications home, application detail and the status sheet",
+   "lane": "W4-D",
+   "status": "ready",
+   "tier": "ui",
+   "base": "#271's branch (W3-A tip); if lane.py stacks it with #279 (shared status state), #279's branch",
+   "depends_on": [
+    271,
+    268,
+    269
+   ],
+   "blocked_by_open_prs": [
+    "#271 PR",
+    "#310 (TmrStatusBar, TmrStatusChip, TmrInitialDisc, TmrFileCard, TmrSoonRow, TmrListRow)",
+    "#307 (TmrTabBar, TmrBottomSheet)",
+    "#306 (TmrPaige home pose, TmrChoiceRow)"
+   ],
+   "criteria": [
+    {
+     "id": "280-c1",
+     "text": "Given no applications and 1 credit, When Applications renders, Then it shows the header with '1 credit' (opens Credits) and the initials avatar 'PD' (opens Profile as root), 'No applications yet', 'Tailor your resume for a job and it shows up here.', Add a job (opens Add job like the + tab), Paige, and the tab bar (screenshot empty)."
+    },
+    {
+     "id": "280-c2",
+     "text": "Given the returning data (3 applications), When Applications renders, Then it shows 'Tailored resumes 3', a stacked status bar with one segment per non-empty status in SEGC colours (Saved #5AA9F8, Applied #F7A940, Interview #A3F43F, Offer #E9E8E4, Rejected #555555) and a legend '<Status> N', then 'Recent' rows with initial disc, title, '<company> · NN% keywords' (D5) and a status chip styled per SS (screenshot list)."
+    },
+    {
+     "id": "280-c3",
+     "text": "Given a row, When tapped, Then ApplicationDetailNavKey(id) is pushed."
+    },
+    {
+     "id": "280-c4",
+     "text": "Given Application detail, When it renders, Then it shows the top bar 'Application' with back, the role, '<company> · <place>', Status with the chip and 'on <date>' or 'Not applied yet', Change, a file card with Share and Open, and Next steps: 'Re-tailor with profile changes · 1 credit', 'View job analysis', and the Soon rows 'Get prep questions' and 'Write a cover letter' (screenshot detail)."
+    },
+    {
+     "id": "280-c5",
+     "text": "Given Change, When tapped, Then the status sheet opens with the five options Saved, Applied, Interview, Offer, Rejected with the current status preselected; When another is picked and Save status is tapped, Then the status is stored through the shared core status rule (SAVED clears the date, others set it) and the toast 'Status set to <status>' shows (ViewModel test for status change; screenshot status sheet with Interview picked on Kestrel Bank)."
+    },
+    {
+     "id": "280-c6",
+     "text": "Given Re-tailor with credits > 0, When tapped, Then Quick question (or Tailoring when the analysis has no question) opens for this application; Given 0 credits, Then PaywallNavKey(returnToApplicationId = id) opens (ViewModel test for the re-tailor credit gate)."
+    },
+    {
+     "id": "280-c7",
+     "text": "Given View job analysis, When tapped, Then JobResultNavKey(id) opens; Given a Soon row, Then the toast 'Coming soon' shows and no screen opens; Given Share / Open, Then the system share sheet / PDF viewer opens for the stored export."
+    },
+    {
+     "id": "280-c8",
+     "text": "Given the applications module strings, When the copy test runs, Then no string uses 'match' as a score ('NN% keywords', not 'NN match')."
+    },
+    {
+     "id": "280-c9",
+     "text": "Given both screens at 337 dp and font scale 2.0, When rendered, Then rows, legend and header do not clip."
+    },
+    {
+     "id": "280-c10",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Notes, reminders, kanban.",
+    "A status history beyond the current status and its date."
+   ],
+   "gates": [
+    "./gradlew :feature:applications:impl:testDebugUnitTest :feature:applications:impl:verifyRoborazziDebug :feature:applications:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:applications:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#271 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh"
+   ],
+   "root_cause": null,
+   "callers": [
+    "ApplicationRepository.observeApplications / observeApplication / updateStatus (#305); CreditsRepository.observeBalance.",
+    "The shared status use case introduced by #279 (or by this issue if it lands first).",
+    "Opens CreditsNavKey, ProfileNavKey (root), JobNavKey, QuickQuestionNavKey, TailoringNavKey, PaywallNavKey, JobResultNavKey through the #271 api keys.",
+    "Exported files from ExportHistoryRepository / ExportedFileStore for Share and Open."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "Shared persisted state with #279 (status + appliedOn rule): one core use case, no duplicated rule; lane.py will stack #279 and #280.",
+    "Keyword meta uses keywordCoverage.final when present, else upTo (D5 label 'keywords').",
+    "R15: ledger and server hold no job titles; local application rows hold them."
+   ],
+   "state": [
+    "room:job_applications.status+applied_on"
+   ],
+   "files": [
+    "feature/applications/impl/**"
+   ],
+   "scale": {
+    "material": true,
+    "note": "The list is unbounded over time: LazyColumn with stable keys; the status bar aggregates counts in the ViewModel, not in composition."
+   }
+  },
+  {
+   "number": 281,
+   "title": "feat(profile): profile overview, experience list and role editor",
+   "lane": "W4-E",
+   "status": "ready",
+   "tier": "ui",
+   "base": "#271's branch (W3-A tip)",
+   "depends_on": [
+    271,
+    268,
+    269
+   ],
+   "blocked_by_open_prs": [
+    "#271 PR",
+    "#310 (TmrListRow, TmrTagChip)",
+    "#306 (TmrToggle, TmrLabeledField, TmrTextField)",
+    "#309 (ProfileCompleteness)"
+   ],
+   "criteria": [
+    {
+     "id": "281-c1",
+     "text": "Given the returning profile, When Profile renders, Then it shows the gear (opens Settings), initials 'PD', 'Priya Deshmukh', '<headline> · N yrs · <city>' ('Finance analyst · 4 yrs · Pune'), percent complete from ProfileCompleteness, rows Contact, Summary, Experience 3, Education 1, Skills N, Achievements 6, 'LinkedIn & links' with an amber 'Add' tag when LinkedIn is empty, 'Built from <file> · Replace', and the tab bar (screenshot profile)."
+    },
+    {
+     "id": "281-c2",
+     "text": "Given the rows, When tapped, Then Contact and LinkedIn open EditContactNavKey, Summary/Education/Achievements open ListEditNavKey(section), Experience opens ExperienceNavKey, Skills opens SkillsNavKey, and Replace opens UploadNavKey."
+    },
+    {
+     "id": "281-c3",
+     "text": "Given Experience, When it renders, Then it shows the top bar 'Profile' with back, the roles with 'Start – End' (current shows 'Now') and '+ Add role' (screenshot experience); tapping a role opens EditRoleNavKey(entryId), '+ Add role' opens EditRoleNavKey(null)."
+    },
+    {
+     "id": "281-c4",
+     "text": "Given Edit role for the Tata Digital intern, When it renders, Then it shows the top bar 'Experience' with back and Save, heading 'Edit role', Job title, Company, Start, End, the 'I work here now' toggle off, 'What you did' bullets, '+ Add bullet' and 'Delete this role' (screenshot edit role)."
+    },
+    {
+     "id": "281-c5",
+     "text": "Given Add role, When it renders, Then the heading reads 'Add role', fields are empty with hints, one empty bullet shows and there is no Delete this role (screenshot add role)."
+    },
+    {
+     "id": "281-c6",
+     "text": "Given 'I work here now' on, When it renders, Then End shows the 'Present' hint and is dimmed and not editable (screenshot current-job toggle on); saving stores endDate 'Present' (the PrototypeFixtures convention) so RequiredGaps does not flag it."
+    },
+    {
+     "id": "281-c7",
+     "text": "Given edits, When Save is tapped, Then the entry is stored as a USER_EDITED fact (new roles USER_STATED with ids from FactIdAllocator), the app goes back and the toast 'Role saved' shows; and the required gap from Review (#275) disappears when the end date is filled."
+    },
+    {
+     "id": "281-c8",
+     "text": "Given an existing role, When Delete this role is tapped, Then the entry is removed, the app goes back and the toast 'Role deleted' shows."
+    },
+    {
+     "id": "281-c9",
+     "text": "Given the profile module strings and screens at 337 dp and font scale 2.0, When rendered, Then nothing is clipped."
+    },
+    {
+     "id": "281-c10",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Contact, skills and list editors (#282).",
+    "Settings (#283)."
+   ],
+   "gates": [
+    "./gradlew :feature:profile:impl:testDebugUnitTest :feature:profile:impl:verifyRoborazziDebug :feature:profile:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:profile:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#271 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh"
+   ],
+   "root_cause": null,
+   "callers": [
+    "ProfileRepository observe/update (#305); FactIdAllocator; RequiredGaps / ProfileCompleteness (#309).",
+    "EditRoleNavKey(entryId) is also opened from Review's Add date (#275).",
+    "feature/profile/impl guidedform/ContactFieldValidator (kept; reuse in #282)."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "I.1 / PRD 6.4 item 5: saved edits are USER_EDITED facts; the editor never fabricates or reformats facts beyond what the user typed.",
+    "Deleting a role that tailored resumes cite: the tailored text keeps its stored copy; the guard re-checks on the next tailoring.",
+    "ProfileLimits: max 15 bullets per entry, 400 chars per bullet, 40 entries."
+   ],
+   "state": [
+    "room:profile.entries EXPERIENCE edits (USER_EDITED/USER_STATED)"
+   ],
+   "files": [
+    "feature/profile/impl/src/main/**/overview/**",
+    "feature/profile/impl/src/main/**/experience/**",
+    "feature/profile/impl/src/main/**/navigation/ProfileEntryProvider.kt (swap placeholders)",
+    "feature/profile/impl/src/test/**",
+    "feature/profile/impl/src/main/res/values/strings_profile.xml",
+    "feature/profile/impl/src/test/screenshots/profile_*"
+   ],
+   "scale": {
+    "material": false,
+    "note": "At most 40 entries and 15 bullets each (ProfileLimits); plain columns are fine, LazyColumn for the experience list."
+   }
+  },
+  {
+   "number": 282,
+   "title": "feat(profile): contact, skills and list editors for summary, education and achievements",
+   "lane": "W4-E",
+   "status": "ready",
+   "tier": "ui",
+   "base": "#281's branch (stack on W4-E)",
+   "depends_on": [
+    281
+   ],
+   "blocked_by_open_prs": [
+    "#281 PR"
+   ],
+   "criteria": [
+    {
+     "id": "282-c1",
+     "text": "Given Contact with LinkedIn empty, When it renders, Then it shows the top bar 'Profile' with back and Save, Full name, Phone, City, 'Email · from Google' read-only, 'LinkedIn · optional' with an amber border, and 'Portfolio · optional' (screenshot contact empty LinkedIn)."
+    },
+    {
+     "id": "282-c2",
+     "text": "Given edits, When Save is tapped, Then fullName, phone, city, linkedinUrl and portfolioUrl are stored (email is never editable), the app goes back and the toast 'Contact saved' shows; completeness rises by 4 when LinkedIn is added (ProfileCompleteness)."
+    },
+    {
+     "id": "282-c3",
+     "text": "Given invalid contact input, When Save is tapped, Then ContactFieldValidator rules apply inline on the field (no new error screen)."
+    },
+    {
+     "id": "282-c4",
+     "text": "Given Skills, When it renders, Then it shows '<N> skills. Paige picks the most relevant ones for each job.', an Add field and removable chips (screenshot skills); adding a non-blank skill puts it first, removing a chip drops it, and Done stores the list and shows the toast 'Skills saved'; added skills are user-stated (userStatedSkills)."
+    },
+    {
+     "id": "282-c5",
+     "text": "Given ListEdit(SUMMARY), When it renders, Then the title 'Summary', the note 'Your starting point. Each tailored resume adapts it to the job.' and one text item show, with no add button (screenshot list edit summary)."
+    },
+    {
+     "id": "282-c6",
+     "text": "Given ListEdit(EDUCATION), When it renders, Then the title 'Education', no note, the item and '+ Add education' show (screenshot list edit education)."
+    },
+    {
+     "id": "282-c7",
+     "text": "Given ListEdit(ACHIEVEMENTS), When it renders, Then the title 'Achievements', the note 'Numbers help. Paige pulls the most relevant ones into each resume.', six items and '+ Add achievement' show (screenshot list edit achievements)."
+    },
+    {
+     "id": "282-c8",
+     "text": "Given any list edit, When Save is tapped, Then the items are stored (summary text; EDUCATION/ACHIEVEMENT entries as USER_EDITED or USER_STATED with FactIdAllocator ids), the app goes back and the toast 'Saved' shows."
+    },
+    {
+     "id": "282-c9",
+     "text": "Given all editors at 337 dp and font scale 2.0, When rendered, Then fields and chips are not clipped."
+    },
+    {
+     "id": "282-c10",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Editing the Google email.",
+    "A portfolio/links list beyond LinkedIn and one portfolio URL."
+   ],
+   "gates": [
+    "./gradlew :feature:profile:impl:testDebugUnitTest :feature:profile:impl:verifyRoborazziDebug :feature:profile:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:profile:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#281 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh"
+   ],
+   "root_cause": null,
+   "callers": [
+    "ProfileRepository (#305) contact fields city, linkedinUrl, portfolioUrl, summary, skills, userStatedSkills.",
+    "feature/profile/impl guidedform/ContactFieldValidator and its test.",
+    "EditContactNavKey is also opened from Review (#275); SkillsNavKey from Review."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "I.1: user-typed skills and items are user-stated facts; the editor never adds anything the user did not type.",
+    "ProfileLimits: max 100 skills of up to 60 characters; 200-character text fields.",
+    "Links are stored as typed; open them only through an explicit user action (no fetch, I.5)."
+   ],
+   "state": [
+    "room:profile contact, skills, summary, education and achievement entries"
+   ],
+   "files": [
+    "feature/profile/impl/src/main/**/contact/**",
+    "feature/profile/impl/src/main/**/skills/**",
+    "feature/profile/impl/src/main/**/listedit/**",
+    "feature/profile/impl/src/main/**/navigation/ProfileEntryProvider.kt (swap placeholders)",
+    "feature/profile/impl/src/test/**",
+    "feature/profile/impl/src/main/res/values/strings_editors.xml",
+    "feature/profile/impl/src/test/screenshots/editors_*"
+   ],
+   "scale": {
+    "material": false,
+    "note": "Up to 100 skills in a flow row; lists are small (ProfileLimits)."
+   }
+  },
+  {
+   "number": 283,
+   "title": "feat(settings): settings, download my data, sign out and the delete account sheet",
+   "lane": "W4-F",
+   "status": "ready",
+   "tier": "sensitive",
+   "base": "#272's branch (W3 tip), after the #272 PR is open",
+   "depends_on": [
+    272,
+    271,
+    268
+   ],
+   "blocked_by_open_prs": [
+    "#271 and #272 PRs",
+    "#305 (ResumeSettingsRepository, DeleteAccountUseCase/DeleteMyDataUseCase changes per D34)",
+    "#307 (TmrBottomSheet)",
+    "#306 (TmrToggle, TmrPaige sad, TmrTextField)"
+   ],
+   "criteria": [
+    {
+     "id": "283-c1",
+     "text": "Given Settings, When it renders, Then it shows the top bar 'Profile' with back; Account: the Google email, 'Signed in with Google', 'Credits & purchases' with 'N left' (opens Credits); Resume: Page size A4/Letter and File name Name_Company_Role / Name_Role / Name_Resume; Notifications: only the Product updates toggle (no Follow-up reminders); Privacy & help: Download my data, Help & feedback, Delete account, Sign out; footer 'Terms · Privacy · v<versionName>' (screenshot settings)."
+    },
+    {
+     "id": "283-c2",
+     "text": "Given Page size, When tapped, Then it toggles A4 <-> LETTER in ResumeSettings; Given File name, When tapped, Then it cycles the three formats; Given Product updates, When toggled, Then ResumeSettings.productUpdates flips; all survive process death."
+    },
+    {
+     "id": "283-c3",
+     "text": "Given Download my data, When tapped, Then ExportAccountDataUseCase builds the on-device archive and the system share sheet opens with it through the settings FileProvider (interim D8/R6), with an honest toast that does not promise an email; the archive is written to cache and covers profile, applications (notes and legacyStatus while stored, D34), credits ledger and resume settings."
+    },
+    {
+     "id": "283-c4",
+     "text": "Given Help & feedback, When tapped, Then an email intent to the support address opens (address owner-supplied; precedent text until then)."
+    },
+    {
+     "id": "283-c5",
+     "text": "Given Sign out, When tapped, Then the gateway signs out, local data is wiped by the existing SignOutCleaner/LocalDataWiper path, the app shows Sign in as root with an empty stack, and the toast 'Signed out' shows (ViewModel test: sign out clears local data)."
+    },
+    {
+     "id": "283-c6",
+     "text": "Given Delete account, When tapped, Then the sheet opens with sad Paige, 'Delete your account?', 'This removes your profile, N tailored resume(s) and your application history. Your N unused credit(s) will be lost. This can't be undone.' with real counts and plurals, a 'Type DELETE to confirm' field, a disabled Delete account and Keep my account (screenshot delete sheet empty)."
+    },
+    {
+     "id": "283-c7",
+     "text": "Given the sheet, When the field holds 'delete', ' DELETE ' or 'Delete' (trimmed, case-insensitive), Then Delete account enables (screenshot with DELETE typed); any other text keeps it disabled and tapping does nothing (ViewModel test: delete refused until DELETE)."
+    },
+    {
+     "id": "283-c8",
+     "text": "Given DELETE confirmed, When Delete account is tapped, Then DeleteAccountUseCase runs the full local wipe (Room incl. credit_ledger, resume settings DataStore, exported files, every new key, D34) plus DELETE /v1/me in prod (PendingAccountWipe marker on a lost reply), then the app shows Sign in as root and the toast 'Account deleted' (ViewModel test: wipe called)."
+    },
+    {
+     "id": "283-c9",
+     "text": "Given Keep my account or a tap outside, When used, Then the sheet closes and nothing is deleted."
+    },
+    {
+     "id": "283-c10",
+     "text": "Given Settings and the sheet at 337 dp and font scale 2.0, When rendered, Then nothing is clipped and the keyboard does not hide the confirm field."
+    },
+    {
+     "id": "283-c11",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Follow-up reminders.",
+    "The emailed data export (B12/#99, owner provider).",
+    "Credits and paywall screens (#284)."
+   ],
+   "gates": [
+    "./gradlew :feature:settings:impl:testDebugUnitTest :feature:settings:impl:verifyRoborazziDebug :feature:settings:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:settings:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#272 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh",
+    "./gradlew :core:domain:testDebugUnitTest :core:data:testDebugUnitTest :core:domain:koverVerify :core:data:koverVerify",
+    "./gradlew dependencyGuard"
+   ],
+   "root_cause": null,
+   "callers": [
+    "core/domain account/DeleteAccountUseCase, DeleteMyDataUseCase, ExportAccountDataUseCase, CollectAccountDataUseCase, AccountDataArchiveWriter (changed by #305 per D34).",
+    "app/src/prod auth/SignOutCleaner, LocalDataWiper, RemoteServerAccountDeleter, RemoteAccountWipeFinisher, PendingWipeStartTask (wipe and server delete).",
+    "feature/settings/impl navigation/SettingsFileShare.kt (SettingsFileProvider, createSettingsShareIntent, zip).",
+    "ResumeSettingsRepository (#305) read by #279 for page size and file name.",
+    "Root to Sign in through the #271 root() and the #272 account-change handling."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "Security review required (accounts, deletion, data export). Delete only after the explicit DELETE confirmation; never log personal data or the archive contents.",
+    "I.5: DELETE /v1/me only in prod; demo performs the local wipe only. Backups stay off.",
+    "D8/R6: interim on-device archive via the share sheet; the prototype's email toast copy is not used because it would be untrue.",
+    "D34: delete account and delete my data clear credit_ledger, resume settings and every new key; the archive exports what is stored.",
+    "Version string from BuildConfig/versionName, not hard-coded.",
+    "Support email and Terms/Privacy URLs are owner-supplied (MVP_PLAN C10); keep the existing 'Address not set in this build' precedent until provided."
+   ],
+   "state": [
+    "datastore:resume_settings (pageSize, fileNameFormat, productUpdates)",
+    "account wipe: all local data + server account (delete), local data (sign out)",
+    "cache: data-export archive file"
+   ],
+   "files": [
+    "feature/settings/impl/src/main/**/settings/**",
+    "feature/settings/impl/src/main/**/delete/**",
+    "feature/settings/impl/src/main/**/navigation/SettingsEntryProvider.kt (swap the Settings placeholder)",
+    "feature/settings/impl/src/test/**",
+    "feature/settings/impl/src/main/res/values/strings_settings.xml",
+    "feature/settings/impl/src/test/screenshots/settings_*"
+   ],
+   "scale": {
+    "material": true,
+    "note": "The archive is built off the main thread and streamed to a cache file; the wipe runs as one transaction per store with the PendingAccountWipe marker for crash safety."
+   }
+  },
+  {
+   "number": 284,
+   "title": "feat(credits): credits ledger, paywall with 5, 15 and 40 packs, payment failed sheet and restore",
+   "lane": "W4-F",
+   "status": "ready",
+   "tier": "sensitive",
+   "base": "#283's branch (stack on W4-F)",
+   "depends_on": [
+    283,
+    268,
+    270
+   ],
+   "blocked_by_open_prs": [
+    "#283 PR",
+    "#305 (CreditsRepository, credit_ledger)",
+    "#308 (ApplicationPack 5/15/40, MockPackCatalogue D33 prices, PaymentGateway)"
+   ],
+   "criteria": [
+    {
+     "id": "284-c1",
+     "text": "Given the returning ledger, When Credits renders, Then it shows the top bar 'Settings' with back, the big count, 'credits left. They never expire.', Buy more, 'History' newest first with +N in lime and −1 in white, labels joined with local applications ('Free first resume / Welcome · 2 Oct', 'Bought 5 credits / ₹199 · 5 Oct', '<job title> / <company> · <date>'; generic label when the application is gone, R15) and 'Receipts go to your Google email' (screenshot credits)."
+    },
+    {
+     "id": "284-c2",
+     "text": "Given Buy more, When tapped, Then PaywallNavKey(returnToApplicationId = null) opens."
+    },
+    {
+     "id": "284-c3",
+     "text": "Given 0 credits from Job analyzed, When the Paywall renders, Then it shows Close, the amber hero '0 credits left' / 'Keep tailoring for every job' with Paige and '+1', '1 credit = 1 tailored resume. Credits never expire.', three packs 5 / 15 / 40 with price and per-resume price, 15 preselected with 'Best value', the buy button 'Buy 15 credits · <price>' and 'One-time payment · Restore purchases' (screenshot paywall out of credits)."
+    },
+    {
+     "id": "284-c4",
+     "text": "Given the prod flavour, When packs load, Then prices come from Play ProductDetails (application_pack_5, _15, _40); Given demo, Then from MockPackCatalogue (D33); per-resume price = price / credits rounded to the currency unit."
+    },
+    {
+     "id": "284-c5",
+     "text": "Given a pack is picked, When Buy is tapped, Then the label becomes 'Processing…', a second tap does nothing, and PaymentGateway.purchase(packId) is called once (screenshot buying)."
+    },
+    {
+     "id": "284-c6",
+     "text": "Given PurchaseResult.Completed, When it arrives, Then CreditsRepository.refresh runs, the toast '<N> credits added' shows, and the app replaces the Paywall with QuickQuestionNavKey(returnToApplicationId) when set, else goes back (logic buy/payReturn) (TestPaymentGateway test: success)."
+    },
+    {
+     "id": "284-c7",
+     "text": "Given PurchaseResult.Failed, When it arrives, Then the payment failed sheet shows 'Payment didn't go through', 'You weren't charged. Try again, or pick another payment method.', Try again (closes the sheet and buys again) and Cancel (screenshot payment failed sheet; test: failure)."
+    },
+    {
+     "id": "284-c8",
+     "text": "Given PurchaseResult.Cancelled, When it arrives, Then nothing changes: no sheet, no toast, the button returns to 'Buy N credits · <price>' (test: cancel)."
+    },
+    {
+     "id": "284-c9",
+     "text": "Given PurchaseResult.Pending, When it arrives, Then the toast 'Payment is pending. Credits arrive when it completes.' shows and no credits are added yet (R10; test: pending)."
+    },
+    {
+     "id": "284-c10",
+     "text": "Given Restore purchases, When restore finds nothing new, Then the toast 'No previous purchases found' shows; When it restores credits, Then the balance refreshes and a toast reports the added credits (test: restore)."
+    },
+    {
+     "id": "284-c11",
+     "text": "Given the paywall Close, When tapped, Then the previous screen shows (back) and no purchase starts."
+    },
+    {
+     "id": "284-c12",
+     "text": "Given Credits, Paywall and the sheet at 337 dp and font scale 2.0, When rendered, Then pack rows and the buy label are not clipped."
+    },
+    {
+     "id": "284-c13",
+     "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes and dependencyGuard is unchanged."
+    }
+   ],
+   "non_goals": [
+    "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+    "Subscriptions.",
+    "Creating Play Console products or prices (#288, owner).",
+    "Server ledger and spend rules (B2-B4, W5-N2 #287)."
+   ],
+   "gates": [
+    "./gradlew :feature:settings:impl:testDebugUnitTest :feature:settings:impl:verifyRoborazziDebug :feature:settings:impl:lintRelease -PwarningsAsErrors=true",
+    "./gradlew :feature:settings:impl:recordRoborazziDebug  # only to record this issue's new baselines, then inspect them",
+    "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+    "./gradlew spotlessCheck",
+    "BASE_REF=<#283 branch> tools/ci/check-constitution.sh",
+    "tools/ci/verify-local.sh",
+    "./gradlew :core:domain:testDebugUnitTest :core:data:testDebugUnitTest :core:domain:koverVerify :core:data:koverVerify",
+    "./gradlew dependencyGuard"
+   ],
+   "root_cause": null,
+   "callers": [
+    "core/domain PaymentGateway.packs / purchase / restorePurchases / observeEntitlement; PurchaseResult Completed | Pending | Cancelled | Failed; ApplicationPack constants (#308).",
+    "core/testing gateway/TestPaymentGateway (tests); demo OfflinePaymentGateway + MockPackCatalogue; prod RemotePaymentGateway (Play Billing + POST /purchases verification).",
+    "CreditsRepository.observeBalance / observeLedger / refresh (#305); ApplicationRepository for ledger labels.",
+    "PaywallNavKey is opened by Job analyzed (#277), Application detail re-tailor (#280) and Credits Buy more."
+   ],
+   "constraints": [
+    "Constitution wins every conflict. Settled items (GOAL.md section 1, PRD 6.1.2 'Not in the MVP') are never reopened: no consent, no 18+ check, no light theme, Google sign-in only, no follow-up reminders, no offline states, no error states beyond the five drawn ones (sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed); undrawn failures map to a drawn state or the drawn toast pattern (PLAN R5).",
+    "II.1: a feature impl depends only on core:*, its own api and other features' api modules; screens open other modules' screens only through the W3-A NavKeys. II.2: one StateFlow of a sealed UiState via stateIn(WhileSubscribed(5_000)); stateless screen; Route collects with collectAsStateWithLifecycle. II.3: no !!, no GlobalScope, no runBlocking. II.4: injected dispatchers only. II.5: Tmr* components from core:designsystem, never raw Material. IV.1: every new ViewModel ships with its test.",
+    "Copy: strings in res/values/strings_<area>.xml with the module prefix; I.3 / D5: never 'match', 'fit', 'ATS' or a job-likelihood claim as a score; keyword numbers are labelled keyword coverage (for example 'Keywords matched 61% -> 92%', '92% keywords').",
+    "Motion (AGENTS.md): read TmrTheme.motion (proof default, hop for the four named moments, idle for Paige/story/spinner); no tween(, spring( or numeric duration in feature code; under TmrTheme.motion.reduced nothing moves and the state change stays visible; Paige is a still at phase 0.",
+    "Layout: works at 337 dp width and font scale 2.0 with nothing clipped; labels never ellipsize or break inside a word (D40); actionable toasts stay until dismissed when a screen reader is on (D40).",
+    "Roborazzi: one baseline per drawn state on the Prototype device (374 x 834, dark) at a settled frame with PrototypeFixtures data; progress states at fixed percentages using virtual time, never wall time; never re-record for a motion change; stage paths explicitly (no git add -A; stale copies live in .claude/worktrees/sync).",
+    "Process rules: never git stash (shared stash stack across lane worktrees); no tools:ignore, no lint-baseline entries (III.3), no weakened tests; no code comments unless they pass the grounding test in ~/.claude/CLAUDE.md (III.2 policy); one bounded wait per Gradle run; never ./gradlew --stop while other lanes run; host load rule D22/D35.",
+    "Security review required (money). Purchases are verified on the server (prod); the client never grants credits on its own; credits shown come from the wallet/ledger after refresh.",
+    "Play Billing test purchases only (licence testers or test cards); no real purchases in any test or walk (GOAL Phase 3 item 9).",
+    "R10: cancel shows nothing; pending shows a toast; the failed sheet is only for a real failure.",
+    "I.4: no keys or tokens in the app; I.5: Play Billing allowed, no new library (dependencyGuard unchanged).",
+    "Prices: never hard-code rupee prices in prod code; D33 demo prices only in MockPackCatalogue.",
+    "apps-backend#55 (voided/refunded purchases) must land before the 15 and 40 packs go live (PROGRESS owner list)."
+   ],
+   "state": [
+    "room:credit_ledger PURCHASE rows (via gateway + refresh)",
+    "billing: pending pack ids / purchase acknowledgement (prod gateway)"
+   ],
+   "files": [
+    "feature/settings/impl/src/main/**/credits/**",
+    "feature/settings/impl/src/main/**/paywall/**",
+    "feature/settings/impl/src/main/**/navigation/SettingsEntryProvider.kt (swap Credits and Paywall placeholders)",
+    "feature/settings/impl/src/test/**",
+    "feature/settings/impl/src/main/res/values/strings_credits.xml",
+    "feature/settings/impl/src/test/screenshots/credits_*"
+   ],
+   "scale": {
+    "material": true,
+    "note": "The ledger grows with every purchase and tailoring: LazyColumn, newest first, joined with applications in the ViewModel via one combine, not per row."
+   }
+  }
+ ]
+}

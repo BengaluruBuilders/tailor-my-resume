@@ -1,0 +1,76 @@
+{
+  "head_sha": "3031e3ec0b252320f9dd080cb8293f766a0e2a1a",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "c1",
+      "status": "met",
+      "evidence": "job-imports.ts:75 z.strictObject({url: max 2048}); :77-81 meetsUrlRules requires https:, empty username/password, empty port (WHATWG drops :443 and :0443, any other port is non-empty); :662 parse runs before tryAcquire (:667), the claim (:683), DNS and fetch. Probed: a@example.com -> INVALID_INPUT; example.com:443 and :0443 -> accepted on 443. Test 'rejects http, over-long, userinfo, non-443 port and extra fields...' (test:210)."
+    },
+    {
+      "id": "c2",
+      "status": "met",
+      "evidence": "job-imports.ts:92-126 BlockList covers every listed IPv4/IPv6 class plus 192.0.0/24, docs ranges, ::/96, ::ffff:0:0:0/96, 64:ff9b::/96, 64:ff9b:1::/48, 100::/64, 2001::/32 Teredo, 2002::/16, fec0::/10, ff00::/8; :128-142 mapped ::ffff:x:y re-checked as IPv4; :133 zone ids refused; :149-157 literal hosts (incl. bracketed IPv6), localhost, single label, trailing dot, .localhost/.internal/.flycast/.local refused before lookup; :193 every resolved address must pass. Probed 40 addresses (127.0.0.1, 255.255.255.255, 100.64.0.1, 169.254.169.254, ::ffff:169.254.169.254, ::ffff:7f00:1, ::127.0.0.1, 64:ff9b::7f00:1, 2002:7f00:1::1, 2001:0:1::1, fdaa::3, fe80::1%eth0, ::ffff:0:7f00:1 -> refused; 8.8.8.8, ::ffff:8.8.8.8, 2606:4700::1111 -> allowed) and decimal/octal/hex/fullwidth IPv4 URL forms (all normalise to 127.0.0.1, refused as literal). Test at test:310."
+    },
+    {
+      "id": "c3",
+      "status": "met",
+      "evidence": "job-imports.ts:235-262 loop of 4 requests, each hop re-runs meetsUrlRules on the Location resolved against the current URL and validateHost (resolve + vet); the 4th redirect refuses (:255). Pinning verified at runtime by the reviewer: createHttpsTransport with host 'pin.test' (not in DNS) and vetted 127.0.0.1 reached a local TLS server with Host=pin.test, path and query intact; with host 'other.test' the cert check failed ERR_TLS_CERT_ALTNAME_INVALID; without the CA trusted it failed DEPTH_ZERO_SELF_SIGNED_CERT (TLS verification on); same results with --no-network-family-autoselection (lookup honours both all:true and the single-address callback, :319-322). agent:false, port 443 hard-coded (:307, :311). Tests at test:409, test:450, test:393."
+    },
+    {
+      "id": "c4",
+      "status": "met",
+      "evidence": "One signal per import (:634-635) shared by DNS (:191), request (:243, passed to https.request :312) and every body read (:211); readBody destroys past 2,097,152 bytes (:213-216); Accept-Encoding identity sent (:316) and any non-identity Content-Encoding refused (:269-274), so counted bytes equal decoded bytes (node:http never decompresses); Content-Type must match ^text/html (:200). Node's default 16 KB header limit applies. Test at test:527."
+    },
+    {
+      "id": "c5",
+      "status": "met",
+      "evidence": "extractVisibleText (:507-605) single pass; reviewer benchmarked 15 adversarial 2 MB inputs (entity floods, '< ' floods, unclosed attributes, deep nesting churn, script floods): worst 86 ms, no superlinear path; output capped at 20,000 (:500-504), under 200 throws (:601). sourceHost is final URL hostname (:640). Commit 003b0c6 adjudicated: no assertion weakened. deepEqual(requests, []) -> equal(length, 0) is equivalent; the whitespace case changed expectation from preserved text newlines to HTML collapse (consistent with c5 'whitespace collapsed'), the other edits fix harness bugs (next-day script reset, invalid_url is 400 per c1, garbage-token verifier, 23514 read from the driver error, prettier fixture). Tests at test:365, test:625."
+    },
+    {
+      "id": "c6",
+      "status": "met",
+      "evidence": "Busy check (:667) answers 429 RATE_LIMITED before claimAllowance (:683); claim with a random key and dailyLimit 20 under withLiveUser's user lock (claims.ts:36-38, 94); markUsed in finally (:694-698) so failed fetches count. See finding on the day used by markUsed. Tests at test:733, test:772."
+    },
+    {
+      "id": "c7",
+      "status": "met",
+      "evidence": "Only logFailure (:65-73) writes, with enum failure and host_class; transport/DNS errors are mapped to the enum in fetchPage (:279-285) before logging; server onError (server.ts:85-99) logs only route path, status and code for 5xx. Test at test:806 asserts no path, query marker, page text or ECONNREFUSED text."
+    },
+    {
+      "id": "c8",
+      "status": "met",
+      "evidence": "Mounted at routes.ts:90 under the appId guard (routes.ts:45-50) and server.ts:104-132 (IP limit, requireAppUser, per-user and per-app limits), same as every other tailormyresume route. No aiConsentGate: consistent with docs/compliance.md (consent is per purpose; no model call, no user data beyond the URL leaves the server) and the scout constraint. Test at test:922 (401, 401, 403 cross-audience, 404 other app id, 409 deleted, 200 without consent rows)."
+    },
+    {
+      "id": "c9",
+      "status": "met",
+      "evidence": "drizzle/0008_outgoing_post.sql widens the CHECK only (DROP + ADD with JOB_IMPORT); existing ANALYSIS/FREE_TAILORING rows pass validation, no data rewritten; snapshot diff vs 0007 is the id/prevId and the one CHECK value. PR body states reversal (delete JOB_IMPORT rows, then narrow) and the renumber-after-#108 step. Test 'old claim rows survive and JOB_IMPORT inserts' (test:959)."
+    },
+    {
+      "id": "c10",
+      "status": "met",
+      "evidence": "docs/architecture.md bullet added and matches the code. Reviewer ran npm run typecheck (pass); the DB-backed tests were not re-run here (no local Postgres), so the full npm run check result rests on the PR report (561 tests) and the CI Validation run, which was queued at review time. No dependency change (package.json and lockfile untouched); no key or certificate committed."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/job-imports.ts",
+      "line": 697,
+      "rule": "c6 (20 per user per TailorMyResume day); claims.ts markUsed contract keyed by (userId, day, kind, key)",
+      "trigger": "An import claimed at 18:29:59.5Z (IST day D) whose fetch finishes at 18:30:03Z: claimAllowance (:686) writes PENDING on day D, but markUsed gets a second dependencies.now() and computes day D+1, so the upsert does not conflict and inserts a new USED row on D+1. The user gets 19 imports on D+1 and a stray PENDING row on D. analyses.ts:154/212 capture now once and tailoring.ts:227 passes row.createdAt for this reason.",
+      "title": "markUsed takes a fresh now(), so an import that crosses IST midnight is charged to the next day",
+      "proof": "Route test with now() returning 2026-10-11T18:29:59.900Z for the claim and 18:30:00.100Z after the fetch: expect one USED row on day D and none on D+1; at head the D+1 row exists. Fix: const now = dependencies.now() once, used for claimAllowance and markUsed."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/job-imports.ts",
+      "line": 609,
+      "rule": "Scale/availability: the PR's concurrency bound does not account for the shared libuv threadpool or per-user fairness",
+      "trigger": "One account points a domain at a name server that never answers and sends 4 concurrent imports (perUserPerMinute defaults to 60, src/apps.ts:94; busy 429s at :667 cost no allowance). dns.lookup runs getaddrinfo on the libuv threadpool (default 4 threads; Dockerfile sets no UV_THREADPOOL_SIZE). abortable (:191) frees the import slot at 8 s but cannot cancel the lookup, so all 4 threads stay busy until the stub resolver times out. Meanwhile the global cap of 4 (:626) answers 429 to every other user's import, and other threadpool work stalls, including pg Pool reconnect lookups (src/core/db/service.ts:2) and outbound fetches. Repeatable for 20 imports per account per day.",
+      "title": "Slow-DNS imports from one account fill the global import cap and the shared libuv threadpool",
+      "proof": "Cap starvation is testable now: inject a resolve port that never settles, start 4 imports as user A, then a 5th import by user B answers 429 RATE_LIMITED. The threadpool stall needs the real default port: with resolv.conf pointing at a local UDP listener that never replies, 4 pending defaultPorts.resolve calls delay an unrelated dns.lookup in the same process until the stub resolver times out. Fix sketch: resolve with dns.promises.Resolver (c-ares resolve4/resolve6 with a timeout and cancel() on abort, off the threadpool), and allow 1 running import per user."
+    }
+  ]
+}

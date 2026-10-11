@@ -1,0 +1,79 @@
+{
+  "head_sha": "3dab8d52097eeb817b753314ddf41c685486e26b",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "285-c1", "status": "partial", "evidence": "Every PLAN section 4 route is in sections 4.2-4.11. POST routes have request, response and error tables. GET routes have no body and give their errors inline. The gate 3 grep loop prints no 'missing'. Partial because the C17 export shape in 4.10 (GET /me/export) leaves out the ledger rows that apps-backend #89 c8 and #100 c2 add, and drops the v1 `unlocks` list while section 6 still stores that table (finding 2)."},
+    {"id": "285-c2", "status": "met", "evidence": "Lines 21 and 25 mark D5 and D9 as dropped in v2 and give a reason. D1-D4, D6-D8 and D10-D12 stay. The D4 count list (line 20) is now credits, ledger, daily analyses, daily job imports and purchases. D12 (line 28) no longer names DOCX or unlock. Lines 30-41 list the compatibility fields as deprecated and cite revamp D12 and app #287."},
+    {"id": "285-c3", "status": "met", "evidence": "4.4 credit rules 1-7: reserve at start, 402 NO_CREDIT, debit and a TAILORING row on SUCCEEDED, release on FAILED or INTERRUPTED, each new requestId costs 1. 4.6 ledger: kinds WELCOME, PURCHASE, TAILORING, REFUND and MIGRATION, newest first, at most 100. Packs _5/_15/_40. The Wallet shape is in section 3. Section 5 sets 20 analyses a day and no free tailorings. One low conflict on the definition of `balance` (finding 6)."},
+    {"id": "285-c4", "status": "partial", "evidence": "C7 question (4.3 rule 6), C8 answer and USER_ANSWER with the 2.3 truth rule (4.4), C9 summary and skills, C10 location, reason and 422 NOT_A_JOB_POST, C11 parse fields and C12 job-imports are all present. Partial because, as the evidence-id rule (section 3) and check 2 (4.4) are written, an `ans-` citation is always removed (finding 3). The skills.added rule also lets a NOT_YET or SKIPPED detail add a skill (finding 4)."},
+    {"id": "285-c5", "status": "met", "evidence": "Section 4.12 lists unlock (C5), prep-questions and cover-letters (C15), the `section` parameter and the consent gate (C14). Each row names the app side and the backend issue. The 4.5 and 4.6 bodies and the unlock body are gone. A low wording conflict with D12 is in finding 8."},
+    {"id": "285-c6", "status": "met", "evidence": "The PR body lists apps-backend #87-#100. Each title matches `gh issue view -R BengaluruBuilders/apps-backend`."},
+    {"id": "285-c7", "status": "met", "evidence": "`git diff --stat e387b855 3dab8d52` shows only docs/BACKEND_CONTRACT.md. The local check-constitution.sh prints 'Constitution check passed.' On the PR, 'Constitution policy' passes and the Gradle shards are skipped. Line 10 and 4.9 mark POST /me/data-export as target, blocked by #99 (revamp D8), and describe the on-device interim."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 208,
+      "rule": "Run decision D15; consistency with apps-backend #87 (scout non-goal)",
+      "trigger": "Line 208 and 4.12 (line 790) say that the TailorMyResume config removes `noticeVersion`, and they assign this to #87. D15 says #87 keeps `noticeVersion`. The #87 scout makes its removal a non-goal, because test/tailormyresume-ai-harness.ts, the shutdown tests, the tailorings test and scripts/tailormyresume-eval/run.ts read it. If the #87 builder follows this contract, which says it wins, the builder deletes the key and `npm run check` and the eval runner break. The other option is to edit tests outside the scope.",
+      "title": "Contract removes noticeVersion, but D15 and the #87 scout keep it"
+    },
+    {
+      "severity": "medium",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 746,
+      "rule": "Constitution I.5 privacy (data export); apps-backend #89 c8, #100 c2; backend rule 22",
+      "trigger": "The v2 GET /me/export shape has no `credits` (ledger) list. #89 c8 requires export.credits with every ledger row, oldest first, with no cap of 100. #100 c2 tells compliance.md to say that ledger rows appear in the export. The shape also removes the v1 `unlocks` list. Section 6 (line 813) still keeps tailormyresume_unlocks for one release and says 'Export it before the drop'. The export `wallet` also drops the deprecated fields that section 1 keeps. If a builder follows 4.10, ledger history is left out of the user's data export, and an `unlocks` field that the export returns today is removed.",
+      "title": "GET /me/export v2 shape leaves out the credit ledger and drops `unlocks`"
+    },
+    {
+      "severity": "medium",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 479,
+      "rule": "285-c4 / C8 truth rule (PLAN 2.3, D6); apps-backend #95 c3, c4",
+      "trigger": "An answer {requirementId:req-4, choice:A_FEW_TIMES, detail:'Presented ... at Infosys'} gives the server facts `ans-req-4` and `ans-req-4-b1`. Section 3 (lines 132-136) defines the evidence ids as the ids sent in the request, and says that the server removes every other id. Check 2 (line 479) needs every sourceIds value to be an evidence id of the request, and all sources of a bullet to belong to `entryId`. As written, the server removes the `ans-` id from the summary, and it reverts the Infosys bullet that cites `ans-req-4-b1`, because that bullet belongs to entry `ans-req-4`. #95 c3 and c4 expect both citations to survive. The doc also does not give the text of `ans-<req>` when there is no detail, and it does not say how the device FabricationGuard (D7) accepts `ans-` ids.",
+      "title": "Evidence-id rule and check 2 make every USER_ANSWER citation impossible"
+    },
+    {
+      "severity": "medium",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 467,
+      "rule": "Constitution I.1 / run D6; apps-backend #95 c6",
+      "trigger": "An answer {choice:NOT_YET, detail:'I plan to learn Tableau'} or {choice:SKIPPED, detail:'Tableau'} meets the `result.skills.added` rule: 'or that an answer names verbatim in its detail'. This rule does not depend on the choice. So result.skills.added can hold 'Tableau', a skill that the candidate said they do not have. #95 c6 limits this to YES_REGULARLY or A_FEW_TIMES with a detail. Answer rule 1 (line 498) adds no fact for NOT_YET or SKIPPED, but the skills row does not refer to that rule. The doc also does not say whether a `detail` sent with NOT_YET or SKIPPED is refused or ignored.",
+      "title": "skills.added lets a NOT_YET or SKIPPED answer add a skill"
+    },
+    {
+      "severity": "medium",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 25,
+      "rule": "Constitution I.5 on main (consent screen S4); run decision D16 merge order",
+      "trigger": "PR #255, which removes S4 from I.5, is still OPEN. On main, I.5 says 'only after the candidate accepts consent screen S4'. This PR drops D9 and says 'The app does not show a Consent screen' (line 25). Section 8 item 3 and 4.12 tell the app to stop calling POST /v1/me/consents. If #293 merges first, the contract on main conflicts with the Constitution on main. Backend #87 depends only on this doc, so it can then remove the server gate. D16 holds #258-#260 and #263 until #255 merges, but it does not hold #285. The PR body does not state this order.",
+      "title": "Consent removal conflicts with I.5 on main until PR #255 merges; no merge-order guard"
+    },
+    {
+      "severity": "low",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 586,
+      "rule": "apps-backend #89 c5 and non-goal (wallet counters stay authoritative)",
+      "trigger": "During the #89 deploy window, the old image creates a wallet with no WELCOME row. The ledger sum is then 0 and the wallet credits are 1. The doc defines `balance` as 'the sum of all amount values'. #89 c5 sets balance = freeCredits + purchasedCredits from the wallet row, and the scout accepts the drift in history only.",
+      "title": "GET /credits `balance` is defined as the ledger sum, but #89 uses the wallet counters"
+    },
+    {
+      "severity": "low",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 703,
+      "rule": "apps-backend #97 scope and scout c3",
+      "trigger": "The doc says that v1 kinds COVER_LETTER and PREP_QUESTION 'are removed with their routes'. #97 says 'Keep the content-report item kinds', and scout c3 needs POST /content-reports to still accept them and export to still return them. A #97 builder who follows this doc may narrow the enum or the check constraint.",
+      "title": "Content-report item kinds are removed here, but #97 keeps them"
+    },
+    {
+      "severity": "low",
+      "file": "docs/BACKEND_CONTRACT.md",
+      "line": 782,
+      "rule": "Run decision D12 (compatibility routes)",
+      "trigger": "The 4.12 lead sentence says 'The backend removes each in the issue named in the last column. The app side has stopped using each one.' It names #90 for unlock and for `section`. Section 1 and D12 keep both until after app #287 deploys, and the app on main still calls unlock and sends `section: null`.",
+      "title": "4.12 lead sentence says #90 removes unlock and `section`, but D12 keeps them"
+    }
+  ]
+}

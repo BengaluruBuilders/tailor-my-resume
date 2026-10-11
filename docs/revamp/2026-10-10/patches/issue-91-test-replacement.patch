@@ -1,0 +1,84 @@
+diff --git a/test/tailormyresume-analyses-repeat.test.ts b/test/tailormyresume-analyses-repeat.test.ts
+index 3e586a1..c649b99 100644
+--- a/test/tailormyresume-analyses-repeat.test.ts
++++ b/test/tailormyresume-analyses-repeat.test.ts
+@@ -25,7 +25,16 @@ const jobText = (name: string): string =>
+ const modelAnswer = {
+   title: "Associate Analyst",
+   company: "Northwind",
+-  requirements: [],
++  requirements: [
++    {
++      text: "Strong SQL",
++      type: "SKILL",
++      priority: "MUST_HAVE",
++      keywords: ["sql"],
++      status: "GAP",
++      evidenceIds: [],
++    },
++  ],
+ };
+ 
+ const useModel = (): void => {
+diff --git a/test/tailormyresume-analyses.test.ts b/test/tailormyresume-analyses.test.ts
+index 5d4deb9..0234c10 100644
+--- a/test/tailormyresume-analyses.test.ts
++++ b/test/tailormyresume-analyses.test.ts
+@@ -109,8 +109,14 @@ await test("an analysis returns server ids, one match per requirement, and the a
+       requirementId: "req-1",
+       status: "MET",
+       evidenceIds: ["skill:SQL", "EXP-01-1"],
++      reason: "Shown in your resume",
++    },
++    {
++      requirementId: "req-2",
++      status: "GAP",
++      evidenceIds: [],
++      reason: "Not clear in your resume",
+     },
+-    { requirementId: "req-2", status: "GAP", evidenceIds: [] },
+   ]);
+   assert.deepEqual(body.allowance, {
+     analysesLeftToday: 2,
+@@ -272,9 +278,24 @@ await test("an unknown id and a skill that was not sent are removed and the stat
+   });
+   const body = bodyShape.parse(await response.json());
+   assert.deepEqual(body.matches, [
+-    { requirementId: "req-1", status: "GAP", evidenceIds: [] },
+-    { requirementId: "req-2", status: "PARTIAL", evidenceIds: ["EXP-01"] },
+-    { requirementId: "req-3", status: "GAP", evidenceIds: [] },
++    {
++      requirementId: "req-1",
++      status: "GAP",
++      evidenceIds: [],
++      reason: "Not clear in your resume",
++    },
++    {
++      requirementId: "req-2",
++      status: "PARTIAL",
++      evidenceIds: ["EXP-01"],
++      reason: "Partly shown in your resume",
++    },
++    {
++      requirementId: "req-3",
++      status: "GAP",
++      evidenceIds: [],
++      reason: "Not clear in your resume",
++    },
+   ]);
+ });
+ 
+@@ -289,7 +310,12 @@ await test("an empty requirement is skipped and a repeated evidence id is kept o
+   const response = await analyze(await newUser(), jobText("a"));
+   const body = bodyShape.parse(await response.json());
+   assert.deepEqual(body.matches, [
+-    { requirementId: "req-1", status: "MET", evidenceIds: ["EXP-01-1"] },
++    {
++      requirementId: "req-1",
++      status: "MET",
++      evidenceIds: ["EXP-01-1"],
++      reason: "Shown in your resume",
++    },
+   ]);
+ });
+ 

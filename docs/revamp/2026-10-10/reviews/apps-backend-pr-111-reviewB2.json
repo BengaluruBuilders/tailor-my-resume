@@ -1,0 +1,57 @@
+{
+  "head_sha": "3b2ce0d0d966bdbf4ad71dccb4eeef70f2ad0efc",
+  "verdict": "clean",
+  "criteria": [
+    {
+      "id": "c1",
+      "status": "met",
+      "evidence": "Unchanged by 3031e3e..3b2ce0d. job-imports.ts:75 strict schema (url max 2048), :77-81 meetsUrlRules (https, no userinfo, no explicit port), :704 parse before tryAcquire (:710), claim (:727), DNS and fetch. Test at test:210 passes at head."
+    },
+    {
+      "id": "c2",
+      "status": "met",
+      "evidence": "Name refusals (localhost, single label, trailing dot, .localhost/.internal/.flycast/.local, literals) run at :189-190 before resolve (:191), so c-ares ignoring /etc/hosts does not weaken them; new test at test:1137 asserts no resolve and no request for localhost, db.internal, app.flycast, printer.local. createDnsResolve (:626-645) merges every resolve4 and resolve6 address (:635-639) and validateHost refuses if ANY address is refused (:193), so one public A plus one private AAAA is refused (mixed cases [public, 10.0.0.5] and [public, ::1] at test:348-355; merge proven at test:1094). Only ENODATA maps to empty (:616-624); ENOTFOUND, ETIMEOUT, ESERVFAIL, ECANCELLED reject, fail closed as 'network'. Probed real node:dns Resolver: servers = the system resolv.conf server (no setServers anywhere in src), localhost -> ENOTFOUND (hosts file not read), www.github.com (CNAME) -> final A address only, A-only name resolve6 -> ENODATA, cancel() -> ECANCELLED. Production base is node:24-alpine (Dockerfile:2): musl getaddrinfo already failed on a SERVFAIL or missing answer for either family, so fail-closed per family is not a regression."
+    },
+    {
+      "id": "c3",
+      "status": "met",
+      "evidence": "Pinning unchanged: the only DNS call is ports.resolve inside validateHost (:191); createHttpsTransport (:298-337) is untouched, agent:false, port 443, and its lookup override (:319-322) returns only the vetted address for both all:true and single-address calls, so no default dns.lookup runs; redirects are followed manually (:247-262) and every hop re-runs validateHost and pins the new hop's vetted address (:236-244). No fallback path to node:dns lookup remains (grep: node:dns imported only as Resolver at :2). Tests at test:393, test:409, test:450 pass."
+    },
+    {
+      "id": "c4",
+      "status": "met",
+      "evidence": "One deadline signal (8_000 ms, config.ts:6) per import (:676-677) now also cancels the c-ares channel: abort listener registered before the first await (:633), removed and cancel() called in finally (:640-643); abortable (:191) rejects at the deadline regardless. c-ares runs on the event loop, not the libuv threadpool, which resolves round-1 finding 2's threadpool stall. Tests: never-answering resolver ends 422 within the injected 150 ms deadline with no request (test:1046); cancel on abort (test:1124-1134). Body, encoding and content-type limits unchanged (:202-225, :264-275)."
+    },
+    {
+      "id": "c5",
+      "status": "met",
+      "evidence": "extractVisibleText and sourceHost (:682) unchanged by this commit. Test file diff is additions only (134 insertions, 0 deletions): the 'drops the test database' test was already last at 3031e3e and stays last; no existing assertion was edited or removed."
+    },
+    {
+      "id": "c6",
+      "status": "met",
+      "evidence": "Round-1 finding 1 fixed: now read once (:726) and passed to claimAllowance (:730) and markUsed (:741), so the claim and the USED upsert share one IST day (claims.ts tailormyresumeDay(now) in both). Midnight test (test:1017) claims at 18:29:59.900Z and fetches at 18:30:00.100Z, asserts one USED row on 2026-10-11, then 20 imports on 10-12 succeed and the 21st is 429. Round-1 finding 2 fixed: per-user cap of one running import (:662-670) answers 429 before any claim; a second concurrent request by the same user returns at :710-718 without entering the try, so it never releases the first request's slot. Slot released in the outer finally (:743-745) on success, claim exhaustion, 422, timeout and any throw including markUsed; exercised by the serial alternating 200/422 loop (test:733) and the next-day import after ALLOWANCE_EXHAUSTED, both by one user. runningUsers.size equals the running count, so the global cap of 4 holds (test:772). Verified the new tests are not vacuous: run against the 3031e3e source, the midnight test fails (2 rows, expected 1) and the per-user test fails (422, expected 429)."
+    },
+    {
+      "id": "c7",
+      "status": "met",
+      "evidence": "No new log statement. c-ares errors (which carry the hostname) are rejected into fetchPage's catch (:279-285) and mapped to the enum before logFailure (:65-73); the only output is event, failure and host_class. Test at test:806 passes at head."
+    },
+    {
+      "id": "c8",
+      "status": "met",
+      "evidence": "Mounting and guards unchanged; userId for the per-user cap comes from requireAppUser via c.get('userId') (:709). Test at test:922 passes."
+    },
+    {
+      "id": "c9",
+      "status": "met",
+      "evidence": "Migration untouched by this commit; test 'old claim rows survive and JOB_IMPORT inserts' passes at head."
+    },
+    {
+      "id": "c10",
+      "status": "met",
+      "evidence": "Reviewer ran npm run typecheck (exit 0) and node --test test/tailormyresume-job-imports.test.ts against a throwaway initdb Postgres (TCP-only, free port, stopped and removed afterwards): 20 pass, 0 fail. No dependency change; worktree left clean."
+    }
+  ],
+  "findings": []
+}

@@ -1,0 +1,96 @@
+{
+ "head_sha": "d82a97940332369a1ad0fba895e8bd0a2aec9608",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "c1",
+   "status": "partial",
+   "evidence": "Values match README Look table and tests assert them, but textDisabled stays #7A7A7A and boundary aliases lineHigher, contrary to required D32."
+  },
+  {
+   "id": "c2",
+   "status": "met",
+   "evidence": "Type.kt: Space Mono 400/700 and Space Grotesk variable 400/500/600/700 via FontVariation.weight; tests assert weights."
+  },
+  {
+   "id": "c3",
+   "status": "met",
+   "evidence": "Shapes and spacing out of this reviewer's scope (Reviewer B)."
+  },
+  {
+   "id": "c4",
+   "status": "partial",
+   "evidence": "disabledContent (textDisabled) differs from onSurfaceVariant (textMuted), asserted; value must change to #7D7D7D per D32."
+  },
+  {
+   "id": "c5",
+   "status": "met",
+   "evidence": "Single dark path; lead-only test patch pending, out of scope."
+  },
+  {
+   "id": "c6",
+   "status": "met",
+   "evidence": "Three TTFs and two OFL files present, sizes match plan; no other font."
+  },
+  {
+   "id": "c7",
+   "status": "met",
+   "evidence": "No dependency files in diff."
+  },
+  {
+   "id": "c8",
+   "status": "met",
+   "evidence": "TmrIdleSpecs adds ambient constants only, no new tween/easing scale; Reduced zeroes amplitude and stops auto-advance/spinner."
+  },
+  {
+   "id": "c9",
+   "status": "met",
+   "evidence": "TmrGoogleG paths match the four paths in Prototype.dc.html line 138 (viewBox 48)."
+  },
+  {
+   "id": "c10",
+   "status": "met",
+   "evidence": "Out of scope (Reviewer B)."
+  },
+  {
+   "id": "c11",
+   "status": "met",
+   "evidence": "Two new baselines declared in pregate; none changed."
+  },
+  {
+   "id": "c12",
+   "status": "met",
+   "evidence": "Docs out of scope (Reviewer B)."
+  },
+  {
+   "id": "c13",
+   "status": "met",
+   "evidence": "Legacy aliases retained as computed vals; Type legacy members kept; no tools:ignore found."
+  },
+  {
+   "id": "c14",
+   "status": "partial",
+   "evidence": "CI Static checks and unit tests were still in progress at review time; four lead-only tests pending patch which still encodes pre-D32 pairs."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/theme/Color.kt",
+   "line": 62,
+   "rule": "D32 (required): boundary aliases textDisabled, so interactive outlines reach 3:1",
+   "trigger": "boundary = lineHigher (#3A3A3A) on #000000 or #111111 gives contrast about 1.85:1, below the 3.0 gate; text fields, toggles and chips drawn with boundary fail WCAG 1.4.11 and the repo contrast tests that measure boundary.",
+   "title": "boundary still aliases lineHigher instead of textDisabled (D32 not applied)",
+   "proof": "TmrBoundaryContrastTest on boundary vs background must be >= 3.0"
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/theme/Palette.kt",
+   "line": 22,
+   "rule": "D32 (required): textDisabled must be #7D7D7D",
+   "trigger": "textDisabled = #7A7A7A on surface #111111 is 4.40:1, below the 4.5 threshold; disabled text and placeholder fail the palette contrast gate. TmrPaigeColorValuesTest line 29 also pins 0xFF7A7A7A and must change to 0xFF7D7D7D.",
+   "title": "textDisabled is #7A7A7A, D32 requires #7D7D7D",
+   "proof": "contrast(textDisabled, surface) >= 4.5 in TmrPaletteContrastTest"
+  }
+ ]
+}

@@ -1,0 +1,21 @@
+{
+ "head_sha": "630dd60024ac2329e1d3767e5a332ef5b833d8b3",
+ "verdict": "findings",
+ "criteria": [
+  {"id":"278-c1","status":"met","evidence":"TailoringViewModelTest.progressRowsAtQuartersAndNeverFullBeforeResult asserts 0/25/50/75/99 and row states, no 100 before result; baselines tailoring 0/50/100 + font2 read, match prototype layout. 4000ms/40ms delay() ramp in the VM is state timing, not an animation (no tween/spring/duration in feature code, grep clean); acceptable. Ticking counter does not consult motion.reduced but nothing visual is tweened."},
+  {"id":"278-c2","status":"met","evidence":"TailoringViewModelTest.successReplacesWithTailored asserts Done outcome and progress 100 (runner side is Reviewer B scope)."},
+  {"id":"278-c3","status":"met","evidence":"TailoringViewModelTest.failureEmitsFailedOutcome asserts Failed and progress <100; failed baseline read."},
+  {"id":"278-c4","status":"met","evidence":"TailoredPaperMapperTest covers highlights with/without answer, summary-first, skills-last, rejected bullet unhighlighted, span concatenation invariant; copy is '% keywords' (D5, no match/fit/ATS)."},
+  {"id":"278-c5","status":"partial","evidence":"Cards only for changed text and violating bullets are reverted by the use case, so none appear. But ChangeCardMapperTest.prototypeAnswerGivesThreeChangesAndNoInfosysAdded builds its own resume, so it cannot fail if the employer rule is removed; the I.1 rule is enforced only in TailorResumeUseCase."},
+  {"id":"278-c6","status":"partial","evidence":"Per-change Undo incl. summary and skills tested in TailorViewModelDecisionTest and ChangeCardMapperTest.undoneChangeShowsOriginal..., but an undone Added card renders an empty body (finding 1) and is untested."},
+  {"id":"278-c7","status":"met","evidence":"TailorViewModelDecisionTest.acceptChangesAcceptsEveryPendingAndStampsChangesAcceptedAt; single Accept changes button in footer; accepted baseline read."},
+  {"id":"278-c8","status":"met","evidence":"exportRefused... and exportAllowedAfterAccept tests; export-disabled baseline present; Export uses enabled=exportEnabled with onDisabledClick toast."},
+  {"id":"278-c9","status":"met","evidence":"TailoredNoPerBulletTogglesTest; TailoredScreen has only per-change Undo, no per-bullet toggles."},
+  {"id":"278-c13","status":"met","evidence":"font2_337dp baselines read: Changes tab label and Export PDF wrap at word boundaries, nothing ellipsized or clipped; hero scales height with fontScale."},
+  {"id":"278-c14","status":"partial","evidence":"CI Build jobs were still IN_PROGRESS at review time; delivery-gates-pregate and Detect code changes passed."}
+ ],
+ "findings": [
+  {"severity":"medium","file":"feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/result/ChangeCardMapper.kt","line":67,"rule":"278-c6 per-change Undo","trigger":"An Added bullet (originalText blank, kind Added) with decision REJECTED yields after = originalText = \"\" and before = null, so the card after Undo shows tag and chips, an empty body and 'Undone'; the user cannot see what was undone.","title":"Undone Added card renders an empty body","proof":"ChangeCardMapperTest: bullet original=\"\" proposed=\"X\" decision=REJECTED; assert cards[0].after is not blank (fails today)."},
+  {"severity":"low","file":"feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/result/ChangeCardMapperTest.kt","line":19,"rule":"278-c5 test can fail","trigger":"Test hand-builds a resume with no Infosys Added card, so deleting the employer-names rule from TailorResumeUseCase leaves it green; the mapper itself has no I.1 check.","title":"No-Infosys-Added assertion is vacuous in the mapper test"}
+ ]
+}

@@ -1,0 +1,121 @@
+{
+ "head_sha": "b14dbe9858062ffc47c42b896bd0274cbf2a5121",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "276-c1",
+   "status": "met",
+   "evidence": "JobViewModelTest.emptyStateHasNoTextAndAnalyzeDisabled, JobScreenTest.emptyScreen..., job_empty baselines"
+  },
+  {
+   "id": "276-c2",
+   "status": "met",
+   "evidence": "detectedLabel tests incl. offMain/latestWins; stale label for 300 ms between two >=200 texts is untested (finding 1)"
+  },
+  {
+   "id": "276-c3",
+   "status": "met",
+   "evidence": "paste/clear/typing tests assert flag and text"
+  },
+  {
+   "id": "276-c4",
+   "status": "met",
+   "evidence": "199/200 boundary, whitespace padding, cap tests; JobTextRule trims; MAX 20,000 per BACKEND_CONTRACT"
+  },
+  {
+   "id": "276-c5",
+   "status": "met",
+   "evidence": "backendNotAJobPostShowsSameStateAndCreatesNothing"
+  },
+  {
+   "id": "276-c6",
+   "status": "met",
+   "evidence": "ticker virtual-time test caps at 95; success saves tailoredResume null, draftStore cleared (asserted)"
+  },
+  {
+   "id": "276-c7",
+   "status": "met",
+   "evidence": "retry toast tests; CancellationException rethrown and tested"
+  },
+  {
+   "id": "276-c8",
+   "status": "met",
+   "evidence": "initialState test, joblink baselines, AnalysisEntryWiringTest renders real entries"
+  },
+  {
+   "id": "276-c9",
+   "status": "met",
+   "evidence": "https-only before importer call; failed/429/allowance all end in not-a-job-post; importer called exactly once (no auto-retry); no logging in feature code"
+  },
+  {
+   "id": "276-c10",
+   "status": "met",
+   "evidence": "hint copy 'most accurate analysis' (D51), no match/fit/ATS in strings_job.xml"
+  },
+  {
+   "id": "276-c11",
+   "status": "partial",
+   "evidence": "337dp/font-2.0 baselines exist and layout tests assert no ellipsis, but the font-200 not-a-job-post baseline is cut off inside the amber card, so the D40 copy is not visible in any baseline (finding 3)"
+  },
+  {
+   "id": "276-c12",
+   "status": "partial",
+   "evidence": "PR body says verify-local green; CI at review time: Constitution policy, pregate, detect SUCCESS; Static, unit, Screenshot, Lint, Assemble IN_PROGRESS"
+  },
+  {
+   "id": "276-x1",
+   "status": "met",
+   "evidence": "10 baselines present; 1x hasText and joblink compared to prototype, match layout and copy"
+  },
+  {
+   "id": "276-x2",
+   "status": "met",
+   "evidence": "retryToastStaysWithScreenReader, noLabelEllipsizedAtFont200 (Empty and HasText only)"
+  },
+  {
+   "id": "276-x3",
+   "status": "partial",
+   "evidence": "no tween/spring/animate in feature code; delay(300) label debounce and 200 ms ticker are state timing, acceptable; but the reduced-motion test cannot fail (finding 2)"
+  },
+  {
+   "id": "276-x4",
+   "status": "unmet",
+   "evidence": "D44 walk pending per PR body (stage 12)"
+  }
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "feature/analysis/impl/src/main/kotlin/com/tailormyresume/feature/analysis/impl/job/JobViewModel.kt",
+   "line": 84,
+   "rule": "276-c2",
+   "title": "Previous job's detected label stays visible for 300 ms after the text is replaced by another 200+ char post",
+   "trigger": "Paste post A (label 'Analyst \u00b7 Northwind'), then paste post B within the debounce window: the combine keeps the last emitted label, so B shows A's role and company until proposeJobLabel(B) returns.",
+   "proof": "JobViewModelTest: set POST_200 then POST_250 without advancing 300 ms, assert detected is null or B's label, not A's."
+  },
+  {
+   "severity": "low",
+   "file": "feature/analysis/impl/src/test/kotlin/com/tailormyresume/feature/analysis/impl/job/JobScreenTest.kt",
+   "line": 133,
+   "rule": "276-x3",
+   "title": "reducedMotionShowsPercentWithoutAnimation cannot fail",
+   "trigger": "It sets ANIMATOR_DURATION_SCALE to 0 and asserts the 37% text is displayed; the screen never reads TmrTheme.motion.reduced or animates, so the test passes whether or not a motion regression is added."
+  },
+  {
+   "severity": "low",
+   "file": "feature/analysis/impl/src/test/kotlin/com/tailormyresume/feature/analysis/impl/job/JobScreenshotTest.kt",
+   "line": 64,
+   "rule": "276-c11 / 276-x1",
+   "title": "Font-200 job_notAJobPost baseline clips the amber card and hides the not-a-job-post body copy and Analyze button",
+   "trigger": "At 337dp and font 2.0 the recorded image ends inside the card's first line ('This doesn't look...'), so the D51 paste-the-post copy is in no baseline at that size; the PR lists it as a follow-up."
+  },
+  {
+   "severity": "low",
+   "file": "feature/analysis/impl/src/main/kotlin/com/tailormyresume/feature/analysis/impl/joblink/JobLinkScreen.kt",
+   "line": 20,
+   "rule": "D40 / consistency",
+   "title": "JobLinkScreen uses the legacy component.TmrPrimaryButton while JobScreen uses component.input.TmrPrimaryButton",
+   "trigger": "Disabled Import button while importing lacks the 'Not available yet' state description the input button gives, and the two buttons can diverge in font-200 wrapping; no test checks the Import label at font 2.0 beyond the generic truncation check."
+  }
+ ]
+}

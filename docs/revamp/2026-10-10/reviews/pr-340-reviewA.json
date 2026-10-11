@@ -1,0 +1,103 @@
+{
+ "head_sha": "353b036ed0e4f388e86e0e9569a03e69a0ec88b2",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "280-c1",
+   "status": "met",
+   "evidence": "ApplicationsViewModelTest empty case, empty screenshot, ApplicationsNavigationTest credits/avatar/add job; ApplicationsScreen.EmptyState matches prototype copy."
+  },
+  {
+   "id": "280-c2",
+   "status": "met",
+   "evidence": "ViewModel sorts by updatedAt, counts statuses, meta '<company> \u00b7 NN% keywords' (keywordPercent final ?: upTo); copy test rejects match/fit/ATS; D5 respected."
+  },
+  {
+   "id": "280-c3",
+   "status": "met",
+   "evidence": "ApplicationsNavigationTest.rowTapPushesApplicationDetail."
+  },
+  {
+   "id": "280-c4",
+   "status": "met",
+   "evidence": "Ready/NotFound/no-file states in ViewModel and tests; file card hidden when exportFileName null; screenshots read (prototype and 337dp/2.0 look correct)."
+  },
+  {
+   "id": "280-c5",
+   "status": "met",
+   "evidence": "Status sheet via shared SetApplicationStatusUseCase, toast on StatusSet; VM and real-entry Hilt test assert stored Interview and toast."
+  },
+  {
+   "id": "280-c6",
+   "status": "met",
+   "evidence": "onRetailor: credits<=0 -> PaywallNavKey(returnToApplicationId); question -> QuickQuestion else navigateToTailoring (UUID per call). Double tap is idempotent: Navigator.navigate drops an equal top key and navigateToTailoring returns when already on that app's tailoring. Paywall in #337 uses navigator.replace(QuickQuestion), so no double QuickQuestion from this entry. No credit spent here."
+  },
+  {
+   "id": "280-c7",
+   "status": "met",
+   "evidence": "JobResult navigation test; Soon rows only emit ComingSoon."
+  },
+  {
+   "id": "280-c8",
+   "status": "met",
+   "evidence": "ApplicationsCopyTest; strings use keywords wording."
+  },
+  {
+   "id": "280-c9",
+   "status": "partial",
+   "evidence": "Screenshots at 337dp/2.0 show no clipping with prototype data, but titles and company text use plain material Text, not a whole-word component (D40); no long-word case is tested. See finding 1."
+  },
+  {
+   "id": "280-c10",
+   "status": "met",
+   "evidence": "Merge fixups in TailorHiltTestBindings (NoRemoteLedger, ExportedPdfIntents bind) and ExportedPdfIntentsImplTest change no assertion; CI evidence per PR body."
+  },
+  {
+   "id": "280-c11",
+   "status": "met",
+   "evidence": "ExportedPdfIntentsImpl: per-application lookup under exports/<id>, re-render through ExportResumeUseCase (I.2-gated, Exported only), IOException/IllegalStateException -> null; read-only FileProvider grant unchanged; FileMissing toast; ActivityNotFound toast."
+  },
+  {
+   "id": "280-c12",
+   "status": "met",
+   "evidence": "navigateToTailoring mints a UUID per call; twoRetailorTapsPushTwoDifferentRunIds."
+  },
+  {
+   "id": "280-c13",
+   "status": "met",
+   "evidence": "ApplicationsRealEntryHiltTest renders real entries on Room repositories, waits with waitUntil, asserts stored status, toast and Paywall key."
+  },
+  {
+   "id": "280-c14",
+   "status": "met",
+   "evidence": "No delete UI or event; exposesNoDeleteAction guard."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "feature/applications/impl/src/main/kotlin/com/tailormyresume/feature/applications/impl/ApplicationsScreen.kt",
+   "line": 262,
+   "rule": "D40 / D47 / lane plan 280-c9 (whole-word wrapping)",
+   "trigger": "A company or title containing one long word (e.g. 'Infrastructure Engineer', 'Pharmaceuticals') at 337dp with font scale 2.0: plain Text breaks the word mid-word; the detail header (ApplicationDetailScreen.kt:64) and company line (:70) behave the same. No test covers a long word; fixtures use short names.",
+   "title": "Row and detail header text bypass the whole-word wrapping used elsewhere (D40)",
+   "proof": "Screenshot or assertNoWordBrokenAcrossLines test at 337dp/font 2.0 with a title such as 'Infrastructure Reliability Engineer' at Kestrel row."
+  },
+  {
+   "severity": "low",
+   "file": "feature/applications/impl/src/main/kotlin/com/tailormyresume/feature/applications/impl/detail/ApplicationDetailViewModel.kt",
+   "line": 75,
+   "rule": "Paths: double tap",
+   "trigger": "Two quick taps on Save status before the first suspend returns: setApplicationStatus runs twice and StatusSet fires twice (two toasts).",
+   "title": "Save status not single-flight"
+  },
+  {
+   "severity": "low",
+   "file": "feature/applications/impl/src/main/kotlin/com/tailormyresume/feature/applications/impl/detail/ApplicationDetailRoute.kt",
+   "line": 44,
+   "rule": "Plan c6 vs #337 integrate",
+   "trigger": "0 credits and the analysis has no question: Detail opens Paywall(returnToApplicationId); on purchase #337 does navigator.replace(QuickQuestionNavKey) unconditionally, so the user lands on QuickQuestion although re-tailor would otherwise start tailoring directly. Verify at integrate that QuickQuestion handles an application without a question.",
+   "title": "Paywall return always targets QuickQuestion even when no question exists"
+  }
+ ]
+}

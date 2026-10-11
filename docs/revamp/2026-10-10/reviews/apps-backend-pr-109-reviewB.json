@@ -1,0 +1,59 @@
+{
+  "head_sha": "0e6ac7b299991c494959cfd49a03327f5068a949",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "facts.ts adds summary {idSchema, 1-1000 chars} nullish; superRefine counts the summary id for uniqueness and keeps bulletCount on entry facts; transform drops a null summary; type adds summary?. Test 'a summary id equal to an entry or bullet id and a summary over 1000 characters are 400' passes locally (Postgres 16, full suite)."},
+    {"id": "c2", "status": "met", "evidence": "verifyBatch appends the summary as index drafts.length of the same verify call; repair shares one call; tests 'first verify call ... PASSED with no extra call' (generator 1, verifier 1) and 'repair call ... REPAIRED' pass locally."},
+    {"id": "c3", "status": "partial", "evidence": "Copy of summaryPasses at head: absent employer (Globex), absent tool (Kubernetes), absent number, 4 vs Q4, 2024 vs FY2024, blank, punctuation-only, no id and unknown id all return false; positives (two-fact combine, title+org, whole number, own summary id) return true. Still true: function-word-only text 'The and of in.', recombinations across cited facts ('Used Python at Saffron Retail', 'Built a revenue dashboard for 40 stores'), and stated-skill annotation words ('Verified Rust experience'). See findings."},
+    {"id": "c4", "status": "met", "evidence": "resolveSkills keeps ordered only from profile.skills case-insensitively, once, profile spelling, appends omitted in order; added only from userStatedSkills (already a subset of skills via the facts transform); null skills give profile order and empty added; no verifier. Test 'skills keep the profile spelling ...' passes."},
+    {"id": "c5", "status": "met", "evidence": "tailoringResultSchema: summary nullish().default(null), skills default {ordered:[],added:[]}; asView parses old rows. Test 'a stored SUCCEEDED row without summary or skills reads as 200' passes."},
+    {"id": "c6", "status": "met", "evidence": "Traced every branch: repair only when a bullet or the summary failed; second verify only when a candidate or a passing repaired summary exists; summary-only failure gives 3 or 4 calls; max 4. Test 'a failing summary and a failing bullet share one repair call of at most four model calls' passes."},
+    {"id": "c7", "status": "met", "evidence": "make-fixtures adds a fixed summary (no rng), normal.json regenerated (100 items, +summary each, counts unchanged), fixtures test reproduces the committed file and checks summary ids; metrics test proves an unsourced number in a summary is critical; run.ts judges the summary with judge and verbViolations using the profile summary plus cited facts. Paid eval is lead-only (D13)."},
+    {"id": "c8", "status": "partial", "evidence": "npm run check locally with TEST_DATABASE_URL: typecheck, lint, format, boundaries pass; tests 568/570, the two failures are the lead-only replacements listed in the PR body. docs/architecture.md:285 still describes the pre-pass-2 digit-only rule (finding)."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "line": 215,
+      "rule": "c3 / Constitution I.1; Reviewer A M disposition; D23 (no content word fails closed)",
+      "trigger": "Summary draft {proposedText: 'The and of in.', sourceIds: ['EXP-01-1']}: words is non-empty, every word is a function word, so summaryPasses returns true (run against a copy) and the text goes to the verifier, which may call a claim-free text supported, giving summary {text:'The and of in.', verification:'PASSED'}. The coder-pass-2 fix only covers zero words.",
+      "title": "Function-word-only summary still passes the deterministic check",
+      "proof": "Generate summary 'The and of in.' citing EXP-01-1, verifier supported for all; expect result.summary null."
+    },
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "line": 213,
+      "rule": "c3 / Constitution I.1; D23 (recombination is an inference the facts do not state)",
+      "trigger": "Union of cited-fact tokens: 'Used Python at Saffron Retail.' citing ['skill:Python','E1'] and 'Built a revenue dashboard for 40 stores.' citing ['EXP-01-1','EXP-01-2'] both pass the copy, leaving only the model verifier. Proportionate rule (tested on a copy): split the text into clauses at sentence punctuation, ', ' and the words and/or/with; each clause's non-function words must fit within ONE cited fact, and at least one clause must hold a content word. This rejects both recombinations and the function-word-only case, and keeps every positive test, including 'Cleaned sales data and built a revenue dashboard.'.",
+      "title": "Summary words checked against the union of cited facts allow cross-fact recombination",
+      "proof": "Summary 'Built a revenue dashboard for 40 stores.' citing EXP-01-1 and EXP-01-2, verifier supported; expect result.summary null."
+    },
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "line": 199,
+      "rule": "Constitution I.1 / statedSkillRule: a stated skill is never presented as verified experience; #91 fixed the same leak in 357894b",
+      "trigger": "Profile userStatedSkills ['Rust']: factTexts gives skill:Rust the text 'Rust (stated by the candidate, not verified experience)', so 'Verified Rust experience.' citing ['skill:Rust'] passes summaryPasses (copy) because 'verified' and 'experience' come from the annotation. A stated skill should contribute only its bare name (or no tokens, as #91 does).",
+      "title": "Stated-skill annotation words feed the summary allowlist",
+      "proof": "Summary 'Verified Rust experience.' citing skill:Rust with Rust in userStatedSkills, verifier supported; expect result.summary null."
+    },
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 285,
+      "rule": "c8: docs describe the shipped rule",
+      "trigger": "The Pipeline bullet says the check requires 'every word of the draft that holds a digit' to appear in a cited source; since 0e6ac7b every non-function word must appear in the cited facts and a text with no word fails.",
+      "title": "Architecture doc still states the digit-only summary rule"
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "line": 91,
+      "rule": "c2 usability: the check the model must pass is not stated to it (D25 precedent: allowlist must not null natural wording)",
+      "trigger": "summaryClause asks only that numbers, tools, employers, titles and dates appear in a cited source, and the repair item says reason 'check' with no rule. A natural draft such as 'Data analyst who cleaned sales data and built revenue dashboards.' citing EXP-01, EXP-01-1, EXP-01-2 fails ('who', 'dashboards') and the repair has no instruction to converge, so most real summaries end null. Add one sentence to summaryClause and summaryRepairClause: use only words that appear in the cited sources, apart from short function words; each phrase rests on one source.",
+      "title": "Summary prompt does not state the word allowlist the check enforces"
+    }
+  ]
+}

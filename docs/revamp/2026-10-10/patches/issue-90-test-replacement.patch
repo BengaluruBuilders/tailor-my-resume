@@ -1,0 +1,1094 @@
+diff --git a/test/tailormyresume-ai-harness.ts b/test/tailormyresume-ai-harness.ts
+index 60570ba..09d9756 100644
+--- a/test/tailormyresume-ai-harness.ts
++++ b/test/tailormyresume-ai-harness.ts
+@@ -60,7 +60,7 @@ export const promptOf = (model: MockLanguageModelV4, call = 0): string =>
+ 
+ const errorBodySchema = z.object({ error: z.object({ code: z.string() }) });
+ 
+-export async function createTailormyresumeAiHarness(dailyCallQuota = 6) {
++export async function createTailormyresumeAiHarness(dailyCallQuota = 25) {
+   const tailormyresume: AppConfig = appConfigSchema.parse({
+     appId: "tailormyresume",
+     firebaseProjectId: "tailormyresume-firebase",
+diff --git a/test/tailormyresume-analyses-repeat.test.ts b/test/tailormyresume-analyses-repeat.test.ts
+index 3e586a1..28fafae 100644
+--- a/test/tailormyresume-analyses-repeat.test.ts
++++ b/test/tailormyresume-analyses-repeat.test.ts
+@@ -31,7 +31,7 @@ const modelAnswer = {
+ const useModel = (): void => {
+   models.set(
+     modelNames.extraction,
+-    answering(...Array.from({ length: 8 }, () => modelAnswer)),
++    answering(...Array.from({ length: 25 }, () => modelAnswer)),
+   );
+ };
+ const extractionCalls = (): number =>
+@@ -78,32 +78,34 @@ const holdFirstRequest = (model: ReturnType<typeof answering>) => {
+   return { started: started.promise, finish: finish.resolve };
+ };
+ 
+-await test("ten posts of one JD make three model calls, three ai_usage rows and seven 429 ALLOWANCE_EXHAUSTED", async () => {
++await test("twenty-five posts of one JD make twenty model calls, twenty ai_usage rows and five 429 ALLOWANCE_EXHAUSTED", async () => {
+   useModel();
+   const user = await newUser();
+   const statuses: number[] = [];
+   const codes: string[] = [];
+-  for (let attempt = 0; attempt < 10; attempt += 1) {
++  for (let attempt = 0; attempt < 25; attempt += 1) {
+     const response = await analyze(user, jobText("same"));
+     statuses.push(response.status);
+     if (response.status !== 200)
+       codes.push(await harness.errorCodeOf(response));
+   }
+-  assert.deepEqual(
+-    statuses,
+-    [200, 200, 200, 429, 429, 429, 429, 429, 429, 429],
+-  );
+-  assert.deepEqual(codes, Array(7).fill("ALLOWANCE_EXHAUSTED"));
+-  assert.equal(extractionCalls(), 3);
+-  assert.equal((await aiRowsOf(user)).length, 3);
++  assert.deepEqual(statuses, [
++    ...Array<number>(20).fill(200),
++    ...Array<number>(5).fill(429),
++  ]);
++  assert.deepEqual(codes, Array(5).fill("ALLOWANCE_EXHAUSTED"));
++  assert.equal(extractionCalls(), 20);
++  assert.equal((await aiRowsOf(user)).length, 20);
+ });
+ 
+-await test("the same JD as the first after three analyses is 429 ALLOWANCE_EXHAUSTED with no model call", async () => {
++await test("the same JD as the first after twenty analyses is 429 ALLOWANCE_EXHAUSTED with no model call", async () => {
+   useModel();
+   const user = await newUser();
+-  for (const name of ["a", "b", "c"]) await analyze(user, jobText(name));
++  for (let index = 0; index < 20; index += 1) {
++    await analyze(user, jobText(`n${index}`));
++  }
+   const before = extractionCalls();
+-  const refused = await analyze(user, `  ${jobText("a")}\n\n  `);
++  const refused = await analyze(user, `  ${jobText("n0")}\n\n  `);
+   assert.equal(refused.status, 429);
+   assert.equal(await harness.errorCodeOf(refused), "ALLOWANCE_EXHAUSTED");
+   assert.equal(extractionCalls(), before);
+@@ -134,7 +136,7 @@ await test("a second request for a JD still in flight is 409 ANALYSIS_IN_PROGRES
+   assert.equal(rows[0]?.status, "USED");
+ });
+ 
+-await test("when the in-flight request fails 502, its claim is released and the wallet shows three analyses left", async () => {
++await test("when the in-flight request fails 502, its claim is released and the wallet shows twenty analyses left", async () => {
+   const held = failing();
+   const hold = holdFirstRequest(held);
+   models.set(modelNames.extraction, held);
+@@ -153,20 +155,20 @@ await test("when the in-flight request fails 502, its claim is released and the
+     assert.equal(await harness.errorCodeOf(failed), "AI_PROVIDER_ERROR");
+   }
+   assert.equal((await claimRows(user)).length, 0);
+-  assert.equal(await analysesLeft(user), 3);
++  assert.equal(await analysesLeft(user), 20);
+ });
+ 
+-await test("three distinct JDs each make one model call and the fourth is 429 with no model call", async () => {
++await test("twenty distinct JDs each make one model call and the 21st is 429 with no model call", async () => {
+   useModel();
+   const user = await newUser();
+-  for (const name of ["a", "b", "c"]) {
+-    assert.equal((await analyze(user, jobText(name))).status, 200);
++  for (let index = 0; index < 20; index += 1) {
++    assert.equal((await analyze(user, jobText(`n${index}`))).status, 200);
+   }
+-  assert.equal(extractionCalls(), 3);
+-  const refused = await analyze(user, jobText("d"));
++  assert.equal(extractionCalls(), 20);
++  const refused = await analyze(user, jobText("extra"));
+   assert.equal(refused.status, 429);
+   assert.equal(await harness.errorCodeOf(refused), "ALLOWANCE_EXHAUSTED");
+-  assert.equal(extractionCalls(), 3);
++  assert.equal(extractionCalls(), 20);
+ });
+ 
+ await test("another user analysing the same JD gets 200 with their own call and the first user's claim rows are unchanged", async () => {
+@@ -183,8 +185,8 @@ await test("another user analysing the same JD gets 200 with their own call and
+     (await claimRows(second)).map((row) => row.key),
+     [hashOf(jobText("same"))],
+   );
+-  assert.equal(await analysesLeft(first), 2);
+-  assert.equal(await analysesLeft(second), 2);
++  assert.equal(await analysesLeft(first), 19);
++  assert.equal(await analysesLeft(second), 19);
+ });
+ 
+ await test("a request that crosses IST midnight is billed to the day it started and leaves the next day's allowance whole", async () => {
+@@ -212,13 +214,13 @@ await test("a request that crosses IST midnight is billed to the day it started
+           }),
+         })
+         .parse(await response.json()).allowance,
+-      { analysesLeftToday: 2, day: "2026-10-07" },
++      { analysesLeftToday: 19, day: "2026-10-07" },
+     );
+     assert.deepEqual(
+       (await claimRows(user)).map((row) => [row.day, row.status]),
+       [["2026-10-07", "USED"]],
+     );
+-    assert.equal(await analysesLeft(user), 3);
++    assert.equal(await analysesLeft(user), 20);
+   } finally {
+     harness.setNow(startingNow);
+   }
+diff --git a/test/tailormyresume-analyses.test.ts b/test/tailormyresume-analyses.test.ts
+index d900a9b..59e7597 100644
+--- a/test/tailormyresume-analyses.test.ts
++++ b/test/tailormyresume-analyses.test.ts
+@@ -66,7 +66,7 @@ const modelAnswer = {
+ const useModel = (answer: unknown = modelAnswer): void => {
+   models.set(
+     modelNames.extraction,
+-    answering(...Array.from({ length: 8 }, () => answer)),
++    answering(...Array.from({ length: 25 }, () => answer)),
+   );
+ };
+ const extractionCalls = (): number =>
+@@ -113,7 +113,7 @@ await test("an analysis returns server ids, one match per requirement, and the a
+     { requirementId: "req-2", status: "GAP", evidenceIds: [] },
+   ]);
+   assert.deepEqual(body.allowance, {
+-    analysesLeftToday: 2,
++    analysesLeftToday: 19,
+     day: "2026-10-07",
+     resetsAt: "2026-10-07T18:30:00.000Z",
+   });
+@@ -172,14 +172,14 @@ await test("a MET backed only by a stated skill is downgraded to PARTIAL", async
+   assert.deepEqual(body.matches[0]?.evidenceIds, ["skill:SQL"]);
+ });
+ 
+-await test("three distinct JDs pass, the fourth is 429 ALLOWANCE_EXHAUSTED with no model call", async () => {
++await test("twenty distinct JDs pass, the 21st is 429 ALLOWANCE_EXHAUSTED with no model call", async () => {
+   useModel();
+   const user = await newUser();
+-  for (const name of ["a", "b", "c"]) {
+-    assert.equal((await analyze(user, jobText(name))).status, 200);
++  for (let index = 0; index < 20; index += 1) {
++    assert.equal((await analyze(user, jobText(`n${index}`))).status, 200);
+   }
+   const before = extractionCalls();
+-  const refused = await analyze(user, jobText("d"));
++  const refused = await analyze(user, jobText("extra"));
+   assert.equal(refused.status, 429);
+   assert.equal(await harness.errorCodeOf(refused), "ALLOWANCE_EXHAUSTED");
+   assert.equal(extractionCalls(), before);
+@@ -194,7 +194,7 @@ await test("a repeat of the first JD is 200 and spends another analysis", async
+   assert.equal(repeat.status, 200);
+   assert.equal(
+     bodyShape.parse(await repeat.json()).allowance.analysesLeftToday,
+-    0,
++    17,
+   );
+ });
+ 
+@@ -207,7 +207,7 @@ await test("a provider failure does not use an analysis", async () => {
+   const next = await analyze(user, jobText("b"));
+   assert.equal(
+     bodyShape.parse(await next.json()).allowance.analysesLeftToday,
+-    2,
++    19,
+   );
+ });
+ 
+@@ -247,7 +247,9 @@ await test("a same-JD request while the first is in flight is 409 and leaves no
+ await test("three concurrent different JDs with two left give two 200 and one 429", async () => {
+   useModel();
+   const user = await newUser();
+-  await analyze(user, jobText("first"));
++  for (let index = 0; index < 18; index += 1) {
++    await analyze(user, jobText(`pre${index}`));
++  }
+   const responses = await Promise.all(
+     ["x", "y", "z"].map((name) => analyze(user, jobText(name))),
+   );
+diff --git a/test/tailormyresume-ledger.test.ts b/test/tailormyresume-ledger.test.ts
+index 0e6bac9..ba4a053 100644
+--- a/test/tailormyresume-ledger.test.ts
++++ b/test/tailormyresume-ledger.test.ts
+@@ -419,60 +419,53 @@ await test("credits equals free plus purchased on wallet, purchase and unlock re
+         )
+       ).json(),
+     ).wallet;
+-  assert.equal(unlocked.credits, 5);
++  assert.equal(unlocked.credits, 6);
+   assert.equal(
+     unlocked.credits,
+     unlocked.freeCredits + unlocked.purchasedCredits,
+   );
+-  assert.deepEqual(unlocked.unlockedApplicationIds, ["shape-app"]);
++  assert.deepEqual(unlocked.unlockedApplicationIds, []);
+   assert.equal(typeof unlocked.freeTailoringsLeftToday, "number");
+ });
+ 
+-await test("unlock writes one TAILORING -1 row; GET /credits balance equals the counters and the row sum; a repeat unlock spends nothing", async () => {
++await test("unlock spends nothing and writes no ledger row; GET /credits balance equals the counters and the row sum", async () => {
+   await walletOf("spender");
+   const unlock = () =>
+     call("POST", "/v1/tailormyresume/applications/spend-app/unlock", "spender");
+-  assert.equal((await unlock()).status, 201);
++  assert.equal((await unlock()).status, 200);
+   assert.equal((await unlock()).status, 200);
+   const credits = await creditsOf("spender");
+   const wallet = await walletOf("spender");
+-  assert.equal(credits.balance, 0);
++  assert.equal(credits.balance, 1);
+   assert.equal(credits.balance, wallet.freeCredits + wallet.purchasedCredits);
+   assert.deepEqual(
+     credits.entries.map((entry) => [entry.kind, entry.amount]),
+-    [
+-      ["TAILORING", -1],
+-      ["WELCOME", 1],
+-    ],
++    [["WELCOME", 1]],
+   );
+-  assert.equal(credits.entries[0]?.applicationId, "spend-app");
+   assert.equal(
+     credits.entries.reduce((sum, entry) => sum + entry.amount, 0),
+     credits.balance,
+   );
+ });
+ 
+-await test("a first request that is an unlock lists WELCOME before TAILORING", async () => {
++await test("a first request that is an unlock lists only WELCOME", async () => {
+   const unlock = await call(
+     "POST",
+     "/v1/tailormyresume/applications/cold-app/unlock",
+     "cold-start",
+   );
+-  assert.equal(unlock.status, 201);
++  assert.equal(unlock.status, 200);
+   assert.deepEqual(
+     (await ledgerRows("cold-start")).map((row) => [row.kind, row.amount]),
+-    [
+-      ["WELCOME", 1],
+-      ["TAILORING", -1],
+-    ],
++    [["WELCOME", 1]],
+   );
+   assert.deepEqual(
+     (await creditsOf("cold-start")).entries.map((entry) => entry.kind),
+-    ["TAILORING", "WELCOME"],
++    ["WELCOME"],
+   );
+ });
+ 
+-await test("an unlock with no credit left answers 402 and writes no row", async () => {
++await test("a second unlock answers 200 and writes no row", async () => {
+   await walletOf("broke");
+   await call("POST", "/v1/tailormyresume/applications/a1/unlock", "broke");
+   const second = await call(
+@@ -480,13 +473,10 @@ await test("an unlock with no credit left answers 402 and writes no row", async
+     "/v1/tailormyresume/applications/a2/unlock",
+     "broke",
+   );
+-  assert.equal(second.status, 402);
++  assert.equal(second.status, 200);
+   assert.deepEqual(
+     (await ledgerRows("broke")).map((row) => [row.kind, row.amount]),
+-    [
+-      ["WELCOME", 1],
+-      ["TAILORING", -1],
+-    ],
++    [["WELCOME", 1]],
+   );
+ });
+ 
+diff --git a/test/tailormyresume-reports-export.test.ts b/test/tailormyresume-reports-export.test.ts
+index 2592478..5aaab3f 100644
+--- a/test/tailormyresume-reports-export.test.ts
++++ b/test/tailormyresume-reports-export.test.ts
+@@ -343,12 +343,9 @@ await test("the export holds only the caller's consents, wallet, unlocks and rep
+     alice.consents.map((row) => row.purpose),
+     ["purpose-of-ex-a"],
+   );
+-  assert.equal(alice.wallet.freeCredits, 0);
+-  assert.deepEqual(alice.wallet.unlockedApplicationIds, ["app-x"]);
+-  assert.deepEqual(
+-    alice.unlocks.map((row) => row.applicationId),
+-    ["app-x"],
+-  );
++  assert.equal(alice.wallet.freeCredits, 1);
++  assert.deepEqual(alice.wallet.unlockedApplicationIds, []);
++  assert.deepEqual(alice.unlocks, []);
+   assert.deepEqual(alice.purchases, []);
+   assert.deepEqual(
+     alice.contentReports.map((row) => row.itemText),
+diff --git a/test/tailormyresume-tailorings.test.ts b/test/tailormyresume-tailorings.test.ts
+index 27c006f..fb169c1 100644
+--- a/test/tailormyresume-tailorings.test.ts
++++ b/test/tailormyresume-tailorings.test.ts
+@@ -9,7 +9,6 @@ import { tailormyresumeConfig } from "../src/apps/tailormyresume/config.ts";
+ import { purgeTailormyresumeRows } from "../src/apps/tailormyresume/purge.ts";
+ import {
+   tailormyresumeTailorings,
+-  tailormyresumeUsageClaims,
+   tailormyresumeWallets,
+ } from "../src/apps/tailormyresume/schema.ts";
+ import { appConfigSchema, type AppConfig } from "../src/apps.ts";
+@@ -282,11 +281,6 @@ const settle = async (uid: string, id: string) => {
+ };
+ const run = async (uid: string, payload = body()) =>
+   settle(uid, await start(uid, payload));
+-const claimsOf = (uid: string) =>
+-  database
+-    .select()
+-    .from(tailormyresumeUsageClaims)
+-    .where(eq(tailormyresumeUsageClaims.userId, uid));
+ const callCount = () => ({
+   generator: generator.doGenerateCalls.length,
+   verifier: verifier.doGenerateCalls.length,
+@@ -409,19 +403,6 @@ await test("a number missing from every cited source fails the check", async ()
+   assert.equal(callCount().verifier, 0);
+ });
+ 
+-await test("a section regeneration drops a bullet for an entry outside the section", async () => {
+-  reset();
+-  await grant("t-section");
+-  generatorScript = [bullets(good1, good3)];
+-  verifierScript = [verdicts(true)];
+-  const view = await run("t-section", body({ section: "EXPERIENCE" }));
+-  assert.deepEqual(
+-    view.result?.bullets.map((bullet) => bullet.entryId),
+-    ["EXP-01", "EXP-01"],
+-  );
+-  assert.deepEqual(verificationsOf(view), ["PASSED", "UNCHANGED"]);
+-});
+-
+ await test("the verifier prompt holds the proposed text and sources but no job text", async () => {
+   reset();
+   await grant("t-prompt");
+@@ -454,7 +435,7 @@ await test("a provider error ends the job FAILED with AI_PROVIDER_ERROR", async
+ 
+ await test("the core quota used up during the job ends it FAILED with QUOTA_EXCEEDED", async () => {
+   reset();
+-  await grant("t-quota");
++  await grant("t-quota", 2);
+   generatorScript = [bullets(good1, good2), bullets(good2)];
+   verifierScript = [verdicts(true, false), verdicts(true)];
+   assert.equal((await run("t-quota")).status, "SUCCEEDED");
+@@ -520,9 +501,9 @@ await test("a repeated requestId ignores an otherwise invalid body and an empty
+   assert.deepEqual(callCount(), calls);
+ });
+ 
+-await test("402 NO_CREDIT without unlock, credit, used free tailoring or a free tailoring left today", async () => {
++await test("402 NO_CREDIT when the balance is zero", async () => {
+   reset();
+-  await grant("t-402", 0);
++  await grant("t-402", 1);
+   const first = body();
+   generatorScript = [bullets(good1)];
+   verifierScript = [verdicts(true)];
+@@ -537,150 +518,9 @@ await test("402 NO_CREDIT without unlock, credit, used free tailoring or a free
+   assert.equal(await errorCode(response), "NO_CREDIT");
+ });
+ 
+-await test("a free full tailoring marks its claim USED on success, a failure releases it", async () => {
+-  reset();
+-  await grant("t-free", 0);
+-  generatorScript = [new Error("down")];
+-  const failing = body();
+-  assert.equal((await run("t-free", failing)).status, "FAILED");
+-  assert.deepEqual(await claimsOf("t-free"), []);
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  assert.equal(
+-    (await run("t-free", body({ applicationId: failing.applicationId })))
+-      .status,
+-    "SUCCEEDED",
+-  );
+-  const [claim] = await claimsOf("t-free");
+-  assert.equal(claim?.status, "USED");
+-});
+-
+-await test("a free tailoring finishing after TailorMyResume midnight marks the original day's claim USED", async () => {
+-  reset();
+-  await grant("t-free-midnight", 0);
+-  const originalTime = clock.getTime();
+-  clock.setTime(new Date("2026-10-07T18:29:00Z").getTime());
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  let open = (): void => undefined;
+-  gate = new Promise<void>((resolve) => {
+-    open = resolve;
+-  });
+-  let id = "";
+-  try {
+-    id = await start("t-free-midnight");
+-    const [pending] = await claimsOf("t-free-midnight");
+-    assert.equal(pending?.day, "2026-10-07");
+-    assert.equal(pending?.status, "PENDING");
+-    clock.setTime(new Date("2026-10-07T18:31:00Z").getTime());
+-    open();
+-    assert.equal((await settle("t-free-midnight", id)).status, "SUCCEEDED");
+-    const claims = await claimsOf("t-free-midnight");
+-    assert.equal(claims.length, 1);
+-    assert.equal(claims[0]?.id, pending?.id);
+-    assert.equal(claims[0]?.day, "2026-10-07");
+-    assert.equal(claims[0]?.status, "USED");
+-  } finally {
+-    open();
+-    if (id) await settle("t-free-midnight", id);
+-    clock.setTime(originalTime);
+-  }
+-});
+-
+-await test("a section regeneration after a free full tailoring starts without a new claim, one of a never-tailored application is 402", async () => {
+-  reset();
+-  await grant("t-regen", 0);
+-  const full = body();
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  await run("t-regen", full);
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  const view = await run(
+-    "t-regen",
+-    body({ applicationId: full.applicationId, section: "EXPERIENCE" }),
+-  );
+-  assert.equal(view.status, "SUCCEEDED");
+-  assert.equal((await claimsOf("t-regen")).length, 1);
+-  const other = await request(
+-    "POST",
+-    "/v1/tailormyresume/tailorings",
+-    "t-regen",
+-    body({ section: "EXPERIENCE" }),
+-  );
+-  assert.equal(other.status, 402);
+-  assert.equal(await errorCode(other), "NO_CREDIT");
+-});
+-
+-await test("a section regeneration with a free tailoring left today is 402 and makes no claim", async () => {
+-  reset();
+-  await grant("t-section-free", 0);
+-  const calls = callCount();
+-  const refused = await request(
+-    "POST",
+-    "/v1/tailormyresume/tailorings",
+-    "t-section-free",
+-    body({ section: "EXPERIENCE" }),
+-  );
+-  assert.equal(refused.status, 402);
+-  assert.equal(await errorCode(refused), "NO_CREDIT");
+-  assert.deepEqual(callCount(), calls);
+-  assert.deepEqual(await claimsOf("t-section-free"), []);
+-});
+-
+-await test("a section regeneration is not entitled by an earlier-day USED claim or by any PENDING claim", async () => {
++await test("two concurrent tailorings with one credit start one job and answer one 402", async () => {
+   reset();
+-  await grant("t-section-count", 0);
+-  const applicationId = `app-section-count`;
+-  await database.insert(tailormyresumeUsageClaims).values([
+-    {
+-      userId: "t-section-count",
+-      day: "2026-10-06",
+-      kind: "FREE_TAILORING",
+-      key: applicationId,
+-      status: "USED",
+-      createdAt: new Date(clock.getTime() - 24 * 3_600_000),
+-    },
+-    {
+-      userId: "t-section-count",
+-      day: "2026-10-07",
+-      kind: "FREE_TAILORING",
+-      key: "expired",
+-      status: "PENDING",
+-      createdAt: new Date(
+-        clock.getTime() - tailormyresumeConfig.pendingClaimTtlMs,
+-      ),
+-    },
+-  ]);
+-  const before = await claimsOf("t-section-count");
+-  const calls = callCount();
+-  const refuse = async (): Promise<void> => {
+-    const refused = await request(
+-      "POST",
+-      "/v1/tailormyresume/tailorings",
+-      "t-section-count",
+-      body({ applicationId, section: "EXPERIENCE" }),
+-    );
+-    assert.equal(refused.status, 402);
+-    assert.equal(await errorCode(refused), "NO_CREDIT");
+-    assert.deepEqual(callCount(), calls);
+-  };
+-  await refuse();
+-  assert.deepEqual(await claimsOf("t-section-count"), before);
+-  await database.insert(tailormyresumeUsageClaims).values({
+-    userId: "t-section-count",
+-    day: "2026-10-07",
+-    kind: "FREE_TAILORING",
+-    key: applicationId,
+-    status: "PENDING",
+-    createdAt: clock,
+-  });
+-  await refuse();
+-});
+-
+-await test("two concurrent full tailorings on the free path with one left start one job and answer one 402", async () => {
+-  reset();
+-  await grant("t-race", 0);
++  await grant("t-race", 1);
+   generatorScript = [bullets(good1)];
+   verifierScript = [verdicts(true)];
+   const responses = await Promise.all([
+@@ -696,9 +536,9 @@ await test("two concurrent full tailorings on the free path with one left start
+   assert.equal((await settle("t-race", id)).status, "SUCCEEDED");
+ });
+ 
+-await test("two full tailorings of the same application with different requestIds start one job and answer the running job to the other", async () => {
++await test("two tailorings of the same application with different requestIds and one credit start one job and answer the other 402", async () => {
+   reset();
+-  await grant("t-race-same", 0);
++  await grant("t-race-same", 1);
+   generatorScript = [bullets(good1)];
+   verifierScript = [verdicts(true)];
+   let open = (): void => undefined;
+@@ -723,22 +563,19 @@ await test("two full tailorings of the same application with different requestId
+     ]);
+     assert.deepEqual(
+       responses.map((response) => response.status).sort(),
+-      [200, 202],
++      [202, 402],
+     );
+     const accepted = responses.find((response) => response.status === 202);
+     id = viewSchema.parse(await accepted?.json()).tailoring.id;
+-    const repeated = responses.find((response) => response.status === 200);
+-    assert.equal(viewSchema.parse(await repeated?.json()).tailoring.id, id);
+-    assert.equal((await claimsOf("t-race-same")).length, 1);
+   } finally {
+     open();
+     if (id) await settle("t-race-same", id);
+   }
+ });
+ 
+-await test("a second full tailoring of the same application while the first job is RUNNING on a free claim answers 200 with the running job", async () => {
++await test("a second tailoring of the same application while the first job is RUNNING on the only credit is 402 NO_CREDIT", async () => {
+   reset();
+-  await grant("t-inflight", 0);
++  await grant("t-inflight", 1);
+   generatorScript = [bullets(good1)];
+   verifierScript = [verdicts(true)];
+   let open = (): void => undefined;
+@@ -757,11 +594,8 @@ await test("a second full tailoring of the same application while the first job
+       "t-inflight",
+       body({ applicationId: "same", requestId: crypto.randomUUID() }),
+     );
+-    assert.equal(response.status, 200);
+-    const view = viewSchema.parse(await response.json()).tailoring;
+-    assert.equal(view.id, id);
+-    assert.equal(view.status, "RUNNING");
+-    assert.equal((await claimsOf("t-inflight")).length, 1);
++    assert.equal(response.status, 402);
++    assert.equal(await errorCode(response), "NO_CREDIT");
+   } finally {
+     open();
+     if (id) await settle("t-inflight", id);
+@@ -775,20 +609,9 @@ await test("a second full tailoring of the same application while the first job
+   assert.deepEqual([wallet?.freeCredits, wallet?.purchasedCredits], [0, 0]);
+ });
+ 
+-await test("a second full tailoring while the found RUNNING job belongs to another boot starts a fresh job and fails the old one as INTERRUPTED", async () => {
++await test("a second tailoring while the found RUNNING job belongs to another boot starts a fresh job and fails the old one as INTERRUPTED", async () => {
+   reset();
+-  await grant("t-stale-inflight", 0);
+-  const [claim] = await database
+-    .insert(tailormyresumeUsageClaims)
+-    .values({
+-      userId: "t-stale-inflight",
+-      day: "2026-10-07",
+-      kind: "FREE_TAILORING",
+-      key: "same",
+-      status: "PENDING",
+-      createdAt: clock,
+-    })
+-    .returning({ id: tailormyresumeUsageClaims.id });
++  await grant("t-stale-inflight", 1);
+   await database.insert(tailormyresumeTailorings).values({
+     id: "tl_stale_inflight",
+     userId: "t-stale-inflight",
+@@ -797,7 +620,7 @@ await test("a second full tailoring while the found RUNNING job belongs to anoth
+     section: null,
+     bootId: "old-boot",
+     status: "RUNNING",
+-    claimId: claim?.id,
++    creditReserved: true,
+     createdAt: clock,
+   });
+   generatorScript = [bullets(good1)];
+@@ -816,42 +639,18 @@ await test("a second full tailoring while the found RUNNING job belongs to anoth
+   assert.equal(stale.status, "FAILED");
+   assert.equal(stale.failureCode, "INTERRUPTED");
+   assert.deepEqual(callCount(), { generator: 1, verifier: 1 });
+-  const claims = await claimsOf("t-stale-inflight");
+-  assert.equal(claims.length, 1);
+-  assert.equal(claims[0]?.status, "USED");
+-});
+-
+-await test("an unlocked application tailors with zero credits and makes no claim", async () => {
+-  reset();
+-  await grant("t-unlock");
+-  const payload = body();
+-  const unlock = await request(
+-    "POST",
+-    `/v1/tailormyresume/applications/${payload.applicationId}/unlock`,
+-    "t-unlock",
+-  );
+-  assert.equal(unlock.status, 201);
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  assert.equal((await run("t-unlock", payload)).status, "SUCCEEDED");
+-  assert.deepEqual(await claimsOf("t-unlock"), []);
++  const [wallet] = await database
++    .select()
++    .from(tailormyresumeWallets)
++    .where(eq(tailormyresumeWallets.userId, "t-stale-inflight"));
++  assert.deepEqual([wallet?.freeCredits, wallet?.purchasedCredits], [0, 0]);
+ });
+ 
+-await test("a RUNNING job of another boot or older than five minutes reads as INTERRUPTED and its pending claim is gone", async () => {
++await test("a RUNNING job of another boot or older than five minutes reads as INTERRUPTED", async () => {
+   reset();
+   await grant("t-stale");
+   const staleIds = await Promise.all(
+     ["boot-old", bootId].map(async (boot, position) => {
+-      const [claim] = await database
+-        .insert(tailormyresumeUsageClaims)
+-        .values({
+-          userId: "t-stale",
+-          day: "2026-10-07",
+-          kind: "FREE_TAILORING",
+-          key: `k${position}`,
+-          status: "PENDING",
+-        })
+-        .returning({ id: tailormyresumeUsageClaims.id });
+       const [row] = await database
+         .insert(tailormyresumeTailorings)
+         .values({
+@@ -861,7 +660,7 @@ await test("a RUNNING job of another boot or older than five minutes reads as IN
+           applicationId: "a",
+           bootId: boot,
+           status: "RUNNING",
+-          claimId: claim?.id,
++          creditReserved: true,
+           createdAt:
+             position === 0 ? clock : new Date(clock.getTime() - 6 * 60_000),
+         })
+@@ -874,64 +673,6 @@ await test("a RUNNING job of another boot or older than five minutes reads as IN
+     assert.equal(view.status, "FAILED");
+     assert.equal(view.failureCode, "INTERRUPTED");
+   }
+-  assert.deepEqual(await claimsOf("t-stale"), []);
+-});
+-
+-await test("interruption reconciliation rolls back the job update if claim release fails", async () => {
+-  reset();
+-  await grant("t-interrupt-atomic");
+-  const [claim] = await database
+-    .insert(tailormyresumeUsageClaims)
+-    .values({
+-      userId: "t-interrupt-atomic",
+-      day: "2026-10-07",
+-      kind: "FREE_TAILORING",
+-      key: "atomic",
+-      status: "PENDING",
+-      createdAt: clock,
+-    })
+-    .returning();
+-  assert.ok(claim);
+-  await database.insert(tailormyresumeTailorings).values({
+-    id: "tl_atomic",
+-    userId: "t-interrupt-atomic",
+-    requestId: crypto.randomUUID(),
+-    applicationId: "atomic",
+-    bootId: "old-boot",
+-    status: "RUNNING",
+-    claimId: claim.id,
+-    createdAt: clock,
+-  });
+-  await testDatabase.pool.query(`
+-    CREATE FUNCTION refuse_claim_delete() RETURNS trigger LANGUAGE plpgsql AS
+-    $$ BEGIN RAISE EXCEPTION 'claim delete refused'; END $$;
+-    CREATE TRIGGER refuse_claim_delete BEFORE DELETE ON tailormyresume_usage_claims
+-      FOR EACH ROW EXECUTE FUNCTION refuse_claim_delete();
+-  `);
+-  try {
+-    const response = await request(
+-      "GET",
+-      "/v1/tailormyresume/tailorings/tl_atomic",
+-      "t-interrupt-atomic",
+-    );
+-    assert.equal(response.status, 500);
+-    const [row] = await database
+-      .select()
+-      .from(tailormyresumeTailorings)
+-      .where(eq(tailormyresumeTailorings.id, "tl_atomic"));
+-    assert.equal(row?.status, "RUNNING");
+-    assert.equal(row?.failureCode, null);
+-    assert.equal(row?.finishedAt, null);
+-    assert.equal((await claimsOf("t-interrupt-atomic"))[0]?.status, "PENDING");
+-  } finally {
+-    await testDatabase.pool.query(
+-      "DROP TRIGGER refuse_claim_delete ON tailormyresume_usage_claims; DROP FUNCTION refuse_claim_delete();",
+-    );
+-  }
+-  const view = await settle("t-interrupt-atomic", "tl_atomic");
+-  assert.equal(view.status, "FAILED");
+-  assert.equal(view.failureCode, "INTERRUPTED");
+-  assert.deepEqual(await claimsOf("t-interrupt-atomic"), []);
+ });
+ 
+ await test("a fifth concurrent job gets 429 RATE_LIMITED with Retry-After 10, and a slot frees when a job ends", async () => {
+@@ -1087,196 +828,6 @@ await test("DELETE /v1/me removes the user's tailorings and keeps another user's
+   assert.equal(await count("t-del-b"), 1);
+ });
+ 
+-const postTailoring = (uid: string, payload: unknown) =>
+-  request("POST", "/v1/tailormyresume/tailorings", uid, payload);
+-const tailoringsOf = (uid: string) =>
+-  database
+-    .select()
+-    .from(tailormyresumeTailorings)
+-    .where(eq(tailormyresumeTailorings.userId, uid));
+-const refusedWithoutWork = async (
+-  response: Response,
+-  uid: string,
+-  calls: ReturnType<typeof callCount>,
+-) => {
+-  assert.equal(response.status, 402);
+-  assert.equal(await errorCode(response), "NO_CREDIT");
+-  assert.deepEqual(callCount(), calls);
+-  assert.deepEqual(await tailoringsOf(uid), []);
+-};
+-
+-await test("a section regeneration without unlock, credit or a same-day USED claim is 402 NO_CREDIT and makes no model call, row or claim", async () => {
+-  reset();
+-  await grant("t-section-none", 0);
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  const response = await postTailoring(
+-    "t-section-none",
+-    body({ section: "EXPERIENCE" }),
+-  );
+-  await refusedWithoutWork(response, "t-section-none", {
+-    generator: 0,
+-    verifier: 0,
+-  });
+-  assert.deepEqual(await claimsOf("t-section-none"), []);
+-});
+-
+-await test("a section regeneration right after a same-day free full tailoring is 202, succeeds and leaves exactly one USED claim", async () => {
+-  reset();
+-  await grant("t-section-after", 0);
+-  const full = body();
+-  generatorScript = [bullets(good1), bullets(good1)];
+-  verifierScript = [verdicts(true), verdicts(true)];
+-  assert.equal((await run("t-section-after", full)).status, "SUCCEEDED");
+-  const before = await claimsOf("t-section-after");
+-  const view = await run(
+-    "t-section-after",
+-    body({ applicationId: full.applicationId, section: "EXPERIENCE" }),
+-  );
+-  assert.equal(view.status, "SUCCEEDED");
+-  assert.deepEqual(callCount(), { generator: 2, verifier: 2 });
+-  const after = await claimsOf("t-section-after");
+-  assert.deepEqual(after, before);
+-  assert.equal(after.length, 1);
+-  assert.equal(after[0]?.status, "USED");
+-});
+-
+-await test("three section regenerations with today's free allowance unused are each 402 NO_CREDIT, call no model and leave no live claim", async () => {
+-  reset();
+-  await grant("t-section-repeat", 0);
+-  generatorScript = [bullets(good1), bullets(good1), bullets(good1)];
+-  verifierScript = [verdicts(true), verdicts(true), verdicts(true)];
+-  const applicationId = body().applicationId;
+-  for (let attempt = 0; attempt < 3; attempt += 1) {
+-    const response = await postTailoring(
+-      "t-section-repeat",
+-      body({ applicationId, section: "EXPERIENCE" }),
+-    );
+-    await refusedWithoutWork(response, "t-section-repeat", {
+-      generator: 0,
+-      verifier: 0,
+-    });
+-    assert.deepEqual(await claimsOf("t-section-repeat"), []);
+-  }
+-});
+-
+-await test("a USED free tailoring claim of an earlier day no longer entitles the application: a full tailoring claims today's allowance (202), and with today's allowance used it is 402 with no model call", async () => {
+-  reset();
+-  await grant("t-stale-used", 0);
+-  const stale = ["stale-1", "stale-2"].map((key) => ({
+-    userId: "t-stale-used",
+-    day: "2026-10-06",
+-    kind: "FREE_TAILORING" as const,
+-    key,
+-    status: "USED" as const,
+-    createdAt: new Date(clock.getTime() - 24 * 3_600_000),
+-  }));
+-  await database.insert(tailormyresumeUsageClaims).values(stale);
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  const view = await run("t-stale-used", body({ applicationId: "stale-1" }));
+-  assert.equal(view.status, "SUCCEEDED");
+-  const claims = await claimsOf("t-stale-used");
+-  assert.equal(claims.length, 3);
+-  const today = claims.filter((claim) => claim.day === "2026-10-07");
+-  assert.deepEqual(
+-    today.map((claim) => [claim.key, claim.status]),
+-    [["stale-1", "USED"]],
+-  );
+-  const calls = callCount();
+-  const refused = await postTailoring(
+-    "t-stale-used",
+-    body({ applicationId: "stale-2" }),
+-  );
+-  assert.equal(refused.status, 402);
+-  assert.equal(await errorCode(refused), "NO_CREDIT");
+-  assert.deepEqual(callCount(), calls);
+-  assert.equal((await claimsOf("t-stale-used")).length, 3);
+-});
+-
+-await test("a section regeneration by another user of an application with a USED claim is 402 NO_CREDIT and changes none of the first user's rows", async () => {
+-  reset();
+-  await grant("t-owner", 0);
+-  await grant("t-other", 0);
+-  const full = body();
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  assert.equal((await run("t-owner", full)).status, "SUCCEEDED");
+-  const claimsBefore = await claimsOf("t-owner");
+-  const tailoringsBefore = await tailoringsOf("t-owner");
+-  const calls = callCount();
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  const response = await postTailoring(
+-    "t-other",
+-    body({ applicationId: full.applicationId, section: "EXPERIENCE" }),
+-  );
+-  await refusedWithoutWork(response, "t-other", calls);
+-  assert.deepEqual(await claimsOf("t-other"), []);
+-  assert.deepEqual(await claimsOf("t-owner"), claimsBefore);
+-  assert.deepEqual(await tailoringsOf("t-owner"), tailoringsBefore);
+-});
+-
+-await test("a section regeneration by an account that still holds its starting credit runs free and makes no claim (known hole, see #72)", async () => {
+-  reset();
+-  await grant("t-section-starting-credit");
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  const id = await start(
+-    "t-section-starting-credit",
+-    body({ section: "EXPERIENCE" }),
+-  );
+-  assert.equal(
+-    (await settle("t-section-starting-credit", id)).status,
+-    "SUCCEEDED",
+-  );
+-  assert.deepEqual(await claimsOf("t-section-starting-credit"), []);
+-});
+-
+-await test("a section regeneration just after TailorMyResume midnight is 402 although the full tailoring finished minutes earlier on the previous day", async () => {
+-  reset();
+-  await grant("t-section-midnight", 0);
+-  const originalTime = clock.getTime();
+-  clock.setTime(new Date("2026-10-07T18:28:00Z").getTime());
+-  generatorScript = [bullets(good1)];
+-  verifierScript = [verdicts(true)];
+-  const full = body();
+-  let open = (): void => undefined;
+-  gate = new Promise<void>((resolve) => {
+-    open = resolve;
+-  });
+-  let id = "";
+-  try {
+-    id = await start("t-section-midnight", full);
+-    clock.setTime(new Date("2026-10-07T18:31:00Z").getTime());
+-    open();
+-    assert.equal((await settle("t-section-midnight", id)).status, "SUCCEEDED");
+-    const [claim] = await claimsOf("t-section-midnight");
+-    assert.equal(claim?.day, "2026-10-07");
+-    assert.equal(claim?.status, "USED");
+-    clock.setTime(new Date("2026-10-07T18:32:00Z").getTime());
+-    const before = await claimsOf("t-section-midnight");
+-    const tailoringsBefore = await tailoringsOf("t-section-midnight");
+-    const calls = callCount();
+-    const response = await postTailoring(
+-      "t-section-midnight",
+-      body({ applicationId: full.applicationId, section: "EXPERIENCE" }),
+-    );
+-    assert.equal(response.status, 402);
+-    assert.equal(await errorCode(response), "NO_CREDIT");
+-    assert.deepEqual(callCount(), calls);
+-    assert.deepEqual(
+-      await tailoringsOf("t-section-midnight"),
+-      tailoringsBefore,
+-    );
+-    assert.deepEqual(await claimsOf("t-section-midnight"), before);
+-  } finally {
+-    open();
+-    if (id) await settle("t-section-midnight", id);
+-    clock.setTime(originalTime);
+-  }
+-});
+-
+ await test("without userStatedSkills the generate and repair prompts equal those on main", async () => {
+   reset();
+   await grant("t-golden");
+diff --git a/test/tailormyresume-wallet.test.ts b/test/tailormyresume-wallet.test.ts
+index bbd642e..570ded3 100644
+--- a/test/tailormyresume-wallet.test.ts
++++ b/test/tailormyresume-wallet.test.ts
+@@ -134,8 +134,8 @@ await test("the first wallet call creates one free credit and the second adds no
+   assert.deepEqual(first, {
+     freeCredits: 1,
+     purchasedCredits: 0,
+-    analysesLeftToday: 3,
+-    freeTailoringsLeftToday: 1,
++    analysesLeftToday: 20,
++    freeTailoringsLeftToday: 0,
+     day: "2026-10-07",
+     resetsAt: "2026-10-07T18:30:00.000Z",
+     unlockedApplicationIds: [],
+@@ -143,43 +143,39 @@ await test("the first wallet call creates one free credit and the second adds no
+   assert.equal((await walletOf("w1")).freeCredits, 1);
+ });
+ 
+-await test("an unlock answers 201 then 200 on repeat and spends one credit", async () => {
++await test("an unlock answers 200 every time, spends nothing and returns a FREE unlock", async () => {
+   await walletOf("u1");
+   const first = await unlock("u1", "app-1");
+-  assert.equal(first.status, 201);
++  assert.equal(first.status, 200);
+   const created = unlockShape.parse(await first.json());
+   assert.equal(created.unlock.creditKind, "FREE");
+-  assert.equal(created.wallet.freeCredits, 0);
+-  assert.deepEqual(created.wallet.unlockedApplicationIds, ["app-1"]);
++  assert.equal(created.wallet.freeCredits, 1);
++  assert.deepEqual(created.wallet.unlockedApplicationIds, []);
+   const repeat = await unlock("u1", "app-1");
+   assert.equal(repeat.status, 200);
+   const again = unlockShape.parse(await repeat.json());
+   assert.equal(again.unlock.creditKind, "FREE");
+-  assert.equal(again.unlock.unlockedAt, created.unlock.unlockedAt);
+-  assert.equal(again.wallet.freeCredits, 0);
++  assert.equal(again.wallet.freeCredits, 1);
+ });
+ 
+-await test("a free credit is spent before a purchased credit", async () => {
++await test("an unlock spends no free or purchased credit", async () => {
+   await walletOf("u2");
+   await setPurchased("u2", 2);
+-  const kinds: string[] = [];
+   for (const id of ["a", "b", "c"]) {
+     const response = await unlock("u2", id);
+-    assert.equal(response.status, 201);
+-    kinds.push(unlockShape.parse(await response.json()).unlock.creditKind);
++    assert.equal(response.status, 200);
+   }
+-  assert.deepEqual(kinds, ["FREE", "PURCHASED", "PURCHASED"]);
+   const wallet = await walletOf("u2");
+-  assert.equal(wallet.freeCredits + wallet.purchasedCredits, 0);
+-  assert.deepEqual(wallet.unlockedApplicationIds, ["a", "b", "c"]);
++  assert.equal(wallet.freeCredits, 1);
++  assert.equal(wallet.purchasedCredits, 2);
++  assert.deepEqual(wallet.unlockedApplicationIds, []);
+ });
+ 
+-await test("an unlock with no credit is 402 NO_CREDIT and writes nothing", async () => {
++await test("an unlock with no credit answers 200 and writes nothing", async () => {
+   await walletOf("u3");
+   await setFree("u3", 0);
+   const response = await unlock("u3", "x");
+-  assert.equal(response.status, 402);
+-  assert.equal(await codeOf(response), "NO_CREDIT");
++  assert.equal(response.status, 200);
+   assert.deepEqual((await walletOf("u3")).unlockedApplicationIds, []);
+ });
+ 
+@@ -219,34 +215,41 @@ await test("an unlock with a body is 400 INVALID_INPUT and changes nothing", asy
+   );
+ });
+ 
+-await test("two concurrent unlocks of one application spend one credit", async () => {
++await test("two concurrent unlocks of one application spend nothing", async () => {
+   await walletOf("c1");
+   await setPurchased("c1", 5);
+   const responses = await Promise.all([
+     unlock("c1", "same"),
+     unlock("c1", "same"),
+   ]);
+-  assert.deepEqual(responses.map((r) => r.status).sort(), [200, 201]);
++  assert.deepEqual(responses.map((r) => r.status).sort(), [200, 200]);
+   const wallet = await walletOf("c1");
+-  assert.equal(wallet.freeCredits, 0);
++  assert.equal(wallet.freeCredits, 1);
+   assert.equal(wallet.purchasedCredits, 5);
+ });
+ 
+-await test("two concurrent unlocks of different applications with one credit give 201 and 402", async () => {
++await test("two concurrent unlocks of different applications with one credit give 200 and 200", async () => {
+   await walletOf("c2");
+   const responses = await Promise.all([
+     unlock("c2", "one"),
+     unlock("c2", "two"),
+   ]);
+-  assert.deepEqual(responses.map((r) => r.status).sort(), [201, 402]);
++  assert.deepEqual(responses.map((r) => r.status).sort(), [200, 200]);
+ });
+ 
++const insertUnlock = (uid: string, applicationId: string) =>
++  database.insert(tailormyresumeUnlocks).values({
++    userId: uid,
++    applicationId,
++    creditKind: "FREE",
++    unlockedAt: new Date(),
++  });
++
+ await test("another user's unlocks never show in a wallet", async () => {
+   await walletOf("alice");
+-  await unlock("alice", "alice-app");
++  await insertUnlock("alice", "alice-app");
+   await walletOf("bob");
+-  await setFree("bob", 1);
+-  await unlock("bob", "bob-app");
++  await insertUnlock("bob", "bob-app");
+   assert.deepEqual((await walletOf("alice")).unlockedApplicationIds, [
+     "alice-app",
+   ]);
+@@ -281,10 +284,10 @@ await test("a claim counts for the day and the allowance resets at 18:30:00Z", a
+   const claimed = await claim("d1", "jd", before);
+   assert.equal(claimed.status, "claimed");
+   clock = before;
+-  assert.equal((await walletOf("d1")).analysesLeftToday, 2);
++  assert.equal((await walletOf("d1")).analysesLeftToday, 19);
+   clock = new Date("2026-10-07T18:30:00Z");
+   const next = await walletOf("d1");
+-  assert.equal(next.analysesLeftToday, 3);
++  assert.equal(next.analysesLeftToday, 20);
+   assert.equal(next.day, "2026-10-08");
+   assert.equal(next.resetsAt, "2026-10-08T18:30:00.000Z");
+   clock = new Date("2026-10-07T06:00:00Z");
+@@ -337,7 +340,7 @@ await test("markUsed after a released claim leaves one USED row", async () => {
+   assert.deepEqual(rows, [
+     { day: "2026-10-07", kind: "ANALYSIS", key: "a", status: "USED" },
+   ]);
+-  assert.equal((await walletOf("k6")).analysesLeftToday, 2);
++  assert.equal((await walletOf("k6")).analysesLeftToday, 19);
+ });
+ 
+ await test("a pending claim older than 10 minutes no longer counts", async () => {
+@@ -433,7 +436,8 @@ const rowCounts = async (uid: string) => ({
+ 
+ await test("DELETE /v1/me erases the wallet tables, keeps others, and the retry completes", async () => {
+   for (const uid of ["del-a", "del-b"]) {
+-    await unlock(uid, "app");
++    await walletOf(uid);
++    await insertUnlock(uid, "app");
+     await claim(uid, "jd", now);
+   }
+   assert.deepEqual(await rowCounts("del-a"), {

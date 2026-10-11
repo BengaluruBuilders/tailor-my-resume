@@ -1,0 +1,33 @@
+{
+  "head_sha": "b247a3f318a813a886deed52edfcb1d1640f1dc1",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "268-c1", "status": "met", "evidence": "Schema, entities and TmrDatabase unchanged since round 1 (git diff db9eccef b247a3f3 on core/database/schemas, model, TmrMigrations.kt, TmrDatabase.kt is empty); TmrDatabaseSchemaTest; CI 'Check Room schema is committed' runs in the passing Core unit tests job."},
+    {"id": "268-c2", "status": "met", "evidence": "MIGRATION_2_3 unchanged since round 1 (TmrMigrations.kt:21-33). Legacy notes/legacyStatus now survive every later write: all five production writers (CreateApplicationUseCase:36, UpdateBulletDecisionUseCase:18, DeleteAccountUseCase:173, OfflineSampleDataController:43, HandEditBulletUseCase:34) go through ApplicationRepository.upsertApplication, whose only production implementation (OfflineFirstApplicationRepository.kt:35-36) calls JobApplicationDao.upsertKeepingLegacyColumns; updateStatus touches only status/updatedAt. The generated JobApplicationDao_Impl wraps the default method in performInTransactionSuspending, so read and upsert share one write transaction. OfflineFirstApplicationRepositoryLegacyColumnsTest (Room, Robolectric) covers observed-model, bare-model and re-insert-after-delete."},
+    {"id": "268-c3", "status": "met", "evidence": "Migration SQL and DatabaseModule addMigrations unchanged since round 1; migration2To3SqlIsAdditiveOnly and DatabaseModuleTest."},
+    {"id": "268-c4", "status": "met", "evidence": "JobApplication gains read-only legacyNotes/legacyStatus (JobApplication.kt:25-26); no UI reads them (git grep legacyNotes in main sources hits only mappers, DAO and archive writer)."},
+    {"id": "268-c5", "status": "met", "evidence": "ApplicationMappers.kt:32-33 and 55-56 now map notes/legacyStatus both ways; round-trip contract cases on Room and fakes."},
+    {"id": "268-c6", "status": "met", "evidence": "CreditsRepository.clear/removeForApplication (CreditLedgerDao DELETE queries; TestCreditsRepository); CreditsRepositoryContractTest clearEmptiesTheLedger and removingAnApplicationDropsOnlyItsRows run on Room and fake. record() still has no production caller."},
+    {"id": "268-c7", "status": "met", "evidence": "resume.settings is the only new MockStateStore key; StoredResumeSettingsRepository.clear removes it under the mutex; DeleteAccountUseCase:89 and DeleteMyDataUseCase:34 call it; RoomLocalDataWiper store.clear covers account switch and pending-wipe finish."},
+    {"id": "268-c8", "status": "met", "evidence": "PrototypeFixtures unchanged since round 1; PrototypeFixturesTest."},
+    {"id": "268-c9", "status": "met", "evidence": "toFactsDto (Mappers.kt:23) filters USER_ANSWER before confirmedWithinLimits; it is the only profile-to-DTO path (RemoteJobAnalysisSource.kt:37, RemoteResumeTailor.kt:43); ContentReport.toRequest carries generated item text only. UserAnswerFactsTest covers the limit ordering. See the low finding for the evidence-id window."},
+    {"id": "268-c10", "status": "met", "evidence": "AccountDataArchiveWriter.kt:89-90 (text) and 216-217 (JSON) export notes and legacyStatus whenever stored; every JobApplicationEntity column now reaches the model and the archive; ledger and settings exported as in round 1. AccountDataArchiveWriterSimplifiedFlowTest."},
+    {"id": "268-c11", "status": "met", "evidence": "CI run 38085661682 at b247a3f3: Core unit tests job (build.yml:192-193 runs :core:domain:koverVerify and :core:data:koverVerify, minValue 80 in TailorMyResumeKoverPlugin.kt:20) completed success."},
+    {"id": "268-c12", "status": "met", "evidence": "CI at b247a3f3: delivery-gates-pregate pass (run 38085693502), Constitution policy pass, Static checks, Core, Feature and Screenshot tests and Lint pass in run 38085661682; App unit tests pass; Assemble APKs was still running at review time (Constitution policy in this run was cancelled and passed in run 38085693451)."},
+    {"id": "R1-F1", "status": "met", "evidence": "Resolved: upsertKeepingLegacyColumns keeps stored notes/legacyStatus inside one Room transaction; restore after a partial delete re-inserts them from the snapshot model (DeleteAccountArtefactRestoreTest.restoreKeepsLegacyNotesAndStatusAndStaysIntact), so Failed(dataIntact = true) is now honest."},
+    {"id": "R1-F2", "status": "met", "evidence": "Resolved: DeleteAccountUseCase.kt:88-89 clears ledger and settings on both demo and backend happy paths (DeleteAccountSimplifiedFlowDataTest both flavours); a failure after the clear sets creditsTouched so dataIntact is false; the backend failure path settles through RemoteAccountWipeFinisher -> RoomLocalDataWiper.wipeAll. DeleteMyDataUseCase.kt:32,34 removes ledger rows of deleted applications and the settings (DeleteMyDataUseCaseTest). Sign-out keeps profile and applications by design (SessionRepositoryContractTest.signOutRemovesTheAccountAndTheKeptJobDescriptionOnly), so keeping the ledger and settings there is consistent; account switch wipes all."},
+    {"id": "R1-F3", "status": "met", "evidence": "Resolved per D34 (Constitution I.5 over R14): archive exports notes and legacyStatus in text and JSON."},
+    {"id": "R1-F4", "status": "met", "evidence": "Resolved for the payload: USER_ANSWER is filtered before confirmedWithinLimits (Mappers.kt:23); UserAnswerFactsTest."}
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "core/network/src/main/kotlin/com/tailormyresume/core/network/mapper/Mappers.kt",
+      "line": 23,
+      "rule": "268-c9 with ProfileLimits: the facts the app validates server evidence against must be the facts it sent",
+      "trigger": "Profile with 3 confirmed USER_ANSWER entries first, then 40 confirmed IMPORTED entries. toFactsDto now sends IMPORTED 1-40, but RemoteJobAnalysisSource.kt:42 and :57 build factIds from profile.confirmedWithinLimits() without the filter (USER_ANSWER 1-3 + IMPORTED 1-37), and RemoteResumeTailor.kt:92 builds sourceText the same way. Server evidence citing IMPORTED 38-40 (or their bullets) is dropped and the requirement falls back to GAP; a tailored bullet sourced from them gets an empty 'was' text; USER_ANSWER ids, never sent, are accepted as evidence. Latent today: no production code creates USER_ANSWER entries yet.",
+      "title": "USER_ANSWER filter applies only to the sent payload, so evidence and source-text validation use a different fact window",
+      "proof": "RemoteJobAnalysisSourceTest: the profile above, fake API returns a match citing IMPORTED entry 40 -> assert the match keeps that evidence id (fails today). Fix: move the USER_ANSWER filter into one shared sendable-facts function (or into confirmedWithinLimits) used by toFactsDto, RemoteJobAnalysisSource and RemoteResumeTailor."
+    }
+  ]
+}

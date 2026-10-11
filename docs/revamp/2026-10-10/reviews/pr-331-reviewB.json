@@ -1,0 +1,148 @@
+{
+ "head_sha": "0098cbfaf48b5aed7216dbddcacc62919d0a069e",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "279-c1",
+   "status": "met",
+   "evidence": "EditResumeViewModelTest.readyStateShowsSummaryBulletsSourceTagsAndSkills; export_edit baselines read (summary, From your resume / From your answer tags, skills line, fits line); chrome title Resume + Save from ScreenChrome.kt:75."
+  },
+  {
+   "id": "279-c2",
+   "status": "met",
+   "evidence": "onSave stores only changed bullets through HandEditBulletUseCase (ACCEPTED + reviewState.markEdited, changesAcceptedAt untouched, so ExportReadiness stays ALLOWED); overflowHidesStillFitsOnOnePage. The page-fit render now runs on every keystroke (finding)."
+  },
+  {
+   "id": "279-c3",
+   "status": "met",
+   "evidence": "ExportResumeUseCase gates on ExportReadiness, names with core ExportFileName (FileNameFormat mapped), renders at settings.pageSize, stores exportFileName and records ExportHistory; ExportResumeUseCaseTest x6; PdfPageWriter A4 595x842 / Letter 612x792 (ResumePdfFitTest.pagesAreCreatedAtTheSettingsPageSize)."
+  },
+  {
+   "id": "279-c4",
+   "status": "partial",
+   "evidence": "One page in A4 and Letter and the fit passes are proven through the PdfPages seam with a bitmap sink (D65). Composer lines are recorded from input, not extracted from PDF bytes; selectable text and the ~200 KB size are deferred to the D44 walk, which is not in the PR yet."
+  },
+  {
+   "id": "279-c5",
+   "status": "met",
+   "evidence": "ExportResumeUseCase returns Refused before render when ExportReadiness != ALLOWED (refusesWhenNotAcceptedOrPending asserts renderCalls 0, no history, no exportFileName); ExportedViewModelTest.deepLinkWithoutAcceptShowsNothingExported; ExportedRouteTest. Export uses the stored resume, not withPendingAccepted, and the shared assembler (D54 fallbacks)."
+  },
+  {
+   "id": "279-c6",
+   "status": "met",
+   "evidence": "paidExportShowsCreditsLine and export_exported_paid baselines; Close leading roots Applications (TmrApp.kt:152)."
+  },
+  {
+   "id": "279-c7",
+   "status": "partial",
+   "evidence": "freeExportShowsNothingChargedLine passes for a single-application ledger, but the free/paid choice ignores which ledger entry paid for this application (plan: from the ledger entry spent), so a re-export of the free application after a purchase shows the paid line (finding)."
+  },
+  {
+   "id": "279-c8",
+   "status": "met",
+   "evidence": "Share (ACTION_SEND in a chooser) and Open (ACTION_VIEW) use the tailor FileProvider (cache-path exports/ only, exported=false, grantUriPermissions) with FLAG_GRANT_READ_URI_PERMISSION; missing file -> FileMissing toast; no Activity -> open_failed toast; PdfShareIntentTest, shareAndOpenEmitIntentEventsForTheFile."
+  },
+  {
+   "id": "279-c9",
+   "status": "met",
+   "evidence": "SetApplicationStatusUseCase under DecisionWriteLock returns the previous status and date; restore writes both; SetApplicationStatusUseCaseTest, markAppliedSetsStatusDateAndUndoRestores, export_exported_applied_undo baselines."
+  },
+  {
+   "id": "279-c10",
+   "status": "met",
+   "evidence": "Status chip, Marked on, Change, TmrStatusSheet (five TmrChoiceRow + Save status) in core:designsystem; changeStatusSavesThroughSharedUseCase; TmrStatusSheetTest; export_exported_status_sheet baselines read at 337dp font 2.0."
+  },
+  {
+   "id": "279-c11",
+   "status": "met",
+   "evidence": "onSoon only emits ComingSoon; Go to Applications calls navigator.root(DefaultApplicationsNavKey); soonRowsOnlyEmitComingSoonToast, ExportedRouteTest.goToApplicationsRootsApplications."
+  },
+  {
+   "id": "279-c12",
+   "status": "met",
+   "evidence": "Ten export_* baselines at prototype 1x and 337dp font 2.0; read edit and exported paid/status-sheet frames: no ellipsized labels, file name wraps at word boundaries. Narrow baselines may need re-recording after the w4-base merge (TmrFitText changed there)."
+  },
+  {
+   "id": "279-c13",
+   "status": "unmet",
+   "evidence": "CI run 38102500012 at head: Feature unit tests FAILED, TailorRealEntryHiltTest.editResumeEntryRendersAndSaves AssertionError at TailorRealEntryHiltTest.kt:144 (207 tests, 1 failed). The PR body claims verify-local green. D44 walk evidence is not in docs/revamp/2026-10-10/evidence yet."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "high",
+   "file": "feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/navigation/TailorRealEntryHiltTest.kt",
+   "line": 144,
+   "rule": "279-c13 (CI green), D55 real-entry test",
+   "trigger": "CI run 38102500012 (head 0098cbfa), job Feature unit tests: 'TailorRealEntryHiltTest > editResumeEntryRendersAndSaves FAILED java.lang.AssertionError at TailorRealEntryHiltTest.kt:144'. EditResumeViewModel only reaches Ready after the real Hilt Room/DataStore flows emit on background executors, and show() only calls waitForIdle, so onNodeWithText(\"Edit resume\").assertExists() races the Loading state (blank screen). The Exported test already waits with waitFor { onAllNodesWithText(...) }; the edit test does not. The required gate is red at head.",
+   "title": "Real-entry Hilt test for Edit resume fails on CI: asserts the title before the ViewModel is Ready",
+   "proof": "gh run view 38102500012 --job 114361181242 log line: TailorRealEntryHiltTest > editResumeEntryRendersAndSaves FAILED"
+  },
+  {
+   "severity": "medium",
+   "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/exported/ExportedViewModel.kt",
+   "line": 158,
+   "rule": "279-c6/c7 and plan c7 (derive the line from the ledger entry spent for this application); billing copy must be true",
+   "trigger": "Ledger FREE_GRANT +1, SPEND -1 (app hr), PURCHASE +5, SPEND -1 (app kb) (the ExportedViewModelTest fixture). Re-export hr from Tailored: SPEND count is 2, so Exported for the free application shows '4 left, was 5. Credits never expire.' instead of 'Free resume used... Nothing was charged.' Same after only buying a pack: FREE_GRANT, SPEND(hr), PURCHASE +5 -> re-export hr shows '5 left, was 6', a balance that never existed. After the w4-base merge (CreditLedgerKind gains REFUND, MIGRATION) MIGRATION +3 and one SPEND gives freeResumeUsed=true, so the card shows the big number 2 beside 'Free resume used. 0 credits left.' CreditLedgerEntry already carries applicationId; use the SPEND entry for this application and whether a PURCHASE/MIGRATION balance funded it.",
+   "title": "Free vs paid credits line counts every SPEND in the ledger instead of this application's spend",
+   "proof": "ExportedViewModelTest: seed the paidExportShowsCreditsLine ledger, export application 'hr', expect freeResumeUsed == true (fails at head)."
+  },
+  {
+   "severity": "medium",
+   "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/export/ExportDirectory.kt",
+   "line": 11,
+   "rule": "data integrity of exported files; cross-lane #280 (Application detail file card Share/Open reads exportFileName); supersedes Reviewer A low #2",
+   "trigger": "This PR makes ExportDirectory.write reachable in production for the first time (ExportResumeUseCase -> AndroidPdfResumeRenderer). Every export, successful or not, deletes every file in cache/exports first. Export application A (A.pdf stored as A.exportFileName), then export application B: A.pdf is deleted while A.exportFileName still names it, so #280's Application detail Share/Open for A shows 'Couldn't find the PDF'. A failed render or rename after the wipe also leaves the same application's stored name pointing at a deleted file. Either keep one file per application (delete only the previous file of this application after the rename succeeds) or have readers re-export when the file is missing, and say which in the contract #280 builds on.",
+   "title": "Each export wipes every other application's PDF before writing the new one"
+  },
+  {
+   "severity": "low",
+   "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/edit/EditResumeScreen.kt",
+   "line": 131,
+   "rule": "Constitution II.5 (Tmr* components; TmrTextArea exists with a label and contentDescription); accessibility",
+   "trigger": "With TalkBack on Edit resume, each bullet field is a raw BasicTextField with no label or contentDescription, so it reads only as an edit box with the bullet text and no name. Sighted users see bullet cards styled exactly like the read-only summary and skills cards (export_edit_prototype_dark), so nothing shows that only bullets are editable.",
+   "title": "Bullet editor is a raw BasicTextField without an accessible name or edit affordance"
+  },
+  {
+   "severity": "low",
+   "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/edit/EditResumeViewModel.kt",
+   "line": 125,
+   "rule": "scale (plan: PDF render is CPU-bound, at most two fit passes per page size)",
+   "trigger": "Each keystroke updates drafts, and mapLatest calls renderer.pageCount, which builds up to two native PdfDocuments with StaticLayouts for the whole resume inside a non-cancellable withContext(Default). Typing 5 characters a second starts a new full layout while the earlier ones still run to completion, so several fit passes run at once on the Default pool on low-end devices. Debounce the drafts (or compute the fit only on pause) before the page count.",
+   "title": "Full PDF fit pass runs on every keystroke in Edit resume"
+  },
+  {
+   "severity": "low",
+   "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/exported/ExportedRoute.kt",
+   "line": 63,
+   "rule": "AGENTS.md debug build: opens any screen in a forced state; D44 walk",
+   "trigger": "Debug menu target Exported opens ExportedNavKey(sample-northwind-associate-analyst). The sample data set never sets changesAcceptedAt for that application (SampleDataSet / OfflineSampleDataController), so ExportResumeUseCase returns Refused and the route shows 'Accept the changes first' and goes back immediately. The debug Exported entry can no longer show the screen; before this PR it showed the placeholder.",
+   "title": "Debug Exported target now bounces because the sample application is never accepted"
+  }
+ ],
+ "reviewer_a_adjudication": [
+  {
+   "finding": "A1 ExportedViewModel.kt:75 export runs in init and appends an ExportRecord on every entry",
+   "decision": "confirmed, low",
+   "reason": "NavigationState uses rememberViewModelStoreNavEntryDecorator, so the ViewModel lives per back-stack entry. Tapping Export PDF again is a real user re-export (new file from current settings and edits), so a second record is correct there. The defect is the process-death restore of an Exported entry (rememberNavBackStack is saved): a new ViewModel exports again with no user action, adds a duplicate ExportRecord and bumps updatedAt, which the account archive lists. Cheap fix: skip the export when the latest ExportRecord for this application has the same file name and is newer than updatedAt, or make the export an explicit action from Tailored. Low stays right."
+  },
+  {
+   "finding": "A2 ExportDirectory.kt:11 previous exports deleted before the new file is written",
+   "decision": "confirmed and raised to medium (see my ExportDirectory finding)",
+   "reason": "The failure path A named is real, but the larger effect is on success: every export deletes every other application's PDF, and #280's Application detail file card (Share/Open) reads exportFileName, so it breaks for all but the latest export. Today only the Exported screen reads the file, and it always reads the new one."
+  },
+  {
+   "finding": "A3 ResumePdfFitTest.kt:104 line equality records input text, not drawn text",
+   "decision": "confirmed, low; accepted under D65 with a follow-up",
+   "reason": "ResumePdfComposer appends to drawn before writer.draw*, so clipped or undrawn text would still pass. D65 accepts this until the D44 walk extracts text from the exported PDF; the follow-up instrumented test must stay in the PR follow-ups."
+  }
+ ],
+ "integrate_notes": [
+  "git merge-tree origin/revamp/w4-base 0098cbfa: no textual conflicts.",
+  "Compile break on w4-base: TailorHiltTestBindings.kt:43-49 overrides ResumeTailor.tailor(..., section: EntryCategory?). On w4-base the parameter is answer: QuickAnswer? (D62 contract v2). Change the parameter and import, or the feature test source set will not compile.",
+  "Behaviour on w4-base: CreditLedgerKind gains REFUND and MIGRATION. ExportedViewModel.kt:158 has no exhaustive when, so it compiles, but REFUND or MIGRATION entries make the free/paid line wrong (see the medium finding).",
+  "TmrFitText is rewritten on w4-base (D47 WholeWordAutoSize, step 0.9). TmrFileCard uses it, so export_exported_*_narrow-337-font-200 baselines will probably need re-recording after the merge. 1x baselines are unaffected (no autosize at font scale 1). TmrSectionLabel only adds readAs semantics.",
+  "TailoringRunner and CreditsRepository.observeLedger: not touched by this diff; signatures are unchanged on w4-base (OfflineFirstCreditsRepository adds remote ledger merge only).",
+  "JobDescription.location (defaulted) and EditType.UNKNOWN on w4-base: no use in this diff that breaks."
+ ]
+}

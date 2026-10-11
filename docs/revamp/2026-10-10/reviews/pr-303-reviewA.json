@@ -1,0 +1,33 @@
+{
+ "head_sha": "efedc042506f50cc2d759837ba2755594c716cf0",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "261-c1", "status": "partial", "evidence": "No deleted symbol is referenced under app, feature, core, tools or .github (git grep -w per symbol; only docs/DESIGN_SYSTEM.md mentions them). The gradle jobs (core/feature/app unit, lint, assemble, screenshots) were still pending at review time, and delivery-gates-pregate is red."},
+  {"id": "261-c2", "status": "partial", "evidence": "No light symbols remain in core/designsystem/src/main. The issue's literal grep 'isSystemInDarkTheme\\|LightColors\\|Manrope\\|Archivo' core app feature still matches TmrThemeDarkOnlyTest.kt lines 26-32."},
+  {"id": "261-c3", "status": "met", "evidence": "TmrThemeDarkOnlyTest.themeProvidesDarkColorsAtSystemLightMode runs at qualifiers notnight and asserts TmrDarkColors and DarkColorScheme; on the red commit TmrTheme defaulted to isSystemInDarkTheme() so it fails there. LocalTmrDark/isDark have no remaining use."},
+  {"id": "261-c4", "status": "met", "evidence": "Both TTFs and both fonts-licenses/*-OFL.txt are deleted in the same commit; no OFL or fonts-licenses reference remains outside docs. typographyUsesDefaultFamily asserts FontFamily.Default (TmrFontFamilies.sans/display were Manrope/Archivo on the red base)."},
+  {"id": "261-c5", "status": "met", "evidence": "14 PNGs deleted; they belong to TmrComponentsScreenshotTest and TmrScreenLandscapeScreenshotTest, both deleted. No other module has baselines, so no surviving screen needs re-recording."},
+  {"id": "261-c6", "status": "met", "evidence": "Deleted components have no consumer in app or feature. Kept files (TmrScreen, TmrSheet, TmrBottomActionBar, TmrDivider, TmrIconButton, HeaderBackdrop and others) are retained; TmrScreen is used only by the debug menu."},
+  {"id": "261-c7", "status": "met", "evidence": "git diff base..head shows no change to theme/Motion.kt, component/TmrMotion.kt or theme/TmrMotionReducedTest.kt."},
+  {"id": "261-c8", "status": "unmet", "evidence": "No tools:ignore, baselines added or ungrounded comments in the diff, but delivery-gates-pregate fails on the head with ASSERT_REMOVED, so the CI gate is not green."}
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrPaletteContrastTest.kt",
+   "line": 1,
+   "rule": "261-c8 / CI gate: pregate ASSERT_REMOVED needs a justification under '## Pre-review gate' in the PR body",
+   "trigger": "delivery-gates-pregate fails on efedc042 with ASSERT_REMOVED for TmrA11ySemanticsTest (-5), TmrBoundaryContrastTest (-2), TmrDisabledButtonTest (-2), TmrPaletteContrastTest (-7) and TmrStatusBarIconsTest (-5). The PR body still lists these five files under '## Lead test replacements (pending)' with no path-prefixed line in the Pre-review gate section, so is_justified() fails and the PR cannot merge.",
+   "title": "PR body lacks Pre-review gate justifications for the five light-case test edits; pregate check is red"
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/theme/TmrThemeDarkOnlyTest.kt",
+   "line": 26,
+   "rule": "Issue #261 acceptance criterion 2: grep -rn 'isSystemInDarkTheme\\|LightColors\\|Manrope\\|Archivo' core app feature returns nothing",
+   "trigger": "Running the issue's grep on the head prints TmrThemeDarkOnlyTest.kt lines 26, 27, 30 and 32, because the banned-word list is written out as literals. The literal criterion therefore fails.",
+   "title": "Banned-symbol list in the test makes the issue's own grep non-empty",
+   "proof": "grep -rn 'isSystemInDarkTheme\\|LightColors\\|Manrope\\|Archivo' core app feature"
+  }
+ ]
+}

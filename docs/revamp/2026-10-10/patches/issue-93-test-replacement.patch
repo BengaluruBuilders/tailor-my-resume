@@ -1,0 +1,26 @@
+diff --git a/test/tailormyresume-resume-parse.test.ts b/test/tailormyresume-resume-parse.test.ts
+index 83ce5b5..4a27ca0 100644
+--- a/test/tailormyresume-resume-parse.test.ts
++++ b/test/tailormyresume-resume-parse.test.ts
+@@ -83,7 +83,8 @@ await test("a resume parses into refs, verbatim text and a deduplicated droppedS
+       title: "Data Operations Associate",
+       organization: "Saffron Retail",
+       startDate: "Jul 2024",
+-      endDate: "Present",
++      endDate: null,
++      current: true,
+       bullets: [
+         {
+           ref: "e1b1",
+@@ -295,8 +296,11 @@ await test("a field the schema does not list never reaches the answer", async ()
+     "entries",
+     "fullName",
+     "headline",
++    "links",
++    "location",
+     "phone",
+     "skills",
++    "summary",
+   ]);
+ });
+ 

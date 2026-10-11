@@ -1,0 +1,30 @@
+{
+  "head_sha": "cfd95c6c7d6328227c83026bc47e9ec87000300e",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "routes.ts drops both mounts and imports; unmatched paths reach server.ts app.notFound (404 NOT_FOUND). test/tailormyresume-deleted-routes.test.ts posts both paths with a valid consenting user and asserts 404 NOT_FOUND and 0 doGenerateCalls; on the base the same {} body would answer 400, so the test fails if the mounts are restored."},
+    {"id": "c2", "status": "met", "evidence": "prep-questions.ts and cover-letters.ts deleted with their prompts and schemas; grep of every tracked file outside the eval fixtures finds no prep-questions, cover-letters, prepQuestionsRoute, coverLettersRoute, prepInjectionReasons or cover-letter/prep ai_usage task names in src, scripts, docs or config. Only the deliberately kept COVER_LETTER/PREP_QUESTION report kinds (schema.ts:26-27, :182, drizzle 0005 check constraint) remain. Leftover cover-letter-only role branch in scripts is reported as a low finding."},
+    {"id": "c3", "status": "met", "evidence": "schema.ts reportItemKinds, the check constraint and migrations are untouched. New test 'export and deletion still cover prep and cover-letter reports' POSTs both kinds (201), asserts GET /me/export returns exactly COVER_LETTER and PREP_QUESTION, and DELETE /v1/me leaves 0 rows. No prep or cover table ever existed, so no row needs retention or migration; report rows keep the 180-day purge."},
+    {"id": "c4", "status": "met", "evidence": "run.ts drops the /cover-letters and /prep-questions calls, letterBodySchema, prepBodySchema and the prepInjectionReasons import; metrics.ts drops prepInjectionReasons; report.ts drops the prep injection sentence. npm run typecheck passes locally; test/tailormyresume-eval-metrics.test.ts and eval-fixtures tests pass (26/26)."},
+    {"id": "c5", "status": "met", "evidence": "PR body '## Pre-review gate' lists test/tailormyresume-prep-questions.test.ts and test/tailormyresume-cover-letters.test.ts with 'route deleted by #97', plus the eval-metrics test removal; delivery-gates-pregate passed on the head. The deleted files asserted only route-specific logic plus commonRouteTests (400/413/403/502/429/auth), which still runs for /analyses and /resume/parse; the sync deadline stays covered in resume-parse tests. No shared behaviour lost coverage."},
+    {"id": "c6", "status": "met", "evidence": "Validation (npm run check with Postgres) passed on cfd95c6 in CI; locally typecheck, lint, format:check and boundaries pass. Golden commit c5c52d3 only deletes the prep, cover-write and cover-repair keys; analysis, tailoring-generate and tailoring-repair values are byte-identical and their consumers (analyses and tailorings tests via prompt-golden.ts) are unchanged. Secret scan still pending at review time. Merge stays gated on tailor-my-resume#260, which is still open."}
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 278,
+      "rule": "c2 / rule 27: docs updated in the same PR must describe the code",
+      "trigger": "The rewritten sentence says factTexts appends the 'stated by the candidate' note 'for the seeded eval set'. At the head factTexts is called only by analyses.ts:101 (which filters stated ids out first) and scripts/tailormyresume-eval/run.ts:292 inside runGeneration, where it feeds sourcesOf for judging tailoring bullets; the seeded set never calls it. A reader would look for the note in the wrong place.",
+      "title": "architecture.md misstates where factTexts' stated-skill note is used after the cover-letter removal"
+    },
+    {
+      "severity": "low",
+      "file": "scripts/tailormyresume-eval/metrics.ts",
+      "line": 18,
+      "rule": "issue #97 scope: delete the features' code and tests",
+      "trigger": "OutputItem.role (OPENING|EVIDENCE|CLOSING) and the role branch in criticalReasons (line 33) existed only for cover-letter paragraphs; after run.ts lost its cover-letter judge call no caller passes role, so the branch is dead. test/tailormyresume-eval-metrics.test.ts:86 'cover-letter forbidden terms apply only to evidence...' still tests that dead path.",
+      "title": "Cover-letter-only role branch and its test remain in the eval metrics"
+    }
+  ]
+}

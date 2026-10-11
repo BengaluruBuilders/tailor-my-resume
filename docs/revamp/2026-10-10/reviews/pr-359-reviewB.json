@@ -1,0 +1,90 @@
+{
+  "head_sha": "07f299749bf7f088c89676b4ef6b935144c11e50",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "338-one-visible-balance-source",
+      "status": "met",
+      "evidence": "Settings (SettingsViewModel -> AccountCreditBalance.observeCredits -> CreditsRepository.observeKnownBalance), Credits, Paywall, delete preview (cachedCredits/unusedCredits), Applications pill, JobResult gate and Detail re-tailor gate all read CreditsRepository. creditLine/AccountCreditLine deleted. Grep of main sources at head: the only remaining reader of the gateway entitlement as a balance is CollectAccountDataUseCase -> AccountDataArchiveWriter freeCredits/purchasedCredits (data-export archive), the known gap D84 moves to a follow-up issue. Prod CreditsRepository = server snapshot (remote.ownsLedger); demo = Room ledger fed by FREE_GRANT (LedgerWelcomeCreditGrant), PURCHASE (PaywallViewModel.record) and SPEND (TailoringRunner). AccountCreditBalanceSourceTest pins a stale gateway (5) against ledger (2) and fails on revert."
+    },
+    {
+      "id": "338-unknown-is-not-zero",
+      "status": "met",
+      "evidence": "OfflineFirstCreditsRepository.observeKnownBalance returns null in prod until a snapshot for the current owner arrives (NO_SNAPSHOT removed); account switch -> null. Settings/pill show a dash, Paywall 'Credits: -', JobResult 'Uses 1 credit', Credits hero a dash. KnownBalanceTest (unknown until snapshot, failed refresh keeps last known, other account starts unknown, local ledger always known) and OneBalanceApplicationsTest.anUnknownBalanceShowsADashNotZeroCredits fail on revert. Delete-sheet unknown copy is true but ungrammatical (finding 2)."
+    },
+    {
+      "id": "338-one-test-renders-four-screens-over-one-balance",
+      "status": "met",
+      "evidence": "OneBalanceAcrossScreensTest renders Settings, Credits, Paywall and the delete sheet over one TestCreditsRepository (1 + 15 - 3) with a deliberately stale gateway (5) and asserts 13 on all four. It is flavour-agnostic because every reader goes through the CreditsRepository interface; the prod-specific repository semantics are covered by KnownBalanceTest. Fails on revert (Settings/delete would show 5)."
+    },
+    {
+      "id": "351-free-first-resume-demo",
+      "status": "partial",
+      "evidence": "OfflineSignInGateway.signIn -> LedgerWelcomeCreditGrant.grantOnce (Hilt @Singleton, Mutex, ledger check for any FREE_GRANT). Re-sign-in: sign-out does not clear the Room ledger (OfflineSignInGateway.signOut, D59), so no second grant. Spend then re-sign-in: FREE_GRANT row remains, no regrant. Two quick sign-ins: mutex serialises the read-then-insert in one process; the Room insert completes before unlock, so the second call sees the row (no concurrency test, sequential only). Process death: grant is persisted in Room; but a death between saveAccount and grantOnce leaves a signed-in user without a grant and no retry path (finding 4). After delete: DeleteAccountUseCase clears the ledger and the gateway (closed=true -> next signIn removes PAYMENT_STATE_KEY), so the next account gets exactly one grant (WelcomeCreditGrantTest.aClearedLedgerGrantsAgainForTheNextAccount). Farming: sign-out/sign-in cannot farm. Latent only: DeleteMyDataUseCase.removeForApplication would delete the SPEND row and refund the grant, but the use case has no caller at head (not filed). DemoWelcomeGrantSeamTest pins the demo binding."
+    },
+    {
+      "id": "351-free-first-resume-prod",
+      "status": "met",
+      "evidence": "apps-backend main aa044e7 wallet.ts ensureWallet inserts the wallet row with freeCredits = startingFreeCredits (1) using onConflictDoNothing keyed by userId, called from getWallet, tailoring creditCheck and export: one grant per wallet, never re-granted on sign-out/sign-in. Prod gate now reads the server snapshot (1) instead of NO_SNAPSHOT 0, so a new prod user sees 'Uses 1 credit - you have 1' once the wallet refresh lands (AppViewModel.refreshWallet on account change); an unknown balance refreshes first. Note (pre-existing, not filed): the server also allows dailyFreeTailorings = 1 at zero balance, which the client gate blocks on a known 0."
+    },
+    {
+      "id": "D84-unknown-after-refresh-proceeds-only-if-NO_CREDIT-routes-to-paywall",
+      "status": "unmet",
+      "evidence": "Traced prod: RemoteResumeTailor.start -> api.startTailoring -> 402/NO_CREDIT (tailoring.ts creditCheck line 152) -> ApiError.NoCredit -> AiFailure.NoCredit (AiFailureMapping) -> AiException -> TailoringRunner catch -> TailoringResult.Failure -> TailoringViewModel TailoringOutcome.Failed -> TailoringRoute.onFailed -> TailorFailedNavKey ('Tailoring didn't finish / Something went wrong on our side. Your credit wasn't used.', Retry reuses the runId and hits NO_CREDIT again). No path checks AiFailure.NoCredit. Not a charge: the server throws before any work and the client records SPEND only on success (TailoringCreditSpend.forSuccess; prod record is a refresh). D84's condition is not met, so its fallback applies (finding 1). Tests JobResultFreeFirstResumeTest.aBalanceThatStaysUnknownNeverOpensThePaywall and RetailorUnknownBalanceTest.aBalanceThatStaysUnknownLetsTheServerDecideInsteadOfOpeningThePaywall encode the rejected behaviour."
+    },
+    {
+      "id": "delete-clearUnusedCredits-both-flavours",
+      "status": "met",
+      "evidence": "AccountCreditBalance keeps PaymentGateway only for clearUnusedCredits. Demo: OfflinePaymentGateway.clearCredits saves PaymentState(0, closed=true) and DeleteAccountUseCase then calls creditsRepository.clear() (ledger wiped), so neither store keeps credits. Prod: RemotePaymentGateway.clearCredits clears the local wallet cache after the server delete; CreditsRepository.clear drops the snapshot. invoke() now calls balanceAfterRefreshIfUnknown before the server delete; refreshConfirmed swallows non-cancellation failures (returns false), so an offline wallet yields null counts, not a crash. The unknown delete copy is truthful (the server wallet is deleted with the account) but reads 'Your any unused credits will be lost.' (finding 2)."
+    },
+    {
+      "id": "sample-data-ledger-consistency",
+      "status": "met",
+      "evidence": "OfflineSampleDataController.reset clears store (gateway) and ledger; load records FREE_GRANT 1 + PURCHASE 5 (pack credits from MockPackCatalogue) and one SPEND per export only when gateway unlock returned Spent with a kind, mirroring the gateway. signInSampleCandidate writes the session directly, not via OfflineSignInGateway, so no second FREE_GRANT. SampleDataLedgerTest asserts ledger == gateway after one and two loads."
+    },
+    {
+      "id": "D84-existing-test-rewrites",
+      "status": "met",
+      "evidence": "AccountCreditBalanceCachedTest: 'never calls entitlement' -> 'never refreshes' keeps the protected property (cached read does no network) on the new source; second test adds a stale gateway 9 vs ledger 2 (stronger). Replacement. AccountCreditBalanceTest: free 3 and free+purchased 5 rewritten as FREE_GRANT 3 and FREE_GRANT 1 + PURCHASE 4; same property on the ledger; clear tests call-site only. Replacement. DeleteAccountUseCasePreviewTest: preview-without-wallet now uses gateway 9 vs ledger 4 (stronger); 'fresh entitlement' -> 'refreshes an unknown balance first' (same intent, new source); 'falls back to cached when the wallet fails' -> 'keeps the known balance' - the gateway try/catch fallback no longer exists; cached-first is pinned here and the failed-refresh/no-crash property moved to KnownBalanceTest.aFailedRefreshKeepsTheLastKnownBalance and aServerBalanceIsUnknownNotZeroUntilASnapshotArrives (real repository, IOException). Replacement, not weakening. DeleteAccountUseCaseTest: unreachable-wallet -> 3 encoded the gateway observed entitlement as the balance (the D71 defect); now unknown -> null. The name 'InsteadOfCrashing' over-claims since preview() never refreshes, but the crash path is covered at the repository layer above. Replacement. SettingsViewModelTest (2): spends via ledger instead of gateway.unlock, and Settings and the delete sheet now share one CreditsRepository; both still fail if either reads the gateway. Replacement. Remaining edits (7 DeleteAccount*Test, fixtures, JobResultScreenshotTest checkNotNull) are call-site only."
+    },
+    {
+      "id": "hygiene",
+      "status": "met",
+      "evidence": "No !! and no comments in changed files; no new SharingStarted in added lines (existing WhileSubscribed(5_000) untouched). OfflineSampleDataController credits is a nullable default param (style, not filed)."
+    },
+    {
+      "id": "ci",
+      "status": "partial",
+      "evidence": "gh pr checks 359 (run 38118192138, pull_request event, not a PR-edit run): Core/Feature/App unit tests, Lint, Static checks, Constitution policy, delivery-gates-pregate pass; Screenshot tests and Assemble APKs still pending at review time. PR body reports verify-local green."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "feature/analysis/impl/src/main/kotlin/com/tailormyresume/feature/analysis/impl/result/JobResultViewModel.kt",
+      "line": 53,
+      "rule": "D84: unknown-after-refresh may proceed only if a server NO_CREDIT routes to the Paywall; else the gate shows \"Couldn't check your credits. Try again.\" and stays",
+      "trigger": "Prod, user with 0 credits and today's free tailoring used; no snapshot yet (cold start, account switch) and the wallet refresh fails (GET /wallet timeout or 5xx, or offline) -> balanceAfterRefreshIfUnknown returns null -> JobResult (and ApplicationDetailViewModel.onRetailor line 93) emits Tailor/StartTailoring -> server start returns NO_CREDIT (402) -> AiFailure.NoCredit is swallowed by TailoringRunner into TailoringResult.Failure -> TailorFailed screen 'Something went wrong on our side. Your credit wasn't used.'; Try again repeats NO_CREDIT; the user is never offered the Paywall. No charge occurs. Offline the same gate sends the user through the tailoring animation into a generic failure instead of the D84 copy.",
+      "title": "Unknown balance proceeds to tailoring although a server NO_CREDIT lands on the generic failure screen, not the Paywall",
+      "proof": "JobResultFreeFirstResumeTest: credits.sendUnknown() (no revealOnRefresh); onTailor(); assert no Tailor event and the state shows \"Couldn't check your credits. Try again.\" - fails at head (emits Tailor). Same in RetailorUnknownBalanceTest for StartTailoring. Alternatively, a TailoringViewModel test where the runner fails with AiException(AiFailure.NoCredit) and the outcome routes to the Paywall - fails at head (TailoringOutcome.Failed)."
+    },
+    {
+      "severity": "low",
+      "file": "feature/settings/impl/src/main/kotlin/com/tailormyresume/feature/settings/impl/delete/DeleteAccountSheet.kt",
+      "line": 89,
+      "rule": "#338 unknown state copy; Constitution truthful, readable copy",
+      "trigger": "Prod, delete sheet opened with no wallet snapshot and the refreshed preview still unknown (offline) -> feature_settings_impl_delete_body 'Your %2$s will be lost.' with %2$s = 'any unused credits' renders 'Your any unused credits will be lost.'",
+      "title": "Unknown-credits delete copy reads \"Your any unused credits will be lost.\"",
+      "proof": "DeleteAccountSheetContent with unusedCredits = null; onNodeWithText(\"Your any unused credits\", substring = true).assertDoesNotExist() fails at head. Fix: make the unknown argument fit the sentence (e.g. a separate body string 'Any unused credits will be lost.')."
+    },
+    {
+      "severity": "low",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/offline/OfflineSignInGateway.kt",
+      "line": 45,
+      "rule": "#351 free first resume survives process death",
+      "trigger": "Demo: process killed after sessionRepository.saveAccount(account) persisted and before welcomeGrant.grantOnce() inserted the FREE_GRANT -> on relaunch the user is signed in, onboarding continues past sign-in, nothing calls grantOnce again -> balance 0, JobResult shows 'No credits left' and Tailor opens the Paywall (the #351 symptom) until a later sign-out/sign-in.",
+      "title": "Demo grant is not re-attempted if the process dies between saving the account and recording the grant",
+      "proof": "Unit test with a SessionRepository that persists and a WelcomeCreditGrant that throws on first call (simulated death): after signIn fails, a fresh gateway/app-start path must leave balance 1 - fails at head (0). Smallest fix: grant before saveAccount (grantOnce is idempotent)."
+    }
+  ]
+}

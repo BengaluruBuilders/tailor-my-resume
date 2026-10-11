@@ -1,0 +1,63 @@
+{
+  "head_sha": "e84f8751908f54dd2ea38743a24dea2a33dec0d4",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "c1",
+      "status": "partial",
+      "evidence": "docs/architecture.md:272-283 lists every route mounted in src/apps/tailormyresume/routes.ts:57-160 (wallet, credits, packs, unlock compat, resume/parse, analyses, job-imports, tailorings + GET, purchases, content-reports, me/export) with body limits and status codes that match the handlers and src/core/errors.ts:44-69; removed routes (prep, cover, free daily tailoring, unlock spend) are listed as not mounted, and the credit rule (packs 5/15/40 config.ts:23-27, 1 credit per success wallet.ts:159-176 / tailoring.ts:163-209, reservation tailoring.ts:99-131, 20 analyses/day config.ts:3) is correct. The consent gate is still described because #87 is not merged, which matches the code. Partial because the wallet bullet names the wrong set of deprecated fields (finding 1) and line 283 overstates the report-kind removal (finding 2)."
+    },
+    {
+      "id": "c2",
+      "status": "partial",
+      "evidence": "docs/compliance.md:60 states ledger columns, retention until account deletion (schema.ts:223-237 cascade, no purge in purge.ts) and the export under credits without purchaseId/tailoringId (export.ts credits map, ledger.ts:38-45); compliance.md:61 states job imports keep nothing and log only failure and host class (job-imports.ts:65-73, claim key randomUUID at :724). The consent-removal and withdrawal rewrite are deferred to #87, correctly, because aiConsentGate (routes.ts:127) and requireAiConsent in sync-ai.ts:48 are still merged; compliance.md:46-54 records this and the DPDP section 9 owner checklist item."
+    },
+    {
+      "id": "c3",
+      "status": "met",
+      "evidence": "Route names and methods in architecture.md:273-282 match routes.ts:57-160 and the sub-routers; codes match: unlock 400 for non-empty body or bad id (routes.ts:88-99), tailorings 202/200/402/403/429 Retry-After 10 and GET Retry-After 2 (routes.ts:124-157, tailoring.ts:128-130,324,357), analyses 409/422/429 (analyses.ts:299-346), job-imports 400/422/429 (job-imports.ts:701-735), rate limits 300/60/6000 (index.ts:278, apps.ts:94-95, server.ts:104-132)."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "docs/architecture.md",
+      "line": 273,
+      "rule": "c1: wallet with the deprecated fields as in contract v2; every statement supported by its cited source",
+      "trigger": "The bullet says analysesLeftToday, freeTailoringsLeftToday, day, resetsAt and unlockedApplicationIds are deprecated compatibility fields (contract v2, section 1). Contract v2 section 1 (hirehop revamp/285-contract-v2 docs/BACKEND_CONTRACT.md, Compatibility fields) deprecates only freeTailoringsLeftToday and unlockedApplicationIds; section 3 Wallet keeps analysesLeftToday, day and resetsAt as live fields (cap 20, the TailorMyResume day). A reader following this page would stop reading analysesLeftToday, the only server source for the daily analysis allowance.",
+      "title": "Wallet bullet marks the live fields analysesLeftToday, day and resetsAt as deprecated"
+    },
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 283,
+      "rule": "c1/c3: statements must match the merged code",
+      "trigger": "The line says report kinds COVER_LETTER and PREP_QUESTION stay for old rows. reports.ts:13 still validates itemKind with z.enum(reportItemKinds), and schema.ts:29-35 includes both kinds, so POST /content-reports with itemKind COVER_LETTER or PREP_QUESTION still inserts a new row and answers 201. The kinds are accepted for new writes, not kept only for old rows.",
+      "title": "Removed-routes line says COVER_LETTER and PREP_QUESTION report kinds are only for old rows, but new reports still accept them"
+    },
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 287,
+      "rule": "No stale statement left in an edited bullet",
+      "trigger": "The PR edits this Wallet bullet but keeps that the unlock route answers 200 always. routes.ts:88-99 answer 400 INVALID_INPUT for a non-empty body or an id outside [A-Za-z0-9_-]{1,64}, and the PR's own route list at line 276 says so, so the two lines of the same page contradict each other.",
+      "title": "Wallet bullet still says unlock answers 200 always, contradicting line 276 and routes.ts"
+    },
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 296,
+      "rule": "No stale statement left (claim wording fixed in the Ceiling bullet but not here)",
+      "trigger": "The Pipeline bullet ends with a provider failure ending the job FAILED and releasing the claim. Tailorings take no claim: tailoring.ts begin() (:260-292) inserts only the tailoring row with credit_reserved, and finish() (:163-209) touches no claim; the PR itself changes line 307 to say tailorings take no claim. The two bullets now contradict each other.",
+      "title": "Pipeline bullet still says a failed tailoring releases the claim"
+    },
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 298,
+      "rule": "Job-import limits must match job-imports.ts",
+      "trigger": "The bullet says 4 imports run at once per process. job-imports.ts tryAcquire (:662-671) also refuses a user who already has an import running (runningUsers.has(userId)), so a second concurrent POST /job-imports from the same user answers 429 RATE_LIMITED with Retry-After 5 (:709-717) even when no other import runs. The one-per-user limit is missing from both this bullet and the route list at line 279.",
+      "title": "Job-import concurrency omits the one-import-per-user limit"
+    }
+  ]
+}

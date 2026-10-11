@@ -1,0 +1,57 @@
+{
+  "head_sha": "f8942df9bb50ba33450961c2e89a9ad8734f1ba5",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "260-c1", "status": "partial", "evidence": "CI on f8942df9: Core unit tests, Feature unit tests, Screenshot tests, Static checks and Constitution policy pass. App unit tests, Assemble APKs and Lint are still pending. delivery-gates-pregate fails (see 260-c13). The reviewer ran no Gradle build (read-only review, shared host)."},
+    {"id": "260-c2", "status": "met", "evidence": "PR body koverLog on the same host: core:domain 88.0086 -> 88.3082, core:data 81.717 -> 80.8967. Both are >= 80 and the bound is unchanged."},
+    {"id": "260-c3", "status": "met", "evidence": "git diff origin/revamp/w1-base...f8942df9 on *Fabrication*, *TailorResumeUseCase*, *UpdateBulletDecisionUseCase*, NumberClaims, ScaleClaims, OwnershipVerbs, EvidenceIndex, TokenSubset, AliasRewriter and the lexicons is empty."},
+    {"id": "260-c4", "status": "partial", "evidence": "git grep -E 'Consent|CoverLetter|PrepQuestion|Connectivity' over core, app and feature *.kt finds 2 hits: the test names signOut_removesLegacyConsentKey and clear_removesLegacyConsentKey in StoredSessionRepositoryTest.kt:34 and :44 (finding 4). There are no other hits."},
+    {"id": "260-c5", "status": "partial", "evidence": "Every listed symbol is gone with its fakes and contract tests, except UpgradedMatch.kt. The Builder kept it on purpose because RemoteJobAnalysisSource.rematch still calls it and RemoteAnalysisRematchTest covers the #193 gap-closing rule. The reviewer agrees with this deviation: deleting it would remove a live rule. The owner must decide on it. KeptJobDescription is kept."},
+    {"id": "260-c6", "status": "met", "evidence": "grep over feature/*/api/src/main finds only Analysis, ApplicationDetail, Applications, Credits, DeleteAccount, Exported, ImportResume, Profile, Settings, SignIn and Tailor NavKeys. No .kt file references any of the 15 deleted keys. TmrFirstRunRoot starts on DefaultSignInNavKey (TmrApp.kt:74). The debug preview starts on SignInNavKey()."},
+    {"id": "260-c7", "status": "met", "evidence": "ObserveStartDestinationUseCase.kt:18 returns Applications only if account != null && complete, otherwise SignIn. StoredSessionRepository.signOut removes session.account, so a signed-out user always gets SignIn. ObserveStartDestinationUseCaseTest covers no-account+complete, sign-out and clear. OnboardingStep.Consent and every consent read are gone."},
+    {"id": "260-c8", "status": "met", "evidence": "signOut and clear remove session.consent (StoredSessionRepository.kt:52-55), and two tests cover this. StoredApplicationCleanup.clearFor removes coverletter.<id> and prep.plan.<id> (ApplicationCleanup.kt:18-19); OfflineFirstApplicationRepositoryTest covers this, including the retry path. RoomLocalDataWiper.wipeAll is unchanged and LocalDataWiperTest covers it. The job-draft prep key that the scout state lists is no longer removed (finding 1)."},
+    {"id": "260-c9", "status": "met", "evidence": "AccountData, CollectAccountDataUseCase and AccountDataArchiveWriter lose only the consent, coverLetter and prepPlan sections. AccountDataArchiveWriterTest still asserts account, profile, entitlement, purchases, applications, notes and exports. The server.json part of the prod export is unchanged. Legacy on-device letters are now not exported (finding 2)."},
+    {"id": "260-c10", "status": "met", "evidence": "The body of RemoteServerAccountDeleter is byte-identical to the base and still sends DELETE /v1/me (RemoteAccountServerTest.deleteCallsDeleteMe). The okHttp client now has only AppIdInterceptor and AuthInterceptor; nothing was added. The recordConsent, prepQuestions and coverLetter Retrofit methods are deleted, so no call to them can compile. The PII test still checks the analysis and tailor bodies."},
+    {"id": "260-c11", "status": "met", "evidence": "No lint-baseline.xml or app/dependencies file changes. The Constitution policy CI job passes."},
+    {"id": "260-c12", "status": "met", "evidence": "git diff on core/database is empty."},
+    {"id": "260-c13", "status": "partial", "evidence": "delivery-gates-pregate fails with ASSERT_REMOVED errors for 8 lead-edited test files (DebugMenuViewModelTest, RemoteSignInGatewayTest, SignOutCleanerTest, AccountDataArchiveWriterTest, CollectAccountDataUseCaseTest, NextOnboardingStepUseCaseTest, and the 2 NavKeyPlaceholderEntryTest files). The PR body lists them under 'Lead test replacements (pending)' but not under '## Pre-review gate'. The body needs per-path justification lines. This is a PR body fix, not a code fix."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/DiscardJobDraftsUseCase.kt",
+      "line": 10,
+      "rule": "Scout state for #260 says 'prep.plan.<applicationId>: still removed on application delete and job-draft discard'. Privacy: Delete my data must remove the stored data.",
+      "trigger": "An install from main saved gap-analysis prep items under prep.plan.analysis-draft-<hash>: AnalysisViewModel on origin/main calls prepPlanRepository.add(ready.draftKey, ...) and draftKey = KeptJobDescription.draftKey. The user upgrades and taps Delete my data. DeleteMyDataUseCase.kt:29 calls discardJobDrafts(kept), which now clears only content reports. The draft key is not an application id, so StoredApplicationCleanup never matches it. The key stays in DataStore until a full account wipe. The plan's caller note ('legacy prep keys are removed on application delete') does not cover draft keys.",
+      "title": "Delete my data no longer removes the legacy prep plan stored under the job-draft key",
+      "proof": "DeleteMyDataUseCaseTest.clearsTheReportsOfTheKeptJobDescription: before useCase(), write store.write(\"prep.plan.${kept.draftKey}\", \"plan\") on a TestMockStateStore injected into DiscardJobDraftsUseCase, then assert store.read(...) is null. This test fails at the head. Fix: inject MockStateStore and call store.remove(\"prep.plan.${job.draftKey}\")."
+    },
+    {
+      "severity": "low",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/account/CollectAccountDataUseCase.kt",
+      "line": 20,
+      "rule": "Data export and minimisation: Download my data must export what the app stores, and the app must not keep data it can no longer show, use or export.",
+      "trigger": "On an install that wrote coverletter.<appId> (cover letter text built from candidate facts) or prep.plan.<appId> before this change, the user taps Download my data. The archive has no cover-letter or prep section, but the text is still in DataStore. It stays there through a same-account sign-out (SignOutCleanerExportFilesTest asserts this) and is removed only when that application is deleted or the account is wiped. session.consent also stays until sign-out. The scout accepted this retention, but the export now differs from what is stored.",
+      "title": "Legacy cover letters and prep plans stay on device but are no longer exported",
+      "proof": "Write coverletter.app-1 to the store, run CollectAccountDataUseCase plus the archive writer, and check: the letter text is absent from my-data.json while the store still holds it. Fix: run a one-time purge at app start (store.removeWithPrefix(\"coverletter.\"), store.removeWithPrefix(\"prep.plan.\"), remove session.consent and session.careerStage). This also closes finding 1."
+    },
+    {
+      "severity": "low",
+      "file": "core/data/src/main/kotlin/com/tailormyresume/core/data/repository/StoredSessionRepository.kt",
+      "line": 52,
+      "rule": "Constitution IV.1 and checklist item 5: surviving cleanup behaviour keeps a test that fails when it breaks.",
+      "trigger": "Remove LEGACY_CAREER_STAGE_KEY from signOut() or clear(). Every test still passes, because the career-stage contract tests and StoredSessionRepositoryCareerStageTest are deleted and the replacement tests write only session.consent. A stale session.careerStage value would then stay on the device after sign-out or a reset.",
+      "title": "Removal of the legacy session.careerStage key on sign-out and clear has no test",
+      "proof": "StoredSessionRepositoryTest: write session.careerStage=\"STUDENT\", call signOut() (and clear()), and assert store.read(\"session.careerStage\") is null."
+    },
+    {
+      "severity": "low",
+      "file": "core/data/src/test/kotlin/com/tailormyresume/core/data/repository/StoredSessionRepositoryTest.kt",
+      "line": 34,
+      "rule": "260-c4: the grep for 'Consent|CoverLetter|PrepQuestion|Connectivity' over core, app and feature returns nothing except ContentReport kinds.",
+      "trigger": "git grep -nE 'Consent|CoverLetter|PrepQuestion|Connectivity' -- 'core/*.kt' 'app/*.kt' 'feature/*.kt' at f8942df9 returns StoredSessionRepositoryTest.kt:34 signOut_removesLegacyConsentKey and :44 clear_removesLegacyConsentKey, so the criterion as written fails.",
+      "title": "Two test names still match the c4 grep gate",
+      "proof": "Rename the tests to signOut_removesLegacySessionKeys and clear_removesLegacySessionKeys (and assert session.careerStage there as well, which also closes finding 3). The grep then returns nothing."
+    }
+  ]
+}

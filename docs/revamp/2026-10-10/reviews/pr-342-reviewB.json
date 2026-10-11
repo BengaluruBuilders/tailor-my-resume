@@ -1,0 +1,95 @@
+{
+ "head_sha": "ebff787acf633b926514ae71cc81df7ec427f662",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "275-c1",
+   "status": "met",
+   "evidence": "ReviewScreen/ReviewMapper draw every prototype review string (Prototype.dc.html at 21ee644d, is.review block); ReviewScreenTest.needsFixStateShowsEveryPrototypeString scrolls to and asserts each string; ReviewScreenshotTest.needsFix90; ReviewMapperTest.freshProfileMapsToBannerOptionalRowAndAmberDates."
+  },
+  {
+   "id": "275-c2",
+   "status": "met",
+   "evidence": "canContinue = gap == null from RequiredGaps.of; uiState is stateIn(WhileSubscribed(5_000)) of observeProfile (II.2); ReviewViewModelTest.fixedProfileShowsDoneBannerEnabledCtaAnd96And100WithLinkedin and stateRecomputesWhenTheProfileChanges; fixed96 and linkedinAdded100 baselines."
+  },
+  {
+   "id": "275-c3",
+   "status": "met",
+   "evidence": "TmrPrimaryButton onDisabledClick = onContinue; MarkProfileReviewedUseCase re-reads the saved profile and returns RequiredInfoMissing before any write; VM maps it to MissingEndDate and the Route shows the toast. MarkProfileReviewedUseCaseTest.refusesWithRequiredGapAndLeavesProfileUntouched, ReviewViewModelTest.continueRefusedWithRequiredGapSavesNothingAndToasts (saves == 0), ReviewScreenTest.tappingDisabledContinueShowsToast."
+  },
+  {
+   "id": "275-c4",
+   "status": "met",
+   "evidence": "ReviewRoute maps Add date to EditRoleNavKey(gap entryId), LinkedIn and Contact to EditContactNavKey, Experience to ExperienceNavKey, Skills to SkillsNavKey; Education card has onClick = null. ReviewRouteNavigationTest covers each, including educationCardIsNotTappable."
+  },
+  {
+   "id": "275-c5",
+   "status": "met",
+   "evidence": "reviewedAt = clock.now() from the injected kotlin.time.Clock (DataModule provides Clock.System); AtomicBoolean single-flight (doubleTapContinuesOnce holds the save on a gate, saves == 1); Navigator.navigate ignores a key equal to the top, so a tap after the latch resets cannot stack two JobNavKey. Save failure now emits SaveFailed and the Route toasts 'Couldn't save. Try again.' (saveFailureEmitsSaveFailedAndContinueWorksAgain). NothingToReview replaces with Upload (emptyProfileReplacesWithUpload)."
+  },
+  {
+   "id": "275-c6",
+   "status": "met",
+   "evidence": "reviewDates: blank start -> None, blank end -> EndMissing, 'Present' (ignore case) -> Current ('<start> – Now'); private PRESENT const per D74. ReviewMapperTest.presentEndDateReadsNowAndIsNotAGap, roleWithoutStartDateShowsNoDates."
+  },
+  {
+   "id": "275-c7",
+   "status": "partial",
+   "evidence": "Fix commit ebff787a moves Contact name/email/phone, role title/organisation, education and chips to TmrFitText (D40/D47 whole-word auto-size, email breaks after @ and .); ReviewLayoutTest.contactRoleAndChipTextNeverBreakInsideAWordAtFontScale2 proves it with 30+ character words, and the @GraphicsMode(NATIVE) and useUnmergedTree changes make the check measure real text on the exact node (stronger, see report). The Required banner message 'End date missing for <title>' is still a plain Text, so a long word in the gapped role title breaks inside the word at font 2.0 (finding 2)."
+  },
+  {
+   "id": "275-c8",
+   "status": "partial",
+   "evidence": "PR body reports verify-local green apart from OnboardingEntryKeysTest, which the lead deleted (79088176, D55). gh pr checks 342: 'no checks reported' at ebff787a, because GitHub reports the PR as CONFLICTING with revamp/274-upload, so CI has not run on the reviewed head (finding 1)."
+  },
+  {
+   "id": "275-c9",
+   "status": "met",
+   "evidence": "CONFIRMED_ON_REVIEW = EXPERIENCE, EDUCATION; other categories unchanged (confirmsOnlyExperienceAndEducation, achievementsStayUnconfirmed); latest profile read at tap (keepsEditsSavedAfterTheScreenState in use case and VM); opening Review writes nothing (openingReviewWritesNothingAndConfirmsNothing). Consistent with #341 D78: the list editors are the confirm path for achievements. Residual: bullets of a confirmed role are not drawn (Reviewer A finding 2, upheld as low, D74)."
+  },
+  {
+   "id": "275-c10",
+   "status": "met",
+   "evidence": "Use case only copies isConfirmed and reviewedAt; no FactIdAllocator; entryAndBulletIdsUnchanged compares entries and the rest of the profile field by field."
+  },
+  {
+   "id": "275-c11",
+   "status": "met",
+   "evidence": "core:model logicalEntries/countLogicalEntries (same index-0-or-not-continues rule as the removed countRoles) used by ReadingViewModel.doneRows and ReviewMapper; CountLogicalEntriesTest, ReviewMapperTest.splitRoleShowsOneRowAndCountsOnce."
+  },
+  {
+   "id": "275-c12",
+   "status": "met",
+   "evidence": "SaveManualProfileUseCase.isManualRole now matches ManualProfileViewModel.isManualRole (blank start and end); the use case still writes only name/email/phone/city of the identity block, as before, so D73/D77 are not changed here (contactUserStated lands at #335 integrate). doesNotReplaceARoleThatHasDatesEvenIfUserStated, stillReplacesTheUntouchedManualRole."
+  },
+  {
+   "id": "275-c13",
+   "status": "met",
+   "evidence": "OnboardingRealEntryHiltTest renders the real entry<ReviewProfileNavKey> with hiltViewModel over the real repository, taps 'Add your LinkedIn' (EditContactNavKey on the stack) and 'Looks right, continue' (JobNavKey, reviewedAt persisted). Real Clock instead of a fixed one is disclosed; the assertion is non-null only, so it is deterministic."
+  },
+  {
+   "id": "275-c14",
+   "status": "met",
+   "evidence": "linkedinAdded100 baseline; skillsOverFiveShowPlusN, skillsAtOrUnderFiveShowNoPill, manualProfileMapsWithoutEmptyCards."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/reading/ReadingViewModel.kt",
+   "line": 151,
+   "rule": "Cross-lane merge with the moving base; VI.1 green CI; D80 integrate procedure",
+   "trigger": "git merge-tree --write-tree origin/revamp/274-upload (53d4d88d) ebff787a reports CONFLICT (content) in ReadingViewModel.kt: base commit 53d4d88d changes the import and the Contact row to personNameOrNull (lines 9 and 150), the lane removes the ProfileEntry/continues imports and countRoles for countLogicalEntries on the adjacent lines (10-13, 151-154). GitHub shows mergeable=CONFLICTING and gh pr checks reports no checks at ebff787a, so no CI has run on the reviewed head. Under D80, merging origin/main -X ours after #333 lands would keep the head's looksLikeName line and revert base code, so git diff origin/main HEAD would not equal the reviewed diff and the train would stop.",
+   "title": "Branch still conflicts with revamp/274-upload tip 53d4d88d; CI has not run on the head"
+  },
+  {
+   "severity": "low",
+   "file": "feature/onboarding/impl/src/main/kotlin/com/tailormyresume/feature/onboarding/impl/review/ReviewScreen.kt",
+   "line": 236,
+   "rule": "D40/D47 labels never break inside a word; 275-c7",
+   "trigger": "At 337dp and font scale 2.0 the banner text is plain Text at 14sp x2 = 28sp in a ~277dp column (309dp card minus 2x16 padding). A gapped role titled 'Telecommunications Engineer' or 'Pharmacovigilance Associate' (17-18 letter words) or the test's own 'Subcontinentalpartnershipmanager' with a blank end date gives 'End date missing for <title>', whose long word does not fit on one line and breaks inside the word, while RoleRow draws the same title whole through TmrFitText.",
+   "title": "Required banner message still breaks a long role-title word inside the word at font 2.0",
+   "proof": "ReviewLayoutTest: fixedReviewProfile().withEntries(importedRole(\"r1\", title = \"Subcontinentalpartnershipmanager\", endDate = \"\")) at NARROW_DEVICE font scale, then assertLinesEndAtWordBoundaries(\"End date missing for Subcontinentalpartnershipmanager\") fails today; TmrFitText for that Text makes it pass."
+  }
+ ]
+}

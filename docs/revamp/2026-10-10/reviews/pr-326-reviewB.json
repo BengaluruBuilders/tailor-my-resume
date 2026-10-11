@@ -1,0 +1,64 @@
+{
+  "head_sha": "b215a02ce41ff522bfb302cb6072ed1f5c4e538b",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "283-c1", "status": "met", "evidence": "SettingsScreen.kt renders Account (email from observeAccount, 'Signed in with Google', Credits & purchases N left -> navigateToCredits), Resume, Notifications (Product updates only), Privacy & help and the versionName footer read from PackageManager in SettingsRoute.kt; SettingsScreenTest and the settings_default baselines cover it."},
+    {"id": "283-c2", "status": "met", "evidence": "SettingsViewModel.onPageSizeClicked/onFileNameClicked/onProductUpdatesToggled update one field each through ResumeSettingsRepository.update; state is derived from observeSettings (DataStore). SettingsViewModelTest and SettingsRealEntryWiringTest.pageSizeRow_flipsTheStoredSetting prove it."},
+    {"id": "283-c3", "status": "met", "evidence": "Single-flight onDownloadMyData -> ExportAccountDataUseCase -> Offline/RemoteAccountDataExporter write cacheDir/data-exports/tailormyresume-my-data.zip (temp + rename, off-main). SettingsFileProvider is exported=false with a single cache-path data-exports/ root; the ACTION_SEND carries only FLAG_GRANT_READ_URI_PERMISSION for that one URI. The toast makes no email promise. Nothing is logged. Retention is until sign-out/delete only (see the low finding)."},
+    {"id": "283-c4", "status": "met", "evidence": "SupportMail.kt: a blank address returns null and the route shows 'Address not set in this build'; otherwise ACTION_SENDTO mailto:, and ActivityNotFoundException gives the same toast. SupportMailTest covers it."},
+    {"id": "283-c5", "status": "met", "evidence": "onSignOut runs SignInGateway.signOut and PendingToast.set inside withContext(NonCancellable) and is single-flight. In prod, RemoteSignInGateway.signOut saves lastAccountId, removes the account and runs SignOutCleaner (credits cache, analysis, report queue, tailoring.request.*, exports and data-exports). Room data is kept for the same account (D59); a different-account signIn runs cleaner.clear plus LocalDataWiper.wipeAll before saveAccount. The #315 gate re-roots on observeAccount. TmrAppRootTest.signedOutToastShowsInNewRoot proves the toast."},
+    {"id": "283-c6", "status": "met", "evidence": "DeleteAccountSheetContent shows sad Paige, the title and a body with resume/credit plurals from DeleteAccountUseCase.preview(); Delete account is disabled until the text matches. DeleteAccountViewModelTest.sheetShowsCounts_pluralised, DeleteAccountSheetTest.bodyPluralisesCounts and the settings_delete_sheet_empty baselines cover it."},
+    {"id": "283-c7", "status": "met", "evidence": "matchesDeleteConfirmation = trim + equals(\"DELETE\", ignoreCase = true) per D59(1). The ViewModel re-checks it in onDelete, so the UI gate is not the only gate. DeleteConfirmationTest and deleteRefusedUntilDelete cover it."},
+    {"id": "283-c8", "status": "met", "evidence": "onDelete: confirmation check, compareAndSet single-flight, then DeleteAccountUseCase in NonCancellable (prod: markRequested, DELETE /v1/me -> 202 per apps-backend src/core/accounts/routes.ts:91-98, markServerClosed, then the profile/applications/artefacts/credit_ledger/resume settings/session/exports wipe, then pendingWipe.clear). Deleted queues PendingToast inside the NonCancellable block. Failed and LocalWipePending re-enable the button with one toast. Demo binds OfflineServerAccountDeleter (I.5). A retry adopts REQUESTED only; see the low marker finding."},
+    {"id": "283-c9", "status": "partial", "evidence": "Keep my account and scrim/back dismiss without a use-case call when idle (keepMyAccountDismissesWithoutDelete, scrimTapDismissesWithoutDelete). Keep stays enabled during an in-flight delete, and the delete then completes anyway (medium finding)."},
+    {"id": "283-c10", "status": "met", "evidence": "The sheet is a verticalScroll column with imePadding and a BringIntoViewRequester on focus. Six baselines include 337dp / font 2.0. The D44 real-keyboard walk is still pending per the PR body."},
+    {"id": "283-c11", "status": "met", "evidence": "The PR body reports tools/ci/verify-local.sh and the constitution check (BASE_REF=origin/revamp/272-session-gate) passing on the head. The reviewer did not re-run them (read-only review). SKIP_ADDED in SettingsFixture.kt:36 is File.createTempFile(...).deleteOnExit() in GatedExporter, not a skipped test: the diff adds no @Ignore, assume or @Disabled. The Hilt test setup is test-only (testImplementation hilt-android-testing, kspTest), per D57."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "feature/settings/impl/src/main/kotlin/com/tailormyresume/feature/settings/impl/delete/DeleteAccountSheet.kt",
+      "line": 107,
+      "rule": "283-c9 (Keep my account / tap outside -> nothing is deleted); destructive-action affordance",
+      "trigger": "Type DELETE, tap Delete account (prod, slow DELETE /v1/me), then tap 'Keep my account', scrim or back while the request is in flight. The sheet closes (onKeep = sheetHost::dismiss, never disabled; TmrBottomSheet onDismiss unconditional) and onSheetClosed only clears the text. The NonCancellable use case carries on, deletes the server account and local data, and re-roots to Sign in with 'Account deleted'. The user explicitly chose Keep, and the account is deleted anyway.",
+      "title": "'Keep my account' and dismiss stay active during an in-flight delete; the account is still deleted",
+      "proof": "DeleteAccountSheetTest: RecordingServerAccountDeleter(gate = CompletableDeferred()), type DELETE, tap Delete account, assert 'Keep my account' is not enabled (or that tapping it keeps the sheet). It fails today because the button is enabled and remainingApplications() becomes 0 after gate.complete()."
+    },
+    {
+      "severity": "low",
+      "file": "feature/settings/impl/src/main/kotlin/com/tailormyresume/feature/settings/impl/delete/DeleteAccountViewModel.kt",
+      "line": 94,
+      "rule": "D59(3) one toast on a failed delete; dismissing mid-delete must be safe",
+      "trigger": "Tap Delete account, dismiss the sheet before the result arrives, and the delete then fails (offline, IOException). DeleteFailed goes into a BUFFERED Channel that only the sheet's LaunchedEffect collects. No feedback shows at failure time. Later, when the user reopens the sheet (Settings entry still alive), 'Couldn't delete your account. Try again.' fires at once for a stale attempt.",
+      "title": "Delete failure after mid-delete dismissal is silent, then replayed as a stale toast on the next sheet open",
+      "proof": "DeleteAccountViewModelTest: gated failing deleter, onDelete, onSheetClosed, release the gate, then start collecting events. A DeleteFailed item arrives although no attempt is in flight."
+    },
+    {
+      "severity": "low",
+      "file": "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt",
+      "line": 163,
+      "rule": "D59(4) PendingToast carries 'Signed out'/'Account deleted' across the key(accountId) re-root",
+      "trigger": "PendingToast.set runs after SignInGateway.signOut / DeleteAccountUseCase return, and the re-root needs AppViewModel to observe the account removal, run observeStartDestination().first() (2 DataStore reads plus a Room query) and recompose. If the gateway tail (demo: 3 DataStore removes plus a cache delete) finishes first, the OLD account root's TmrShell recomposes on PendingToast.queued, consumes the message into its own toastState, and key(null) then disposes that shell, so the toast is lost. TmrAppRootTest.accountDeletedToastShowsInNewRoot applies set() and the root swap in the same frame, so it never covers this order. Effect is a lost confirmation toast only, with no data exposure.",
+      "title": "PendingToast can be consumed by the outgoing account root's shell and lost",
+      "proof": "TmrAppRootTest: show account-1 root, PendingToast.set(...), rule.waitForIdle() (old shell recomposes), then ready = Ready(SignIn, null), waitForIdle, then onNodeWithText(\"Account deleted\").assertIsDisplayed(). It fails today."
+    },
+    {
+      "severity": "low",
+      "file": "feature/settings/impl/src/main/kotlin/com/tailormyresume/feature/settings/impl/settings/SettingsViewModel.kt",
+      "line": 92,
+      "rule": "Security review: exported archive lifetime (archive deleted after share or on next start)",
+      "trigger": "Tap Download my data and share. cacheDir/data-exports/tailormyresume-my-data.zip (full profile, applications, ledger, server.json) stays on disk until sign-out or delete (CacheExportedFiles.deleteAll). Nothing removes it after the share or at the next app start. The fixed file name means a share target whose read grant is still live re-reads any later export through the same content URI. The file is app-private and holds the same user's data, which matches the plan's c3 retention, so the impact is low.",
+      "title": "Data-export zip persists in cache indefinitely after sharing",
+      "proof": "SettingsRealEntryWiringTest.downloadMyDataRow_opensTheShareSheet: after the chooser starts and the activity is recreated or restarted, assert File(cacheDir, \"data-exports\").listFiles() is empty. It fails today."
+    },
+    {
+      "severity": "low",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCase.kt",
+      "line": 64,
+      "rule": "283-c8 'retry is safe: the use case adopts the REQUESTED marker'",
+      "trigger": "Prod: the server delete succeeds and markServerClosed runs, then a local wipe step throws and the finisher also fails, so the result is LocalWipePending with marker SERVER_CLOSED. The sheet re-enables Delete. If the user retries offline, hasEarlierRequestedAttempt() is false (state is not REQUESTED), and markRequested() (StoredPendingAccountWipe.kt:20-23 overwrites unconditionally) downgrades SERVER_CLOSED to REQUESTED. The offline delete gives settlePendingWipe -> isClosed fails -> STILL_PENDING. PendingWipeStartTask can no longer finish the local wipe offline: it needs a network isClosed() first. Once online it converges.",
+      "title": "Retry after LocalWipePending downgrades a SERVER_CLOSED marker to REQUESTED",
+      "proof": "DeleteAccountViewModelTest with TestPendingAccountWipe pre-set to SERVER_CLOSED and a deleter failing with IOException: onDelete, then assert pendingWipe.state() == SERVER_CLOSED. It is REQUESTED today."
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+diff --git a/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt b/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt
+deleted file mode 100644
+index 9a1eb3ba..00000000
+--- a/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt
++++ /dev/null
+@@ -1,127 +0,0 @@
+-package com.tailormyresume.app.ui
+-
+-import app.cash.turbine.test
+-import com.google.common.truth.Truth.assertThat
+-import com.tailormyresume.core.data.mock.NoMockLatency
+-import com.tailormyresume.core.domain.offline.OfflineSignInGateway
+-import com.tailormyresume.core.domain.onboarding.ObserveStartDestinationUseCase
+-import com.tailormyresume.core.model.SignInAccount
+-import com.tailormyresume.core.testing.mock.TestMockStateStore
+-import com.tailormyresume.core.testing.repository.TestProfileRepository
+-import com.tailormyresume.core.testing.repository.TestSessionRepository
+-import com.tailormyresume.core.testing.util.MainDispatcherRule
+-import kotlinx.coroutines.test.StandardTestDispatcher
+-import kotlinx.coroutines.test.runTest
+-import org.junit.Rule
+-import org.junit.Test
+-
+-class AppViewModelTest {
+-
+-    @get:Rule
+-    val mainDispatcherRule = MainDispatcherRule(StandardTestDispatcher())
+-
+-    private val sessionRepository = TestSessionRepository()
+-
+-    private fun viewModel() = AppViewModel(ObserveStartDestinationUseCase(sessionRepository, TestProfileRepository()))
+-
+-    @Test
+-    fun rootState_beforeAnyValueIsCollected_isLoading() {
+-        assertThat(viewModel().rootState.value).isEqualTo(AppRootState.Loading)
+-    }
+-
+-    @Test
+-    fun rootState_whenOnboardingIsNotComplete_isFirstRun() = runTest {
+-        viewModel().rootState.test {
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Loading)
+-            assertThat(awaitItem()).isEqualTo(AppRootState.FirstRun)
+-            cancelAndIgnoreRemainingEvents()
+-        }
+-    }
+-
+-    @Test
+-    fun rootState_whenOnboardingIsComplete_isMainWithoutShowingFirstRun() = runTest {
+-        sessionRepository.sendAccount(SignInAccount.localAccount)
+-        sessionRepository.sendOnboardingComplete(true)
+-
+-        viewModel().rootState.test {
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Loading)
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Main)
+-            cancelAndIgnoreRemainingEvents()
+-        }
+-    }
+-
+-    @Test
+-    fun rootState_followsTheOnboardingFlagInBothDirections() = runTest {
+-        viewModel().rootState.test {
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Loading)
+-            assertThat(awaitItem()).isEqualTo(AppRootState.FirstRun)
+-
+-            sessionRepository.saveAccount(SignInAccount.localAccount)
+-            sessionRepository.markOnboardingComplete()
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Main)
+-
+-            sessionRepository.signOut()
+-            assertThat(awaitItem()).isEqualTo(AppRootState.FirstRun)
+-
+-            sessionRepository.saveAccount(SignInAccount.localAccount)
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Main)
+-            cancelAndIgnoreRemainingEvents()
+-        }
+-    }
+-
+-    @Test
+-    fun rootState_afterOfflineGatewaySignOut_goesFromMainToFirstRun() = runTest {
+-        val gateway = OfflineSignInGateway(sessionRepository, NoMockLatency, TestMockStateStore())
+-        gateway.signIn()
+-        sessionRepository.markOnboardingComplete()
+-
+-        viewModel().rootState.test {
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Loading)
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Main)
+-
+-            gateway.signOut()
+-
+-            assertThat(awaitItem()).isEqualTo(AppRootState.FirstRun)
+-            cancelAndIgnoreRemainingEvents()
+-        }
+-    }
+-
+-    @Test
+-    fun rootState_signOutThenSameAccountSignIn_returnsToMainWithoutWipe() = runTest {
+-        val store = TestMockStateStore()
+-        store.write(LOCAL_DATA_KEY, LOCAL_DATA_VALUE)
+-        val gateway = OfflineSignInGateway(sessionRepository, NoMockLatency, store)
+-        gateway.signIn()
+-        sessionRepository.markOnboardingComplete()
+-
+-        viewModel().rootState.test {
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Loading)
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Main)
+-
+-            gateway.signOut()
+-            assertThat(awaitItem()).isEqualTo(AppRootState.FirstRun)
+-
+-            gateway.signIn()
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Main)
+-            cancelAndIgnoreRemainingEvents()
+-        }
+-        assertThat(store.read(LOCAL_DATA_KEY)).isEqualTo(LOCAL_DATA_VALUE)
+-    }
+-
+-    @Test
+-    fun rootState_whenSignedInWithoutCompletedOnboarding_isFirstRunNotMain() = runTest {
+-        sessionRepository.sendAccount(SignInAccount.localAccount)
+-        sessionRepository.sendOnboardingComplete(false)
+-
+-        viewModel().rootState.test {
+-            assertThat(awaitItem()).isEqualTo(AppRootState.Loading)
+-            assertThat(awaitItem()).isEqualTo(AppRootState.FirstRun)
+-            cancelAndIgnoreRemainingEvents()
+-        }
+-    }
+-
+-    private companion object {
+-        const val LOCAL_DATA_KEY = "applications.kept"
+-        const val LOCAL_DATA_VALUE = "kept"
+-    }
+-}
+diff --git a/app/src/test/kotlin/com/tailormyresume/app/ui/RootViewModelStoresTest.kt b/app/src/test/kotlin/com/tailormyresume/app/ui/RootViewModelStoresTest.kt
+index c2ce22f4..9acb70e3 100644
+--- a/app/src/test/kotlin/com/tailormyresume/app/ui/RootViewModelStoresTest.kt
++++ b/app/src/test/kotlin/com/tailormyresume/app/ui/RootViewModelStoresTest.kt
+@@ -10,6 +10,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
+ import com.google.common.truth.Truth.assertThat
+ import org.junit.Test
+ 
++private val SIGNED_OUT = AccountRoot(null)
++private val SIGNED_IN = AccountRoot("account-1")
++
+ class RootViewModelStoresTest {
+ 
+     private val stores = RootViewModelStores()
+@@ -22,7 +25,7 @@ class RootViewModelStoresTest {
+         }
+     }
+ 
+-    private fun probeIn(root: NavigationRoot): Probe =
++    private fun probeIn(root: AccountRoot): Probe =
+         ViewModelProvider.create(
+             stores.storeOf(root),
+             viewModelFactory { initializer { Probe() } },
+@@ -30,38 +33,38 @@ class RootViewModelStoresTest {
+ 
+     @Test
+     fun leavingTheFirstRunRootClearsItsViewModels() {
+-        val firstRunProbe = probeIn(NavigationRoot.FirstRun)
++        val firstRunProbe = probeIn(SIGNED_OUT)
+ 
+-        stores.keepOnly(NavigationRoot.Main)
++        stores.keepOnly(SIGNED_IN)
+ 
+         assertThat(firstRunProbe.cleared).isTrue()
+     }
+ 
+     @Test
+     fun leavingTheFirstRunRootKeepsTheViewModelsOfTheMainRoot() {
+-        val mainProbe = probeIn(NavigationRoot.Main)
+-        probeIn(NavigationRoot.FirstRun)
++        val mainProbe = probeIn(SIGNED_IN)
++        probeIn(SIGNED_OUT)
+ 
+-        stores.keepOnly(NavigationRoot.Main)
++        stores.keepOnly(SIGNED_IN)
+ 
+         assertThat(mainProbe.cleared).isFalse()
+-        assertThat(probeIn(NavigationRoot.Main)).isSameInstanceAs(mainProbe)
++        assertThat(probeIn(SIGNED_IN)).isSameInstanceAs(mainProbe)
+     }
+ 
+     @Test
+     fun returningToTheFirstRunRootGivesNewViewModels() {
+-        val before = probeIn(NavigationRoot.FirstRun)
+-        stores.keepOnly(NavigationRoot.Main)
++        val before = probeIn(SIGNED_OUT)
++        stores.keepOnly(SIGNED_IN)
+ 
+-        stores.keepOnly(NavigationRoot.FirstRun)
++        stores.keepOnly(SIGNED_OUT)
+ 
+-        assertThat(probeIn(NavigationRoot.FirstRun)).isNotSameInstanceAs(before)
++        assertThat(probeIn(SIGNED_OUT)).isNotSameInstanceAs(before)
+     }
+ 
+     @Test
+     fun rootOwnerUsesItsOwnStoreAndTheParentFactory() {
+         val parent = ParentOwner()
+-        val store = stores.storeOf(NavigationRoot.Main)
++        val store = stores.storeOf(SIGNED_IN)
+ 
+         val owner = RootViewModelStoreOwner(parent, store)
+ 
+@@ -72,8 +75,8 @@ class RootViewModelStoresTest {
+ 
+     @Test
+     fun clearingTheHolderClearsEveryRoot() {
+-        val first = probeIn(NavigationRoot.FirstRun)
+-        val main = probeIn(NavigationRoot.Main)
++        val first = probeIn(SIGNED_OUT)
++        val main = probeIn(SIGNED_IN)
+ 
+         stores.releaseAll()
+ 
+diff --git a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewKeepOnlyTest.kt b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewKeepOnlyTest.kt
+index 5fb551df..79547b51 100644
+--- a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewKeepOnlyTest.kt
++++ b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewKeepOnlyTest.kt
+@@ -11,8 +11,8 @@ import androidx.test.core.app.ApplicationProvider
+ import androidx.test.ext.junit.runners.AndroidJUnit4
+ import com.google.common.truth.Truth.assertThat
+ import com.tailormyresume.app.ui.AppRootState
+-import com.tailormyresume.app.ui.NavigationRoot
+ import com.tailormyresume.app.ui.RootViewModelStores
++import com.tailormyresume.core.domain.onboarding.StartDestination
+ import kotlinx.coroutines.flow.MutableStateFlow
+ import org.junit.Rule
+ import org.junit.Test
+@@ -25,7 +25,7 @@ class DebugPreviewKeepOnlyTest {
+     @get:Rule
+     val composeRule = createEmptyComposeRule()
+ 
+-    private val rootState = MutableStateFlow(AppRootState.Main)
++    private val rootState = MutableStateFlow<AppRootState>(AppRootState.Ready(StartDestination.Applications, "account-1"))
+     private val hasAccount = MutableStateFlow(true)
+     private val stores = RootViewModelStores()
+ 
+@@ -41,14 +41,14 @@ class DebugPreviewKeepOnlyTest {
+             .addActivityIfNotPresent(ComponentName(application, ComponentActivity::class.java))
+         ActivityScenario.launch(ComponentActivity::class.java).use { scenario ->
+             scenario.onActivity { it.setContent { Preview() } }
+-            val mainStore = stores.storeOf(NavigationRoot.Main)
++            val mainStore = stores.storeOf(PreviewRoot.Main.accountRoot)
+             composeRule.waitForIdle()
+-            assertThat(stores.storeOf(NavigationRoot.Main)).isSameInstanceAs(mainStore)
++            assertThat(stores.storeOf(PreviewRoot.Main.accountRoot)).isSameInstanceAs(mainStore)
+ 
+             hasAccount.value = false
+             composeRule.waitForIdle()
+ 
+-            assertThat(stores.storeOf(NavigationRoot.Main)).isNotSameInstanceAs(mainStore)
++            assertThat(stores.storeOf(PreviewRoot.Main.accountRoot)).isNotSameInstanceAs(mainStore)
+         }
+     }
+ }
+diff --git a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewNavigationRootTest.kt b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewNavigationRootTest.kt
+index 14fdd62b..1efefb7d 100644
+--- a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewNavigationRootTest.kt
++++ b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewNavigationRootTest.kt
+@@ -2,48 +2,51 @@ package com.tailormyresume.app.debug
+ 
+ import com.google.common.truth.Truth.assertThat
+ import com.tailormyresume.app.ui.AppRootState
+-import com.tailormyresume.app.ui.NavigationRoot
++import com.tailormyresume.core.domain.onboarding.StartDestination
+ import org.junit.Test
+ 
+ class DebugPreviewNavigationRootTest {
+ 
++    private val signedOut = AppRootState.Ready(StartDestination.SignIn, null)
++    private val applications = AppRootState.Ready(StartDestination.Applications, "account-1")
++
+     private fun root(
+         opensFirstRunRoot: Boolean = false,
+         seenMain: Boolean = false,
+-        rootState: AppRootState = AppRootState.Main,
++        rootState: AppRootState = applications,
+         seenAccount: Boolean = false,
+         hasAccount: Boolean = false,
+     ) = previewNavigationRoot(opensFirstRunRoot, seenMain, rootState, seenAccount, hasAccount)
+ 
+     @Test
+     fun aFirstRunTargetShowsTheFirstRunRoot() {
+-        assertThat(root(opensFirstRunRoot = true)).isEqualTo(NavigationRoot.FirstRun)
++        assertThat(root(opensFirstRunRoot = true)).isEqualTo(PreviewRoot.FirstRun)
+     }
+ 
+     @Test
+     fun aMainTargetShowsTheMainRoot() {
+-        assertThat(root()).isEqualTo(NavigationRoot.Main)
++        assertThat(root()).isEqualTo(PreviewRoot.Main)
+     }
+ 
+     @Test
+     fun aSeenMainThatBecomesFirstRunShowsTheFirstRunRoot() {
+-        assertThat(root(seenMain = true, rootState = AppRootState.FirstRun)).isEqualTo(NavigationRoot.FirstRun)
++        assertThat(root(seenMain = true, rootState = signedOut)).isEqualTo(PreviewRoot.FirstRun)
+     }
+ 
+     @Test
+     fun anAccountThatGoesAwayShowsTheFirstRunRootEvenWhenOnboardingWasNeverComplete() {
+-        val shown = root(seenMain = false, rootState = AppRootState.FirstRun, seenAccount = true, hasAccount = false)
++        val shown = root(seenMain = false, rootState = signedOut, seenAccount = true, hasAccount = false)
+ 
+-        assertThat(shown).isEqualTo(NavigationRoot.FirstRun)
++        assertThat(shown).isEqualTo(PreviewRoot.FirstRun)
+     }
+ 
+     @Test
+     fun anAccountThatIsStillThereKeepsTheMainRoot() {
+-        assertThat(root(seenAccount = true, hasAccount = true)).isEqualTo(NavigationRoot.Main)
++        assertThat(root(seenAccount = true, hasAccount = true)).isEqualTo(PreviewRoot.Main)
+     }
+ 
+     @Test
+     fun aPreviewOpenedSignedOutKeepsTheMainRoot() {
+-        assertThat(root(seenAccount = false, hasAccount = false)).isEqualTo(NavigationRoot.Main)
++        assertThat(root(seenAccount = false, hasAccount = false)).isEqualTo(PreviewRoot.Main)
+     }
+ }
+diff --git a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewRootTest.kt b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewRootTest.kt
+index a5558e39..edacae5f 100644
+--- a/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewRootTest.kt
++++ b/app/src/testDebug/kotlin/com/tailormyresume/app/debug/DebugPreviewRootTest.kt
+@@ -2,16 +2,20 @@ package com.tailormyresume.app.debug
+ 
+ import com.google.common.truth.Truth.assertThat
+ import com.tailormyresume.app.ui.AppRootState
++import com.tailormyresume.core.domain.onboarding.StartDestination
+ import org.junit.Test
+ 
+ class DebugPreviewRootTest {
+ 
++    private val signedOut = AppRootState.Ready(StartDestination.SignIn, null)
++    private val applications = AppRootState.Ready(StartDestination.Applications, "account-1")
++
+     @Test
+     fun previewShowsWelcome_onlyAfterMainWasSeenAndRootIsFirstRun() {
+-        assertThat(previewShowsWelcome(seenMain = true, rootState = AppRootState.FirstRun)).isTrue()
+-        assertThat(previewShowsWelcome(seenMain = false, rootState = AppRootState.FirstRun)).isFalse()
+-        assertThat(previewShowsWelcome(seenMain = true, rootState = AppRootState.Main)).isFalse()
++        assertThat(previewShowsWelcome(seenMain = true, rootState = signedOut)).isTrue()
++        assertThat(previewShowsWelcome(seenMain = false, rootState = signedOut)).isFalse()
++        assertThat(previewShowsWelcome(seenMain = true, rootState = applications)).isFalse()
+         assertThat(previewShowsWelcome(seenMain = true, rootState = AppRootState.Loading)).isFalse()
+-        assertThat(previewShowsWelcome(seenMain = false, rootState = AppRootState.Main)).isFalse()
++        assertThat(previewShowsWelcome(seenMain = false, rootState = applications)).isFalse()
+     }
+ }

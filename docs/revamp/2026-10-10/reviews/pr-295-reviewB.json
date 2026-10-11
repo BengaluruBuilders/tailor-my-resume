@@ -1,0 +1,57 @@
+{
+  "head_sha": "0bf9d9e1736762a10348be828add2877fecc0ea5",
+  "verdict": "clean",
+  "criteria": [
+    {
+      "id": "257-c1",
+      "status": "met",
+      "evidence": "CI on 0bf9d9e1: Static checks, Core unit tests, Feature unit tests, Screenshot tests, Constitution policy, delivery-gates-pregate and Build, lint, and unit tests succeeded; PR body reports the full gate with -PwarningsAsErrors=true green. git grep finds no reference to a deleted tailor impl symbol or feature_tailor_impl_ resource outside feature/tailor/impl."
+    },
+    {
+      "id": "257-c2",
+      "status": "met",
+      "evidence": "All listed packages and files are deleted; exported/ExportedFileStore.kt is kept; git ls-files feature/tailor/impl/src/test/screenshots prints 0."
+    },
+    {
+      "id": "257-c3",
+      "status": "met",
+      "evidence": "Keep list present and unchanged except the scoped ExportModule (docx binding) and PdfShareIntent (docx and createExportShareIntent) removals; createPdfShareIntent, createPdfViewIntent, PDF binding and ResumeHeadings binding remain. The seven named tests exist. Reviewer A's finding is fixed: ReviewContinuationTest and ReviewExportConsistencyTest are restored and differ from origin/main only by the two removed TailorInputs arguments (isOffline, regenerationsUsed); every assertion is kept."
+    },
+    {
+      "id": "257-c4",
+      "status": "met",
+      "evidence": "TailorViewModelTest loses only the seven onRegenerate_* cases, uiState_marksOffline..., and the FixedTailor/NoViolationGuard helpers; PENDING start, onAccept, onKeepOriginal, onUndo, onEditByHand, report and scenario cases are intact. git diff origin/main...HEAD -- core is empty, so UpdateBulletDecisionUseCaseTest, TailorResumeUseCaseTest and OfflineFabricationGuardTest (I.1, I.2) are untouched."
+    },
+    {
+      "id": "257-c5",
+      "status": "met",
+      "evidence": "TailorViewModel constructor has neither RegenerateSectionUseCase nor ConnectivityMonitor; combine drops the online input; grep ConnectivityMonitor in feature/tailor/impl/src is empty. TailorUiState/Builder lose MAX_REGENERATIONS, regenerationsLeft and isOffline only. DebugScenario.OFFLINE now falls to the normal build branch, which is correct with offline states cut."
+    },
+    {
+      "id": "257-c6",
+      "status": "met",
+      "evidence": "TailorEntryProvider.kt has nine entries rendering BasicText(key.javaClass.simpleName); signature tailorEntry(navigator: Navigator) kept; no material3 import; feature/tailor/api and app are not in the diff."
+    },
+    {
+      "id": "257-c7",
+      "status": "met",
+      "evidence": "grep -rlE 'CoverLetter|PrepQuestion|Docx|RegenerateSection' feature/tailor/impl returns only navigation/TailorEntryProvider.kt (NavKey imports and entries)."
+    },
+    {
+      "id": "257-c8",
+      "status": "met",
+      "evidence": "lint-baseline.xml goes from 3 to 2 issues (stale PluralsCandidate for feature_tailor_impl_progress removed); no additions; no tools:ignore anywhere in feature/tailor/impl/src/main (the two tools:ignore attributes on main are deleted with their strings)."
+    },
+    {
+      "id": "257-c9",
+      "status": "met",
+      "evidence": "strings.xml keeps only the six feature_tailor_impl_document_heading_* strings, byte-identical to their origin/main copies in strings_export_preview.xml and all used by document/ResumeHeadings.kt; the eight feature strings files are deleted; no remaining R.string/R.plurals reference is dangling."
+    },
+    {
+      "id": "257-c10",
+      "status": "met",
+      "evidence": "PR body reports verify-local BUILD SUCCESSFUL. The 19 added lines contain no comments. Prototype needs are preserved for W4-C: TailorViewModel onAccept/onUndo/onKeepOriginal/onEditByHand, HandEditBulletUseCase, WordDiff, document/**, the PDF renderer, ExportFileName, PdfShareIntent PDF intents and ExportedFileStore; deleted items match PLAN screen map rows (BulletReview and ExportPreview delete, D4). Sibling open PRs #294 and #299 touch only onboarding, analysis and applications impl modules."
+    }
+  ],
+  "findings": []
+}

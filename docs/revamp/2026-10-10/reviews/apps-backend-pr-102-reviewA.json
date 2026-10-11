@@ -1,0 +1,57 @@
+{
+  "head_sha": "18980df3f4e3995afe14d2bb67c1717664669e97",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1 422 codes", "status": "met", "evidence": "ApiError status test 'NOT_A_JOB_POST and JOB_IMPORT_FAILED are 422' covers both codes (errors.ts itself skipped, Reviewer B)."},
+    {"id": "c2 NOT_A_JOB_POST", "status": "met", "evidence": "analyses.ts 178-195: releaseClaim runs before markUsed, so no allowance is charged; reserveAiCall/settleAiCall in structured.ts keep the ai_usage row and it counts to dailyCallQuota and the cost cap, so repeated non-job text cannot dodge the quota. Test asserts 422, 0 claims, 1 ai_usage row, next call leaves 2 left, for flagged and empty-requirements cases."},
+    {"id": "c3 location", "status": "partial", "evidence": "locationOf trims, nulls blank, caps at 120 and test covers it, but the prompt asks only for 'city or region' while the issue AC expects 'Bengaluru · Hybrid' for the Northwind JD; no test or fixture uses that JD (model-dependent, paid eval not run)."},
+    {"id": "c4 GAP reason", "status": "met", "evidence": "reasonFor returns the fixed phrase for GAP and for MET downgraded to GAP; test 'a GAP reason is the fixed phrase whatever the model said' fails if reverted."},
+    {"id": "c5 MET/PARTIAL reason", "status": "partial", "evidence": "Over-120, empty and uncited-number cases fall back and are tested. The number check uses substring containment (analyses.ts:80) so it is weaker than 'built only from cited evidence'; non-numeric facts (company, tool, title) are not checked at all."},
+    {"id": "c6 schemas and ids unchanged", "status": "met", "evidence": "jobSchema and matchSchema stay strictObject with only optional location/reason added; id/status/evidence logic unchanged; existing tests pass (golden case lead-only)."},
+    {"id": "c7 docs / npm run check", "status": "partial", "evidence": "Docs skipped (Reviewer B). CI at review time: Validation in progress, delivery-gates-pregate queued, Secret scan passed; the PR body states 535 pass, 1 expected golden failure."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 80,
+      "rule": "Constitution I.1: a reason must not assert a fact absent from the resume",
+      "trigger": "Cited fact text contains a date such as 2015 and the model writes 'Led 5 stores' or '5 years': numbersIn gives '5', citedText.includes('5') is true because of '2015', and the invented number is returned. Likewise '10' passes against '2010' and '4' against '2024'.",
+      "title": "Number check is substring containment, so short invented numbers pass against any longer number or date",
+      "proof": "Test: MET match citing EXP-01-1 (fact text 'Cleaned weekly sales data for 40 stores', dates 2024) with reason 'Led 4 stores'; expected 'Shown in your resume', actual reason kept."
+    },
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 67,
+      "rule": "Constitution I.1 and issue scope: reason built only from cited evidence",
+      "trigger": "MET match cites skill:SQL and the model writes 'Used at Infosys and Tata Digital' or 'Led a team of five'; it has no digits, so reasonFor returns it unchanged although no cited fact names Infosys or a team.",
+      "title": "Only digits are validated; company names, tools, titles and number words in a reason are never checked against the cited facts",
+      "proof": "Test: MET with evidenceIds ['EXP-01-1'] and reason 'Used at Infosys and Tata Digital'; expected fallback phrase, actual reason returned verbatim. Upgrade path: require every capitalised token and number word to appear in citedText, or build the reason from the cited fact text server-side."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 118,
+      "rule": "Issue AC: Northwind JD -> location 'Bengaluru · Hybrid'",
+      "trigger": "Northwind JD that says 'Bengaluru · Hybrid': prompt line 117 tells the model to return 'the job's city or region', so the model will likely return 'Bengaluru' and the AC value is not produced; no test or fixture pins this.",
+      "title": "Location prompt and the Northwind acceptance value disagree"
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 170,
+      "rule": "Scale: output bounded within maxOutputTokens 8000",
+      "trigger": "40 requirements with up to 10 keywords, 400-char text, and a reason of about 25 tokens each plus location now sit in the same 8000 cap; a long JD can truncate the JSON, generateObject throws, the user gets a provider error and the claim is released but the ai_usage row is spent. Reason length is bounded only by the prompt (schema line 53 has no max), so the server fallback does not bound the output.",
+      "title": "Output cap unchanged while per-requirement output grew; no measured headroom"
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/analyses.ts",
+      "line": 76,
+      "rule": "Constitution I.3: no fit, ATS or likelihood wording",
+      "trigger": "Model returns a MET reason such as 'Strong fit for this role' or 'Likely to pass ATS'; it has no digits and 20 chars, so it is returned. The prompt (lines 113-119) does not forbid fit wording and the server does not filter it.",
+      "title": "Neither the prompt nor reasonFor blocks fit/ATS/likelihood wording in reasons"
+    }
+  ]
+}

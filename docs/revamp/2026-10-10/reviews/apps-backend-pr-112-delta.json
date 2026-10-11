@@ -1,0 +1,22 @@
+{
+  "head_sha": "9e402ba30553ed4a04641438e0e1ef460539ede8",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "Delta: git diff edb26639..9e402ba3 touches the same 13 files as 3031e3e..5cc67adb (old base = merge-base 3031e3e) and the +/- lines of every file are identical (per-file hash of change lines matches). routes.ts still only drops the two mounts and imports; test/tailormyresume-deleted-routes.test.ts unchanged."},
+    {"id": "c2", "status": "met", "evidence": "git grep at 9e402ba3 (excluding fixtures) finds prep-questions/cover-letters only in the two #97 tests that assert their absence. Every line removed relative to edb26639 is in the prep/cover scope (deleted route, test and prompt files, the two docs bullets, the eval cover/prep calls and schemas, the three golden keys); no removed line touches ledger, credits, answer facts, job imports or summary/skills code. Prior low on the cover-letter-only role branch in scripts/tailormyresume-eval/metrics.ts:18/33 is unchanged by the merge and not re-reported."},
+    {"id": "c3", "status": "met", "evidence": "drizzle/ is identical between edb26639 and 9e402ba3 (git diff --quiet). schema.ts keeps COVER_LETTER/PREP_QUESTION in reportItemKinds and the check constraint. The stack's export.ts adds a credits array from readAllLedger but leaves contentReports intact, so the new test's contentReports.map(itemKind) assertion and DELETE /v1/me 202 (same status the stack's own deletion test at line 391 uses) still hold. Not run locally (TEST_DATABASE_URL unset, no Postgres on host); PR CI Validation for 9e402ba3 was queued at review time."},
+    {"id": "c4", "status": "met", "evidence": "run.ts at head keeps every line the stack added between 3031e3e and edb26639 (summary judging at run.ts:374-395, make-fixtures changes; scripted check found 0 missing lines). The stack has no answer-fact path in run.ts, so none could be dropped. npm run typecheck passes at 9e402ba3; eslint on scripts/tailormyresume-eval and the two #97 tests passes."},
+    {"id": "c5", "status": "met", "evidence": "Test count reconciles exactly: #111 CI Validation on edb26639 ran 648 tests; #112 removes cover-letters (15 tests + 6 commonRouteTests = 21), prep-questions (10 + 6 = 16) and 1 eval-metrics prep injection test, and adds 3 (deleted-routes 404, export/deletion kinds, routes.ts source check): 648 - 38 + 3 = 613, matching the PR body. No surprising drop."},
+    {"id": "c6", "status": "met", "evidence": "Golden fixture at head has exactly analysis, tailoring-generate, tailoring-repair, each value equal to edb26639; analysis and tailoring-generate differ from #112's old copy at 5cc67adb, so the stack's newer values (#92, #94/#95) won. The fixture diff vs edb26639 is only the three deleted keys. delivery-gates-pregate passed on 9e402ba3; Validation and Secret scan still queued."}
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 278,
+      "rule": "c2 / rule 27: docs updated in the same PR must describe the code",
+      "trigger": "#112's sentence says factTexts (with the 'stated by the candidate, not verified experience' note) is 'used by analyses.ts and by runGeneration in scripts/tailormyresume-eval/run.ts'. After integrating the stack, src/apps/tailormyresume/tailoring-pipeline.ts:224 summaryFacts spreads factTexts(profile) and feeds the production tailoring source index (line 395 textById) and the repair prompt facts (line 472). A reader of the doc concludes the tailoring pipeline never sees the stated-skill note, which is wrong at this head.",
+      "title": "Merged architecture.md omits the stack's tailoring-pipeline caller of factTexts"
+    }
+  ]
+}

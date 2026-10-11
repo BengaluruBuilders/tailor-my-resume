@@ -1,0 +1,48 @@
+{
+  "head_sha": "1e8e2de8543372ecd88de48f8960e52d2bc87244",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "260-c1", "status": "partial", "evidence": "CI on 1e8e2de8: Core unit tests, Feature unit tests, App unit tests, Screenshot tests, Lint, Static checks, Constitution policy and 'Build, lint, and unit tests' pass. Assemble APKs was still in progress at review time. The reviewer ran no Gradle build (read-only review, shared host)."},
+    {"id": "260-c2", "status": "met", "evidence": "Unchanged from round 1. PR body koverLog: core:domain 88.0086 -> 88.3082, core:data 81.717 -> 80.8967. Both are >= 80. The fix adds LegacyDataPurge and its test, so core:data coverage does not fall."},
+    {"id": "260-c3", "status": "met", "evidence": "1e8e2de8 touches no FabricationGuard, TailorResumeUseCase, UpdateBulletDecisionUseCase, claim checker or lexicon file. git show --stat lists 6 files, and none of them is in that set."},
+    {"id": "260-c4", "status": "unmet", "evidence": "The two StoredSessionRepositoryTest names are renamed (round-1 F4 fixed). But the grep at 1e8e2de8 now returns a new hit: LegacyDataPurgeTest.kt:11 removesCoverLetterAndPrepPlanKeysIncludingDraftKeysAndLeavesTheRest. See finding 1."},
+    {"id": "260-c5", "status": "met", "evidence": "Unchanged from round 1. The UpgradedMatch.kt deviation still stands and the owner must still decide on it."},
+    {"id": "260-c6", "status": "met", "evidence": "Unchanged from round 1. 1e8e2de8 touches no NavKey or entry provider."},
+    {"id": "260-c7", "status": "met", "evidence": "Unchanged from round 1 (ObserveStartDestinationUseCase.kt:14-20). The purge removes only coverletter.* and prep.plan.* keys. It never touches session.account or session.onboardingComplete, so it cannot change the start destination."},
+    {"id": "260-c8", "status": "met", "evidence": "StoredSessionRepository.kt:52-55 removes session.consent and session.careerStage on signOut and clear. StoredSessionRepositoryTest.signOut_removesLegacySessionKeys and clear_removesLegacySessionKeys now assert both keys, so round-1 F3 is fixed. ApplicationCleanup.kt:18-19 and RoomLocalDataWiper.wipeAll (LocalDataWiper.kt:29-34: clearAllTables + store.clear) are unchanged. The account-delete path (DeleteAccountUseCase -> AccountWipeFinisher -> wipeAll) still clears everything. The new LegacyDataPurge (LegacyDataPurge.kt:9-13) removes only the coverletter. and prep.plan. prefixes. Every key that survives is under session., payment., usage., account., exports., reports.content., tailor.edited., tailor.regenerations. or tailoring.request., and none of these collides with the purged prefixes. A grep of every MockStateStore user in main, prod, demo and debug finds no production read or write of the purged prefixes other than ApplicationCleanup.remove, so the async start-task race does not matter. The purge is idempotent and safe on a fresh install: DataStore 1.1.7 DataStoreImpl.kt:336 writes only if the new data differs from the current data, so a no-op purge does no disk I/O. Round-1 F1 (prep.plan.analysis-draft-*) is closed in production by the start task, and LegacyDataPurgeTest asserts the draft key."},
+    {"id": "260-c9", "status": "met", "evidence": "The archive sections are unchanged since round 1. Round-1 F2 (legacy letters kept but not exported) is closed: LegacyDataPurgeStartTask removes the coverletter.* and prep.plan.* keys at every start, before the user can reach an export. session.consent still stays until sign-out or clear, as the scout state accepts. DeleteMyDataUseCase now calls legacyDataPurge, and DeleteMyDataUseCaseTest.removesLegacyPrepPlanStoredUnderTheJobDraftKey asserts that the draft-key plan and the cover letter are gone. Note: DeleteMyDataUseCase has no production caller on revamp/w1-base or at this head because YourData is already removed on the base. So the start task is the only shipped path for this purge (finding 3)."},
+    {"id": "260-c10", "status": "met", "evidence": "Unchanged from round 1. 1e8e2de8 touches no network or auth code, and LegacyDataPurge makes no network call."},
+    {"id": "260-c11", "status": "met", "evidence": "No lint-baseline or app/dependencies change. The Constitution policy job passes on 1e8e2de8. The earlier cancelled run was superseded."},
+    {"id": "260-c12", "status": "met", "evidence": "No core/database change."},
+    {"id": "260-c13", "status": "partial", "evidence": "delivery-gates-pregate passes on the run started after the PR body edit (run 38081249330). The earlier failure (run 38081241207) read the pre-edit body. The '## Pre-review gate' section now has a justification line for every ASSERT_REMOVED path. verify-local.sh was not run by the reviewer, and Assemble APKs was still in progress."}
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "core/data/src/test/kotlin/com/tailormyresume/core/data/mock/LegacyDataPurgeTest.kt",
+      "line": 11,
+      "rule": "260-c4: grep -rnE 'Consent|CoverLetter|PrepQuestion|Connectivity' --include=*.kt core app feature returns nothing except ContentReport item kinds.",
+      "trigger": "At 1e8e2de8, git grep -nE 'Consent|CoverLetter|PrepQuestion|Connectivity' -- 'core/*.kt' 'app/*.kt' 'feature/*.kt' returns LegacyDataPurgeTest.kt:11 removesCoverLetterAndPrepPlanKeysIncludingDraftKeysAndLeavesTheRest. The round-1 F4 rename fixed the two old hits, but this new test name adds a new one, so the criterion as written still fails.",
+      "title": "New LegacyDataPurgeTest name matches the c4 grep gate",
+      "proof": "Rename it to removesLegacyLetterAndPlanKeysIncludingDraftKeysAndLeavesTheRest (or similar). The c4 grep then returns nothing."
+    },
+    {
+      "severity": "low",
+      "file": "app/src/main/kotlin/com/tailormyresume/app/LegacyDataPurgeStartTask.kt",
+      "line": 19,
+      "rule": "Not lazy about error handling: an app-scope start task must not crash start-up. House pattern: FinishPendingAccountWipeUseCase.kt:22-32 and PurchaseRestorer.kt:33-39 catch Exception (and rethrow CancellationException) inside their app-scope launches.",
+      "trigger": "A user upgrades from a build that stored coverletter.<id> or prep.plan.<id> while device storage is full. On launch, scope.launch { purge() } runs on @ApplicationScope (CoroutineScopesModule.kt:27: SupervisorJob + Default, with no CoroutineExceptionHandler). The keys exist, so the edit is not a no-op. DataStoreImpl.writeData throws IOException (no space left), the exception reaches the thread's uncaught handler, and the process dies. The keys stay, so every later launch crashes the same way until the user frees storage. Without this task, the demo flavour does only DataStore reads at start, so it would launch.",
+      "title": "Legacy purge start task has no exception handling and can crash-loop the app on a failed DataStore write",
+      "proof": "LegacyDataPurgeStartTaskTest: pass a MockStateStore whose removeWithPrefix throws IOException and a TestScope with a CoroutineExceptionHandler that records exceptions. Call start(), then advanceUntilIdle, and assert that no exception reached the handler. The test fails at the head. Fix: wrap purge() in try/catch (rethrow CancellationException, ignore other exceptions so the next start retries)."
+    },
+    {
+      "severity": "low",
+      "file": "app/src/main/kotlin/com/tailormyresume/app/LegacyDataPurgeStartTask.kt",
+      "line": 14,
+      "rule": "Checklist item 1 and Constitution IV.1: the fix for round-1 F1 needs a test that fails if the fix is reverted. PendingWipeStartTaskTest is the house pattern for start tasks.",
+      "trigger": "DeleteMyDataUseCase has no production caller at the base or the head (git grep finds it only in its own file and test, because YourData was removed on revamp/w1-base). The only shipped path that removes prep.plan.analysis-draft-* is LegacyDataPurgeStartTask. Delete the LegacyDataPurgeBindings @IntoSet method or make start() a no-op, and every test still passes, while upgraders keep the draft prep plan and cover letters on the device.",
+      "title": "The start task that actually closes round-1 F1 has no test",
+      "proof": "LegacyDataPurgeStartTaskTest, modelled on PendingWipeStartTaskTest: write prep.plan.analysis-draft-x to a TestMockStateStore, call LegacyDataPurgeStartTask(LegacyDataPurge(store), TestScope(testScheduler)).start(), then advanceUntilIdle, and assert that store.read(...) is null."
+    }
+  ]
+}

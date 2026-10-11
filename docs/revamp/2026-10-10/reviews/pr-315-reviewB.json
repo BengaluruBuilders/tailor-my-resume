@@ -1,0 +1,43 @@
+{
+  "head_sha": "bb9e877feb5c2967d0939d2337e1fda7e3e0b80c",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "272-c1", "status": "met", "evidence": "AppViewModel.kt:29-36 emits Ready(SignIn, null) for a null account; TmrApp.kt:94-101 roots key(null) at DefaultSignInNavKey. AppViewModelGateTest.rootState_signedOut_startsAtSignIn and TmrAppRootTest.accountChange_resetsBackStackToNewStart (stack == [SignIn]) prove it."},
+    {"id": "272-c2", "status": "met", "evidence": "StartDestination.Upload maps to UploadNavKey() (TmrApp.kt:107). BackFallback.kt:15-16 returns null on the Upload root when hasHome is false, and the chrome is backWhenNotFirst(0). AppViewModelGateTest.rootState_signedInOnboardingIncomplete_startsAtUpload and TmrAppRootTest.startsAtTheKeyOfTheStartDestination prove it."},
+    {"id": "272-c3", "status": "met", "evidence": "AppViewModelGateTest.rootState_signedInReviewedOrComplete_startsAtApplications covers both the onboarding-complete branch and the reviewedAt branch."},
+    {"id": "272-c4", "status": "met", "evidence": "The start is read once with first() inside flatMapLatest, after distinctUntilChanged on the account id (AppViewModel.kt:30-34). Eagerly sharing keeps a background resubscribe from reading it again. rememberNavBackStack(startKey) is not keyed on startKey, so a later Ready with the same account id cannot rebuild the stack. AppViewModelGateTest.rootState_profileReviewedAndOnboardingCompleteAfterStart_doesNotReEmit fails if the one-shot rule is reverted."},
+    {"id": "272-c5", "status": "partial", "evidence": "Re-rooting is correct: key(accountId) at TmrApp.kt:94 drops the NavBackStack and the saveable entry state, and the composite key hash includes the account id, so a restored stack cannot be consumed under another account. keepOnly at RootViewModelStores.kt:30 releases every other root, and Nav3 entry stores live inside the root store. SessionExpiryHandler and RemoteSignInGateway.signOut both end in sessionRepository.signOut, which the gate test exercises through OfflineSignInGateway. The gap is that the TmrApp.kt:77 LaunchedEffect, which calls keepOnly on an account change, has no test (see the finding)."},
+    {"id": "272-c6", "status": "met", "evidence": "AppViewModel.kt:35 calls refresh once for each non-null account id emission, and :44-46 swallow failures. Tested by signIn_refreshesWalletOnce, signIn_whenWalletRefreshThrows_stillEmitsReady and signedOut_neverRefreshesWallet. A CancellationException rethrown inside the flatMapLatest child does not cancel the parent collector, so the gate stays live. The bound OfflineFirstCreditsRepository.refresh is Unit at this head (also on 286-network-v2), so there is no credit side effect and no network call. No logging was added."},
+    {"id": "272-c7", "status": "met", "evidence": "stateIn initialValue is Loading and TmrApp renders nothing for Loading (TmrApp.kt:81). Ready is emitted only after observeStartDestination().first(), and DataStore and Room emit real values with no placeholder. AppViewModelGateTest.rootState_beforeFirstDestination_isLoadingNeverSignIn asserts Loading followed directly by Ready(Upload)."},
+    {"id": "272-c8", "status": "met", "evidence": "AppViewModelGateTest (12 Turbine tests with fakes) covers the three starts, sign-out and session expiry, same-account re-sign-in, a different account and the one-shot rule. Lead test replacement adjudicated as accepted: every deleted AppViewModelTest case is re-asserted as Ready(start, accountId) except the follow-the-flag case, which c4 removes by design. The four carried-forward tests keep every assertion and only rename the root types."},
+    {"id": "272-c9", "status": "met", "evidence": "The PR body states verify-local passes on the head. CI at bb9e877f shows app, core and feature unit tests, Lint, Constitution, Screenshot and Static checks passing. Assemble APKs was still pending at review time. delivery-gates-pregate fails only on the disclosed TEST_DELETED for AppViewModelTest."}
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt",
+      "line": 77,
+      "rule": "272-c5 (previous root's ViewModel stores cleared on account change); review checklist 1 (would the test fail if the fix were reverted)",
+      "trigger": "Delete the LaunchedEffect body at TmrApp.kt:77 that calls stores.keepOnly(AccountRoot(rootState.accountId)). Every test still passes: TmrAppRootTest drives TmrAccountRoot, not TmrApp, and RootViewModelStores*Test only unit-test keepOnly. In the app, user A's root ViewModels, holding the loaded profile and application UiState, would then stay alive in the activity-scoped RootViewModelStores after sign-out or session expiry, and A would get those stale instances back on re-sign-in.",
+      "title": "The account-change keepOnly wiring in TmrApp has no test, so the c5 memory-isolation property is unguarded",
+      "proof": "Add a TmrApp-level test: compose TmrApp(Ready(Applications, \"account-1\")), get a probe ViewModel from the root store, switch rootState to Ready(SignIn, null), waitForIdle, and assert the probe's onCleared ran."
+    },
+    {
+      "severity": "low",
+      "file": "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt",
+      "line": 126,
+      "rule": "PR #315 Decisions: 'A pending deep link replaces the stack only when the start is a top-level tab, so a signed-out user cannot skip Sign in'; 272-c1 and 272-c2 (Sign in and Upload start with an empty stack)",
+      "trigger": "Set PendingNavigation to [DefaultProfileNavKey] (or any detail key) while signed out, then let TmrRoot compose with startKey SignIn. startsAtTab is false, so the else branch calls navigator.navigate(key) and the stack becomes [SignIn, Profile]. The signed-out user sees the linked screen above Sign in, and a mid-onboarding user likewise skips past Upload. The guard only changes root() into a push; it does not drop the key. This is latent today: PendingNavigation.set has no caller in any source set, and MainActivity reads no intent extras.",
+      "title": "The deep-link guard pushes pending keys above Sign in or Upload instead of dropping them, contrary to the PR's security claim",
+      "proof": "TmrRoot(root = AccountRoot(null), startKey = DefaultSignInNavKey, initialKeys = { listOf(DefaultProfileNavKey) }) followed by asserting the stack == [DefaultSignInNavKey] fails with [SignIn, Profile]."
+    },
+    {
+      "severity": "low",
+      "file": "app/src/main/kotlin/com/tailormyresume/app/ui/AppViewModel.kt",
+      "line": 40,
+      "rule": "Constitution II.2 (stateIn(WhileSubscribed(5_000)), Review-gated) and scout 272 constraint 'AppViewModel keeps one StateFlow via stateIn(WhileSubscribed(5_000)) with Loading as the initial value'",
+      "trigger": "The diff switches to SharingStarted.Eagerly and records no decision. The PR Decisions section and DECISIONS.md are silent. The change is technically needed: with WhileSubscribed(5_000), returning after more than 5 s in the background restarts the upstream, which reads the start again and calls refresh() a second time, breaking c6 'exactly once'. Eagerly also keeps sign-out visible while the app is stopped. The deviation is still unrecorded against a review-gated rule.",
+      "title": "AppViewModel deviates from Constitution II.2 (Eagerly instead of WhileSubscribed) with no recorded decision"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "head_sha": "7ac6c0943ea5b32a0b82d4d5b01f98fd90850a82",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "270-c1", "status": "met", "evidence": "OfflineFabricationGuardTest answerBulletFromDetailPasses / answerBulletAddingTermNumberOrScaleIsFlagged and TailorResumeUseCaseTest.unsupportedAnswerBulletFallsBackToOriginal; requirement numbers are never in the fact text (AnswerFacts.kt:24-29). See F1 for requirement wording that still enters the fact."},
+    {"id": "270-c2", "status": "met", "evidence": "AnswerFacts.kt:18 and :27 give no fact or keywords for NOT_YET/SKIPPED; notYetAndSkippedAnswersCreateNoFactAndAnsBulletFailsWithMissingSource."},
+    {"id": "270-c3", "status": "met", "evidence": "TailorResumeUseCase.kt:65 drops a non-attachable answer bullet; whole-word org/title regex at :80-84; answerWithoutEmployerNameIsNotAttachedToInfosys, answerNamingInfosysOrTitleMayAttach (Infosystems negative), prototypeAnswerGivesThreeChanges."},
+    {"id": "270-c4", "status": "partial", "evidence": "Each sentence is checked and a violation restores profile.summary (TailorResumeUseCase.kt:88-102), but the check runs against the union of cited facts per sentence, so D36 one-fact-per-clause is not applied (F2, probe confirmed)."},
+    {"id": "270-c5", "status": "met", "evidence": "verifiedSkills allows only profile.skills, userStatedSkills and answer keywords (TailorResumeUseCase.kt:105-113); skillsReorderedFromProfileOnly, addedSkillFromUserStatedOrAnswerKept, otherAddedSkillRemovedWithViolation. Answer keywords inherit F1."},
+    {"id": "270-c6", "status": "partial", "evidence": "New bullets, summary and skills start PENDING (newSuggestionsStartPending); bullet Undo works (undoSetsRejectedAndOriginalTextIsUsed), but summary and skills changes have no Undo path (F3)."},
+    {"id": "270-c7", "status": "met", "evidence": "AcceptChangesUseCaseTest covers PENDING->ACCEPTED, REJECTED kept, clock timestamp, idempotent second run. Concurrency gap noted in F5."},
+    {"id": "270-c8", "status": "met", "evidence": "ExportReadiness.kt:10-14 refuses when changesAcceptedAt is null or any decision is PENDING; ExportReadinessTest three cases. An empty-text fallback answer bullet cannot reach the PDF: BulletReconciler.matches needs a profile bullet id in sourceIds and equal originalText, and applies only ACCEPTED bullets without violations."},
+    {"id": "270-c9", "status": "met", "evidence": "MockPackCatalogue.kt 5/15/40, creditsExpire false; MockPackCatalogueTest. Prices are demo-only: OfflinePaymentGateway is bound only in app/src/demo PaymentBindings; prod RemotePaymentGateway.kt:64 takes priceMicros from Play (D33). Lead replacement 7ac6c094 equals docs/revamp/2026-10-10/patches/issue-270-test-replacement.patch."},
+    {"id": "270-c10", "status": "met", "evidence": "TailoringCreditSpend records one SPEND -1 entry only after tailoring returns (D33 maps SPEND to TAILORING); TailoringCreditSpendTest covers failure and cancellation."},
+    {"id": "270-c11", "status": "met", "evidence": "numstat: TailorResumeUseCaseTest, OfflineFabricationGuardTest, UpdateBulletDecisionUseCaseTest only additions; TailorViewModelTest untouched; CI Core and Feature unit tests pass."},
+    {"id": "270-c12", "status": "met", "evidence": "build.yml:192 runs :core:domain:koverVerify (minValue 80) in Core unit tests, green on head; PR reports 88.4% lines."},
+    {"id": "270-c13", "status": "partial", "evidence": "CI on head: 9 of 10 checks pass; Assemble APKs was still pending at review time."},
+    {"id": "privacy-sendable-facts", "status": "met", "evidence": "sendableFacts() (CandidateProfile.kt:52) is the only source for toFactsDto (Mappers.kt:22) and the evidence checks (RemoteJobAnalysisSource.kt:42,:57, RemoteResumeTailor.kt:92); no other payload path found. SendableFactsEvidenceTest crowds the 200-bullet window with 210 USER_ANSWER bullets, so it fails with the old confirmedWithinLimits() call."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/AnswerFacts.kt",
+      "line": 20,
+      "rule": "Constitution I.1, #296 (an answer without detail must not borrow requirement wording; only the named skill in general terms), mandate (1)",
+      "trigger": "JD line '- Experience presenting quarterly results to the board for 3+ years' through OfflineJobDescriptionAnalyzer gives fallback keywords [presenting, quarterly, results] (RequirementExtractor.kt:38-43, the first 3 words of the requirement). Answer A_FEW_TIMES with empty detail makes fact ans-req-1 = 'presenting, quarterly, results'. Summary 'Presenting quarterly results.' citing ans-req-1 is kept with zero violations, and the skills line ['SQL','Quarterly','Results'] is kept with zero violations. The candidate only said 'a few times'; 'quarterly' is a requirement specific. Probe run on a copy of the head confirmed both.",
+      "title": "Fallback requirement keywords copy JD wording into the answer fact and the skills allowlist",
+      "proof": "TailorResumeUseCaseTest: analyse the JD line above, answer A_FEW_TIMES with detail '', propose summary 'Presenting quarterly results.' citing ans-<req>; expect violations non-empty and text == profile.summary (currently passes through unchanged). Fix sketch: when the detail is blank, take only keywords that isNamedSkillKeyword (KeywordsStatedIn.kt:20) accepts; this changes the #269/#270 shared contract, so the lead decides for both lanes."
+    },
+    {
+      "severity": "medium",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/TailorResumeUseCase.kt",
+      "line": 90,
+      "rule": "Constitution I.1, D36 and D23 (split clauses at ', ', and, or, with; each clause from ONE cited fact; at least one content word), mandate (1)",
+      "trigger": "Answer YES_REGULARLY, detail 'Presented the monthly variance report to the CFO'; profile bullet exp-infosys-b1 'Built Power BI dashboards for monthly finance reports'. Summary 'Presented the monthly variance report to the CFO with Power BI dashboards.' citing [exp-infosys-b1, ans-req-1] is kept with zero violations (probe confirmed). Neither fact says the CFO report used Power BI. The sentence is split only at [.!?] and guard.check gets every cited source together, and TokenSubset/NumberClaims/term checks take the union of the source texts.",
+      "title": "Summary check lets words from two cited facts recombine into one claim",
+      "proof": "TailorResumeUseCaseTest: the summary and sources above; expect violations non-empty and text == profile.summary. Fix sketch: split clauses as D36 says and pass each clause if guard.check(clause, listOf(source), profile) is empty for at least one single cited source; reject a summary with no content word."
+    },
+    {
+      "severity": "medium",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/ExportReadiness.kt",
+      "line": 13,
+      "rule": "Constitution I.2 and D4 (per-change Undo plus one Accept changes action), criterion 270-c6",
+      "trigger": "Tailoring returns a supported summary (decision PENDING, counted in changeCount). The user wants to keep the original summary. UpdateBulletDecisionUseCase matches only bullets by id (UpdateBulletDecisionUseCase.kt:26), so no call can set the summary or skills to REJECTED. ExportReadiness returns PENDING_CHANGES until AcceptChangesUseCase runs, and that sets the summary to ACCEPTED. Export therefore requires accepting a summary or skills change the user tried to undo.",
+      "title": "Summary and skills changes have no Undo, so export forces their acceptance",
+      "proof": "UpdateBulletDecisionUseCaseTest: application with a PENDING summary; any invocation leaves summary.decision PENDING, and ExportReadiness.check stays PENDING_CHANGES until AcceptChangesUseCase marks it ACCEPTED. Fix sketch: give the summary and skills a decision target (for example fixed ids 'summary' and 'skills') in UpdateBulletDecisionUseCase."
+    },
+    {
+      "severity": "low",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/AnswerFacts.kt",
+      "line": 11,
+      "rule": "Cross-lane shared contract (scout constraint C8: choices map to the #268 quickAnswer choice)",
+      "trigger": "QuickAnswer.choice is a free String. #268 PrototypeFixtures.kt:62, ApplicationRepositoryContractTest.kt:126 and AccountDataArchiveWriterSimplifiedFlowTest store choice 'yes'. AnswerFacts accepts only the exact strings 'YES_REGULARLY' and 'A_FEW_TIMES', so the prototype answer creates no fact and no keywords. This fails closed (no truth risk), but the prototype's answer can never back a change.",
+      "title": "Answer choice constants do not match the 'yes' value stored by #268 fixtures",
+      "proof": "AnswerFacts.factOf(QuickAnswer(req.id, \"yes\", \"detail\"), job) returns null. Fix sketch: one shared choice enum or constants in core:model that both #268 data and #269/#270 use."
+    },
+    {
+      "severity": "low",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/AcceptChangesUseCase.kt",
+      "line": 18,
+      "rule": "Constitution I.2 (nothing exported that the user did not accept); TOCTOU",
+      "trigger": "The user taps Undo on bullet b1, then Accept changes, quickly. Both coroutines read the same snapshot through observeApplication().first(). Undo upserts b1=REJECTED. Accept then upserts the whole application with b1=ACCEPTED from its stale read. BulletReconciler exports b1's proposed text. This is latent until W4-C2 wires both actions, and UpdateBulletDecisionUseCase has the same read-modify-write.",
+      "title": "Accept changes can overwrite a concurrent Undo with ACCEPTED",
+      "proof": "With a repository fake that suspends inside first(), run UpdateBulletDecisionUseCase(REJECTED) and AcceptChangesUseCase concurrently; expect b1 REJECTED, but it ends up ACCEPTED. Fix sketch: serialise decision writes (one Mutex shared by both use cases, or a repository transaction that updates decisions in place)."
+    }
+  ]
+}

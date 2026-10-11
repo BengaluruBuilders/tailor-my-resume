@@ -1,0 +1,31 @@
+{
+  "head_sha": "aeabc5dd53f463c0156c894b1f0b354620092546",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "config.ts:17-21 lists _5, _15, _40 in order with creditsExpire false; routes.ts:130 returns config.packs; test 'GET /packs lists the three packs in order' deep-equals the exact body (fails on base with 1 pack). App side drops packs Play does not know (hirehop RemotePaymentGateway.kt:58-68 mapNotNull on productDetails), so listing _15/_40 before tailor-my-resume#288 shows nothing unbuyable."},
+    {"id": "c2", "status": "met", "evidence": "purchases.ts:240-243 picks the pack by request productId from config only, :187 requires Play's productId (when present) to equal it, :266/:283 grant pack.credits. Test 'first purchase of each pack answers 201 and grants 5, 15 or 40' checks status, creditsGranted and the wallet row for fresh users (base fails with 400). Not run locally: no Postgres on this host; CI Validation still pending at review time."},
+    {"id": "c3", "status": "met", "evidence": "storedPurchase (purchases.ts:209-231) answers by token hash before any Play call; test reposts an _15 token and asserts 200, unchanged Play call count, 15 credits and one row."},
+    {"id": "c4", "status": "met", "evidence": "purchases.ts:243 throws INVALID_INPUT before storedPurchase or Play; test asserts 400 INVALID_INPUT, zero Play calls, zero rows for application_pack_99. Guard unchanged, so the test passes on base too, as the PR states."},
+    {"id": "c5", "status": "met", "evidence": "purchases.ts:187 unchanged; test stages a Play answer with productId application_pack_5 and posts it as _40: 400 PURCHASE_INVALID, no row, no credits. It would fail if the equality check were removed. Only the productId-present case is covered (see finding 1)."},
+    {"id": "c6", "status": "partial", "evidence": "PR body reports npm run check 535 pass; docs/architecture.md names all three packs in the wallet, purchases and promo-code bullets (rule 27). CI Validation job (which runs check against Postgres) was still pending at review time and could not be reproduced locally (TEST_DATABASE_URL unset, no local Postgres)."}
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/purchases.ts",
+      "line": 187,
+      "rule": "Scout constraint: a cheap pack token cannot be posted as a dear pack; the grant is keyed by the verified productId",
+      "trigger": "Play answers with productId omitted (ProductPurchase.productId is optional in play.ts:21 and absent from every goodPurchase fixture). A user posts a token bought as application_pack_5 with productId application_pack_40: line 187 skips the comparison, so the server grants 40 credits. With one pack this was unreachable; with three packs the in-app check against cross-pack substitution is now only Play's path binding (products/{productId}/tokens/{token}, play.ts:162,167). Low because real Play is expected to reject a token under another product's path with 400/404, which play.ts maps to PURCHASE_INVALID; not verified against Play.",
+      "title": "Cross-pack substitution guard is skipped when Play omits productId",
+      "proof": "test: stage(goodPurchase('no-pid')) (productId undefined) and post it as application_pack_40; expect 400 PURCHASE_INVALID, today 201 with creditsGranted 40. Either pin the fake to reject a path productId that differs from the staged one, or document the reliance on Play's path binding in docs/architecture.md."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/config.ts",
+      "line": 20,
+      "rule": "Security review (money): refund and voided-purchase handling (scout non-goal, tracked in apps-backend#55, open)",
+      "trigger": "No voided-purchase sweep exists yet. A user buys application_pack_40, gets 40 credits (consumed at once by settleConsume), then refunds the order in Play: the 40 credits stay. Before this PR the most one refund could keep was 5 credits; this PR raises it 8x. Not a regression in this diff's code, but #55 must land before the _40 product goes live in Play (tailor-my-resume#288).",
+      "title": "The 40-credit pack raises refund-abuse exposure while voided purchases are unhandled (#55)"
+    }
+  ]
+}

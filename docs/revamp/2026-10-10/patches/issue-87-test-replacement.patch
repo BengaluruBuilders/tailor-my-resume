@@ -1,0 +1,182 @@
+diff --git a/test/tailormyresume-ai-harness.ts b/test/tailormyresume-ai-harness.ts
+index fa0a0c5..31aaffd 100644
+--- a/test/tailormyresume-ai-harness.ts
++++ b/test/tailormyresume-ai-harness.ts
+@@ -237,12 +237,12 @@ export async function commonRouteTests(
+     assert.equal(await errorCodeOf(response), "PAYLOAD_TOO_LARGE");
+   });
+ 
+-  await test("a user without consent gets 403 CONSENT_REQUIRED and no model call", async () => {
++  await test("a user with no consent rows succeeds with the normal model calls", async () => {
+     routeCase.useSuccessModels();
++    const before = modelCalls(harness);
+     const response = await post(path, body, "no-consent-user");
+-    assert.equal(response.status, 403);
+-    assert.equal(await errorCodeOf(response), "CONSENT_REQUIRED");
+-    assert.equal(modelCalls(harness), 0);
++    assert.equal(response.status, 200);
++    assert.ok(modelCalls(harness) > before);
+   });
+ 
+   await test("a user with no consent rows succeeds with the normal model calls", async () => {
+diff --git a/test/tailormyresume-module.test.ts b/test/tailormyresume-module.test.ts
+index cc5069a..48fb3c8 100644
+--- a/test/tailormyresume-module.test.ts
++++ b/test/tailormyresume-module.test.ts
+@@ -5,8 +5,6 @@ import test from "node:test";
+ 
+ import { z } from "zod";
+ 
+-import { tailormyresumeConfig } from "../src/apps/tailormyresume/config.ts";
+-import { requireAiConsent } from "../src/apps/tailormyresume/consent.ts";
+ import { tailormyresumeDay } from "../src/apps/tailormyresume/day.ts";
+ import {
+   evidenceIds,
+@@ -16,12 +14,6 @@ import {
+ } from "../src/apps/tailormyresume/facts.ts";
+ import { tailormyresumeRoutes } from "../src/apps/tailormyresume/routes.ts";
+ import { appConfigSchema, type AppConfig } from "../src/apps.ts";
+-import {
+-  accountDeletions,
+-  consents,
+-  users,
+-} from "../src/core/accounts/schema.ts";
+-import { ApiError } from "../src/core/errors.ts";
+ import { createServerApp } from "../src/server.ts";
+ import { unusedDeletionPorts, unusedFilePresigner } from "./deletion-ports.ts";
+ import { unlimitedRateLimit } from "./rate-limits.ts";
+@@ -143,102 +135,6 @@ await test("an unknown X-App-Id on a tailormyresume path keeps the core 400", as
+   assert.equal(response.status, 400);
+ });
+ 
+-const { noticeVersion } = tailormyresumeConfig;
+-const at = (minutes: number): Date =>
+-  new Date(Date.UTC(2026, 9, 1, 0, minutes));
+-type ConsentSeed = {
+-  purpose: string;
+-  granted: boolean;
+-  policyVersion: string;
+-  recordedAt: Date;
+-};
+-const grantOf = (
+-  purpose: string,
+-  minutes: number,
+-  overrides: Partial<ConsentSeed> = {},
+-): ConsentSeed => ({
+-  purpose,
+-  granted: true,
+-  policyVersion: noticeVersion,
+-  recordedAt: at(minutes),
+-  ...overrides,
+-});
+-
+-let nextUser = 0;
+-async function seedUser(rows: readonly ConsentSeed[]): Promise<string> {
+-  const userId = `consent-user-${nextUser++}`;
+-  await database.insert(users).values({ userId });
+-  if (rows.length > 0) {
+-    await database.insert(consents).values(rows.map((r) => ({ userId, ...r })));
+-  }
+-  return userId;
+-}
+-
+-async function consentOutcome(userId: string): Promise<string> {
+-  try {
+-    await requireAiConsent(database, userId, noticeVersion);
+-    return "passes";
+-  } catch (error) {
+-    return error instanceof ApiError ? error.code : "unexpected";
+-  }
+-}
+-
+-const consentCases: [string, readonly ConsentSeed[], string][] = [
+-  ["no rows", [], "CONSENT_REQUIRED"],
+-  [
+-    "newest ai-processing row is a withdrawal",
+-    [
+-      grantOf("ai-processing", 1),
+-      grantOf("age-18-plus", 1),
+-      grantOf("ai-processing", 2, { granted: false }),
+-    ],
+-    "CONSENT_REQUIRED",
+-  ],
+-  [
+-    "an older grant then a newer withdrawal of age-18-plus",
+-    [
+-      grantOf("ai-processing", 1),
+-      grantOf("age-18-plus", 1),
+-      grantOf("age-18-plus", 5, { granted: false }),
+-    ],
+-    "CONSENT_REQUIRED",
+-  ],
+-  [
+-    "a grant of an old notice version",
+-    [
+-      grantOf("ai-processing", 1, { policyVersion: "2026-09-a" }),
+-      grantOf("age-18-plus", 1),
+-    ],
+-    "CONSENT_REQUIRED",
+-  ],
+-  ["age-18-plus missing", [grantOf("ai-processing", 1)], "CONSENT_REQUIRED"],
+-  [
+-    "a withdrawal then a newer grant",
+-    [
+-      grantOf("ai-processing", 1, { granted: false }),
+-      grantOf("ai-processing", 2),
+-      grantOf("age-18-plus", 1),
+-    ],
+-    "passes",
+-  ],
+-  [
+-    "both granted on the current version",
+-    [grantOf("ai-processing", 1), grantOf("age-18-plus", 1)],
+-    "passes",
+-  ],
+-];
+-for (const [name, rows, expected] of consentCases) {
+-  await test(`consent gate with ${name} gives ${expected}`, async () => {
+-    assert.equal(await consentOutcome(await seedUser(rows)), expected);
+-  });
+-}
+-
+-await test("consent gate on a deleted account gives ACCOUNT_DELETED before consent", async () => {
+-  const userId = await seedUser([]);
+-  await database.insert(accountDeletions).values({ userId });
+-  assert.equal(await consentOutcome(userId), "ACCOUNT_DELETED");
+-});
+-
+ await test("src has no requireAiConsent or aiConsentGate", async () => {
+   const sources = await readdir("src", { recursive: true });
+   for (const file of sources.filter((name) => name.endsWith(".ts"))) {
+diff --git a/test/tailormyresume-tailorings.test.ts b/test/tailormyresume-tailorings.test.ts
+index 2985cf7..2d9134e 100644
+--- a/test/tailormyresume-tailorings.test.ts
++++ b/test/tailormyresume-tailorings.test.ts
+@@ -1041,7 +1041,7 @@ await test("a fifth concurrent job gets 429 RATE_LIMITED with Retry-After 10, an
+   assert.equal((await run("t-c5")).status, "SUCCEEDED");
+ });
+ 
+-await test("another user's job is 404 and a POST without consent is 403", async () => {
++await test("another user's job is 404 and a POST without consent is 202", async () => {
+   reset();
+   await grant("t-owner");
+   generatorScript = [bullets(good1)];
+@@ -1060,14 +1060,10 @@ await test("another user's job is 404 and a POST without consent is 403", async
+     "t-owner",
+   );
+   assert.equal(unknown.status, 404);
+-  const noConsent = await request(
+-    "POST",
+-    "/v1/tailormyresume/tailorings",
+-    "t-none",
+-    body(),
+-  );
+-  assert.equal(noConsent.status, 403);
+-  assert.equal(await errorCode(noConsent), "CONSENT_REQUIRED");
++  await fund("t-none");
++  generatorScript = [bullets(good1)];
++  verifierScript = [verdicts(true)];
++  await settle("t-none", await start("t-none"));
+ });
+ 
+ await test("the stored row holds no profile or job text", async () => {

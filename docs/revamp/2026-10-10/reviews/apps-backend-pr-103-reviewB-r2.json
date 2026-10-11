@@ -1,0 +1,77 @@
+{
+  "head_sha": "b278a47d4c235b1aa58cc9d873e15bc5fb3b6c65",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "c1",
+      "status": "met",
+      "evidence": "The test 'the prototype resume gives Infosys current, Tata not current...' (test/tailormyresume-resume-parse-fields.test.ts:413) uses the prototype RESUME_TXT verbatim. It checks Infosys current=true and endDate null, Tata Digital endDate null and current=false, and location Pune. It passes at b278a47 and fails on a1a63e7, where Tata endDate is \"\" and not null. Schema, prompt and response carry summary, location, links and current."
+    },
+    {
+      "id": "c2",
+      "status": "met",
+      "evidence": "The summary must be a whole-word normalised substring that does not follow 'not ' or 'no ' directly (resume-parse.ts:206-215). '2 engineers' and 'une' are now null (test 26), and 'not/no certified in AWS' is null (test 27). Both tests fail on a1a63e7. A residual negation gap is a low finding."
+    },
+    {
+      "id": "c3",
+      "status": "met",
+      "evidence": "No change since round 1. Reviewer B ran these cases at head: url followed by ')', '>', '.', '. more' and '(url)' is kept. url followed by '!', ':', '?', '…', '|x', '/', '.more' or '#top' is dropped (fails closed). 'linkedin.com.evil.com' is OTHER, and javascript: or ftp: is dropped."
+    },
+    {
+      "id": "c4",
+      "status": "partial",
+      "evidence": "D24 is implemented. The model's Present without support gives current=false and endDate null (test 23 fails on a1a63e7), sourceSpan is gone, and blank dates become null. Reviewer B ran these variants: 'Mar 2023–Present', 'Mar 2023 — present', '03/2023 - present', '2023 - Current' and 'Till Date' are current. Present on the next line, a model start date that differs from the text, and a missing start date all give current=false with endDate null (fails closed). But the start date is searched on every line of the resume, so an open-ended entry becomes current from another line (medium finding). 'Ongoing', 'Currently' and 'Today' are kept as end dates (low finding)."
+    },
+    {
+      "id": "c5",
+      "status": "met",
+      "evidence": "Location must be a whole-word substring and passes the sensitive filter (tests 18, 26). Reviewer B ran these summaries at head. '14 March 1999', '+91 98200 41736', '98200-41736', Aadhaar '1234 5678 9012', 'ABCDE1234F' and '12/03/2021' are dropped. '2019 - 2023', '12,00,000', 'Jan 2020 to Dec 2022' and '1200000' are kept. Entries, refs and the sensitive drop are unchanged apart from current."
+    },
+    {
+      "id": "c6",
+      "status": "met",
+      "evidence": "npm run check passes at b278a47 on a local Postgres: typecheck, lint, format, boundaries, and 557/557 tests. The two lead replacements in test/tailormyresume-resume-parse.test.ts are in c98513c, so the PR body's 'pending' note is out of date. In CI, Secret scan passed, Validation was in progress and delivery-gates-pregate was queued when this review was written. The architecture.md:279 bullet now matches the code."
+    },
+    {
+      "id": "c7",
+      "status": "met",
+      "evidence": "A fabricated summary, location or link is null or dropped (test 9). A recombined, truncated or negated summary or location is null. A model Present that the text does not support no longer makes a role current. The open-ended cross-line case is the medium finding."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/resume-parse.ts",
+      "line": 166,
+      "rule": "c4 / D24 / Constitution I.1: a closed or undated role is never current, fail closed",
+      "trigger": "startedBeforePresent checks every line of the resume, and any present word later on that line counts, so an open-ended entry takes its current flag from another line. All of these were reproduced at head through the route. (a) The prototype RESUME_TXT plus a summary line 'Since Jun 2021 I have worked in analytics and now lead reporting.' makes Tata Digital (Jun 2021 – ) current=true. (b) 'Business Analyst, Infosys, Jan 2020 - Present' plus 'Analyst Intern, Tata Digital, Jan 2020 - ' makes both current. (c) A certification 'AWS Certified Cloud Practitioner, Jan 2023' next to a 'Jan 2023 - Present' job is current. (d) A project with startDate '2023' matches the '2023' inside 'Mar 2023 - Present' and is current. (e) 'Mindtree, Jan 2019 - Jan 2021 (now LTIMindtree)' with a model endDate null is current. In each case the required end-date gap is hidden and a past role is shown as running. Fix: count the line only when a range separator and a present word follow the start date directly, after normalising (^\\s*(?:-|to)\\s*(?:present|current|now|till date|to date)\\b). Return current false when the date occurrence that matched also satisfies another entry's startDate.",
+      "title": "An open-ended entry is current when its start date appears on any other line before a present word",
+      "proof": "parse(prototypeResume with the line 'Since Jun 2021 I have worked in analytics and now lead reporting.' added, entries [infosysRole, tataRole]) expects entries[1].current false. The head returns true."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/resume-parse.ts",
+      "line": 31,
+      "rule": "Issue #93 scope: current is true when the source says Present, now, current or similar",
+      "trigger": "Common Indian resume wording is missed. 'Data Analyst, Infosys, Jan 2023 - Ongoing' with the model endDate 'Ongoing' gives endDate 'Ongoing' and current=false. 'Currently' gives the same, because \\bcurrent\\b does not match 'currently', and so does 'Today'. The device then sees a closed role with a non-date end, and the end-date gap never asks.",
+      "title": "presentPattern misses Ongoing, Currently and Today, so the word is kept as a closed end date"
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/resume-parse.ts",
+      "line": 130,
+      "rule": "Constitution I.1 / round-1 low disposition: a truncated summary or location must not reverse the meaning",
+      "trigger": "negatedBefore catches only 'not ' or 'no ' directly before the match. These pass at head. 'I don't hold an AWS certification.' with summary 'hold an AWS certification'. 'I have never been certified in AWS.' and 'I am not yet certified in AWS.' with 'certified in AWS'. 'Not relocating to Mumbai. Based in Pune.' with location 'Mumbai'.",
+      "title": "Negation guard misses n't, never and 'not yet', so a negated statement can come back as a positive summary"
+    },
+    {
+      "severity": "low",
+      "file": "test/tailormyresume-resume-parse-fields.test.ts",
+      "line": 449,
+      "rule": "Review checklist 1: the test must fail if the fix were reverted (round-1 M2 disposition)",
+      "trigger": "Tests 24 ('a current word in a bullet of an older role...') and 25 ('a title and organization repeated in the summary...') pass both at b278a47 and with resume-parse.ts reverted to a1a63e7. Both give an explicit endDate ('2022', 'Dec 2022'), so the line check never runs. Every round-1 M2 trace used endDate null. No test would catch a return of the cross-line match.",
+      "title": "The regression tests for the sourceSpan fix also pass on the round-1 code",
+      "proof": "Swap a1a63e7:src/apps/tailormyresume/resume-parse.ts into a copy of the head and run the fields test file: tests 24 and 25 still pass, and only 22, 23, 26 and 27 fail."
+    }
+  ]
+}

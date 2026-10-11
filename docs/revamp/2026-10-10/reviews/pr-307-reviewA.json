@@ -1,0 +1,135 @@
+{
+ "head_sha": "381e1f1168eabb465b31798ab96c5367a02b100f",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "265-c1",
+   "status": "met",
+   "evidence": "tmrStepPillStyle test covers all three states, stepTextsAndDescription checks labels and description; baselines chrome_stepbar_1..3; layout at large font scale is finding 1."
+  },
+  {
+   "id": "265-c2",
+   "status": "partial",
+   "evidence": "Back, close, action targets asserted at 48dp; fixed heights clip at font scale 2.0 (finding 2); title font/case not asserted."
+  },
+  {
+   "id": "265-c3",
+   "status": "partial",
+   "evidence": "Selected+Role.Tab and callbacks asserted; disc 56dp asserted; 54dp item height and divider colour only in screenshots."
+  },
+  {
+   "id": "265-c4",
+   "status": "met",
+   "evidence": "toastIsVisibleAt3199AndGoneAt3200 uses mainClock virtual time."
+  },
+  {
+   "id": "265-c5",
+   "status": "partial",
+   "evidence": "Replacement/restart test would fail without restart; actionRunsOnce misses dismissing a callback-shown toast (finding 4)."
+  },
+  {
+   "id": "265-c6",
+   "status": "partial",
+   "evidence": "Polite live region asserted; colour, radius, 96dp, insets and 40dp action in screenshots only; action target 40dp (finding 3)."
+  },
+  {
+   "id": "265-c7",
+   "status": "partial",
+   "evidence": "Handle 44x4 and 18dp side padding asserted; scrim, colour, radius 32 and 12/40 paddings unasserted."
+  },
+  {
+   "id": "265-c8",
+   "status": "partial",
+   "evidence": "Sheet reduced first frame tested; toast is not (finding 6)."
+  },
+  {
+   "id": "265-c9",
+   "status": "met",
+   "evidence": "20 chrome_* baselines, 10 screens x 2 font scales, both states drawn by the prototype."
+  },
+  {
+   "id": "265-c10",
+   "status": "partial",
+   "evidence": "pregate green; Build CI jobs were still in progress at review time."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrStepBar.kt",
+   "line": 36,
+   "rule": "Accessibility: WCAG 1.4.4 / issue constraint 'layouts must not clip at font scale 2.0 (heights are minimums)'",
+   "trigger": "System font scale 2.0: TmrCapsText caps labels at 1.3 so step, tab and title labels ignore the user's remaining 35% of enlargement, and the step-bar Row has no weights, so three non-wrapping pills (softWrap=false, maxLines=1) overflow a 360dp width once labels like '2 JOB' or translated names grow; nothing asserts the 2.0 layout.",
+   "title": "Font-scale cap on chrome labels (TmrChromeText.kt, MAX_CHROME_FONT_SCALE=1.3) is a workaround; adapt the layout instead of capping",
+   "proof": "Test at fontScale 2.0 with a 320dp width asserting the step bar's right edge stays within the parent and pill text is not clipped"
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrTopBar.kt",
+   "line": 71,
+   "rule": "Constraint: heights are minimums at font scale 2.0",
+   "trigger": "Font scale 2.0: the bar is fixed height(50dp) and the action pill fixed height(44dp), so a 'Save' or 'Done' button label (Text, no cap) grows past the lime pill and is clipped; leading/title row cannot grow.",
+   "title": "TopBar and action pill use fixed heights instead of heightIn(min=...)",
+   "proof": "Compose test with LocalDensity fontScale=2f asserting the action text bounds are inside the pill bounds"
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrToast.kt",
+   "line": 105,
+   "rule": "Accessibility: touch target >= 48dp",
+   "trigger": "Toast action pill is height(40.dp) with clickable and no minimum-interactive padding, so the Undo target is 40dp high; it is also a fixed height, so the label clips at font scale 2.0. The criterion's 40dp visual can stay, but the hit area must reach 48dp.",
+   "title": "Toast action touch target 40dp < 48dp and fixed height",
+   "proof": "assertTouchHeightIsAtLeast(48.dp) on TOAST_ACTION (the current test suite never checks it)"
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrToast.kt",
+   "line": 109,
+   "rule": "Correctness: action runs once and dismisses only its own toast",
+   "trigger": "Undo callback calls state.show('Undone'); the pill then runs state.dismiss() unconditionally, which clears the NEW toast immediately, so a follow-up confirmation never appears.",
+   "title": "dismiss() after action.onClick() wipes a toast shown by the callback",
+   "proof": "Test: action = { state.show(\"Undone\") }; click action; assert 'Undone' is displayed"
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrToast.kt",
+   "line": 70,
+   "rule": "Accessibility: WCAG 2.2.1 timing adjustable; TalkBack users",
+   "trigger": "Toast carrying an Undo action disappears at a fixed 3200 ms regardless of AccessibilityManager.getRecommendedTimeoutMillis, so TalkBack or switch users cannot reach Undo in time. The 3.2 s value is prototype-specified; at least the action variant should extend to the recommended timeout.",
+   "title": "Fixed 3.2 s timeout ignores the system recommended accessibility timeout for actionable toasts"
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrChromeTest.kt",
+   "line": 392,
+   "rule": "Criterion 265-c8: sheet and toast first composed frame at final position",
+   "trigger": "Only the sheet has a reduced-motion test. If TmrToastHost used Animatable(0f) under motion.reduced (translationY 12dp, alpha 0) no test fails; criterion says both sheet and toast.",
+   "title": "No reduced-motion test for the toast host",
+   "proof": "Reduced motion, show toast, first frame without advancing the clock: assert toast alpha 1 and top == toastTop"
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrBottomSheet.kt",
+   "line": 35,
+   "rule": "Accessibility: sheet has a title and dismiss action",
+   "trigger": "TalkBack opens the sheet with no pane title, content behind the scrim stays focusable, and there is no back-press handling, so the sheet cannot be dismissed with the system back gesture; only the unlabelled scrim exposes a dismiss action.",
+   "title": "Sheet lacks paneTitle/traversal grouping and BackHandler"
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrTabBar.kt",
+   "line": 58,
+   "rule": "Accessibility: tabs announce selected state and position",
+   "trigger": "Selected state and Role.Tab are present, but no CollectionInfo/CollectionItemInfo is set, so TalkBack does not announce 'tab 1 of 2'; the lime disc sits between the tabs as a plain button.",
+   "title": "Tab position is not announced"
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrChromeTest.kt",
+   "line": 261,
+   "rule": "Criteria 265-c3, c6, c7 evidence: assertions that can fail",
+   "trigger": "Tab item 54dp height, divider colour, toast radius/top/side insets, scrim 65%, sheet colour, top radius 32dp and the 12/40 paddings are covered by screenshots only (re-recorded baselines pass if wrong); changing sheetPaddingBottom or the toast radius passes unit tests.",
+   "title": "Geometry criteria rely on screenshot baselines alone"
+  }
+ ]
+}

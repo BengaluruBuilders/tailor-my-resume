@@ -1,0 +1,42 @@
+{
+  "head_sha": "806a1daf27956fccb7b2ffe9a35537b2fc58da9d",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "263-c1",
+      "status": "met",
+      "evidence": "docs/CONSTITUTION.md:120 at 806a1daf names `design/prototype-2026-10-10/` at 374 x 834 dp as the acceptance criterion; the rest of the Why cell and the Gate cell are unchanged from the base. Unchanged since round 1 (806a1daf only adds lines 139-140)."
+    },
+    {
+      "id": "263-c2",
+      "status": "met",
+      "evidence": "docs/CONSTITUTION.md:138-140 hold three rows under '### Ledger amendment — 2026-10-10, screenshot acceptance source' in the Item/Why/Gate format of the sections above: the screenshot source, D4 (one 'Accept changes' action plus per-change Undo satisfies I.2; Export PDF disabled until taken; gates UpdateBulletDecisionUseCaseTest and TailorViewModelTest) and D5 (before/after number is keyword coverage per PRD 4.2; gate policy I.3). Both match DECISIONS.md D4 and D5. Gates exist: core/domain/src/test/kotlin/com/tailormyresume/core/domain/UpdateBulletDecisionUseCaseTest.kt, feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorViewModelTest.kt, and `forbid I.3` at tools/ci/check-constitution.sh:85. Both rows state 'I.2 is unchanged' / 'I.3 is unchanged'. See the low finding on the D5 gate cell."
+    },
+    {
+      "id": "263-c3",
+      "status": "met",
+      "evidence": "git diff base...806a1daf touches only docs/CONSTITUTION.md (9+, 1-), all below '## Ledger' (line 99): line 120 and lines 134-141. Article I table (lines 16-27) is byte-identical, so I.1, I.2, I.3 and I.5 rule text and gates are untouched; the #255 I.5 ledger row (128-132) is unchanged. No row relaxes a rule: D4 keeps 'no export without an explicit accept', D5 narrows the label."
+    },
+    {
+      "id": "263-c4",
+      "status": "met",
+      "evidence": "CI at 806a1daf, run 38078206669: 'Constitution policy' success, 'Build, lint, and unit tests' success (Gradle shards skipped, docs-only); 'delivery-gates-pregate' success. The earlier run 38078199239 was cancelled by the newer run (same SHA). Local: BASE_REF=origin/main tools/ci/check-constitution.sh printed 'Constitution check passed.'"
+    },
+    {
+      "id": "263-c5",
+      "status": "met",
+      "evidence": "PR body at 806a1daf cites 'Amendment per Article VII.1' and 'revamp decisions D4 and D5 (docs/revamp/2026-10-10/DECISIONS.md)' with one-line summaries of each. The '## Review disposition' section records the round-1 c2/c5 finding as fixed in 806a1daf, which the diff confirms."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "docs/CONSTITUTION.md",
+      "line": 140,
+      "rule": "Article VII.2 (a rule must name its gate; if none exists, write 'Review') and 263-c2 (D5 row cites a real gate)",
+      "trigger": "The D5 row says the number is 'labelled as keyword coverage, never match, fit or ATS' and names `tools/ci/check-constitution.sh` policy I.3 as its gate. The I.3 regex (check-constitution.sh:85-87) only matches ATS-score and guarantee phrases: a res/values string 'Your match 92' or 'Fit score 92' passes it (verified: grep -E with the I.3 pattern exits 1). DECISIONS.md D5 itself records 'the I.3 regex would not catch match'. The ledger therefore claims an enforcement for the 'never match, fit' part that does not exist.",
+      "title": "D5 gate cell overstates policy I.3: the regex does not catch 'match' or 'fit' labels",
+      "proof": "printf 'Your match 92\\n' | grep -E '[Yy]our ATS score|ATS score:|[Bb]eats? (the )?ATS|ATS[- ](proof|approved)|[Gg]uaranteed (job|interview|selection|placement|shortlist)' exits 1. Fix in-PR: gate cell 'Policy I.3 (ATS and guarantee phrases); Review for the match/fit label', with no rule-text change."
+    }
+  ]
+}

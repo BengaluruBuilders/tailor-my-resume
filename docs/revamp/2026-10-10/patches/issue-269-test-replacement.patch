@@ -1,0 +1,42 @@
+diff --git a/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt b/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt
+index 75b596d9..0ee4cc1f 100644
+--- a/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt
++++ b/app/src/test/kotlin/com/tailormyresume/app/ui/AppViewModelTest.kt
+@@ -7,6 +7,7 @@ import com.tailormyresume.core.domain.offline.OfflineSignInGateway
+ import com.tailormyresume.core.domain.onboarding.ObserveStartDestinationUseCase
+ import com.tailormyresume.core.model.SignInAccount
+ import com.tailormyresume.core.testing.mock.TestMockStateStore
++import com.tailormyresume.core.testing.repository.TestProfileRepository
+ import com.tailormyresume.core.testing.repository.TestSessionRepository
+ import com.tailormyresume.core.testing.util.MainDispatcherRule
+ import kotlinx.coroutines.test.StandardTestDispatcher
+@@ -21,7 +22,7 @@ class AppViewModelTest {
+ 
+     private val sessionRepository = TestSessionRepository()
+ 
+-    private fun viewModel() = AppViewModel(ObserveStartDestinationUseCase(sessionRepository))
++    private fun viewModel() = AppViewModel(ObserveStartDestinationUseCase(sessionRepository, TestProfileRepository()))
+ 
+     @Test
+     fun rootState_beforeAnyValueIsCollected_isLoading() {
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/ObserveStartDestinationUseCaseTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/ObserveStartDestinationUseCaseTest.kt
+index 80d4f91a..a9357745 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/ObserveStartDestinationUseCaseTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/onboarding/ObserveStartDestinationUseCaseTest.kt
+@@ -3,6 +3,7 @@ package com.tailormyresume.core.domain.onboarding
+ import app.cash.turbine.test
+ import com.google.common.truth.Truth.assertThat
+ import com.tailormyresume.core.model.SignInAccount
++import com.tailormyresume.core.testing.repository.TestProfileRepository
+ import com.tailormyresume.core.testing.repository.TestSessionRepository
+ import kotlinx.coroutines.test.runTest
+ import org.junit.Test
+@@ -10,7 +11,7 @@ import org.junit.Test
+ class ObserveStartDestinationUseCaseTest {
+ 
+     private val session = TestSessionRepository()
+-    private val useCase = ObserveStartDestinationUseCase(session)
++    private val useCase = ObserveStartDestinationUseCase(session, TestProfileRepository())
+ 
+     @Test
+     fun withOnboardingIncompleteTheStartIsSignIn() = runTest {

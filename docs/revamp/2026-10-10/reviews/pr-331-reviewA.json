@@ -1,0 +1,100 @@
+{
+ "head_sha": "0098cbfaf48b5aed7216dbddcacc62919d0a069e",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "279-c1",
+   "status": "met",
+   "evidence": "EditResumeViewModelTest.readyStateShowsSummaryBulletsSourceTagsAndSkills plus export_edit baselines; chrome title Resume and Save come from ScreenChrome (ScreenChrome.kt:75)."
+  },
+  {
+   "id": "279-c2",
+   "status": "met",
+   "evidence": "onSave goes through HandEditBulletUseCase (USER_EDITED words, no rewrite); edits after accept keep changesAcceptedAt so ExportReadiness stays ALLOWED; overflow hides the fits line."
+  },
+  {
+   "id": "279-c3",
+   "status": "met",
+   "evidence": "ExportResumeUseCase gates on ExportReadiness, names the file with core ExportFileName, stores exportFileName; page size 595x842 / 612x792 in PdfPageWriter."
+  },
+  {
+   "id": "279-c4",
+   "status": "partial",
+   "evidence": "Fit logic is tested through the PdfPages seam; production AndroidPdfResumeRenderer and the bitmap sink share ResumePdfFit/PdfPageWriter/ResumePdfComposer, so layout is the same code. Text is drawn with StaticLayout.draw onto the PdfDocument canvas (real text path), but no test extracts text from the PDF bytes; deferred to the D44 walk per D65."
+  },
+  {
+   "id": "279-c5",
+   "status": "met",
+   "evidence": "Gate in ExportResumeUseCase.invoke (ExportReadiness.check != ALLOWED -> Refused, nothing written) and ExportedViewModel maps Refused to NothingExported; rejected bullets and D54 fallbacks come from the shared assembler."
+  },
+  {
+   "id": "279-c6",
+   "status": "met",
+   "evidence": "ExportedViewModel.stateFor derives credits from ledger; close is the shell Close leading for ExportedNavKey; ExportedScreenshots paid."
+  },
+  {
+   "id": "279-c7",
+   "status": "met",
+   "evidence": "freeResumeUsed line and string match the issue text; screenshot exported_free."
+  },
+  {
+   "id": "279-c8",
+   "status": "met",
+   "evidence": "Share/Open via FileProvider (cache-path exports/, exported=false, grantUriPermissions) with FLAG_GRANT_READ_URI_PERMISSION; PdfShareIntentTest; file resolved by name from ExportedFileStore."
+  },
+  {
+   "id": "279-c9",
+   "status": "met",
+   "evidence": "SetApplicationStatusUseCase returns the previous status and date, Undo restores both through restore; tests listed in the PR."
+  },
+  {
+   "id": "279-c10",
+   "status": "met",
+   "evidence": "Status chip, Marked on, Change and TmrStatusSheet; Saved clears appliedOn."
+  },
+  {
+   "id": "279-c11",
+   "status": "met",
+   "evidence": "Soon rows only emit ComingSoon; Go to Applications roots DefaultApplicationsNavKey."
+  },
+  {
+   "id": "279-c12",
+   "status": "met",
+   "evidence": "export_* baselines exist at prototype 1x and narrow 337dp font 2.0 for edit and four exported states; file name uses TmrFitText in TmrFileCard."
+  },
+  {
+   "id": "279-c13",
+   "status": "partial",
+   "evidence": "TailorRealEntryHiltTest covers D55/D57 and the placeholder keys test was moved to routed keys. verify-local green and the D44 emulator walk (PDF bytes, selectable text, size, Share/Open) are not shown in the PR yet."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/exported/ExportedViewModel.kt",
+   "line": 75,
+   "rule": "PRD 6.1.2 export history; scale (repeated I/O)",
+   "trigger": "Open Exported, go back to Tailored, tap Export PDF again (or recreate after process death): init re-runs exportResume, which rewrites the PDF and appends another ExportRecord with the same file name and bumps updatedAt each time, so the history and the account data archive list the same export several times.",
+   "title": "Export runs in ViewModel init and appends a new ExportRecord on every entry",
+   "inline": true
+  },
+  {
+   "severity": "low",
+   "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/export/ExportDirectory.kt",
+   "line": 11,
+   "rule": "data integrity: error paths",
+   "trigger": "A new export deletes every file in cache/exports before writing; if the render or rename then fails, the previous application's PDF is already gone and its stored exportFileName points at a missing file (Open then shows Couldn't find the PDF). Delete after the rename succeeds, and only files other than the new target.",
+   "title": "Previous exports are deleted before the new file is written",
+   "inline": true
+  },
+  {
+   "severity": "low",
+   "file": "feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/export/ResumePdfFitTest.kt",
+   "line": 104,
+   "rule": "279-c4 text extracted equals the accepted document (test strength)",
+   "trigger": "renderedLinesEqualAcceptedDocument compares composer.lines, which the composer fills from its input before drawing, to a list built from the same document; text that fails to draw or is clipped would still pass. Accepted by D65 until the D44 walk extracts the PDF text, but a follow-up instrumented test is needed.",
+   "title": "Line equality test records input text, not drawn text",
+   "inline": true
+  }
+ ]
+}

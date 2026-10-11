@@ -1,0 +1,47 @@
+{
+ "head_sha": "78a562ba099a26a456ce5b8d27b5f2fbd6f6823e",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "266-c1", "status": "met", "evidence": "All 11 poses are drawn from the spec table and assertSpec checks every pose. The content-box sizes now match design/prototype-2026-10-10/Paige.dc.html. Arms: lines 20-21 are 22px with a 2.5px border on each side, so 27. Fold: line 24 is 30px with border-left and border-bottom, so 32.5. Happy mouth: line 32 has a border with border-top:none, so mw+5 by mh+2.5. Sad mouth: 25 x 12.5. right:-16px keeps the right arm growing leftwards, which matches the Compose formula. Only the bordered parts changed, so this is not an unrelated redesign. The 11 hero_paige_* and 3 hero_card_* re-records come from this size change."},
+  {"id": "266-c2", "status": "met", "evidence": "running = !motion.reduced && animated, so under reduced no loop starts and stillClock returns 0. reducedClockStaysZero and reduced*PixelsNeverChange still cover the composable. The settled frame is unchanged: a still spec (Fail, Delete) under Default motion previously got transforms of 0 at every t, because bobPhase is null and wobble is false. It now gets stillClock, and the transforms are still 0."},
+  {"id": "266-c3", "status": "met", "evidence": "The time is still read only inside graphicsLayer. The loop uses withInfiniteAnimationFrameNanos, so the test InfiniteAnimationPolicy cancels it when autoAdvance is on. paigeUnderDefaultMotionReachesIdleWithAutoAdvancingClock uses the default autoAdvance and could not idle with the old withFrameNanos loop. nonReducedClockRuns, which uses autoAdvance=false, still proves that Paige moves. No tween(, spring( or duration literal was added outside motion code."},
+  {"id": "266-c4", "status": "met", "evidence": "clearAndSetSemantics is unchanged, and paigeIsNotATalkBackStop still applies."},
+  {"id": "266-c5", "status": "met", "evidence": "maxLines and ellipsis are removed and the card grows. headlineStyle still checks 28 sp and 12 sp. The new test does not guard the change (low finding)."},
+  {"id": "266-c6", "status": "met", "evidence": "clip(pill) comes before background and clickable, and the disabled tap tests are unchanged. The hit area becomes the stadium shape, which is the same as Material Surface buttons. The height is still 56 dp. The focus overlay comes from the same indication and is clipped to the pill."},
+  {"id": "266-c7", "status": "met", "evidence": "input_button_primary(_font200) changes only at the anti-aliased pill edge, where the clip and the background shape coincide. The CI Screenshot tests job passes on the head."},
+  {"id": "266-c8", "status": "met", "evidence": "The secondary, text and upload card ripples are clipped. The upload card clips after drawBehind, so its dashed border is not cut."},
+  {"id": "266-c9", "status": "met", "evidence": "The choice row clips after background and border, so its baselines are unchanged and the RadioButton tests pass."},
+  {"id": "266-c10", "status": "met", "evidence": "label is required and the whole row is a single toggleable with Role.Switch and min 48 dp. toggleRowIsTheSwitchWithNameAndTouchTarget checks role, height, merged text and click. toggleExposesOneToggleableNode checks for one toggleable node. Both fail on the old 52x32 unlabelled box. The row clip introduces new label clipping (medium finding)."},
+  {"id": "266-c11", "status": "met", "evidence": "Text fields are unchanged by the Fixer commit."},
+  {"id": "266-c12", "status": "partial", "evidence": "Build run 38088645856 on the head: Static checks, Core, Feature and App unit tests, and Screenshot tests passed. Lint and Assemble APKs were still in progress. Constitution policy was cancelled there and passed in run 38088674572. Strings and packages are unchanged."}
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/input/TmrToggle.kt",
+   "line": 30,
+   "rule": "PRD 10.5 dynamic text size; Prototype.dc.html:835: the toggle row is an unclipped full-width button, and the card supplies padding 0 16px",
+   "trigger": "The Fixer clips the whole full-width row to TmrTheme.shapes.pill, which is CircleShape. The label Text starts at x=0 with no horizontal padding. Take TmrToggle(label = \"Email me when a tailored application is ready to review\") in a 374 dp column, or any label at font scale 2.0. The label wraps to 2 lines, so the row is 48 dp tall and the corner radius is 24 dp. At the cap top of line 1 (y about 7 dp), the clip edge is at x about 7 dp, so the top-left of the first glyph is cut off. The same happens to the bottom-left of line 2, and taller rows cut more. At 1.0, the single-line 'Notify me' baseline is intact, which is why the baselines miss this. Fix: drop the row clip, or clip to a shape whose radius is no larger than the horizontal padding (for example pillRow with padding of 16 dp or more).",
+   "title": "Pill clip on the toggle row cuts the leading glyphs of a wrapped label",
+   "proof": "Add a Roborazzi capture of TmrToggle with a two-line label at TmrTestDevices.prototypeLargeFont. The first glyph is visibly cut. Alternatively, sample the pixels of the first glyph column at the line-1 cap top and compare them with the same composable without .clip."
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/hero/TmrHeroTest.kt",
+   "line": 389,
+   "rule": "Review checklist 1: the test must fail if the fix is reverted (round-1 headline truncation)",
+   "trigger": "Compose's FontScaling uses nonlinear scaling at fontScale 2.0. 28 sp becomes about 37 dp, not 56 dp: the glyphs in hero_card_blue_font200 are about 1.32x the 1.0 baseline. So 'Tell Paige about you' at 374 dp wraps to exactly 2 lines, and the baseline shows 'Tell Paige / about you'. If maxLines = 2 and TextOverflow.Ellipsis are restored, hasVisualOverflow stays false and this test and the new baseline both still pass. My round-1 trigger assumed linear 56 sp. The fix is still correct, because longer headlines exceed 2 lines even at 1.0, but nothing guards it.",
+   "title": "Font-2.0 headline test passes on the pre-fix code",
+   "proof": "Revert TmrHeroCard to maxLines = 2 with overflow = TextOverflow.Ellipsis. headlineFullyDisplayedAtFontScale200 still passes. Use the long headline from headlineStyle and assert lineCount > 2 and !hasVisualOverflow. That test fails on the old code."
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/hero/TmrHeroTest.kt",
+   "line": 316,
+   "rule": "Review checklist 1 (round-1 finding: no frame loop for poses that never move)",
+   "trigger": "staticPosesDoNotRunClock reads a separate rememberPaigeTimeMs(Default, animated = false) that it creates itself. It never observes the value TmrPaige passes at TmrPaige.kt:158. Change that line to animated = true, or drop the bobPhase check. Then Fail and Delete run the per-vsync loop again, and the test still passes.",
+   "title": "Static-pose test does not exercise TmrPaige's animated wiring",
+   "proof": "Edit TmrPaige.kt:158 to rememberPaigeTimeMs(motion, animated = true). staticPosesDoNotRunClock still passes. Extract an internal TmrPaigeSpec.animates and assert it is false only for Fail and Delete. That test fails on the edit."
+  }
+ ]
+}

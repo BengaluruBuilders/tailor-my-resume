@@ -1,0 +1,1492 @@
+[
+  {
+    "key": "W1-A",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "chore(tailor): delete cover letter, prep questions, DOCX, export preview, section regeneration and the old tailor screens",
+    "body_markdown": "## Context\n\nThe 2026-10-10 prototype replaces the whole tailor area. Cover letter, prep questions and DOCX are cut (PRD 6.1.2). The old Avvio screens are not a build source. Wave 1 removes them so later waves build on a clean module. Plan: docs/revamp/2026-10-10/PLAN.md section 1.\n\n## Scope\n\n- Delete packages `coverletter/`, `prepquestions/`, `export/docx/`, `exportpreview/`, `packpurchase/`, `credits/` (UI), `exported/` UI files (keep `ExportedFileStore.kt`), `ShareLastExport*`.\n- Delete `BulletReviewSheet.kt`, `RegenerateSectionUseCase.kt`, `AiNotice.kt`, `CanvasParts.kt`, `ReviewContent.kt`, `ReviewParts.kt`, `ReviewLabels.kt`, `JobLabels.kt`, `TailorScreen.kt`, `TailorRoute.kt` and their screenshot tests and baselines.\n- KEEP (later waves reuse them): `TailorViewModel.kt` and `TailorViewModelTest` (Constitution I.2 gate; strip UI-only fields so it compiles), `TailorUiState*.kt` only as far as the ViewModel needs, `HandEditBulletUseCase.kt`, `diff/WordDiff.kt`, `document/**`, `export/` PDF files (`AndroidPdfResumeRenderer`, `ResumePdfComposer`, `Pagination`, `PdfPageWriter`, `PdfResumeStyle`, `RenderedResume`, `ResumePdfRenderer`, `ExportDirectory`, `ExportFileName`, `ExportModule`, `PdfShareIntent`, `TailorFileProvider`), `exported/ExportedFileStore.kt`.\n- Replace each removed entry in `TailorEntryProvider.kt` with a placeholder entry that renders the NavKey name with `androidx.compose.foundation.text.BasicText` (no raw Material, Constitution II.5), so navigation still compiles. Keep the NavKeys in `feature/tailor/api` (W1-D removes the dead ones).\n- Delete string resources that no remaining file uses.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Changing `feature/tailor/api`, `core/*` or `:app` (W1-D owns them).\n\n## Acceptance criteria\n\n- [ ] `./gradlew :feature:tailor:impl:testDebugUnitTest :feature:tailor:impl:verifyRoborazziDebug assembleDemoDebug assembleProdDebug` passes.\n- [ ] `TailorViewModelTest` and `UpdateBulletDecisionUseCaseTest` still exist and pass (I.2 gates).\n- [ ] No file under `feature/tailor/impl` mentions CoverLetter, PrepQuestion, Docx or RegenerateSection.\n- [ ] `feature/tailor/impl/lint-baseline.xml` has no more entries than before.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/tailor/impl/src/main/**`\n- `feature/tailor/impl/src/test/**`\n- `feature/tailor/impl/src/test/screenshots/** (166 PNG)`\n- `feature/tailor/impl/src/main/res/**`\n- `feature/tailor/impl/lint-baseline.xml (may only shrink)`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W1, lane W1-A\n- Depends on: none\n\n## Prototype reference\n\nREADME \"Not in the MVP\"; PRD 6.1.2 rows \"Prep questions, cover letter\" and \"Export\".\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W1",
+      "lane:W1-A",
+      "routing:minimax-impl"
+    ],
+    "wave": "W1",
+    "lane": "W1-A",
+    "depends_on_titles": [],
+    "depends_on_keys": [],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/tailor/impl/src/main/**",
+      "feature/tailor/impl/src/test/**",
+      "feature/tailor/impl/src/test/screenshots/** (166 PNG)",
+      "feature/tailor/impl/src/main/res/**",
+      "feature/tailor/impl/lint-baseline.xml (may only shrink)"
+    ]
+  },
+  {
+    "key": "W1-B",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "chore(onboarding,profile): delete welcome, consent, fact-by-fact confirmation, guided form, evidence path and the old profile screens",
+    "body_markdown": "## Context\n\nThe prototype starts at Sign in, has no consent screen and no 18+ check, and replaces per-fact confirmation with one profile review (PRD 6.1.2). The old screens go so W4 can rebuild onboarding and profile.\n\n## Scope\n\n- feature:onboarding:impl: delete `welcome/`, `consent/`, `confirmfacts/`, `pastejd/` (the job screen moves to feature:analysis in W4), and the UI, UiState, ViewModel and screenshot tests of `signin/` and `importresume/`.\n- KEEP in onboarding: `importresume/ContentResolverResumeTextSource.kt`, `importresume/ResumeTextSource.kt`, `di/OnboardingModule.kt` (binding of the text source), with their unit tests.\n- feature:profile:impl: delete `evidencepath/`, `guidedform/` (keep `ContactFieldValidator.kt` and its test), `facteditor/`, `ProfileScreen*`, `ProfileOverview`, `ProfileSheetHost`, `ProfileHeader`, `ProfileCard`, `ProfileEmptyState`, `ProfileExit`, `common/**`, `ProfileViewModel` and tests, all screenshot tests and the 114 + 73 baselines.\n- KEEP in profile: `UserFactWriter.kt` if a use case still needs it, else delete; `ContactFieldValidator.kt`.\n- Replace removed entries in both `*EntryProvider.kt` files with `BasicText` placeholders, as in W1-A.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- `feature/*/api`, `core/*`, `:app` (W1-D).\n\n## Acceptance criteria\n\n- [ ] `./gradlew :feature:onboarding:impl:testDebugUnitTest :feature:profile:impl:testDebugUnitTest verifyRoborazziDebug assembleDemoDebug assembleProdDebug` passes.\n- [ ] No file in these modules mentions Consent, Welcome, EvidencePath, GuidedForm or ConfirmFacts.\n- [ ] `ContentResolverResumeTextSource` tests still pass (needed for Upload in W4-A2).\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/onboarding/impl/**`\n- `feature/profile/impl/**`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W1, lane W1-B\n- Depends on: none\n\n## Prototype reference\n\nREADME \"Not in the MVP\" item 1; PRD 6.1.2 rows \"Sign-in\" and \"Profile\".\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W1",
+      "lane:W1-B",
+      "routing:minimax-impl"
+    ],
+    "wave": "W1",
+    "lane": "W1-B",
+    "depends_on_titles": [],
+    "depends_on_keys": [],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/onboarding/impl/**",
+      "feature/profile/impl/**"
+    ]
+  },
+  {
+    "key": "W1-C",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "chore(analysis,applications,settings): delete the share card, requirement sheets, notes, Your data and Account deleted screens and the old screens",
+    "body_markdown": "## Context\n\nThe share card, notes, prep tasks, the separate Your data and Delete account screens and the consent read-only view are cut (PRD 6.1.2). Wave 4 rebuilds Applications, Job and Settings from the prototype.\n\n## Scope\n\n- feature:analysis:impl: delete every file except `navigation/AnalysisEntryProvider.kt` (placeholders) and `AnalysisResultMapper.kt` if it is pure mapping with tests; delete `ShareFitScreen.kt`, `AnalysisSheets.kt`, all screenshot tests and the 42 baselines.\n- feature:applications:impl: delete all screens, `NotesAutosaver.kt`, `ApplicationWorkspace*`, fixtures, ViewModels and the 48 baselines; keep the entry provider with placeholders.\n- feature:settings:impl: delete `yourdata/`, `deleteaccount/AccountDeleted*`, all screens, ViewModels and the 54 baselines; KEEP `navigation/SettingsFileShare.kt` (interim data-export share, see PLAN R6) and its test if any.\n- Remove the `projects.core.ui` dependency from `feature/settings/impl/build.gradle.kts` only if no file in the module still imports `core.ui` (W1-F deletes the module).\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- `feature/*/api`, `core/*`, `:app` (W1-D).\n\n## Acceptance criteria\n\n- [ ] `./gradlew :feature:analysis:impl:testDebugUnitTest :feature:applications:impl:testDebugUnitTest :feature:settings:impl:testDebugUnitTest verifyRoborazziDebug assembleDemoDebug assembleProdDebug` passes.\n- [ ] No file in these modules mentions ShareFit, Notes, YourData, AccountDeleted or Consent.\n- [ ] `feature/analysis/impl/lint-baseline.xml` has no more entries than before.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/analysis/impl/**`\n- `feature/applications/impl/**`\n- `feature/settings/impl/**`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W1, lane W1-C\n- Depends on: none\n\n## Prototype reference\n\nPRD 6.1.2 rows \"Share card\", \"Applications\", \"Settings\".\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W1",
+      "lane:W1-C",
+      "routing:minimax-impl"
+    ],
+    "wave": "W1",
+    "lane": "W1-C",
+    "depends_on_titles": [],
+    "depends_on_keys": [],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/analysis/impl/**",
+      "feature/applications/impl/**",
+      "feature/settings/impl/**"
+    ]
+  },
+  {
+    "key": "W1-D",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "chore(core,app): remove consent, cover letter, prep, connectivity and other dead features from the domain, data, network and app layers",
+    "body_markdown": "## Context\n\nAfter W1-A..C no screen uses these features. This issue removes the code below the screens, so W2 starts from a small core.\n\n## Scope\n\n- Delete consent: `ConsentUploader`, `ConsentRecord`, `ConsentRequest/ConsentDto/ConsentResponse` DTOs and the `recordConsent` call in `TailorMyResumeApi`, `ConsentRevoker` (prod), `ConsentNavKey`.\n- Delete cover letter and prep: `core/domain/coverletter/**`, `core/domain/prep/**`, `CoverLetterRepository`, `StoredCoverLetterRepository`, `PrepPlanRepository`, `StoredPrepPlanRepository`, `WrittenCoverLetter`, `PrepPlanItem`, DTO files `CoverLetter.kt`, `Prep.kt`, API methods `prepQuestions`, `coverLetter`, prod `GuardedCoverLetterSource`, `GuardedPrepQuestionSource`, `RemoteCoverLetterSource`, `RemotePrepQuestionSource`, their contract tests and fakes in core:testing.\n- Delete connectivity (no offline states): `core/data/connectivity/**`, `ConnectivityBindings` in demo and prod, `TestConnectivityMonitor`, `ConnectivityMonitorContractTest`, the debug menu \"switch offline\" action.\n- Delete `UpgradedMatch.kt`, `CareerStage.kt`, `ImportRemovalNotice.kt` UI use (keep dropping sensitive fields), `KeptJobDescription` if unused.\n- Delete NavKeys of deleted screens from `feature/*/api` (Welcome, PasteJobDescription, Consent, ConfirmFacts, FactEditor, GuidedProfileForm, FactEvidence, YourData, AccountDeleted, ExportPreview, PackPurchase, ShareLastExport, BulletReview, CoverLetter, PrepQuestions) and every reference in `:app` (`TopLevelNavItem`, `TmrApp`, debug targets).\n- Remove the cover-letter and prep stores from `SignOutCleaner`, `LocalDataWiper`, `AccountDataArchiveWriter` and the wipe lists, with tests updated.\n- KEEP (must survive): `FabricationGuard`, `OfflineFabricationGuard` and its lexicons and claim checkers, `TailorResumeUseCase`, `UpdateBulletDecisionUseCase`, `core:network` (minus deleted DTOs), Credential Manager and Firebase sign-in, Play Billing and `RemotePaymentGateway`, `PurchaseRestorer`, `ContentReportRepository` (Play AI-content policy, PLAN R7), `DeleteAccountUseCase`, `ExportAccountDataUseCase`.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Room schema changes (W2-E).\n- New features.\n\n## Acceptance criteria\n\n- [ ] `./gradlew testDebugUnitTest :app:testDemoDebugUnitTest :app:testProdDebugUnitTest assembleDemoDebug assembleProdDebug lintRelease :app:lintDemoRelease :app:lintProdRelease dependencyGuard` passes.\n- [ ] `:core:domain:koverVerify` and `:core:data:koverVerify` pass (80% line coverage, Constitution ledger).\n- [ ] `OfflineFabricationGuardTest`, `TailorResumeUseCaseTest`, `UpdateBulletDecisionUseCaseTest` exist and pass (I.1, I.2 gates).\n- [ ] `grep -rn 'Consent\\|CoverLetter\\|PrepQuestion\\|Connectivity' --include=*.kt core app feature` returns nothing outside ContentReport item kinds.\n- [ ] Lint baselines do not grow (III.3). If `dependencyGuard` reports a removed library, the baseline update is in this PR with the reason.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/model/**`\n- `core/domain/**`\n- `core/data/**`\n- `core/network/**`\n- `core/testing/**`\n- `core/database/** (no schema change)`\n- `app/src/**`\n- `feature/*/api/**`\n- `app/lint-baseline.xml`\n- `core/navigation/lint-baseline.xml`\n- `app/dependencies/* (only if a library disappears)`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (touches sign-out and account wipe wiring)\n- Wave W1, lane W1-D\n- Depends on: W1-A, W1-B, W1-C\n\n## Prototype reference\n\nREADME \"Not in the MVP\" items 1, 4, 5; PRD 6.1.2.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W1",
+      "lane:W1-D",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W1",
+    "lane": "W1-D",
+    "depends_on_titles": [
+      "chore(tailor): delete cover letter, prep questions, DOCX, export preview, section regeneration and the old tailor screens",
+      "chore(onboarding,profile): delete welcome, consent, fact-by-fact confirmation, guided form, evidence path and the old profile screens",
+      "chore(analysis,applications,settings): delete the share card, requirement sheets, notes, Your data and Account deleted screens and the old screens"
+    ],
+    "depends_on_keys": [
+      "W1-A",
+      "W1-B",
+      "W1-C"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (touches sign-out and account wipe wiring)",
+    "files": [
+      "core/model/**",
+      "core/domain/**",
+      "core/data/**",
+      "core/network/**",
+      "core/testing/**",
+      "core/database/** (no schema change)",
+      "app/src/**",
+      "feature/*/api/**",
+      "app/lint-baseline.xml",
+      "core/navigation/lint-baseline.xml",
+      "app/dependencies/* (only if a library disappears)"
+    ]
+  },
+  {
+    "key": "W1-E",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "chore(designsystem): delete the Avvio components, the light theme and the Manrope and Archivo Black fonts",
+    "body_markdown": "## Context\n\nThe Avvio and Jade design system is the old design. Wave 2 builds the Paige design system. Only `:app` still uses the old shell until W3.\n\n## Scope\n\n- Delete every component file that has no consumer after W1-A..C (see PLAN section 1.3): Background, LoadingWheel, TmrBottomActionBar, TmrCheckbox, TmrConfirmDialog, TmrCoverageBlock, TmrDesignValues, TmrEvidenceMark, TmrFilterChip, TmrHeaderBackdrop, TmrHeaderCollapseState, TmrHomeHeader, TmrIconConfirmDialog, TmrInnerHeader, TmrMetrics, TmrOfflineBanner, TmrPillRow, TmrPrimitives, TmrProvenanceKind, TmrSnackbar, TmrSpotIllustration, TmrSpotKind, TmrStatusDisc, TmrStatusKind, `illustration/**`, and every other component file without a consumer.\n- Keep for now (used by `:app` until W3): `TmrDock`, `icon/TmrIcons.kt`, `component/TmrMotion.kt`, `theme/**`, `TmrPreviewTheme`.\n- Make `TmrTheme` dark only: delete `TmrLightColors`, `LightColorScheme`, the `darkTheme` parameter and `isSystemInDarkTheme()`.\n- Delete `res/font/core_designsystem_manrope.ttf`, `core_designsystem_archivo_black.ttf` and `fonts-licenses/*-OFL.txt`; use `FontFamily.Default` until W2-A.\n- Delete `TmrComponentsScreenshotTest`, `TmrScreenLandscapeScreenshotTest` and the 14 baselines.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Adding new components (W2).\n\n## Acceptance criteria\n\n- [ ] `./gradlew :core:designsystem:testDebugUnitTest assembleDemoDebug assembleProdDebug` passes.\n- [ ] `grep -rn 'isSystemInDarkTheme\\|LightColors\\|Manrope\\|Archivo' core app feature` returns nothing.\n- [ ] `tools/ci/check-constitution.sh` passes (II.5 scan).\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/designsystem/**`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W1, lane W1-E\n- Depends on: W1-A, W1-B, W1-C\n\n## Prototype reference\n\nREADME \"Look\" (dark only); README \"Not in the MVP\" item 2.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W1",
+      "lane:W1-E",
+      "routing:minimax-impl"
+    ],
+    "wave": "W1",
+    "lane": "W1-E",
+    "depends_on_titles": [
+      "chore(tailor): delete cover letter, prep questions, DOCX, export preview, section regeneration and the old tailor screens",
+      "chore(onboarding,profile): delete welcome, consent, fact-by-fact confirmation, guided form, evidence path and the old profile screens",
+      "chore(analysis,applications,settings): delete the share card, requirement sheets, notes, Your data and Account deleted screens and the old screens"
+    ],
+    "depends_on_keys": [
+      "W1-A",
+      "W1-B",
+      "W1-C"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "core/designsystem/**"
+    ]
+  },
+  {
+    "key": "W1-F",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "build: delete the core:ui module",
+    "body_markdown": "## Context\n\n`core:ui` holds only Avvio composables (status sheet, coverage meter, provenance chips). The Paige components go to `core:designsystem` in W2. The CI workflow lists the module, so this is a CI config change.\n\n## Scope\n\n- Delete `core/ui`.\n- Remove `include(\":core:ui\")`, every `projects.core.ui` dependency, and `:core:ui:testDebugUnitTest` from `.github/workflows/build.yml`.\n- Update the module list in `docs/ARCHITECTURE.md` section 2.\n\n## Out of scope\n\n- Any other module rename or removal.\n\n## Acceptance criteria\n\n- [ ] CI `Build, lint, and unit tests` passes on the PR.\n- [ ] `./gradlew projects` no longer lists `:core:ui`.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/ui/**`\n- `settings.gradle.kts`\n- `app/build.gradle.kts`\n- `feature/settings/impl/build.gradle.kts`\n- `.github/workflows/build.yml`\n- `docs/ARCHITECTURE.md (module table only)`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: no\n- Wave W1, lane W1-F\n- Depends on: W1-C, W1-D, W1-E\n\n## Prototype reference\n\nPLAN section 1.1.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W1",
+      "lane:W1-F",
+      "routing:in-harness-sonnet"
+    ],
+    "wave": "W1",
+    "lane": "W1-F",
+    "depends_on_titles": [
+      "chore(analysis,applications,settings): delete the share card, requirement sheets, notes, Your data and Account deleted screens and the old screens",
+      "chore(core,app): remove consent, cover letter, prep, connectivity and other dead features from the domain, data, network and app layers",
+      "chore(designsystem): delete the Avvio components, the light theme and the Manrope and Archivo Black fonts"
+    ],
+    "depends_on_keys": [
+      "W1-C",
+      "W1-D",
+      "W1-E"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "no",
+    "files": [
+      "core/ui/**",
+      "settings.gradle.kts",
+      "app/build.gradle.kts",
+      "feature/settings/impl/build.gradle.kts",
+      ".github/workflows/build.yml",
+      "docs/ARCHITECTURE.md (module table only)"
+    ]
+  },
+  {
+    "key": "W1-G",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "docs(constitution): point the screenshot ledger at the 2026-10-10 prototype",
+    "body_markdown": "## Context\n\nThe Roborazzi ledger row says the frames in `design/claude-design` are the acceptance criterion. The prototype replaced them. Article VII.1 says a rule text changes only through a PR that edits the Constitution. Rules I.1, I.2 and I.3 stay unchanged (orchestrator decisions D4 and D5).\n\n## Scope\n\n- In the ledger amendment \"coverage and screenshot tests moved forward\", replace the `design/claude-design` reference with `design/prototype-2026-10-10/` at 374 x 834 dp.\n- Add a ledger row dated 2026-10-10 that records D4 (one \"Accept changes\" control satisfies I.2) and D5 (the number is keyword coverage, I.3).\n\n## Out of scope\n\n- Any change to the text or gate of Articles I to VI.\n\n## Acceptance criteria\n\n- [ ] Policy job passes.\n- [ ] The PR body cites Article VII.1 and decisions D4 and D5.\n\n## Files\n\n- `docs/CONSTITUTION.md`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: no\n- Wave W1, lane W1-G\n- Depends on: none\n\n## Prototype reference\n\nConstitution ledger; PLAN section 6.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W1",
+      "lane:W1-G",
+      "routing:in-harness-sonnet"
+    ],
+    "wave": "W1",
+    "lane": "W1-G",
+    "depends_on_titles": [],
+    "depends_on_keys": [],
+    "routing": "in-harness-sonnet",
+    "security_review": "no",
+    "files": [
+      "docs/CONSTITUTION.md"
+    ]
+  },
+  {
+    "key": "W2-A",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(designsystem): dark-only Paige tokens with Space Mono and Space Grotesk",
+    "body_markdown": "## Context\n\nWave 2 builds the new design system from the README \"Look\" table. Tokens come first so the component lanes W2-B, W2-C, W2-D can run in parallel.\n\n## Scope\n\n- Colour, type, shape, spacing and motion tokens exactly as PLAN section 3 lists them, read through `TmrTheme.colors|typography|shapes|spacing|motion`.\n- Bundle Space Mono (400, 700) and Space Grotesk (400, 500, 600, 700) as `res/font` TTF files with their OFL licence texts in `fonts-licenses/`. No downloadable fonts (I.5).\n- Add `TmrTheme.motion.idle` (ambient loop: Paige bob amplitude 5 dp, period 2.64 s; tailoring wobble; story bar 5 s) next to `proof` and `hop`. Under `reduced` every idle value is static.\n- Icons used by the prototype: back, close, check, chevron right, gear, plus, file, applications, profile, Google G, share, open.\n- `core:screenshot`: add the device `Prototype` 374 x 834 dp, density 3, dark, and make it the default for `captureScreenTmr`.\n- Rewrite `docs/DESIGN_SYSTEM.md` Tokens section; update the AGENTS.md design table to point at `design/prototype-2026-10-10/` and the Motion section to name the idle spec.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Components (W2-B..D).\n\n## Acceptance criteria\n\n- [ ] Token values match PLAN section 3 one for one (a unit test asserts the colour hex values and font sizes).\n- [ ] `TmrTheme` has no light branch.\n- [ ] Font licence files exist for both families.\n- [ ] A screenshot test renders a type specimen and a colour swatch sheet at 374 x 834.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/designsystem/src/main/kotlin/**/theme/**`\n- `core/designsystem/src/main/res/font/**`\n- `core/designsystem/fonts-licenses/**`\n- `core/designsystem/src/main/kotlin/**/icon/TmrIcons.kt`\n- `core/designsystem/src/main/kotlin/**/component/TmrPreviewTheme.kt`\n- `core/screenshot/**`\n- `docs/DESIGN_SYSTEM.md`\n- `AGENTS.md (Design source and Motion sections only)`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W2, lane W2-A\n- Depends on: W1-E\n\n## Prototype reference\n\nREADME \"Look\" table and Type paragraph; PLAN section 3.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W2",
+      "lane:W2-A",
+      "routing:minimax-impl"
+    ],
+    "wave": "W2",
+    "lane": "W2-A",
+    "depends_on_titles": [
+      "chore(designsystem): delete the Avvio components, the light theme and the Manrope and Archivo Black fonts"
+    ],
+    "depends_on_keys": [
+      "W1-E"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "core/designsystem/src/main/kotlin/**/theme/**",
+      "core/designsystem/src/main/res/font/**",
+      "core/designsystem/fonts-licenses/**",
+      "core/designsystem/src/main/kotlin/**/icon/TmrIcons.kt",
+      "core/designsystem/src/main/kotlin/**/component/TmrPreviewTheme.kt",
+      "core/screenshot/**",
+      "docs/DESIGN_SYSTEM.md",
+      "AGENTS.md (Design source and Motion sections only)"
+    ]
+  },
+  {
+    "key": "W2-B",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(designsystem): screen chrome — top bar, step bar, tab bar, toast host and bottom sheet",
+    "body_markdown": "## Context\n\nEvery prototype screen uses the same chrome. The `T` table in `renderVals()` decides back, close, title, action and the step bar.\n\n## Scope\n\n- `TmrTopBar(back|close|none, title?, action?)`: 44 dp circle buttons on #1C1C1C, title Space Mono 12 uppercase #A6A6A6, action lime pill 44 dp.\n- `TmrStepBar(current: 1..3)`: pills `1 PROFILE · 2 JOB · 3 TAILOR`; done = \"✓ Profile\" lime ink on #1C1C1C, current lime fill with #0A0A0A ink, later #A6A6A6.\n- `TmrTabBar(selected, onApplications, onAdd, onProfile)`: 54 dp items, centre 56 dp lime + disc, top line #1A1A1A.\n- `TmrToastHost` and `TmrToastState`: one toast at a time, white #FFFFFF card radius 18 at 96 dp from the top, 3.2 s, optional action pill (#0A0A0A fill, lime text). A new toast replaces the old one.\n- `TmrBottomSheet`: scrim rgba(0,0,0,0.65), sheet #141414, top radius 32, handle 44 x 4 #3A3A3A, padding 12/18/40.\n- Screenshot test per component, both states where the prototype has two.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Wiring into `:app` (W3-A).\n\n## Acceptance criteria\n\n- [ ] Step bar matches `steps` in `renderVals()` for current = 1, 2, 3.\n- [ ] Toast auto-dismiss is tested with virtual time (IV.3).\n- [ ] Under `TmrTheme.motion.reduced` the sheet and toast appear without movement.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/designsystem/src/main/kotlin/**/component/chrome/**`\n- `core/designsystem/src/test/**/chrome/**`\n- `core/designsystem/src/test/screenshots/chrome_*`\n- `core/designsystem/src/main/res/values/strings_chrome.xml`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W2, lane W2-B\n- Depends on: W2-A\n\n## Prototype reference\n\nREADME \"Navigation\"; logic `T`, `steps`, `toast`, `sh`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W2",
+      "lane:W2-B",
+      "routing:minimax-impl"
+    ],
+    "wave": "W2",
+    "lane": "W2-B",
+    "depends_on_titles": [
+      "feat(designsystem): dark-only Paige tokens with Space Mono and Space Grotesk"
+    ],
+    "depends_on_keys": [
+      "W2-A"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "core/designsystem/src/main/kotlin/**/component/chrome/**",
+      "core/designsystem/src/test/**/chrome/**",
+      "core/designsystem/src/test/screenshots/chrome_*",
+      "core/designsystem/src/main/res/values/strings_chrome.xml"
+    ]
+  },
+  {
+    "key": "W2-C",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(designsystem): Paige, hero card, buttons, choice rows, toggle and text fields",
+    "body_markdown": "## Context\n\nPaige and the colour hero card are the signature of the new look. Buttons and inputs follow the README.\n\n## Scope\n\n- `TmrPaige(pose)`: the `Paige.dc.html` drawing in Compose (124 x 154 dp page, 2.5 dp #0A0A0A outline, radius 16, folded corner #DCDCD5, eyes, cheeks #FF6A2B, mouth or sad mouth, optional ticks and arms). Poses: sign-in 1..3, upload, job, question, tailoring (wobble), fail (sad), home, paywall, delete (sad, no arms).\n- Paige bob uses `TmrTheme.motion.idle` with `graphicsLayer` translation only. Under `reduced` Paige is a still.\n- `TmrHeroCard(colour: Blue|Amber|Lime, label, headline, stickers, paige)`: radius 32, padding 22, label Space Mono 12 uppercase, headline Space Mono 28 two lines, `TmrSticker` pills (white or #FF6A2B, 2.5 dp outline, rotated).\n- `TmrPrimaryButton`: lime pill, #0A0A0A Space Mono text; disabled = #222 fill, #7A7A7A text, still clickable to call `onDisabledClick` (the screen shows a toast with the reason).\n- `TmrSecondaryButton`, `TmrTextButton`, `TmrUploadCard` (dashed #3A3A3A, #0D0D0D, radius 24).\n- `TmrChoiceRow` (option with dot; selected border #A3F43F, fill #141A0A; else #2A2A2A on #111 / #3A3A3A on #1A1A1A in sheets).\n- `TmrToggle` (track #A3F43F on / #333 off, knob #0A0A0A / #A6A6A6).\n- `TmrTextField`, `TmrTextArea`, `TmrLabeledField` (label above, #242424 fill, optional read-only, optional amber #F7A940 border).\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Each component has a screenshot test; Paige has one per pose.\n- [ ] A test asserts that under `reduced` Paige's offset is 0 at any frame time.\n- [ ] Disabled primary button calls `onDisabledClick` and not `onClick`.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/designsystem/src/main/kotlin/**/component/hero/**`\n- `core/designsystem/src/main/kotlin/**/component/input/**`\n- `core/designsystem/src/test/**/hero/**`\n- `core/designsystem/src/test/**/input/**`\n- `core/designsystem/src/test/screenshots/hero_*`\n- `core/designsystem/src/test/screenshots/input_*`\n- `core/designsystem/src/main/res/values/strings_input.xml`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W2, lane W2-C\n- Depends on: W2-A\n\n## Prototype reference\n\nREADME \"Look\"; `Paige.dc.html`; logic `EX`, `bob`, `bt`, `q.opts`, `pw.packs`, `tog`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W2",
+      "lane:W2-C",
+      "routing:minimax-impl"
+    ],
+    "wave": "W2",
+    "lane": "W2-C",
+    "depends_on_titles": [
+      "feat(designsystem): dark-only Paige tokens with Space Mono and Space Grotesk"
+    ],
+    "depends_on_keys": [
+      "W2-A"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "core/designsystem/src/main/kotlin/**/component/hero/**",
+      "core/designsystem/src/main/kotlin/**/component/input/**",
+      "core/designsystem/src/test/**/hero/**",
+      "core/designsystem/src/test/**/input/**",
+      "core/designsystem/src/test/screenshots/hero_*",
+      "core/designsystem/src/test/screenshots/input_*",
+      "core/designsystem/src/main/res/values/strings_input.xml"
+    ]
+  },
+  {
+    "key": "W2-D",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(designsystem): rows, chips, progress rows, status bar, resume paper and file card",
+    "body_markdown": "## Context\n\nContent components shared by several screens in W4.\n\n## Scope\n\n- `TmrListRow(label, meta, tag?, chevron)` and `TmrCard` (#111, radius 16-24).\n- `TmrSectionLabel` (Space Mono 12 uppercase, letter-spacing 0.6).\n- `TmrStatusChip(Saved|Applied|Interview|Offer|Rejected)` with the `SS` colours.\n- `TmrKeywordChip(have|missing)` (lime dot / amber outline), `TmrSourceChip(YourResume|YourAnswer)` (lime / amber), `TmrTag(Soon|Add|Best value|Required|New|Rewritten|Added|Reordered)`.\n- `TmrProgressRows(rows, percent)` with done (check), active (spinner using `TmrTheme.motion`), pending (#7A7A7A) rows, as `rd` and `tg`.\n- `TmrStatusBar(segments)` stacked bar plus legend with the `SEGC` colours.\n- `TmrInitialDisc(letter, colour)`, `TmrStoryBars(count, index, progress)`.\n- `TmrResumePaper`: white one-page preview with highlight spans (keyword lime #E4FBB8, from-your-answer amber #FFE2C2) and a keyword-coverage badge.\n- `TmrFileCard(fileName, meta, onShare, onOpen)`, `TmrSoonRow(label)`, `TmrCoverageDelta(now, upTo)` (PLAN D5: label \"Keywords matched\", values as percent).\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Any \"match\", \"fit\" or \"ATS\" wording (Constitution I.3, decision D5).\n\n## Acceptance criteria\n\n- [ ] Each component has a screenshot test.\n- [ ] Status chip colours equal `SS` in `renderVals()`.\n- [ ] No string resource in the module contains \"match\" as a score label.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/designsystem/src/main/kotlin/**/component/content/**`\n- `core/designsystem/src/test/**/content/**`\n- `core/designsystem/src/test/screenshots/content_*`\n- `core/designsystem/src/main/res/values/strings_content.xml`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W2, lane W2-D\n- Depends on: W2-A\n\n## Prototype reference\n\nlogic `SS`, `SEGC`, `rd`, `tg`, `tr`, `ex`; README Applications and Tailored resume rows.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W2",
+      "lane:W2-D",
+      "routing:minimax-impl"
+    ],
+    "wave": "W2",
+    "lane": "W2-D",
+    "depends_on_titles": [
+      "feat(designsystem): dark-only Paige tokens with Space Mono and Space Grotesk"
+    ],
+    "depends_on_keys": [
+      "W2-A"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "core/designsystem/src/main/kotlin/**/component/content/**",
+      "core/designsystem/src/test/**/content/**",
+      "core/designsystem/src/test/screenshots/content_*",
+      "core/designsystem/src/main/res/values/strings_content.xml"
+    ]
+  },
+  {
+    "key": "W2-E",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(data): profile, application, credits and resume-settings data for the simplified flow (Room v3)",
+    "body_markdown": "## Context\n\nThe prototype needs new fields: city, LinkedIn, portfolio, summary, source file name and one review flag on the profile; keyword coverage, applied date, file name, quick answer and accepted changes on an application; a credit ledger; page size, file-name format and product updates in settings. Constitution V.6 requires a migration.\n\n## Scope\n\n- core:model: add `ProfileContact(city, linkedinUrl, portfolioUrl)`, `summary`, `sourceFileName`, `reviewedAt`; `ApplicationStatus` = Saved, Applied, Interview, Offer, Rejected (drop NO_RESPONSE); `JobApplication.location`, `appliedOn`, `keywordCoverage(now, upTo, final)`, `exportFileName`, `quickAnswer(requirementId, choice, detail)`, `changesAcceptedAt`; `FactSource.USER_ANSWER`; `CreditLedgerEntry(kind, amount, applicationId?, productId?, createdAt)`; `ResumeSettings(pageSize A4|Letter, fileNameFormat Name_Company_Role|Name_Role|Name_Resume, productUpdates)`; delete `notes` from the domain model.\n- core:database: version 3 with an additive migration 2 -> 3 (new nullable columns or defaults; NO_RESPONSE rows become APPLIED), commit `schemas/3.json`, a migration test.\n- core:data: `CreditsRepository` (balance, ledger flow, refresh) replacing `UsageAllowance`; `ResumeSettingsRepository` (DataStore); profile and application repositories expose the new fields.\n- core:testing: fakes for the new repositories and `PrototypeFixtures` with the prototype sample data (`ROLES`, `SKILLS`, `LISTS`, `JD`, `NW`, the returning ledger and apps) for screenshot tests in W4.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Network DTOs (W5-N1).\n\n## Acceptance criteria\n\n- [ ] Room migration test 2 -> 3 passes and `core/database/schemas/3.json` is committed (V.6).\n- [ ] `PrototypeFixtures` reproduces `fresh()` and `returning()` data exactly (names, dates, ledger amounts, statuses).\n- [ ] `:core:data:koverVerify` passes.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/model/**`\n- `core/database/** (schemas/3.json, TmrMigrations.kt)`\n- `core/data/**`\n- `core/testing/**`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: no\n- Wave W2, lane W2-E\n- Depends on: W1-D\n\n## Prototype reference\n\nlogic `fresh()`, `returning()`, `ROLES`, `SKILLS`, `LISTS`, `PACKS`, `STATUSES`, `FMTS`, `NW`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W2",
+      "lane:W2-E",
+      "routing:in-harness-sonnet"
+    ],
+    "wave": "W2",
+    "lane": "W2-E",
+    "depends_on_titles": [
+      "chore(core,app): remove consent, cover letter, prep, connectivity and other dead features from the domain, data, network and app layers"
+    ],
+    "depends_on_keys": [
+      "W1-D"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "no",
+    "files": [
+      "core/model/**",
+      "core/database/** (schemas/3.json, TmrMigrations.kt)",
+      "core/data/**",
+      "core/testing/**"
+    ]
+  },
+  {
+    "key": "W2-F",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(domain): keyword coverage, profile completeness, required gaps, start destination and export file names",
+    "body_markdown": "## Context\n\nPure logic the W4 screens need. Decision D5: the number is keyword coverage, never a match score.\n\n## Scope\n\n- `KeywordCoverage`: distinct JD keywords (union of `requirements[].keywords`, case-insensitive). now = share present in confirmed profile facts; upTo = share whose requirement is MET or PARTIAL (evidence exists) plus keywords confirmed by the quick answer; final = share present in the accepted tailored resume text. Rounded percent.\n- `ScreenForKeywords`: the have and missing chip lists for \"What they screen for · N\".\n- `ProfileCompleteness`: 100, minus 6 per open required gap, minus 4 without LinkedIn (gives 90, 96, 100 on the prototype data).\n- `RequiredGaps`: an EXPERIENCE entry with a start date, no end date and not marked current is a required gap (\"End date missing for <title>\").\n- `ObserveStartDestinationUseCase`: signed out -> Sign in; signed in and no reviewed profile -> Upload; else Applications.\n- `ExportFileName.build(profile, job, format)`: words joined with \"-\", parts with \"_\" (`Priya-Deshmukh_Northwind-GCC_Associate-Analyst.pdf`), three formats.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Unit tests reproduce 61 -> 92 (or the D5 percent values) and 84 without the answer from `PrototypeFixtures`, and 90/96/100 completeness.\n- [ ] `ExportFileName` test covers all three `FMTS` and unsafe characters.\n- [ ] `:core:domain:koverVerify` passes.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/domain/src/main/**/coverage/**`\n- `core/domain/src/main/**/profile/**`\n- `core/domain/src/main/**/onboarding/**`\n- `core/domain/src/main/**/export/**`\n- `core/domain/src/main/**/di/DomainModule.kt`\n- `core/domain/src/test/** (matching packages)`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W2, lane W2-F\n- Depends on: W2-E\n\n## Prototype reference\n\nlogic `comp`, `jr`, `tr.match`, `FMTS`, `NW.file`; README Review profile and Job analyzed rows.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W2",
+      "lane:W2-F",
+      "routing:minimax-impl"
+    ],
+    "wave": "W2",
+    "lane": "W2-F",
+    "depends_on_titles": [
+      "feat(data): profile, application, credits and resume-settings data for the simplified flow (Room v3)"
+    ],
+    "depends_on_keys": [
+      "W2-E"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "core/domain/src/main/**/coverage/**",
+      "core/domain/src/main/**/profile/**",
+      "core/domain/src/main/**/onboarding/**",
+      "core/domain/src/main/**/export/**",
+      "core/domain/src/main/**/di/DomainModule.kt",
+      "core/domain/src/test/** (matching packages)"
+    ]
+  },
+  {
+    "key": "W2-G",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(domain): quick-answer facts, summary and skills in the fabrication guard, and one Accept changes decision",
+    "body_markdown": "## Context\n\nConstitution I.1 and I.2 must hold in the new flow. Decision D4: the Changes tab has a per-change Undo, and export needs one explicit \"Accept changes\". The quick-question answer is a new fact source (\"Your answer\").\n\n## Scope\n\n- A `USER_ANSWER` fact (from the quick question; choice YES or FEW, optional detail) is a confirmed fact for the guard. Its keywords are grounded only in the requirement text and the detail text.\n- Truth rule for answer bullets: an answer-backed bullet may attach to an experience entry only if the detail text names that entry's organisation or title; otherwise it may only appear in the summary or skills. A test covers the prototype answer (no employer named) and an answer that names Infosys.\n- The guard checks the tailored summary and the skills line, not only bullets (every sentence cites source ids).\n- `UpdateBulletDecisionUseCase` keeps PENDING / ACCEPTED / REJECTED. Undo on a change sets it to REJECTED (original text). `AcceptChangesUseCase` sets every PENDING change to ACCEPTED and records `changesAcceptedAt`. Export is allowed only when `changesAcceptedAt` is set.\n- `ApplicationPack` list: 5, 15, 40 credits (`application_pack_5`, `application_pack_15`, `application_pack_40`), credits never expire. `CreditSpend` reflects one credit per successful tailoring.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Per-bullet accept or reject toggles (D4 forbids them).\n\n## Acceptance criteria\n\n- [ ] `OfflineFabricationGuardTest`, `TailorResumeUseCaseTest`, `UpdateBulletDecisionUseCaseTest` pass with new cases for USER_ANSWER, summary and skills.\n- [ ] A test proves that export is refused while `changesAcceptedAt` is null.\n- [ ] `:core:domain:koverVerify` passes.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/domain/src/main/**/FabricationGuard.kt`\n- `core/domain/src/main/**/offline/OfflineFabricationGuard.kt`\n- `core/domain/src/main/**/offline/EvidenceIndex.kt`\n- `core/domain/src/main/**/offline/EvidenceSources.kt`\n- `core/domain/src/main/**/TailorResumeUseCase.kt`\n- `core/domain/src/main/**/UpdateBulletDecisionUseCase.kt`\n- `core/domain/src/main/**/AcceptChangesUseCase.kt`\n- `core/domain/src/main/**/PaymentGateway.kt`\n- `core/domain/src/main/**/ApplicationPack.kt`\n- `core/domain/src/main/**/CreditSpend.kt`\n- `core/domain/src/test/** (matching)`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (credits and packs)\n- Wave W2, lane W2-G\n- Depends on: W2-E\n\n## Prototype reference\n\nREADME Tailored resume and Quick question rows; logic `changes`, `er`, `hasEx`; Constitution I.1, I.2; decision D4.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W2",
+      "lane:W2-G",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W2",
+    "lane": "W2-G",
+    "depends_on_titles": [
+      "feat(data): profile, application, credits and resume-settings data for the simplified flow (Room v3)"
+    ],
+    "depends_on_keys": [
+      "W2-E"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (credits and packs)",
+    "files": [
+      "core/domain/src/main/**/FabricationGuard.kt",
+      "core/domain/src/main/**/offline/OfflineFabricationGuard.kt",
+      "core/domain/src/main/**/offline/EvidenceIndex.kt",
+      "core/domain/src/main/**/offline/EvidenceSources.kt",
+      "core/domain/src/main/**/TailorResumeUseCase.kt",
+      "core/domain/src/main/**/UpdateBulletDecisionUseCase.kt",
+      "core/domain/src/main/**/AcceptChangesUseCase.kt",
+      "core/domain/src/main/**/PaymentGateway.kt",
+      "core/domain/src/main/**/ApplicationPack.kt",
+      "core/domain/src/main/**/CreditSpend.kt",
+      "core/domain/src/test/** (matching)"
+    ]
+  },
+  {
+    "key": "W3-A",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(app): navigation shell — setup flow with step bar, Applications/+/Profile tabs, back and close rules from T",
+    "body_markdown": "## Context\n\nW4 lanes must only touch their own feature impl module. This issue creates every NavKey and placeholder entry first, and the shared chrome.\n\n## Scope\n\n- One NavKey per prototype screen (PLAN section 2 column \"NavKey\"), in the owning feature `api` module.\n- Each screen declares its chrome from the `T` table: steps 1/2/3, back, noBack (reading, tailoring), close (exported -> root Applications; paywall -> back), title, action.\n- Back pops the stack; when the stack is empty it goes to Applications if the user has applications or a reviewed profile, else Upload (logic `back`).\n- `root(...)` semantics for tab switches, \"Go to Applications\", sign out and delete account (clear the stack).\n- Bottom tabs only on Applications and Profile; centre + starts a new job (logic `newApp`).\n- One `TmrToastHost` and one sheet host at the app root.\n- Placeholder entries render the screen name; W4 replaces them.\n- Delete `TmrDock`, `TopLevelNavItem` Settings tab.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] A Robolectric test walks Sign in -> Upload -> Review -> Job -> Job analyzed -> Quick question -> Tailoring -> Tailored -> Exported -> Applications with the T-table chrome asserted on each screen.\n- [ ] Tabs show only on Applications and Profile.\n- [ ] Close on Exported goes to Applications with an empty stack.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `app/src/main/kotlin/**/ui/TmrApp.kt`\n- `app/src/main/kotlin/**/navigation/**`\n- `app/src/main/kotlin/**/MainActivity.kt`\n- `core/navigation/**`\n- `feature/*/api/**`\n- `feature/*/impl/src/main/**/navigation/*EntryProvider.kt`\n- `core/designsystem/**/component/TmrDock.kt (delete)`\n- `docs/ARCHITECTURE.md section 6`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W3, lane W3-A\n- Depends on: W2-B, W2-C, W2-D, W2-F\n\n## Prototype reference\n\nlogic `T`, `go`, `swap`, `back`, `root`, `newApp`, `tabs`, `showTabs`; README \"Navigation\".\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W3",
+      "lane:W3-A",
+      "routing:minimax-impl"
+    ],
+    "wave": "W3",
+    "lane": "W3-A",
+    "depends_on_titles": [
+      "feat(designsystem): screen chrome — top bar, step bar, tab bar, toast host and bottom sheet",
+      "feat(designsystem): Paige, hero card, buttons, choice rows, toggle and text fields",
+      "feat(designsystem): rows, chips, progress rows, status bar, resume paper and file card",
+      "feat(domain): keyword coverage, profile completeness, required gaps, start destination and export file names"
+    ],
+    "depends_on_keys": [
+      "W2-B",
+      "W2-C",
+      "W2-D",
+      "W2-F"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "app/src/main/kotlin/**/ui/TmrApp.kt",
+      "app/src/main/kotlin/**/navigation/**",
+      "app/src/main/kotlin/**/MainActivity.kt",
+      "core/navigation/**",
+      "feature/*/api/**",
+      "feature/*/impl/src/main/**/navigation/*EntryProvider.kt",
+      "core/designsystem/**/component/TmrDock.kt (delete)",
+      "docs/ARCHITECTURE.md section 6"
+    ]
+  },
+  {
+    "key": "W3-B",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(app): start destination and session gate",
+    "body_markdown": "## Context\n\nSigned-out users start at Sign in. Signed-in users without a reviewed profile resume at Upload. Everyone else starts at Applications.\n\n## Scope\n\n- `AppViewModel` uses `ObserveStartDestinationUseCase` (W2-F).\n- Session expiry (`SessionExpiryHandler`) returns to Sign in with an empty stack.\n- After sign-in the app reads the wallet once so the free credit appears (README Sign in row).\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] ViewModel tests with fakes and Turbine cover the three start destinations and session expiry.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `app/src/main/kotlin/**/ui/AppViewModel.kt`\n- `app/src/main/kotlin/**/ui/AppRootState.kt`\n- `app/src/main/kotlin/**/ui/RootViewModelStores.kt`\n- `app/src/test/**/ui/**`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (accounts)\n- Wave W3, lane W3-A\n- Depends on: W3-A\n\n## Prototype reference\n\nlogic `signIn`, `fresh()`, `returning()`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W3",
+      "lane:W3-A",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W3",
+    "lane": "W3-A",
+    "depends_on_titles": [
+      "feat(app): navigation shell — setup flow with step bar, Applications/+/Profile tabs, back and close rules from T"
+    ],
+    "depends_on_keys": [
+      "W3-A"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (accounts)",
+    "files": [
+      "app/src/main/kotlin/**/ui/AppViewModel.kt",
+      "app/src/main/kotlin/**/ui/AppRootState.kt",
+      "app/src/main/kotlin/**/ui/RootViewModelStores.kt",
+      "app/src/test/**/ui/**"
+    ]
+  },
+  {
+    "key": "W4-A1",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(onboarding): sign-in stories, Google sign-in and the sign-in cancelled toast",
+    "body_markdown": "## Context\n\nSign in is the first screen. Google only; the drawn Apple button is cut.\n\n## Scope\n\n- Full-bleed story slides (blue, amber, lime), progress bars, \"Paige · N of 3\", \"Tap · hold\" / \"Paused\".\n- Auto-advance every 5 s; tap left third = previous, else next; hold > 250 ms pauses. Under reduced motion: no auto-advance and no bar animation; taps still step.\n- Slide 3 sticker reads a keyword-coverage value, not \"match\" (D5).\n- \"Continue with Google\" -> \"Signing in…\" -> Upload (new) or Applications (returning), via `SignInGateway`.\n- Cancelled: toast \"Sign-in cancelled. Nothing was saved.\" with Retry.\n- Footer: Terms, Privacy links, \"Your first tailored resume is free.\"\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Apple sign-in.\n\n## Acceptance criteria\n\n- [ ] Screenshots: story 1, 2, 3; signing in; cancelled toast.\n- [ ] ViewModel tests: cancel keeps no data, success routes by start destination.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/onboarding/impl/src/main/**/signin/**`\n- `feature/onboarding/impl/src/test/**/signin/**`\n- `feature/onboarding/impl/src/main/res/values/strings_signin.xml`\n- `feature/onboarding/impl/src/test/screenshots/signin_*`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (accounts)\n- Wave W4, lane W4-A\n- Depends on: W3-B\n\n## Prototype reference\n\nindex() Onboarding: \"Sign in\", \"Sign-in cancelled\"; logic `st`, `signIn`; README Sign in row.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-A",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W4",
+    "lane": "W4-A",
+    "depends_on_titles": [
+      "feat(app): start destination and session gate"
+    ],
+    "depends_on_keys": [
+      "W3-B"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (accounts)",
+    "files": [
+      "feature/onboarding/impl/src/main/**/signin/**",
+      "feature/onboarding/impl/src/test/**/signin/**",
+      "feature/onboarding/impl/src/main/res/values/strings_signin.xml",
+      "feature/onboarding/impl/src/test/screenshots/signin_*"
+    ]
+  },
+  {
+    "key": "W4-A2",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(onboarding): upload, unreadable file, paste resume, fill in myself and reading",
+    "body_markdown": "## Context\n\nFive onboarding states batched by screen area.\n\n## Scope\n\n- Upload: blue hero \"Paige builds your profile / Start with your resume\", PDF and DOCX stickers, upload card \"PDF or DOCX · up to 5 MB\", Paste as text, Fill in myself, \"Never shared.\" System file picker, no storage permission.\n- Unreadable file (image-only PDF, `NoTextLayer`): file card, three tips, Choose another file, Paste as text.\n- Paste resume: text area, Read text.\n- Fill in myself: six fields, email from Google read-only value, Continue -> Review profile.\n- Reading: progress rows Contact details, Work experience, Education, Skills, Achievements with counts, percent, \"Takes about 20 seconds\", no back. Parse via `ResumeTextParser` (prod: POST /resume/parse).\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Error states other than \"Unreadable file\"; a parse failure also lands on Unreadable file (PLAN R5).\n\n## Acceptance criteria\n\n- [ ] Screenshots for upload, uploadError, pasteResume, manual, reading at 0%, 40%, 100%.\n- [ ] Reading has no back button.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/onboarding/impl/src/main/**/upload/**`\n- `feature/onboarding/impl/src/main/**/importresume/**`\n- `feature/onboarding/impl/src/test/**`\n- `feature/onboarding/impl/src/main/res/values/strings_upload.xml`\n- `feature/onboarding/impl/src/test/screenshots/upload_*`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W4, lane W4-A\n- Depends on: W4-A1\n\n## Prototype reference\n\nindex(): \"Upload resume\", \"Unreadable file\", \"Paste resume\", \"Fill in myself\", \"Reading\"; logic `up`, `rd`, `manualFields`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-A",
+      "routing:minimax-impl"
+    ],
+    "wave": "W4",
+    "lane": "W4-A",
+    "depends_on_titles": [
+      "feat(onboarding): sign-in stories, Google sign-in and the sign-in cancelled toast"
+    ],
+    "depends_on_keys": [
+      "W4-A1"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/onboarding/impl/src/main/**/upload/**",
+      "feature/onboarding/impl/src/main/**/importresume/**",
+      "feature/onboarding/impl/src/test/**",
+      "feature/onboarding/impl/src/main/res/values/strings_upload.xml",
+      "feature/onboarding/impl/src/test/screenshots/upload_*"
+    ]
+  },
+  {
+    "key": "W4-A3",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(onboarding): review profile once — required fix, LinkedIn and completeness",
+    "body_markdown": "## Context\n\nOne profile review replaces fact-by-fact confirmation.\n\n## Scope\n\n- \"Your profile\", source file line, completeness percent (W2-F).\n- Required banner \"End date missing for <title>\" with Add date (opens the role editor of W4-E1 through its NavKey); fixed state \"All required info is done\".\n- Optional \"Add your LinkedIn\" (opens Contact editor).\n- Cards: Contact, Experience · N with dates (amber \"end date?\"), Skills · N (5 chips + \"+N\"), Education.\n- CTA \"Looks right, continue\" disabled until no required gap; tapping disabled shows toast \"Add the missing end date first\". Continue marks the profile reviewed and opens Add job.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Screenshots: needs fix (90%), fixed (96%).\n- [ ] ViewModel test: continue refused with a required gap; `reviewedAt` set on success.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/onboarding/impl/src/main/**/review/**`\n- `feature/onboarding/impl/src/test/**/review/**`\n- `feature/onboarding/impl/src/main/res/values/strings_review.xml`\n- `feature/onboarding/impl/src/test/screenshots/review_*`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W4, lane W4-A\n- Depends on: W4-A2\n\n## Prototype reference\n\nindex(): \"Review profile\"; logic `rv`, `roles`, `comp`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-A",
+      "routing:minimax-impl"
+    ],
+    "wave": "W4",
+    "lane": "W4-A",
+    "depends_on_titles": [
+      "feat(onboarding): upload, unreadable file, paste resume, fill in myself and reading"
+    ],
+    "depends_on_keys": [
+      "W4-A2"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/onboarding/impl/src/main/**/review/**",
+      "feature/onboarding/impl/src/test/**/review/**",
+      "feature/onboarding/impl/src/main/res/values/strings_review.xml",
+      "feature/onboarding/impl/src/test/screenshots/review_*"
+    ]
+  },
+  {
+    "key": "W4-B1",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(job): add job, not a job post, analyzing and import from a link",
+    "body_markdown": "## Context\n\nThe job screen moves from onboarding to feature:analysis (module name kept to avoid CI churn).\n\n## Scope\n\n- Empty: amber hero \"Paige reads it for you / Paste the job you want\", Paste from clipboard, Use a link, hint.\n- Has text: \"Job description\" header with Clear, character count, detected \"<title> · <company>\" (local `ProposeJobLabelUseCase`) when >= 200 characters.\n- Not a job post: under 200 characters, or the backend answers NOT_A_JOB_POST -> \"This doesn't look like a job post\" + hint.\n- Analyzing: \"Reading the job… N%\", then Job analyzed. An analysis failure shows a toast with Retry (PLAN R5).\n- Import link: \"Import from a link\", Job link field, note about login pages, Import job -> back to Add job with the text and toast \"Imported from <host>\". A failed import returns to Add job with the \"not a job post\" state.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Screenshots: empty, has text (detected), not a job post, analyzing, import link.\n- [ ] ViewModel tests for the 200-character rule and the import result.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/analysis/impl/src/main/**/job/**`\n- `feature/analysis/impl/src/main/**/joblink/**`\n- `feature/analysis/impl/src/test/**`\n- `feature/analysis/impl/src/main/res/values/strings_job.xml`\n- `feature/analysis/impl/src/test/screenshots/job_*`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W4, lane W4-B\n- Depends on: W3-A\n\n## Prototype reference\n\nindex(): \"Add job\", \"Import link\", \"Not a job post\"; logic `jb`, `analyze`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-B",
+      "routing:minimax-impl"
+    ],
+    "wave": "W4",
+    "lane": "W4-B",
+    "depends_on_titles": [
+      "feat(app): navigation shell — setup flow with step bar, Applications/+/Profile tabs, back and close rules from T"
+    ],
+    "depends_on_keys": [
+      "W3-A"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/analysis/impl/src/main/**/job/**",
+      "feature/analysis/impl/src/main/**/joblink/**",
+      "feature/analysis/impl/src/test/**",
+      "feature/analysis/impl/src/main/res/values/strings_job.xml",
+      "feature/analysis/impl/src/test/screenshots/job_*"
+    ]
+  },
+  {
+    "key": "W4-B2",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(job): job analysis with keyword coverage and the quick question",
+    "body_markdown": "## Context\n\nDecision D5: show keyword coverage, labelled as keyword coverage, never a match, fit, ATS or job-likelihood score.\n\n## Scope\n\n- Job analyzed: title, company, place; `TmrCoverageDelta` \"Keywords matched\" now -> up to, after tailoring; \"We only use what's backed by your experience.\"; \"What they screen for · N\" with have and missing chips; \"Missing skills are only added if you confirm you have them.\"; must-haves with reason, the unclear one marked \"!\" with \"Not clear in your resume. We'll ask you next.\"\n- CTA \"Tailor my resume\", note \"Uses 1 credit · you have N\"; with 0 credits the note says \"No credits left · get more to continue\" and the CTA opens the paywall, which returns to Quick question after a purchase.\n- Quick question: \"One quick question\", the question, why line, options Yes, regularly / A few times / Not yet; Yes or A few shows an optional detail field; Continue disabled until picked (toast \"Pick an answer, or skip\"); Skip this. The answer is stored on the application.\n- When the analysis has no question, Tailor goes straight to Tailoring.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- The words match, fit, ATS or score as a label (I.3, D5).\n\n## Acceptance criteria\n\n- [ ] Screenshots: with credits, no credits, question none picked, question picked with detail.\n- [ ] Copy check: no string in the module says \"match\" as a score.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/analysis/impl/src/main/**/result/**`\n- `feature/analysis/impl/src/main/**/question/**`\n- `feature/analysis/impl/src/test/**`\n- `feature/analysis/impl/src/main/res/values/strings_result.xml`\n- `feature/analysis/impl/src/test/screenshots/result_*`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W4, lane W4-B\n- Depends on: W4-B1\n\n## Prototype reference\n\nindex(): \"Job analyzed\", \"Quick question\", \"Out of credits\"; logic `jr`, `q`, `startTailor`; decision D5.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-B",
+      "routing:minimax-impl"
+    ],
+    "wave": "W4",
+    "lane": "W4-B",
+    "depends_on_titles": [
+      "feat(job): add job, not a job post, analyzing and import from a link"
+    ],
+    "depends_on_keys": [
+      "W4-B1"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/analysis/impl/src/main/**/result/**",
+      "feature/analysis/impl/src/main/**/question/**",
+      "feature/analysis/impl/src/test/**",
+      "feature/analysis/impl/src/main/res/values/strings_result.xml",
+      "feature/analysis/impl/src/test/screenshots/result_*"
+    ]
+  },
+  {
+    "key": "W4-C1",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(tailor): tailoring, tailoring failed, and the tailored resume with Changes, Undo and Accept changes",
+    "body_markdown": "## Context\n\nConstitution I.2 gate (`TailorViewModelTest`). Decision D4: per-change Undo plus one \"Accept changes\" control; Export PDF disabled until accepted. No per-bullet toggles.\n\n## Scope\n\n- Tailoring: lime hero, percent, keyword stickers, rows Matching N keywords / Rewriting bullets / Adding your example or Checking must-haves / Fitting to 1 page, wobbling Paige (still when reduced), no back.\n- Tailoring failed: sad Paige, \"Tailoring didn't finish\", \"Something went wrong on our side. Your credit wasn't used.\", Try again, Go back.\n- Tailored resume: \"Your resume is ready\", \"For <role> · <company>\", tabs Resume / Changes · N.\n- Resume tab: one-page paper with keyword highlights (lime) and answer highlights (amber), coverage badge (D5), legend From your resume / From your answer.\n- Changes tab: per change area · kind (New, Rewritten, Added, Reordered), source chip, before struck through, after, and an Undo per change; one \"Accept changes\" control drawn in the prototype style.\n- Edit and Export PDF; Export PDF stays disabled until Accept changes; tapping it disabled shows a toast saying why.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Per-bullet accept or reject toggles (D4).\n\n## Acceptance criteria\n\n- [ ] Screenshots: tailoring 0/50/100%, failed, Resume tab with answer, Resume tab without answer, Changes tab before accept, after one Undo, after accept.\n- [ ] `TailorViewModelTest` covers Undo -> REJECTED, Accept -> ACCEPTED, export refused before accept (I.2).\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/tailor/impl/src/main/**/tailoring/**`\n- `feature/tailor/impl/src/main/**/result/**`\n- `feature/tailor/impl/src/main/**/TailorViewModel.kt`\n- `feature/tailor/impl/src/main/**/TailorUiState*.kt`\n- `feature/tailor/impl/src/test/**`\n- `feature/tailor/impl/src/main/res/values/strings_result.xml`\n- `feature/tailor/impl/src/test/screenshots/result_*`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: no\n- Wave W4, lane W4-C\n- Depends on: W3-A, W2-G\n\n## Prototype reference\n\nindex(): \"Tailoring\", \"Tailoring failed\", \"Tailored resume\"; logic `tg`, `tf`, `tr`, `changes`, `finishTailor`; decision D4.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-C",
+      "routing:in-harness-sonnet"
+    ],
+    "wave": "W4",
+    "lane": "W4-C",
+    "depends_on_titles": [
+      "feat(app): navigation shell — setup flow with step bar, Applications/+/Profile tabs, back and close rules from T",
+      "feat(domain): quick-answer facts, summary and skills in the fabrication guard, and one Accept changes decision"
+    ],
+    "depends_on_keys": [
+      "W3-A",
+      "W2-G"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "no",
+    "files": [
+      "feature/tailor/impl/src/main/**/tailoring/**",
+      "feature/tailor/impl/src/main/**/result/**",
+      "feature/tailor/impl/src/main/**/TailorViewModel.kt",
+      "feature/tailor/impl/src/main/**/TailorUiState*.kt",
+      "feature/tailor/impl/src/test/**",
+      "feature/tailor/impl/src/main/res/values/strings_result.xml",
+      "feature/tailor/impl/src/test/screenshots/result_*"
+    ]
+  },
+  {
+    "key": "W4-C2",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(tailor): edit resume, one-page PDF export with page size and file-name format, and the exported screen",
+    "body_markdown": "## Context\n\nPDF only, file name `Name_Company_Role.pdf` by default, A4 or Letter (PRD 6.1.2).\n\n## Scope\n\n- Edit resume: title \"Resume\", Save (toast \"Changes saved\"), \"Still fits on 1 page\", summary, bullets with source tag, skills line. Hand edits are USER_EDITED (PRD 6.4 item 5).\n- PDF: single column, selectable text, A4 or Letter from `ResumeSettings`, file name from `ExportFileName` (W2-F); fit to one page by stepping the body size down (PLAN R9).\n- Exported: close -> Applications; check badge; file card with Share and Open; credits line \"N left, was N+1. Credits never expire.\" or \"Free resume used. 0 credits left. Nothing was charged.\"; \"Saved to Applications: <role>, <company>\".\n- \"Did you apply? ✓ Mark as Applied\" -> status Applied with toast \"Applied, marked on <date>\" + Undo; when not Saved: status chip, \"Marked on <date>\", Change (status sheet).\n- Soon rows \"Get prep questions\" and \"Write a cover letter\" -> toast \"Coming soon\"; no screen behind them. Go to Applications.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- DOCX, templates, share card.\n\n## Acceptance criteria\n\n- [ ] Screenshots: edit, exported paid, exported free, marked Applied with Undo toast.\n- [ ] PDF test: one page on the prototype data in A4 and Letter; text extracted equals the accepted document.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/tailor/impl/src/main/**/edit/**`\n- `feature/tailor/impl/src/main/**/export/**`\n- `feature/tailor/impl/src/main/**/exported/**`\n- `feature/tailor/impl/src/test/**`\n- `feature/tailor/impl/src/main/res/values/strings_export.xml`\n- `feature/tailor/impl/src/test/screenshots/export_*`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W4, lane W4-C\n- Depends on: W4-C1\n\n## Prototype reference\n\nindex(): \"Edit resume\", \"Exported\"; logic `er`, `ex`, `exportPdf`, `markApplied`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-C",
+      "routing:minimax-impl"
+    ],
+    "wave": "W4",
+    "lane": "W4-C",
+    "depends_on_titles": [
+      "feat(tailor): tailoring, tailoring failed, and the tailored resume with Changes, Undo and Accept changes"
+    ],
+    "depends_on_keys": [
+      "W4-C1"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/tailor/impl/src/main/**/edit/**",
+      "feature/tailor/impl/src/main/**/export/**",
+      "feature/tailor/impl/src/main/**/exported/**",
+      "feature/tailor/impl/src/test/**",
+      "feature/tailor/impl/src/main/res/values/strings_export.xml",
+      "feature/tailor/impl/src/test/screenshots/export_*"
+    ]
+  },
+  {
+    "key": "W4-D1",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(applications): Applications home, application detail and the status sheet",
+    "body_markdown": "## Context\n\nThe app area home and detail.\n\n## Scope\n\n- Applications: header with credit count (opens Credits) and initials avatar (opens Profile); bottom tabs.\n- Empty: \"No applications yet\", \"Tailor your resume for a job and it shows up here.\", Add a job, Paige.\n- List: \"Tailored resumes N\", stacked status bar with legend, \"Recent\" rows (initial disc, title, \"<company> · NN% keywords\" (D5), status chip).\n- Application detail: title Application; role, company · place; Status with \"on <date>\" or \"Not applied yet\", Change; file card Share/Open; Next steps: \"Re-tailor with profile changes · 1 credit\" (paywall when 0), \"View job analysis\", Soon rows.\n- Status sheet: five options, Save status -> toast \"Status set to <status>\".\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Notes, reminders, kanban.\n\n## Acceptance criteria\n\n- [ ] Screenshots: empty, list (returning data), detail, status sheet (Interview picked).\n- [ ] ViewModel tests for status change and re-tailor credit gate.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/applications/impl/**`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W4, lane W4-D\n- Depends on: W3-A\n\n## Prototype reference\n\nindex(): \"Home\", \"Empty home\", \"Application\", \"Status sheet\"; logic `hm`, `ad`, `sh.opts`, `SEGC`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-D",
+      "routing:minimax-impl"
+    ],
+    "wave": "W4",
+    "lane": "W4-D",
+    "depends_on_titles": [
+      "feat(app): navigation shell — setup flow with step bar, Applications/+/Profile tabs, back and close rules from T"
+    ],
+    "depends_on_keys": [
+      "W3-A"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/applications/impl/**"
+    ]
+  },
+  {
+    "key": "W4-E1",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(profile): profile overview, experience list and role editor",
+    "body_markdown": "## Context\n\nProfile tab and the experience editors.\n\n## Scope\n\n- Profile: gear (Settings), initials, name, \"<headline> · N yrs · <city>\", percent complete; rows Contact, Summary, Experience N, Education N, Skills N, Achievements N, LinkedIn & links (amber Add tag when empty); \"Built from <file> · Replace\" (Replace -> Upload).\n- Experience: role list with dates, + Add role.\n- Edit role: heading Edit role / Add role, Job title, Company, Start, End, \"I work here now\" toggle (End shows Present and dims), What you did bullets, + Add bullet, Delete this role (edit only, toast \"Role deleted\"); Save -> toast \"Role saved\". Saved edits are USER_EDITED facts.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Screenshots: profile, experience, edit role, add role, current-job toggle on.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/profile/impl/src/main/**/overview/**`\n- `feature/profile/impl/src/main/**/experience/**`\n- `feature/profile/impl/src/test/**`\n- `feature/profile/impl/src/main/res/values/strings_profile.xml`\n- `feature/profile/impl/src/test/screenshots/profile_*`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W4, lane W4-E\n- Depends on: W3-A\n\n## Prototype reference\n\nindex(): \"Profile\", \"Experience\", \"Edit role\"; logic `pr`, `xp`, `role`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-E",
+      "routing:minimax-impl"
+    ],
+    "wave": "W4",
+    "lane": "W4-E",
+    "depends_on_titles": [
+      "feat(app): navigation shell — setup flow with step bar, Applications/+/Profile tabs, back and close rules from T"
+    ],
+    "depends_on_keys": [
+      "W3-A"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/profile/impl/src/main/**/overview/**",
+      "feature/profile/impl/src/main/**/experience/**",
+      "feature/profile/impl/src/test/**",
+      "feature/profile/impl/src/main/res/values/strings_profile.xml",
+      "feature/profile/impl/src/test/screenshots/profile_*"
+    ]
+  },
+  {
+    "key": "W4-E2",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(profile): contact, skills and list editors for summary, education and achievements",
+    "body_markdown": "## Context\n\nSmall editors batched in one PR.\n\n## Scope\n\n- Contact: Full name, Phone, City, Email from Google read-only, LinkedIn optional (amber border when empty), Portfolio optional; Save -> toast \"Contact saved\".\n- Skills: \"N skills. Paige picks the most relevant ones for each job.\", Add field, removable chips; Done -> toast \"Skills saved\".\n- List edit: one editor for Summary (note), Education (+ Add education), Achievements (note, + Add achievement); Save -> toast \"Saved\".\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Screenshots: contact empty LinkedIn, skills, list edit for each section.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/profile/impl/src/main/**/contact/**`\n- `feature/profile/impl/src/main/**/skills/**`\n- `feature/profile/impl/src/main/**/listedit/**`\n- `feature/profile/impl/src/test/**`\n- `feature/profile/impl/src/main/res/values/strings_editors.xml`\n- `feature/profile/impl/src/test/screenshots/editors_*`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W4, lane W4-E\n- Depends on: W4-E1\n\n## Prototype reference\n\nindex(): \"Contact\", \"Skills\"; logic `ct`, `sk`, `le`, `LISTS`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-E",
+      "routing:minimax-impl"
+    ],
+    "wave": "W4",
+    "lane": "W4-E",
+    "depends_on_titles": [
+      "feat(profile): profile overview, experience list and role editor"
+    ],
+    "depends_on_keys": [
+      "W4-E1"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/profile/impl/src/main/**/contact/**",
+      "feature/profile/impl/src/main/**/skills/**",
+      "feature/profile/impl/src/main/**/listedit/**",
+      "feature/profile/impl/src/test/**",
+      "feature/profile/impl/src/main/res/values/strings_editors.xml",
+      "feature/profile/impl/src/test/screenshots/editors_*"
+    ]
+  },
+  {
+    "key": "W4-F1",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(settings): settings, download my data, sign out and the delete account sheet",
+    "body_markdown": "## Context\n\nSettings replaces the separate Your data and Delete account screens.\n\n## Scope\n\n- Account: email, \"Signed in with Google\", Credits & purchases (N left) -> Credits.\n- Resume: Page size A4/Letter, File name Name_Company_Role / Name_Role / Name_Resume (cycle on tap), stored in `ResumeSettings`.\n- Notifications: Product updates toggle only (no Follow-up reminders).\n- Privacy & help: Download my data (interim: on-device archive through the share sheet, PLAN R6; the emailed variant waits for B12), Help & feedback (email intent to support), Delete account (sheet), Sign out (root Sign in, toast \"Signed out\"). Footer \"Terms · Privacy · v<versionName>\".\n- Delete sheet: sad Paige, \"Delete your account?\", text naming the N resumes and N unused credits, \"Type DELETE to confirm\" (case-insensitive), Delete account enabled only on DELETE, Keep my account. Success: full local wipe plus `DELETE /v1/me`, root Sign in, toast \"Account deleted\".\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Follow-up reminders.\n\n## Acceptance criteria\n\n- [ ] Screenshots: settings, delete sheet empty, delete sheet with DELETE typed.\n- [ ] ViewModel tests: delete refused until DELETE; wipe called; sign out clears local data.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/settings/impl/src/main/**/settings/**`\n- `feature/settings/impl/src/main/**/delete/**`\n- `feature/settings/impl/src/test/**`\n- `feature/settings/impl/src/main/res/values/strings_settings.xml`\n- `feature/settings/impl/src/test/screenshots/settings_*`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (accounts, deletion, data export)\n- Wave W4, lane W4-F\n- Depends on: W3-B\n\n## Prototype reference\n\nindex(): \"Settings\", \"Delete account\"; logic `se`, `sh.delText`, `sh.onDelete`; README \"Not in the MVP\" item 4.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-F",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W4",
+    "lane": "W4-F",
+    "depends_on_titles": [
+      "feat(app): start destination and session gate"
+    ],
+    "depends_on_keys": [
+      "W3-B"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (accounts, deletion, data export)",
+    "files": [
+      "feature/settings/impl/src/main/**/settings/**",
+      "feature/settings/impl/src/main/**/delete/**",
+      "feature/settings/impl/src/test/**",
+      "feature/settings/impl/src/main/res/values/strings_settings.xml",
+      "feature/settings/impl/src/test/screenshots/settings_*"
+    ]
+  },
+  {
+    "key": "W4-F2",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(credits): credits ledger, paywall with 5, 15 and 40 packs, payment failed sheet and restore",
+    "body_markdown": "## Context\n\nPacks move from one 5-pack to 5, 15 and 40 credits; 1 credit = 1 tailored resume; credits never expire.\n\n## Scope\n\n- Credits: big count, \"credits left. They never expire.\", Buy more -> paywall; History (newest first): +N lime, −1 white, labels from the ledger joined with local applications; \"Receipts go to your Google email\".\n- Paywall: close; amber hero \"N credits left / Keep tailoring for every job\" with Paige and +1; \"1 credit = 1 tailored resume. Credits never expire.\"; packs with per-resume price, 15 preselected with Best value; prices from Play `ProductDetails`; buy label \"Buy N credits · <price>\" then \"Processing…\"; \"One-time payment · Restore purchases\" (toast \"No previous purchases found\" when none).\n- Success: toast \"N credits added\", return to `payReturn` (Quick question) or back.\n- Payment failed sheet: \"Payment didn't go through\", \"You weren't charged. Try again, or pick another payment method.\", Try again, Cancel. User cancel closes nothing and shows no sheet; a pending purchase shows a toast (PLAN R10).\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n- Subscriptions.\n\n## Acceptance criteria\n\n- [ ] Screenshots: credits (returning ledger), paywall out of credits, buying, payment failed sheet.\n- [ ] ViewModel tests with `TestPaymentGateway` for success, failure, cancel, pending, restore.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/settings/impl/src/main/**/credits/**`\n- `feature/settings/impl/src/main/**/paywall/**`\n- `feature/settings/impl/src/test/**`\n- `feature/settings/impl/src/main/res/values/strings_credits.xml`\n- `feature/settings/impl/src/test/screenshots/credits_*`\n- `feature/settings/api/** (Credits and Paywall NavKeys already exist from W3-A)`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (money)\n- Wave W4, lane W4-F\n- Depends on: W4-F1, W2-E, W2-G\n\n## Prototype reference\n\nindex(): \"Credits\", \"Out of credits\", \"Payment failed\"; logic `cr`, `pw`, `buy`, `PACKS`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W4",
+      "lane:W4-F",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W4",
+    "lane": "W4-F",
+    "depends_on_titles": [
+      "feat(settings): settings, download my data, sign out and the delete account sheet",
+      "feat(data): profile, application, credits and resume-settings data for the simplified flow (Room v3)",
+      "feat(domain): quick-answer facts, summary and skills in the fabrication guard, and one Accept changes decision"
+    ],
+    "depends_on_keys": [
+      "W4-F1",
+      "W2-E",
+      "W2-G"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (money)",
+    "files": [
+      "feature/settings/impl/src/main/**/credits/**",
+      "feature/settings/impl/src/main/**/paywall/**",
+      "feature/settings/impl/src/test/**",
+      "feature/settings/impl/src/main/res/values/strings_credits.xml",
+      "feature/settings/impl/src/test/screenshots/credits_*",
+      "feature/settings/api/** (Credits and Paywall NavKeys already exist from W3-A)"
+    ]
+  },
+  {
+    "key": "W5-DOC",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "docs(contract): backend contract v2 for the simplified MVP",
+    "body_markdown": "## Context\n\nThe contract is the spec for every W5 backend issue. Start it at once, in parallel with W1.\n\n## Scope\n\n- Write the v2 shapes in PLAN section 4 into `docs/BACKEND_CONTRACT.md`: drop D5 (unlock per application), D9 (consent gate); add the credit-per-tailoring rule, ledger, packs 5/15/40, quick question and answer, summary and skills in tailoring, parse fields, NOT_A_JOB_POST, job imports, wallet shape, removed routes.\n- Keep D1, D2, D3, D6, D7, D8, D10, D11, D12.\n\n## Out of scope\n\n- Code.\n\n## Acceptance criteria\n\n- [ ] Every route in PLAN section 4 has a request, response and error table.\n- [ ] The PR links each backend issue title.\n\n## Files\n\n- `docs/BACKEND_CONTRACT.md`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: no\n- Wave W5, lane W5-DOC\n- Depends on: none\n\n## Prototype reference\n\nPLAN section 4; README Job analyzed, Quick question, Credits, Paywall rows.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:W5-DOC",
+      "routing:in-harness-sonnet"
+    ],
+    "wave": "W5",
+    "lane": "W5-DOC",
+    "depends_on_titles": [],
+    "depends_on_keys": [],
+    "routing": "in-harness-sonnet",
+    "security_review": "no",
+    "files": [
+      "docs/BACKEND_CONTRACT.md"
+    ]
+  },
+  {
+    "key": "W5-N1",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(network): contract v2 DTOs and remote sources for parse, analysis, quick question, tailoring and link import",
+    "body_markdown": "## Context\n\nThe prod flavour must speak contract v2. Can be written against the contract before the backend deploys; test with a mock web server.\n\n## Scope\n\n- Parse: `summary`, `location`, `links`, `entries[].current`.\n- Analysis: `job.location`, `matches[].reason`, `question`, error NOT_A_JOB_POST.\n- Tailoring: request `answer`, no `section`; result `summary`, `skills`; 402 NO_CREDIT.\n- Job import: POST /job-imports.\n- Guarded sources keep the on-device `FabricationGuard` as the last gate (contract D7).\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] MockWebServer tests for every new field and error code.\n- [ ] `:app:testProdDebugUnitTest` passes.\n- [ ] `dependencyGuard` unchanged.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/network/src/main/**/dto/Analysis.kt`\n- `core/network/src/main/**/dto/Resume.kt`\n- `core/network/src/main/**/dto/Tailoring.kt`\n- `core/network/src/main/**/dto/Shared.kt`\n- `core/network/src/main/**/dto/JobImport.kt`\n- `core/network/src/main/**/TailorMyResumeApi.kt`\n- `core/network/src/main/**/mapper/**`\n- `app/src/prod/kotlin/**/ai/**`\n- `app/src/prod/kotlin/**/di/AiBindings.kt`\n- `core/network/src/test/**`\n- `app/src/testProd/**`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: no\n- Wave W5, lane W5-N\n- Depends on: W5-DOC, W2-G\n\n## Prototype reference\n\nPLAN section 4.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:W5-N",
+      "routing:in-harness-sonnet"
+    ],
+    "wave": "W5",
+    "lane": "W5-N",
+    "depends_on_titles": [
+      "docs(contract): backend contract v2 for the simplified MVP",
+      "feat(domain): quick-answer facts, summary and skills in the fabrication guard, and one Accept changes decision"
+    ],
+    "depends_on_keys": [
+      "W5-DOC",
+      "W2-G"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "no",
+    "files": [
+      "core/network/src/main/**/dto/Analysis.kt",
+      "core/network/src/main/**/dto/Resume.kt",
+      "core/network/src/main/**/dto/Tailoring.kt",
+      "core/network/src/main/**/dto/Shared.kt",
+      "core/network/src/main/**/dto/JobImport.kt",
+      "core/network/src/main/**/TailorMyResumeApi.kt",
+      "core/network/src/main/**/mapper/**",
+      "app/src/prod/kotlin/**/ai/**",
+      "app/src/prod/kotlin/**/di/AiBindings.kt",
+      "core/network/src/test/**",
+      "app/src/testProd/**"
+    ]
+  },
+  {
+    "key": "W5-N2",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(billing): three packs, the credit ledger and spend-per-tailoring in the prod flavour",
+    "body_markdown": "## Context\n\nWallet v2, GET /credits and three Play products.\n\n## Scope\n\n- `RemotePaymentGateway` queries `application_pack_5`, `_15`, `_40`; `obfuscatedAccountId` stays SHA-256 of the uid.\n- `CreditsRepository` prod implementation reads GET /wallet and GET /credits; no unlock call.\n- Restore re-posts tokens from `queryPurchasesAsync`.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Tests with a fake Play client for 3 products, pending, failure, restore.\n- [ ] `dependencyGuard` unchanged.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/network/src/main/**/dto/Wallet.kt`\n- `core/network/src/main/**/dto/Purchases.kt`\n- `app/src/prod/kotlin/**/billing/**`\n- `app/src/prod/kotlin/**/di/PaymentBindings.kt`\n- `app/src/testProd/**/billing/**`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (money)\n- Wave W5, lane W5-N\n- Depends on: W5-N1, W2-E\n\n## Prototype reference\n\nREADME Paywall and Credits rows; PLAN section 4.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:W5-N",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W5",
+    "lane": "W5-N",
+    "depends_on_titles": [
+      "feat(network): contract v2 DTOs and remote sources for parse, analysis, quick question, tailoring and link import",
+      "feat(data): profile, application, credits and resume-settings data for the simplified flow (Room v3)"
+    ],
+    "depends_on_keys": [
+      "W5-N1",
+      "W2-E"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (money)",
+    "files": [
+      "core/network/src/main/**/dto/Wallet.kt",
+      "core/network/src/main/**/dto/Purchases.kt",
+      "app/src/prod/kotlin/**/billing/**",
+      "app/src/prod/kotlin/**/di/PaymentBindings.kt",
+      "app/src/testProd/**/billing/**"
+    ]
+  },
+  {
+    "key": "W5-PLAY",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "chore(release): create the 15 and 40 credit products in Play Console and set pack prices",
+    "body_markdown": "## Context\n\nThe paywall sells 5 for ₹199, 15 for ₹449, 40 for ₹999. Only the owner can create Play products and licence testers.\n\n## Scope\n\n- Create managed products `application_pack_15` and `application_pack_40`; set `application_pack_5` to ₹199, `_15` to ₹449, `_40` to ₹999 (GST included).\n- Confirm licence testers for the closed test.\n\n## Out of scope\n\n- Code.\n\n## Acceptance criteria\n\n- [ ] The three products are active in Play Console.\n- [ ] A licence tester can buy each one on the closed-test build.\n\n## Files\n\n- (Play Console, no repository files)\n\n## Routing\n\n- Routing: `owner`\n- Security review: yes (money)\n- Wave W5, lane W5-OWNER\n- Depends on: none\n\n## Prototype reference\n\nREADME Paywall row; label revamp-blocker.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:W5-OWNER",
+      "routing:owner",
+      "security-review",
+      "revamp-blocker"
+    ],
+    "wave": "W5",
+    "lane": "W5-OWNER",
+    "depends_on_titles": [],
+    "depends_on_keys": [],
+    "routing": "owner",
+    "security_review": "yes (money)",
+    "files": [
+      "(Play Console, no repository files)"
+    ]
+  },
+  {
+    "key": "B1",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): drop the consent gate from the AI routes",
+    "body_markdown": "## Context\n\nThe owner cut the consent screen and the 18+ check on 2026-10-10 (hirehop PRD 6.1.2). Today every AI route returns 403 CONSENT_REQUIRED unless `ai-processing` and `age-18-plus` are granted for notice `2026-10-b` (`consent.ts` `requiredPurposes`).\n\nParallel note: Can start in parallel with app W1 to W3.\n\n## Scope\n\n- Remove the CONSENT_REQUIRED check from resume/parse, analyses and tailorings (and prep-questions and cover-letters until B10 deletes them).\n- Remove `noticeVersion` from the TMR config if nothing else reads it.\n- Keep the core `consents` table and `POST /v1/me/consents` (core route, history stays in the export).\n\n## Out of scope\n\n- Deleting consent rows or the table.\n\n## Acceptance criteria\n\n- [ ] Tests: an AI route succeeds for a user with no consent rows.\n- [ ] `npm run check` passes.\n- [ ] After deploy, `GET /health` answers and POST /analyses works without consent rows.\n\n## Files\n\n- `src/apps/tailormyresume/consent.ts`\n- `src/apps/tailormyresume/config.ts (noticeVersion only)`\n- `test/*consent*.test.ts`\n- `tests of the gated routes`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: no\n- Wave W5, lane BE-E\n- Depends on: W5-DOC\n\n## Prototype reference\n\nhirehop PRD 6.1.2 \"Not in the MVP\" item 1; PLAN section 4 row \"Dropped consent fields\".\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-E",
+      "routing:in-harness-sonnet"
+    ],
+    "wave": "W5",
+    "lane": "BE-E",
+    "depends_on_titles": [
+      "docs(contract): backend contract v2 for the simplified MVP"
+    ],
+    "depends_on_keys": [
+      "W5-DOC"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "no",
+    "files": [
+      "src/apps/tailormyresume/consent.ts",
+      "src/apps/tailormyresume/config.ts (noticeVersion only)",
+      "test/*consent*.test.ts",
+      "tests of the gated routes"
+    ]
+  },
+  {
+    "key": "B2",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): credit packs of 5, 15 and 40",
+    "body_markdown": "## Context\n\nThe paywall sells three packs. Today `packs` has only `application_pack_5`.\n\nParallel note: Can start in parallel with app W1 to W3.\n\n## Scope\n\n- `packs`: `application_pack_5` (5), `application_pack_15` (15), `application_pack_40` (40), all `creditsExpire:false`.\n- GET /packs returns all three; POST /purchases grants the matching count.\n\n## Out of scope\n\n- Prices (Play Console owns them).\n\n## Acceptance criteria\n\n- [ ] Tests grant 5, 15 and 40 credits for the three product ids.\n- [ ] Unknown product id is still 400 INVALID_INPUT.\n- [ ] `npm run check` passes.\n\n## Files\n\n- `src/apps/tailormyresume/config.ts (packs)`\n- `test/*purchases*.test.ts`\n- `test/*wallet*.test.ts`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (money)\n- Wave W5, lane BE-A\n- Depends on: W5-DOC\n\n## Prototype reference\n\nhirehop README Paywall row.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-A",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W5",
+    "lane": "BE-A",
+    "depends_on_titles": [
+      "docs(contract): backend contract v2 for the simplified MVP"
+    ],
+    "depends_on_keys": [
+      "W5-DOC"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (money)",
+    "files": [
+      "src/apps/tailormyresume/config.ts (packs)",
+      "test/*purchases*.test.ts",
+      "test/*wallet*.test.ts"
+    ]
+  },
+  {
+    "key": "B3",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): credit ledger table and GET /v1/tailormyresume/credits",
+    "body_markdown": "## Context\n\nThe Credits screen shows a history (+5 bought, −1 per tailored resume, +1 welcome). The server has two counters and no history.\n\nParallel note: Can start in parallel with app W1 to W3.\n\n## Scope\n\n- Table `tailormyresume_credit_ledger(id uuid, user_id fk cascade, kind WELCOME|PURCHASE|TAILORING|REFUND|MIGRATION, amount int != 0, application_id text null, product_id text null, purchase_id uuid null, tailoring_id text null, created_at)`; index (user_id, created_at).\n- Backfill: one MIGRATION row per existing wallet with its current balance.\n- Write a WELCOME row when the wallet is created and a PURCHASE row in the same transaction as a purchase grant.\n- GET /credits -> `{credits:{balance, entries:[{id, kind, amount, applicationId, productId, createdAt}]}}`, newest first, at most 100; register it in the wallet sub-router.\n- Wallet v2: `{wallet:{credits, freeCredits, purchasedCredits, analysesLeftToday, day, resetsAt}}` (drop `freeTailoringsLeftToday`, `unlockedApplicationIds` in B4).\n- Add the ledger to GET /me/export; `DELETE /v1/me` cascade covers it (test).\n\n## Out of scope\n\n- Job titles or company names on the server (data minimisation: the app joins `applicationId` with its local Room data).\n\n## Acceptance criteria\n\n- [ ] Migration test and schema-drift test pass; the balance equals the sum of ledger amounts for every wallet after backfill.\n- [ ] Deletion test removes ledger rows.\n- [ ] `npm run check` passes.\n- [ ] After deploy, GET /credits answers on the Fly app.\n\n## Files\n\n- `drizzle/0008_*.sql`\n- `drizzle/meta/**`\n- `src/apps/tailormyresume/schema.ts`\n- `src/apps/tailormyresume/ledger.ts (new)`\n- `src/apps/tailormyresume/wallet.ts`\n- `src/apps/tailormyresume/purchases.ts`\n- `src/apps/tailormyresume/export.ts`\n- `test/*ledger*.test.ts`\n- `test/schema-*.test.ts`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (money, data export)\n- Wave W5, lane BE-A\n- Depends on: B2\n\n## Prototype reference\n\nhirehop README Credits row; logic `ledger`, `credits()`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-A",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W5",
+    "lane": "BE-A",
+    "depends_on_titles": [
+      "feat(tailormyresume): credit packs of 5, 15 and 40"
+    ],
+    "depends_on_keys": [
+      "B2"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (money, data export)",
+    "files": [
+      "drizzle/0008_*.sql",
+      "drizzle/meta/**",
+      "src/apps/tailormyresume/schema.ts",
+      "src/apps/tailormyresume/ledger.ts (new)",
+      "src/apps/tailormyresume/wallet.ts",
+      "src/apps/tailormyresume/purchases.ts",
+      "src/apps/tailormyresume/export.ts",
+      "test/*ledger*.test.ts",
+      "test/schema-*.test.ts"
+    ]
+  },
+  {
+    "key": "B4",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): spend one credit per successful tailoring; drop unlock and the daily free tailoring",
+    "body_markdown": "## Context\n\nThe prototype spends 1 credit when a tailoring finishes (`finishTailor` writes −1); \"Tailoring failed\" says \"Your credit wasn't used\"; \"Re-tailor · 1 credit\" spends again. Today a credit is spent by POST /applications/:id/unlock at first export, and a daily free tailoring exists.\n\n## Scope\n\n- POST /tailorings reserves 1 credit (column `credit_reserved boolean` on the tailorings table) and answers 402 NO_CREDIT when the balance is 0.\n- On SUCCEEDED: write a TAILORING ledger row (−1) and decrement the wallet in one transaction. On FAILED or INTERRUPTED: release the reservation; no ledger row.\n- Every new tailoring (new requestId) costs 1, also for the same applicationId (re-tailor). Remove section regeneration (`section` field).\n- Remove POST /applications/:id/unlock, `dailyFreeTailorings` and FREE_TAILORING claims. Keep the `tailormyresume_unlocks` table for one release (drop later).\n- Raise `dailyAnalyses` from 3 to 20 as an abuse limit (the prototype has no allowance state; PLAN R5).\n\n## Out of scope\n\n- Refunds of voided Play purchases.\n\n## Acceptance criteria\n\n- [ ] Tests: success spends exactly 1; failure spends 0; concurrent starts cannot overdraw; repeat requestId does not double spend.\n- [ ] `npm run check` passes.\n- [ ] After deploy, a tailoring on the Fly app moves the balance by −1 and adds a ledger row.\n\n## Files\n\n- `src/apps/tailormyresume/tailoring.ts (credit check and settle only)`\n- `src/apps/tailormyresume/claims.ts`\n- `src/apps/tailormyresume/wallet.ts`\n- `src/apps/tailormyresume/routes.ts (remove the unlock route)`\n- `src/apps/tailormyresume/config.ts`\n- `drizzle/0009_*.sql`\n- `test/*tailoring*.test.ts`\n- `test/*wallet*.test.ts`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (money)\n- Wave W5, lane BE-A\n- Depends on: B3\n\n## Prototype reference\n\nlogic `finishTailor`, `startTailor`, `tf`; README Tailoring failed and Application rows.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-A",
+      "routing:in-harness-sonnet",
+      "security-review"
+    ],
+    "wave": "W5",
+    "lane": "BE-A",
+    "depends_on_titles": [
+      "feat(tailormyresume): credit ledger table and GET /v1/tailormyresume/credits"
+    ],
+    "depends_on_keys": [
+      "B3"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (money)",
+    "files": [
+      "src/apps/tailormyresume/tailoring.ts (credit check and settle only)",
+      "src/apps/tailormyresume/claims.ts",
+      "src/apps/tailormyresume/wallet.ts",
+      "src/apps/tailormyresume/routes.ts (remove the unlock route)",
+      "src/apps/tailormyresume/config.ts",
+      "drizzle/0009_*.sql",
+      "test/*tailoring*.test.ts",
+      "test/*wallet*.test.ts"
+    ]
+  },
+  {
+    "key": "B6",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): must-have reasons, job location and NOT_A_JOB_POST in analyses",
+    "body_markdown": "## Context\n\nJob analyzed shows place, and a reason per must-have (\"You have 4 years\", \"Used at Infosys and Tata Digital\", \"Not clear in your resume\"). The Add job screen has a \"not a job post\" state.\n\nParallel note: Can start in parallel with app W1 to W3.\n\n## Scope\n\n- `job.location` (string or null).\n- `matches[].reason` (<= 120 characters, built only from cited evidence; GAP reason is a fixed phrase).\n- Return 422 NOT_A_JOB_POST when the model finds no requirement or classifies the text as not a job post; the claim is released.\n- Add error codes NOT_A_JOB_POST and JOB_IMPORT_FAILED (both 422) to `src/core/errors.ts`.\n\n## Out of scope\n\n- Numeric scores (the app computes keyword coverage, D5).\n\n## Acceptance criteria\n\n- [ ] Tests for a referral message (\"Hey Priya! Saw this role…\") -> 422, and the Northwind JD -> location \"Bengaluru · Hybrid\".\n- [ ] `npm run check` passes.\n\n## Files\n\n- `src/apps/tailormyresume/analyses.ts`\n- `src/core/errors.ts (add NOT_A_JOB_POST 422 and JOB_IMPORT_FAILED 422)`\n- `test/*analyses*.test.ts`\n- `test/fixtures/tailormyresume-prompts-*.json`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W5, lane BE-B\n- Depends on: W5-DOC\n\n## Prototype reference\n\nindex(): \"Not a job post\", \"Job analyzed\"; logic `jr`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-B",
+      "routing:minimax-impl"
+    ],
+    "wave": "W5",
+    "lane": "BE-B",
+    "depends_on_titles": [
+      "docs(contract): backend contract v2 for the simplified MVP"
+    ],
+    "depends_on_keys": [
+      "W5-DOC"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "src/apps/tailormyresume/analyses.ts",
+      "src/core/errors.ts (add NOT_A_JOB_POST 422 and JOB_IMPORT_FAILED 422)",
+      "test/*analyses*.test.ts",
+      "test/fixtures/tailormyresume-prompts-*.json"
+    ]
+  },
+  {
+    "key": "B5a",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): one quick question in the analysis answer",
+    "body_markdown": "## Context\n\n\"One quick question\" asks about one must-have the resume does not show.\n\nParallel note: Can start in parallel with app W1 to W3.\n\n## Scope\n\n- Response field `question: {requirementId, text, why, options:[\"YES_REGULARLY\",\"A_FEW_TIMES\",\"NOT_YET\"]} | null`: at most one, for the first MUST_HAVE with status GAP or PARTIAL whose type is EXPERIENCE or SOFT_SKILL.\n- `text` is a yes/no question in plain English (<= 80 characters).\n\n## Out of scope\n\n- Several questions.\n\n## Acceptance criteria\n\n- [ ] Tests: Northwind JD with Priya facts -> question about presenting to senior stakeholders; a fully met JD -> null.\n- [ ] `npm run check` passes.\n\n## Files\n\n- `src/apps/tailormyresume/analyses.ts`\n- `test/*analyses*.test.ts`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W5, lane BE-B\n- Depends on: B6\n\n## Prototype reference\n\nindex(): \"Quick question\"; logic `q`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-B",
+      "routing:minimax-impl"
+    ],
+    "wave": "W5",
+    "lane": "BE-B",
+    "depends_on_titles": [
+      "feat(tailormyresume): must-have reasons, job location and NOT_A_JOB_POST in analyses"
+    ],
+    "depends_on_keys": [
+      "B6"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "src/apps/tailormyresume/analyses.ts",
+      "test/*analyses*.test.ts"
+    ]
+  },
+  {
+    "key": "B7",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): summary, location, links and current-role flag in resume parse",
+    "body_markdown": "## Context\n\nReview profile needs a required-gap rule (end date missing) that can tell \"now\" from a missing date; Profile shows city, LinkedIn, portfolio and summary.\n\nParallel note: Can start in parallel with app W1 to W3.\n\n## Scope\n\n- `profile.summary` (verbatim or null), `profile.location` (city), `profile.links: [{kind: LINKEDIN|PORTFOLIO|OTHER, url}]`.\n- `entries[].current: boolean` (true when the source says Present, now, current or similar).\n- All values verbatim from the source text (existing rule).\n\n## Out of scope\n\n- Uploading files to the server (contract D2 stays).\n\n## Acceptance criteria\n\n- [ ] Test with the prototype `RESUME_TXT`: Infosys current=true, Tata Digital endDate=null current=false, location \"Pune\".\n- [ ] `npm run check` passes.\n\n## Files\n\n- `src/apps/tailormyresume/resume-parse.ts`\n- `test/*resume-parse*.test.ts`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W5, lane BE-C\n- Depends on: W5-DOC\n\n## Prototype reference\n\nindex(): \"Reading\", \"Review profile\"; logic `RESUME_TXT`, `roles`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-C",
+      "routing:minimax-impl"
+    ],
+    "wave": "W5",
+    "lane": "BE-C",
+    "depends_on_titles": [
+      "docs(contract): backend contract v2 for the simplified MVP"
+    ],
+    "depends_on_keys": [
+      "W5-DOC"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "src/apps/tailormyresume/resume-parse.ts",
+      "test/*resume-parse*.test.ts"
+    ]
+  },
+  {
+    "key": "B8",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): tailoring returns a verified summary and skills order",
+    "body_markdown": "## Context\n\nThe Changes tab shows \"Summary · New\" and \"Skills · Reordered\". Today the result has bullets only.\n\nParallel note: Can start in parallel with app W1 to W3.\n\n## Scope\n\n- Facts payload: optional `summary: {id, text}`.\n- Result: `summary: {text, sourceIds, verification} | null`, `skills: {ordered: string[], added: string[]}` where `added` only holds skills grounded in user-stated skills or answer facts.\n- Summary passes the same deterministic checks and the verifier model as bullets; on failure it is null (no summary change).\n\n## Out of scope\n\n- Changing the bullet rules.\n\n## Acceptance criteria\n\n- [ ] Eval run shows 0 critical fabrications on the existing set plus summary cases.\n- [ ] `npm run check` passes.\n\n## Files\n\n- `src/apps/tailormyresume/tailoring-pipeline.ts`\n- `src/apps/tailormyresume/facts.ts (profile.summary)`\n- `test/*tailoring*.test.ts`\n- `scripts/tailormyresume-eval/**`\n- `test/fixtures/tailormyresume-eval/**`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: no\n- Wave W5, lane BE-D\n- Depends on: W5-DOC\n\n## Prototype reference\n\nindex(): \"Tailored resume\" Changes tab; logic `changes`, `summary`, `skillsLine`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-D",
+      "routing:in-harness-sonnet"
+    ],
+    "wave": "W5",
+    "lane": "BE-D",
+    "depends_on_titles": [
+      "docs(contract): backend contract v2 for the simplified MVP"
+    ],
+    "depends_on_keys": [
+      "W5-DOC"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "no",
+    "files": [
+      "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "src/apps/tailormyresume/facts.ts (profile.summary)",
+      "test/*tailoring*.test.ts",
+      "scripts/tailormyresume-eval/**",
+      "test/fixtures/tailormyresume-eval/**"
+    ]
+  },
+  {
+    "key": "B5b",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): the quick-question answer as a tailoring fact source",
+    "body_markdown": "## Context\n\nThe answer is a source (\"Your answer\", amber). Truth rule from PLAN 2.3: an answer bullet attaches to an experience entry only when the detail names that entry.\n\n## Scope\n\n- Request field `answer: {requirementId, choice: YES_REGULARLY|A_FEW_TIMES|NOT_YET|SKIPPED, detail: string<=400|null} | null`.\n- YES or A_FEW: the server adds a fact entry `ans-<requirementId>` with source USER_ANSWER (new enum value) and, when detail exists, one bullet `ans-<requirementId>-b1` with the detail text.\n- An answer bullet may be cited by a bullet of entry E only when the detail text names E's organization or title; else it may support only the summary and skills.\n- NOT_YET and SKIPPED add no fact.\n\n## Out of scope\n\n- Storing the answer on the server after the job ends (24 h rule stays).\n\n## Acceptance criteria\n\n- [ ] Tests: prototype answer -> summary cites `ans-…`, no Infosys bullet cites it; answer naming Infosys -> an Added Infosys bullet may cite it.\n- [ ] Eval: 0 critical fabrications.\n- [ ] `npm run check` passes.\n\n## Files\n\n- `src/apps/tailormyresume/tailoring.ts (request schema)`\n- `src/apps/tailormyresume/tailoring-pipeline.ts`\n- `src/apps/tailormyresume/facts.ts`\n- `test/*tailoring*.test.ts`\n- `test/fixtures/tailormyresume-eval/**`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: no\n- Wave W5, lane BE-D\n- Depends on: B4, B8, B5a\n\n## Prototype reference\n\nindex(): \"Quick question\", \"Tailored resume\"; logic `hasEx`, `changes`, `er`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-D",
+      "routing:in-harness-sonnet"
+    ],
+    "wave": "W5",
+    "lane": "BE-D",
+    "depends_on_titles": [
+      "feat(tailormyresume): spend one credit per successful tailoring; drop unlock and the daily free tailoring",
+      "feat(tailormyresume): tailoring returns a verified summary and skills order",
+      "feat(tailormyresume): one quick question in the analysis answer"
+    ],
+    "depends_on_keys": [
+      "B4",
+      "B8",
+      "B5a"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "no",
+    "files": [
+      "src/apps/tailormyresume/tailoring.ts (request schema)",
+      "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "src/apps/tailormyresume/facts.ts",
+      "test/*tailoring*.test.ts",
+      "test/fixtures/tailormyresume-eval/**"
+    ]
+  },
+  {
+    "key": "B9",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): import a job post from a link",
+    "body_markdown": "## Context\n\n\"Import from a link\" pulls a description from a careers page. This is a server-side fetch of a user URL.\n\nParallel note: Can start in parallel with app W1 to W3.\n\n## Scope\n\n- POST /job-imports `{url}` (https only, <= 2,048 characters) -> `{jobText, sourceHost}`.\n- SSRF guard: resolve DNS first and refuse private, loopback, link-local, CGNAT and metadata addresses (IPv4 and IPv6), refuse redirects to such hosts, at most 3 redirects, 8 s timeout, 2 MB body, text/html only.\n- Extract visible text (strip scripts and styles), cap at 20,000 characters; fewer than 200 characters -> 422 JOB_IMPORT_FAILED.\n- Rate limit: 20 imports per user per day (claims kind JOB_IMPORT). Never log the URL path or the body.\n\n## Out of scope\n\n- Logged-in pages (the copy tells the user to paste instead).\n\n## Acceptance criteria\n\n- [ ] Tests for each refused address class, redirect to 169.254.169.254, oversize body, non-HTML, and a fixture careers page.\n- [ ] `npm run check` passes.\n\n## Files\n\n- `src/apps/tailormyresume/job-imports.ts (new)`\n- `src/apps/tailormyresume/routes.ts`\n- `test/*job-imports*.test.ts`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no (owner policy; SSRF guards are acceptance criteria, see PLAN R4)\n- Wave W5, lane BE-E\n- Depends on: B6, B1\n\n## Prototype reference\n\nindex(): \"Import link\"; logic `jb.onImport`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-E",
+      "routing:minimax-impl"
+    ],
+    "wave": "W5",
+    "lane": "BE-E",
+    "depends_on_titles": [
+      "feat(tailormyresume): must-have reasons, job location and NOT_A_JOB_POST in analyses",
+      "feat(tailormyresume): drop the consent gate from the AI routes"
+    ],
+    "depends_on_keys": [
+      "B6",
+      "B1"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no (owner policy; SSRF guards are acceptance criteria, see PLAN R4)",
+    "files": [
+      "src/apps/tailormyresume/job-imports.ts (new)",
+      "src/apps/tailormyresume/routes.ts",
+      "test/*job-imports*.test.ts"
+    ]
+  },
+  {
+    "key": "B10",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "chore(tailormyresume): delete the prep-questions and cover-letters routes",
+    "body_markdown": "## Context\n\nPrep questions and the cover letter are not in the MVP. The app stops calling them in W1-D.\n\n## Scope\n\n- Delete both routes, their prompts, schemas and tests.\n- Keep the content-report item kinds (old reports stay readable).\n\n## Out of scope\n\n- The content-reports route.\n\n## Acceptance criteria\n\n- [ ] `npm run check` passes.\n- [ ] After deploy, both paths answer 404.\n\n## Files\n\n- `src/apps/tailormyresume/prep-questions.ts`\n- `src/apps/tailormyresume/cover-letters.ts`\n- `src/apps/tailormyresume/routes.ts`\n- `test/*prep*.test.ts`\n- `test/*cover*.test.ts`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W5, lane BE-E\n- Depends on: B9, W1-D\n\n## Prototype reference\n\nREADME \"Not in the MVP\"; PRD 6.1.2.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-E",
+      "routing:minimax-impl"
+    ],
+    "wave": "W5",
+    "lane": "BE-E",
+    "depends_on_titles": [
+      "feat(tailormyresume): import a job post from a link",
+      "chore(core,app): remove consent, cover letter, prep, connectivity and other dead features from the domain, data, network and app layers"
+    ],
+    "depends_on_keys": [
+      "B9",
+      "W1-D"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "src/apps/tailormyresume/prep-questions.ts",
+      "src/apps/tailormyresume/cover-letters.ts",
+      "src/apps/tailormyresume/routes.ts",
+      "test/*prep*.test.ts",
+      "test/*cover*.test.ts"
+    ]
+  },
+  {
+    "key": "B11",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "chore: staging test identity for API testing without Google sign-in on a device",
+    "body_markdown": "## Context\n\nNo staging test identity exists: the server verifies only real Firebase ID tokens, with no bypass. The end-to-end run needs API access for a synthetic user.\n\nParallel note: Can start in parallel with app W1 to W3. Running it is an owner step (revamp-blocker).\n\n## Scope\n\n- A script, run locally by the owner with the Firebase service account, that creates or reuses a synthetic user `tmr-e2e-<n>` through firebase-admin, mints a custom token, exchanges it for an ID and refresh token through the Firebase Auth REST API, and writes them to a git-ignored file.\n- No server code path changes. No bypass header, flag or env var.\n\n## Out of scope\n\n- Any runtime auth bypass.\n\n## Acceptance criteria\n\n- [ ] `grep -rn 'bypass\\|TEST_USER\\|DEV_AUTH' src` still returns nothing.\n- [ ] The script refuses to run without `--uid-prefix tmr-e2e-`.\n- [ ] `npm run check` passes.\n\n## Files\n\n- `scripts/mint-test-token.ts (new)`\n- `docs/architecture.md (test identity paragraph only)`\n- `.gitignore`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (accounts)\n- Wave W5, lane BE-F\n- Depends on: none\n\n## Prototype reference\n\nOrchestrator prompt Phase 3 step 1.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-F",
+      "routing:in-harness-sonnet",
+      "security-review",
+      "revamp-blocker"
+    ],
+    "wave": "W5",
+    "lane": "BE-F",
+    "depends_on_titles": [],
+    "depends_on_keys": [],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (accounts)",
+    "files": [
+      "scripts/mint-test-token.ts (new)",
+      "docs/architecture.md (test identity paragraph only)",
+      ".gitignore"
+    ]
+  },
+  {
+    "key": "B12",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "feat(tailormyresume): email the data export to the Google account email",
+    "body_markdown": "## Context\n\nSettings shows \"We'll email your data to <email> within 24 hours\". The backend has no email provider and stores no profile (contract D1), so the app must upload its local data for the email. BLOCKED: the owner must choose an email provider and add its secret.\n\nParallel note: Label revamp-blocker until the provider and secret exist.\n\n## Scope\n\n- POST /me/data-export `{device: <profile and applications JSON, <= 1 MB>}` -> 202; the server merges `GET /me/export`, emails a JSON attachment to the verified Google email of the token, keeps nothing after sending, and rate-limits to 1 per day.\n- Record the provider as a processor in `docs/compliance.md`.\n\n## Out of scope\n\n- Storing the export.\n\n## Acceptance criteria\n\n- [ ] Tests with a fake mailer.\n- [ ] `npm run check` passes.\n\n## Files\n\n- `src/apps/tailormyresume/export.ts`\n- `src/core/email/** (new)`\n- `test/*export*.test.ts`\n- `docs/compliance.md`\n\n## Routing\n\n- Routing: `in-harness-sonnet`\n- Security review: yes (data export)\n- Wave W5, lane BE-G\n- Depends on: B3\n\n## Prototype reference\n\nindex(): \"Settings\" Download my data; logic `se.onData`; PLAN R6.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-G",
+      "routing:in-harness-sonnet",
+      "security-review",
+      "revamp-blocker"
+    ],
+    "wave": "W5",
+    "lane": "BE-G",
+    "depends_on_titles": [
+      "feat(tailormyresume): credit ledger table and GET /v1/tailormyresume/credits"
+    ],
+    "depends_on_keys": [
+      "B3"
+    ],
+    "routing": "in-harness-sonnet",
+    "security_review": "yes (data export)",
+    "files": [
+      "src/apps/tailormyresume/export.ts",
+      "src/core/email/** (new)",
+      "test/*export*.test.ts",
+      "docs/compliance.md"
+    ]
+  },
+  {
+    "key": "B13",
+    "repo": "BengaluruBuilders/apps-backend",
+    "title": "docs: TailorMyResume section of architecture.md and compliance.md for contract v2",
+    "body_markdown": "## Context\n\nBackend docs must match contract v2 (hirehop docs/BACKEND_CONTRACT.md).\n\n## Scope\n\n- Routes, credit rule, ledger retention (account deletion), job-import fetch rule, removed consent gate, removed routes.\n\n## Out of scope\n\n- Code.\n\n## Acceptance criteria\n\n- [ ] Docs match the deployed routes.\n\n## Files\n\n- `docs/architecture.md`\n- `docs/compliance.md`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W5, lane BE-E\n- Depends on: B1, B4, B5b, B7, B9, B10\n\n## Prototype reference\n\nPLAN section 4.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W5",
+      "lane:BE-E",
+      "routing:minimax-impl"
+    ],
+    "wave": "W5",
+    "lane": "BE-E",
+    "depends_on_titles": [
+      "feat(tailormyresume): drop the consent gate from the AI routes",
+      "feat(tailormyresume): spend one credit per successful tailoring; drop unlock and the daily free tailoring",
+      "feat(tailormyresume): the quick-question answer as a tailoring fact source",
+      "feat(tailormyresume): summary, location, links and current-role flag in resume parse",
+      "feat(tailormyresume): import a job post from a link",
+      "chore(tailormyresume): delete the prep-questions and cover-letters routes"
+    ],
+    "depends_on_keys": [
+      "B1",
+      "B4",
+      "B5b",
+      "B7",
+      "B9",
+      "B10"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "docs/architecture.md",
+      "docs/compliance.md"
+    ]
+  },
+  {
+    "key": "W6-A",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(demo): offline fakes for contract v2 — packs, ledger, quick question, link import and the five failures",
+    "body_markdown": "## Context\n\nThe demo flavour has no INTERNET permission (I.5). It must run every prototype state offline.\n\nParallel note: May start after W3, in parallel with W4 (disjoint files).\n\n## Scope\n\n- Packs 5/15/40 with ₹199/₹449/₹999, ledger rows like `returning()`, one credit per successful tailoring, release on failure.\n- Offline analysis returns the Northwind question and must-have reasons; offline tailor returns the prototype changes (with and without the answer); offline link import returns the Northwind JD for any https URL and fails for others.\n- Forced failures for the five drawn error states: sign-in cancelled, unreadable file, not a job post, tailoring failed, payment failed.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Unit tests for each fake.\n- [ ] `assembleDemoDebug` runs the full flow on the emulator with no network.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/domain/src/main/**/offline/OfflinePaymentGateway.kt`\n- `core/domain/src/main/**/offline/MockPackCatalogue.kt`\n- `core/domain/src/main/**/offline/ForcedPaymentScenario.kt`\n- `core/domain/src/main/**/offline/OfflineJobAnalysisSource.kt`\n- `core/domain/src/main/**/offline/OfflineResumeTailor.kt`\n- `core/domain/src/main/**/offline/OfflineJobImporter.kt (new)`\n- `core/domain/src/main/**/offline/OfflineSignInGateway.kt`\n- `core/domain/src/test/**/offline/**`\n- `app/src/demo/**`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W6, lane W6-A\n- Depends on: W2-F, W2-G, W5-DOC\n\n## Prototype reference\n\nlogic `fresh()`, `returning()`, `finishTailor`, `buy`, `index()` error chips.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W6",
+      "lane:W6-A",
+      "routing:minimax-impl"
+    ],
+    "wave": "W6",
+    "lane": "W6-A",
+    "depends_on_titles": [
+      "feat(domain): keyword coverage, profile completeness, required gaps, start destination and export file names",
+      "feat(domain): quick-answer facts, summary and skills in the fabrication guard, and one Accept changes decision",
+      "docs(contract): backend contract v2 for the simplified MVP"
+    ],
+    "depends_on_keys": [
+      "W2-F",
+      "W2-G",
+      "W5-DOC"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "core/domain/src/main/**/offline/OfflinePaymentGateway.kt",
+      "core/domain/src/main/**/offline/MockPackCatalogue.kt",
+      "core/domain/src/main/**/offline/ForcedPaymentScenario.kt",
+      "core/domain/src/main/**/offline/OfflineJobAnalysisSource.kt",
+      "core/domain/src/main/**/offline/OfflineResumeTailor.kt",
+      "core/domain/src/main/**/offline/OfflineJobImporter.kt (new)",
+      "core/domain/src/main/**/offline/OfflineSignInGateway.kt",
+      "core/domain/src/test/**/offline/**",
+      "app/src/demo/**"
+    ]
+  },
+  {
+    "key": "W6-B",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(demo): Priya Deshmukh and Northwind GCC sample data for New user and Returning user",
+    "body_markdown": "## Context\n\nThe debug build loads sample data. The prototype has two presets.\n\nParallel note: May start after W2-E, in parallel with W3 and W4.\n\n## Scope\n\n- `SampleDataSet.New` = `fresh()` (1 welcome credit, no apps). `SampleDataSet.Returning` = `returning()` (3 apps: Northwind Applied 8 Oct, Kestrel Interview 6 Oct, Halden Saved; 5 ledger rows; reviewed profile with 3 roles, 18 skills, lists).\n- Unify `CanonicalFixtures` and `PrototypeFixtures` (W2-E) so screenshot tests and the demo use one source; synthetic people only.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] A test compares the loaded Returning set with `PrototypeFixtures`.\n- [ ] `verifyRoborazziDebug` unchanged (no baseline churn).\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `core/domain/src/main/**/sample/**`\n- `core/testing/src/main/**/data/**`\n- `core/domain/src/test/**/sample/**`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W6, lane W6-B\n- Depends on: W2-E\n\n## Prototype reference\n\nREADME \"Sample data\"; logic `JD`, `RESUME_TXT`, `ROLES`, `SKILLS`, `LISTS`, `NW`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W6",
+      "lane:W6-B",
+      "routing:minimax-impl"
+    ],
+    "wave": "W6",
+    "lane": "W6-B",
+    "depends_on_titles": [
+      "feat(data): profile, application, credits and resume-settings data for the simplified flow (Room v3)"
+    ],
+    "depends_on_keys": [
+      "W2-E"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "core/domain/src/main/**/sample/**",
+      "core/testing/src/main/**/data/**",
+      "core/domain/src/test/**/sample/**"
+    ]
+  },
+  {
+    "key": "W6-C",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "feat(debug): developer menu mirrors the prototype index",
+    "body_markdown": "## Context\n\n\"TailorMyResume dev\" opens any screen in a forced state. It should list exactly the prototype chips.\n\n## Scope\n\n- Groups Onboarding, Job & tailor, App with every `index()` label; New user and Returning user presets; reset.\n- Replace `DebugScenario` values with the prototype state names; delete unused values.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Every `index()` label opens the matching state (Robolectric test over the list).\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `app/src/debug/**`\n- `core/model/src/main/**/DebugScenario.kt`\n- `docs/ARCHITECTURE.md (Debug developer menu)`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W6, lane W6-C\n- Depends on: W6-A, W6-B, W4-A3, W4-B2, W4-C2, W4-D1, W4-E2, W4-F2\n\n## Prototype reference\n\nlogic `index()`, `presetNew`, `presetReturning`, `jump`.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W6",
+      "lane:W6-C",
+      "routing:minimax-impl"
+    ],
+    "wave": "W6",
+    "lane": "W6-C",
+    "depends_on_titles": [
+      "feat(demo): offline fakes for contract v2 — packs, ledger, quick question, link import and the five failures",
+      "feat(demo): Priya Deshmukh and Northwind GCC sample data for New user and Returning user",
+      "feat(onboarding): review profile once — required fix, LinkedIn and completeness",
+      "feat(job): job analysis with keyword coverage and the quick question",
+      "feat(tailor): edit resume, one-page PDF export with page size and file-name format, and the exported screen",
+      "feat(applications): Applications home, application detail and the status sheet",
+      "feat(profile): contact, skills and list editors for summary, education and achievements",
+      "feat(credits): credits ledger, paywall with 5, 15 and 40 packs, payment failed sheet and restore"
+    ],
+    "depends_on_keys": [
+      "W6-A",
+      "W6-B",
+      "W4-A3",
+      "W4-B2",
+      "W4-C2",
+      "W4-D1",
+      "W4-E2",
+      "W4-F2"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "app/src/debug/**",
+      "core/model/src/main/**/DebugScenario.kt",
+      "docs/ARCHITECTURE.md (Debug developer menu)"
+    ]
+  },
+  {
+    "key": "W6-D",
+    "repo": "BengaluruBuilders/hirehop",
+    "title": "test: one screenshot baseline per prototype state at 374 x 834 and docs/MOCK_BACKEND.md for v2",
+    "body_markdown": "## Context\n\nQA compares each state with the prototype at 374 x 834 dp.\n\n## Scope\n\n- Audit PLAN section 2 against existing screenshot tests; add the missing ones.\n- Rewrite `docs/MOCK_BACKEND.md` for the new fakes and sample data.\n\n## Out of scope\n\n- Anything in PRD 6.1.2 \"Not in the MVP\": consent screen, 18+ check, light theme, Apple sign-in, follow-up reminders, offline states, error states beyond the five drawn ones, prep questions, cover letter, share card, DOCX export, templates.\n\n## Acceptance criteria\n\n- [ ] Every row of PLAN section 2 has a baseline.\n- [ ] `tools/ci/verify-local.sh` is green.\n\n## Files\n\n- `feature/*/impl/src/test/** (missing state tests only)`\n- `docs/MOCK_BACKEND.md`\n\n## Routing\n\n- Routing: `minimax-impl`\n- Security review: no\n- Wave W6, lane W6-D\n- Depends on: W6-C\n\n## Prototype reference\n\nPLAN section 2.\n\nPlan: `docs/revamp/2026-10-10/PLAN.md`. Sources: `docs/CONSTITUTION.md`, `docs/PRD.md` 6.1.2, `design/prototype-2026-10-10/README.md` and `Prototype.dc.html`. Orchestrator decisions D4 (one Accept changes control, I.2 kept) and D5 (keyword coverage, I.3) apply.",
+    "labels": [
+      "revamp",
+      "wave:W6",
+      "lane:W6-D",
+      "routing:minimax-impl"
+    ],
+    "wave": "W6",
+    "lane": "W6-D",
+    "depends_on_titles": [
+      "feat(debug): developer menu mirrors the prototype index"
+    ],
+    "depends_on_keys": [
+      "W6-C"
+    ],
+    "routing": "minimax-impl",
+    "security_review": "no",
+    "files": [
+      "feature/*/impl/src/test/** (missing state tests only)",
+      "docs/MOCK_BACKEND.md"
+    ]
+  }
+]

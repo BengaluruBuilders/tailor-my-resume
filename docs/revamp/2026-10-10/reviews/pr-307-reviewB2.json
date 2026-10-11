@@ -1,0 +1,54 @@
+{
+ "head_sha": "607d1503cd1e86cf02de4985f84e94b29ccd1015",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "265-c1", "status": "met", "evidence": "FlowRow keeps the composition order 1,2,3 and the traversal order. The current pill keeps its merged 'Step n of 3' contentDescription, and stepTextsAndDescription is unchanged. At 2.0 the re-recorded baselines show whole words: 'PROFILE' and '2 JOB' on row 1, '3 TAILOR' on row 2. stepBarLabelsKeepWholeWordsAtFontScale2 fails on c2f22b16, because the old text was ellipsized and exposed no GetTextLayoutResult."},
+  {"id": "265-c2", "status": "met", "evidence": "48dp targets unchanged. didOverflowHeight is now asserted on 'Save'. topBarActionGrowsWithTextAtFontScale3 overflows when height(44) is restored, because Density(d, 3f) scales linearly: 13sp becomes 39dp of text. At 1x a long caller title is now clipped mid-glyph (finding 3)."},
+  {"id": "265-c3", "status": "partial", "evidence": "Behaviour tests pass. tabBarLabelsKeepWholeWordsAtFontScale2 passes only after 12 frames. The committed chrome_tabbar_*_prototype-font-200 baselines still record 'APPLICAT'/'IONS' (finding 1)."},
+  {"id": "265-c4", "status": "met", "evidence": "Default 3200 ms unchanged. actionlessToastHonoursItsOwnDurationWithoutScreenReader covers the caller's durationMillis at 4999 and 5000 ms."},
+  {"id": "265-c5", "status": "met", "evidence": "Replace/restart and dismiss-before-callback are unchanged at this head."},
+  {"id": "265-c6", "status": "partial", "evidence": "With a screen reader, an actionable toast now stays on every API level (D40), and tests cover the default SDK and SDK 28. Touch exploration is read once per toast id, inside remember(toast.id). That matches M3 SnackbarHost and is accepted. However, the indefinite toast has no dismiss path apart from its own action (finding 2)."},
+  {"id": "265-c7", "status": "met", "evidence": "Sheet geometry unchanged. paneTitle now comes from the caller, as sheetExposesItsTitleAsPaneTitle shows. The generic default remains (finding 4)."},
+  {"id": "265-c8", "status": "partial", "evidence": "toastReducedMotionFirstFrameIsFinal now asserts top == 104dp. boundsInRoot includes the graphicsLayer translation, so the Animatable(0f) mutation now fails the test, which fixes round-1 finding 2. Still open: under reduced motion the chrome labels visibly resize over several frames (finding 1)."},
+  {"id": "265-c9", "status": "partial", "evidence": "The 3 step-bar font-200 baselines are re-recorded and justified, and the 1x baselines are unchanged. The tab-bar font-200 baselines were not re-recorded and show the mid-word break that D40 forbids. The capture settles only 2 frames after the font switch."},
+  {"id": "265-c10", "status": "partial", "evidence": "On head 607d1503 the Gradle jobs ran this time. Screenshot tests, Core unit tests, Static checks, Constitution policy and delivery-gates-pregate pass. App unit, Feature unit, Lint and Assemble were still pending when checked. Reviewer B did not run verify-local.sh."}
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrChromeText.kt",
+   "line": 50,
+   "rule": "D40 (never break inside a word); AGENTS.md Motion: when reduced is true nothing moves, and a settled frame must not change",
+   "trigger": "The shrink writes `size` from onTextLayout, which runs during measure. Each 0.9 step therefore costs a recomposition and a drawn frame, and going from 2.0 to the 1x floor takes up to 7 frames (0.9^7 < 0.5). During those frames users see split words and oversized text, and the bar height jumps from 2 lines to 1. This happens on every screen entry, also under reduced motion. The screenshot gate records exactly this transient frame. TmrChromeScreenshotTest.capture advances 2 frames after setting fontScale 2.0, and the committed chrome_tabbar_applications/profile_prototype-font-200_dark.png at this head still show 'APPLICAT'/'IONS'. CI Screenshot tests pass against them. The whole-words test passes only because it advances FIX_SHRINK_FRAMES=12. `size` also never grows again when the width increases, because the remember keys are text, fontSize and fontScale. Fix: replace the onTextLayout loop with a custom androidx.compose.foundation.text.TextAutoSize. Foundation 1.10 in this BOM has `TextAutoSizeLayoutScope.getFontSize(constraints, text)` with `performLayout(constraints, text, size)`. It steps 0.9 from style.fontSize down to oneXSize while `performLayout(...).splitsWord()`, all in one measure pass, and constraints changes recompute it. Pass it via BasicText or M3 Text `autoSize`. Then re-record the 2 tab-bar font-200 baselines.",
+   "title": "Shrink loop resizes over up to 7 drawn frames; tab-bar font-200 baselines record the unsettled 'APPLICAT/IONS'",
+   "proof": "In TmrChromeWholeWordsA11yTest set FIX_SHRINK_FRAMES = 1 (one frame after setContent). tabBarLabelsKeepWholeWordsAtFontScale2 fails at head and passes with a single-pass TextAutoSize. Visual evidence: the committed chrome_tabbar_applications_prototype-font-200_dark.png."
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrToast.kt",
+   "line": 115,
+   "rule": "D40 (stays until dismissed, as M3 Snackbar does); WCAG 2.2.1 and 2.1.1",
+   "trigger": "With TalkBack on, show('Applied, marked today', Undo). The toast now never times out. The only ways to remove it are its action, which runs Undo and reverts the user's change, or a later show(). The toast Row (line 150) exposes only liveRegion, with no dismiss semantics action and no close control. A screen-reader user must therefore undo their own action, or live with a stale toast covering the content below the top bar. M3 SnackbarHost avoids this by adding `semantics { dismiss { data.dismiss(); true } }`. Fix: add `dismiss { state.dismiss(); true }` to the toast Row's semantics block at line 150.",
+   "title": "Indefinite screen-reader toast can only be dismissed by performing its action",
+   "proof": "TmrToastTimeoutA11yTest with screenReader = true: showWithAction, then onNodeWithTag(TOAST).performSemanticsAction(SemanticsActions.Dismiss), then assert state.current == null and that Undo did not run. This fails at head because the action is missing."
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrChromeText.kt",
+   "line": 49,
+   "rule": "D40 (labels never break or hide part of a word); regression from c2f22b16 Ellipsis at 1x",
+   "trigger": "At 1x the text is still softWrap=false and maxLines=1, but the overflow mode changed from Ellipsis to Clip. A caller-supplied top-bar title longer than the weighted centre slot is now cut mid-glyph with no visual cue, for example TmrTopBar(Back, title = 'Senior product designer at Example', action = 'Save') at 337dp. Fix: drop the `enlarged` gate on softWrap and maxLines (always softWrap = true, maxLines = Int.MAX_VALUE) and keep only the shrink gated. Short 1x labels still fit on one line, so the 1x baselines stay identical, and long titles wrap at word boundaries as D40 requires.",
+   "title": "At 1x a long top-bar title is now hard-clipped mid-glyph instead of wrapping",
+   "proof": "At fontScale 1f and 337dp, with that title, assert !textLayoutOf(title).didOverflowWidth. It fails at head."
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/TmrBottomSheet.kt",
+   "line": 41,
+   "rule": "Android accessibility: paneTitle names the pane (round-1 L, Reviewer A L1)",
+   "trigger": "`title` defaults to the generic 'Sheet' string. A W3-A caller that omits it, such as 'Change status' or delete-account, still announces 'Sheet', and nothing flags the omission. The PR body says no caller outside tests exists yet, so requiring the parameter costs nothing now. Fix: make `title: String` required, with no default, and delete core_designsystem_chrome_sheet_title if nothing else uses it.",
+   "title": "Sheet title is optional with a generic default; make it required while there are no callers",
+   "proof": "Compile-time: TmrBottomSheet(onDismiss = {}) { } must fail to compile."
+  }
+ ]
+}

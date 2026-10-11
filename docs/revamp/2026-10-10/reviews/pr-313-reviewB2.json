@@ -1,0 +1,92 @@
+{
+  "head_sha": "b37173627d41c00ff5143ce6157e32564115ba2e",
+  "verdict": "clean",
+  "criteria": [
+    {
+      "id": "271-c1",
+      "status": "met",
+      "evidence": "27 @Serializable keys across the six api modules (onboarding 7, analysis 4, tailor 5, applications 2, profile 6 + ProfileListSection, settings 3, CreditsNavKey moved, PaywallNavKey(returnToApplicationId)). git grep finds ImportResume/Analysis/Tailor/DeleteAccount NavKey, openInOwnTab, returnToTopLevel and TOP_LEVEL_NAV_ITEMS only in the negative tests; DebugScenarioTarget is remapped. NavKeyCatalogTest covers it."
+    },
+    {
+      "id": "271-c2",
+      "status": "met",
+      "evidence": "Every *EntryProvider registers every key of its module with NavKeyPlaceholder (TmrTheme.typography.body, colors.text). The six *EntryKeysTest resolve every key and assert the TextLayoutResult colour == TmrTheme.colors.text. They are stricter than the five deleted tests, which only checked one or two keys for displayed text."
+    },
+    {
+      "id": "271-c3",
+      "status": "met",
+      "evidence": "ShellWalkTest::walkAssertsChromeOnEveryScreen now does shell.root(UploadNavKey()) after SignIn, as the prototype signIn() does, and asserts Upload with leading = None, then walks Reading to Exported and Close to Applications. Passes at b3717362. (The ShellChromeScreenshotTest 'step1' state still pushes Upload over SignIn, so its baseline shows a Back that the real flow does not produce; it only pins chrome pixels, and the walk now owns the T-row assertion.)"
+    },
+    {
+      "id": "271-c4",
+      "status": "met",
+      "evidence": "chromeFor checked row by row against the prototype T object (Prototype.dc.html l.1171-1184) for all 27 keys: steps 1/2/3; noBack on reading and tailoring; close on exported and paywall; titles Resume/Application/Profile/Experience/Settings; Save on editResume/editRole/editContact/listEdit; Done on skills; no bar on signin/home/profile. ScreenChromeTest pins all 27."
+    },
+    {
+      "id": "271-c5",
+      "status": "met",
+      "evidence": "backWhenNotFirst(entriesBelow) for Upload and Job, matching T `back: !noBack && !close && (back || stack.length>0)`. Tested by ScreenChromeTest::uploadAndJobHideBackOnEmptyStackAndShowItOtherwise."
+    },
+    {
+      "id": "271-c6",
+      "status": "met",
+      "evidence": "Unchanged from round 1. The PR body now names BackFallbackTest and BackTargetViewModelTest, which exist and cover the empty-stack fallback."
+    },
+    {
+      "id": "271-c7",
+      "status": "met",
+      "evidence": "root() clears the stack and adds the target. It is used by the tabs, Exported Close and navigateToSignIn. NavigatorRootTest, TabBarVisibilityTest::tabSwitchUsesRootAndMarksTheCurrentTab and NavigatorSeamTest cover it. The #272 seam is intact: AppRootState still switches TmrFirstRunRoot/TmrMainRoot, and each has its own saved stack. Stopping a reset mid-setup depends on #272-c4 (start destination applied only at launch or account change, D43). The shell itself does not reset the stack."
+    },
+    {
+      "id": "271-c8",
+      "status": "met",
+      "evidence": "tabsVisible = isTopLevelDestination() (Applications, Profile). TmrTabBar selection comes from the key. TabBarVisibilityTest roots each of the 27 keys."
+    },
+    {
+      "id": "271-c9",
+      "status": "met",
+      "evidence": "Navigator.newApp() (analysis api) pushes JobNavKey(). NewApplicationTest covers it on both tabs."
+    },
+    {
+      "id": "271-c10",
+      "status": "met",
+      "evidence": "onLeading: Close on ExportedNavKey calls root(Applications), otherwise goBack. Covered by ShellWalkTest::exportedCloseLeavesEmptyStackAtApplications and ::paywallCloseGoesBack. System back on Exported still pops to Tailored (no T rule for system back on close screens)."
+    },
+    {
+      "id": "271-c11",
+      "status": "met",
+      "evidence": "TmrShell now runs LaunchedEffect(key) { sheetHost.dismiss() }, so the one shared sheet is cleared whenever the current NavKey changes. ShellHostsTest::aSheetOpenOnOneScreenIsGoneAfter{Go,Back,Root,Replace} show a sheet from an entry, navigate, and assert no sheet node and sheetHost.current == null. Mutation check in a scratch worktree: with the LaunchedEffect line deleted, all 4 fail ('found 1 node') and the other 3 ShellHostsTest cases pass; at head, all 7 pass."
+    },
+    {
+      "id": "271-c12",
+      "status": "met",
+      "evidence": "TmrDock.kt, TmrDockDefaults and TmrDockDefaultsTest are deleted. No source reference remains (NoDockReferencesTest). ARCHITECTURE.md section 2 (line 40) still names TmrDock, which the PR records as a follow-up. MVP_PLAN history rows are historical."
+    },
+    {
+      "id": "271-c13",
+      "status": "met",
+      "evidence": "rememberTmrNavTransitions and TmrVisibility(rise) are used, with no tween, spring or duration in app code. The ReducedMotionShellTest frame loop (max 10 frames until the node exists) does not weaken it: screensMoveWhenMotionIsNotReduced still proves that movement is detectable."
+    },
+    {
+      "id": "271-c14",
+      "status": "met",
+      "evidence": "rememberNavBackStack holds @Serializable keys. NavigationStateRestoreTest asserts that the stack and the current key survive recreation, and that a rooted stack survives. The old dropRestoredStrangers check was removed on purpose; only the debug preview passed a different startKey."
+    },
+    {
+      "id": "271-c15",
+      "status": "met",
+      "evidence": "The Fixer's diagnosis is correct. Plain Text (TextStringSimpleNode) answers GetTextLayoutResult through ParagraphLayoutCache.slowCreateTextLayoutResultOrNull (foundation 1.10.0-alpha04, l.366-402). That method lays out a new MultiParagraph at prevConstraints.copyMaxDimensions() (the full max width) but reports size = layoutSize (the shrink-wrapped node size). So didOverflowWidth (size.width < multiParagraph.width) is true for every text narrower than its constraint, such as 'UploadNavKey' at 1x. The replacement check still detects truncation. I proved this with mutations in a scratch worktree, running only ShellChromeScreenshotTest. (A) TmrCapsText with softWrap=false, maxLines=1 and width(30.dp): both tests fail with '1 Profile overflows its width: line right 429.0 > 90'. This is the real onTextLayout layout, where the paragraph is unbounded and its size is constrained. (B) The top-bar action Text with softWrap=false, maxLines=1 and width(24.dp): both fail with 'Save overflows its height', because the semantics re-layout exceeds maxLines. (B2) The same without maxLines: both fail with 'Save overflows its height', because the re-layout wraps to more lines than the node height. At head, both tests pass. No baseline was re-recorded in this commit. Remaining blind spot: clipping by an ancestor, which neither this check nor the original hasVisualOverflow could see."
+    },
+    {
+      "id": "271-c16",
+      "status": "met",
+      "evidence": "ARCHITECTURE.md hunks are all in section 6 (lines 227-340): the 27-key table with modules and the back/root/close/tab rules. Checked by ArchitectureDocNavKeysTest."
+    },
+    {
+      "id": "271-c17",
+      "status": "met",
+      "evidence": "The PR reports verify-local passing. At head 4c75b82e, CI ran the Gradle jobs (not skipped despite the stacked base): Constitution policy, Static checks, Core/Feature/App unit tests, Screenshot tests and Lint passed, and Assemble APKs was still in progress. No comments, no tools:ignore and no lint-baseline change in the diff. NEW_DEPENDENCY is justified: roborazzi plugin and testImplementation(core:screenshot, roborazzi, roborazzi-compose) in :app, test classpath only, needed for c15; dependencyGuard covers only release classpaths."
+    }
+  ],
+  "findings": []
+}

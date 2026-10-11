@@ -1,0 +1,34 @@
+{
+  "head_sha": "8095a02ac6f900289d5b524f2e37470e35303e7b",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "Delta touches no schema or id rule. Test 'a summary id equal to an entry or bullet id ... 400' passes at 8095a02 (temporary local Postgres 16)."},
+    {"id": "c2", "status": "met", "evidence": "Summary rides the same verify and repair calls. Both prompts (tailoring-pipeline.ts:92, :94) now state one entry group per sentence and that only a cited, not merely stated, skill id supplies its name. This closes the round-2 low finding."},
+    {"id": "c3", "status": "partial", "evidence": "A verbatim copy of summaryPasses at 8095a02 (lines 102 and 188-260) rejects every round-1 negative and every round-2 recombination: 'Data Analyst at Initech with Kotlin.' (EXP-01+PRJ-01-1), 'Tableau and Kotlin', ', Kotlin', 'with Python' (EXP-01+SUM-01). It also rejects splits by ; : - ( ) / newline and ellipsis, and summary+entry mixes in one sentence ('Data analyst skilled in Python at Initech.', 'Skilled in Python and built a revenue dashboard.'). Stated-skill-only clauses are rejected: 'Rust.', 'Rust and Excel.' citing EXP-01-1, 'Data Analyst at Initech with Rust.', 'Excel. Rust.'. Resume-skill-only sentences pass: 'Excel, SQL.', 'Excel and SQL.', 'Excel.'. 'Skilled in Excel and SQL.' and 'Expert Excel.' are null. On the normal set, wrong pairings of '<title> at <org> with <tool of another entry or the summary>' pass 0/336, down from 336/336. Two new paths still pass a false employer-tool association: a resume skill id joins any entry group (582/582), and a period inside a name ends the sentence (336/336 with 'Pvt. Ltd.'). See the findings."},
+    {"id": "c4", "status": "met", "evidence": "resolveSkills is unchanged. Test 'skills keep the profile spelling and order and are never verified' passes."},
+    {"id": "c5", "status": "met", "evidence": "Unchanged. Test 'a stored SUCCEEDED row without summary or skills reads as 200' passes."},
+    {"id": "c6", "status": "met", "evidence": "The delta changes only the deterministic check and the prompt text. Test 'a failing summary and a failing bullet share one repair call of at most four model calls' passes. The new test 'a summary of resume skill names only is PASSED' asserts generator 1 and verifier 1."},
+    {"id": "c7", "status": "met", "evidence": "Survival on the 100-item normal set with the copy at 8095a02 (round-2 numbers at dcc25ee in brackets). 'Title at Org.': 100/100 [100]. 'Title at Org with MH1 and MH2' citing the holder bullet or summary: 12/73 [73/73], as D37 predicts. 'Title skilled in <MH list>': 0/68. 'Candidate skilled in <MH list>' on the own summary: 17/68 [43/68]. 'Skilled in <MH>. Title at Org; bullet1': 17/68. 'Title at Org. bullet1 bullet2': 100/100. 'Title at Org, <bullet shortened>': 100/100. Free-form styles 'who <bullet>' and 'with experience in X and Y': 0/100. The new 'MH1, MH2.' citing skill ids: 100/100. 'Title at Org. MH1, MH2.' citing skill ids: 100/100."},
+    {"id": "c8", "status": "met", "evidence": "docs/architecture.md:285 describes the sentence rule and resume-skill names, but its claim 'a tool or employer of another entry never attaches' does not cover skill ids (finding 1). At 8095a02: tsc --noEmit passes; eslint and prettier pass on the changed files; node --test gives 570/572. The two failures are the known lead-only replacements, 'the stored row holds no profile or job text' and 'without userStatedSkills the generate and repair prompts equal those on main'. The summary-skills file passes 18/18, including the new s-mixed-groups, s-stated-only and skills-only tests."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "line": 234,
+      "rule": "D37 (one entry group per sentence) / Constitution I.1; new path in this delta",
+      "trigger": "A cited resume-section skill gets group undefined, and the check treats undefined as a member of every group. A skill name therefore joins any entry's sentence. 'Data Analyst at Initech with SQL.' citing EXP-01 and skill:SQL passes, and so do 'Cleaned weekly sales data with SQL.' (EXP-01-1+skill:SQL) and 'Data analyst with SQL.' (SUM-01+skill:SQL). On the normal set, '<title> at <org> with <skill not in that entry>' citing [entry, skill:X] passes 582/582 (normal-001: 'QA Engineer at Tarang Foods with Kubernetes.'). 'Title at Org with MH1 and MH2' citing skill ids passes 100/100. Before this delta, skill ids supplied no words, so this path did not exist. The new prompt text invites the model to cite skill ids, so the D37 protection holds only for tools that sit in another entry's bullets. Candidate fix tested on the copy: give skill sets their own group (entryOf.get(id) ?? \"skills\"). A skills-only sentence still passes ('Excel, SQL.' 100/100 on the normal set, and the new test). A skill mixed with an entry or the summary in one sentence becomes null: 582/582 rejected, and 'Title at Org with MH1 and MH2' citing skill ids drops to 0/100. All positives in the test file and in my case list are kept.",
+      "title": "A resume skill id joins any entry group, so the employer-tool recombination D37 closed passes again via skill ids",
+      "proof": "Summary 'Data Analyst at Initech with SQL.' citing EXP-01 and skill:SQL (SQL in skills, in no Initech bullet), verifier supported for all; expect result.summary null."
+    },
+    {
+      "severity": "medium",
+      "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+      "line": 205,
+      "rule": "D37 / Constitution I.1",
+      "trigger": "sentenceBreak splits at every . ! ? that is not followed by a digit, including periods inside names. A tool clause after an abbreviated organization therefore becomes its own sentence and may rest on any group. With each organization suffixed 'Pvt. Ltd.' (common in Indian resumes; the normal set has no dotted organization), 'QA Engineer at Tarang Foods Pvt. Ltd. with Node.js.' citing EXP-01 and PRJ-01-1 passes. The same template passes 336/336, against 0/336 without the suffix. 'Data Analyst at Initech with .NET.' (EXP-01 + another entry's .NET bullet) and 'Engineer at Yahoo! with Kotlin.' (EXP-02+PRJ-01-1) also pass. Candidate fix tested on the copy: /[.!?](?=\\s+\\p{Lu}|\\s*$)/u, which splits only before whitespace and a capital letter or at the end. It rejects all three cases and the 336, and keeps every positive. The cost is 2/100 on 'Title at Org. mh1, mh2.' when a skill name starts lowercase (greytHR, dbt); those become null, which is safe.",
+      "title": "A period or bang inside a name ends the sentence, so a tool from another entry attaches to an abbreviated employer",
+      "proof": "Profile with EXP-01 organization 'Initech Pvt. Ltd.'; summary 'Data Analyst at Initech Pvt. Ltd. with Kotlin.' citing EXP-01 and PRJ-01-1, verifier supported for all; expect result.summary null."
+    }
+  ]
+}

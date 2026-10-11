@@ -1,0 +1,51 @@
+{
+  "head_sha": "eea4b00c02cd3bdd9002d5d432c1382a9d4300c1",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "286-c1", "status": "met", "evidence": "RemoteResumeTextParser.kt maps summary/location/LINKEDIN/PORTFOLIO (OTHER and UNKNOWN ignored, blank url skipped) and current -> 'Present'; RemoteResumeTextParserV2Test.parseMapsSummaryLocationLinksAndCurrent and nullSummaryLocationAndMissingLinksMapToEmpty. Server resume-parse.ts already filters links to http/https and demotes non-linkedin hosts to OTHER."},
+    {"id": "286-c2", "status": "met", "evidence": "Mappers.kt summaryFactOf: trimmed, omitted when blank or >1000, id 'summary' then 'summary-N' skipping entry/bullet ids of sendableFacts; matches server facts.ts idSchema and uniqueness superRefine. SummaryFactsPayloadTest (4 tests) incl. no PII/links."},
+    {"id": "286-c3", "status": "met", "evidence": "MatchDto.reason, JobDto.location, ProfileFactsDto.summary, TailoringStartRequest.answer use @EncodeDefault(NEVER); toDto never sets reason/location. AnalysisRequestJsonTest.requestOmitsReasonLocationSectionAndNullAnswer asserts on raw JSON. Verified server matchSchema reason .optional() rejects null (zod 4.6.5), so omission is required. The nested answer.detail is the exception: see finding 1."},
+    {"id": "286-c4", "status": "met", "evidence": "RemoteJobAnalysisSource maps job.location, reason, question; stillOpenIn drops a question whose requirement is unknown or MET after the device filter. RemoteAnalysisV2Test.mapsLocationReasonAndQuestion, nullQuestionStaysNull, questionDroppedWhenRequirementMetOrUnknown."},
+    {"id": "286-c5", "status": "partial", "evidence": "Reason is cleared when the device changes the status (matchesOf line 92, rematch line 72) and on a local upgrade (upgradedMatch builds a match with no reason). RemoteAnalysisV2Test.reasonClearedWhenDeviceChangesStatus and cachedRematchClearsReasonAndQuestionWhenTheProfileUpgradesTheMatch. Gap: when the rematch drops some but not all evidence ids the reason survives (finding 3)."},
+    {"id": "286-c6", "status": "met", "evidence": "apiErrorOf NOT_A_JOB_POST -> ApiError.NotAJobPost -> AiFailure.NotAJobPost; exception thrown before the cache write; no retry loop in analyse. Server errors.ts maps NOT_A_JOB_POST to 422. AiFailureMappingV2Test, RemoteAnalysisV2Test.notAJobPostIsItsOwnFailureNotCachedAndNotRetried (2 calls, 2 requests)."},
+    {"id": "286-c7", "status": "unmet", "evidence": "Criterion requires 'a blank detail sent as null'. AnswerDto.detail has @EncodeDefault(NEVER) so a blank detail omits the key; the server answerSchema (answer-facts.ts) declares detail as z.string().max(400).nullable() inside a strictObject, which rejects a missing key (verified with zod 4.6.5: omitted=false, null=true). Choice/requirement/cap/surrogate logic is otherwise correct (AnswerMappingTest). See finding 1."},
+    {"id": "286-c8", "status": "met", "evidence": "RemoteResumeTailor maps summary (blank -> null) and skills (empty ordered or missing -> null). TailorResumeUseCase.verifiedSummary resolves sourceIds only against confirmed profile bullets and answer ids, so a summary citing only 'summary', a skill id, an entry id or an unknown id has no sources -> MissingSource -> original summary restored (fail closed, confirmed by reading TailorResumeUseCase.kt:94-118). RemoteResumeTailorV2ResultTest.summaryWithUnresolvableIdFailsClosed."},
+    {"id": "286-c9", "status": "met", "evidence": "NoCredit is outside RESUMABLE so the requestId is cleared; a FAILED job clears it at RemoteResumeTailor.kt:51 before throwing; unknown failureCode decodes to UNKNOWN -> Unavailable. RemoteResumeTailorFailureTest (3 tests)."},
+    {"id": "286-c10", "status": "met", "evidence": "PendingTailoringIds key is tailoring.request.<applicationId>; SignOutCleaner still wipes by the 'tailoring.request.' prefix (also clears stale .all keys). RemoteResumeTailorRequestIdTest.retrySendsSameRequestIdWithoutSection and aRetryAfterANetworkDropSendsTheSameRequestId."},
+    {"id": "286-c11", "status": "met", "evidence": "RemoteJobImporter validates trimmed length <= 2048 and OkHttp isHttps before any call, sends only {url}; remoteAi has no retry; RATE_LIMITED keeps retryAfterSeconds. Server job-imports.ts does the SSRF checks; userinfo/port URLs pass the client check but the server answers 400 INVALID_INPUT before claiming allowance, so no allowance is spent. RemoteJobImporterTest (7 tests incl. bearer only to backend host)."},
+    {"id": "286-c12", "status": "met", "evidence": "ApiError.NotAJobPost/JobImportFailed; unknown 422 -> Unknown(422); server message never decoded into the error. ApiErrorTest.newCodesAndUnknown422."},
+    {"id": "286-c13", "status": "met", "evidence": "Prod AiBindings binds RemoteJobImporter (AiBindingsJobImporterTest); demo binds OfflineJobImporter from core:domain (no network class). INTERNET only in app/src/prod/AndroidManifest.xml; core:network stays prodImplementation. CI 'Assemble APKs' was still pending at review time."},
+    {"id": "286-c14", "status": "met", "evidence": "GapAnalysis.generationId from response.generationId; each bullet copies the result generationId. RemoteAnalysisV2Test asserts g-analysis; RemoteResumeTailorV2ResultTest asserts g-tailor on the bullet."},
+    {"id": "286-c15", "status": "met", "evidence": "NoLoggingSourceTest scans core/network/src/main and app/src/prod; my grep for print(, System.out/err, printStackTrace, Log., Timber, Logger in both roots found nothing. OkHttp client has no logging interceptor (TailorMyResumeHttp.kt:18-24)."},
+    {"id": "286-c16", "status": "partial", "evidence": "CI at the head: App, Core, Feature unit tests, Lint, Screenshot, Static checks and Constitution policy pass; Assemble APKs pending. Not rerun locally (read-only review)."}
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Tailoring.kt",
+      "line": 16,
+      "rule": "286-c7 ('a blank detail sent as null'); contract v2 4.4 answer table ('detail: At most 400 characters, or null'); server answerSchema in apps-backend revamp/be-all src/apps/tailormyresume/answer-facts.ts (detail: z.string().max(400).nullable() in a strictObject)",
+      "trigger": "QuickAnswer('req-1', 'NOT_YET', '') or ('req-1', 'SKIPPED', '   ') -> toAnswerDto gives detail = null -> @EncodeDefault(NEVER) omits the key -> body has \"answer\":{\"requirementId\":\"req-1\",\"choice\":\"NOT_YET\"} -> tailoringRequestSchema.safeParse fails (nullable is required, not optional; checked with the backend's zod 4.6.5: omitted -> false, null -> true) -> 400 INVALID_INPUT -> AiFailure.InvalidInput. Every tailoring with an answer that has no detail fails, on every retry, so the application cannot be tailored.",
+      "title": "A blank answer detail omits the 'detail' key; the strict server schema requires it as null and answers 400",
+      "proof": "AnalysisRequestJsonTest.answerIsSentWithoutADetailKeyWhenBlank and RemoteResumeTailorAnswerTest.blankDetailIsSentAsNoDetail pin the rejected shape; change both to expect \"detail\":null and they fail at this head. Fix: drop @EncodeDefault(NEVER) and the default on AnswerDto.detail, so encodeDefaults with explicitNulls emits null."
+    },
+    {
+      "severity": "low",
+      "file": "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Tailoring.kt",
+      "line": 31,
+      "rule": "Scout constraint for 286 (an unknown enum value in a response, editType named, must not crash decoding; fail closed); D48 (responses decode unknown values, statuses named, to an UNKNOWN case)",
+      "trigger": "The server stores a SUCCEEDED row whose bullet has an editType the app lacks, or returns a new tailoring status -> decoding TailoringResponse throws SerializationException -> ApiError.Unknown(0) -> AiFailure.Unavailable, which is in RESUMABLE -> requestId kept -> each retry resends it, the server answers 200 with the same stored row, and decoding fails again. The credit is already spent and the application is stuck until sign-out. This is not a fail-closed outcome.",
+      "title": "TailoringStatus and EditType still decode strictly; an unknown value makes a paid tailoring fail on every retry",
+      "proof": "A RemoteResumeTailorTest that replies 202 with a SUCCEEDED result whose bullet has editTypes [\"SIMPLIFY\"] currently throws AiFailure.Unavailable and leaves tailoring.request.app-1 set. The PR body lists EditType as a follow-up."
+    },
+    {
+      "severity": "low",
+      "file": "app/src/prod/kotlin/com/tailormyresume/app/ai/RemoteJobAnalysisSource.kt",
+      "line": 72,
+      "rule": "286-c5 (evidence ids dropped by the sendable-facts filter -> reason removed); I.1 / D21 / D23",
+      "trigger": "The server answers MET with evidenceIds [W-01-b1, W-02-b1] and the reason 'Presented the variance report to the CFO' (server reasonFor accepts it because every token is in W-02-b1). The candidate then unconfirms W-02 and reopens the same JD. The cached rematch filters evidence to [W-01-b1], the status stays MET, and the takeIf keeps the reason, so the UI still shows a reason quoting a fact that is no longer confirmed.",
+      "title": "The cached rematch keeps the server reason after the fact that backs it is dropped from the evidence",
+      "proof": "Add to RemoteAnalysisV2Test: analyse with MET evidence [FACT_ID, 'W-02-b1'] and a reason, then analyse the same text with W-02 unconfirmed; it expects reason == null and fails at this head. Fix: keep the reason only when evidence == server.evidenceIds."
+    }
+  ]
+}

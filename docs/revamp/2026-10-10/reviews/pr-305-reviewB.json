@@ -1,0 +1,56 @@
+{
+  "head_sha": "db9eccef3d0e8fa44490142da2b381ec69e506c3",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "268-c1", "status": "met", "evidence": "TmrDatabase version 3 with CreditLedgerEntity; 3.json createSql for profile, profile_entries, job_applications, credit_ledger matches the entity columns, defaults and nullability; TmrDatabaseSchemaTest."},
+    {"id": "268-c2", "status": "met", "evidence": "TmrMigrations.kt MIGRATION_2_3 copies NO_RESPONSE into legacyStatus before setting APPLIED; ProfileMigrationTest builds from the committed v2 schema with MigrationTestHelper, runMigrationsAndValidate(3) asserts kept values, notes, legacyStatus and empty credit_ledger; 1->3 path tested."},
+    {"id": "268-c3", "status": "met", "evidence": "Migration holds only ALTER TABLE ADD COLUMN, two UPDATEs and CREATE TABLE IF NOT EXISTS; migration2To3SqlIsAdditiveOnly records the statements via a proxy; DatabaseModule.addMigrations(MIGRATION_1_2, MIGRATION_2_3) with no destructive fallback."},
+    {"id": "268-c4", "status": "met", "evidence": "CandidateProfile, ApplicationStatus (NO_RESPONSE gone), JobApplication (no notes, ApplicationKeywordCoverage, QuickAnswer), FactSource.USER_ANSWER, CreditLedgerEntry, ResumeSettings; SimplifiedFlowModelTest."},
+    {"id": "268-c5", "status": "met", "evidence": "ProfileMappers and ApplicationMappers map every new field both ways; roundTripsEvery* contract cases run on Room and fakes. Legacy notes/legacyStatus are deliberately not mapped (see finding 1)."},
+    {"id": "268-c6", "status": "met", "evidence": "CreditLedgerDao SUM/ORDER BY createdAt DESC, id DESC; OfflineFirstCreditsRepository.refresh is a no-op on the local ledger; record() has no production caller, so no local spend can desync the server wallet yet; UsageAllowance, StoredUsageAllowance, TestUsageAllowance and WalletUsageAllowance are gone with their bindings."},
+    {"id": "268-c7", "status": "met", "evidence": "StoredResumeSettingsRepository under key resume.settings with defaults A4/NAME_COMPANY_ROLE/false and unknown-enum fallback; StoredResumeSettingsRepositoryTest; RoomLocalDataWiper store.clear() resets it (LocalDataWiperSimplifiedFlowTest)."},
+    {"id": "268-c8", "status": "met", "evidence": "PrototypeFixtures.fresh()/returning() with fixed 2026 instants; PrototypeFixturesTest."},
+    {"id": "268-c9", "status": "met", "evidence": "Mappers.kt toFactsDto filters FactSource.USER_ANSWER; it is the only profile-to-DTO path (RemoteJobAnalysisSource.analyse and RemoteResumeTailor.tailor both call it); UserAnswerFactsTest. See finding 4 for the limit ordering."},
+    {"id": "268-c10", "status": "met", "evidence": "AccountDataArchiveWriter writes profile contact/summary/sourceFileName/reviewedAt, application location/appliedOn/exportFileName/changesAcceptedAt/coverage/quickAnswer, ledger and settings in text and JSON; CollectAccountDataUseCase fills ledger and settings; both exporters use the writer. Notes left the archive as planned (see finding 3)."},
+    {"id": "268-c11", "status": "met", "evidence": "Local :core:data and :core:domain koverVerify at 02:11 (head content, patch applied before the 02:12 commit) left empty verify.err files; CI Core unit tests (which run koverVerify, build.yml:192-193) still pending."},
+    {"id": "268-c12", "status": "partial", "evidence": "CI at db9eccef: Static checks, Constitution policy, Detect code changes pass; delivery-gates-pregate fails (ASSERT_REMOVED/TEST_DELETED for the lead-replaced tests are not listed under the PR body Pre-review gate); unit, screenshot, lint and assemble jobs pending."}
+  ],
+  "findings": [
+    {
+      "severity": "high",
+      "file": "core/database/src/main/kotlin/com/tailormyresume/core/database/model/JobApplicationEntity.kt",
+      "line": 21,
+      "rule": "Owner rule (scout 268 constraints): migration is reversible, NO_RESPONSE stays recoverable, notes are kept (R14); no silent loss of user data",
+      "trigger": "Upgrade a v2 install with application 'silent' (status NO_RESPONSE, notes 'no reply yet'); after migration legacyStatus='NO_RESPONSE', notes kept. Accept one bullet: UpdateBulletDecisionUseCase.kt:18 -> upsertApplication -> JobApplication.asEntity() (ApplicationMappers.kt:11, no notes/legacyStatus) -> @Upsert rewrites every column, so notes becomes '' and legacyStatus NULL. The same happens in HandEditBulletUseCase and in DeleteAccountUseCase.restore (line 167), which then reports Failed(dataIntact = true) after a mid-loop deleteApplicationRow failure although the legacy columns were erased.",
+      "title": "Any full upsert of a migrated application silently erases legacy notes and legacyStatus, undoing the reversibility the migration preserves",
+      "proof": "OfflineFirstApplicationRepositoryTest: insert JobApplicationEntity(notes='n', legacyStatus='NO_RESPONSE') via the DAO, call upsertApplication(observed model), assert the row still has notes='n' and legacyStatus='NO_RESPONSE' (fails today). Fix: @Transaction upsert in OfflineFirstApplicationRepository that reads the existing row and carries notes and legacyStatus into the new entity."
+    },
+    {
+      "severity": "medium",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCase.kt",
+      "line": 83,
+      "rule": "Lead mandate (2) / Constitution I.5 data rights: delete account wipes every new table and MockStateStore key",
+      "trigger": "Insert a credit_ledger row (PURCHASE +5, applicationId 'app-1') and set resume settings LETTER/productUpdates=true; run DeleteAccountUseCase successfully (demo: deletesRemoteData=false; prod happy path with server delete OK). It clears profile, export history, application rows, credits via AccountCreditBalance and session keys (StoredSessionRepository.clear removes only ACCOUNT/LAST_ACCOUNT/ONBOARDING/KEPT_JOB/legacy keys), but never touches credit_ledger or resume.settings; RoomLocalDataWiper.wipeAll (the only clearAllTables/store.clear path) runs only on account switch and pending-wipe finish. The ledger with application ids and the settings survive account deletion and appear in the next download-my-data archive. LocalDataWiperSimplifiedFlowTest covers only RoomLocalDataWiper, so the PR's 'Constitution I.5 delete' evidence does not cover this path. DeleteMyDataUseCase likewise leaves ledger rows referencing deleted application ids.",
+      "title": "Account deletion leaves the new credit ledger and resume settings on the device",
+      "proof": "DeleteAccountUseCaseTest with TestCreditsRepository and TestResumeSettingsRepository seeded: after invoke() returns Deleted, assert observeLedger().first() is empty and observeSettings().first() == ResumeSettings() (fails today; DeleteAccountUseCase has no dependency on either repository)."
+    },
+    {
+      "severity": "medium",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/account/AccountDataArchiveWriter.kt",
+      "line": 210,
+      "rule": "Lead mandate (2): download-my-data exports every stored column, including legacyStatus and notes while they are still stored",
+      "trigger": "Migrated v2 row with notes 'Referral from a Saffron Retail colleague' and legacyStatus 'NO_RESPONSE': the notes text and legacyStatus stay in job_applications, but the model drops them (JobApplication has no notes) so applicationJson/applicationsText write neither; the user can neither see nor export personal free text the app still holds.",
+      "title": "Archive omits legacy notes and legacyStatus that remain stored on the device",
+      "proof": "AccountDataArchiveWriter test fed from a migrated row: assert the my-data JSON holds notes and legacyStatus for that application (fails today). Note: scout constraint says notes leave the archive (R14); the lead must reconcile that with mandate (2), for example by exporting them as legacy fields or clearing them once with consent."
+    },
+    {
+      "severity": "low",
+      "file": "core/network/src/main/kotlin/com/tailormyresume/core/network/mapper/Mappers.kt",
+      "line": 27,
+      "rule": "268-c9 with ProfileLimits: the backend payload holds up to MAX_ENTRIES confirmed sendable facts",
+      "trigger": "Profile with 40 confirmed IMPORTED entries plus 3 confirmed USER_ANSWER entries placed before some of them: confirmedWithinLimits() takes the first 40 entries and the bullet budget of 200 before toFactsDto drops USER_ANSWER, so only 37 IMPORTED entries (and fewer bullets) reach the backend although 40 fit.",
+      "title": "USER_ANSWER entries consume the entry and bullet limits before they are filtered out",
+      "proof": "MappersTest: 3 USER_ANSWER then 40 IMPORTED confirmed entries -> assert toFactsDto().entries.size == 40 (gets 37). Fix: filter USER_ANSWER before applying confirmedWithinLimits."
+    }
+  ]
+}

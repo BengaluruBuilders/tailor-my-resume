@@ -1,0 +1,92 @@
+{
+ "head_sha": "1d68c572bf19624036fa3aa9c93414da9f33dbcd",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "281-c1",
+   "status": "partial",
+   "evidence": "Header, percent (ProfileCompleteness.percent), counts, Add tag, years per D52 (merged intervals, floored, null on unparsable start) tested in ProfileOverviewTest; a role whose end date is blank or unparsable yields '0 yrs' rather than omitting (finding 3). ProfileScreenshotTest.profile baseline matches the prototype."
+  },
+  {
+   "id": "281-c2",
+   "status": "met",
+   "evidence": "ProfileDestinationsTest maps every target to its NavKey and back; ProfileRealEntryWiringTest (in-harness, out of scope) covers the real entry."
+  },
+  {
+   "id": "281-c3",
+   "status": "met",
+   "evidence": "ExperienceViewModelTest filledList/missingEndDate/empty; required_fix baseline shows amber 'Jun 2021 - end date?' and 'Now' for Present."
+  },
+  {
+   "id": "281-c4",
+   "status": "met",
+   "evidence": "EditRoleViewModelTest.existingRole_loadsDraftFromEntry; edit_role baselines at 1x and 337dp/2.0 show Start/End stacked above 1.3 (D40)."
+  },
+  {
+   "id": "281-c5",
+   "status": "met",
+   "evidence": "addMode_startsEmptyWithOneBulletAndNoDelete; add_role baselines."
+  },
+  {
+   "id": "281-c6",
+   "status": "met",
+   "evidence": "currentToggle_savesPresentAndClearsGap and currentToggleOff_restoresTypedEnd assert Present, empty RequiredGaps and +6 completeness."
+  },
+  {
+   "id": "281-c7",
+   "status": "partial",
+   "evidence": "Save is ignored while invalid (blankTitle_blocksSaveWithoutWriting, bulletLimits_enforced), USER_EDITED/USER_STATED and ids tested; but a double Save in add mode can write two roles with one id (finding 1), and bullets are trimmed on save (finding 4)."
+  },
+  {
+   "id": "281-c8",
+   "status": "partial",
+   "evidence": "delete_removesEntryAndEmitsDeleted proves only the target role is removed; deleteInAddMode_isNoop, named in the PR criteria, does not exist in RoleViewModelsTest (finding 2)."
+  },
+  {
+   "id": "281-c9",
+   "status": "met",
+   "evidence": "14 baselines present (7 states x prototype and narrow-337-font-200); read profile, edit_role and experience_required_fix: no clipping, layout matches prototype. ProfileLargeFontLayoutTest asserts no truncated text at 337dp/2.0. No animation code, so reduced motion has nothing to gate."
+  },
+  {
+   "id": "281-c10",
+   "status": "partial",
+   "evidence": "CI at review time: pregate and detect-changes SUCCESS; Static checks, unit tests, Screenshot tests, Lint and Assemble still IN_PROGRESS. D44 walk pending per PR body."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "feature/profile/impl/src/main/kotlin/com/tailormyresume/feature/profile/impl/experience/EditRoleViewModel.kt",
+   "line": 131,
+   "rule": "Constitution I.1 / data integrity: one role per Save",
+   "trigger": "Add mode, valid draft, tap Save twice before the first Saved event. Both coroutines pass the 'finished' check at line 133 before either reaches line 152 (the check is not repeated after observeProfile().first()), both read the same profile, and idAllocator.nextId returns the same id, so two roles with one id are written. ExperienceScreen then uses entryId as a LazyColumn key, so the duplicate key crashes the Experience list.",
+   "title": "Double Save in add mode writes two roles with the same id",
+   "proof": "EditRoleViewModelTest: new role with a valid draft, call save() twice before collecting events, then assert the saved profile has exactly one new entry."
+  },
+  {
+   "severity": "medium",
+   "file": "feature/profile/impl/src/test/kotlin/com/tailormyresume/feature/profile/impl/experience/RoleViewModelsTest.kt",
+   "line": 384,
+   "rule": "281-c8: criteria in scope have tests that can fail",
+   "trigger": "The PR criteria list EditRoleViewModelTest.deleteInAddMode_isNoop, but no such test exists. Removing the 'entryId ?: return' guard in delete() leaves every test green.",
+   "title": "deleteInAddMode_isNoop is claimed but missing",
+   "proof": "Add a test: viewModel(null).delete() emits no event and leaves the saved profile equal to the original."
+  },
+  {
+   "severity": "low",
+   "file": "feature/profile/impl/src/main/kotlin/com/tailormyresume/feature/profile/impl/overview/ProfileViewModel.kt",
+   "line": 88,
+   "rule": "D52 / I.1: do not state what cannot be derived",
+   "trigger": "A profile whose only role has a blank or unparsable end date (the required-gap case) shows '0 yrs'. Line 88 skips the role, so the sum is 0 and the header claims zero years. ProfileOverviewTest.blankEndDate/unparsableEndDate pin this behaviour.",
+   "title": "Roles with unparsable end dates are skipped and can produce a misleading '0 yrs'"
+  },
+  {
+   "severity": "low",
+   "file": "feature/profile/impl/src/main/kotlin/com/tailormyresume/feature/profile/impl/experience/EditRoleViewModel.kt",
+   "line": 205,
+   "rule": "Constitution I.1: bullets kept verbatim",
+   "trigger": "A bullet typed or imported as '  spaced  ' is saved as 'spaced' (bulletLimits_enforced asserts this). Only whitespace is lost, so this is a minor deviation from verbatim storage.",
+   "title": "Bullet text is trimmed on save"
+  }
+ ]
+}

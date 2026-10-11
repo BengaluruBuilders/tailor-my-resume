@@ -1,0 +1,42 @@
+{
+  "head_sha": "7608114b8ba57e2a68ae193a0c208c0f9841c8c5",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "263-c1",
+      "status": "met",
+      "evidence": "docs/CONSTITUTION.md:120 at 7608114b: the Roborazzi row now reads 'The prototype in `design/prototype-2026-10-10/`, at 374 x 834 dp, is the acceptance criterion'; the rest of the Why text and the Gate cell are byte-identical to the base (one-line hunk). design/prototype-2026-10-10/README.md:46 gives 374 x 834 px with 1 px = 1 dp, so the size matches the source."
+    },
+    {
+      "id": "263-c2",
+      "status": "unmet",
+      "evidence": "The new section at docs/CONSTITUTION.md:134-138 has one row (screenshot acceptance source) and no D4 or D5 row. Issue #263 scope bullet 2, scout 263-c2, lane-plan 263-c2 and PLAN.md line 23 ('W1-G (ledger note)') all require a 2026-10-10 amendment recording D4 (one 'Accept changes' control satisfies I.2; Export PDF disabled until taken; gates UpdateBulletDecisionUseCaseTest, TailorViewModelTest) and D5 (match number is keyword coverage per PRD 4.2, I.3; gate policy I.3). The PR body says 'no rows for D4 or D5'; no logged decision drops them (delivery-ledger.jsonl and DECISIONS.md D1-D20 checked)."
+    },
+    {
+      "id": "263-c3",
+      "status": "met",
+      "evidence": "git diff 21ee644d..7608114b touches only docs/CONSTITUTION.md (7+, 1-), both hunks below '## Ledger' (lines 120 and 134-139). No line of Articles I to VII changes; I.1, I.3 and the I.5 privacy text are untouched. The new row does not restate #255's I.5 consent row (lines 128-132 unchanged)."
+    },
+    {
+      "id": "263-c4",
+      "status": "met",
+      "evidence": "PR title 'docs(constitution): point the screenshot ledger at the 2026-10-10 prototype' matches VI.2. CI at 7608114b: 'Constitution policy' SUCCESS, 'delivery-gates-pregate' SUCCESS, Gradle shards SKIPPED as docs-only, aggregate 'Build, lint, and unit tests' SUCCESS. Local run in the worktree: BASE_REF=origin/main tools/ci/check-constitution.sh printed 'Constitution check passed.'"
+    },
+    {
+      "id": "263-c5",
+      "status": "partial",
+      "evidence": "The PR body cites Article VII.1 ('Amendment per Article VII.1') but does not cite D4 or D5 from docs/revamp/2026-10-10/DECISIONS.md; it states the opposite ('One VII ledger row, no rows for D4 or D5')."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "docs/CONSTITUTION.md",
+      "line": 138,
+      "rule": "263-c2 and 263-c5 (issue #263 scope bullet 2 and acceptance criterion 2; PLAN.md D4 row assigns the ledger note to W1-G)",
+      "trigger": "Read the 2026-10-10 ledger amendments at 7608114b: no row records D4 (Changes tab 'Accept changes' as the single I.2 accept control, Export PDF disabled until taken) or D5 (prototype match number built and labelled as keyword coverage, I.3). After merge, the Constitution has no ledger record of how the prototype is reconciled with I.2 and I.3, and the PR body omits D4 and D5, so the issue's PR-body criterion fails too.",
+      "title": "D4 and D5 ledger rows dropped, and the PR body does not cite D4 or D5",
+      "proof": "grep -nE 'Accept changes|keyword coverage per PRD 4.2' docs/CONSTITUTION.md returns no ledger line at 7608114b; gh pr view 300 --json body | grep -E 'D4|D5' shows only 'no rows for D4 or D5'. Fix: add the two rows from lane-plan 263-c2 (Item/Why/Gate, STE prose, gates UpdateBulletDecisionUseCaseTest, TailorViewModelTest; policy I.3 in tools/ci/check-constitution.sh) and cite VII.1, D4 and D5 in the PR body."
+    }
+  ]
+}

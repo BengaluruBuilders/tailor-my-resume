@@ -1,0 +1,85 @@
+{
+ "head_sha": "8751abc064810a43500f80f674e3e830b8da11e2",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "281-c1",
+   "status": "partial",
+   "evidence": "Header, initials, counts, Add tag, Built from/Replace and percent from ProfileCompleteness are tested in ProfileViewModelTest; years are omitted when any start or end cannot be computed (A finding 3 fixed, blankEndDate/unparsableEndDate expect null). The interval arithmetic treats the end month as exclusive, so 'N yrs' is one month short per role (finding 3). The gear is the 'Settings' text button and maps to SettingsNavKey (settingsTarget_mapsToSettingsNavKey). The profile baselines at 1x and 337dp/2.0 have no clipping; the file-name mid-word wrap is the known follow-up."
+  },
+  {
+   "id": "281-c2",
+   "status": "met",
+   "evidence": "ProfileTarget.navKey covers every row; Replace only navigates to UploadNavKey and does not touch the profile. ProfileRealEntryWiringTest renders the real Profile, Experience and EditRole entries with Hilt ViewModels and drives one action each (D55). The Hilt setup is test-only: testImplementation(hilt-android-testing), kspTest, a catalog entry and no change to app/dependencies/*ReleaseRuntimeClasspath.txt. feature:settings:api is an api module (II.1)."
+  },
+  {
+   "id": "281-c3",
+   "status": "met",
+   "evidence": "ExperienceViewModelTest filledList/missingEndDate/empty/orderFollowsStoredOrder. experience_required_fix at 337dp/2.0 shows amber 'Jun 2021 – end date?' and 'Now', with whole-word wrapping."
+  },
+  {
+   "id": "281-c4",
+   "status": "met",
+   "evidence": "existingRole_loadsDraftFromEntry and laterProfileEmissions_doNotOverwriteTheDraft. The edit_role 337dp/2.0 baseline stacks Start/End above font scale 1.3 (D40)."
+  },
+  {
+   "id": "281-c5",
+   "status": "met",
+   "evidence": "addMode_startsEmptyWithOneBulletAndNoDelete; add_role baselines."
+  },
+  {
+   "id": "281-c6",
+   "status": "met",
+   "evidence": "currentToggle_savesPresentAndClearsGap and currentToggleOff_restoresTypedEnd. The current_job_on baseline shows End dimmed with the 'Present' hint."
+  },
+  {
+   "id": "281-c7",
+   "status": "partial",
+   "evidence": "Save stores exactly what was typed (trim only, A finding 4 accepted). Existing roles become USER_EDITED and new roles USER_STATED, both with isConfirmed=true, which TailorResumeUseCase and ReviewedEntries treat as confirmed. An edit replaces only the matching id in a fresh profile read. Save is single-flight (doubleSaveInAddMode_writesOneRoleWithOneId fails without the guard) and ignored while invalid (blankTitle_blocksSaveWithoutWriting, saveInAddModeAtEntryLimit_isBlocked). But FactIdAllocator fills gaps, so after a delete a new role reuses the deleted id (finding 2)."
+  },
+  {
+   "id": "281-c8",
+   "status": "partial",
+   "evidence": "delete_removesEntryAndEmitsDeleted and deleteInAddMode_isNoop (A finding 2 fixed). Delete removes only that id and its bullets. Delete is not single-flight like Save, so a double tap pops two screens (finding 1)."
+  },
+  {
+   "id": "281-c9",
+   "status": "met",
+   "evidence": "14 baselines present. I opened profile (1x, 337dp/2.0), edit_role 337dp/2.0, experience_required_fix 337dp/2.0 and current_job_on 1x: nothing is clipped or ellipsized and labels wrap at word boundaries. assertNoTruncatedText runs on every state. No motion code."
+  },
+  {
+   "id": "281-c10",
+   "status": "partial",
+   "evidence": "At head 8751abc0 delivery-gates succeeded. Build run 38098726823 is still in progress and its sibling 38098727066 was cancelled. verify-local is reported for 1d68c572 only. The D44 walk is pending."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "feature/profile/impl/src/main/kotlin/com/tailormyresume/feature/profile/impl/experience/EditRoleViewModel.kt",
+   "line": 172,
+   "rule": "281-c8 / single-flight like Save (A finding 1 class)",
+   "trigger": "Edit an existing role and tap 'Delete this role' twice before the first Room write completes. Both coroutines pass 'if (finished)' at line 172, because finished is only set at line 176 after saveProfile. Both send EditRoleEvent.Deleted, and EditRoleRoute calls navigator.goBack() for each event. The second goBack pops Experience, or Review when the editor was opened from #275's Add date, and 'Role deleted' shows twice. Save then Delete in the same window can also resurrect the role, because delete() ignores the saving flag.",
+   "title": "Delete is not single-flight: a double tap emits two Deleted events and pops an extra screen",
+   "proof": "RoleViewModelsTest: with the slow repository from doubleSaveInAddMode, call viewModel(existingId).delete() twice inside events.test and assert exactly one Deleted event (expectNoEvents after the first)."
+  },
+  {
+   "severity": "medium",
+   "file": "feature/profile/impl/src/main/kotlin/com/tailormyresume/feature/profile/impl/experience/EditRoleViewModel.kt",
+   "line": 157,
+   "rule": "Constitution I.1 / scout constraint 'tailored text keeps its stored copy' (cross-lane with tailor ReviewedEntries)",
+   "trigger": "Profile W-01, W-02, W-03 with an application whose TailoredResume cites W-02 and W-02-b1. Delete W-02, then Add role 'Analyst'. FactIdAllocator.nextId fills the gap (aGapInTheRunIsFilledBeforeCountingUp), so the new role gets W-02 and its first bullet W-02-b1 (nextFreeBulletId). reviewedEntries/TailorUiStateBuilder join stored resumes to the current profile by id. The old application's tailored resume now shows the new role's title, company and dates, and the export pulls the new W-02-b1 bullet. A document the user already approved changes to a different job. This PR adds the first delete path, so this is the first way to free an id and reuse it.",
+   "title": "A deleted role's id is reused by the next added role, so old tailored resumes attach to the wrong job",
+   "proof": "EditRoleViewModelTest: delete W-02 from the returning fixture, then add a role in a new ViewModel, and assert the new id is not 'W-02'. The fix allocates past the highest number used, or keeps deleted ids reserved."
+  },
+  {
+   "severity": "medium",
+   "file": "feature/profile/impl/src/main/kotlin/com/tailormyresume/feature/profile/impl/overview/ProfileViewModel.kt",
+   "line": 135,
+   "rule": "D52 'N yrs' (sum of non-overlapping role intervals, floored) / I.1 accurate statement about the candidate",
+   "trigger": "The end month is treated as exclusive, so each role loses a month. A single role 'Jan 2024 – Dec 2024' shows '0 yrs' (nonExperienceEntries_areIgnored pins 0). 'Jun 2020 – May 2021' shows 0 (lessThanTwelveMonths_floorsToZero, which is actually 12 months). '2020 – 2021' shows 1, and 'Jul 2022 – Jun 2025' shows 2 instead of 3. Roles that end and start on month boundaries are the normal case, so the header understates experience by a year for many profiles.",
+   "title": "Years of experience counts the end month as exclusive and understates whole years",
+   "proof": "ProfileOverviewTest: yearsOfExperience(listOf(experience(\"Jan 2024\", \"Dec 2024\")), clock) == 1 and experience(\"2020\", \"2021\") == 2. Both fail at this head."
+  }
+ ]
+}

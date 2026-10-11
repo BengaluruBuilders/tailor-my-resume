@@ -1,0 +1,36 @@
+{
+  "head_sha": "dc28a7c98ddedf7c249259e760705ca1eb532ed3",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "c1", "status": "met", "evidence": "`git diff 561b6f2 dc28a7c -- drizzle` is empty, so 0008 (table, kind and amount checks, cascade FK, (user_id, created_at) index) is unchanged since round 1, where it was verified. Test at test/tailormyresume-ledger.test.ts:188 still pins it."},
+    {"id": "c2", "status": "met", "evidence": "0009 is unchanged since round 1. It writes one MIGRATION row per wallet where free+purchased <> 0, so balance = sum(ledger) holds for existing wallets."},
+    {"id": "c3", "status": "met", "evidence": "wallet.ts:40-61 writes WELCOME only when `created.length > 0 && startingFreeCredits > 0`, in the caller's withLiveUser transaction. The new third parameter defaults to config. Every production caller passes two arguments: wallet.ts:143 and :176, routes.ts:67, export.ts:25, purchases.ts:217 and :258, tailoring.ts:105. The only 3-argument call is in test/tailormyresume-ledger.test.ts:475, so no request can reach the parameter. The zero-credit test at :473 proves that no row is written."},
+    {"id": "c4", "status": "met", "evidence": "purchases.ts:281-293 is unchanged. It writes one PURCHASE row inside `if (inserted)`, in the same transaction as the purchasedCredits increment, and the amount and productId come from config `pack`. Every credit-counter write in src was grepped: wallet.ts:47 (insert plus WELCOME), wallet.ts:154 (spendCredit, reached only from unlockApplication, which now writes TAILORING -1), and purchases.ts:282 (PURCHASE). tailoring.ts:106-113 only reads the counters. No refund, promo or admin path in src changes the counters."},
+    {"id": "c5", "status": "met", "evidence": "ledger.ts:46-59 is unchanged: the read is scoped by userId, sorted by created_at desc then id desc, and limited to 100. The balance still comes from the counters at routes.ts:68-74."},
+    {"id": "c6", "status": "met", "evidence": "This part is unchanged since round 1. requireAppUser supplies the userId. withLiveUser (src/core/accounts/service.ts:41-60) takes pg_advisory_xact_lock(hashtextextended(userId)) and checks the tombstone before any write, including the new unlock ledger write."},
+    {"id": "c7", "status": "met", "evidence": "unlockApplication (wallet.ts:169-225) runs under the per-user advisory lock. It re-reads the existing unlock under that lock (line 177) and returns early with no write for a repeat unlock (lines 190-196). It writes TAILORING -1 at line 214 only after a successful spendCredit and the unlocks insert. The 402 path throws at line 208, which rolls back the whole transaction. The tests at ledger test:431 (201, then 200 on the repeat, one row, balance = counters = row sum) and :455 (402 writes no row) cover these cases. The `credits` field is unchanged."},
+    {"id": "c8", "status": "met", "evidence": "export.ts and readAllLedger are unchanged since round 1. The export is uncapped and ordered oldest first."},
+    {"id": "c9", "status": "met", "evidence": "The cascade FK and the deletion tests are unchanged since round 1."},
+    {"id": "c10", "status": "partial", "evidence": "At dc28a7c, Validation, Secret scan and both delivery-gates-pregate checks are all still QUEUED. The local typecheck passes, and eslint on the changed files passes. The DB-backed tests could not run locally because no TEST_DATABASE_URL or Postgres is available, so the new unlock and zero-WELCOME tests are not yet proven green."}
+  ],
+  "findings": [
+    {
+      "severity": "low",
+      "file": "docs/architecture.md",
+      "line": 232,
+      "rule": "Rollback doc accuracy: it must name every request path that the table drop breaks",
+      "trigger": "The same commit (dc28a7c) made unlockApplication write a ledger row (wallet.ts:214), but the doc still says that dropping the table under this image breaks only new-wallet creation and purchase grants. An operator follows the doc and does a single-deploy DROP during a quiet window, expecting existing users to be unaffected. Instead, every existing user's first-time POST /applications/X/unlock fails with 42P01 and answers 500, and that is the paid core action.",
+      "title": "The rollback doc leaves out unlock: after the table drop, every new unlock also answers 500, not only new wallets and purchases",
+      "proof": "In the drop test (ledger test:528), after the DROP, call POST /v1/tailormyresume/applications/another-app/unlock for 'dropper' and observe a 500. Fix the doc sentence (and the PR body) to read 'new-wallet creation, purchase grants and unlocks'."
+    },
+    {
+      "severity": "low",
+      "file": "src/apps/tailormyresume/wallet.ts",
+      "line": 214,
+      "rule": "History order: GET /credits is sorted by created_at, then id (ledger.ts:54-57); the export is oldest first",
+      "trigger": "A new user's first request is POST /applications/X/unlock. ensureWallet (line 176) writes WELCOME +1, and line 214 writes TAILORING -1, in the same transaction. created_at defaults to now(), which is the transaction start (0008), so both rows get the same timestamp. The tie-break is the random v4 uuid id. In about half of cases, the oldest-first export and GET /credits put the -1 spend before the +1 grant, so a running balance shows -1.",
+      "title": "WELCOME and TAILORING rows from one first-unlock transaction share created_at and are ordered by a random uuid",
+      "proof": "Run a loop of 20 fresh users, each with only POST unlock and then GET /credits. Assert that entries[0].kind === 'TAILORING' every time. It fails on some runs. Fix: set createdAt to sql`clock_timestamp()` in recordLedger (ledger.ts:32-34)."
+    }
+  ]
+}

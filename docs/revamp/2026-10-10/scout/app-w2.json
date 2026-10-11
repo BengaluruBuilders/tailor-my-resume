@@ -1,0 +1,535 @@
+{
+  "repo": "BengaluruBuilders/tailor-my-resume",
+  "wave": "W2",
+  "scouted_at": "2026-10-11",
+  "base": {
+    "designsystem_stack": "revamp/w1-base 98da8f2a (main e387b855 + #295 #294 #299) -> revamp/262-drop-core-ui-module (PR #301, core:ui gone) -> revamp/261-old-designsystem-cuts (PR #303, head eed859e9, old design system cut, dark only)",
+    "data_domain_stack": "revamp/w1-base 98da8f2a -> revamp/260-core-cuts (PR #302, head 91ceefe5). PR #302 is based on w1-base, NOT on #301, so core:ui still exists at its head.",
+    "prototype": "../hirehop-wt/scout at 21ee644d (PR #255 head, not merged): design/prototype-2026-10-10/README.md, Prototype.dc.html (logic from line 967), Paige.dc.html"
+  },
+  "sources": [
+    "gh issue view 264..270 (title, body, comments); comment on #264 (disabledContent equals onSurfaceVariant 0xFF8C918E on #303); comment on #274 (import rules from the deleted ImportResumeViewModel)",
+    "docs/revamp/2026-10-10/PLAN.md sections 0, 1.3, 1.4, 2.1-2.3, 3 (tokens, Paige), 4 (C2, C8, C9, C11, C13), 5 (W2 lanes), 6 (risks R1-R15, hot files)",
+    "docs/revamp/2026-10-10/DECISIONS.md D4, D5, D6, D20-D27",
+    "Code read with git show at origin/revamp/261-old-designsystem-cuts and origin/revamp/260-core-cuts",
+    "docs/CONSTITUTION.md (PR #255 head), tools/ci/check-constitution.sh, tools/ci/verify-local.sh, AGENTS.md Motion section",
+    "github.com/google/fonts listing (gh api, no download): ofl/spacemono has SpaceMono-Regular.ttf, SpaceMono-Bold.ttf, OFL.txt; ofl/spacegrotesk has only the variable font SpaceGrotesk[wght].ttf and OFL.txt"
+  ],
+  "routing": {
+    "bases": {
+      "264": "origin/revamp/261-old-designsystem-cuts (PR #303 head eed859e9)",
+      "265": "#264's branch, after the #264 PR is open (stack on W2-A)",
+      "266": "#264's branch, after the #264 PR is open (stack on W2-A)",
+      "267": "#264's branch, after the #264 PR is open (stack on W2-A)",
+      "268": "Recommended: a new integration branch revamp/w2-data-base = origin/revamp/260-core-cuts (91ceefe5) merged with origin/revamp/262-drop-core-ui-module (PR #301), same method as D20. The two branches change disjoint files (git diff --name-only against w1-base intersect is empty). Reason: #268 drops ApplicationStatus.NO_RESPONSE and adds FactSource.USER_ANSWER, and core/ui (still present on #302) uses both (ApplicationStatusKindMapper.kt, component/ApplicationStatusSheet.kt, FactSourceProvenance.kt). Fallback: base on 260-core-cuts and make minimal core/ui edits that later conflict (modify/delete) with #301.",
+      "269": "#268's branch (stack on W2-E)",
+      "270": "#268's branch (stack on W2-E)"
+    },
+    "overlap_pairs": [
+      "264->265, 264->266, 264->267: dependency, not file overlap. 265/266/267 read TmrTheme, TmrIcons and TmrPreviewTheme that #264 owns. If #264 changes after they branch, they rebase.",
+      "265 | 266 | 267: parallel. Disjoint subpackages component/chrome, component/hero + component/input, component/content; disjoint strings_chrome.xml, strings_input.xml, strings_content.xml; disjoint screenshot prefixes chrome_, hero_/input_, content_. None may edit legacy component files (Button.kt, TmrCard.kt, TmrPrimitives.kt, TmrMotion.kt) or theme/** or icon/**. Shared risk: the same res/values directory and core/designsystem/build.gradle.kts (no lane should need a build file change).",
+      "268->269, 268->270: dependency plus shared persisted state (room:job_applications, room:profile). Stack.",
+      "269 | 270: parallel on #268's branch, both in core:domain. Disjoint file sets if #270 does not edit di/DomainModule.kt (owned by #269, PLAN 6.6) and neither edits core/domain/src/test/.../Fakes.kt beyond what already compiles. Shared contracts: (a) answer-confirmed keywords = keywordsStatedIn(requirement, requirement.text + newline + detail) for choice YES or FEW, none for NOT_YET or SKIPPED; (b) final keyword coverage reads only ACCEPTED or unchanged text (REJECTED shows the original text).",
+      "268 | 264-267: no shared file. Both stacks edit app/src/debug/DebugScenarioActivity.kt only through #302/#303 already (W1); W2 lanes do not touch it.",
+      "Cross-stack contract: #264 must keep compiling every design-system symbol that :app uses on BOTH stacks (#302 and #303 heads): TmrTheme.colors.onSurface, .onSurfaceVariant; TmrTheme.typography.bodyL, .bodyM, .titleM; TmrTheme.spacing.gutter, .md, .sm; TmrTheme.motion.proofSpecs.fade, .offset; TmrIcons.Applications, ApplicationsBorder, Profile, ProfileBorder, Settings, SettingsBorder; components TmrBackground, TmrCard, TmrDock*, TmrFilterChip, TmrInnerHeader, TmrOutlineButton, TmrPrimaryButton, TmrScreen, TmrSwitch, LocalTmrBottomInset, rememberTmrNavTransitions."
+    ],
+    "tiers": {
+      "264": "ui",
+      "265": "ui",
+      "266": "ui",
+      "267": "ui",
+      "268": "sensitive",
+      "269": "standard",
+      "270": "sensitive"
+    },
+    "lead_actions": [
+      "Create revamp/w2-data-base (260-core-cuts + 262-drop-core-ui-module merge) before the #268 Planner, or accept the core/ui fallback.",
+      "Test replacements the Coder may not make (lead edits, decision event per SKILL Review rounds): #264 TmrPaletteContrastTest (asserts 0xFF161817, 0xFFAEFF00), TmrBoundaryContrastTest (asserts outlineVariant 0xFF3A3D3B), TmrThemeDarkOnlyTest.typographyUsesDefaultFamily and its res/font-is-empty assertion, TmrDisabledButtonTest (asserts disabled label contrast >= 4.5 on card; #7A7A7A on #111111 is 4.40). #268 tests that encode notes, updateNotes, NO_RESPONSE or UsageAllowance. #269 ObserveStartDestinationUseCaseTest constructor (the use case needs ProfileRepository); its six assertions stay."
+    ]
+  },
+  "needs_info": [
+    "None blocks a lane. Open items for the lead: (1) #269 cannot reproduce 61 -> 92 / 84 exactly: the prototype JD has 8 distinct keywords, so every percent is a multiple of 12.5 (5 of 8 = 62.5). The issue allows 'the D5 percent values'; the scout's conservative choice is to assert the formula's values and list them in the PR (D5). (2) Space Grotesk exists in google/fonts only as the variable font SpaceGrotesk[wght].ttf. Bundle it once and declare weights 400/500/600/700 with FontVariation (minSdk 26 supports it). If Robolectric screenshots do not render the weights, static instances need fonttools (not installed) or another source: that is a missing-authority card, not a silent workaround. (3) The lead must make the listed test replacements."
+  ],
+  "issues": [
+    {
+      "number": 264,
+      "title": "feat(designsystem): dark-only Paige tokens with Space Mono and Space Grotesk",
+      "lane": "W2-A",
+      "status": "ready",
+      "tier": "ui",
+      "base": "origin/revamp/261-old-designsystem-cuts (PR #303, eed859e9)",
+      "depends_on": [261],
+      "criteria": [
+        {"id": "264-c1", "text": "Given the dark token set, When a unit test reads every colour token, Then each PLAN 3.1 token exists with its exact value: background #000000, surface #111111, surfaceRaised #161616, surfaceHigh #1C1C1C, sheet #141414, sheetOption #1A1A1A, uploadCard #0D0D0D, fill #242424, disabledFill #222222, line #2A2A2A, lineStrong #333333, lineHigher #3A3A3A, tabDivider #1A1A1A, text #FFFFFF, textSecondary #C8C8C8, textMuted #A6A6A6, textDisabled #7A7A7A, ink #0A0A0A, lime #A3F43F, limeSelected #141A0A, limeSoft #E4FBB8, amber #F7A940, amberHighlight #FFE2C2, blue #5AA9F8, cheek #FF6A2B, paper #FFFFFF, paperFold #DCDCD5, segOffer #E9E8E4, segRejected #555555, rejectedBorder #444444, scrim #000000 at alpha 0.65."},
+        {"id": "264-c2", "text": "Given TmrTheme.typography, When a unit test reads each PLAN 3.2 token, Then family, weight, size, line height and letter spacing match one for one (for example headline = Space Mono 400, 28 sp, line height 1.1 x size, letter spacing -1.0; label = Space Mono 400, 12 sp, letter spacing 0.6, uppercase applied by the component; body = Space Grotesk 400, 15 sp, line height 1.45 x size; displayLarge = Space Mono 700, 60 sp)."},
+        {"id": "264-c3", "text": "Given TmrTheme.shapes and TmrTheme.spacing, When a unit test reads them, Then the radii are pill 999 (or a fully rounded shape), hero 32, cardLarge 24, card 20, cardSmall 16, toast 18, paperCorner 12, bar 2 dp, and the PLAN 3.4 sizes exist (gutter 14, top-bar button 44, primary button height 56, tab item 54, tab centre disc 56, toast top 96, sheet padding 12/18/40, sheet handle 44 x 4)."},
+        {"id": "264-c4", "text": "Given the dark token set, When TmrDisabledButtonTest (or its lead-approved replacement) runs, Then the disabled text token (textDisabled #7A7A7A) differs from the secondary text token (textMuted #A6A6A6), and any legacy alias kept for old components also keeps disabledContent different from onSurfaceVariant (comment on #264)."},
+        {"id": "264-c5", "text": "Given src/main of core/designsystem, When TmrThemeDarkOnlyTest runs under the notnight qualifier, Then no light symbol exists (isSystemInDarkTheme, TmrLightColors, LightColorScheme, toLightScheme) and TmrTheme provides the dark tokens and the dark Material scheme."},
+        {"id": "264-c6", "text": "Given the module, When the files are listed, Then core/designsystem/src/main/res/font holds Space Mono Regular and Bold and Space Grotesk (the google/fonts variable font, renamed to a valid resource name, or four static weights) with font families that resolve weights 400, 500, 600 and 700, and core/designsystem/fonts-licenses holds the OFL.txt of each family byte-identical to google/fonts ofl/spacemono/OFL.txt and ofl/spacegrotesk/OFL.txt."},
+        {"id": "264-c7", "text": "Given the release classpath, When ./gradlew dependencyGuard runs, Then it passes with no baseline change (no ui-text-google-fonts, no downloadable fonts, I.5)."},
+        {"id": "264-c8", "text": "Given TmrTheme.motion, When a unit test reads idle, Then bob amplitude = 5 dp with angular period 420 ms (full period about 2639 ms) and a phase input 0..4, tailoring wobble = 4 degrees at 300 ms and 6 dp at 210 ms, story duration = 5000 ms, spinner turn = 900 ms; and When reduced is true, Then every idle amplitude is 0, the spinner and story auto-advance are static, and proof and hop still snap (TmrMotionReducedTest stays green)."},
+        {"id": "264-c9", "text": "Given TmrIcons, When the icons are listed, Then Back, Close, Check, ChevronRight, Gear (settings), Plus (add), File, Applications, Profile, GoogleG, Share and Open exist; GoogleG is an ImageVector built from the four-colour SVG path in Prototype.dc.html line 138 (no downloaded asset); and the names :app uses (Applications, ApplicationsBorder, Profile, ProfileBorder, Settings, SettingsBorder) still compile."},
+        {"id": "264-c10", "text": "Given core:screenshot, When TmrTestDevices is read, Then a Prototype device exists with qualifiers w374dp-h834dp at density 3 (480 dpi), it is the default device of the capture helpers (captureForDevice, captureForDevices, captureMultiTheme or their successor), the default theme name is dark, BOARD_QUALIFIERS still exists (four feature tests use it), and captureScreenHh keeps the ThreadedRenderer fix."},
+        {"id": "264-c11", "text": "Given the theme screenshot test, When ./gradlew :core:designsystem:verifyRoborazziDebug runs, Then a type specimen (every typography token) and a colour swatch sheet (every colour token) are verified against committed baselines recorded on the Prototype device, dark, 374 x 834."},
+        {"id": "264-c12", "text": "Given the docs, When docs/DESIGN_SYSTEM.md and AGENTS.md are read, Then the DESIGN_SYSTEM Tokens section lists the PLAN 3 tokens and the idle spec, the AGENTS.md design table points at design/prototype-2026-10-10/ first, the AGENTS.md Motion section names the idle spec and the reduced-motion still rule, and no other AGENTS.md section changes."},
+        {"id": "264-c13", "text": "Given the branch head, When ./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true runs, Then :app and every legacy component still compile and pass against the new tokens."},
+        {"id": "264-c14", "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."}
+      ],
+      "non_goals": [
+        "Anything in PRD 6.1.2 'Not in the MVP' (consent, 18+, light theme, Apple sign-in, follow-up reminders, offline states, extra error states, prep questions, cover letter, share card, DOCX, templates).",
+        "Building components (W2-B #265, W2-C #266, W2-D #267).",
+        "Deleting or restyling the legacy components still used by :app (TmrDock, Button.kt, TmrCard.kt, TmrScreen.kt, TmrSheet.kt, TmrSwitch.kt and others); W3-A removes them.",
+        "Editing app/** or any feature module.",
+        "A light theme or a second colour scheme.",
+        "Downloading anything other than the two font families and their OFL texts from github.com/google/fonts."
+      ],
+      "gates": [
+        "./gradlew :core:designsystem:testDebugUnitTest :core:designsystem:verifyRoborazziDebug :core:designsystem:lintRelease -PwarningsAsErrors=true",
+        "./gradlew :core:designsystem:recordRoborazziDebug  # only to record the new theme baselines, then inspect them",
+        "./gradlew assembleDemoDebug assembleProdDebug :app:testDemoDebugUnitTest :app:testProdDebugUnitTest -PwarningsAsErrors=true",
+        "./gradlew dependencyGuard",
+        "./gradlew spotlessCheck",
+        "BASE_REF=origin/revamp/261-old-designsystem-cuts tools/ci/check-constitution.sh",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt reads TmrTheme.motion.proofSpecs.offset and .fade and uses TmrDock, TmrBackground, LocalTmrBottomInset, rememberTmrNavTransitions: keep them.",
+        "app/src/main/kotlin/com/tailormyresume/app/navigation/TopLevelNavItem.kt uses TmrIcons.Applications, ApplicationsBorder, Profile, ProfileBorder, Settings, SettingsBorder: keep these names.",
+        "app/src/debug/kotlin/com/tailormyresume/app/debug/DebugScenarioMenu.kt reads TmrTheme.colors.onSurface and .onSurfaceVariant, typography.bodyL, .bodyM, .titleM, spacing.gutter, .md, .sm (both #302 and #303 versions): keep these names as aliases onto Paige values until W3-A/W6-C.",
+        "Every legacy file in core/designsystem/src/main/kotlin/.../component/ reads old TmrColors, TmrTypography, TmrShapes, TmrSpacing and TmrElevation members. Lazy path: keep the old member names as aliases mapped onto Paige values inside theme/**, so no legacy component file changes.",
+        "feature/{analysis,applications,profile,settings}/impl navigation tests use TmrTestDevices.BOARD_QUALIFIERS and TmrTheme: keep both.",
+        "core/designsystem tests on #303: TmrA11ySemanticsTest, TmrBoundaryContrastTest, TmrDisabledButtonTest, TmrDockDefaultsTest, TmrHeaderCollapse*Test, TmrPaletteContrastTest, TmrStatusBarIconsTest, TmrMotionReducedTest, TmrThemeDarkOnlyTest."
+      ],
+      "constraints": [
+        "Fonts: the owner authorised downloading Space Mono and Space Grotesk with their OFL licences from github.com/google/fonts only. Space Grotesk exists there only as the variable font SpaceGrotesk[wght].ttf: bundle it under a valid resource name (lowercase, digits, underscore) and select weights with FontVariation.weight; minSdk 26 supports variable fonts. No other download (no fonttools, no upstream static files) without a card.",
+        "PLAN 6.4 / Constitution I.5: no downloadable fonts and no new release dependency; dependencyGuard baselines app/dependencies/*ReleaseRuntimeClasspath.txt must not change.",
+        "AGENTS.md Motion: two registers (proof, hop) read from TmrTheme.motion; idle is one named spec (PLAN R8), not a duration or easing scale; motion code stays in core:designsystem; under reduced nothing moves and the state change stays visible; Paige is a still at phase 0 under reduced.",
+        "Comment on #264: disabled text and secondary text tokens must stay distinct, and TmrDisabledButtonTest asserts it again.",
+        "Tests that encode the old Avvio palette or the no-font rule (TmrPaletteContrastTest, TmrBoundaryContrastTest, TmrThemeDarkOnlyTest font assertions, TmrDisabledButtonTest 4.5 on card) encode a replaced design: only the lead may replace them, with coverage at least as strong (contrast pairs re-stated on Paige tokens) and a decision event.",
+        "Accessibility: text pairs on Paige tokens: #A6A6A6 on #111111 7.76, #0A0A0A on #A3F43F 14.68, #7A7A7A on #000000 4.89, #7A7A7A on #111111 4.40 (below 4.5: use textDisabled only for disabled or placeholder text, never for body text on surface), #7A7A7A on #242424 3.62 (placeholder in fields; the label above the field carries the meaning). Keep a contrast test for every token pair used for readable text.",
+        "Constitution III.2 (policy): no comment without an external ground (URL, issue number, or 'Line N'); III.3: lint baselines only shrink; II.3: no !!.",
+        "Roborazzi (PLAN 6.3): baselines in core/designsystem/src/test/screenshots, recorded on the Prototype device at a settled frame; never re-record for a motion change; stage paths explicitly (no git add -A, stale copies exist in .claude/worktrees/sync).",
+        "Font scale 2.0: TmrTestDevices keeps a large-font device (fontScale 2.0); the new Prototype device must allow a fontScale 2.0 variant for the component lanes.",
+        "Behaviour check (UI tier): the tokens are not reachable in the running app until W3/W4, so the Verifier inspects the recorded baselines against the prototype (delegate vision) instead of driving the app.",
+        "No git stash across worktrees (shared stash stack)."
+      ],
+      "state": [],
+      "files": [
+        "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/theme/**",
+        "core/designsystem/src/main/res/font/**",
+        "core/designsystem/fonts-licenses/**",
+        "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/icon/TmrIcons.kt",
+        "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/TmrPreviewTheme.kt",
+        "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/theme/**",
+        "core/designsystem/src/test/screenshots/theme_*",
+        "core/screenshot/**",
+        "docs/DESIGN_SYSTEM.md",
+        "AGENTS.md (Design source table and Motion section only)"
+      ],
+      "scale": {"material": false, "note": "Token constants and font files only. The APK gains about 3 TTF files (Space Mono Regular and Bold, Space Grotesk variable); report their sizes in the PR. No runtime hot path."}
+    },
+    {
+      "number": 265,
+      "title": "feat(designsystem): screen chrome — top bar, step bar, tab bar, toast host and bottom sheet",
+      "lane": "W2-B",
+      "status": "ready",
+      "tier": "ui",
+      "base": "#264's branch (stack on W2-A)",
+      "depends_on": [264],
+      "criteria": [
+        {"id": "265-c1", "text": "Given TmrStepBar with current = 1, 2 and 3, When it renders, Then the three pills match `steps` in renderVals(): a done step reads '✓ <Name>' in lime #A3F43F on #1C1C1C, the current step reads '<n> <Name>' in #0A0A0A on lime, a later step reads '<n> <Name>' in #A6A6A6 on #1C1C1C (names Profile, Job, Tailor), asserted by a unit test and by screenshots chrome_stepbar_1..3."},
+        {"id": "265-c2", "text": "Given TmrTopBar(back | close | none, title?, action?), When it renders, Then back and close are 44 dp circles on #1C1C1C with content descriptions from strings_chrome.xml, the title is Space Mono 12 uppercase #A6A6A6, the action is a lime pill 44 dp high, and each tappable control has a touch target of at least 48 dp."},
+        {"id": "265-c3", "text": "Given TmrTabBar(selected, onApplications, onAdd, onProfile), When it renders, Then items are 54 dp high, the centre is a 56 dp lime disc with a '+' icon and an accessible label, the top line is #1A1A1A, the selected tab exposes selected semantics, and each callback fires on its item."},
+        {"id": "265-c4", "text": "Given TmrToastHost and TmrToastState, When a toast is shown and the test clock advances 3199 ms, Then it is visible, and When it advances to 3200 ms, Then it is gone; the test uses virtual time (runTest or the Compose main clock), never Thread.sleep (IV.3)."},
+        {"id": "265-c5", "text": "Given a toast is visible, When a second toast is shown, Then only the second toast is visible and its 3.2 s timer starts again; When the optional action pill is tapped, Then its callback runs once."},
+        {"id": "265-c6", "text": "Given a toast, When it renders, Then it is a white #FFFFFF card with radius 18, 96 dp from the top, 14 dp side insets, min height 44, and an optional action pill 40 dp high with #0A0A0A fill and lime text; TalkBack announces it as a polite live region."},
+        {"id": "265-c7", "text": "Given TmrBottomSheet, When it is open, Then the scrim is #000000 at 65%, the sheet is #141414 with top radius 32, the handle is 44 x 4 #3A3A3A, and the padding is 12/18/40."},
+        {"id": "265-c8", "text": "Given TmrTheme.motion.reduced = true, When the sheet and the toast appear, Then their first composed frame is already at the final position (no offset or translation animation), asserted by a test."},
+        {"id": "265-c9", "text": "Given the chrome screenshot tests, When ./gradlew :core:designsystem:verifyRoborazziDebug runs, Then each component has a committed chrome_* baseline on the Prototype device, both states where the prototype draws two (top bar back and close, with and without action; tab bar Applications and Profile selected; toast with and without action)."},
+        {"id": "265-c10", "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."}
+      ],
+      "non_goals": [
+        "Anything in PRD 6.1.2 'Not in the MVP'.",
+        "Wiring chrome into :app or the `T` table logic (W3-A); deleting TmrDock or other legacy components (W3-A).",
+        "Editing theme/**, icon/**, legacy component files or other W2 lanes' packages.",
+        "Toasts beyond one at a time, queues, or a snackbar."
+      ],
+      "gates": [
+        "./gradlew :core:designsystem:testDebugUnitTest :core:designsystem:verifyRoborazziDebug :core:designsystem:lintRelease -PwarningsAsErrors=true",
+        "./gradlew :core:designsystem:recordRoborazziDebug  # only to record chrome_* baselines, then inspect them",
+        "./gradlew spotlessCheck",
+        "BASE_REF=<#264 branch> tools/ci/check-constitution.sh",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "No caller yet: W3-A wires the chrome into :app. app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt keeps using TmrDock until then."
+      ],
+      "constraints": [
+        "Put every new composable in package com.tailormyresume.core.designsystem.component.chrome; strings only in res/values/strings_chrome.xml; baselines only with the chrome_ prefix (PLAN 5 W2 file sets).",
+        "AGENTS.md Motion: sheet and toast motion read TmrTheme.motion (proof register); no tween(, spring( or numeric duration outside theme/Motion.kt except the toast display time 3.2 s from the prototype `toast` (a timeout, not an animation duration); under reduced nothing moves.",
+        "Constitution IV.3: auto-dismiss tested with virtual time; II.3: no !!, UI text in resources; III.2: no ungrounded comments.",
+        "Accessibility: back, close, add and action controls have content descriptions; touch targets at least 48 dp (visual 44 dp circles may keep their size); step bar announces the current step; toast is a polite live region; layouts must not clip at font scale 2.0 (heights are minimums).",
+        "Legacy names in package component (TmrSheet, TmrScreen, TmrInnerHeader, TmrDock) stay untouched; new names must not collide inside the same package.",
+        "Roborazzi: settled frames, Prototype device, stage paths explicitly."
+      ],
+      "state": [],
+      "files": [
+        "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/chrome/**",
+        "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/chrome/**",
+        "core/designsystem/src/test/screenshots/chrome_*",
+        "core/designsystem/src/main/res/values/strings_chrome.xml"
+      ],
+      "scale": {"material": false, "note": "Static chrome plus one toast timer; no list or per-frame work."}
+    },
+    {
+      "number": 266,
+      "title": "feat(designsystem): Paige, hero card, buttons, choice rows, toggle and text fields",
+      "lane": "W2-C",
+      "status": "ready",
+      "tier": "ui",
+      "base": "#264's branch (stack on W2-A)",
+      "depends_on": [264],
+      "criteria": [
+        {"id": "266-c1", "text": "Given TmrPaige(pose) for each pose signin1, signin2, signin3, upload, job, question, tailoring, fail, home, paywall, delete, When the screenshot tests run, Then one committed hero_paige_<pose> baseline per pose matches PLAN 3.6 (124 x 154 dp page, 2.5 dp #0A0A0A outline, radius 16, #DCDCD5 folded corner, eyes, #FF6A2B cheeks or the sad mouth, ticks and arms per the pose table)."},
+        {"id": "266-c2", "text": "Given TmrTheme.motion.reduced = true, When Paige is measured at several frame times (for example 0, 105, 420, 1000 and 2639 ms on the Compose main clock), Then her time-based translationY and time-based rotation are 0 at every time and only the static pose transform stays."},
+        {"id": "266-c3", "text": "Given reduced = false and phase 0, When the main clock reaches a time where sin(t / 420 ms) = 1, Then Paige's translationY equals 5 dp, applied through graphicsLayer only (no layout offset)."},
+        {"id": "266-c4", "text": "Given Paige on screen, When the semantics tree is read, Then Paige has no content description and is not a TalkBack focus stop (decorative)."},
+        {"id": "266-c5", "text": "Given TmrHeroCard(colour = Blue | Amber | Lime, label, headline, stickers, paige), When it renders, Then the card has radius 32 and padding 22, the label is Space Mono 12 uppercase, the headline is Space Mono 28 on two lines, and TmrSticker pills are white or #FF6A2B with a 2.5 dp outline and rotation; one hero_card_<colour> baseline each."},
+        {"id": "266-c6", "text": "Given a disabled TmrPrimaryButton, When it is tapped, Then onDisabledClick runs and onClick does not; it renders #222222 fill and #7A7A7A text; and TalkBack still reports it as a button whose state says it is not available yet."},
+        {"id": "266-c7", "text": "Given an enabled TmrPrimaryButton, When it renders, Then it is a lime #A3F43F pill with #0A0A0A Space Mono text and a minimum height of 56 dp, and at font scale 2.0 its label is not clipped."},
+        {"id": "266-c8", "text": "Given TmrSecondaryButton, TmrTextButton and TmrUploadCard, When the screenshot tests run, Then each has a baseline, and the upload card has a dashed #3A3A3A border on #0D0D0D with radius 24."},
+        {"id": "266-c9", "text": "Given TmrChoiceRow selected and unselected, on screen and in a sheet, When it renders, Then selected = border #A3F43F, fill #141A0A, lime dot; unselected = #2A2A2A on #111111 on screen and #3A3A3A on #1A1A1A in a sheet; it exposes radio-button role and selected state."},
+        {"id": "266-c10", "text": "Given TmrToggle on and off, When it renders, Then the track is #A3F43F on and #333333 off and the knob is #0A0A0A on and #A6A6A6 off; it exposes switch role and toggleable state; tapping calls onCheckedChange with the new value."},
+        {"id": "266-c11", "text": "Given TmrTextField, TmrTextArea and TmrLabeledField, When they render, Then the label sits above the field and is its accessible name, the fill is #242424, a read-only variant cannot be edited, and an optional amber #F7A940 border variant exists; one input_* baseline per variant."},
+        {"id": "266-c12", "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."}
+      ],
+      "non_goals": [
+        "Anything in PRD 6.1.2 'Not in the MVP'; the drawn Apple button.",
+        "The multi-frame sign-in sequence or story auto-advance logic (W4-A1); AGENTS.md forbids building the board's multi-frame sequences.",
+        "Deleting or restyling legacy Button.kt, TmrCard.kt (old TmrHeroCard) or TmrSwitch.kt (W3-A).",
+        "Editing theme/**, icon/** or other W2 lanes' packages."
+      ],
+      "gates": [
+        "./gradlew :core:designsystem:testDebugUnitTest :core:designsystem:verifyRoborazziDebug :core:designsystem:lintRelease -PwarningsAsErrors=true",
+        "./gradlew :core:designsystem:recordRoborazziDebug  # only to record hero_* and input_* baselines, then inspect them",
+        "./gradlew spotlessCheck",
+        "BASE_REF=<#264 branch> tools/ci/check-constitution.sh",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "No caller yet (W4 screens). Name collisions: component/Button.kt already defines TmrPrimaryButton, TmrSecondaryButton, TmrTextButton in package ...designsystem.component, and component/TmrCard.kt defines TmrHeroCard; app/src/debug/DebugScenarioMenu.kt imports the legacy TmrPrimaryButton. The new ones must live in packages ...component.hero and ...component.input so both compile until W3-A deletes the legacy files."
+      ],
+      "constraints": [
+        "Put new composables in ...designsystem.component.hero (TmrPaige, TmrHeroCard, TmrSticker) and ...designsystem.component.input (buttons, upload card, choice row, toggle, fields); strings only in res/values/strings_input.xml; baselines only with hero_ and input_ prefixes.",
+        "AGENTS.md Motion and PLAN 3.5/3.6: Paige bob = 5 dp x sin(t / 420 ms + phase) and the tailoring wobble read TmrTheme.motion.idle; apply them only in graphicsLayer (translationY, rotationZ) so frames do not recompose; under reduced Paige is a still at phase 0 with her pose; no tween(, spring( or numeric duration in component code.",
+        "Roborazzi baselines capture the settled frame (phase 0); never re-record for a motion change; drive time with the Compose main clock, not wall time.",
+        "Accessibility: Paige decorative (contentDescription null); the disabled primary button stays clickable for onDisabledClick, so expose its unavailable state with stateDescription instead of disabled semantics; choice rows radio semantics; toggle switch semantics; field labels are accessible names; #7A7A7A disabled text on #222222 is 3.71:1 (allowed for a disabled control, WCAG 1.4.3 exception) and placeholder #7A7A7A on #242424 is 3.62:1 (the label above carries the meaning); font scale 2.0 must not clip labels (56 dp is a minimum height).",
+        "Constitution II.3 (no !!, UI text in resources), III.2 (no ungrounded comments), IV.3 (virtual time).",
+        "Paige drawing source: Paige.dc.html (props eyeW eyeH eyeT mouthW mouthH ticks arms sad tf) and the EX table in Prototype.dc.html renderVals()."
+      ],
+      "state": [],
+      "files": [
+        "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/hero/**",
+        "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/input/**",
+        "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/hero/**",
+        "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/input/**",
+        "core/designsystem/src/test/screenshots/hero_*",
+        "core/designsystem/src/test/screenshots/input_*",
+        "core/designsystem/src/main/res/values/strings_input.xml"
+      ],
+      "scale": {"material": true, "note": "Paige runs an ambient loop on most setup screens, also on low-end devices. Baseline: none (new). Contract: the per-frame value is read inside a graphicsLayer block so composition does not run per frame, and the loop does not run under reduced motion. No numeric target is invented; give a complexity argument in the PR."}
+    },
+    {
+      "number": 267,
+      "title": "feat(designsystem): rows, chips, progress rows, status bar, resume paper and file card",
+      "lane": "W2-D",
+      "status": "ready",
+      "tier": "ui",
+      "base": "#264's branch (stack on W2-A)",
+      "depends_on": [264],
+      "criteria": [
+        {"id": "267-c1", "text": "Given each component (TmrListRow, TmrCard, TmrSectionLabel, TmrStatusChip, TmrKeywordChip, TmrSourceChip, TmrTag, TmrProgressRows, TmrStatusBar, TmrInitialDisc, TmrStoryBars, TmrResumePaper, TmrFileCard, TmrSoonRow, TmrCoverageDelta), When ./gradlew :core:designsystem:verifyRoborazziDebug runs, Then each has at least one committed content_* baseline on the Prototype device."},
+        {"id": "267-c2", "text": "Given TmrStatusChip for Saved, Applied, Interview, Offer and Rejected, When a unit test reads its colours, Then text, fill and border equal `SS` in renderVals(): Saved #5AA9F8 / transparent / #5AA9F8, Applied #F7A940 / transparent / #F7A940, Interview #0A0A0A / #A3F43F / #A3F43F, Offer #0A0A0A / #F7A940 / #F7A940, Rejected #A6A6A6 / transparent / #444444."},
+        {"id": "267-c3", "text": "Given TmrStatusBar(segments), When it renders, Then segment colours equal `SEGC` (Saved #5AA9F8, Applied #F7A940, Interview #A3F43F, Offer #E9E8E4, Rejected #555555), zero-count statuses are omitted, and the legend shows '<Status> <n>' for each segment."},
+        {"id": "267-c4", "text": "Given every string resource in core/designsystem, When a unit test scans res/values*/strings*.xml, Then none uses 'match' (or 'matches') as a whole word or score label, and none contains 'fit score' or 'ATS score'; the D5 label 'Keywords matched' is allowed (Constitution I.3, D5)."},
+        {"id": "267-c5", "text": "Given TmrCoverageDelta(now, upTo), When it renders with now = 61 and upTo = 92, Then it shows the label 'Keywords matched' and the values as '61%' and '92%'."},
+        {"id": "267-c6", "text": "Given TmrProgressRows(rows, percent) with done, active and pending rows, When it renders at 0%, 40% and 100% (fixed inputs, no wall clock), Then done rows show a check and lime meta, the active row shows a spinner driven by TmrTheme.motion (one turn per 900 ms) that is a static ring under reduced motion, and pending rows use #7A7A7A."},
+        {"id": "267-c7", "text": "Given TmrResumePaper with highlight spans, When it renders, Then the page is white, keyword spans use #E4FBB8, from-your-answer spans use #FFE2C2, and a keyword-coverage badge shows a percent with no 'match' wording."},
+        {"id": "267-c8", "text": "Given TmrKeywordChip(have | missing), TmrSourceChip(YourResume | YourAnswer) and TmrTag(Soon | Add | Best value | Required | New | Rewritten | Added | Reordered), When they render, Then have = lime dot, missing = amber outline, YourResume = lime, YourAnswer = amber, and each tag label comes from strings_content.xml."},
+        {"id": "267-c9", "text": "Given TmrFileCard(fileName, meta, onShare, onOpen), When Share or Open is tapped, Then the matching callback runs, and both controls have accessible labels."},
+        {"id": "267-c10", "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."}
+      ],
+      "non_goals": [
+        "Anything in PRD 6.1.2 'Not in the MVP'.",
+        "Any 'match', 'fit' or 'ATS' wording (I.3, D5).",
+        "Computing keyword coverage (W2-F #269) or story timing logic (W4-A1); components take values as inputs.",
+        "Deleting legacy component/TmrCard.kt (W3-A); editing theme/**, icon/** or other W2 lanes' packages."
+      ],
+      "gates": [
+        "./gradlew :core:designsystem:testDebugUnitTest :core:designsystem:verifyRoborazziDebug :core:designsystem:lintRelease -PwarningsAsErrors=true",
+        "./gradlew :core:designsystem:recordRoborazziDebug  # only to record content_* baselines, then inspect them",
+        "./gradlew spotlessCheck",
+        "BASE_REF=<#264 branch> tools/ci/check-constitution.sh",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "No caller yet (W4). Name collision: component/TmrCard.kt already defines TmrCard in package ...designsystem.component and app/src/debug/DebugScenarioMenu.kt imports it; the new TmrCard must live in ...designsystem.component.content."
+      ],
+      "constraints": [
+        "Put new composables in ...designsystem.component.content; strings only in res/values/strings_content.xml; baselines only with the content_ prefix.",
+        "Constitution I.3 and D5: the number is keyword coverage; label 'Keywords matched', values as percent; the policy regex does not catch 'match', so the unit test in 267-c4 is the guard.",
+        "AGENTS.md Motion: the spinner reads TmrTheme.motion idle spinner spec; static ring under reduced; in lazy lists animate graphicsLayer alpha, translation and scale only; no tween(, spring( or numeric duration in component code.",
+        "Roborazzi: progress rows recorded at fixed percentages 0, 40, 100 (PLAN 6.3); settled frames; Prototype device.",
+        "Accessibility: status chips and status bar carry text labels (colour is never the only cue; #444444 border and #555555 segment are below 3:1 on black, so the label carries the meaning); spinner has a progress semantics or is decorative next to the percent text; file card buttons labelled; font scale 2.0 must not clip rows (min heights); the resume paper is a fixed-scale preview, so give it an accessible summary instead of relying on 7-9 sp text.",
+        "Constitution II.3 (no !!, UI text in resources), III.2 (no ungrounded comments)."
+      ],
+      "state": [],
+      "files": [
+        "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/content/**",
+        "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/content/**",
+        "core/designsystem/src/test/screenshots/content_*",
+        "core/designsystem/src/main/res/values/strings_content.xml"
+      ],
+      "scale": {"material": false, "note": "Display components with input values; one spinner per progress screen; the paper preview renders one page."}
+    },
+    {
+      "number": 268,
+      "title": "feat(data): profile, application, credits and resume-settings data for the simplified flow (Room v3)",
+      "lane": "W2-E",
+      "status": "ready",
+      "tier": "sensitive",
+      "base": "revamp/w2-data-base (lead creates: origin/revamp/260-core-cuts 91ceefe5 + merge of origin/revamp/262-drop-core-ui-module); fallback origin/revamp/260-core-cuts with minimal core/ui edits",
+      "depends_on": [260, 262],
+      "criteria": [
+        {"id": "268-c1", "text": "Given the head, When the files are listed, Then TmrDatabase version is 3 and core/database/schemas/com.tailormyresume.core.database.TmrDatabase/3.json is committed and matches the entities (V.6; the build.yml 'Check Room schema is committed' step passes)."},
+        {"id": "268-c2", "text": "Given a version 2 database with a profile, profile entries and job applications including one NO_RESPONSE row and one SAVED row with notes, When a Robolectric MigrationTestHelper test runs runMigrationsAndValidate(3) with MIGRATION_2_3 (pattern of ProfileMigrationTest), Then every existing value is unchanged, the NO_RESPONSE row reads APPLIED, the original status stays recoverable (kept in an additive column), the notes column still holds its value, new columns are null or their defaults, and the new credit ledger table exists and is empty."},
+        {"id": "268-c3", "text": "Given MIGRATION_2_3, When its SQL is read, Then it holds only ALTER TABLE ... ADD COLUMN, CREATE TABLE and UPDATE statements (no DROP, no RENAME, no table rebuild), and DatabaseModule registers MIGRATION_1_2 and MIGRATION_2_3 with no destructive fallback."},
+        {"id": "268-c4", "text": "Given core:model, When it compiles, Then CandidateProfile has contact (city, linkedinUrl, portfolioUrl), summary, sourceFileName and reviewedAt; ApplicationStatus is exactly SAVED, APPLIED, INTERVIEW, OFFER, REJECTED (constant names unchanged, NO_RESPONSE gone); JobApplication has location, appliedOn, keyword coverage (now, upTo, final), exportFileName, quickAnswer (requirementId, choice, detail), changesAcceptedAt and no notes; FactSource has USER_ANSWER; CreditLedgerEntry(kind, amount, applicationId?, productId?, createdAt) and ResumeSettings(pageSize A4 | Letter, fileNameFormat Name_Company_Role | Name_Role | Name_Resume, productUpdates) exist."},
+        {"id": "268-c5", "text": "Given the profile and application repositories (Room-backed and the core:testing fakes), When a profile and an application with every new field set are saved and observed, Then every new field round-trips unchanged, asserted by the shared contract tests in core:testing run against both."},
+        {"id": "268-c6", "text": "Given CreditsRepository and its fake, When ledger entries +1, -1, +5, -1, -1 are stored, Then balance is 3, the ledger flow lists entries newest first, and refresh completes without changing a local-only ledger; UsageAllowance has no remaining reference in core:data or core:testing main sources (or the PR records why one remains until W5-N2)."},
+        {"id": "268-c7", "text": "Given ResumeSettingsRepository with no stored value, When it is observed, Then it emits pageSize A4, fileNameFormat Name_Company_Role and productUpdates false; When each field is updated, Then the new value persists; When the local wipe clears the store, Then the defaults come back."},
+        {"id": "268-c8", "text": "Given PrototypeFixtures, When fresh() and returning() are read, Then they reproduce the prototype exactly: Priya Deshmukh, priya.deshmukh@gmail.com, +91 98200 41736, Pune; ROLES (Business Analyst Infosys Jul 2022 current; Data Analyst Intern Tata Digital Jun 2021 with the end date missing in fresh and May 2022 in returning; Finance Associate Bajaj Finserv Jun 2020 - May 2021) with their bullets; the 18 SKILLS; LISTS summary, education and 6 achievements; JD and NW; fresh has no applications, an empty ledger and no LinkedIn; returning has nw Applied on 8 Oct, kb Interview on 6 Oct, hr Saved, and the ledger Free first resume +1 (2 Oct), Data Analyst Halden Retail -1 (4 Oct), Bought 5 credits +5 application_pack_5 (5 Oct), Business Analyst Kestrel Bank -1 (6 Oct), Associate Analyst Northwind GCC -1 (8 Oct), balance 3; a test asserts each value."},
+        {"id": "268-c9", "text": "Given a profile that holds a USER_ANSWER fact, When core/network builds the current backend facts payload (dto/Shared.kt), Then no entry with source USER_ANSWER is sent (the live backend accepts only IMPORTED, USER_STATED, USER_EDITED until B5b)."},
+        {"id": "268-c10", "text": "Given the 'Download my data' archive (AccountDataArchiveWriter), When it is written for a profile with the new contact and summary fields, Then those fields appear in both the text and JSON entries, and the archive no longer reads JobApplication.notes."},
+        {"id": "268-c11", "text": "Given the branch head, When ./gradlew :core:data:koverVerify :core:domain:koverVerify runs, Then both pass (>= 80% line coverage)."},
+        {"id": "268-c12", "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."}
+      ],
+      "non_goals": [
+        "Anything in PRD 6.1.2 'Not in the MVP'.",
+        "Network DTOs and the prod GET /credits client (W5-N1, W5-N2); RemotePaymentGateway or OfflinePaymentGateway rewrites (W5-N2, W6-A).",
+        "Dropping the notes column or any table (R14: ignored, not dropped).",
+        "Keyword coverage computation, completeness, gaps (W2-F #269); guard, decisions and packs (W2-G #270).",
+        "Demo sample data unification and the debug menu (W6-B, W6-C), beyond compile fixes in core/domain/sample.",
+        "UI or ViewModels (W4)."
+      ],
+      "gates": [
+        "./gradlew :core:model:test :core:database:testDebugUnitTest :core:data:testDebugUnitTest :core:testing:testDebugUnitTest :core:domain:testDebugUnitTest :core:network:testDebugUnitTest -PwarningsAsErrors=true",
+        "./gradlew :core:database:testDebugUnitTest --tests '*Migration*' -PwarningsAsErrors=true",
+        "test -f core/database/schemas/com.tailormyresume.core.database.TmrDatabase/3.json",
+        "./gradlew :core:data:koverVerify :core:domain:koverVerify",
+        "./gradlew :app:testDemoDebugUnitTest :app:testProdDebugUnitTest assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true",
+        "./gradlew dependencyGuard",
+        "./gradlew spotlessCheck",
+        "BASE_REF=<base> tools/ci/check-constitution.sh",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "ApplicationStatus.NO_RESPONSE: core/domain/sample/SampleDataSet.kt and its OfflineSampleDataControllerTest; core/ui ApplicationStatusKindMapper.kt and component/ApplicationStatusSheet.kt with their tests (gone if the base includes #301). Room stores the enum by name, so the UPDATE in MIGRATION_2_3 is required or reading an old row throws.",
+        "JobApplication.notes and ApplicationRepository.updateNotes: core/data ApplicationMappers.kt, OfflineFirstApplicationRepository.kt (+ test updateNotesChangesNotesAndStampsUpdatedAt, FakeJobApplicationDao, TestModels), core/database JobApplicationDao.updateNotes (+ androidTest JobApplicationDaoTest), core/domain CreateApplicationUseCase.kt, sample/OfflineSampleDataController.kt, sample/SampleDataSet.kt, account/AccountDataArchiveWriter.kt (+ AccountDataArchiveWriterTest), src/test Fakes.kt and UpdateBulletDecisionUseCaseTest, core/testing ApplicationTestData.kt, CanonicalFixtures.kt, ApplicationRepositoryContractTest.kt, TestApplicationRepository.kt (+ test), feature/tailor/impl/src/test TailorTestData.kt, app/src/testProd auth/LocalDataWiperTest.kt.",
+        "UsageAllowance: app/src/demo/kotlin/.../di/PaymentBindings.kt, app/src/prod/kotlin/.../billing/WalletUsageAllowance.kt, app/src/prod/kotlin/.../di/PaymentBindings.kt, app/src/testProd/.../billing/RemotePaymentGatewayTest.kt, core/data StoredUsageAllowance.kt (+ test), core/testing TestUsageAllowance.kt, UsageAllowanceContractTest.kt, TestFakesContractTest.kt. No feature module injects it.",
+        "FactSource: enum stored by name in profile_entries (additive value is safe); core/network/dto/Shared.kt serialises it to the backend (see 268-c9); core/ui FactSourceProvenance.kt (gone with #301).",
+        "Name clash: core/model GapAnalysis.kt already defines data class KeywordCoverage(covered, total); the new (now, upTo, final) type needs a different name or must extend it deliberately.",
+        "Import rules (comment on #274): FactIdAllocator ids, user-stated facts never overwritten, imported entries marked imported. New profile fields must not break these when W4-A2 ports them; do not change FactIdAllocator or source semantics here."
+      ],
+      "constraints": [
+        "Sensitive tier (migration, customer data): the Builder writes the code in-harness (router refuses paths containing 'migration'); Reviewer B with a security mandate.",
+        "Constitution V.6: bump the version, commit 3.json, add a migration; keep exportSchema = true.",
+        "Owner/lead rule for this run: the 2 -> 3 migration is additive and reversible: ADD COLUMN with defaults or NULL, CREATE TABLE, and UPDATE only; keep the original NO_RESPONSE value recoverable (for example a nullable legacy status column) because the mapping to APPLIED is otherwise lossy; never drop the notes column (R14).",
+        "Room has no down migration; never add fallbackToDestructiveMigration (it would delete user data).",
+        "Privacy and wipe: the new credit ledger lives in a Room table, so RoomLocalDataWiper's clearAllTables wipes it; store ResumeSettings in the existing preferences DataStore behind MockStateStore (store.clear() wipes it) or wire a new store into every wipe path; do not edit app/src/prod/.../auth without the sensitive review.",
+        "Data rights: the 'Download my data' archive must include new personal fields (contact, summary, source file name, quick answer detail); legacy notes stay in the Room column but leave the archive and the UI (R14): list this under Decisions.",
+        "Contract D1 / R15: the ledger keeps applicationId and productId only; job titles and companies stay on the device.",
+        "USER_ANSWER facts are never sent as profile facts to the current backend (C8 sends the answer as a separate request field after B5b).",
+        "Representation of a current role (contract with #269): an entry is current when its endDate is an open-ended word in FactDateFormat (present, current, now, ongoing, till date, to date); no new column for it. PrototypeFixtures stores Infosys with endDate 'Present' and Tata Digital with endDate '' in fresh().",
+        "Fixture dates: the prototype has no year; use 2026 (TODAY = 10 Oct) and fixed instants, never the wall clock (IV.3).",
+        "Kover >= 80% on core:data and core:domain (build-logic TailorMyResumeKoverPlugin minValue 80); new repositories ship with tests.",
+        "Constitution IV.2: fakes in core:testing, no mocks; III.3: production code never imports a Fake; II.4: inject dispatchers; II.1: core:model stays pure JVM.",
+        "Tests that encode notes, updateNotes, NO_RESPONSE or UsageAllowance encode removed behaviour: the lead replaces them (decision event), the Coder never edits them.",
+        "dependencyGuard: no new library (DataStore and Room already present)."
+      ],
+      "state": [
+        "room:profile",
+        "room:profile_entries",
+        "room:job_applications",
+        "room:credit_ledger",
+        "room:schema_version_3",
+        "datastore:resume_settings"
+      ],
+      "files": [
+        "core/model/**",
+        "core/database/** (TmrDatabase.kt, TmrMigrations.kt, di/DatabaseModule.kt, model/**, dao/**, json/**, schemas/com.tailormyresume.core.database.TmrDatabase/3.json, src/test/**)",
+        "core/data/**",
+        "core/testing/**",
+        "core/network/src/main/kotlin/com/tailormyresume/core/network/dto/Shared.kt and mappers (compile fixes and 268-c9 only)",
+        "core/domain compile-fix callers only: CreateApplicationUseCase.kt, sample/**, account/AccountDataArchiveWriter.kt, src/test/**/Fakes.kt",
+        "app/src/demo/kotlin/**/di/PaymentBindings.kt, app/src/prod/kotlin/**/di/PaymentBindings.kt, app/src/prod/kotlin/**/billing/WalletUsageAllowance.kt (only if UsageAllowance is removed)",
+        "core/ui/** only in the fallback base"
+      ],
+      "scale": {"material": false, "note": "One-time migration on a single-user device database (one profile row, tens of applications); ledger at most about 100 rows (C2). Give a one-line rationale; no numeric target."}
+    },
+    {
+      "number": 269,
+      "title": "feat(domain): keyword coverage, profile completeness, required gaps, start destination and export file names",
+      "lane": "W2-F",
+      "status": "ready",
+      "tier": "standard",
+      "base": "#268's branch (stack on W2-E)",
+      "depends_on": [268],
+      "criteria": [
+        {"id": "269-c1", "text": "Given PrototypeFixtures (JD keywords have SQL, Power BI, Excel, Python, Forecasting; missing Stakeholder mgmt, Financial reporting, Variance analysis), When KeywordCoverage computes now, upTo and final with the quick answer YES plus detail and again without the answer, Then each value equals the formula's rounded percent asserted literally in the test (now = 5 of 8 distinct keywords -> 63 with half-up rounding), now <= upTo, and final with the answer > final without it; 61 -> 92 and 84 are not reachable with 8 keywords, so the PR lists the computed values (D5)."},
+        {"id": "269-c2", "text": "Given requirements whose keywords repeat with different case (SQL in two requirements, 'sql' in a third), When the distinct set is built, Then it counts once; Given no keywords, Then every percent is 0 and nothing divides by zero."},
+        {"id": "269-c3", "text": "Given matches with statuses MET, PARTIAL and GAP and a quick answer, When upTo is computed, Then it counts keywords of MET and PARTIAL requirements plus keywordsStatedIn(answered requirement, requirement text + detail) for choice YES or FEW, and adds nothing for NOT_YET or SKIPPED."},
+        {"id": "269-c4", "text": "Given a tailored resume with ACCEPTED, REJECTED and unchanged changes, When final is computed, Then it counts keywords present in the accepted text only (a REJECTED change contributes its original text)."},
+        {"id": "269-c5", "text": "Given the prototype JD and profile, When ScreenForKeywords runs, Then it returns have = [SQL, Power BI, Excel, Python, Forecasting], missing = [Stakeholder mgmt, Financial reporting, Variance analysis] and count 8 (order as in the requirements)."},
+        {"id": "269-c6", "text": "Given PrototypeFixtures fresh (one open required gap, no LinkedIn), fixed (no gap, no LinkedIn) and fixed with LinkedIn, When ProfileCompleteness runs, Then it returns 90, 96 and 100; with many gaps the value never goes below 0."},
+        {"id": "269-c7", "text": "Given profile entries, When RequiredGaps runs, Then an EXPERIENCE entry with a start date, a blank end date and no open-ended end word is a gap carrying its entry id and title (the screen formats 'End date missing for <title>' from resources); a current entry (end date 'Present' or another FactDateFormat open-ended word), a non-EXPERIENCE entry and an entry with an end date are not gaps; fresh fixtures yield exactly one gap for Data Analyst Intern."},
+        {"id": "269-c8", "text": "Given ObserveStartDestinationUseCase, When the account is null, Then it emits SignIn; When signed in with no profile.reviewedAt and onboarding not complete, Then Upload; When signed in and reviewedAt is set, or the legacy onboardingComplete flag is true (existing installs), Then Applications; the six existing ObserveStartDestinationUseCaseTest assertions still pass (only the constructor call changes)."},
+        {"id": "269-c9", "text": "Given ExportFileName.build(profile, job, format), When it runs for Priya Deshmukh / Northwind GCC / Associate Analyst, Then Name_Company_Role = Priya-Deshmukh_Northwind-GCC_Associate-Analyst.pdf, Name_Role = Priya-Deshmukh_Associate-Analyst.pdf, Name_Resume = Priya-Deshmukh_Resume.pdf."},
+        {"id": "269-c10", "text": "Given names with unsafe characters (slash, backslash, : * ? quote < > |, control characters, '..', leading dots, emoji, repeated spaces), When ExportFileName.build runs, Then the result has no path separator or reserved character, words are joined with '-', parts with '_', empty parts are dropped, a fallback base is used when every part is empty, the length is capped, and the name ends with .pdf."},
+        {"id": "269-c11", "text": "Given the branch head, When ./gradlew :core:domain:koverVerify runs, Then it passes (>= 80%)."},
+        {"id": "269-c12", "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."}
+      ],
+      "non_goals": [
+        "Anything in PRD 6.1.2 'Not in the MVP'; any 'match', 'fit' or 'ATS' score (I.3, D5).",
+        "UI copy, ViewModels or screens (W4); the feature/tailor ExportFileName used by the current PDF export (W4-C2 switches to the domain one).",
+        "Editing the fabrication guard, TailorResumeUseCase, UpdateBulletDecisionUseCase, packs or credits (W2-G #270).",
+        "Storing coverage values (the repositories from #268 already persist them)."
+      ],
+      "gates": [
+        "./gradlew :core:domain:testDebugUnitTest -PwarningsAsErrors=true",
+        "./gradlew :core:domain:koverVerify",
+        "./gradlew :app:testDemoDebugUnitTest :app:testProdDebugUnitTest assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true",
+        "./gradlew spotlessCheck",
+        "BASE_REF=<#268 branch> tools/ci/check-constitution.sh",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "ObserveStartDestinationUseCase / StartDestination: app/src/main/kotlin/com/tailormyresume/app/ui/AppViewModel.kt has an exhaustive when (SignIn -> FirstRun, Applications -> Main); adding Upload needs a one-line branch there (Upload -> FirstRun until W3-A) and AppViewModelTest stays green. This app/ui path raises the computed tier to ui.",
+        "ObserveStartDestinationUseCaseTest constructs ObserveStartDestinationUseCase(session); a new ProfileRepository parameter needs a lead test edit (constructor only, assertions unchanged).",
+        "NextOnboardingStepUseCase (onboarding/) is separate and stays unchanged unless the plan proves a caller needs it.",
+        "keywordsStatedIn (KeywordsStatedIn.kt) is reused, not changed; feature/tailor/impl/export/ExportFileName.kt (joins with '_') stays for the current export until W4-C2."
+      ],
+      "constraints": [
+        "D5 and I.3: the number is keyword coverage per PRD 4.2, never a match, fit, ATS or job-likelihood score; names in code use 'coverage', not 'match'.",
+        "Name clash: core.model.KeywordCoverage(covered, total) exists; the domain calculator in package coverage needs a distinct name or must reuse the model type deliberately.",
+        "PLAN 6.6: di/DomainModule.kt belongs to this lane; #270 must not edit it.",
+        "Contract with #270: answer-confirmed keywords = keywordsStatedIn(requirement, requirement.text + newline + detail) for YES or FEW only; final coverage reads accepted text only.",
+        "Contract with #268: a role is current when its end date is a FactDateFormat open-ended word; reviewedAt is on the profile.",
+        "Legacy users (onboardingComplete true, reviewedAt null after the v3 migration) must still start at Applications, not Upload.",
+        "Domain returns typed values (gap with entry id and title); user-facing text lives in feature resources (II.3).",
+        "Kover >= 80% on core:domain; Constitution IV.1 unit tests for all domain logic; IV.2 fakes from core:testing; IV.3 runTest and Turbine; III.2 no ungrounded comments; II.3 no !!.",
+        "Standard tier: MiniMax through the router; Reviewer A and B."
+      ],
+      "state": [],
+      "files": [
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/coverage/**",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/profile/**",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/onboarding/**",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/export/**",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/di/DomainModule.kt",
+        "core/domain/src/test/kotlin/com/tailormyresume/core/domain/{coverage,profile,onboarding,export}/**",
+        "app/src/main/kotlin/com/tailormyresume/app/ui/AppViewModel.kt (one when branch only)"
+      ],
+      "scale": {"material": false, "note": "Pure functions over at most tens of requirements and keywords per job (O(requirements x keywords)); no I/O."}
+    },
+    {
+      "number": 270,
+      "title": "feat(domain): quick-answer facts, summary and skills in the fabrication guard, and one Accept changes decision",
+      "lane": "W2-G",
+      "status": "ready",
+      "tier": "sensitive",
+      "base": "#268's branch (stack on W2-E)",
+      "depends_on": [268],
+      "criteria": [
+        {"id": "270-c1", "text": "Given a quick answer YES or FEW with detail for requirement R, When the guard checks a bullet that cites ans-<R> and whose words, numbers and terms all come from R's text or the detail, Then it passes; When the bullet adds a term, number or scale claim found in neither, Then the guard reports UnsupportedTerm, UnsupportedNumber or UnsupportedScaleClaim and the original text (or no bullet) is used."},
+        {"id": "270-c2", "text": "Given a quick answer NOT_YET or SKIPPED, When tailoring runs, Then no USER_ANSWER fact exists and any bullet citing ans-<R> fails with MissingSource."},
+        {"id": "270-c3", "text": "Given the prototype answer detail 'presented the monthly variance report to the CFO' (names no employer), When tailoring proposes an answer-backed bullet under the Infosys entry, Then it is not attached to Infosys and the answer may support only the summary or the skills line (Changes count 3, R3); Given a detail that names 'Infosys' (or the entry title 'Business Analyst'), Then the bullet may attach to that entry (whole-word, case-insensitive)."},
+        {"id": "270-c4", "text": "Given a tailored summary, When the guard runs, Then every sentence must cite source ids of confirmed facts (profile or USER_ANSWER) and pass the same checks as a bullet; a sentence with no source or a violation falls back to the original summary, so no unsupported sentence reaches the result."},
+        {"id": "270-c5", "text": "Given a tailored skills line, When the guard runs, Then reordered skills come only from the confirmed profile, and added skills only from user-stated skills or answer-grounded keywords; any other added skill is removed or flagged with a violation."},
+        {"id": "270-c6", "text": "Given new suggestions, When they are created, Then each starts PENDING (I.2); When Undo is applied to a change, Then UpdateBulletDecisionUseCase sets it to REJECTED and the original text is used."},
+        {"id": "270-c7", "text": "Given an application with PENDING, ACCEPTED and REJECTED changes, When AcceptChangesUseCase runs, Then every PENDING becomes ACCEPTED, REJECTED stays REJECTED, and changesAcceptedAt is set from the injected Clock; running it again changes nothing else."},
+        {"id": "270-c8", "text": "Given an application whose changesAcceptedAt is null, When export is requested through the domain export check, Then it is refused; Given changesAcceptedAt is set but a change is PENDING again (for example after a re-tailor), Then it is refused; Given every change is decided and changesAcceptedAt is set, Then it is allowed."},
+        {"id": "270-c9", "text": "Given the pack list, When it is read, Then it holds exactly application_pack_5 (5 credits), application_pack_15 (15) and application_pack_40 (40), each with creditsExpire false."},
+        {"id": "270-c10", "text": "Given a successful tailoring for application A, When the credit spend is mapped, Then exactly one credit is spent (one ledger entry, kind TAILORING, amount -1, applicationId A); Given a failed or interrupted tailoring, Then no credit is spent."},
+        {"id": "270-c11", "text": "Given the I.1 and I.2 gate tests, When ./gradlew :core:domain:testDebugUnitTest --tests '*OfflineFabricationGuardTest' --tests '*TailorResumeUseCaseTest' --tests '*UpdateBulletDecisionUseCaseTest' and :feature:tailor:impl:testDebugUnitTest --tests '*TailorViewModelTest' run, Then all existing cases pass unchanged and the new USER_ANSWER, summary and skills cases pass."},
+        {"id": "270-c12", "text": "Given the branch head, When ./gradlew :core:domain:koverVerify runs, Then it passes (>= 80%)."},
+        {"id": "270-c13", "text": "Given the branch head, When tools/ci/verify-local.sh runs, Then it passes."}
+      ],
+      "non_goals": [
+        "Anything in PRD 6.1.2 'Not in the MVP'.",
+        "Per-bullet accept or reject toggles (D4 forbids them).",
+        "UI for Undo, Accept changes or export (W4-C1, W4-C2).",
+        "Backend B5b or B8 changes; core/network DTOs (W5-N1).",
+        "RemotePaymentGateway, OfflinePaymentGateway, MockPackCatalogue prices or Play products (W5-N2, W6-A, W5-PLAY).",
+        "Editing di/DomainModule.kt (owned by #269)."
+      ],
+      "gates": [
+        "./gradlew :core:domain:testDebugUnitTest --tests '*OfflineFabricationGuardTest' --tests '*TailorResumeUseCaseTest' --tests '*UpdateBulletDecisionUseCaseTest' -PwarningsAsErrors=true",
+        "./gradlew :core:domain:testDebugUnitTest :core:domain:koverVerify -PwarningsAsErrors=true",
+        "./gradlew :feature:tailor:impl:testDebugUnitTest --tests '*TailorViewModelTest' -PwarningsAsErrors=true",
+        "./gradlew :app:testDemoDebugUnitTest :app:testProdDebugUnitTest assembleDemoDebug assembleProdDebug -PwarningsAsErrors=true",
+        "./gradlew spotlessCheck",
+        "BASE_REF=<#268 branch> tools/ci/check-constitution.sh",
+        "tools/ci/verify-local.sh"
+      ],
+      "root_cause": null,
+      "callers": [
+        "FabricationGuard.check: TailorResumeUseCase.kt, offline/OfflineFabricationGuard.kt, app/src/testProd RemoteResumeTailorTest; tests OfflineFabricationGuardTest, TailorResumeUseCaseTest, OfflineResumeTailorTest, OfflineRobustnessTest, CreateApplication*Test, OfflineSampleDataControllerTest, SampleJobPreviewTest. Extend the signature only if every caller stays correct; an added overload is the smaller change.",
+        "TailorResumeUseCase is constructed explicitly in di/DomainModule.kt provideSampleDataController as TailorResumeUseCase(resumeTailor, fabricationGuard): keep this two-argument constructor so DomainModule (owned by #269) does not change; pass the answer as an invoke parameter.",
+        "UpdateBulletDecisionUseCase: feature/tailor/impl TailorViewModel.kt and TailorViewModelTest (I.2 gate) must keep compiling and passing.",
+        "PaymentGateway.unlock and CreditSpend: app/src/prod/.../billing/RemotePaymentGateway.kt (+ RemotePaymentGatewayTest), offline/OfflinePaymentGateway.kt, sample/OfflineSampleDataController.kt, core/testing PaymentGatewayContractTest; changing the interface ripples into prod billing (sensitive) and W6-A files, so keep the interface and add the per-tailoring spend mapping beside it.",
+        "ApplicationPack.APPLICATION_PACK_FIVE: offline/MockPackCatalogue.kt, sample/SampleDataSet.kt, many app/src/testProd billing tests and core/network contract JSON: keep the constant.",
+        "TailoredResume summary and skills: adding them touches core/model TailoredResume.kt, core/database json/TailoredResumeDtos.kt and core/data TailoredResumeMappers.kt (the #268 file set): new DTO fields need defaults so stored JSON from v2 still decodes (TmrJson ignoreUnknownKeys = true, encodeDefaults = true)."
+      ],
+      "constraints": [
+        "Constitution I.1: tailored text uses only confirmed facts, every bullet and summary sentence cites source ids, the guard checks each, a violation restores the original; gate tests OfflineFabricationGuardTest and TailorResumeUseCaseTest must survive and stay green.",
+        "Constitution I.2 and D4: every suggestion starts PENDING; one explicit Accept changes action; export only after it; gate tests UpdateBulletDecisionUseCaseTest and TailorViewModelTest must survive (deleting either needs a rule-text change, forbidden in this run).",
+        "D6 and PLAN 2.3 (S4): an answer never creates an employer claim; an answer-backed bullet sits under an entry only when the detail names that entry's organisation or title; otherwise summary or skills only.",
+        "C8 ids: the answer fact is ans-<requirementId>, its bullet ans-<requirementId>-b1; choices YES_REGULARLY, A_FEW_TIMES, NOT_YET, SKIPPED map to the #268 quickAnswer choice.",
+        "Fail closed, like the backend truth filters D21-D26: whole-token matching after normalisation, numbers kept whole (D23), no recombination of words from two different facts into one claim (D23), a missing or empty source set means the fixed or original text.",
+        "Security review (credits and packs): Reviewer B with a security mandate; the Builder writes in-harness (sensitive tier).",
+        "Credits never expire; one credit per successful tailoring; a failed or interrupted tailoring spends nothing (C4).",
+        "USER_ANSWER facts never go into the current backend facts payload before B5b (see 268-c9).",
+        "Do not edit di/DomainModule.kt or core/domain/src/test/.../Fakes.kt shared with #269 beyond compile needs; prefer new test files.",
+        "Kover >= 80% on core:domain; IV.2 fakes; IV.3 runTest; II.3 no !!; III.2 no ungrounded comments."
+      ],
+      "state": [
+        "room:job_applications",
+        "room:job_applications.tailoredresume_json",
+        "room:job_applications.changesacceptedat",
+        "room:credit_ledger"
+      ],
+      "files": [
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/FabricationGuard.kt",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/offline/OfflineFabricationGuard.kt",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/offline/EvidenceIndex.kt",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/offline/EvidenceSources.kt",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/TailorResumeUseCase.kt",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/UpdateBulletDecisionUseCase.kt",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/AcceptChangesUseCase.kt (new)",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/PaymentGateway.kt",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/ApplicationPack.kt",
+        "core/domain/src/main/kotlin/com/tailormyresume/core/domain/CreditSpend.kt",
+        "core/domain/src/test/kotlin/com/tailormyresume/core/domain/** (matching tests)",
+        "core/model/src/main/kotlin/com/tailormyresume/core/model/TailoredResume.kt, core/database/.../json/TailoredResumeDtos.kt, core/data/.../model/TailoredResumeMappers.kt (summary and skills only, stacked on #268)"
+      ],
+      "scale": {"material": false, "note": "The guard runs per bullet and per summary sentence over at most 200 bullets (ProfileLimits); unchanged complexity per check. One-line rationale."}
+    }
+  ]
+}

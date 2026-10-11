@@ -1,0 +1,67 @@
+{
+ "head_sha": "b461d8c5add90065f051713b9174259b28ed4af8",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "257-c1",
+   "status": "met",
+   "evidence": "Gate evidence is in the PR body (verify-local BUILD SUCCESSFUL); not re-run by this read-only review. No residual reference to a deleted symbol found by grep across app, core and sibling feature modules."
+  },
+  {
+   "id": "257-c2",
+   "status": "met",
+   "evidence": "git ls-files feature/tailor/impl/src/test/screenshots prints 0; all listed packages and files are deleted; exported/ExportedFileStore.kt is kept."
+  },
+  {
+   "id": "257-c3",
+   "status": "partial",
+   "evidence": "Kept main files and the seven named tests exist. But document/ReviewContinuationTest.kt and document/ReviewExportConsistencyTest.kt (not named in c3 and not in the issue's delete scope) were deleted though they exercise surviving buildTailorUiState and ResumeDocumentAssembler. See finding."
+  },
+  {
+   "id": "257-c4",
+   "status": "met",
+   "evidence": "TailorViewModelTest diff removes only onRegenerate_* (7 cases incl. the early recordsTheRegeneration case), uiState_marksOffline..., FixedTailor/NoViolationGuard helpers and now-unused imports. Surviving: uiState_startsLoading, onAccept, onKeepOriginal, onUndo, nextOpenChange, onEditByHand, report cases, scenario cases. core/domain untouched; UpdateBulletDecisionUseCaseTest, TailorResumeUseCaseTest, OfflineFabricationGuardTest exist and are unchanged (git diff core is empty). The fabrication guard was never asserted in TailorViewModelTest, so I.1 coverage is not weakened."
+  },
+  {
+   "id": "257-c5",
+   "status": "met",
+   "evidence": "TailorViewModel constructor has no RegenerateSectionUseCase or ConnectivityMonitor; regenerateFailures channel, onRegenerate and online combine input removed; grep ConnectivityMonitor/isOffline/regenerationsUsed in feature/tailor/impl/src is empty."
+  },
+  {
+   "id": "257-c6",
+   "status": "met",
+   "evidence": "TailorEntryProvider.kt has nine entries each using BasicText(key.javaClass.simpleName), signature tailorEntry(navigator: Navigator) kept, no material3 import; feature/tailor/api not in the diff."
+  },
+  {
+   "id": "257-c7",
+   "status": "met",
+   "evidence": "grep -rlE 'PrepQuestion|CoverLetter|Docx|RegenerateSection' feature/tailor/impl returns only navigation/TailorEntryProvider.kt."
+  },
+  {
+   "id": "257-c8",
+   "status": "met",
+   "evidence": "lint-baseline.xml diff is a single removed PluralsCandidate issue; no additions. No tools:ignore added."
+  },
+  {
+   "id": "257-c9",
+   "status": "met",
+   "evidence": "strings_*.xml for deleted features removed; no code references to removed resources found (strings.xml itself reviewed by Reviewer B)."
+  },
+  {
+   "id": "257-c10",
+   "status": "met",
+   "evidence": "PR body reports verify-local.sh green; no new comments in added lines (grep of added lines for // is empty)."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorViewModelTest.kt",
+   "line": 293,
+   "rule": "review-checklist 5 (pregate justifies every deleted test); issue 257 keeps document/** and TailorUiState* for later waves; 257-c3",
+   "trigger": "document/ReviewExportConsistencyTest.kt asserted that the entries built by buildTailorUiState (what the user reviews) equal the entries ResumeDocumentAssembler emits (what is exported), including a late USER_STATED fact; document/ReviewContinuationTest.kt asserted continuation merging in the same review-vs-export path. Both were deleted with the pregate reason 'review screen ... subject deleted', but their subjects (buildTailorUiState, ResumeDocumentAssembler, both kept) survive. After this PR a drift between the reviewed and exported resume (e.g. a dropped continuation or fact) passes the whole suite.",
+   "proof": "Restore both tests minus the isOffline and regenerationsUsed arguments of TailorInputs; they should pass unchanged otherwise.",
+   "title": "Deleted review-vs-export consistency and continuation tests cover surviving code"
+  }
+ ]
+}

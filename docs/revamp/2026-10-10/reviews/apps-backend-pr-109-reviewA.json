@@ -1,0 +1,66 @@
+{
+ "head_sha": "6fe4a9606962dbeab0dd48ab097b9ef92ad0e703",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "c1",
+   "status": "met",
+   "evidence": "facts.ts schema accepts summary, id uniqueness covers it, 1000 cap (Reviewer B owns those lines); test at summary-skills 'a summary id equal...' covers 400s."
+  },
+  {
+   "id": "c2",
+   "status": "met",
+   "evidence": "verifyBatch appends summary as last item of the same verify call; repair shares one call; PASSED after 2 calls, REPAIRED via second verify; tests 'first verify call' and 'repair call' exist. Could not run: TEST_DATABASE_URL unset."
+  },
+  {
+   "id": "c3",
+   "status": "partial",
+   "evidence": "Adversarial copy of summaryPasses: number in another token (Q4/2024 vs 4), absent number, uncited, unknown id, empty ids all return false. But a whitespace-only or punctuation-only summary passes the deterministic check and relies on the verifier; employer/tool without digits is verifier-only."
+  },
+  {
+   "id": "c4",
+   "status": "met",
+   "evidence": "resolveSkills keeps ordered only from profile.skills case-insensitively once, appends omitted in order, added only from userStatedSkills; null skills gives profile order and empty added."
+  },
+  {
+   "id": "c5",
+   "status": "met",
+   "evidence": "tailoringResultSchema uses summary nullish().default(null) and skills default empty, so old rows parse."
+  },
+  {
+   "id": "c6",
+   "status": "met",
+   "evidence": "Calls: generate, verify, optional repair plus second verify = max 4; repair runs only if a bullet or the summary failed; no extra call."
+  },
+  {
+   "id": "c7",
+   "status": "met",
+   "evidence": "Sonnet-written eval lines skipped (Reviewer B)."
+  },
+  {
+   "id": "c8",
+   "status": "met",
+   "evidence": "Docs skipped (Reviewer B). CI: Validation still in progress and pregate queued at review time."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+   "line": 199,
+   "rule": "c3 / Constitution I.1: a summary that is not verified must be null",
+   "trigger": "Model returns summary {proposedText:'   ', sourceIds:['b1']}: wordsIn gives no words, the number filter is empty, every() is true, so summaryPasses returns true (verified with a copy of the function); the text then rides to the verifier and, if it answers supported (no claim to refute), result.summary is a blank PASSED summary. Same for '---'.",
+   "proof": "Generate summary proposedText '   ' with a valid sourceId and verifier supported:true for all; expect result.summary null, actual {text:'   ', verification:'PASSED'}.",
+   "title": "Whitespace or punctuation-only summary passes the deterministic check"
+  },
+  {
+   "severity": "low",
+   "file": "src/apps/tailormyresume/tailoring-pipeline.ts",
+   "line": 199,
+   "rule": "c3 adversarial: employer or tool not in cited facts",
+   "trigger": "Summary 'Built at Globex with Kubernetes' citing b1 (no digits, Globex and Kubernetes absent) passes the deterministic check; only the model verifier stops it, so a lenient verifier returns it unverified-in-fact. Plan accepts this; consider a deterministic capitalised-token check against cited sources.",
+   "proof": "Verifier supported:true for an item with an uncited employer name; expect null.",
+   "title": "Employer or tool without digits is verified only by the model"
+  }
+ ]
+}

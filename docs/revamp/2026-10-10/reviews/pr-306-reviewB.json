@@ -1,0 +1,71 @@
+{
+ "head_sha": "6848343574cd65a16539942ac0057653faa01f0d",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "266-c1", "status": "met", "evidence": "TmrPaige draws all 11 poses from the spec table. everyPoseHasSpec now asserts 14 values for every pose (fixes A-L1). 11 hero_paige_* baselines inspected and look correct. Small fidelity drift is reported as a low finding."},
+  {"id": "266-c2", "status": "met", "evidence": "Under reduced, rememberPaigeTimeMs returns stillClock and starts no loop (reducedClockStaysZero). reduced*PixelsNeverChange renders the composable at 0/105/420/1000/2639 ms (fixes A-M1). Coder's residual gap: if graphicsLayer read Default motion under reduced, the offset would be 5*sin(phase) at t=0, which is 4.2/4.5/-3.8 dp for Job/Question/Paywall. Those baselines are recorded under Reduced, so verifyRoborazziDebug fails at 5/10000 px tolerance. No transform seam is needed in main code."},
+  {"id": "266-c3", "status": "met", "evidence": "translationYIs5dpAtQuarterPeriod. The time is read only inside graphicsLayer {} (TmrPaige.kt:163-168). No Modifier.offset."},
+  {"id": "266-c4", "status": "met", "evidence": "clearAndSetSemantics {} on the Canvas. paigeIsNotATalkBackStop finds no content description and no focusable node."},
+  {"id": "266-c5", "status": "met", "evidence": "headlineTwoLines checks 28 sp, 12 sp and <= 2 lines. hero_card_* baselines match the radius 32 / padding 22 spec. Truncation at font scale 2.0 is a separate finding."},
+  {"id": "266-c6", "status": "met", "evidence": "disabledTapRunsOnDisabledClickOnly, enabledTapRunsOnClick and disabledReportsButtonWithStateDescription. buttonFillsComeFromTokens samples the disabledFill pixel (fixes A-L2)."},
+  {"id": "266-c7", "status": "met", "evidence": "enabledColoursAndMinHeight checks 56 dp and ink. The lime fill is pixel-asserted. The input_button_primary font-200 baseline shows no clipping."},
+  {"id": "266-c8", "status": "met", "evidence": "Secondary, text and upload-card baselines exist. The upload card uses a dashed boundary-token border (D32) on uploadCard, cardLarge."},
+  {"id": "266-c9", "status": "met", "evidence": "choiceRowRolesAndSelectedState checks the RadioButton role, Selected and the click. Four input_choice_* baselines. 56 dp minimum."},
+  {"id": "266-c10", "status": "partial", "evidence": "The Switch role, ToggleableState and callback are asserted, and the knob position is static (reduced-safe). The touch target is 52x32 dp and the toggle has no accessible name (finding)."},
+  {"id": "266-c11", "status": "met", "evidence": "The label is the content description and the field is editable. Read-only removes SetText. Outline uses boundary (D32), amber uses amber. Five input_field_* baselines."},
+  {"id": "266-c12", "status": "partial", "evidence": "Strings are only in strings_input.xml with the core_designsystem_ prefix and contain no 'match' wording. New composables are only in component.hero/input and legacy is untouched. The PR body reports verify-local green. On head 6848343, Static checks, unit tests, Screenshot tests, Lint and Constitution policy are still IN_PROGRESS."}
+ ],
+ "findings": [
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/hero/TmrPaige.kt",
+   "line": 145,
+   "rule": "AGENTS.md Motion / testability of W4 screens: infinite loops must honour InfiniteAnimationPolicy",
+   "trigger": "The idle loop is `while (true) withFrameNanos {}`. Under Robolectric, ANIMATOR_DURATION_SCALE is 1, so TmrTheme provides Default motion. Any compose test that uses autoAdvance (the default), for example a W4 screen test that renders TmrTheme { TmrPaige(Home) }, then never idles: ComposeIdlingResource pumps frames while clock.hasAwaiters (ui-test 1.10 ComposeIdlingResource.android.kt:68-74). setContent/onNode then time out. The PR's own tests avoid this only by setting autoAdvance=false. Fix: use withInfiniteAnimationFrameNanos, which the test InfiniteAnimationPolicy cancels when autoAdvance is on.",
+   "title": "Paige frame loop never lets Compose tests idle",
+   "proof": "rule.setContent { TmrTheme { TmrPaige(TmrPaigePose.Home) } }; rule.onRoot().assertExists() with default autoAdvance times out on head and passes with withInfiniteAnimationFrameNanos."
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/input/TmrToggle.kt",
+   "line": 25,
+   "rule": "PRD 10.5 (48 dp minimum touch target, TalkBack labels); review ask: >= 48 dp targets and labels",
+   "trigger": "TmrToggle(checked=false, onCheckedChange={}) puts toggleable on a 52x32 dp box, so the touch target is 32 dp tall. The API takes no label, so TalkBack announces only 'Switch, off'. The prototype (Prototype.dc.html:835) makes the whole 52 px labelled row the button. A caller that wraps the toggle in a toggleable row gets two focus stops, because onCheckedChange is non-null. Fix: add a label and make the row toggleable, or make onCheckedChange nullable and apply minimumInteractiveComponentSize.",
+   "title": "Toggle target is 32 dp tall and has no accessible name",
+   "proof": "onNodeWithTag(\"t\").assertHeightIsAtLeast(48.dp) fails on head (32 dp)."
+  },
+  {
+   "severity": "medium",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/hero/TmrHeroCard.kt",
+   "line": 44,
+   "rule": "PRD 10.5 dynamic text size; review ask: no clipping at font scale 2.0",
+   "trigger": "At font scale 2.0, the 28 sp Space Mono headline is 56 sp, about 31.6 dp per glyph. On the 374 dp prototype device the text width is about 298 dp, so about 9 glyphs fit per line. 'Tell Paige about you' then wraps to 'Tell / Paige / about you' and maxLines=2 ellipsizes it to 'Tell Paige…'. Half the headline is lost. The plan's 'max 2 lines' fits only at 1.0. There is no hero_card font-200 baseline.",
+   "title": "Hero headline truncates at font scale 2.0",
+   "proof": "Render the hero_card at TmrTestDevices.prototypeLargeFont and assert the headline TextLayoutResult.hasVisualOverflow is false. It fails on head."
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/hero/TmrPaige.kt",
+   "line": 141,
+   "rule": "Plan scale contract: O(1) work per frame only where motion exists",
+   "trigger": "TmrPaige(Fail) or TmrPaige(Delete) under Default motion: the spec has no bobPhase and no wobble, so both transforms are always 0. The LaunchedEffect still writes the time state on every vsync, which re-runs the layer block and keeps the Choreographer awake for as long as the sad Paige is on screen.",
+   "title": "Frame loop runs for poses that never move"
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/input/TmrPrimaryButton.kt",
+   "line": 35,
+   "rule": "Fidelity: pill and rounded shapes (README Look)",
+   "trigger": "The Material3 ripple (LocalIndication) is bounded to the layout rectangle, not to the shape. Pressing TmrPrimaryButton, TmrSecondaryButton, TmrChoiceRow, TmrUploadCard or TmrToggle therefore paints square corners outside the pill or rounded background. The legacy Button.kt uses Surface(shape), which clips. Fix: add .clip(shape) before clickable/selectable/toggleable.",
+   "title": "Press ripple is not clipped to the pill or rounded shape"
+  },
+  {
+   "severity": "low",
+   "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/hero/TmrPaige.kt",
+   "line": 205,
+   "rule": "266-c1 fidelity to Paige.dc.html",
+   "trigger": "Paige.dc.html uses CSS content-box with no box-sizing reset in support.js, so bordered parts are larger than their width/height values. Arms are 22 + 5 = 27 px (Compose draws 22 dp). The fold is 32.5 px (Compose 30 dp). The happy mouth is mw + 5 by mh + 2.5 (Compose mw by mh). The sad mouth is 25 by 12.5 (Compose 20 by 10). The arms are about 20% smaller than the prototype.",
+   "title": "Bordered Paige parts are drawn with border-box sizes"
+  }
+ ]
+}

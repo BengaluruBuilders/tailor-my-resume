@@ -1,0 +1,193 @@
+diff --git a/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt b/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt
+index 788a9f74..8486c1d9 100644
+--- a/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt
++++ b/app/src/test/kotlin/com/tailormyresume/app/navigation/ShellHarness.kt
+@@ -3,8 +3,13 @@ package com.tailormyresume.app.navigation
+ import android.app.Application
+ import android.content.ComponentName
+ import androidx.activity.ComponentActivity
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.material3.Text
+ import androidx.compose.runtime.CompositionLocalProvider
+ import androidx.compose.runtime.remember
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
+ import androidx.compose.ui.platform.LocalDensity
+ import androidx.compose.ui.test.assertCountEquals
+ import androidx.compose.ui.test.hasContentDescription
+@@ -15,6 +20,7 @@ import androidx.compose.ui.test.performClick
+ import androidx.compose.ui.unit.Density
+ import androidx.navigation3.runtime.NavEntry
+ import androidx.navigation3.runtime.NavKey
++import androidx.navigation3.runtime.entryProvider
+ import androidx.test.core.app.ApplicationProvider
+ import com.tailormyresume.app.ui.TmrShell
+ import com.tailormyresume.core.designsystem.component.chrome.TmrTopBarLeading
+@@ -24,6 +30,20 @@ import com.tailormyresume.core.navigation.Navigator
+ import com.tailormyresume.core.navigation.rememberNavigationState
+ import org.robolectric.Shadows.shadowOf
+ 
++private val PLACEHOLDER_ENTRIES: (NavKey) -> NavEntry<NavKey> = entryProvider(
++    fallback = { key ->
++        NavEntry(key) {
++            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
++                Text(
++                    text = key::class.simpleName.orEmpty(),
++                    style = TmrTheme.typography.body,
++                    color = TmrTheme.colors.text,
++                )
++            }
++        }
++    },
++) {}
++
+ private val STEP_DESCRIPTIONS = listOf("Step 1 of 3, Profile", "Step 2 of 3, Job", "Step 3 of 3, Tailor")
+ 
+ internal class ShellHarness(private val rule: ComposeContentTestRule) {
+@@ -51,11 +71,11 @@ internal class ShellHarness(private val rule: ComposeContentTestRule) {
+                     val shellNavigator = remember(navigationState) { shellNavigator(navigationState) { hasHome } }
+                     state = navigationState
+                     navigator = shellNavigator
+-                    if (entries == null) {
+-                        TmrShell(navigationState, shellNavigator)
+-                    } else {
+-                        TmrShell(navigationState, shellNavigator, entryProvider = entries(shellNavigator))
+-                    }
++                    TmrShell(
++                        navigationState,
++                        shellNavigator,
++                        entryProvider = entries?.invoke(shellNavigator) ?: PLACEHOLDER_ENTRIES,
++                    )
+                 }
+             }
+         }
+diff --git a/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorViewModelTest.kt b/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorViewModelTest.kt
+index d3d05479..9da8f13e 100644
+--- a/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorViewModelTest.kt
++++ b/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorViewModelTest.kt
+@@ -1,6 +1,8 @@
+ package com.tailormyresume.feature.tailor.impl
+ 
+ import com.google.common.truth.Truth.assertThat
++import com.tailormyresume.core.domain.ExportCheck
++import com.tailormyresume.core.domain.ExportReadiness
+ import com.tailormyresume.core.domain.UpdateBulletDecisionUseCase
+ import com.tailormyresume.core.model.BulletDecision
+ import com.tailormyresume.core.model.DebugScenario
+@@ -292,41 +294,64 @@ class TailorViewModelTest {
+     }
+ 
+     @Test
+-    fun onAccept_marksTheBulletAcceptedAndCountsItAsReviewed() = runTest {
++    fun onUndoChange_marksTheBulletRejectedAndCountsItAsReviewed() = runTest {
+         val viewModel = viewModel()
+         collectUiState(viewModel)
+         sendData(listOf(reviewable, unchanged))
+ 
+-        viewModel.onAccept("r1")
++        viewModel.onUndoChange("r1")
+ 
+-        assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.ACCEPTED)
++        assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.ORIGINAL_KEPT)
+         assertThat(viewModel.success().reviewedCount).isEqualTo(1)
++    }
++
++    @Test
++    fun onAcceptChanges_acceptsEveryPendingBulletAndKeepsRejectedOnesRejected() = runTest {
++        val viewModel = viewModel()
++        collectUiState(viewModel)
++        sendData(listOf(reviewable, alreadyRejected, flagged, unchanged))
++
++        viewModel.onAcceptChanges()
++
++        assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.ACCEPTED)
++        assertThat(viewModel.bulletOf("f1").state).isEqualTo(BulletReviewState.ACCEPTED)
++        assertThat(viewModel.bulletOf("r2").state).isEqualTo(BulletReviewState.ORIGINAL_KEPT)
++        assertThat(viewModel.bulletOf("u1").state).isEqualTo(BulletReviewState.UNCHANGED)
+         assertThat(viewModel.success().isAllReviewed).isTrue()
+     }
+ 
+     @Test
+-    fun onKeepOriginal_marksTheBulletRejectedAndCountsItAsReviewed() = runTest {
++    fun onAcceptChanges_afterAnUndoLeavesTheUndoneBulletRejected() = runTest {
+         val viewModel = viewModel()
+         collectUiState(viewModel)
+-        sendData(listOf(reviewable, unchanged))
++        sendData(listOf(reviewable, flagged))
+ 
+-        viewModel.onKeepOriginal("r1")
++        viewModel.onUndoChange("r1")
++        viewModel.onAcceptChanges()
+ 
+         assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.ORIGINAL_KEPT)
+-        assertThat(viewModel.success().reviewedCount).isEqualTo(1)
++        assertThat(viewModel.bulletOf("f1").state).isEqualTo(BulletReviewState.ACCEPTED)
+     }
+ 
+     @Test
+-    fun onUndo_putsTheBulletBackToReview() = runTest {
++    fun exportStaysRefusedUntilChangesAreAcceptedThenOpensEvenAfterAnUndo() = runTest {
+         val viewModel = viewModel()
+         collectUiState(viewModel)
+-        sendData(listOf(reviewable))
+-        viewModel.onAccept("r1")
++        sendData(listOf(reviewable, flagged))
++        suspend fun check() = ExportReadiness.check(checkNotNull(applicationRepository.observeApplication("app-1").first()))
++
++        assertThat(check()).isEqualTo(ExportCheck.NOT_ACCEPTED)
++
++        viewModel.onUndoChange("r1")
++        assertThat(check()).isEqualTo(ExportCheck.NOT_ACCEPTED)
+ 
+-        viewModel.onUndo("r1")
++        viewModel.onAcceptChanges()
++        assertThat(check()).isEqualTo(ExportCheck.ALLOWED)
++        assertThat(checkNotNull(applicationRepository.observeApplication("app-1").first()).changesAcceptedAt)
++            .isEqualTo(testClock.instant)
+ 
+-        assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.TO_REVIEW)
+-        assertThat(viewModel.success().reviewedCount).isEqualTo(0)
++        viewModel.onUndoChange("f1")
++        assertThat(check()).isEqualTo(ExportCheck.ALLOWED)
+     }
+ 
+     @Test
+diff --git a/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/navigation/TailorEntryKeysTest.kt b/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/navigation/TailorEntryKeysTest.kt
+index 50e225f8..b7c84fcf 100644
+--- a/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/navigation/TailorEntryKeysTest.kt
++++ b/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/navigation/TailorEntryKeysTest.kt
+@@ -26,6 +26,7 @@ import com.tailormyresume.feature.tailor.api.navigation.TailoredNavKey
+ import com.tailormyresume.feature.tailor.api.navigation.TailoringNavKey
+ import com.tailormyresume.feature.tailor.impl.navigation.tailorEntry
+ import org.junit.Assert.assertEquals
++import org.junit.Assert.assertNotNull
+ import org.junit.Assert.assertTrue
+ import org.junit.Rule
+ import org.junit.Test
+@@ -47,14 +48,23 @@ class TailorEntryKeysTest {
+         }
+ 
+     private val keys: List<NavKey> =
++        listOf(
++            EditResumeNavKey("app-1"),
++            ExportedNavKey("app-1"),
++        )
++
++    private val routedKeys: List<NavKey> =
+         listOf(
+             TailoringNavKey("app-1"),
+             TailorFailedNavKey("app-1"),
+             TailoredNavKey("app-1"),
+-            EditResumeNavKey("app-1"),
+-            ExportedNavKey("app-1"),
+         )
+ 
++    @Test
++    fun routedKeysResolveToEntries() {
++        routedKeys.forEach { key -> assertNotNull("${key::class.simpleName} entry", provider(key)) }
++    }
++
+     @Test
+     fun everyKeyResolvesAndShowsNameInTextColour() {
+         var current: NavKey by mutableStateOf(keys.first())

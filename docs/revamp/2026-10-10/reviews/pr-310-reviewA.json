@@ -1,0 +1,16 @@
+{
+ "head_sha": "4a5202ded0517efd2403a88adcf5a80e0d08b352",
+ "verdict": "findings",
+ "criteria": [
+  {"id": "267-c1", "status": "met", "evidence": "19 content_* baselines exist; opened progress_40, progress_font200, resume_paper, filecard: match prototype intent (check/spinner/pending rows, wrapped labels at 2.0 with no ellipsis, paper with lime/amber highlights and 92% badge, file card with 48dp Share/Open pills)."},
+  {"id": "267-c6", "status": "partial", "evidence": "TmrProgressRowStyleTest covers colours (pending textDisabled per D32) and tmrSpinnerAngle static when reduced; TmrProgressRowsTest covers semantics and 2.0 bounds. No composable-level test that the spinner does not animate under reduced motion."},
+  {"id": "267-c7", "status": "met", "evidence": "TmrPaperColourTest and TmrResumePaperTest assert highlight colours, single merged summary 'Keywords matched: 92%', no 'match' word, legend entries."},
+  {"id": "267-c9", "status": "met", "evidence": "TmrFileCardTest asserts both buttons >=48dp, Role.Button, descriptions, callbacks fire once each."},
+  {"id": "267-c4", "status": "met", "evidence": "Reviewed files use only Keywords matched wording; progress row sample labels in tests are test data only."}
+ ],
+ "findings": [
+  {"severity": "medium", "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/content/TmrContentComposeTests.kt", "line": 203, "rule": "267-c6 / Motion: reduced means nothing moves", "trigger": "ProgressSpinner ignores LocalTmrMotion.reduced and starts rememberInfiniteTransition: reducedMotionStillRenders still passes because it only asserts text exists; only the pure tmrSpinnerAngle helper is tested, which the composable bypasses on the reduced path.", "title": "Reduced-motion test cannot fail if the spinner animates", "proof": "Under Reduced, setContent with mainClock.autoAdvance=false, advance 450ms, and assert the spinner node rotation/bitmap is unchanged (or that no infinite transition is registered)."},
+  {"severity": "low", "file": "core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/content/TmrContentComposeTests.kt", "line": 203, "rule": "D40 no ellipsis, no mid-word break", "trigger": "assertStaysInsideContainer checks only left/right bounds at 337dp/2.0; a label ellipsized or broken mid-word still passes. Text has no maxLines in the changed files, so current code is fine, but the guard is weak.", "title": "Font-scale test does not assert D40 wrapping"},
+  {"severity": "low", "file": "core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/component/content/TmrResumePaper.kt", "line": 113, "rule": "D40 accessibility", "trigger": "Paper text uses fixedSp at 7 to 8.5dp so it does not scale with font 2.0 and is below normal legibility; semantics expose only the summary so a screen reader user gets no resume text.", "title": "Paper body text is fixed tiny size and hidden from semantics"}
+ ]
+}

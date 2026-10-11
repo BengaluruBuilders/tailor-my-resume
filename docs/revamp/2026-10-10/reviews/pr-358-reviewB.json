@@ -1,0 +1,75 @@
+{
+  "head_sha": "baf760f77e7776b9827cc98ac9c0f01a2b1473c1",
+  "verdict": "findings",
+  "criteria": [
+    {
+      "id": "330-partial-only-when-stated-in-cited-evidence",
+      "status": "met",
+      "evidence": "PresentKeywords.kt: PARTIAL -> keywordsStatedIn over the resolved cited evidence only (empty when nothing resolves); GAP -> none. HonestCoverageTest.partialKeywordCountsAsPresentOnlyWhenTheCitedEvidenceStatesIt, partialKeywordWithNoCitedEvidenceIsMissing and partialKeywordMatchesWholeTokensOnly (go-to-market / R&D do not state Go / R) all fail on revert. Lead replacement ScreenForKeywordsTest.partialWithoutCitedEvidenceIsMissingSoFourHaveFourMissingCountEight encodes #330 (Python moves to missing, count stays 8) and is not a weakening."
+    },
+    {
+      "id": "330-screen-and-number-share-one-rule",
+      "status": "met",
+      "evidence": "ScreenForKeywords and KeywordCoverageCalculator.now/upTo both call presentKeywords(evidenceTextsOf(profile)); JobResultViewModel passes the live profile to both. HonestCoverageTest.coverageNumberUsesTheSamePartialRuleAsTheKeywordScreen pins parity. TailoringViewModel still calls ScreenForKeywords without a profile, but it only shows have+missing together (count, stickers), so no present/missing claim is made there. MET with no resolvable evidence trusts the status: see finding 3."
+    },
+    {
+      "id": "352-final-measured-on-the-same-sources",
+      "status": "partial",
+      "evidence": "resumeText reads entry titles, effective bullets (same match rule as BulletReconciler: entryId, sourceId, trimmed originalText, ACCEPTED, no violations), accepted-or-profile skills and accepted summary, the analyzer's sources. acceptingEveryChangeReachesTheUpToPromiseOnEachSampleJob is not tautological: final is measured on text and fails on revert (old final read bullets only). Its answered variant exercises an offline path the app cannot reach (the offline analyzer never sets GapAnalysis.question, no in-app QuickAnswer offline), so it proves parity only. upTo is not a strict upper bound (final can exceed it when keywordsStatedIn sees a keyword the matcher did not cite); that under-promises and is not an I.1 over-claim. The stored final, however, over-claims after Undo (finding 2)."
+    },
+    {
+      "id": "352-no-changes-never-claims-accepted",
+      "status": "partial",
+      "evidence": "TailoredViewModel.accepted requires changeCount > 0 and the footer shows 'No changes to review' when changes are empty; toChangeCards and TailoredResume.changeCount use the same predicates, so the UI and ExportReadiness agree on 'no changes'. TailoredViewModelNoChangesTest and NoChangesTest fail on revert. But 'no changes' is not the previewed resume: exporting the stored PENDING resume drops a PENDING no-op summary and ignores REORDER moves that the preview applies (finding 1). AcceptChangesUseCase still accepts an empty run; harmless now that no UI path calls it for zero changes."
+    },
+    {
+      "id": "offline-answer-keywords-I1",
+      "status": "met",
+      "evidence": "OfflineResumeTailor.skillsWithAnswer adds only AnswerFacts.keywords(answer, job): NOT_YET/SKIPPED add nothing; blank detail adds only named-skill keywords stated in the requirement text (D38, D41, D42); otherwise only keywords stated in the detail (D39). TailorResumeUseCase.verifiedSkills allows the same set, the change is a PENDING skills card with Undo. 'Yes, regularly' with no detail cannot add a non-skill or unstated keyword. The skills card is labelled 'Your resume' (ChangeCardMapper.toSkillsCard hard-codes it), contrary to BACKEND_CONTRACT 4.4 answer rule 4, but offline has no reachable quick answer and the prod mislabel predates this diff, so not filed here."
+    },
+    {
+      "id": "edited-tests-justified",
+      "status": "met",
+      "evidence": "KeywordCoverageCalculatorTest: every lowered now/upTo removes exactly Python (r3 PARTIAL, evidenceIds empty), i.e. encodes #330; final values unchanged. JobViewModelTest, QuickQuestionViewModelTest, JobResultViewModelTest change only the profile argument / constructor. No assertion weakened beyond the #330 correction."
+    },
+    {
+      "id": "hygiene",
+      "status": "met",
+      "evidence": "No !!, no comments, no new SharingStarted other than the existing WhileSubscribed(5_000) (II.2) in added lines."
+    },
+    {
+      "id": "ci",
+      "status": "partial",
+      "evidence": "At baf760f7: Core/Feature/App unit tests, Lint, Static checks, Constitution policy, delivery-gates-pregate success; Assemble APKs and Screenshot tests still in progress when reviewed (pull_request event, not a PR-edit run)."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/ExportReadiness.kt",
+      "line": 13,
+      "rule": "I.2 / data integrity; #352 'no changes' must mean the resume the user previewed",
+      "trigger": "Zero-change run exported without Accept, so ExportResumeUseCase assembles the stored PENDING resume while TailoredViewModel previews resume.withPendingAccepted(). (a) Prod: backend summary rejected by the guard (TailorResumeUseCase.verifiedSummary sets text = original = profile.summary, PENDING) and no bullet/skills change -> changeCount 0 -> export ALLOWED -> ResumeDocumentAssembler.summaryFor returns \"\" for PENDING -> the PDF has no summary although the profile has one and the preview shows it. (b) Offline: OfflineResumeTailor emits REORDER bullets with unchanged text; preview applies the move (ACCEPTED in BulletReconciler), the exported PDF keeps the original order. Before this PR export required Accept, which turned both into ACCEPTED.",
+      "title": "No-changes export is not the previewed resume: PENDING summary is dropped and reorders are lost",
+      "proof": "Domain/feature test: profile.summary = \"S\"; TailoredResume(listOf(unchanged bullet), summary = TailoredText(\"S\", \"S\")); assert ExportReadiness.check(app) == ALLOWED and assembler.assemble(profile, resume).summary == assembler.assemble(profile, resume.withPendingAccepted()).summary -> fails (\"\" vs \"S\"). Fix options: in the no-change state export the same resume the preview uses, or let a PENDING summary whose text equals original render the original, and count REORDER moves as a change."
+    },
+    {
+      "severity": "medium",
+      "file": "feature/tailor/impl/src/main/kotlin/com/tailormyresume/feature/tailor/impl/tailoring/TailoringRunner.kt",
+      "line": 61,
+      "rule": "I.1 / I.3 truth of the keyword-coverage number (D5); PR known limit 'final not recomputed after Undo'",
+      "trigger": "Stored keywordCoverage.final is now computed on tailored.withPendingAccepted() and nothing recomputes it (UpdateBulletDecisionUseCase, AcceptChangesUseCase, hand edits and ExportResumeUseCase never touch keywordCoverage). Tailor -> a rewrite adds 'Python' -> user taps Undo on it -> Accept changes -> Export. ApplicationsMapping.keywordPercent (final ?: upTo) shows the all-accepted percent on the Applications row and on the Application detail exported-file card ('PDF . NN% keywords'), higher than what the exported PDF states. Before this PR the stored final was computed on PENDING (original text) and could only under-claim.",
+      "title": "Stored final over-claims the exported resume after an Undo",
+      "proof": "ExportResumeUseCase test: store a run whose only change states a keyword, REJECT it, accept, export; assert application.keywordCoverage.final == KeywordCoverageCalculator.compute(gap.matches, answer, exportedResume, profile).final -> fails. Fix: recompute final from the exported resume in ExportResumeUseCase (it already has profile, gap and resume), or on every decision write."
+    },
+    {
+      "severity": "low",
+      "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/coverage/PresentKeywords.kt",
+      "line": 23,
+      "rule": "I.1 (#330 rule: present only when stated in cited evidence)",
+      "trigger": "MET falls back to every requirement keyword whenever none of its evidenceIds resolve. At analysis time both matchers only return MET with resolvable evidence (OfflineGapMatcher cites all supporting sources; RemoteJobAnalysisSource downgrades MET without known fact ids to GAP), so the fallback fires only on stale evidence: analyse a job where MET 'python' cites only bullet b1, then delete b1 (or its entry) in Profile and reopen the job result. JobResultViewModel recomputes with the live profile: 'Python' stays under 'In your resume' and in now/upTo, while editing b1's text to drop Python would correctly move it to missing; final (measured on text) excludes it, so final < now again (the F4 symptom).",
+      "title": "MET with no resolvable cited evidence still counts every keyword as present",
+      "proof": "HonestCoverageTest-style: match(MET, \"python\", evidenceIds = listOf(\"gone\")) with a non-null profile lacking that id; assert ScreenForKeywords(matches, profile).have is empty -> fails (contains Python). Fix: when profile != null and evidenceIds are non-empty but none resolve, return emptyList(); keep the trust fallback only for profile == null."
+    }
+  ]
+}

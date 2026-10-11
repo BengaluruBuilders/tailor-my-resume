@@ -1,0 +1,77 @@
+{
+ "head_sha": "9be8722466e65ddba77fdbfb9d9aae481197a21c",
+ "verdict": "findings",
+ "criteria": [
+  {
+   "id": "269-c1",
+   "status": "met",
+   "evidence": "KeywordCoverageCalculator is named coverage, never match/fit/ATS. Traced prototype JD by hand: 8 distinct display-lowercased keywords, now 5/8=63, upTo 6/8=75, final 63 / 75 with stakeholder bullet. Test prototypeJdAnsweredYesPlusDetailAssertsLiteralPercents asserts the literals and matches the PR body. percent is half-up integer math."
+  },
+  {
+   "id": "269-c2",
+   "status": "met",
+   "evidence": "keywordOf lowercases displayName so case variants collapse; percent returns 0 for total 0. Tests repeatedKeywordsDifferingInCaseCountOnce and noKeywordsGivesZeroPercents."
+  },
+  {
+   "id": "269-c3",
+   "status": "partial",
+   "evidence": "Only YES_REGULARLY and A_FEW_TIMES count; blank detail confirms only isNamedSkillKeyword keywords (D38), tested by blankDetailAnswerWithoutNamedSkillConfirmsNothing and ...ConfirmsNamedSkillKeywords. Non-blank detail still lets requirement.text alone confirm keywords (see finding). Requirement ids and numbers never reach the count."
+  },
+  {
+   "id": "269-c4",
+   "status": "met",
+   "evidence": "final reads ACCEPTED proposedText and originalText otherwise; tests finalCountsAcceptedTextOnly, rejectedChangeContributesOriginalText, pendingChangeContributesOriginalText each assert 25."
+  },
+  {
+   "id": "269-c5",
+   "status": "met",
+   "evidence": "ScreenForKeywords partitions MET/PARTIAL vs rest, distinct by lowercase display name, missing excludes have. ScreenForKeywordsTest covers the prototype 5/3/8."
+  },
+  {
+   "id": "269-c6",
+   "status": "met",
+   "evidence": "ProfileCompleteness = 100 - 4 (blank LinkedIn) - 6 per gap, floored at 0; test asserts 90/96/100, 40 gaps give 0, blank-space LinkedIn counts as absent."
+  },
+  {
+   "id": "269-c7",
+   "status": "met",
+   "evidence": "RequiredGaps: EXPERIENCE with non-blank start and blank end. Any non-blank end (Present/Current included) is not a gap; D24 server maps unsupported Present to blank end so it is a gap. Tests cover fresh/returning fixtures, non-experience, closed, undated, whitespace end."
+  },
+  {
+   "id": "269-c8",
+   "status": "met",
+   "evidence": "ObserveStartDestinationUseCase: no account -> SignIn; onboardingComplete or reviewedAt -> Applications; else Upload. AppViewModel maps Upload to FirstRun. ObserveStartDestinationUploadTest covers the five cases and would fail if the order changed."
+  },
+  {
+   "id": "269-c9",
+   "status": "met",
+   "evidence": "Format skipped as Builder-written (Reviewer B). Implementation reads as Name_Company_Role with hyphen words, .pdf, 100 char cap; the prototype README and Prototype.dc.html are not in the checkout, so I could not verify FMTS or the one-page rule here. The one-page rule is not touched by this PR."
+  },
+  {
+   "id": "269-c10",
+   "status": "met",
+   "evidence": "Covered by Builder-written ExportFileNameTest (Reviewer B)."
+  },
+  {
+   "id": "269-c11",
+   "status": "partial",
+   "evidence": "Not verified: delivery-gates-pregate was still IN_PROGRESS at review and no koverVerify result is attached. Test compilation depends on the lead-only patch noted in the PR body."
+  },
+  {
+   "id": "269-c12",
+   "status": "partial",
+   "evidence": "verify-local.sh result not available to me; CI check not complete at review time."
+  }
+ ],
+ "findings": [
+  {
+   "severity": "low",
+   "file": "core/domain/src/main/kotlin/com/tailormyresume/core/domain/coverage/KeywordCoverageCalculator.kt",
+   "line": 64,
+   "rule": "D38 / Constitution I.1: an answer must not turn requirement words into a confirmed keyword",
+   "trigger": "Gap requirement r5 'Python and SQL' (EXPERIENCE type), answer A_FEW_TIMES with detail 'n/a' (non-blank, names nothing). stated(requirement, requirement.text + newline + detail) finds python and sql in requirement.text itself, so upTo counts both although the user supplied no evidence. Only a fully blank detail is guarded.",
+   "proof": "KeywordCoverageCalculatorTest: matches [GAP requirement 'Python and SQL' keywords python, sql], QuickAnswer(id,'YES_REGULARLY','n/a') -> expect upTo == now, currently upTo is 100",
+   "title": "Non-blank vague detail confirms every keyword in the requirement text"
+  }
+ ]
+}

@@ -1,0 +1,299 @@
+diff --git a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrA11ySemanticsTest.kt b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrA11ySemanticsTest.kt
+index 2015a5bf..8a1eb526 100644
+--- a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrA11ySemanticsTest.kt
++++ b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrA11ySemanticsTest.kt
+@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.width
+ import androidx.compose.runtime.CompositionLocalProvider
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.platform.LocalDensity
+-import androidx.compose.ui.semantics.LiveRegionMode
+-import androidx.compose.ui.semantics.ProgressBarRangeInfo
+ import androidx.compose.ui.semantics.Role
+ import androidx.compose.ui.semantics.SemanticsActions
+ import androidx.compose.ui.semantics.SemanticsProperties
+@@ -15,7 +13,6 @@ import androidx.compose.ui.semantics.getOrNull
+ import androidx.compose.ui.test.SemanticsMatcher
+ import androidx.compose.ui.test.SemanticsNodeInteraction
+ import androidx.compose.ui.test.assert
+-import androidx.compose.ui.test.hasTestTag
+ import androidx.compose.ui.test.junit4.createAndroidComposeRule
+ import androidx.compose.ui.test.onNodeWithText
+ import androidx.compose.ui.text.TextLayoutResult
+@@ -38,7 +35,7 @@ class TmrA11ySemanticsTest {
+     @Test
+     fun innerHeaderTitleIsHeading() {
+         rule.setContent {
+-            TmrPreviewTheme(darkTheme = false) {
++            TmrPreviewTheme {
+                 TmrInnerHeader(title = "Fit for Kestrel Labs")
+             }
+         }
+@@ -50,7 +47,7 @@ class TmrA11ySemanticsTest {
+     @Test
+     fun innerHeaderLongTitleWrapsAtLargeFontScale() {
+         rule.setContent {
+-            TmrPreviewTheme(darkTheme = false) {
++            TmrPreviewTheme {
+                 CompositionLocalProvider(LocalDensity provides Density(1f, 2f)) {
+                     Box(Modifier.width(320.dp)) {
+                         TmrInnerHeader(
+@@ -70,54 +67,10 @@ class TmrA11ySemanticsTest {
+         assertFalse(layout.hasVisualOverflow)
+     }
+ 
+-    @Test
+-    fun confirmDialogPanelTitleIsHeadingWithPaneTitle() {
+-        rule.setContent {
+-            TmrPreviewTheme(darkTheme = false) {
+-                TmrConfirmPanel(
+-                    title = "Delete your account?",
+-                    message = null,
+-                    confirmLabel = "Delete",
+-                    cancelLabel = "Keep",
+-                    onConfirm = {},
+-                    onCancel = {},
+-                    destructive = true,
+-                )
+-            }
+-        }
+-        rule
+-            .onNodeWithText("Delete your account?")
+-            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Heading, Unit))
+-        rule
+-            .onNode(
+-                SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Delete your account?"),
+-                useUnmergedTree = true,
+-            ).assertExists()
+-    }
+-
+-    @Test
+-    fun loadingWheelIsIndeterminateProgressWithLiveRegion() {
+-        rule.setContent {
+-            TmrPreviewTheme(darkTheme = false) {
+-                TmrLoadingWheel(contentDesc = "Loading")
+-            }
+-        }
+-        val wheel = rule.onNode(hasTestTag("loadingWheel"), useUnmergedTree = true)
+-        wheel.assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo.Indeterminate))
+-        wheel.assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+-        val description =
+-            wheel
+-                .fetchSemanticsNode()
+-                .config
+-                .getOrNull(SemanticsProperties.ContentDescription)
+-                ?.joinToString(separator = " ")
+-        assertTrue(description != null && description.contains("Loading"))
+-    }
+-
+     @Test
+     fun singleSelectChipIsRadioButton() {
+         rule.setContent {
+-            TmrPreviewTheme(darkTheme = false) {
++            TmrPreviewTheme {
+                 TmrFilterChip(label = "Skills", selected = true, onClick = {}, singleSelect = true)
+             }
+         }
+@@ -129,7 +82,7 @@ class TmrA11ySemanticsTest {
+     @Test
+     fun multiSelectChipStaysCheckbox() {
+         rule.setContent {
+-            TmrPreviewTheme(darkTheme = false) {
++            TmrPreviewTheme {
+                 TmrFilterChip(label = "Skills", selected = true, onClick = {})
+             }
+         }
+@@ -141,7 +94,7 @@ class TmrA11ySemanticsTest {
+     @Test
+     fun longChipLabelWraps() {
+         rule.setContent {
+-            TmrPreviewTheme(darkTheme = false) {
++            TmrPreviewTheme {
+                 CompositionLocalProvider(LocalDensity provides Density(1f, 2f)) {
+                     Box(Modifier.width(160.dp)) {
+                         TmrFilterChip(label = "Quantified achievements and metrics", selected = false, onClick = {})
+diff --git a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrBoundaryContrastTest.kt b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrBoundaryContrastTest.kt
+index c85e6374..fb0412a3 100644
+--- a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrBoundaryContrastTest.kt
++++ b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrBoundaryContrastTest.kt
+@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.graphics.luminance
+ import com.tailormyresume.core.designsystem.theme.TmrColors
+ import com.tailormyresume.core.designsystem.theme.TmrDarkColors
+-import com.tailormyresume.core.designsystem.theme.TmrLightColors
+ import org.junit.Assert.assertEquals
+ import org.junit.Assert.assertNotEquals
+ import org.junit.Assert.assertTrue
+@@ -13,7 +12,7 @@ import org.junit.Test
+ class TmrBoundaryContrastTest {
+     @Test
+     fun boundaryTokenIsThreeToOneOnSurfaceAndCard() {
+-        listOf("light" to TmrLightColors, "dark" to TmrDarkColors).forEach { (mode, colors) ->
++        listOf("dark" to TmrDarkColors).forEach { (mode, colors) ->
+             surfaces(colors).forEach { (name, color) ->
+                 val ratio = contrast(colors.boundary, color)
+                 assertTrue("$mode boundary on $name contrast was $ratio", ratio >= 3.0f)
+@@ -23,9 +22,7 @@ class TmrBoundaryContrastTest {
+ 
+     @Test
+     fun boundaryTokenDiffersFromHairlineToken() {
+-        assertNotEquals(TmrLightColors.boundary, TmrLightColors.outlineVariant)
+         assertNotEquals(TmrDarkColors.boundary, TmrDarkColors.outlineVariant)
+-        assertEquals(Color(0xFFD5D8D2), TmrLightColors.outlineVariant)
+         assertEquals(Color(0xFF3A3D3B), TmrDarkColors.outlineVariant)
+     }
+ 
+diff --git a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrDisabledButtonTest.kt b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrDisabledButtonTest.kt
+index dc686a30..33b89bf4 100644
+--- a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrDisabledButtonTest.kt
++++ b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrDisabledButtonTest.kt
+@@ -10,9 +10,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
+ import androidx.compose.ui.test.onNodeWithText
+ import androidx.compose.ui.text.TextLayoutResult
+ import androidx.test.ext.junit.runners.AndroidJUnit4
+-import com.tailormyresume.core.designsystem.theme.TmrLightColors
++import com.tailormyresume.core.designsystem.theme.TmrDarkColors
+ import org.junit.Assert.assertEquals
+-import org.junit.Assert.assertNotEquals
+ import org.junit.Assert.assertTrue
+ import org.junit.Rule
+ import org.junit.Test
+@@ -28,7 +27,7 @@ class TmrDisabledButtonTest {
+     @Test
+     fun disabledTextButtonLabelIsDimNotPrimaryNorPlaceholder() {
+         rule.setContent {
+-            TmrPreviewTheme(darkTheme = false) {
++            TmrPreviewTheme {
+                 Column {
+                     TmrTextButton(label = "Text on", onClick = {}, enabled = true)
+                     TmrTextButton(label = "Text off", onClick = {}, enabled = false)
+@@ -37,16 +36,15 @@ class TmrDisabledButtonTest {
+         }
+         val enabled = labelColor("Text on")
+         val disabled = labelColor("Text off")
+-        assertEquals(TmrLightColors.primary, enabled)
+-        assertEquals(TmrLightColors.disabledContent, disabled)
+-        assertNotEquals(TmrLightColors.onSurfaceVariant, disabled)
+-        assertTrue(contrast(disabled, TmrLightColors.card) >= 4.5f)
++        assertEquals(TmrDarkColors.primary, enabled)
++        assertEquals(TmrDarkColors.disabledContent, disabled)
++        assertTrue(contrast(disabled, TmrDarkColors.card) >= 4.5f)
+     }
+ 
+     @Test
+     fun disabledOutlineButtonLabelDiffersFromEnabledAndKeepsPlaceholderContrast() {
+         rule.setContent {
+-            TmrPreviewTheme(darkTheme = false) {
++            TmrPreviewTheme {
+                 Column {
+                     TmrOutlineButton(label = "Outline on", onClick = {}, enabled = true)
+                     TmrOutlineButton(label = "Outline off", onClick = {}, enabled = false)
+@@ -55,9 +53,9 @@ class TmrDisabledButtonTest {
+         }
+         val enabled = labelColor("Outline on")
+         val disabled = labelColor("Outline off")
+-        assertEquals(TmrLightColors.onSurface, enabled)
+-        assertEquals(TmrLightColors.onSurfaceVariant, disabled)
+-        assertTrue(contrast(disabled, TmrLightColors.primaryContainer) >= 4.5f)
++        assertEquals(TmrDarkColors.onSurface, enabled)
++        assertEquals(TmrDarkColors.onSurfaceVariant, disabled)
++        assertTrue(contrast(disabled, TmrDarkColors.primaryContainer) >= 4.5f)
+     }
+ 
+     private fun labelColor(text: String): Color {
+diff --git a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrPaletteContrastTest.kt b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrPaletteContrastTest.kt
+index 5dcbdb75..cef78798 100644
+--- a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrPaletteContrastTest.kt
++++ b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrPaletteContrastTest.kt
+@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.graphics.luminance
+ import com.tailormyresume.core.designsystem.theme.TmrColors
+ import com.tailormyresume.core.designsystem.theme.TmrDarkColors
+-import com.tailormyresume.core.designsystem.theme.TmrLightColors
+ import org.junit.Assert.assertEquals
+ import org.junit.Assert.assertFalse
+ import org.junit.Assert.assertTrue
+@@ -13,13 +12,6 @@ import org.junit.Test
+ class TmrPaletteContrastTest {
+     @Test
+     fun appSurfacePaletteMatchesTheClaudeDesignCanvas() {
+-        with(TmrLightColors) {
+-            assertEquals(Color(0xFFFFFFFF), background)
+-            assertEquals(Color(0xFFF4F6F1), card)
+-            assertEquals(Color(0xFFFFFFFF), header)
+-            assertEquals(Color(0xFFAEFF00), brand)
+-            assertEquals(Color(0xFF000000), onBrand)
+-        }
+         with(TmrDarkColors) {
+             assertEquals(Color(0xFF000000), background)
+             assertEquals(Color(0xFF161817), card)
+@@ -31,7 +23,7 @@ class TmrPaletteContrastTest {
+ 
+     @Test
+     fun textAndActionPairsMeetNormalTextContrast() {
+-        listOf("light" to TmrLightColors, "dark" to TmrDarkColors).forEach { (mode, colors) ->
++        listOf("dark" to TmrDarkColors).forEach { (mode, colors) ->
+             pairs(colors).forEach { (name, foreground, background) ->
+                 val ratio = contrast(foreground, background)
+                 assertTrue("$mode $name contrast was $ratio", ratio >= 4.5f)
+@@ -41,8 +33,6 @@ class TmrPaletteContrastTest {
+ 
+     @Test
+     fun statusBarIconPolarityFollowsTheTopSurface() {
+-        assertTrue(tmrDarkStatusBarIcons(lightTop = true, colors = TmrLightColors))
+-        assertTrue(tmrDarkStatusBarIcons(lightTop = false, colors = TmrLightColors))
+         assertFalse(tmrDarkStatusBarIcons(lightTop = true, colors = TmrDarkColors))
+         assertFalse(tmrDarkStatusBarIcons(lightTop = false, colors = TmrDarkColors))
+     }
+diff --git a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrStatusBarIconsTest.kt b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrStatusBarIconsTest.kt
+index 95c9fed8..a64198f2 100644
+--- a/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrStatusBarIconsTest.kt
++++ b/core/designsystem/src/test/kotlin/com/tailormyresume/core/designsystem/component/TmrStatusBarIconsTest.kt
+@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
+ import androidx.core.view.WindowCompat
+ import androidx.test.ext.junit.runners.AndroidJUnit4
+ import org.junit.Assert.assertFalse
+-import org.junit.Assert.assertTrue
+ import org.junit.Rule
+ import org.junit.Test
+ import org.junit.runner.RunWith
+@@ -24,8 +23,8 @@ class TmrStatusBarIconsTest {
+     @get:Rule
+     val rule = createAndroidComposeRule<ComponentActivity>()
+ 
+-    private fun darkIconsAfter(darkTheme: Boolean, screen: @Composable () -> Unit): Boolean {
+-        rule.setContent { TmrPreviewTheme(darkTheme = darkTheme, content = screen) }
++    private fun darkIconsAfter(screen: @Composable () -> Unit): Boolean {
++        rule.setContent { TmrPreviewTheme(content = screen) }
+         rule.waitForIdle()
+         val window = rule.activity.window
+         return WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars
+@@ -36,28 +35,8 @@ class TmrStatusBarIconsTest {
+         Box(Modifier.fillMaxWidth().statusBarsPadding().height(48.dp))
+     }
+ 
+-    @Test
+-    fun headerlessWhiteTopInLightThemeUsesDarkIcons() {
+-        assertTrue(darkIconsAfter(darkTheme = false) { TmrScreen { } })
+-    }
+-
+-    @Test
+-    fun whiteInnerHeaderInLightThemeUsesDarkIcons() {
+-        assertTrue(darkIconsAfter(darkTheme = false) { TmrScreen(header = { TmrInnerHeader(title = "T") }) { } })
+-    }
+-
+-    @Test
+-    fun lightThemeHeaderTopUsesDarkIcons() {
+-        assertTrue(darkIconsAfter(darkTheme = false) { TmrScreen(lightTop = false) { } })
+-    }
+-
+-    @Test
+-    fun whiteHeaderWithLightTopTrueUsesDarkIcons() {
+-        assertTrue(darkIconsAfter(darkTheme = false) { TmrScreen(lightTop = true, header = { WhiteBar() }) { } })
+-    }
+-
+     @Test
+     fun darkThemeUsesLightIcons() {
+-        assertFalse(darkIconsAfter(darkTheme = true) { TmrScreen(lightTop = true, header = { WhiteBar() }) { } })
++        assertFalse(darkIconsAfter { TmrScreen(lightTop = true, header = { WhiteBar() }) { } })
+     }
+ }

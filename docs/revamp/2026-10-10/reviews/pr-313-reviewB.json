@@ -1,0 +1,52 @@
+{
+  "head_sha": "4c75b82eeae55b1aed2bf7f13517d12e0861d6a3",
+  "verdict": "findings",
+  "criteria": [
+    {"id": "271-c1", "status": "met", "evidence": "27 @Serializable keys across the six api modules (onboarding 7, analysis 4, tailor 5, applications 2, profile 6 + ProfileListSection, settings 3, CreditsNavKey moved, PaywallNavKey(returnToApplicationId)). git grep finds ImportResume/Analysis/Tailor/DeleteAccount NavKey, openInOwnTab, returnToTopLevel and TOP_LEVEL_NAV_ITEMS only in the negative tests; DebugScenarioTarget is remapped. NavKeyCatalogTest covers it."},
+    {"id": "271-c2", "status": "met", "evidence": "Every *EntryProvider registers every key of its module with NavKeyPlaceholder (TmrTheme.typography.body, colors.text). The six *EntryKeysTest resolve every key and assert the TextLayoutResult colour == TmrTheme.colors.text. They are stricter than the five deleted tests, which only checked one or two keys for displayed text."},
+    {"id": "271-c3", "status": "partial", "evidence": "ShellWalkTest::walkAssertsChromeOnEveryScreen asserts the T-row chrome on all 10 screens plus Reading. But it pushes Upload on top of SignIn, where the prototype signIn() does root('upload'), so Upload is asserted with Back. That stack never happens in the real flow (finding 2)."},
+    {"id": "271-c4", "status": "met", "evidence": "chromeFor checked row by row against the prototype T object (Prototype.dc.html l.1171-1184) for all 27 keys: steps 1/2/3; noBack on reading and tailoring; close on exported and paywall; titles Resume/Application/Profile/Experience/Settings; Save on editResume/editRole/editContact/listEdit; Done on skills; no bar on signin/home/profile. ScreenChromeTest pins all 27."},
+    {"id": "271-c5", "status": "met", "evidence": "backWhenNotFirst(entriesBelow) for Upload and Job, matching T `back: !noBack && !close && (back || stack.length>0)`. Tested by ScreenChromeTest::uploadAndJobHideBackOnEmptyStackAndShowItOtherwise."},
+    {"id": "271-c6", "status": "met", "evidence": "Navigator.goBack pops, else roots backFallback. shellNavigator/backFallback picks Applications if hasHome, else Upload; null on SignIn or when the target is the current class, so system back leaves the app. The fallback cannot loop because the targets are fixed by a constant hasHome. BackTargetViewModel combines observeApplications().isNotEmpty() with profile.reviewedAt and is collected in MainActivity, so WhileSubscribed is live. Covered by BackFallbackTest, BackTargetViewModelTest, NavigatorBackTest and ShellWalkTest::systemBackMatchesTopBarBack. The PR body names NavigatorBackTest::emptyStackGoesToApplicationsWhen*, which do not exist; the equivalents are in BackFallbackTest and BackTargetViewModelTest."},
+    {"id": "271-c7", "status": "met", "evidence": "root() clears the stack and adds the target. It is used by the tabs, Exported Close and navigateToSignIn. NavigatorRootTest, TabBarVisibilityTest::tabSwitchUsesRootAndMarksTheCurrentTab and NavigatorSeamTest cover it. The #272 seam is intact: AppRootState still switches TmrFirstRunRoot/TmrMainRoot, and each has its own saved stack. Stopping a reset mid-setup depends on #272-c4 (start destination applied only at launch or account change, D43). The shell itself does not reset the stack."},
+    {"id": "271-c8", "status": "met", "evidence": "tabsVisible = isTopLevelDestination() (Applications, Profile). TmrTabBar selection comes from the key. TabBarVisibilityTest roots each of the 27 keys."},
+    {"id": "271-c9", "status": "met", "evidence": "Navigator.newApp() (analysis api) pushes JobNavKey(). NewApplicationTest covers it on both tabs."},
+    {"id": "271-c10", "status": "met", "evidence": "onLeading: Close on ExportedNavKey calls root(Applications), otherwise goBack. Covered by ShellWalkTest::exportedCloseLeavesEmptyStackAtApplications and ::paywallCloseGoesBack. System back on Exported still pops to Tailored (no T rule for system back on close screens)."},
+    {"id": "271-c11", "status": "met", "evidence": "LocalTmrToast is a staticCompositionLocalOf over the unchanged TmrToastState, so #307 replace-on-show and timing are untouched. TmrSheetHostState plus one TmrSheetHost and one TmrToastHost sit above NavDisplay. TmrToastControllerTest and ShellHostsTest cover them. The sheet is not cleared on navigation (finding 3)."},
+    {"id": "271-c12", "status": "met", "evidence": "TmrDock.kt, TmrDockDefaults and TmrDockDefaultsTest are deleted. No source reference remains (NoDockReferencesTest). ARCHITECTURE.md section 2 (line 40) still names TmrDock, which the PR records as a follow-up. MVP_PLAN history rows are historical."},
+    {"id": "271-c13", "status": "met", "evidence": "rememberTmrNavTransitions and TmrVisibility(rise) are used, with no tween, spring or duration in app code. The ReducedMotionShellTest frame loop (max 10 frames until the node exists) does not weaken it: screensMoveWhenMotionIsNotReduced still proves that movement is detectable."},
+    {"id": "271-c14", "status": "met", "evidence": "rememberNavBackStack holds @Serializable keys. NavigationStateRestoreTest asserts that the stack and the current key survive recreation, and that a rooted stack survives. The old dropRestoredStrangers check was removed on purpose; only the debug preview passed a different startKey."},
+    {"id": "271-c15", "status": "partial", "evidence": "20 baselines are recorded. I opened tabsApplications, tabsProfile, step1, editResume and appDetail at 2.0/337dp, and step3 at 1x. Nothing is ellipsized or broken mid-word. The step bar wraps to two rows, and the top-bar titles fit. At 2.0, PROFILE renders larger than APPLICATIONS because WholeWordAutoSize sizes each label on its own (D40/D47). That is acceptable under D40 and not caused by this PR. However, the overflow assertion was relaxed in the impl commit (finding 1)."},
+    {"id": "271-c16", "status": "met", "evidence": "ARCHITECTURE.md hunks are all in section 6 (lines 227-340): the 27-key table with modules and the back/root/close/tab rules. Checked by ArchitectureDocNavKeysTest."},
+    {"id": "271-c17", "status": "met", "evidence": "The PR reports verify-local passing. At head 4c75b82e, CI ran the Gradle jobs (not skipped despite the stacked base): Constitution policy, Static checks, Core/Feature/App unit tests, Screenshot tests and Lint passed, and Assemble APKs was still in progress. No comments, no tools:ignore and no lint-baseline change in the diff. NEW_DEPENDENCY is justified: roborazzi plugin and testImplementation(core:screenshot, roborazzi, roborazzi-compose) in :app, test classpath only, needed for c15; dependencyGuard covers only release classpaths."}
+  ],
+  "findings": [
+    {
+      "severity": "medium",
+      "file": "app/src/test/kotlin/com/tailormyresume/app/navigation/ShellChromeScreenshotTest.kt",
+      "line": 97,
+      "rule": "271-c15 / D40 (labels never clipped) and process rule 'no weakened tests'; the PR body states 'No assertion was loosened'",
+      "trigger": "The red commit asserted !layout.hasVisualOverflow (width OR height). The impl commit replaced it with didOverflowHeight plus layout.size <= node.size. TextLayoutResult.size is coerced to the incoming constraints, so the size check cannot see horizontal overflow. A softWrap=false chrome label wider than its slot (for example a top-bar action or tab label at font 2.0 / 337dp) is clipped and the test still passes. Horizontal overflow is the D40 failure mode #307 hit.",
+      "title": "Screenshot no-truncation check dropped the width-overflow assertion in the impl commit",
+      "proof": "Add assertFalse(\"$text overflows its width\", layout.didOverflowWidth) back to assertNoTruncatedText and run :app:testDemoDebugUnitTest --tests '*ShellChromeScreenshotTest*'. Either it passes (restore the assertion) or it names the text that is clipped at 2.0/337dp (a real D40 defect that the relaxation hid)."
+    },
+    {
+      "severity": "low",
+      "file": "app/src/test/kotlin/com/tailormyresume/app/navigation/ShellWalkTest.kt",
+      "line": 55,
+      "rule": "271-c3 (issue AC1: walk asserts the T-table chrome on each screen of the real flow)",
+      "trigger": "The walk does shell.show(SignIn) and then navigate(Upload), so Upload has an entry below and is asserted with Back. The prototype signIn() does root('upload'), so in the real flow Upload has an empty stack and T gives no back. The walk therefore approves a stack that the prototype never produces. It would stay green if sign-in completion left SignIn under Upload, letting back return to Sign in.",
+      "title": "Walk test pushes Upload over SignIn instead of rooting it, so it asserts Back on Upload",
+      "proof": "Change the walk to shell.root(UploadNavKey()) after SignIn (matching the prototype's root on sign-in) and assert rowOf(Upload) with leading = None via assertChrome(row, leading = None)."
+    },
+    {
+      "severity": "low",
+      "file": "app/src/main/kotlin/com/tailormyresume/app/ui/TmrApp.kt",
+      "line": 132,
+      "rule": "Prototype logic go/swap/back/root (Prototype.dc.html l.1039-1042), which all set sheet: null; 271-c11 one shared sheet host",
+      "trigger": "A W4 screen shows a sheet through LocalTmrSheetHost (status sheet on appDetail, delete-account sheet on settings) and the stack then changes without dismiss(): a sheet action that calls root(SignIn), a tab or Close tap, or a fallback goBack. TmrSheetHostState.current survives, so the old sheet, with content captured from the previous entry, stays drawn over the new screen. The shell is the one owner of the host and the stack, so it should clear the sheet once there rather than in every W4 caller.",
+      "title": "Shell sheet host is not dismissed when the current NavKey changes",
+      "proof": "ShellHostsTest: show a sheet from the EditResume entry, call shell.navigator.goBack(), and assert onAllNodesWithTag(SHEET_TAG).assertCountEquals(0). It fails at head. LaunchedEffect(key) { sheetHost.dismiss() } in TmrShell fixes it."
+    }
+  ]
+}

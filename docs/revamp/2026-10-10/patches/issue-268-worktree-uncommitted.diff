@@ -1,0 +1,326 @@
+diff --git a/app/src/testProd/kotlin/com/tailormyresume/app/billing/RemotePaymentGatewayTest.kt b/app/src/testProd/kotlin/com/tailormyresume/app/billing/RemotePaymentGatewayTest.kt
+index 685cdac0..90372e55 100644
+--- a/app/src/testProd/kotlin/com/tailormyresume/app/billing/RemotePaymentGatewayTest.kt
++++ b/app/src/testProd/kotlin/com/tailormyresume/app/billing/RemotePaymentGatewayTest.kt
+@@ -64,15 +64,6 @@ class RemotePaymentGatewayTest {
+         assertThat(entitlement.totalCredits).isEqualTo(0)
+     }
+ 
+-    @Test
+-    fun allowanceFallsBackToTheContractDefaultsWhenTheWalletCannotBeFetched() = runTest {
+-        server.shutdown()
+-        val allowance = WalletUsageAllowance(source)
+-
+-        assertThat(allowance.observeAnalysesLeft().first()).isEqualTo(3)
+-        assertThat(allowance.observeFreeTailoringsLeft().first()).isEqualTo(1)
+-    }
+-
+     @Test
+     fun entitlementComesFromTheWallet() = runTest {
+         reply(200, """{"wallet":${walletJson(free = 0, purchased = 4, unlocked = "\"a1\"")}}""")
+@@ -210,26 +201,6 @@ class RemotePaymentGatewayTest {
+         assertThat(server.takeRequest().body.readUtf8()).contains("\"purchaseToken\":\"t1\"")
+     }
+ 
+-    @Test
+-    fun usageAllowanceReadsTheWallet() = runTest {
+-        reply(200, """{"wallet":${walletJson(analyses = 2, tailorings = 0)}}""")
+-        reply(200, """{"wallet":${walletJson(analyses = 2, tailorings = 0)}}""")
+-        val allowance = WalletUsageAllowance(source)
+-
+-        assertThat(allowance.consumeFreeTailoring()).isFalse()
+-        assertThat(allowance.observeAnalysesLeft().first()).isEqualTo(2)
+-    }
+-
+-    @Test
+-    fun consumingAnAllowanceNeverDecrementsLocally() = runTest {
+-        repeat(3) { reply(200, "{\"wallet\":${walletJson(analyses = 2, tailorings = 1)}}") }
+-        val allowance = WalletUsageAllowance(source)
+-
+-        assertThat(allowance.consumeAnalysis()).isTrue()
+-        assertThat(allowance.consumeFreeTailoring()).isTrue()
+-        assertThat(allowance.consumeFreeTailoring()).isTrue()
+-    }
+-
+     private class ScriptedPurchases : Dispatcher() {
+         class Step(val response: MockResponse, val gate: CountDownLatch? = null)
+ 
+diff --git a/core/data/src/test/kotlin/com/tailormyresume/core/data/model/TestModels.kt b/core/data/src/test/kotlin/com/tailormyresume/core/data/model/TestModels.kt
+index 0cc18a38..f13820c3 100644
+--- a/core/data/src/test/kotlin/com/tailormyresume/core/data/model/TestModels.kt
++++ b/core/data/src/test/kotlin/com/tailormyresume/core/data/model/TestModels.kt
+@@ -144,7 +144,6 @@ val testApplication = JobApplication(
+     id = "app-1",
+     job = testJob,
+     status = ApplicationStatus.APPLIED,
+-    notes = "Referred by a friend",
+     gapAnalysis = testGapAnalysis,
+     tailoredResume = testTailoredResume,
+     createdAt = Instant.fromEpochMilliseconds(1_700_000_000_000),
+diff --git a/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/FakeJobApplicationDao.kt b/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/FakeJobApplicationDao.kt
+index 4610bd60..7298da21 100644
+--- a/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/FakeJobApplicationDao.kt
++++ b/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/FakeJobApplicationDao.kt
+@@ -31,10 +31,6 @@ class FakeJobApplicationDao : JobApplicationDao {
+         modify(id) { it.copy(status = status, updatedAt = updatedAt) }
+     }
+ 
+-    override suspend fun updateNotes(id: String, notes: String, updatedAt: Instant) {
+-        modify(id) { it.copy(notes = notes, updatedAt = updatedAt) }
+-    }
+-
+     override suspend fun deleteApplication(id: String) {
+         entities.update { it - id }
+     }
+diff --git a/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/OfflineFirstApplicationRepositoryTest.kt b/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/OfflineFirstApplicationRepositoryTest.kt
+index 64512dcf..249c63b2 100644
+--- a/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/OfflineFirstApplicationRepositoryTest.kt
++++ b/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/OfflineFirstApplicationRepositoryTest.kt
+@@ -101,18 +101,6 @@ class OfflineFirstApplicationRepositoryTest {
+         assertThat(saved?.createdAt).isEqualTo(testApplication.createdAt)
+     }
+ 
+-    @Test
+-    fun updateNotesChangesNotesAndStampsUpdatedAt() = runTest {
+-        val repository = newRepository()
+-        repository.upsertApplication(testApplication)
+-
+-        repository.updateNotes(testApplication.id, "Follow up on Monday")
+-
+-        val saved = repository.observeApplication(testApplication.id).first()
+-        assertThat(saved?.notes).isEqualTo("Follow up on Monday")
+-        assertThat(saved?.updatedAt).isEqualTo(now)
+-    }
+-
+     @Test
+     fun deletedApplicationIsGone() = runTest {
+         val repository = newRepository()
+diff --git a/core/database/src/androidTest/kotlin/com/tailormyresume/core/database/dao/JobApplicationDaoTest.kt b/core/database/src/androidTest/kotlin/com/tailormyresume/core/database/dao/JobApplicationDaoTest.kt
+index 7768dfcf..a151fdf8 100644
+--- a/core/database/src/androidTest/kotlin/com/tailormyresume/core/database/dao/JobApplicationDaoTest.kt
++++ b/core/database/src/androidTest/kotlin/com/tailormyresume/core/database/dao/JobApplicationDaoTest.kt
+@@ -88,17 +88,6 @@ internal class JobApplicationDaoTest : DatabaseTest() {
+         assertEquals(Instant.fromEpochMilliseconds(99), saved?.updatedAt)
+     }
+ 
+-    @Test
+-    fun updateNotes_changesNotesAndUpdatedAt() = runTest {
+-        jobApplicationDao.upsertApplication(testApplication("a1", updatedAtMillis = 1))
+-
+-        jobApplicationDao.updateNotes("a1", "Call on Friday", Instant.fromEpochMilliseconds(77))
+-
+-        val saved = jobApplicationDao.observeApplication("a1").first()
+-        assertEquals("Call on Friday", saved?.notes)
+-        assertEquals(Instant.fromEpochMilliseconds(77), saved?.updatedAt)
+-    }
+-
+     @Test
+     fun deleteApplication_removesOnlyThatRow() = runTest {
+         jobApplicationDao.upsertApplication(testApplication("a1", updatedAtMillis = 1))
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/CreateApplicationUseCaseTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/CreateApplicationUseCaseTest.kt
+index f5606546..c67b3112 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/CreateApplicationUseCaseTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/CreateApplicationUseCaseTest.kt
+@@ -43,7 +43,6 @@ class CreateApplicationUseCaseTest {
+         assertThat(id).isEqualTo("app-1")
+         val saved = checkNotNull(repository.current(id))
+         assertThat(saved.status).isEqualTo(ApplicationStatus.SAVED)
+-        assertThat(saved.notes).isEmpty()
+         assertThat(saved.job).isEqualTo(analysis.job)
+         assertThat(saved.gapAnalysis).isEqualTo(analysis.gap)
+     }
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/Fakes.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/Fakes.kt
+index 1a250a2f..20309072 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/Fakes.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/Fakes.kt
+@@ -29,10 +29,6 @@ class FakeApplicationRepository : ApplicationRepository {
+         applications.value[id]?.let { upsertApplication(it.copy(status = status)) }
+     }
+ 
+-    override suspend fun updateNotes(id: String, notes: String) {
+-        applications.value[id]?.let { upsertApplication(it.copy(notes = notes)) }
+-    }
+-
+     override suspend fun deleteApplication(id: String) {
+         applications.value = applications.value - id
+     }
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/UpdateBulletDecisionUseCaseTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/UpdateBulletDecisionUseCaseTest.kt
+index 487fc73a..555d9945 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/UpdateBulletDecisionUseCaseTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/UpdateBulletDecisionUseCaseTest.kt
+@@ -35,7 +35,6 @@ class UpdateBulletDecisionUseCaseTest {
+         id = "app-1",
+         job = JobDescription("t", "c", "raw", emptyList()),
+         status = ApplicationStatus.SAVED,
+-        notes = "",
+         gapAnalysis = GapAnalysis(emptyList(), KeywordCoverage(0, 0)),
+         tailoredResume = resume,
+         createdAt = created,
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/AccountDataArchiveWriterTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/AccountDataArchiveWriterTest.kt
+index 6d609885..8153709c 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/AccountDataArchiveWriterTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/AccountDataArchiveWriterTest.kt
+@@ -53,7 +53,6 @@ class AccountDataArchiveWriterTest {
+             rawText = "Senior Engineer | Bengaluru | Full-time\nResponsibilities:\nShip Kotlin apps",
+             requirements = sampleApplication.job.requirements + terraformRequirement,
+         ),
+-        notes = "Call the recruiter on Tuesday\nAsk about the 2nd round",
+         tailoredResume = TailoredResume(
+             entryIds = listOf("entry-1", "entry-2"),
+             bullets = listOf(
+@@ -125,7 +124,6 @@ class AccountDataArchiveWriterTest {
+         assertThat(entry.getValue("role").jsonPrimitive.content).isEqualTo(application.job.title)
+         assertThat(entry.getValue("company").jsonPrimitive.content).isEqualTo(application.job.company)
+         assertThat(entry.getValue("status").jsonPrimitive.content).isEqualTo("SAVED")
+-        assertThat(entry.getValue("notes").jsonPrimitive.content).isEqualTo("Call the recruiter on Tuesday\nAsk about the 2nd round")
+         assertThat(entry.getValue("createdAt").jsonPrimitive.content).isEqualTo(application.createdAt.toString())
+         assertThat(entry.getValue("updatedAt").jsonPrimitive.content).isEqualTo(application.updatedAt.toString())
+ 
+@@ -226,14 +224,13 @@ class AccountDataArchiveWriterTest {
+     }
+ 
+     @Test
+-    fun applicationsTextShowsJdAnalysisResumeAndNotes() {
++    fun applicationsTextShowsJdAnalysisAndResume() {
+         val text = archive().getValue("applications.txt")
+ 
+         assertThat(text).contains("jobDescription: Senior Engineer | Bengaluru | Full-time")
+         assertThat(text).contains("requirement NICE_TO_HAVE TOOL: Terraform pipelines on AWS")
+         assertThat(text).contains("MET")
+         assertThat(text).contains("Built a Kotlin Android app")
+-        assertThat(text).contains("Call the recruiter on Tuesday")
+     }
+ 
+     @Test
+@@ -245,7 +242,6 @@ class AccountDataArchiveWriterTest {
+         assertThat(atColumnZero.single()).startsWith(application.id)
+         assertThat(lines).contains("  jobDescription: Senior Engineer | Bengaluru | Full-time")
+         assertThat(lines).contains("    Responsibilities:")
+-        assertThat(lines).contains("    Ask about the 2nd round")
+         assertThat(lines).contains("    Cut cost 30% (was: Moved services)")
+     }
+ 
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCasePreviewTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCasePreviewTest.kt
+index 66ae0462..15803d64 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCasePreviewTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCasePreviewTest.kt
+@@ -90,8 +90,6 @@ private class EmptyApplicationRepository(
+ 
+     override suspend fun updateStatus(id: String, status: ApplicationStatus) = Unit
+ 
+-    override suspend fun updateNotes(id: String, notes: String) = Unit
+-
+     override suspend fun deleteApplication(id: String) = Unit
+ }
+ 
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCaseTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCaseTest.kt
+index cf71ca4c..7cec1f36 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCaseTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/account/DeleteAccountUseCaseTest.kt
+@@ -394,8 +394,6 @@ private class RecordingApplicationRepository(
+ 
+     override suspend fun updateStatus(id: String, status: ApplicationStatus) = Unit
+ 
+-    override suspend fun updateNotes(id: String, notes: String) = Unit
+-
+     override suspend fun deleteApplication(id: String) {
+         if (id in failingIds()) throw IllegalStateException("delete failed for $id")
+         calls += "delete:$id"
+diff --git a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/sample/OfflineSampleDataControllerTest.kt b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/sample/OfflineSampleDataControllerTest.kt
+index b53d924d..8559b846 100644
+--- a/core/domain/src/test/kotlin/com/tailormyresume/core/domain/sample/OfflineSampleDataControllerTest.kt
++++ b/core/domain/src/test/kotlin/com/tailormyresume/core/domain/sample/OfflineSampleDataControllerTest.kt
+@@ -62,7 +62,7 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
+             Triple("Associate Analyst", "Northwind GCC", ApplicationStatus.APPLIED),
+             Triple("Data Analyst Intern", "Paisa Ledger", ApplicationStatus.INTERVIEW),
+             Triple("Graduate Engineer Trainee", "Sahyadri Motors", ApplicationStatus.SAVED),
+-            Triple("Business Analyst", "Meridian GCC", ApplicationStatus.NO_RESPONSE),
++            Triple("Business Analyst", "Meridian GCC", ApplicationStatus.APPLIED),
+         )
+     }
+ 
+@@ -108,7 +108,7 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
+             ApplicationStatus.SAVED,
+             ApplicationStatus.INTERVIEW,
+             ApplicationStatus.APPLIED,
+-            ApplicationStatus.NO_RESPONSE,
++            ApplicationStatus.APPLIED,
+         ).inOrder()
+     }
+ 
+diff --git a/core/testing/src/test/kotlin/com/tailormyresume/core/testing/fakes/TestFakesContractTest.kt b/core/testing/src/test/kotlin/com/tailormyresume/core/testing/fakes/TestFakesContractTest.kt
+index d583e602..1a0bbc86 100644
+--- a/core/testing/src/test/kotlin/com/tailormyresume/core/testing/fakes/TestFakesContractTest.kt
++++ b/core/testing/src/test/kotlin/com/tailormyresume/core/testing/fakes/TestFakesContractTest.kt
+@@ -6,7 +6,6 @@ import com.tailormyresume.core.data.repository.ContentReportRepository
+ import com.tailormyresume.core.data.repository.ExportHistoryRepository
+ import com.tailormyresume.core.data.repository.SessionRepository
+ import com.tailormyresume.core.data.repository.TailoringReviewStateRepository
+-import com.tailormyresume.core.data.repository.UsageAllowance
+ import com.tailormyresume.core.domain.PaymentGateway
+ import com.tailormyresume.core.domain.SignInGateway
+ import com.tailormyresume.core.domain.account.AccountDataExporter
+@@ -26,10 +25,7 @@ import com.tailormyresume.core.testing.repository.TestContentReportRepository
+ import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
+ import com.tailormyresume.core.testing.repository.TestSessionRepository
+ import com.tailormyresume.core.testing.repository.TestTailoringReviewStateRepository
+-import com.tailormyresume.core.testing.repository.TestUsageAllowance
+-import com.tailormyresume.core.testing.repository.UsageAllowanceContractTest
+ import com.tailormyresume.core.testing.sample.TestSampleDataController
+-import com.tailormyresume.core.testing.util.TestClock
+ import kotlinx.coroutines.CoroutineScope
+ import kotlinx.coroutines.test.runTest
+ import org.junit.Test
+@@ -55,10 +51,6 @@ class TestTailoringReviewStateRepositoryContractTest : TailoringReviewStateRepos
+         TestTailoringReviewStateRepository()
+ }
+ 
+-class TestUsageAllowanceContractTest : UsageAllowanceContractTest() {
+-    override fun createUsageAllowance(clock: TestClock): UsageAllowance = TestUsageAllowance(clock)
+-}
+-
+ class TestAccountDataExporterContractTest : AccountDataExporterContractTest() {
+     override fun createExporter(): AccountDataExporter = TestAccountDataExporter()
+ }
+diff --git a/core/testing/src/test/kotlin/com/tailormyresume/core/testing/repository/TestApplicationRepositoryTest.kt b/core/testing/src/test/kotlin/com/tailormyresume/core/testing/repository/TestApplicationRepositoryTest.kt
+index 1eb2a7d6..a7014177 100644
+--- a/core/testing/src/test/kotlin/com/tailormyresume/core/testing/repository/TestApplicationRepositoryTest.kt
++++ b/core/testing/src/test/kotlin/com/tailormyresume/core/testing/repository/TestApplicationRepositoryTest.kt
+@@ -26,7 +26,7 @@ class TestApplicationRepositoryTest {
+ 
+     @Test
+     fun upsertApplication_replacesApplicationWithSameId() = runTest {
+-        val edited = sampleApplication.copy(notes = "Follow up on Monday")
++        val edited = sampleApplication.copy(location = "Pune")
+         repository.upsertApplication(sampleApplication)
+ 
+         repository.upsertApplication(edited)
+@@ -61,16 +61,6 @@ class TestApplicationRepositoryTest {
+         assertThat(updated).isEqualTo(sampleApplication.copy(status = ApplicationStatus.INTERVIEW))
+     }
+ 
+-    @Test
+-    fun updateNotes_changesOnlyNotes() = runTest {
+-        repository.upsertApplication(sampleApplication)
+-
+-        repository.updateNotes(sampleApplication.id, "Referred by a friend")
+-
+-        val updated = repository.observeApplication(sampleApplication.id).first()
+-        assertThat(updated).isEqualTo(sampleApplication.copy(notes = "Referred by a friend"))
+-    }
+-
+     @Test
+     fun deleteApplication_removesApplication() = runTest {
+         repository.upsertApplication(sampleApplication)
+diff --git a/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorTestData.kt b/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorTestData.kt
+index 5813c7c1..3167f092 100644
+--- a/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorTestData.kt
++++ b/feature/tailor/impl/src/test/kotlin/com/tailormyresume/feature/tailor/impl/TailorTestData.kt
+@@ -78,7 +78,6 @@ internal fun testApplication(
+     id = "app-1",
+     job = JobDescription(title = "Backend Engineer", company = "Acme", rawText = "", requirements = emptyList()),
+     status = ApplicationStatus.SAVED,
+-    notes = "",
+     gapAnalysis = gapAnalysis,
+     tailoredResume = TailoredResume(bullets, entryIds),
+     createdAt = Instant.fromEpochSeconds(0),
