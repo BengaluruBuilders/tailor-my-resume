@@ -1,5 +1,6 @@
 package com.tailormyresume.feature.tailor.impl.document
 
+import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.ProfileEntry
@@ -18,7 +19,7 @@ internal class ResumeDocumentAssembler @Inject constructor(
             name = profile.fullName.trim(),
             contactLine = listOf(profile.email, profile.phone).cleaned().joinToString(CONTACT_SEPARATOR),
             headline = profile.headline.trim(),
-            skills = profile.skills.cleaned().distinctBy { it.lowercase() },
+            skills = acceptedSkills(profile, resume).cleaned().distinctBy { it.lowercase() },
             sections = EntryCategory.entries.mapNotNull { category ->
                 reviewed
                     .filter { it.category == category }
@@ -28,8 +29,12 @@ internal class ResumeDocumentAssembler @Inject constructor(
                     ?.let { ResumeSection(category, headings.forCategory(category), it) }
             },
             skillsHeading = headings.skills,
+            summary = resume.summary?.takeIf { it.decision == BulletDecision.ACCEPTED }?.text?.trim().orEmpty(),
         )
     }
+
+    private fun acceptedSkills(profile: CandidateProfile, resume: TailoredResume): List<String> =
+        resume.skills?.takeIf { it.decision == BulletDecision.ACCEPTED }?.skills ?: profile.skills
 
     private fun List<ProfileEntry>.mergingContinuations(resume: TailoredResume): List<ResumeEntry> {
         val merged = mutableListOf<Pair<ProfileEntry, ResumeEntry>>()

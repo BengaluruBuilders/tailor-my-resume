@@ -2,13 +2,16 @@ package com.tailormyresume.core.testing.repository
 
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.ApplicationRepository
+import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
+import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.testing.data.canonicalApplication
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 abstract class ApplicationRepositoryContractTest {
 
@@ -45,7 +48,7 @@ abstract class ApplicationRepositoryContractTest {
         val application: JobApplication = canonicalApplication
         repository.upsertApplication(application)
 
-        val renamed = application.copy(notes = "Applied through the college portal")
+        val renamed = application.copy(location = "Pune - Hybrid")
         repository.upsertApplication(renamed)
 
         assertThat(repository.observeApplications().first()).hasSize(1)
@@ -73,18 +76,6 @@ abstract class ApplicationRepositoryContractTest {
 
         assertThat(repository.observeApplications().first().map { it.id })
             .containsExactly(canonicalApplication.id)
-    }
-
-    @Test
-    fun aNotesChangeIsVisibleToTheCaller() = runTest {
-        val repository = createApplicationRepository()
-        val application: JobApplication = canonicalApplication
-        repository.upsertApplication(application)
-
-        repository.updateNotes(application.id, "Recruiter called on 12 Mar")
-
-        assertThat(repository.observeApplication(application.id).first()?.notes)
-            .isEqualTo("Recruiter called on 12 Mar")
     }
 
     @Test
@@ -122,6 +113,23 @@ abstract class ApplicationRepositoryContractTest {
         val ids = repository.observeApplications().first().map { it.id }
 
         assertThat(ids).isEqualTo(listOf(newer.id, older.id))
+    }
+
+    @Test
+    fun roundTripsEveryNewApplicationField() = runTest {
+        val repository = createApplicationRepository()
+        val application = canonicalApplication.copy(
+            location = "Bengaluru - Hybrid",
+            appliedOn = Instant.parse("2026-10-08T09:00:00Z"),
+            keywordCoverage = ApplicationKeywordCoverage(now = 61, upTo = 92, final = 84),
+            exportFileName = "Priya_Northwind_Associate-Analyst.pdf",
+            quickAnswer = QuickAnswer(requirementId = "req-presenting", choice = "yes", detail = "Quarterly reviews"),
+            changesAcceptedAt = Instant.parse("2026-10-08T09:30:00Z"),
+        )
+
+        repository.upsertApplication(application)
+
+        assertThat(repository.observeApplication(application.id).first()).isEqualTo(application)
     }
 
     private companion object {

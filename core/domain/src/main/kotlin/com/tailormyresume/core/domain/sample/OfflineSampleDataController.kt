@@ -77,7 +77,6 @@ class OfflineSampleDataController(
             id = plan.id,
             job = analysis.job,
             status = plan.status,
-            notes = plan.notes,
             gapAnalysis = analysis.gap,
             tailoredResume = reviewed(tailored, plan.review),
             createdAt = now - plan.createdDaysAgo.days,

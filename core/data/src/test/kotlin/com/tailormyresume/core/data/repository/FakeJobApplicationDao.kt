@@ -23,16 +23,14 @@ class FakeJobApplicationDao : JobApplicationDao {
     override fun observeApplication(id: String): Flow<JobApplicationEntity?> =
         entities.map { it[id] }
 
+    override suspend fun getApplication(id: String): JobApplicationEntity? = entities.value[id]
+
     override suspend fun upsertApplication(application: JobApplicationEntity) {
         entities.update { it + (application.id to application) }
     }
 
     override suspend fun updateStatus(id: String, status: ApplicationStatus, updatedAt: Instant) {
         modify(id) { it.copy(status = status, updatedAt = updatedAt) }
-    }
-
-    override suspend fun updateNotes(id: String, notes: String, updatedAt: Instant) {
-        modify(id) { it.copy(notes = notes, updatedAt = updatedAt) }
     }
 
     override suspend fun deleteApplication(id: String) {

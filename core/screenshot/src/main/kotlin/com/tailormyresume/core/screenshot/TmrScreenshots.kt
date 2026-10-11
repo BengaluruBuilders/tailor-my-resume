@@ -76,8 +76,8 @@ fun TmrTestDevice.imageFile(
 suspend fun ComposeTestRule.captureForDevice(
     outputDirectory: String,
     screenName: String,
-    device: TmrTestDevice,
-    theme: String = TMR_THEME_LIGHT,
+    device: TmrTestDevice = TmrTestDevices.prototype,
+    theme: String = TMR_THEME_DARK,
 ): String {
     val file = device.imageFile(outputDirectory, screenName, theme)
     captureScreenHh(file.path)
@@ -88,14 +88,14 @@ suspend fun ComposeTestRule.captureForDevices(
     outputDirectory: String,
     screenName: String,
     devices: List<TmrTestDevice> = TmrTestDevices.all,
-    theme: String = TMR_THEME_LIGHT,
+    theme: String = TMR_THEME_DARK,
 ): List<String> = devices.map { captureForDevice(outputDirectory, screenName, it, theme) }
 
 @OptIn(ExperimentalRoborazziApi::class)
 suspend fun ComposeTestRule.captureMultiTheme(
     outputDirectory: String,
     screenName: String,
-    device: TmrTestDevice = TmrTestDevices.board,
+    device: TmrTestDevice = TmrTestDevices.prototype,
     setTheme: suspend (Boolean) -> Unit,
 ): List<String> {
     val paths = mutableListOf<String>()

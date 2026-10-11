@@ -12,6 +12,7 @@ import org.robolectric.annotation.Config
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -43,7 +44,10 @@ class TmrThemeDarkOnlyTest {
                 )
             }
         }
-        assertTrue(File("src/main/res/font").walkTopDown().none { it.isFile })
+        assertEquals(
+            setOf("space_mono_regular.ttf", "space_mono_bold.ttf", "space_grotesk.ttf"),
+            File("src/main/res/font").walkTopDown().filter { it.isFile }.map { it.name }.toSet(),
+        )
     }
 
     @Test
@@ -61,8 +65,10 @@ class TmrThemeDarkOnlyTest {
     }
 
     @Test
-    fun typographyUsesDefaultFamily() {
-        assertEquals(FontFamily.Default, TmrFontFamilies.sans)
-        assertEquals(FontFamily.Default, TmrFontFamilies.display)
+    fun typographyUsesPaigeFamilies() {
+        assertNotEquals(FontFamily.Default, TmrFontFamilies.mono)
+        assertNotEquals(FontFamily.Default, TmrFontFamilies.grotesk)
+        assertEquals(TmrFontFamilies.grotesk, TmrFontFamilies.sans)
+        assertEquals(TmrFontFamilies.mono, TmrFontFamilies.display)
     }
 }

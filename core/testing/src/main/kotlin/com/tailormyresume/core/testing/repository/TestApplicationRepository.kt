@@ -31,10 +31,6 @@ class TestApplicationRepository : ApplicationRepository {
         modify(id) { it.copy(status = status) }
     }
 
-    override suspend fun updateNotes(id: String, notes: String) {
-        modify(id) { it.copy(notes = notes) }
-    }
-
     override suspend fun deleteApplication(id: String) {
         applicationsFlow.update { applications -> applications.filterNot { it.id == id } }
     }

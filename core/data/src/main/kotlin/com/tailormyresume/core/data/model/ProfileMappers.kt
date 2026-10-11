@@ -19,6 +19,12 @@ fun CandidateProfile.asEntity() = ProfileEntity(
     headline = headline,
     skills = skills,
     userStatedSkills = userStatedSkills,
+    city = city,
+    linkedinUrl = linkedinUrl,
+    portfolioUrl = portfolioUrl,
+    summary = summary,
+    sourceFileName = sourceFileName,
+    reviewedAt = reviewedAt,
 )
 
 fun ProfileEntry.asEntity(position: Int) = ProfileEntryEntity(
@@ -56,6 +62,12 @@ fun PopulatedProfile.asExternalModel() = CandidateProfile(
     headline = profile.headline,
     skills = profile.skills,
     userStatedSkills = profile.userStatedSkills,
+    city = profile.city,
+    linkedinUrl = profile.linkedinUrl,
+    portfolioUrl = profile.portfolioUrl,
+    summary = profile.summary,
+    sourceFileName = profile.sourceFileName,
+    reviewedAt = profile.reviewedAt,
     entries = entries
         .sortedBy(ProfileEntryEntity::position)
         .map(ProfileEntryEntity::asExternalModel),

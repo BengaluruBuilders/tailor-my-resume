@@ -9,9 +9,11 @@ import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestPendingAccountWipe
 import com.tailormyresume.core.testing.repository.TestProfileRepository
+import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -59,6 +61,8 @@ class DeleteAccountUidlessMarkerTest {
         serverAccountDeleter = deleter,
         creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(2)),
         latency = NoMockLatency,
+        creditsRepository = TestCreditsRepository(),
+        resumeSettingsRepository = TestResumeSettingsRepository(),
         pendingWipe = observedMarker,
         finishPendingWipe = FinishPendingAccountWipeUseCase(
             observedMarker,

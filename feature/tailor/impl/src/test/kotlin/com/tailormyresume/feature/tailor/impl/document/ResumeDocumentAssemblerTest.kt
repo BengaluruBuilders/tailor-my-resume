@@ -9,6 +9,8 @@ import com.tailormyresume.core.model.GuardrailViolation
 import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
+import com.tailormyresume.core.model.TailoredSkills
+import com.tailormyresume.core.model.TailoredText
 import com.tailormyresume.feature.tailor.impl.entryFor
 import com.tailormyresume.feature.tailor.impl.evidenceOf
 import com.tailormyresume.feature.tailor.impl.sourceBullets
@@ -273,5 +275,25 @@ class ResumeDocumentAssemblerTest {
         val entry = testEntry("exp-1", bullets = listOf(EvidenceBullet("src-b1", "  ")))
 
         assertThat(assembleBullets(emptyList(), entry)).isEmpty()
+    }
+
+    @Test
+    fun onlyAcceptedSummaryAndSkillsReachTheDocument() {
+        val profile = testProfile(emptyList()).copy(skills = listOf("SQL", "Excel"))
+        fun assembled(decision: BulletDecision) = assembler.assemble(
+            profile,
+            TailoredResume(
+                emptyList(),
+                summary = TailoredText("New summary", "Old", decision = decision),
+                skills = TailoredSkills(listOf("Excel"), listOf("SQL", "Excel"), decision = decision),
+            ),
+        )
+
+        assertThat(assembled(BulletDecision.ACCEPTED).summary).isEqualTo("New summary")
+        assertThat(assembled(BulletDecision.ACCEPTED).skills).containsExactly("Excel")
+        listOf(BulletDecision.PENDING, BulletDecision.REJECTED).forEach { decision ->
+            assertThat(assembled(decision).summary).isEmpty()
+            assertThat(assembled(decision).skills).containsExactly("SQL", "Excel").inOrder()
+        }
     }
 }

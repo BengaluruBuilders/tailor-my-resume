@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_designsystem_content_keywords_matched">Keywords matched</string>
+    <string name="core_designsystem_content_coverage_now">Now</string>
+    <string name="core_designsystem_content_coverage_up_to">Up to, after tailoring</string>
+    <string name="core_designsystem_content_coverage_summary">Keywords matched: %1$d%% now, up to %2$d%% after tailoring</string>
+    <string name="core_designsystem_content_percent">%1$d%%</string>
+
+    <string name="core_designsystem_content_status_saved">Saved</string>
+    <string name="core_designsystem_content_status_applied">Applied</string>
+    <string name="core_designsystem_content_status_interview">Interview</string>
+    <string name="core_designsystem_content_status_offer">Offer</string>
+    <string name="core_designsystem_content_status_rejected">Rejected</string>
+    <string name="core_designsystem_content_status_legend">%1$s %2$d</string>
+
+    <string name="core_designsystem_content_tag_soon">Soon</string>
+    <string name="core_designsystem_content_tag_add">Add</string>
+    <string name="core_designsystem_content_tag_best_value">Best value</string>
+    <string name="core_designsystem_content_tag_required">Required</string>
+    <string name="core_designsystem_content_tag_new">New</string>
+    <string name="core_designsystem_content_tag_rewritten">Rewritten</string>
+    <string name="core_designsystem_content_tag_added">Added</string>
+    <string name="core_designsystem_content_tag_reordered">Reordered</string>
+    <string name="core_designsystem_content_soon_state">Coming soon</string>
+
+    <string name="core_designsystem_content_keyword_have_state">In your resume</string>
+    <string name="core_designsystem_content_keyword_missing_state">Missing</string>
+    <string name="core_designsystem_content_source_your_resume">Your resume</string>
+    <string name="core_designsystem_content_source_your_answer">Your answer</string>
+
+    <string name="core_designsystem_content_progress_done">Done</string>
+    <string name="core_designsystem_content_progress_active">In progress</string>
+    <string name="core_designsystem_content_progress_pending">Waiting</string>
+    <plurals name="core_designsystem_content_progress_percent_state">
+        <item quantity="one">%1$d percent complete</item>
+        <item quantity="other">%1$d percent complete</item>
+    </plurals>
+
+    <string name="core_designsystem_content_paper_from_resume">From your resume</string>
+    <string name="core_designsystem_content_paper_from_answer">From your answer</string>
+    <string name="core_designsystem_content_paper_summary">Resume preview. Keywords matched: %1$d%%. Highlighted text comes from your resume or from your answer.</string>
+
+    <string name="core_designsystem_content_file_share">Share</string>
+    <string name="core_designsystem_content_file_open">Open</string>
+    <string name="core_designsystem_content_file_share_description">Share %1$s</string>
+    <string name="core_designsystem_content_file_open_description">Open %1$s</string>
+
+    <string name="core_designsystem_content_story_step">Step %1$d of %2$d</string>
+</resources>

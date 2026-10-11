@@ -3,9 +3,13 @@ package com.tailormyresume.core.data.model
 import com.tailormyresume.core.database.json.GuardrailViolationDto
 import com.tailormyresume.core.database.json.TailoredBulletDto
 import com.tailormyresume.core.database.json.TailoredResumeDto
+import com.tailormyresume.core.database.json.TailoredSkillsDto
+import com.tailormyresume.core.database.json.TailoredTextDto
 import com.tailormyresume.core.model.GuardrailViolation
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
+import com.tailormyresume.core.model.TailoredSkills
+import com.tailormyresume.core.model.TailoredText
 
 fun GuardrailViolation.asDto(): GuardrailViolationDto = when (this) {
     GuardrailViolation.MissingSource -> GuardrailViolationDto.MissingSource
@@ -49,9 +53,46 @@ fun TailoredBulletDto.asExternalModel() = TailoredBullet(
     generationId = generationId,
 )
 
-fun TailoredResume.asDto() = TailoredResumeDto(bullets = bullets.map(TailoredBullet::asDto), entryIds = entryIds)
+fun TailoredText.asDto() = TailoredTextDto(
+    text = text,
+    original = original,
+    sourceIds = sourceIds,
+    violations = violations.map(GuardrailViolation::asDto),
+    decision = decision,
+)
+
+fun TailoredTextDto.asExternalModel() = TailoredText(
+    text = text,
+    original = original,
+    sourceIds = sourceIds,
+    violations = violations.map(GuardrailViolationDto::asExternalModel),
+    decision = decision,
+)
+
+fun TailoredSkills.asDto() = TailoredSkillsDto(
+    skills = skills,
+    original = original,
+    violations = violations.map(GuardrailViolation::asDto),
+    decision = decision,
+)
+
+fun TailoredSkillsDto.asExternalModel() = TailoredSkills(
+    skills = skills,
+    original = original,
+    violations = violations.map(GuardrailViolationDto::asExternalModel),
+    decision = decision,
+)
+
+fun TailoredResume.asDto() = TailoredResumeDto(
+    bullets = bullets.map(TailoredBullet::asDto),
+    entryIds = entryIds,
+    summary = summary?.asDto(),
+    skills = skills?.asDto(),
+)
 
 fun TailoredResumeDto.asExternalModel() = TailoredResume(
     bullets = bullets.map(TailoredBulletDto::asExternalModel),
     entryIds = entryIds,
+    summary = summary?.asExternalModel(),
+    skills = skills?.asExternalModel(),
 )

@@ -7,8 +7,8 @@ import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.RequirementMatch
 import com.tailormyresume.core.model.TailoredBullet
-import com.tailormyresume.core.model.confirmedWithinLimits
 import com.tailormyresume.core.model.isSkillUserStated
+import com.tailormyresume.core.model.sendableFacts
 import com.tailormyresume.core.network.dto.BulletDto
 import com.tailormyresume.core.network.dto.ContentReportRequest
 import com.tailormyresume.core.network.dto.FactEntryDto
@@ -19,7 +19,7 @@ import com.tailormyresume.core.network.dto.RequirementDto
 import com.tailormyresume.core.network.dto.TailoredBulletDto
 
 fun CandidateProfile.toFactsDto(): ProfileFactsDto {
-    val sent = confirmedWithinLimits()
+    val sent = sendableFacts()
     return ProfileFactsDto(
         skills = sent.skills,
         userStatedSkills = sent.skills.filter { sent.isSkillUserStated(it) },

@@ -11,8 +11,10 @@ import com.tailormyresume.core.testing.data.sampleApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
+import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -36,6 +38,8 @@ class DeleteAccountArtefactRestoreTest {
         serverAccountDeleter = OfflineServerAccountDeleter(),
         creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(2)),
         latency = NoMockLatency,
+        creditsRepository = TestCreditsRepository(),
+        resumeSettingsRepository = TestResumeSettingsRepository(),
     )
 
     @Test
@@ -58,6 +62,21 @@ class DeleteAccountArtefactRestoreTest {
         assertThat(rows.observeApplications().first().map(JobApplication::id)).containsExactly("a1", "a2", "a3")
         applications.forEach { application ->
             assertThat(repository.artefacts[application.id]).containsExactly("letter", "prep", "review", "reports")
+        }
+    }
+
+    @Test
+    fun restoreKeepsLegacyNotesAndStatusAndStaysIntact() = runTest {
+        rows.sendApplications(applications.map { it.copy(legacyNotes = "note ${it.id}", legacyStatus = "NO_RESPONSE") })
+        repository.failRowDeleteFor = "a3"
+
+        val result = useCase()()
+
+        assertThat(result).isEqualTo(AccountDeletionResult.Failed(dataIntact = true))
+        val restored = rows.observeApplications().first().associateBy(JobApplication::id)
+        applications.forEach { application ->
+            assertThat(restored.getValue(application.id).legacyNotes).isEqualTo("note ${application.id}")
+            assertThat(restored.getValue(application.id).legacyStatus).isEqualTo("NO_RESPONSE")
         }
     }
 

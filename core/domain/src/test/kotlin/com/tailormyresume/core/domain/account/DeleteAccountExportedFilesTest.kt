@@ -7,8 +7,10 @@ import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
+import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -29,6 +31,8 @@ class DeleteAccountExportedFilesTest {
         serverAccountDeleter = serverAccountDeleter,
         creditBalance = AccountCreditBalance(paymentGateway = TestPaymentGateway()),
         latency = NoMockLatency,
+        creditsRepository = TestCreditsRepository(),
+        resumeSettingsRepository = TestResumeSettingsRepository(),
         exportedFiles = exportedFiles,
     )
 

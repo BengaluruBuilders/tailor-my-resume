@@ -8,7 +8,7 @@ import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.TailoredResume
-import com.tailormyresume.core.model.confirmedWithinLimits
+import com.tailormyresume.core.model.sendableFacts
 import com.tailormyresume.core.network.ApiError
 import com.tailormyresume.core.network.ApiException
 import com.tailormyresume.core.network.TailorMyResumeApi
@@ -89,7 +89,7 @@ class RemoteResumeTailor @Inject constructor(
     }
 
     private fun TailoringResultDto.toTailoredResume(profile: CandidateProfile): TailoredResume {
-        val sourceText = profile.confirmedWithinLimits().entries.flatMap { it.bullets }.associate { it.id to it.text }
+        val sourceText = profile.sendableFacts().entries.flatMap { it.bullets }.associate { it.id to it.text }
         return TailoredResume(
             bullets = bullets.map { bullet ->
                 bullet.toTailoredBullet(bullet.sourceIds.firstNotNullOfOrNull(sourceText::get).orEmpty())

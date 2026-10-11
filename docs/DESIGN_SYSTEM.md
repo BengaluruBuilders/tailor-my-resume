@@ -41,58 +41,94 @@ A feature must change these things when it adopts the integration changes.
 
 ## Tokens
 
+The app is dark only. The values come from the plan for the revamp (GitHub issues labelled `revamp`) and the
+prototype in `design/prototype-2026-10-10/`. The phone screen is 374 x 834 dp. Every token from the
+older Avvio palette keeps its name as a computed alias of a Paige token, so existing components
+compile unchanged. `disabledContent` is `textDisabled` and `onSurfaceVariant` is `textMuted`; they
+differ on purpose.
+
 ### Colour (`TmrTheme.colors`)
 
-The app action fill is the sampled Lime `#AAFF00`, paired with black `#000000` text. `brand`,
-`special`, and `onToolSelected` use lime. `primary` is a text and focus color: darker green
-`#3C6208` on light surfaces to meet text contrast, and lime on dark surfaces. The link green,
-pressed lime `#91D900`, secondary text, and hairline strokes are TailorMyResume accessibility and
-interaction adaptations; the Play artwork does not verify their native-app tokens. Keep `error`
-and `coral` for errors and warnings, not decoration. Status colors keep words and shapes.
-
-| Role | Light | Dark |
+| Token | Value | Use |
 |---|---|---|
-| Background and ground | white `#FFFFFF` | black `#000000` |
-| Header | black `#000000`, white text | black `#000000`, white text |
-| Card | pale neutral `#F4F6F1` | charcoal `#141614` |
-| Surface and document | white | charcoal `#141614` and inset `#252624` |
-| Quiet containers and evidence | `#EFF1EC` and inset `#EBEEE7` | inset `#252624` |
-| Dock | black `#000000` | charcoal `#141614` |
-| Main text | black `#000000` | white `#FFFFFF` |
-| Secondary text | neutral `#525251` | light neutral `#E4E5E1` |
-| Main action | Lime `#AAFF00`, black text | Lime `#AAFF00`, black text |
-| Subtle stroke | `#D5D8D2` | `#525251` |
+| `background` | `#000000` | Every screen except Sign in |
+| `surface` | `#111111` | Cards, option rows |
+| `surfaceRaised` | `#161616` | Raised cards |
+| `surfaceHigh` | `#1C1C1C` | Top-bar buttons, step pills, done steps |
+| `sheet` | `#141414` | Bottom sheet |
+| `sheetOption` | `#1A1A1A` | Unselected option in a sheet |
+| `uploadCard` | `#0D0D0D` | Upload card fill |
+| `fill` | `#242424` | Chips, inputs |
+| `disabledFill` | `#222222` | Disabled primary button |
+| `line` | `#2A2A2A` | Unselected option border, lines |
+| `lineStrong` | `#333333` | Toggle off track |
+| `lineHigher` | `#3A3A3A` | Dashed upload border, sheet handle |
+| `tabDivider` | `#1A1A1A` | Tab bar top line |
+| `text` | `#FFFFFF` | Primary text |
+| `textSecondary` | `#C8C8C8` | Body copy |
+| `textMuted` | `#A6A6A6` | Labels, later steps |
+| `textDisabled` | `#7D7D7D` | Placeholder, disabled, pending rows |
+| `ink` | `#0A0A0A` | Text on light fills |
+| `lime` | `#A3F43F` | Primary, selected, Interview |
+| `limeSelected` | `#141A0A` | Selected option fill |
+| `limeSoft` | `#E4FBB8` | Keyword highlight on the paper |
+| `amber` | `#F7A940` | Needs attention, Applied, Offer fill |
+| `amberHighlight` | `#FFE2C2` | Answer highlight on the paper |
+| `blue` | `#5AA9F8` | Saved, resume and profile hero |
+| `cheek` | `#FF6A2B` | Paige cheeks, DOCX sticker |
+| `paper` | `#FFFFFF` | Resume paper, toast, Paige page |
+| `paperFold` | `#DCDCD5` | Paige folded corner |
+| `segOffer` | `#E9E8E4` | Offer segment in the status bar |
+| `segRejected` | `#555555` | Rejected segment |
+| `rejectedBorder` | `#444444` | Rejected chip border |
+| `scrim` | `#000000` at 65% | Sheet scrim |
 
-The black, charcoal, white, pale panel, and lime values above were sampled from flat phone UI
-regions in the [Google Play artwork](https://play.google.com/store/apps/details?id=xyz.avvio.app).
-They are not published native app source tokens. The neutral secondary text and strokes are
-TailorMyResume choices checked for contrast. The [brand kit](https://avvio.xyz/brand/) describes a
-different website and identity palette; its green-tinted darks and `#B9FA4B` lime do not set
-the app theme.
+`textDisabled` (`#7D7D7D`) is 4.59:1 on `surface` and `card` and 5.10:1 on `background`. `boundary` and
+`outline` alias it, so component borders reach 3:1. Use it for placeholder, disabled and pending
+text and for component borders.
 
 ### Type (`TmrTheme.typography`)
 
-Manrope (`res/font/core_designsystem_manrope.ttf`) is the UI face. Archivo Black
-(`core_designsystem_archivo_black.ttf`) sets uppercase headlines through `TmrHeadline`. The OFL licenses are in
-`core/designsystem/fonts-licenses/`. Text uses `sp`, and the shared components grow at 200% font scale.
-The scale is in `Type.kt`.
+Space Mono (400 and 700) and Space Grotesk (a variable font, weights 400 to 600 and 700) are bundled in
+`core/designsystem/src/main/res/font/` as `space_mono_regular.ttf`, `space_mono_bold.ttf` and
+`space_grotesk.ttf`. The OFL licences are in `core/designsystem/fonts-licenses/`. Text uses `sp`.
+Letter spacing is in `sp`; line height is the ratio times the size.
 
-`displayL` 36/42, `displayM` 32/39, `headlineL` 28/36, `headlineM` 22/30,
-`titleL` 20/28, `titleM` 16/24, `titleS` 14/21, `bodyL` 16/24,
-`bodyM` 14/22, `button` 15/22, `labelL` 13/19, `labelM` 12/18,
-`bodyS` 12/16, `numeralHero` 44/52, `numeralM` 18/26, `factId` 12/16.
-Values are size/line height in `sp`. Buttons have slight letter spacing.
-`TmrButtonSize.Compact` is 44 dp for buttons inside cards.
+| Token | Family and weight | Size / line height / spacing |
+|---|---|---|
+| `headline` | Space Mono 400 | 28 / 30.8 / -1.0 |
+| `headlineSmall` | Space Mono 400 | 26 / 28.6 / -1.0 |
+| `title` | Space Mono 400 | 22 / 25.3 / -0.6 |
+| `display` | Space Mono 700 | 34 / 34 / -1.5 |
+| `displayLarge` | Space Mono 700 | 60 / 60 / -3 |
+| `label`, `labelWide` | Space Mono 400 | 12 / - / 0.6 and 0.8; the component uppercases |
+| `button` | Space Mono 400 | 13 |
+| `mono15`, `mono14` | Space Mono 400 | 15 and 14 |
+| `body` | Space Grotesk 400 | 15 / 21.75 |
+| `bodyLarge` | Space Grotesk 400 | 16 |
+| `bodySmall` | Space Grotesk 400 | 14 / 21 |
+| `caption` | Space Grotesk 400 | 13 |
+| `strongLarge`, `strongSmall` | Space Grotesk 600 and 700 | 15 and 14 |
+
+Legacy names (`displayL`, `headlineM`, `titleL`, `bodyM`, `labelL`, `numeralHero`, `factId` and the
+rest) map onto the nearest Paige style. The `paper*` styles come with the resume paper preview.
 
 ### Shape (`TmrTheme.shapes`)
 
-`sheet` and `modalSheet` have 28 dp top corners. `heroCard` is 22 dp; `card` and
-`pillRow` are 20 and 24 dp. `field` and `statusRow` are 18 dp. Buttons and small chips remain pills.
+`pill` is a full pill. `hero` 32, `cardLarge` 24, `card` 20, `cardSmall` 16, `toast` 18,
+`paperCorner` 12 and `bar` 2 dp. The older `sheet`, `modalSheet`, `field` and `pillRow` shapes stay.
 
 ### Spacing (`TmrTheme.spacing`)
 
-`gutter` 16, `cardPadding` 16, `sectionGap` 24, `touch` 48, plus the
-named spacing steps from 2 to 64 dp.
+`gutter` 14, `cardPadding` 16, `sectionGap` 24, `touch` 48, plus the named steps from 2 to 64 dp.
+Paige sizes: `topBarButton` 44, `primaryButtonHeight` 56, `tabItem` 54, `tabCentreDisc` 56,
+`toastTop` 96, `sheetPaddingTop` 12, `sheetPaddingHorizontal` 18, `sheetPaddingBottom` 40,
+`sheetHandleWidth` 44 and `sheetHandleHeight` 4 dp.
+
+### Icons
+
+`TmrIcons` adds `ChevronRight`, `Gear`, `Plus`, `File`, `Open` and `GoogleG`. `GoogleG` is a
+48 x 48 vector with the four brand-coloured paths, not an asset.
 
 ### Elevation (`TmrTheme.elevation`)
 
@@ -100,6 +136,13 @@ named spacing steps from 2 to 64 dp.
 Use `Modifier.tmrShadow(shadow, shape)`.
 
 ### Motion (`TmrTheme.motion`)
+`idle` holds the ambient loops. Paige bob: `bobAmplitude` 5 dp, translateY = 5 x sin(t / 420 ms +
+phase), `bobAngularPeriodMs` 420 and `bobPhaseMax` 4. Tailoring wobble: `wobbleDegrees` 4 with
+`wobbleAngularPeriodMs` 300, and `wobbleOffset` 6 dp with a 210 ms angular period. Story bars last
+`storyDurationMs` 5000 per slide. The spinner turns once per `spinnerTurnMs` 900. When `reduced` is
+true, every amplitude is 0, the story slides do not auto-advance, the spinner is a static ring, and
+taps still step. `TmrIdleSpecs.bobOffsetDp(timeMs, phase)` is the bob formula.
+
 `proofSpecs`: `spatial`, `spatialFast`, `offset`, `size`, `fade`, `color`, `staggerMs`, `staggerMax`.
 `hopSpecs`: `spatial`, `scale`. Use `hopSpecs` only for gap closed, exported, pack purchased,
 first fact confirmed. `reduced` is true when animations are off; the spatial specs then use `snap()`.

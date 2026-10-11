@@ -3,10 +3,12 @@ package com.tailormyresume.core.domain.account
 import com.tailormyresume.core.data.mock.MockLatency
 import com.tailormyresume.core.data.mock.MockOperation
 import com.tailormyresume.core.data.repository.ApplicationRepository
+import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.PendingAccountWipe
 import com.tailormyresume.core.data.repository.PendingWipeState
 import com.tailormyresume.core.data.repository.ProfileRepository
+import com.tailormyresume.core.data.repository.ResumeSettingsRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.model.CandidateProfile
@@ -28,6 +30,8 @@ class DeleteAccountUseCase @Inject constructor(
     private val serverAccountDeleter: ServerAccountDeleter,
     private val creditBalance: AccountCreditBalance,
     private val latency: MockLatency,
+    private val creditsRepository: CreditsRepository,
+    private val resumeSettingsRepository: ResumeSettingsRepository,
     private val exportedFiles: ExportedFiles = ExportedFiles.None,
     private val pendingWipe: PendingAccountWipe = PendingAccountWipe.None,
     private val finishPendingWipe: FinishPendingAccountWipeUseCase =
@@ -81,6 +85,8 @@ class DeleteAccountUseCase @Inject constructor(
             startStep(AccountDeletionStep.CLOSING_ACCOUNT, onStep)
             creditsTouched = true
             creditBalance.clearUnusedCredits()
+            creditsRepository.clear()
+            resumeSettingsRepository.clear()
             withContext(NonCancellable) {
                 signInGateway.signOut()
                 sessionRepository.clear()

@@ -29,10 +29,6 @@ class FakeApplicationRepository : ApplicationRepository {
         applications.value[id]?.let { upsertApplication(it.copy(status = status)) }
     }
 
-    override suspend fun updateNotes(id: String, notes: String) {
-        applications.value[id]?.let { upsertApplication(it.copy(notes = notes)) }
-    }
-
     override suspend fun deleteApplication(id: String) {
         applications.value = applications.value - id
     }

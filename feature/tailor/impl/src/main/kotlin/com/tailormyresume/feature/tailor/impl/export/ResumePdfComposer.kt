@@ -22,6 +22,7 @@ internal class ResumePdfComposer(
         block(document.name, style.name)
         block(document.contactLine, style.contact)
         block(document.headline, style.headline)
+        block(document.summary, style.body)
     }
 
     private fun section(section: ResumeSection) {

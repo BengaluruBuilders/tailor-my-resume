@@ -21,14 +21,14 @@ class OfflinePaymentGatewayContractTest : PaymentGatewayContractTest() {
     override fun createPaymentGateway(): PaymentGateway = offlineGateway()
 
     @Test
-    fun theCatalogueHoldsOnlyTheFiveApplicationPack() = runTest {
+    fun theCatalogueHoldsTheFiveFifteenAndFortyCreditPacks() = runTest {
         val gateway = offlineGateway()
 
         val packs = gateway.packs()
 
-        assertThat(packs).containsExactly(MockPackCatalogue.applicationPackFive)
-        assertThat(packs.single().credits).isEqualTo(5)
-        assertThat(packs.single().priceInPaise).isEqualTo(14_900)
+        assertThat(packs).isEqualTo(MockPackCatalogue.all)
+        assertThat(packs.map { it.credits }).containsExactly(5, 15, 40).inOrder()
+        assertThat(packs.first().priceInPaise).isEqualTo(19_900)
     }
 
     @Test

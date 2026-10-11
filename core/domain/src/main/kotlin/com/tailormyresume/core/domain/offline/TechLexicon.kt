@@ -1,5 +1,7 @@
 package com.tailormyresume.core.domain.offline
 
+private const val EXACT_FORM_PREFIX = "(?:\\b(?:in|with|using|and|or)\\s|[,/(:]\\s?)"
+
 internal val languageEntries: List<LexiconEntry> = listOf(
     skill("Python", "python3", "python 3", "py"),
     skill("Java", loose = listOf("core java")),
@@ -11,7 +13,13 @@ internal val languageEntries: List<LexiconEntry> = listOf(
     tool("ASP.NET", implies = listOf(".net")),
     skill("JavaScript", "js", "java script", loose = listOf("ecmascript", "es6")),
     skill("TypeScript", "ts"),
-    skill("Go", "golang", "go lang", loose = listOf("go programming", "go language")).copy(matchesCanonical = false),
+    skill("Go", "golang", "go lang", loose = listOf("go programming", "go language")).copy(
+        exactForms = listOf("Go"),
+        blockedPrefixes = listOf("-"),
+        blockedSuffixes = listOf("-", "\\s+(?:live|to\\s+market)"),
+        requiredPrefix = EXACT_FORM_PREFIX,
+        matchesCanonical = false,
+    ),
     skill("Rust"),
     skill("PHP"),
     skill("Ruby"),
@@ -33,11 +41,18 @@ internal val languageEntries: List<LexiconEntry> = listOf(
 internal val frameworkEntries: List<LexiconEntry> = listOf(
     tool("React", "react.js", "reactjs", "react js"),
     tool("React Native"),
-    tool("Angular", loose = listOf("angularjs", "angular js")),
+    tool("Angular", loose = listOf("angularjs")),
     tool("Vue", "vue.js", "vuejs", "vue js"),
     tool("Next.js", "nextjs"),
     tool("Node.js", "nodejs", "node js"),
-    tool("Express").copy(aliases = listOf("express.js", "expressjs"), matchesCanonical = false),
+    tool("Express").copy(
+        aliases = listOf("express.js", "expressjs"),
+        exactForms = listOf("Express"),
+        blockedPrefixes = listOf("-"),
+        blockedSuffixes = listOf("-", "\\s+interest"),
+        requiredPrefix = EXACT_FORM_PREFIX,
+        matchesCanonical = false,
+    ),
     tool("Django"),
     tool("Flask"),
     tool("FastAPI"),
