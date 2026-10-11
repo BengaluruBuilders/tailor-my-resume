@@ -31,6 +31,18 @@ internal fun PaywallRoute(
     val nothingToRestore = stringResource(R.string.feature_settings_impl_toast_no_purchases)
     val restoreFailed = stringResource(R.string.feature_settings_impl_toast_restore_failed)
     val pricesFailed = stringResource(R.string.feature_settings_impl_toast_prices_failed)
+    val showFailure: (Boolean) -> Unit = { unconfirmed ->
+        sheetHost.show(failedTitle) {
+            PaymentFailedSheetContent(
+                onTryAgain = {
+                    sheetHost.dismiss()
+                    viewModel.onBuy()
+                },
+                onCancel = sheetHost::dismiss,
+                unconfirmed = unconfirmed,
+            )
+        }
+    }
     LaunchedEffect(viewModel, navigator, returnToApplicationId) {
         viewModel.events.collect { event ->
             when (event) {
@@ -46,15 +58,8 @@ internal fun PaywallRoute(
                 PaywallEvent.NothingToRestore -> toast.show(nothingToRestore)
                 PaywallEvent.RestoreFailed -> toast.show(restoreFailed)
                 PaywallEvent.PricesUnavailable -> toast.show(pricesFailed)
-                PaywallEvent.PaymentFailed -> sheetHost.show(failedTitle) {
-                    PaymentFailedSheetContent(
-                        onTryAgain = {
-                            sheetHost.dismiss()
-                            viewModel.onBuy()
-                        },
-                        onCancel = sheetHost::dismiss,
-                    )
-                }
+                PaywallEvent.PaymentFailed -> showFailure(false)
+                PaywallEvent.PaymentUnconfirmed -> showFailure(true)
             }
         }
     }

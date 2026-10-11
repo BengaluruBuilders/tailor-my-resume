@@ -40,6 +40,7 @@
     <string name="feature_settings_impl_pay_failed_mark" translatable="false">!</string>
     <string name="feature_settings_impl_pay_failed_title">Payment didn\'t go through</string>
     <string name="feature_settings_impl_pay_failed_body">You weren\'t charged. Try again, or pick another payment method.</string>
+    <string name="feature_settings_impl_pay_unconfirmed_body">We haven\'t confirmed your payment yet. Your credits will appear once it is confirmed.</string>
     <string name="feature_settings_impl_pay_failed_retry">Try again</string>
     <string name="feature_settings_impl_pay_failed_cancel">Cancel</string>
 </resources>

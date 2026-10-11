@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tailormyresume.core.designsystem.component.hero.TmrHeroCard
@@ -51,7 +49,6 @@ internal class PaywallActions(
     val onRestore: () -> Unit,
 )
 
-private const val HERO_MAX_FONT_SCALE = 1.4f
 private const val ART_MAX_FONT_SCALE = 1.15f
 private val HeroMinHeight = 210.dp
 private val PackMinHeight = 68.dp
@@ -97,17 +94,14 @@ internal fun PaywallScreen(state: PaywallUiState, actions: PaywallActions, modif
 
 @Composable
 private fun PaywallHero(credits: Int) {
-    val density = LocalDensity.current
-    val showArt = density.fontScale <= ART_MAX_FONT_SCALE
-    CompositionLocalProvider(LocalDensity provides Density(density.density, minOf(density.fontScale, HERO_MAX_FONT_SCALE))) {
-        TmrHeroCard(
-            color = TmrHeroColor.Amber,
-            label = pluralStringResource(R.plurals.feature_settings_impl_paywall_credits_left, credits, credits),
-            headline = stringResource(R.string.feature_settings_impl_paywall_headline),
-            modifier = Modifier.fillMaxWidth().heightIn(min = HeroMinHeight),
-        ) {
-            if (showArt) HeroArt()
-        }
+    val showArt = LocalDensity.current.fontScale <= ART_MAX_FONT_SCALE
+    TmrHeroCard(
+        color = TmrHeroColor.Amber,
+        label = pluralStringResource(R.plurals.feature_settings_impl_paywall_credits_left, credits, credits),
+        headline = stringResource(R.string.feature_settings_impl_paywall_headline),
+        modifier = Modifier.fillMaxWidth().heightIn(min = HeroMinHeight),
+    ) {
+        if (showArt) HeroArt()
     }
 }
 

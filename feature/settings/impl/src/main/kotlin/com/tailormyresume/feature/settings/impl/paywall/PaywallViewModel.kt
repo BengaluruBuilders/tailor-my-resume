@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.PurchaseFailureReason
 import com.tailormyresume.core.domain.PurchaseResult
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
@@ -120,7 +121,9 @@ internal class PaywallViewModel @Inject constructor(
         when (result) {
             is PurchaseResult.Completed -> credit(pack)
             is PurchaseResult.Pending -> eventChannel.send(PaywallEvent.Pending)
-            is PurchaseResult.Failed -> eventChannel.send(PaywallEvent.PaymentFailed)
+            is PurchaseResult.Failed -> eventChannel.send(
+                if (result.reason == PurchaseFailureReason.PaymentUnconfirmed) PaywallEvent.PaymentUnconfirmed else PaywallEvent.PaymentFailed,
+            )
             PurchaseResult.Cancelled -> Unit
         }
     }

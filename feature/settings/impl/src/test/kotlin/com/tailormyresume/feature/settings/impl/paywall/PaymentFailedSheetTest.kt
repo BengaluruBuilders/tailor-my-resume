@@ -2,6 +2,7 @@ package com.tailormyresume.feature.settings.impl.paywall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -42,5 +43,20 @@ class PaymentFailedSheetTest {
         rule.onNodeWithText("Cancel").performClick()
 
         assertThat(taps).containsExactly("again", "cancel").inOrder()
+    }
+
+    @Test
+    fun unconfirmedCopyMakesNoClaimAboutCharging() {
+        rule.setTmrContent(TmrTestDevices.prototype) {
+            Column {
+                PaymentFailedSheetContent(onTryAgain = {}, onCancel = {}, unconfirmed = true)
+            }
+        }
+
+        rule.assertTexts(
+            "Payment didn't go through",
+            "We haven't confirmed your payment yet. Your credits will appear once it is confirmed.",
+        )
+        assertThat(rule.onAllNodesWithText("charged", substring = true).fetchSemanticsNodes()).isEmpty()
     }
 }

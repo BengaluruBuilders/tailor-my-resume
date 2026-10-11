@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.tailormyresume.core.designsystem.component.content.TmrFitText
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 
 enum class TmrHeroColor { Blue, Amber, Lime }
@@ -36,7 +37,7 @@ fun TmrHeroCard(
         Column(modifier = Modifier.padding(22.dp)) {
             Text(text = label.uppercase(), style = TmrTheme.typography.label, color = colors.ink)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
+            TmrFitText(
                 text = headline,
                 style = TmrTheme.typography.headline,
                 color = colors.ink,

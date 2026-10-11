@@ -140,6 +140,19 @@ class PaywallViewModelTest {
     }
 
     @Test
+    fun unconfirmedPaymentIsReportedApartFromAFailure() = runTest {
+        val gateway = CountingPaymentGateway()
+        gateway.scripted.withOutcome(fifteen, PurchaseOutcome.Failed).withFailureReason(PurchaseFailureReason.PaymentUnconfirmed)
+        val viewModel = viewModel(gateway)
+        keepSubscribed(viewModel.uiState)
+        val events = collectEvents(viewModel)
+
+        viewModel.onBuy()
+
+        assertThat(events).containsExactly(PaywallEvent.PaymentUnconfirmed)
+    }
+
+    @Test
     fun cancelledChangesNothing() = runTest {
         val gateway = CountingPaymentGateway()
         gateway.scripted.withOutcome(fifteen, PurchaseOutcome.Cancelled)

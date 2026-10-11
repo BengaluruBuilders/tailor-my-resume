@@ -29,6 +29,7 @@ private val MarkSize = 56.dp
 internal fun ColumnScope.PaymentFailedSheetContent(
     onTryAgain: () -> Unit,
     onCancel: () -> Unit,
+    unconfirmed: Boolean = false,
 ) {
     val colors = TmrTheme.colors
     val typography = TmrTheme.typography
@@ -52,7 +53,9 @@ internal fun ColumnScope.PaymentFailedSheetContent(
             color = colors.text,
         )
         Text(
-            text = stringResource(R.string.feature_settings_impl_pay_failed_body),
+            text = stringResource(
+                if (unconfirmed) R.string.feature_settings_impl_pay_unconfirmed_body else R.string.feature_settings_impl_pay_failed_body,
+            ),
             style = typography.bodySmall,
             color = colors.textSecondary,
         )

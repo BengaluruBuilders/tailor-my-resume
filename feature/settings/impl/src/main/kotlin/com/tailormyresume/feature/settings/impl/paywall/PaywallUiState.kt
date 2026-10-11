@@ -23,6 +23,8 @@ internal sealed interface PaywallEvent {
 
     data object PaymentFailed : PaywallEvent
 
+    data object PaymentUnconfirmed : PaywallEvent
+
     data object NothingToRestore : PaywallEvent
 
     data object RestoreFailed : PaywallEvent
