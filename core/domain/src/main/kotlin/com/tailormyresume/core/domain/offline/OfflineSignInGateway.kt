@@ -11,6 +11,7 @@ import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.SignInOutcome
 import com.tailormyresume.core.domain.SignInResult
 import com.tailormyresume.core.domain.account.ExportedFiles
+import com.tailormyresume.core.domain.account.WelcomeCreditGrant
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,6 +22,7 @@ class OfflineSignInGateway @Inject constructor(
     private val latency: MockLatency,
     private val store: MockStateStore,
     private val exportedFiles: ExportedFiles = ExportedFiles.None,
+    private val welcomeGrant: WelcomeCreditGrant = WelcomeCreditGrant.None,
 ) : SignInGateway {
 
     private var outcome: SignInOutcome = SignInOutcome.SignedIn
@@ -40,6 +42,7 @@ class OfflineSignInGateway @Inject constructor(
                     store.remove(PAYMENT_STATE_KEY)
                 }
                 sessionRepository.saveAccount(account)
+                welcomeGrant.grantOnce()
                 SignInResult.SignedIn(account)
             }
             SignInOutcome.Cancelled -> SignInResult.Cancelled

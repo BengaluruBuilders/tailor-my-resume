@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -84,6 +85,7 @@ class ReviewRouteNavigationTest {
     fun skillsOpensSkills() {
         show(freshReviewProfile())
 
+        composeRule.onNodeWithText("Skills · 18").performScrollTo()
         tap("Skills · 18")
 
         assertThat(navigator.state.currentKey).isEqualTo(SkillsNavKey())

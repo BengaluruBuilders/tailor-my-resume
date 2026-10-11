@@ -5,11 +5,13 @@ import com.tailormyresume.core.domain.keywordsStatedIn
 import com.tailormyresume.core.domain.offline.SkillLexicon
 import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.BulletDecision
+import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobRequirement
-import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
+import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
+import com.tailormyresume.core.model.sendableFacts
 
 object KeywordCoverageCalculator {
     private const val YES_REGULARLY = "YES_REGULARLY"
@@ -19,25 +21,62 @@ object KeywordCoverageCalculator {
         matches: List<RequirementMatch>,
         quickAnswer: QuickAnswer?,
         tailoredResume: TailoredResume?,
+        profile: CandidateProfile,
     ): ApplicationKeywordCoverage {
         val requirements = matches.map { it.requirement }
         val keywordSet = requirements.flatMap(::keywordsOf).toSet()
-        val metKeywords = matches
-            .filter { it.status == MatchStatus.MET || it.status == MatchStatus.PARTIAL }
-            .flatMap { keywordsOf(it.requirement) }
-            .toSet()
+        val metKeywords = evidencedKeywords(matches, profile)
         val answerKeywords = answerKeywords(requirements, quickAnswer)
         return ApplicationKeywordCoverage(
             now = percent(metKeywords.size, keywordSet.size),
             upTo = percent((metKeywords + answerKeywords).size, keywordSet.size),
             final = tailoredResume?.let { resume ->
-                val text = resume.bullets.joinToString("\n") {
-                    if (it.decision == BulletDecision.ACCEPTED) it.proposedText else it.originalText
-                }
+                val text = finalText(resume, profile)
                 percent(requirements.flatMap { stated(it, text) }.toSet().size, keywordSet.size)
             },
         )
     }
+
+    private fun finalText(resume: TailoredResume, profile: CandidateProfile): String {
+        val sendable = profile.sendableFacts()
+        val accepted = resume.bullets.filter { it.decision == BulletDecision.ACCEPTED && it.violations.isEmpty() }
+        val entries = resumeEntries(resume, sendable)
+        val bullets = entries.flatMap { entry ->
+            entry.bullets.map { source -> accepted.appliedText(entry.id, source.id, source.text) }
+        }
+        val summary = resume.summary
+            ?.takeIf { it.decision == BulletDecision.ACCEPTED && it.violations.isEmpty() }
+            ?.text
+            ?: sendable.summary
+        val skills = resume.skills
+            ?.takeIf { it.decision == BulletDecision.ACCEPTED && it.violations.isEmpty() }
+            ?.skills
+            ?: sendable.skills
+        return (entries.map { it.title } + bullets + summary + skills).joinToString("\n")
+    }
+
+    private fun resumeEntries(resume: TailoredResume, profile: CandidateProfile) = buildList {
+        val tailoredByEntry = resume.bullets.groupBy { it.entryId }
+        val recordedIds = resume.entryIds?.toSet()
+        profile.entries.forEach { entry ->
+            val tailored = tailoredByEntry[entry.id]
+            val recorded = recordedIds == null || entry.id in recordedIds
+            if (tailored != null || recorded) {
+                val sourceIds = tailored?.flatMap { it.sourceIds }?.toSet().orEmpty()
+                val bullets = if (tailored == null) {
+                    entry.bullets
+                } else {
+                    entry.bullets.filter { it.id in sourceIds }
+                }
+                add(entry.copy(bullets = bullets))
+            }
+        }
+    }
+
+    private fun List<TailoredBullet>.appliedText(entryId: String, sourceId: String, sourceText: String): String =
+        firstOrNull {
+            it.entryId == entryId && sourceId in it.sourceIds && it.originalText.trim() == sourceText.trim()
+        }?.proposedText ?: sourceText
 
     private fun keywordOf(keyword: String): String = SkillLexicon.displayName(keyword).lowercase()
 

@@ -26,10 +26,10 @@ class ReviewViewModelTest {
     ) : ProfileRepository by delegate {
         var saves = 0
 
-        override suspend fun saveProfile(profile: CandidateProfile) {
+        override suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean {
             saves += 1
             gate?.await()
-            delegate.saveProfile(profile)
+            return delegate.saveProfileIfUnchanged(expected, replacement)
         }
     }
 
@@ -100,7 +100,7 @@ class ReviewViewModelTest {
         val viewModel = viewModel(repository)
 
         viewModel.events.test {
-            viewModel.onContinue()
+            viewModel.onContinue(viewModel.ready().profile)
 
             assertThat(awaitItem()).isEqualTo(ReviewEvent.MissingEndDate)
         }
@@ -115,7 +115,7 @@ class ReviewViewModelTest {
         val viewModel = viewModel()
 
         viewModel.events.test {
-            viewModel.onContinue()
+            viewModel.onContinue(viewModel.ready().profile)
 
             assertThat(awaitItem()).isEqualTo(ReviewEvent.Continue)
         }
@@ -130,21 +130,21 @@ class ReviewViewModelTest {
         val failing = object : ProfileRepository by store {
             var failNext = true
 
-            override suspend fun saveProfile(profile: CandidateProfile) {
+            override suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean {
                 if (failNext) {
                     failNext = false
                     error("disk full")
                 }
-                store.saveProfile(profile)
+                return store.saveProfileIfUnchanged(expected, replacement)
             }
         }
         val viewModel = viewModel(failing)
 
         viewModel.events.test {
-            viewModel.onContinue()
+            viewModel.onContinue(viewModel.ready().profile)
             assertThat(awaitItem()).isEqualTo(ReviewEvent.SaveFailed)
 
-            viewModel.onContinue()
+            viewModel.onContinue(viewModel.ready().profile)
             assertThat(awaitItem()).isEqualTo(ReviewEvent.Continue)
         }
     }
@@ -157,8 +157,8 @@ class ReviewViewModelTest {
         val viewModel = viewModel(repository)
 
         viewModel.events.test {
-            viewModel.onContinue()
-            viewModel.onContinue()
+            viewModel.onContinue(viewModel.ready().profile)
+            viewModel.onContinue(viewModel.ready().profile)
             gate.complete(Unit)
 
             assertThat(awaitItem()).isEqualTo(ReviewEvent.Continue)
@@ -174,8 +174,8 @@ class ReviewViewModelTest {
         val viewModel = viewModel()
 
         viewModel.events.test {
-            viewModel.onContinue()
-            viewModel.onContinue()
+            viewModel.onContinue(viewModel.ready().profile)
+            viewModel.onContinue(viewModel.ready().profile)
 
             assertThat(awaitItem()).isEqualTo(ReviewEvent.Continue)
             assertThat(awaitItem()).isEqualTo(ReviewEvent.Continue)
@@ -198,7 +198,7 @@ class ReviewViewModelTest {
 
         viewModel.events.test {
             assertThat(awaitItem()).isEqualTo(ReviewEvent.NothingToReview)
-            viewModel.onContinue()
+            viewModel.onContinue(null)
             assertThat(awaitItem()).isEqualTo(ReviewEvent.NothingToReview)
         }
 
@@ -206,17 +206,19 @@ class ReviewViewModelTest {
     }
 
     @Test
-    fun keepsEditsSavedAfterTheScreenState() = runTest {
+    fun staleDisplayedProfileCannotConfirmLaterEdits() = runTest {
         store.sendProfile(fixedReviewProfile())
         val viewModel = viewModel()
-        viewModel.ready()
+        val displayed = viewModel.ready().profile
+        val edited = fixedReviewProfile().copy(linkedinUrl = SAMPLE_LINKEDIN)
+        store.sendProfile(edited)
 
-        store.sendProfile(fixedReviewProfile().copy(linkedinUrl = SAMPLE_LINKEDIN))
         viewModel.events.test {
-            viewModel.onContinue()
+            viewModel.onContinue(displayed)
+            expectNoEvents()
+            assertThat(saved()).isEqualTo(edited)
+            viewModel.onContinue(viewModel.ready().profile)
             assertThat(awaitItem()).isEqualTo(ReviewEvent.Continue)
         }
-
-        assertThat(saved().linkedinUrl).isEqualTo(SAMPLE_LINKEDIN)
     }
 }

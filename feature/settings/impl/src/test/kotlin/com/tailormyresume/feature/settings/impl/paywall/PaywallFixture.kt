@@ -11,17 +11,29 @@ import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import java.io.IOException
 
 internal class CountingPaymentGateway(
-    val scripted: TestPaymentGateway = TestPaymentGateway(),
+    val scripted: TestPaymentGateway = TestPaymentGateway().withFreeCredits(0),
     var purchaseGate: CompletableDeferred<Unit>? = null,
     var restoreGate: CompletableDeferred<Unit>? = null,
     var packsFailures: Int = 0,
     var restoreFailure: Exception? = null,
-    var onRestore: () -> Unit = {},
+    initialEntitlement: PurchaseEntitlement? = null,
+    var restoredEntitlement: PurchaseEntitlement? = null,
+    var entitlementFailure: Exception? = null,
 ) : PaymentGateway by scripted {
+    private val held = MutableStateFlow(initialEntitlement)
+
+    override suspend fun entitlement(): PurchaseEntitlement {
+        entitlementFailure?.let { throw it }
+        return held.value ?: scripted.entitlement()
+    }
+
+    override fun observeEntitlement(): Flow<PurchaseEntitlement> = combine(scripted.observeEntitlement(), held) { stored, restored -> restored ?: stored }
+
     var packsCalls = 0
     var purchaseCalls = 0
     var restoreCalls = 0
@@ -44,8 +56,7 @@ internal class CountingPaymentGateway(
         restoreCalls += 1
         restoreGate?.await()
         restoreFailure?.let { throw it }
-        onRestore()
-        return scripted.restorePurchases()
+        return (restoredEntitlement ?: scripted.restorePurchases()).also { held.value = it }
     }
 }
 

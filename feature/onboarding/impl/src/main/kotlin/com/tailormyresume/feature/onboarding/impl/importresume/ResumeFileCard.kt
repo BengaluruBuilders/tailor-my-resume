@@ -11,12 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tailormyresume.core.designsystem.component.content.TmrFitText
+import com.tailormyresume.core.designsystem.component.TmrWholeWordText
 import com.tailormyresume.core.designsystem.icon.TmrIcons
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 
@@ -64,14 +63,14 @@ internal fun ResumeFileCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(3.dp),
                 ) {
-                    TmrFitText(
+                    TmrWholeWordText(
                         text = name,
                         style = TmrTheme.typography.strongLarge,
                         color = titleColor,
                         breakAfter = NAME_SEPARATORS,
                     )
                     if (meta.isNotBlank()) {
-                        Text(text = meta, style = TmrTheme.typography.caption, color = metaColor)
+                        TmrWholeWordText(text = meta, style = TmrTheme.typography.caption, color = metaColor)
                     }
                 }
             }

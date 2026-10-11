@@ -61,7 +61,7 @@ class UnreadableScreenTest {
 
         composeRule.onNodeWithText("We couldn't read that file").assertIsDisplayed()
         composeRule.onNodeWithText("This file is bigger than 5\u00A0MB.").assertIsDisplayed()
-        composeRule.onNodeWithText("PDF · 6.0 MB").assertIsDisplayed()
+        composeRule.onNodeWithText("PDF · 6.0\u00a0MB").assertIsDisplayed()
     }
 
     @Test

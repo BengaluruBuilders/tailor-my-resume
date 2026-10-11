@@ -3,11 +3,15 @@ package com.tailormyresume.feature.tailor.impl.exported
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.JobApplication
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
@@ -26,6 +30,7 @@ import com.tailormyresume.feature.tailor.impl.export.FakeResumePdfRenderer
 import com.tailormyresume.feature.tailor.impl.testProfile
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -53,6 +58,7 @@ class ExportedViewModelTest {
     private val settingsRepository = TestResumeSettingsRepository()
     private val exportHistory = TestExportHistoryRepository()
     private val creditsRepository = TestCreditsRepository()
+    private val paymentGateway = TestPaymentGateway().withFreeCredits(0)
     private val clock = TestClock()
 
     private val b1 = acceptedBullet(
@@ -87,9 +93,13 @@ class ExportedViewModelTest {
         TimeZone.setDefault(initialZone)
     }
 
-    private fun viewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) = ExportedViewModel(
+    private fun viewModel(
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        creditBalance: AccountCreditBalance = AccountCreditBalance(paymentGateway),
+    ) = ExportedViewModel(
         applicationRepository = applicationRepository,
         creditsRepository = creditsRepository,
+        creditBalance = creditBalance,
         exportResume = ExportResumeUseCase(
             applicationRepository,
             profileRepository,
@@ -145,6 +155,7 @@ class ExportedViewModelTest {
 
     @Test
     fun paidExportShowsCreditsLine() = runTest {
+        paymentGateway.withFreeCredits(3)
         creditsRepository.sendLedger(
             listOf(
                 entry(CreditLedgerKind.FREE_GRANT, 1),
@@ -170,6 +181,32 @@ class ExportedViewModelTest {
         assertThat(ready.status).isEqualTo(ApplicationStatus.SAVED)
         assertThat(ready.markedOn).isNull()
         assertThat(ready.statusSheet).isNull()
+    }
+
+    @Test
+    fun walletBalanceUpdatesWhileLedgerHistoryStaysStale() = runTest {
+        paymentGateway.withFreeCredits(3)
+        creditsRepository.sendLedger(listOf(entry(CreditLedgerKind.FREE_GRANT, 99)))
+        seed()
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+
+        assertThat(viewModel.ready().creditsLeft).isEqualTo(3)
+        paymentGateway.unlock("another-application")
+        assertThat(viewModel.ready().creditsLeft).isEqualTo(2)
+    }
+
+    @Test
+    fun unknownWalletIsNotZeroCredits() = runTest {
+        val unknown = PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false)
+        val gateway = object : PaymentGateway by paymentGateway {
+            override fun observeEntitlement() = flowOf(unknown)
+        }
+        seed()
+        val viewModel = viewModel(creditBalance = AccountCreditBalance(gateway))
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+
+        assertThat(viewModel.ready().creditsLeft).isNull()
     }
 
     @Test
@@ -209,6 +246,7 @@ class ExportedViewModelTest {
 
     @Test
     fun anotherApplicationsSpendDoesNotMakeThisOneFree() = runTest {
+        paymentGateway.withFreeCredits(2)
         creditsRepository.sendLedger(
             listOf(
                 entry(CreditLedgerKind.FREE_GRANT, 3),

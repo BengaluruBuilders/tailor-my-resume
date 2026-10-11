@@ -3,7 +3,7 @@ package com.tailormyresume.feature.settings.impl.paywall
 import com.tailormyresume.core.domain.ApplicationPack
 
 internal data class PaywallUiState(
-    val credits: Int,
+    val credits: Int?,
     val packs: List<ApplicationPack>,
     val selectedPackId: String?,
     val busy: Boolean,
@@ -12,7 +12,7 @@ internal data class PaywallUiState(
         get() = packs.firstOrNull { it.id == selectedPackId }
 
     companion object {
-        val Initial = PaywallUiState(credits = 0, packs = emptyList(), selectedPackId = null, busy = false)
+        val Initial = PaywallUiState(credits = null, packs = emptyList(), selectedPackId = null, busy = false)
     }
 }
 

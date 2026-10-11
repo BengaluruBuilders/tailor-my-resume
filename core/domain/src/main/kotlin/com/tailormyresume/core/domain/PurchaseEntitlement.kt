@@ -5,6 +5,7 @@ data class PurchaseEntitlement(
     val purchasedCredits: Int,
     val pendingPackIds: List<String>,
     val unlockedApplicationIds: Set<String> = emptySet(),
+    val hasKnownBalance: Boolean = true,
 ) {
     val totalCredits: Int
         get() = freeCredits + purchasedCredits

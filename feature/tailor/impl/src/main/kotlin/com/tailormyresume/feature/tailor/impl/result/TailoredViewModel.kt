@@ -42,6 +42,7 @@ internal class TailoredViewModel @AssistedInject constructor(
         if (application == null || profile == null || resume == null) return TailoredUiState.NotFound
         val previewed = resume.withPendingAccepted()
         val document = assembler.assemble(profile, previewed)
+        val changes = resume.toChangeCards(profile, application.quickAnswer, application.job.requirements)
         return TailoredUiState.Ready(
             jobTitle = application.job.title,
             company = application.job.company,
@@ -49,10 +50,10 @@ internal class TailoredViewModel @AssistedInject constructor(
             contact = document.contactLine,
             blocks = document.toPaperBlocks(previewed),
             coveragePercent = application.gapAnalysis
-                ?.let { KeywordCoverageCalculator.compute(it.matches, application.quickAnswer, previewed).final }
+                ?.let { KeywordCoverageCalculator.compute(it.matches, application.quickAnswer, previewed, profile).final }
                 ?: 0,
-            changes = resume.toChangeCards(profile),
-            accepted = application.changesAcceptedAt != null,
+            changes = changes,
+            accepted = changes.isNotEmpty() && application.changesAcceptedAt != null,
             exportEnabled = ExportReadiness.check(application) == ExportCheck.ALLOWED,
         )
     }

@@ -5,15 +5,15 @@ import com.tailormyresume.core.domain.profile.RequiredGaps
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.ProfileEntry
-import com.tailormyresume.core.model.logicalEntries
+import com.tailormyresume.core.model.continues
 
 private const val PRESENT = "Present"
-private const val SKILL_CHIPS_SHOWN = 5
 private const val DETAIL_SEPARATOR = " · "
 private const val RANGE_SEPARATOR = " – "
 
 internal fun CandidateProfile.toReviewUiState(): ReviewUiState.Ready =
     ReviewUiState.Ready(
+        profile = this,
         sourceFileName = sourceFileName?.takeIf(String::isNotBlank),
         percent = ProfileCompleteness.percent(this),
         gap = RequiredGaps.of(this).firstOrNull()?.let { ReviewGap(it.entryId, it.title) },
@@ -23,13 +23,20 @@ internal fun CandidateProfile.toReviewUiState(): ReviewUiState.Ready =
             email = email,
             phoneAndCity = listOf(phone, city).filter(String::isNotBlank).joinToString(DETAIL_SEPARATOR),
         ),
-        roles = entries.logicalEntries(EntryCategory.EXPERIENCE).map { ReviewRole(it.title, it.organization, it.reviewDates()) },
+        roles = entries.logicalGroups(EntryCategory.EXPERIENCE).map { group ->
+            group.first().let { entry ->
+                ReviewRole(entry.title, entry.organization, entry.reviewDates(), group.flatMap { it.bullets }.map { it.text })
+            }
+        },
         skills = ReviewSkills(
             count = skills.size,
-            chips = skills.take(SKILL_CHIPS_SHOWN),
-            more = (skills.size - SKILL_CHIPS_SHOWN).coerceAtLeast(0),
+            chips = skills,
         ),
-        education = entries.logicalEntries(EntryCategory.EDUCATION).map { ReviewEducation(it.title, it.educationDetail()) },
+        education = entries.logicalGroups(EntryCategory.EDUCATION).map { group ->
+            group.first().let { entry ->
+                ReviewEducation(entry.title, entry.educationDetail(), group.flatMap { it.bullets }.map { it.text })
+            }
+        },
     )
 
 private fun ProfileEntry.reviewDates(): ReviewDates {
@@ -46,4 +53,14 @@ private fun ProfileEntry.reviewDates(): ReviewDates {
 private fun ProfileEntry.educationDetail(): String {
     val years = listOf(startDate, endDate).map(String::trim).filter(String::isNotEmpty).joinToString(RANGE_SEPARATOR)
     return listOf(organization.trim(), years).filter(String::isNotEmpty).joinToString(DETAIL_SEPARATOR)
+}
+
+private fun List<ProfileEntry>.logicalGroups(category: EntryCategory): List<List<ProfileEntry>> {
+    val groups = mutableListOf<MutableList<ProfileEntry>>()
+    forEachIndexed { index, entry ->
+        if (entry.category == category) {
+            if (index > 0 && entry.continues(this[index - 1])) groups.last().add(entry) else groups += mutableListOf(entry)
+        }
+    }
+    return groups
 }

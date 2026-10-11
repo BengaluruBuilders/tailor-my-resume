@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,8 @@ import com.tailormyresume.feature.tailor.impl.result.ChangeSource
 internal fun EditResumeScreen(
     state: EditResumeUiState.Ready,
     onBulletChange: (bulletId: String, text: String) -> Unit,
+    onSummaryChange: (String) -> Unit,
+    onSkillsChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = TmrTheme.colors
@@ -76,32 +79,53 @@ internal fun EditResumeScreen(
                 )
             }
         }
-        if (state.summary.isNotBlank()) {
-            TmrSectionLabel(text = stringResource(R.string.feature_tailor_impl_edit_summary_label))
-            TmrCard {
-                Text(
-                    text = state.summary,
-                    style = TmrTheme.typography.body,
-                    color = colors.text,
-                )
-            }
-        }
+        TmrSectionLabel(text = stringResource(R.string.feature_tailor_impl_edit_summary_label))
+        EditTextCard(
+            text = state.summary,
+            label = stringResource(R.string.feature_tailor_impl_edit_summary_label),
+            onTextChange = onSummaryChange,
+            minHeight = 96.dp,
+        )
         state.roles.forEach { role ->
             TmrSectionLabel(text = role.label)
             role.bullets.forEach { bullet ->
                 EditBulletCard(bullet = bullet, onBulletChange = onBulletChange)
             }
         }
-        if (state.skills.isNotBlank()) {
-            TmrSectionLabel(text = stringResource(R.string.feature_tailor_impl_edit_skills_label))
-            TmrCard {
-                Text(
-                    text = state.skills,
-                    style = TmrTheme.typography.body,
-                    color = colors.text,
-                )
-            }
-        }
+        TmrSectionLabel(text = stringResource(R.string.feature_tailor_impl_edit_skills_label))
+        EditTextCard(
+            text = state.skills,
+            label = stringResource(R.string.feature_tailor_impl_edit_skills_label),
+            onTextChange = onSkillsChange,
+            minHeight = 70.dp,
+        )
+    }
+}
+
+@Composable
+private fun EditTextCard(
+    text: String,
+    label: String,
+    onTextChange: (String) -> Unit,
+    minHeight: androidx.compose.ui.unit.Dp,
+    modifier: Modifier = Modifier,
+) {
+    val colors = TmrTheme.colors
+    var value by remember(label, text) { mutableStateOf(text) }
+    TmrCard(modifier = modifier) {
+        BasicTextField(
+            value = value,
+            onValueChange = {
+                value = it
+                onTextChange(it)
+            },
+            textStyle = TmrTheme.typography.body.copy(color = colors.text),
+            cursorBrush = SolidColor(colors.lime),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(minHeight)
+                .semantics { contentDescription = label },
+        )
     }
 }
 

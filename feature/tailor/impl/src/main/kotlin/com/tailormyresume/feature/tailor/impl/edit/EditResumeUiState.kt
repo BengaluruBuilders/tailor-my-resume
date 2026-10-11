@@ -29,4 +29,6 @@ internal data class EditBullet(
 
 internal sealed interface EditResumeEvent {
     data object Saved : EditResumeEvent
+
+    data object SaveFailed : EditResumeEvent
 }

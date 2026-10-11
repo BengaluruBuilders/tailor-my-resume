@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
@@ -24,6 +25,8 @@ private const val ZERO_WIDTH_SPACE = '\u200B'
 
 private const val SHRINK_STEP = 0.9f
 
+val TmrWholeWordTextLayoutKey = SemanticsPropertyKey<() -> TextLayoutResult?>("TmrWholeWordTextLayout")
+
 @Composable
 fun TmrWholeWordText(
     text: String,
@@ -31,14 +34,16 @@ fun TmrWholeWordText(
     color: Color,
     modifier: Modifier = Modifier,
     textAlign: TextAlign? = null,
+    breakAfter: CharArray = charArrayOf(),
 ) {
     val fontScale = LocalDensity.current.fontScale
     val autoSize = remember(style.fontSize, fontScale) {
         if (fontScale > 1f) WholeWordAutoSize(style.fontSize, (style.fontSize.value / fontScale).sp) else null
     }
+    val layout = remember { arrayOfNulls<TextLayoutResult>(1) }
     key(fontScale) {
         Text(
-            text = text,
+            text = withBreakOpportunities(text, breakAfter),
             style = style,
             color = color,
             textAlign = textAlign,
@@ -46,7 +51,11 @@ fun TmrWholeWordText(
             softWrap = true,
             maxLines = Int.MAX_VALUE,
             overflow = TextOverflow.Clip,
-            modifier = modifier,
+            onTextLayout = { layout[0] = it },
+            modifier = modifier.semantics {
+                this.text = AnnotatedString(text)
+                this[TmrWholeWordTextLayoutKey] = { layout[0] }
+            },
         )
     }
 }

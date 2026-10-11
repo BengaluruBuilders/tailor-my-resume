@@ -142,19 +142,22 @@ private fun ExportedHeader(state: ExportedUiState.Ready) {
 
 @Composable
 private fun CreditsCard(state: ExportedUiState.Ready) {
+    val creditsLeft = state.creditsLeft
     TmrCard {
         Row(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = state.creditsLeft.toString(),
+                text = creditsLeft?.toString() ?: "—",
                 style = TmrTheme.typography.display,
                 color = TmrTheme.colors.text,
             )
-            val line = if (state.freeResumeUsed) {
+            val line = if (creditsLeft == null) {
+                stringResource(R.string.feature_tailor_impl_exported_balance_unavailable)
+            } else if (state.freeResumeUsed) {
                 stringResource(
-                    if (state.creditsLeft == 0) {
+                    if (creditsLeft == 0) {
                         R.string.feature_tailor_impl_exported_credits_free
                     } else {
                         R.string.feature_tailor_impl_exported_credits_free_with_balance
@@ -163,9 +166,9 @@ private fun CreditsCard(state: ExportedUiState.Ready) {
             } else {
                 pluralStringResource(
                     R.plurals.feature_tailor_impl_exported_credits_paid,
-                    state.creditsLeft,
-                    state.creditsLeft,
-                    state.creditsLeft + 1,
+                    creditsLeft,
+                    creditsLeft,
+                    creditsLeft + 1,
                 )
             }
             Text(

@@ -27,12 +27,14 @@ import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastHost
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastState
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.core.testing.data.PrototypeFixtures
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.feature.applications.api.navigation.ApplicationDetailNavKey
 import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
 import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
@@ -74,6 +76,10 @@ internal abstract class ApplicationsHiltTestBindings {
     companion object {
         @Provides
         @Singleton
+        fun providePaymentGateway(): PaymentGateway = TestPaymentGateway().withFreeCredits(0)
+
+        @Provides
+        @Singleton
         fun provideExportedPdfIntents(): ExportedPdfIntents = object : ExportedPdfIntents {
             override suspend fun shareIntent(applicationId: String): Intent? = null
 
@@ -111,6 +117,9 @@ class ApplicationsRealEntryHiltTest {
     @Inject
     lateinit var creditsRepository: CreditsRepository
 
+    @Inject
+    lateinit var paymentGateway: PaymentGateway
+
     private val state = NavigationState(NavBackStack<NavKey>(DefaultApplicationsNavKey))
     private val navigator = Navigator(state)
     private val toast = TmrToastState()
@@ -121,6 +130,7 @@ class ApplicationsRealEntryHiltTest {
 
     private fun seed(withCredits: Boolean) {
         hiltRule.inject()
+        (paymentGateway as TestPaymentGateway).withFreeCredits(if (withCredits) 3 else 0)
         val scenario = PrototypeFixtures.returning()
         runBlocking {
             profileRepository.saveProfile(scenario.profile)

@@ -31,6 +31,8 @@ internal sealed interface ApplicationDetailEvent {
 
     data object FileMissing : ApplicationDetailEvent
 
+    data object BalanceUnavailable : ApplicationDetailEvent
+
     data object ComingSoon : ApplicationDetailEvent
 
     data class StatusSet(val status: ApplicationStatus) : ApplicationDetailEvent

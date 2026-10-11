@@ -56,7 +56,7 @@ class ReadingScreenTest {
         listOf(
             "Reading your resume",
             "Priya_Deshmukh_Resume.pdf",
-            "PDF · 112 KB",
+            "PDF · 112 KB",
             "100%",
             "Takes about 20 seconds",
             "Contact details",

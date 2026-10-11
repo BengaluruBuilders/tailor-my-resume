@@ -16,15 +16,15 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.ApplicationRepository
-import com.tailormyresume.core.data.repository.CreditsRepository
+import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.designsystem.theme.TmrTheme
-import com.tailormyresume.core.model.CreditLedgerEntry
-import com.tailormyresume.core.model.CreditLedgerKind
+import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.navigation.ChromeActions
 import com.tailormyresume.core.navigation.LocalChromeActions
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.feature.analysis.api.navigation.JobResultNavKey
 import com.tailormyresume.feature.analysis.api.navigation.QuickQuestionNavKey
 import com.tailormyresume.feature.analysis.impl.ResultTestData
@@ -45,7 +45,6 @@ import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import javax.inject.Inject
-import kotlin.time.Instant
 
 private const val TAILOR = "Tailor my resume"
 private const val SKIP = "Skip this"
@@ -76,7 +75,10 @@ class JobResultRealEntryTest {
     lateinit var applicationRepository: ApplicationRepository
 
     @Inject
-    lateinit var creditsRepository: CreditsRepository
+    lateinit var paymentGateway: PaymentGateway
+
+    @Inject
+    lateinit var profileRepository: ProfileRepository
 
     private val state = NavigationState(NavBackStack<NavKey>(JobResultNavKey(ResultTestData.APP_ID)))
     private val navigator = Navigator(state)
@@ -88,7 +90,8 @@ class JobResultRealEntryTest {
         hiltRule.inject()
         runBlocking {
             applicationRepository.upsertApplication(ResultTestData.application())
-            creditsRepository.record(CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, 3, null, null, Instant.fromEpochSeconds(0)))
+            profileRepository.saveProfile(ResultTestData.profile)
+            (paymentGateway as TestPaymentGateway).withFreeCredits(3)
         }
     }
 
@@ -121,9 +124,7 @@ class JobResultRealEntryTest {
 
     @Test
     fun tapTailorWithNoCreditsOpensPaywall() {
-        runBlocking {
-            creditsRepository.record(CreditLedgerEntry(CreditLedgerKind.SPEND, -3, null, null, Instant.fromEpochSeconds(1)))
-        }
+        (paymentGateway as TestPaymentGateway).withFreeCredits(0)
         show(JobResultNavKey(ResultTestData.APP_ID))
         awaitText(TAILOR)
 

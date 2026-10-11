@@ -110,7 +110,7 @@ class TailoringRunnerTest {
         assertThat(stored.changesAcceptedAt).isNull()
         assertThat(stored.keywordCoverage?.final).isNotNull()
         assertThat(stored.keywordCoverage?.final)
-            .isEqualTo(KeywordCoverageCalculator.compute(gap.matches, null, storedResume).final)
+            .isEqualTo(KeywordCoverageCalculator.compute(gap.matches, null, storedResume.withPendingAccepted(), profile).final)
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.tailormyresume.core.domain.offline
 
+import com.tailormyresume.core.domain.AnswerFacts
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
@@ -13,6 +14,7 @@ import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementPriority
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
+import com.tailormyresume.core.model.TailoredSkills
 import com.tailormyresume.core.model.confirmedWithinLimits
 import javax.inject.Inject
 
@@ -30,8 +32,16 @@ class OfflineResumeTailor @Inject constructor() : ResumeTailor {
         val jobKeywords = job.requirements.flatMap { it.keywords }.distinct()
         val bullets = profile.confirmedWithinLimits().entries
             .flatMap { tailorEntry(it, weights, rewriter, jobKeywords) }
-        return TailoredResume(bullets)
+        return TailoredResume(bullets, skills = skillsWithAnswer(profile, AnswerFacts.keywords(answer, job)))
     }
+
+    private fun skillsWithAnswer(profile: CandidateProfile, answerKeywords: List<String>): TailoredSkills? {
+        val known = profile.skills.map(::skillKey).toSet()
+        val added = answerKeywords.filter { skillKey(it) !in known }.distinctBy(::skillKey)
+        return added.takeIf { it.isNotEmpty() }?.let { TailoredSkills(profile.skills + it, profile.skills) }
+    }
+
+    private fun skillKey(skill: String): String = SkillLexicon.normaliseStrict(skill) ?: skill.trim().lowercase()
 
     private fun keywordWeights(gap: GapAnalysis): Map<String, Int> {
         val weights = LinkedHashMap<String, Int>()

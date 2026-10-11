@@ -55,12 +55,13 @@ class RemotePaymentGatewayTest {
     }
 
     @Test
-    fun observedEntitlementEmitsNoCreditsWhenTheWalletCannotBeFetched() = runTest {
+    fun observedEntitlementHasUnknownBalanceWhenTheWalletCannotBeFetched() = runTest {
         server.shutdown()
 
         val entitlement = gateway().observeEntitlement().first()
 
-        assertThat(entitlement.totalCredits).isEqualTo(0)
+        assertThat(entitlement.hasKnownBalance).isFalse()
+        assertThat(com.tailormyresume.core.domain.account.AccountCreditBalance(gateway()).cachedCredits()).isNull()
     }
 
     @Test
@@ -70,6 +71,7 @@ class RemotePaymentGatewayTest {
         val entitlement = gateway().entitlement()
 
         assertThat(entitlement.purchasedCredits).isEqualTo(4)
+        assertThat(entitlement.hasKnownBalance).isTrue()
         assertThat(server.takeRequest().path).isEqualTo("/v1/tailormyresume/wallet")
     }
 

@@ -15,6 +15,24 @@ abstract class ProfileDao {
     @Query("SELECT * FROM profile WHERE id = ${ProfileEntity.SINGLETON_ID}")
     abstract fun observePopulatedProfile(): Flow<PopulatedProfile?>
 
+    @Query("SELECT * FROM profile WHERE id = ${ProfileEntity.SINGLETON_ID}")
+    abstract suspend fun readProfile(): ProfileEntity?
+
+    @Query("SELECT * FROM profile_entries WHERE profileId = ${ProfileEntity.SINGLETON_ID} ORDER BY position")
+    abstract suspend fun readEntries(): List<ProfileEntryEntity>
+
+    @Transaction
+    open suspend fun replaceProfileIfUnchanged(
+        expectedProfile: ProfileEntity,
+        expectedEntries: List<ProfileEntryEntity>,
+        replacement: ProfileEntity,
+        replacementEntries: List<ProfileEntryEntity>,
+    ): Boolean {
+        if (readProfile() != expectedProfile || readEntries() != expectedEntries) return false
+        replaceProfile(replacement, replacementEntries)
+        return true
+    }
+
     @Upsert
     abstract suspend fun upsertProfile(profile: ProfileEntity)
 

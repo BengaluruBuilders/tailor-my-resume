@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.fact.FactIdAllocator
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
+import com.tailormyresume.core.model.EvidenceBullet
 import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.testing.repository.TestProfileRepository
@@ -100,18 +101,31 @@ class SaveManualProfileUseCaseTest {
     }
 
     @Test
-    fun doesNotReplaceARoleThatHasDatesEvenIfUserStated() = runTest {
-        val dated = ProfileEntry(
-            "W-01", EntryCategory.EXPERIENCE, "Business Analyst", "Infosys", "Jul 2022", "Present", emptyList(),
-            FactSource.USER_STATED, isConfirmed = true,
+    fun replacesTheEditedManualRoleAndPreservesEditorFields() = runTest {
+        val edited = ProfileEntry(
+            "W-01",
+            EntryCategory.EXPERIENCE,
+            "Business Analyst",
+            "Infosys",
+            "Jul 2022",
+            "Present",
+            listOf(EvidenceBullet("b-1", "Built monthly reports")),
+            FactSource.USER_EDITED,
+            isConfirmed = true,
         )
-        repository.sendProfile(CandidateProfile("Old", "", "", "", emptyList(), listOf(dated)))
+        repository.sendProfile(CandidateProfile("Old", "", "", "", emptyList(), listOf(edited)))
 
-        useCase(contact, replacingEntryId = dated.id)
+        useCase(contact.copy(jobTitle = "Senior Analyst"), replacingEntryId = edited.id)
 
         val saved = checkNotNull(repository.observeProfile().first())
-        assertThat(saved.entries).hasSize(2)
-        assertThat(saved.entries.first()).isEqualTo(dated)
+        val role = saved.entries.single()
+        assertThat(role.id).isEqualTo("W-01")
+        assertThat(role.title).isEqualTo("Senior Analyst")
+        assertThat(role.organization).isEqualTo("Infosys")
+        assertThat(role.startDate).isEqualTo("Jul 2022")
+        assertThat(role.endDate).isEqualTo("Present")
+        assertThat(role.bullets).containsExactly(EvidenceBullet("b-1", "Built monthly reports"))
+        assertThat(role.source).isEqualTo(FactSource.USER_EDITED)
     }
 
     @Test

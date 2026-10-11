@@ -25,4 +25,5 @@
     <string name="feature_analysis_impl_question_continue">Continue</string>
     <string name="feature_analysis_impl_question_skip">Skip this</string>
     <string name="feature_analysis_impl_question_pick_answer">Pick an answer, or skip</string>
+    <string name="feature_analysis_impl_result_note_unknown_credits">Uses 1 credit · balance unavailable</string>
 </resources>

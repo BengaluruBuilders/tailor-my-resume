@@ -116,14 +116,12 @@ class MarkProfileReviewedUseCaseTest {
     }
 
     @Test
-    fun keepsEditsSavedAfterTheScreenState() = runTest {
-        repository.sendProfile(profile(*allCategories.toTypedArray()))
-        val edited = saved().copy(linkedinUrl = "linkedin.com/in/priya", skills = listOf("SQL", "Python"))
+    fun staleSnapshotDoesNotConfirmOrOverwriteLaterEdits() = runTest {
+        val displayed = profile(*allCategories.toTypedArray())
+        val edited = displayed.copy(linkedinUrl = "linkedin.com/in/priya", skills = listOf("SQL", "Python"))
         repository.sendProfile(edited)
 
-        useCase()
-
-        assertThat(saved().linkedinUrl).isEqualTo("linkedin.com/in/priya")
-        assertThat(saved().skills).containsExactly("SQL", "Python").inOrder()
+        assertThat(useCase(displayed)).isEqualTo(MarkReviewedResult.ProfileChanged)
+        assertThat(saved()).isEqualTo(edited)
     }
 }

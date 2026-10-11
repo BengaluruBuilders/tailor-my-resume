@@ -45,7 +45,8 @@ class SignInScreenshotTest {
     fun signingIn() {
         reduceMotion()
         val gate = CompletableDeferred<SignInResult>()
-        composeRule.showSignIn { SignInRoute(SignInViewModel(ScriptedSignInGateway { gate.await() })) }
+        val viewModel = SignInViewModel(ScriptedSignInGateway { gate.await() })
+        composeRule.showSignIn { SignInRoute(viewModel) }
         composeRule.onNodeWithText("Continue with Google").performClick()
         composeRule.captureSignIn("signin_signing_in")
         assertThat(gate.isCompleted).isFalse()
@@ -55,7 +56,8 @@ class SignInScreenshotTest {
     fun cancelledToast() {
         reduceMotion()
         composeRule.mainClock.autoAdvance = false
-        composeRule.showSignIn { SignInRoute(SignInViewModel(ScriptedSignInGateway { SignInResult.Cancelled })) }
+        val viewModel = SignInViewModel(ScriptedSignInGateway { SignInResult.Cancelled })
+        composeRule.showSignIn { SignInRoute(viewModel) }
         composeRule.onNodeWithText("Continue with Google").performClick()
         composeRule.mainClock.advanceTimeBy(400)
         composeRule.captureSignIn("signin_cancelled_toast")

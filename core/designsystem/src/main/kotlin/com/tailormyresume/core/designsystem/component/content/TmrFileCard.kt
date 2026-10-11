@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.R
+import com.tailormyresume.core.designsystem.component.TmrWholeWordText
 import com.tailormyresume.core.designsystem.icon.TmrIcons
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 
@@ -68,13 +69,13 @@ fun TmrFileCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                TmrFitText(
+                TmrWholeWordText(
                     text = fileName,
                     style = TmrTheme.typography.strongLarge,
                     color = TmrTheme.colors.text,
                     breakAfter = FILE_NAME_SEPARATORS,
                 )
-                Text(
+                TmrWholeWordText(
                     text = meta,
                     style = TmrTheme.typography.caption,
                     color = TmrTheme.colors.textMuted,

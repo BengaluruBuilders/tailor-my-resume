@@ -7,6 +7,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.navigation.RegisterChromeAction
+import com.tailormyresume.core.navigation.RegisterChromeBack
 import com.tailormyresume.feature.tailor.impl.R
 
 @Composable
@@ -17,7 +18,9 @@ internal fun EditResumeRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val toast = LocalTmrToast.current
     val savedMessage = stringResource(R.string.feature_tailor_impl_edit_saved)
+    val saveFailedMessage = stringResource(R.string.feature_tailor_impl_edit_save_failed)
     RegisterChromeAction(onAction = viewModel::onSave)
+    RegisterChromeBack(onBack = viewModel::onSave)
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
@@ -25,10 +28,17 @@ internal fun EditResumeRoute(
                     toast.show(savedMessage)
                     onBack()
                 }
+
+                EditResumeEvent.SaveFailed -> toast.show(saveFailedMessage)
             }
         }
     }
     (state as? EditResumeUiState.Ready)?.let { ready ->
-        EditResumeScreen(state = ready, onBulletChange = viewModel::onBulletChange)
+        EditResumeScreen(
+            state = ready,
+            onBulletChange = viewModel::onBulletChange,
+            onSummaryChange = viewModel::onSummaryChange,
+            onSkillsChange = viewModel::onSkillsChange,
+        )
     }
 }

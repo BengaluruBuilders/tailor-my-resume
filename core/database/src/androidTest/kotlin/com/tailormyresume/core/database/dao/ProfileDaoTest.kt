@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 internal class ProfileDaoTest : DatabaseTest() {
 
@@ -69,6 +71,36 @@ internal class ProfileDaoTest : DatabaseTest() {
         assertNull(profileDao.observePopulatedProfile().first())
         profileDao.upsertProfile(testProfile())
         assertEquals(emptyList(), profileDao.observePopulatedProfile().first()?.entries)
+    }
+
+    @Test
+    fun matchingReviewSnapshotCanConfirmEntries() = runTest {
+        val profile = testProfile()
+        val entries = listOf(testEntry("e1", 0).copy(isConfirmed = false))
+        val confirmed = entries.map { it.copy(isConfirmed = true) }
+        profileDao.replaceProfile(profile, entries)
+
+        assertTrue(profileDao.replaceProfileIfUnchanged(profile, entries, profile, confirmed))
+        assertEquals(confirmed, profileDao.readEntries())
+    }
+
+    @Test
+    fun changedProfileOrEntryRejectsTheReviewSnapshot() = runTest {
+        val profile = testProfile()
+        val entries = listOf(testEntry("e1", 0).copy(isConfirmed = false))
+        val confirmed = entries.map { it.copy(isConfirmed = true) }
+        val latestProfile = profile.copy(email = "updated@example.test")
+        profileDao.replaceProfile(latestProfile, entries)
+
+        assertFalse(profileDao.replaceProfileIfUnchanged(profile, entries, profile, confirmed))
+        assertEquals(latestProfile, profileDao.readProfile())
+        assertEquals(entries, profileDao.readEntries())
+
+        val latestEntries = entries.map { it.copy(bullets = listOf(EvidenceBulletDto("b-e1", "An unseen edit"))) }
+        profileDao.replaceProfile(profile, latestEntries)
+
+        assertFalse(profileDao.replaceProfileIfUnchanged(profile, entries, profile, confirmed))
+        assertEquals(latestEntries, profileDao.readEntries())
     }
 
     private fun testProfile() = ProfileEntity(

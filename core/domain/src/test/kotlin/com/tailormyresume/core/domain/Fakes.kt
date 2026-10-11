@@ -48,6 +48,9 @@ class FakeProfileRepository(initial: CandidateProfile? = null) : ProfileReposito
         this.profile.value = profile
     }
 
+    override suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean =
+        profile.compareAndSet(expected, replacement)
+
     override suspend fun clearProfile() {
         profile.value = null
     }

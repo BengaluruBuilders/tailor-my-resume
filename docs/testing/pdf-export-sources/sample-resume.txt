@@ -1,0 +1,8 @@
+Sample Candidate
+sample@example.test
+Experience
+Data Analyst | Example Company
+Jan 2020 - Dec 2022
+Built SQL reports for the finance team.
+Skills
+SQL, Excel, Python

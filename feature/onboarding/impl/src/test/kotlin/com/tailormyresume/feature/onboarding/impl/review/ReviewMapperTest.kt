@@ -3,6 +3,7 @@ package com.tailormyresume.feature.onboarding.impl.review
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
+import com.tailormyresume.core.model.EvidenceBullet
 import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.ProfileEntry
 import org.junit.Test
@@ -25,7 +26,7 @@ class ReviewMapperTest {
         assertThat(state.roles.map { it.organization }).containsExactly("Infosys", "Tata Digital", "Bajaj Finserv").inOrder()
         assertThat(state.roles[1].dates).isEqualTo(ReviewDates.EndMissing("Jun 2021"))
         assertThat(state.roles[2].dates).isEqualTo(ReviewDates.Range("Jun 2020", "May 2021"))
-        assertThat(state.education).containsExactly(ReviewEducation("B.Com, Finance", "Symbiosis College, Pune · 2020"))
+        assertThat(state.education).containsExactly(ReviewEducation("B.Com, Finance", "Symbiosis College, Pune · 2020", emptyList()))
         assertThat(state.skills.count).isEqualTo(18)
     }
 
@@ -88,20 +89,33 @@ class ReviewMapperTest {
     }
 
     @Test
-    fun skillsOverFiveShowPlusN() {
+    fun splitRoleAndEducationShowEveryConfirmedBullet() {
+        val profile = fixedReviewProfile().withEntries(
+            importedRole("a").copy(bullets = listOf(EvidenceBullet("a-b1", "First role bullet"))),
+            importedRole("a-2").copy(bullets = listOf(EvidenceBullet("a-2-b1", "Second role bullet"))),
+            importedRole("e", title = "B.Com", organization = "College", startDate = "2018", endDate = "2020")
+                .copy(category = EntryCategory.EDUCATION, bullets = listOf(EvidenceBullet("e-b1", "Education bullet"))),
+        )
+
+        val state = profile.toReviewUiState()
+
+        assertThat(state.roles.single().bullets).containsExactly("First role bullet", "Second role bullet").inOrder()
+        assertThat(state.education.single().bullets).containsExactly("Education bullet")
+    }
+
+    @Test
+    fun skillsShowEverySkill() {
         val skills = skillsOf(18).toReviewUiState().skills
 
-        assertThat(skills.chips).containsExactly("Skill 0", "Skill 1", "Skill 2", "Skill 3", "Skill 4").inOrder()
-        assertThat(skills.more).isEqualTo(13)
+        assertThat(skills.chips).containsExactlyElementsIn(List(18) { "Skill $it" }).inOrder()
         assertThat(skills.count).isEqualTo(18)
     }
 
     @Test
-    fun skillsAtOrUnderFiveShowNoPill() {
-        assertThat(skillsOf(5).toReviewUiState().skills.more).isEqualTo(0)
+    fun skillsAtOrUnderFiveShowEverySkill() {
         assertThat(skillsOf(5).toReviewUiState().skills.chips).hasSize(5)
-        assertThat(skillsOf(2).toReviewUiState().skills.more).isEqualTo(0)
-        assertThat(skillsOf(6).toReviewUiState().skills.more).isEqualTo(1)
+        assertThat(skillsOf(2).toReviewUiState().skills.chips).hasSize(2)
+        assertThat(skillsOf(6).toReviewUiState().skills.chips).hasSize(6)
     }
 
     @Test
@@ -122,7 +136,7 @@ class ReviewMapperTest {
 
         assertThat(state.contact.phoneAndCity).isEqualTo("Pune")
         assertThat(state.roles.single().dates).isEqualTo(ReviewDates.None)
-        assertThat(state.skills).isEqualTo(ReviewSkills(0, emptyList(), 0))
+        assertThat(state.skills).isEqualTo(ReviewSkills(0, emptyList()))
         assertThat(state.education).isEmpty()
         assertThat(state.gap).isNull()
         assertThat(state.sourceFileName).isNull()

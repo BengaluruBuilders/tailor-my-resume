@@ -86,8 +86,9 @@ class TailoredViewModelTest {
         assertThat(before.accepted).isFalse()
         assertThat(before.exportEnabled).isFalse()
         val pendingAccepted = TailoredResume(listOf(bullet)).withPendingAccepted()
+        val profile = checkNotNull(profileRepository.observeProfile().first())
         assertThat(before.coveragePercent)
-            .isEqualTo(KeywordCoverageCalculator.compute(gap.matches, null, pendingAccepted).final)
+            .isEqualTo(KeywordCoverageCalculator.compute(gap.matches, null, pendingAccepted, profile).final)
         assertThat(before.blocks.flatMap { it.lines }.map { line -> line.joinToString("") { it.text } })
             .contains("Developed an internal tool")
 
@@ -112,6 +113,22 @@ class TailoredViewModelTest {
             .contains("Built an internal tool")
         assertThat(applicationRepository.observeApplication("app-1").first()?.tailoredResume?.bullets?.single()?.decision)
             .isEqualTo(BulletDecision.REJECTED)
+    }
+
+    @Test
+    fun noChangesNeverShowsAcceptedAndCanExportImmediately() = runTest {
+        val unchanged = bullet.copy(proposedText = bullet.originalText)
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+        applicationRepository.sendApplications(listOf(testApplication(listOf(unchanged), gap)))
+        profileRepository.sendProfile(testProfile(listOf(entryFor("exp-1", unchanged))))
+
+        AcceptChangesUseCase(applicationRepository, clock)("app-1")
+
+        val ready = viewModel.ready()
+        assertThat(ready.changes).isEmpty()
+        assertThat(ready.accepted).isFalse()
+        assertThat(ready.exportEnabled).isTrue()
     }
 
     @Test

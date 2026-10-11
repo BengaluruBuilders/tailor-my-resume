@@ -14,9 +14,11 @@ class AccountCreditBalance @Inject constructor(
 
     suspend fun unusedCredits(): Int = knownEntitlement().totalCredits
 
-    suspend fun cachedCredits(): Int = observeCredits().first()
+    suspend fun cachedCredits(): Int? = observeCredits().first()
 
-    fun observeCredits(): Flow<Int> = paymentGateway.observeEntitlement().map { entitlement -> entitlement.totalCredits }
+    fun observeCredits(): Flow<Int?> = paymentGateway.observeEntitlement().map { entitlement ->
+        entitlement.totalCredits.takeIf { entitlement.hasKnownBalance }
+    }
 
     suspend fun creditLine(): AccountCreditLine {
         val entitlement = knownEntitlement()
@@ -26,12 +28,16 @@ class AccountCreditBalance @Inject constructor(
         )
     }
 
-    private suspend fun knownEntitlement(): PurchaseEntitlement = try {
-        paymentGateway.entitlement()
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (failure: Exception) {
-        paymentGateway.observeEntitlement().first()
+    private suspend fun knownEntitlement(): PurchaseEntitlement {
+        val entitlement = try {
+            paymentGateway.entitlement()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (failure: Exception) {
+            paymentGateway.observeEntitlement().first()
+        }
+        check(entitlement.hasKnownBalance) { "The credit balance is unavailable." }
+        return entitlement
     }
 
     suspend fun clearUnusedCredits(): PurchaseEntitlement {

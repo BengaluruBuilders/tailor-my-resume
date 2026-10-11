@@ -9,6 +9,7 @@ import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
+import com.tailormyresume.core.testing.repository.TestProfileRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.feature.analysis.impl.ResultTestData
 import kotlinx.coroutines.flow.collect
@@ -115,11 +116,11 @@ class QuickQuestionViewModelTest {
 
         assertThat(stored().quickAnswer).isEqualTo(answer)
         assertThat(stored().keywordCoverage)
-            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, answer, null))
+            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, answer, null, profile = ResultTestData.profile))
         assertThat(stored()).isEqualTo(
             before.copy(
                 quickAnswer = answer,
-                keywordCoverage = KeywordCoverageCalculator.compute(ResultTestData.matches, answer, null),
+                keywordCoverage = KeywordCoverageCalculator.compute(ResultTestData.matches, answer, null, profile = ResultTestData.profile),
             ),
         )
     }
@@ -182,27 +183,27 @@ class QuickQuestionViewModelTest {
 
         assertThat(stored().quickAnswer).isNull()
         assertThat(stored().keywordCoverage)
-            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, null, null))
+            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, null, null, profile = ResultTestData.profile))
     }
 
     @Test
     fun storedAnswerRecomputesUpToViaCalculator() = runTest {
-        val nullAnswerUpTo = KeywordCoverageCalculator.compute(ResultTestData.matches, null, null).upTo
+        val nullAnswerUpTo = KeywordCoverageCalculator.compute(ResultTestData.matches, null, null, profile = ResultTestData.profile).upTo
 
         val blank = storedFor(QuickChoice.YES_REGULARLY, "   ")
         assertThat(blank.keywordCoverage)
-            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, blank.quickAnswer, null))
+            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, blank.quickAnswer, null, profile = ResultTestData.profile))
         assertThat(blank.keywordCoverage?.upTo).isEqualTo(nullAnswerUpTo)
 
         val detailed = storedFor(QuickChoice.YES_REGULARLY, ResultTestData.STAKEHOLDER_DETAIL)
         assertThat(detailed.keywordCoverage)
-            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, detailed.quickAnswer, null))
+            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, detailed.quickAnswer, null, profile = ResultTestData.profile))
         assertThat(detailed.keywordCoverage?.upTo).isGreaterThan(nullAnswerUpTo)
 
         val notYet = storedFor(QuickChoice.NOT_YET, null)
         assertThat(notYet.quickAnswer?.detail).isEmpty()
         assertThat(notYet.keywordCoverage)
-            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, notYet.quickAnswer, null))
+            .isEqualTo(KeywordCoverageCalculator.compute(ResultTestData.matches, notYet.quickAnswer, null, profile = ResultTestData.profile))
         assertThat(notYet.keywordCoverage?.upTo).isEqualTo(nullAnswerUpTo)
     }
 
@@ -223,11 +224,11 @@ class QuickQuestionViewModelTest {
                 ),
             ),
         )
-        val storedFinal = KeywordCoverageCalculator.compute(ResultTestData.matches, null, resume).final
+        val storedFinal = KeywordCoverageCalculator.compute(ResultTestData.matches, null, resume, profile = ResultTestData.profile).final
         assertThat(storedFinal).isNotNull()
         seed(
             ResultTestData.application(tailoredResume = resume)
-                .copy(keywordCoverage = KeywordCoverageCalculator.compute(ResultTestData.matches, null, resume)),
+                .copy(keywordCoverage = KeywordCoverageCalculator.compute(ResultTestData.matches, null, resume, profile = ResultTestData.profile)),
         )
         val viewModel = viewModel()
         viewModel.onPick(QuickChoice.A_FEW_TIMES)
@@ -274,7 +275,7 @@ class QuickQuestionViewModelTest {
     }
 
     private fun TestScope.viewModel() =
-        QuickQuestionViewModel(applicationRepository, ResultTestData.APP_ID).also {
+        QuickQuestionViewModel(applicationRepository, TestProfileRepository().apply { sendProfile(ResultTestData.profile) }, ResultTestData.APP_ID).also {
             backgroundScope.launch(UnconfinedTestDispatcher()) { it.uiState.collect() }
         }
 

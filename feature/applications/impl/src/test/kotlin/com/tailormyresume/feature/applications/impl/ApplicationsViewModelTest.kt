@@ -2,8 +2,10 @@ package com.tailormyresume.feature.applications.impl
 
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.designsystem.component.content.TmrApplicationStatus
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.testing.data.PrototypeFixtures
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
@@ -20,10 +22,12 @@ class ApplicationsViewModelTest {
 
     private val applicationRepository = TestApplicationRepository()
     private val creditsRepository = TestCreditsRepository()
+    private val paymentGateway = TestPaymentGateway().withFreeCredits(3)
+    private val creditBalance = AccountCreditBalance(paymentGateway)
     private val profileRepository = TestProfileRepository()
     private val scenario = PrototypeFixtures.returning()
 
-    private fun viewModel() = ApplicationsViewModel(applicationRepository, creditsRepository, profileRepository)
+    private fun viewModel() = ApplicationsViewModel(applicationRepository, creditBalance, profileRepository)
 
     private suspend fun ApplicationsViewModel.settled(): ApplicationsUiState =
         state.first { it !is ApplicationsUiState.Loading }
@@ -38,7 +42,8 @@ class ApplicationsViewModelTest {
     @Test
     fun noApplicationsEmitsEmptyWithCreditsAndInitials() = runTest {
         profileRepository.sendProfile(scenario.profile)
-        creditsRepository.sendLedger(listOf(grant(1)))
+        creditsRepository.sendLedger(listOf(grant(99)))
+        paymentGateway.withFreeCredits(1)
 
         val state = viewModel().settled()
 

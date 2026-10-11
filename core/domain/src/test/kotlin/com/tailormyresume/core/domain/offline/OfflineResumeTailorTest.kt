@@ -2,11 +2,14 @@ package com.tailormyresume.core.domain.offline
 
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.TailorResumeUseCase
+import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EditType
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.JobDescription
+import com.tailormyresume.core.model.MatchStatus
+import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
 import kotlinx.coroutines.test.runTest
@@ -221,6 +224,49 @@ class OfflineResumeTailorTest {
     fun profileWithoutConfirmedEntriesGivesEmptyResume() = runTest {
         val profile = sampleProfile.copy(entries = sampleProfile.entries.map { it.copy(isConfirmed = false) })
         assertThat(tailorFor("Requirements\n- Kotlin", profile).second.bullets).isEmpty()
+    }
+
+    @Test
+    fun confirmedNamedSkillAnswerIsAddedAsAPendingSkillChange() = runTest {
+        val job = analyzer.analyze("Requirements\n- Looker")
+        val gap = matcher.match(sampleProfile, job)
+        val answer = QuickAnswer(job.requirements.single().id, "YES_REGULARLY", "")
+
+        val resume = tailor.tailor(sampleProfile, job, gap, "app-1", answer, "run-1")
+
+        assertThat(resume.skills?.original).isEqualTo(sampleProfile.skills)
+        assertThat(resume.skills?.skills).containsExactlyElementsIn(sampleProfile.skills + "Looker").inOrder()
+        assertThat(resume.skills?.decision).isEqualTo(BulletDecision.PENDING)
+    }
+
+    @Test
+    fun confirmedSkillAnswerDoesNotDuplicateAnExistingAlias() = runTest {
+        val profile = sampleProfile.copy(skills = sampleProfile.skills + "Structured Query Language")
+        val job = analyzer.analyze("Requirements\n- SQL")
+        val gap = matcher.match(profile, job)
+        val answer = QuickAnswer(job.requirements.single().id, "A_FEW_TIMES", "")
+
+        val resume = tailor.tailor(profile, job, gap, "app-1", answer, "run-1")
+
+        assertThat(resume.skills).isNull()
+    }
+
+    @Test
+    fun acceptingEveryOfflineChangeDeliversTheCoveragePromise() = runTest {
+        val useCase = TailorResumeUseCase(tailor, OfflineFabricationGuard())
+        jobDescriptionResources.forEach { resource ->
+            val job = analyzer.analyze(resourceText(resource))
+            val gap = matcher.match(sampleProfile, job)
+            val answered = gap.matches.firstOrNull { it.status == MatchStatus.GAP }
+                ?.let { QuickAnswer(it.requirement.id, "YES_REGULARLY", "") }
+            listOf(null, answered).forEach { answer ->
+                val promise = KeywordCoverageCalculator.compute(gap.matches, answer, null, sampleProfile)
+                val tailored = useCase(sampleProfile, job, gap, "app-1", "run-1", answer).withPendingAccepted()
+                val delivered = KeywordCoverageCalculator.compute(gap.matches, answer, tailored, sampleProfile)
+
+                assertThat(delivered.final).isEqualTo(promise.upTo)
+            }
+        }
     }
 
     @Test

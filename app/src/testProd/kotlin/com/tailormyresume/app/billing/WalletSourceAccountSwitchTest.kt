@@ -50,7 +50,7 @@ class WalletSourceAccountSwitchTest {
 
         val first = withTimeoutOrNull(FAST_WAIT_MILLIS) { gateway.observeEntitlement().first() }
 
-        assertThat(first).isEqualTo(NO_CREDITS)
+        assertThat(first).isEqualTo(NO_CREDITS.copy(hasKnownBalance = false))
     }
 
     @Test

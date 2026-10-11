@@ -271,6 +271,44 @@ class EditRoleViewModelTest {
     }
 
     @Test
+    fun saveSplitRole_updatesMetadataAcrossItsOriginalGroup() = runTest {
+        val base = PrototypeFixtures.fresh().profile
+        val first = base.entry("exp-tata")
+        val continuation = first.copy(
+            id = "exp-tata-2",
+            bullets = listOf(EvidenceBullet("exp-tata-2-b1", "Second fragment bullet")),
+            isConfirmed = false,
+        )
+        val adjacent = base.entry("exp-bajaj")
+        profileRepository.sendProfile(base.copy(entries = base.entries.flatMap { entry -> if (entry.id == first.id) listOf(first, continuation) else listOf(entry) }))
+        val viewModel = viewModel(continuation.id)
+        collectUiState(viewModel)
+        viewModel.onTitleChange("Senior Data Analyst")
+        viewModel.onCompanyChange("Tata Consultancy Services")
+        viewModel.onStartChange("May 2021")
+        viewModel.onEndChange("Apr 2022")
+
+        viewModel.events.test {
+            viewModel.save()
+            assertThat(awaitItem()).isEqualTo(EditRoleEvent.Saved)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        val saved = checkNotNull(savedProfile())
+        val group = saved.entries.filter { it.id in setOf(first.id, continuation.id) }
+        assertThat(group.map { listOf(it.title, it.organization, it.startDate, it.endDate) })
+            .containsExactly(
+                listOf("Senior Data Analyst", "Tata Consultancy Services", "May 2021", "Apr 2022"),
+                listOf("Senior Data Analyst", "Tata Consultancy Services", "May 2021", "Apr 2022"),
+            ).inOrder()
+        assertThat(saved.entry(first.id).bullets).isEqualTo(first.bullets)
+        assertThat(saved.entry(first.id).isConfirmed).isEqualTo(first.isConfirmed)
+        assertThat(saved.entry(continuation.id).bullets.map { it.id }).containsExactly("exp-tata-2-b1")
+        assertThat(saved.entry(adjacent.id)).isEqualTo(adjacent)
+        assertThat(RequiredGaps.of(saved)).isEmpty()
+    }
+
+    @Test
     fun saveNew_usesUserStatedAndAllocatedId() = runTest {
         val profile = PrototypeFixtures.returning().profile
         profileRepository.sendProfile(profile)

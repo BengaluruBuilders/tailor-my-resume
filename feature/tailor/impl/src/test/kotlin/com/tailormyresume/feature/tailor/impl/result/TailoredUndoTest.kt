@@ -44,4 +44,25 @@ class TailoredUndoTest {
 
         assertThat(undone).containsExactly("summary", "exp-infosys-b1", "skills").inOrder()
     }
+
+    @Test
+    fun noChangesFooterDoesNotOfferAcceptanceOrClaimAcceptance() {
+        rule.setContent {
+            TmrTheme {
+                TailoredScreen(
+                    state = ready(changes = emptyList(), accepted = true, exportEnabled = true),
+                    tab = TailoredTab.Changes,
+                    onTabChange = {},
+                    onUndo = {},
+                    onAcceptChanges = {},
+                    onEdit = {},
+                    onExport = {},
+                )
+            }
+        }
+
+        assertThat(rule.onAllNodesWithText("No changes to review").fetchSemanticsNodes()).hasSize(2)
+        assertThat(rule.onAllNodesWithText("Accept changes").fetchSemanticsNodes()).isEmpty()
+        assertThat(rule.onAllNodesWithText("Changes accepted").fetchSemanticsNodes()).isEmpty()
+    }
 }

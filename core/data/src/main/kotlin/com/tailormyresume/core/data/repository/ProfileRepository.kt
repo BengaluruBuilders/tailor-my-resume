@@ -8,5 +8,7 @@ interface ProfileRepository {
 
     suspend fun saveProfile(profile: CandidateProfile)
 
+    suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean
+
     suspend fun clearProfile()
 }

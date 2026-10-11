@@ -24,6 +24,24 @@ internal class OfflineFirstProfileRepository @Inject constructor(
             .flowOn(ioDispatcher)
 
     override suspend fun saveProfile(profile: CandidateProfile) {
+        requireUniqueIds(profile)
+        profileDao.replaceProfile(
+            profile = profile.asEntity(),
+            entries = profile.asEntryEntities(),
+        )
+    }
+
+    override suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean {
+        requireUniqueIds(replacement)
+        return profileDao.replaceProfileIfUnchanged(
+            expected.asEntity(),
+            expected.asEntryEntities(),
+            replacement.asEntity(),
+            replacement.asEntryEntities(),
+        )
+    }
+
+    private fun requireUniqueIds(profile: CandidateProfile) {
         val duplicateIds = profile.entries
             .groupingBy { it.id }
             .eachCount()
@@ -32,10 +50,6 @@ internal class OfflineFirstProfileRepository @Inject constructor(
         require(duplicateIds.isEmpty()) {
             "Profile entries must have unique ids. Duplicate ids: $duplicateIds"
         }
-        profileDao.replaceProfile(
-            profile = profile.asEntity(),
-            entries = profile.asEntryEntities(),
-        )
     }
 
     override suspend fun clearProfile() = profileDao.deleteProfile()

@@ -120,7 +120,8 @@ class OnboardingNavigationTest {
         val navigator = navigatorOf(UploadNavKey(), UploadErrorNavKey())
         draft.fail(UploadFailure(UploadFailureKind.ImageOnly, "scan.pdf", RESUME_PDF_MIME, 2_048L))
 
-        composeRule.showFlowScreen { UnreadableRoute(UnreadableViewModel(draft, NoopResumeFileResolver), navigator) }
+        val viewModel = UnreadableViewModel(draft, NoopResumeFileResolver)
+        composeRule.showFlowScreen { UnreadableRoute(viewModel, navigator) }
         composeRule.onNodeWithText("Paste as text").performClick()
         composeRule.waitForIdle()
 

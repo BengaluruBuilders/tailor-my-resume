@@ -2,6 +2,7 @@ package com.tailormyresume.core.domain.sample
 
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.repository.ApplicationRepository
+import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.SessionRepository
@@ -9,10 +10,13 @@ import com.tailormyresume.core.domain.AnalyzeJobUseCase
 import com.tailormyresume.core.domain.CreditSpend
 import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.domain.TailorResumeUseCase
+import com.tailormyresume.core.domain.offline.MockPackCatalogue
 import com.tailormyresume.core.domain.offline.OfflinePaymentGateway
 import com.tailormyresume.core.domain.onboarding.NextOnboardingStepUseCase
 import com.tailormyresume.core.domain.onboarding.OnboardingStep
 import com.tailormyresume.core.model.BulletDecision
+import com.tailormyresume.core.model.CreditLedgerEntry
+import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.TailoredBullet
@@ -33,6 +37,7 @@ class OfflineSampleDataController(
     private val tailorResume: TailorResumeUseCase,
     private val clock: Clock,
     private val firebaseUid: FirebaseUidProvider = FirebaseUidProvider { null },
+    private val credits: CreditsRepository? = null,
 ) : SampleDataController {
 
     override suspend fun load() {
@@ -40,6 +45,7 @@ class OfflineSampleDataController(
         val now = clock.now()
         signInSampleCandidate()
         paymentGateway.purchase(SampleDataSet.PURCHASED_PACK_ID)
+        recordGrantAndPurchase(now)
         SampleDataSet.applications.forEach { plan -> applicationRepository.upsertApplication(build(plan, now)) }
         SampleDataSet.exports.forEach { plan -> recordExport(plan, now) }
         sessionRepository.markOnboardingComplete()
@@ -49,6 +55,7 @@ class OfflineSampleDataController(
         sessionRepository.clear()
         exportHistoryRepository.clear()
         store.clear()
+        credits?.clear()
         profileRepository.clearProfile()
         applicationRepository.observeApplications().first().forEach { application ->
             applicationRepository.deleteApplication(application.id)
@@ -103,8 +110,17 @@ class OfflineSampleDataController(
 
     private fun TailoredBullet.decidedAs(decision: BulletDecision) = copy(decision = decision)
 
+    private suspend fun recordGrantAndPurchase(now: Instant) {
+        val pack = MockPackCatalogue.all.single { it.id == SampleDataSet.PURCHASED_PACK_ID }
+        credits?.record(CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, 1, null, null, now - 30.days))
+        credits?.record(CreditLedgerEntry(CreditLedgerKind.PURCHASE, pack.credits, null, pack.id, now - 20.days))
+    }
+
     private suspend fun recordExport(plan: SampleExportPlan, now: Instant) {
         val spend = paymentGateway.unlock(plan.applicationId)
+        if ((spend as? CreditSpend.Spent)?.kind != null) {
+            credits?.record(CreditLedgerEntry(CreditLedgerKind.SPEND, -1, plan.applicationId, null, now - plan.exportedDaysAgo.days))
+        }
         exportHistoryRepository.record(
             ExportRecord(
                 applicationId = plan.applicationId,

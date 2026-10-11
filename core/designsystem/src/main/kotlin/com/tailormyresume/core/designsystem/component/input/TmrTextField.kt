@@ -19,7 +19,7 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tailormyresume.core.designsystem.component.content.TmrFitText
+import com.tailormyresume.core.designsystem.component.TmrWholeWordText
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 
 @Composable
@@ -68,7 +68,7 @@ fun TmrReadOnlyField(
                 .border(BorderStroke(1.5.dp, TmrTheme.colors.boundary), shape)
                 .padding(horizontal = 16.dp, vertical = 16.dp),
         ) {
-            TmrFitText(
+            TmrWholeWordText(
                 text = value,
                 style = TmrTheme.typography.bodyLarge,
                 color = TmrTheme.colors.text,

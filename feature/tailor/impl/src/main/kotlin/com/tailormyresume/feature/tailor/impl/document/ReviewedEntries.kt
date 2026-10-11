@@ -12,7 +12,7 @@ internal fun reviewedEntries(profile: CandidateProfile, resume: TailoredResume):
         val recorded = recordedIds == null || entry.id in recordedIds
         if (tailored == null && !recorded) return@mapNotNull null
         val sourceIds = tailored?.flatMap { it.sourceIds }?.toSet().orEmpty()
-        val bullets = if (recordedIds == null && tailored == null) entry.bullets else entry.bullets.filter { it.id in sourceIds }
+        val bullets = if (tailored == null) entry.bullets else entry.bullets.filter { it.id in sourceIds }
         entry.copy(bullets = bullets)
     }
 }

@@ -79,7 +79,7 @@ class RemotePaymentGateway @Inject constructor(
 
     override fun observeEntitlement(): Flow<PurchaseEntitlement> =
         combine(wallet.wallet, pending) { current, held ->
-            current?.toEntitlement(held) ?: NO_CREDITS.copy(pendingPackIds = held)
+            current?.toEntitlement(held) ?: NO_CREDITS.copy(pendingPackIds = held, hasKnownBalance = false)
         }
             .onStart {
                 emit(current())
@@ -237,7 +237,7 @@ class RemotePaymentGateway @Inject constructor(
 
     private fun failed(reason: PurchaseFailureReason) = PurchaseResult.Failed(reason, current())
 
-    private fun current() = wallet.cached?.toEntitlement(pending.value) ?: NO_CREDITS.copy(pendingPackIds = pending.value)
+    private fun current() = wallet.cached?.toEntitlement(pending.value) ?: NO_CREDITS.copy(pendingPackIds = pending.value, hasKnownBalance = false)
 
     private companion object {
         const val MICROS_PER_PAISE = 10_000L

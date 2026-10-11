@@ -388,7 +388,7 @@ class TmrChromeGeometryA11yTest {
     private var spacing: TmrSpacing? = null
 
     @Composable
-    private fun captureSpacing() {
+    private fun CapturedSpacing() {
         spacing = TmrTheme.spacing
     }
 
@@ -417,7 +417,7 @@ class TmrChromeGeometryA11yTest {
             TmrPreviewTheme {
                 CompositionLocalProvider(LocalTmrMotion provides TmrMotionDefaults.Reduced) {
                     Box(Modifier.fillMaxSize()) {
-                        captureSpacing()
+                        CapturedSpacing()
                         TmrToastHost(state)
                     }
                 }
@@ -439,7 +439,7 @@ class TmrChromeGeometryA11yTest {
         composeRule.setContent {
             TmrPreviewTheme {
                 Box(Modifier.fillMaxSize()) {
-                    captureSpacing()
+                    CapturedSpacing()
                     TmrBottomSheet(onDismiss = {}, title = "Sheet") {
                         Text("Change status", color = TmrTheme.colors.text)
                     }

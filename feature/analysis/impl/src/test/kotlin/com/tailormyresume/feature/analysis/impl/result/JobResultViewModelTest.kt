@@ -2,26 +2,28 @@ package com.tailormyresume.feature.analysis.impl.result
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.PurchaseEntitlement
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.domain.coverage.ScreenForKeywords
-import com.tailormyresume.core.model.CreditLedgerEntry
-import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
-import com.tailormyresume.core.testing.repository.TestCreditsRepository
+import com.tailormyresume.core.testing.repository.TestProfileRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.feature.analysis.impl.ResultTestData
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import kotlin.time.Instant
 
 class JobResultViewModelTest {
 
@@ -29,15 +31,15 @@ class JobResultViewModelTest {
     val main = MainDispatcherRule()
 
     private val applicationRepository = TestApplicationRepository()
-    private val creditsRepository = TestCreditsRepository()
+    private val paymentGateway = TestPaymentGateway().withFreeCredits(0)
 
     @Test
     fun readyStateHasComputedCoverageAndKeywordScreen() = runTest {
         val answer = QuickAnswer(ResultTestData.STAKEHOLDER_ID, "YES_REGULARLY", ResultTestData.STAKEHOLDER_DETAIL)
         seed(ResultTestData.application(quickAnswer = answer))
         val state = readyState(viewModel())
-        val coverage = KeywordCoverageCalculator.compute(ResultTestData.matches, answer, null)
-        val screen = ScreenForKeywords(ResultTestData.matches)
+        val coverage = KeywordCoverageCalculator.compute(ResultTestData.matches, answer, null, profile = ResultTestData.profile)
+        val screen = ScreenForKeywords(ResultTestData.matches, profile = ResultTestData.profile)
 
         assertThat(state.title).isEqualTo("Associate Analyst")
         assertThat(state.company).isEqualTo("Northwind GCC")
@@ -125,12 +127,8 @@ class JobResultViewModelTest {
         val viewModel = viewModel()
         assertThat(readyState(viewModel).credits).isEqualTo(2)
 
-        creditsRepository.sendLedger(
-            listOf(
-                entry(CreditLedgerKind.FREE_GRANT, 2),
-                entry(CreditLedgerKind.SPEND, -2, ResultTestData.APP_ID, createdAt = 1),
-            ),
-        )
+        paymentGateway.unlock("spent-1")
+        paymentGateway.unlock("spent-2")
 
         assertThat(readyState(viewModel).credits).isEqualTo(0)
     }
@@ -165,6 +163,21 @@ class JobResultViewModelTest {
             JobResultEvent.Tailor(ResultTestData.APP_ID),
         )
         assertTailorEvent(answered, credits = 1, JobResultEvent.Tailor(ResultTestData.APP_ID))
+    }
+
+    @Test
+    fun unknownBalanceDoesNotPromptAPurchase() = runTest {
+        seed()
+        val gateway = object : PaymentGateway by paymentGateway {
+            override fun observeEntitlement() = flowOf(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
+        }
+        val viewModel = viewModel(gateway)
+        assertThat(readyState(viewModel).credits).isNull()
+
+        viewModel.events.test {
+            viewModel.onTailor()
+            expectNoEvents()
+        }
     }
 
     @Test
@@ -230,11 +243,11 @@ class JobResultViewModelTest {
         credits: Int = 1,
     ) {
         applicationRepository.sendApplications(listOfNotNull(application))
-        creditsRepository.sendLedger(listOf(entry(CreditLedgerKind.FREE_GRANT, credits)))
+        paymentGateway.withFreeCredits(credits)
     }
 
-    private fun TestScope.viewModel() =
-        JobResultViewModel(applicationRepository, creditsRepository, ResultTestData.APP_ID).also {
+    private fun TestScope.viewModel(gateway: PaymentGateway = paymentGateway) =
+        JobResultViewModel(applicationRepository, AccountCreditBalance(gateway), TestProfileRepository().apply { sendProfile(ResultTestData.profile) }, ResultTestData.APP_ID).also {
             backgroundScope.launch(UnconfinedTestDispatcher()) { it.uiState.collect() }
         }
 
@@ -243,11 +256,4 @@ class JobResultViewModelTest {
         assertThat(state).isInstanceOf(JobResultUiState.Ready::class.java)
         return state as JobResultUiState.Ready
     }
-
-    private fun entry(
-        kind: CreditLedgerKind,
-        amount: Int,
-        applicationId: String? = null,
-        createdAt: Long = 0,
-    ) = CreditLedgerEntry(kind, amount, applicationId, null, Instant.fromEpochSeconds(createdAt))
 }

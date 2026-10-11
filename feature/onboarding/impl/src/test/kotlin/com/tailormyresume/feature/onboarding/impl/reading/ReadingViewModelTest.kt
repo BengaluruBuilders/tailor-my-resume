@@ -491,6 +491,8 @@ class ReadingViewModelTest {
             throw RuntimeException("save failed")
         }
 
+        override suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean = error("save failed")
+
         override suspend fun clearProfile() = Unit
     }
 }

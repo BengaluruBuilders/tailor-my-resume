@@ -24,4 +24,7 @@ dependencies {
     kspTest(libs.hilt.compiler)
     kspTest(libs.kotlin.metadata)
     testImplementation(projects.core.testing)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.truth)
 }

@@ -159,7 +159,7 @@ class JobResultScreenshotTest {
         rule.onNodeWithText("What they screen for · 8", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Must-haves", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Not clear in your resume. We'll ask you next.", useUnmergedTree = true).assertExists()
-        if (state.credits > 0) {
+        if ((state.credits ?: 0) > 0) {
             rule.onNodeWithText("Uses 1 credit · you have ${state.credits}", useUnmergedTree = true).assertExists()
         } else {
             rule.onNodeWithText("No credits left · get more to continue", useUnmergedTree = true).assertExists()

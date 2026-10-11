@@ -81,7 +81,7 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
 }
 
 @Composable
-private fun BalanceCard(credits: Int, onBuyMore: () -> Unit, modifier: Modifier = Modifier) {
+private fun BalanceCard(credits: Int?, onBuyMore: () -> Unit, modifier: Modifier = Modifier) {
     TmrCard(modifier = modifier) {
         BalanceHero(credits = credits)
         TmrPrimaryButton(
@@ -93,10 +93,18 @@ private fun BalanceCard(credits: Int, onBuyMore: () -> Unit, modifier: Modifier 
 }
 
 @Composable
-private fun BalanceHero(credits: Int) {
+private fun BalanceHero(credits: Int?) {
     val colors = TmrTheme.colors
     val numberStyle = TmrTheme.typography.displayLarge
     val captionStyle = TmrTheme.typography.body
+    if (credits == null) {
+        Text(
+            text = stringResource(R.string.feature_settings_impl_credits_unavailable),
+            style = captionStyle,
+            color = colors.textSecondary,
+        )
+        return
+    }
     val caption = pluralStringResource(R.plurals.feature_settings_impl_credits_caption, credits)
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current

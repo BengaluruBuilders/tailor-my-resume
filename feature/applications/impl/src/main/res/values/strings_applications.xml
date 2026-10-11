@@ -29,4 +29,5 @@
     <string name="feature_applications_impl_coming_soon">Coming soon</string>
     <string name="feature_applications_impl_file_missing">Couldn\'t find the PDF</string>
     <string name="feature_applications_impl_open_failed">No app can open PDFs</string>
+    <string name="feature_applications_impl_credits_unknown">Balance unavailable</string>
 </resources>

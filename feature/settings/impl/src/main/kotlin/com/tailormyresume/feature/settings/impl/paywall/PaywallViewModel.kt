@@ -7,6 +7,7 @@ import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.PurchaseFailureReason
 import com.tailormyresume.core.domain.PurchaseResult
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -30,6 +30,7 @@ import kotlin.time.Clock
 internal class PaywallViewModel @Inject constructor(
     private val paymentGateway: PaymentGateway,
     private val creditsRepository: CreditsRepository,
+    private val creditBalance: AccountCreditBalance,
     private val clock: Clock,
 ) : ViewModel() {
 
@@ -41,7 +42,7 @@ internal class PaywallViewModel @Inject constructor(
     val events: Flow<PaywallEvent> = eventChannel.receiveAsFlow()
 
     val uiState: StateFlow<PaywallUiState> = combine(
-        creditsRepository.observeBalance(),
+        creditBalance.observeCredits(),
         packs,
         chosenPackId,
         busy,
@@ -59,7 +60,6 @@ internal class PaywallViewModel @Inject constructor(
     )
 
     init {
-        viewModelScope.launch { creditsRepository.refresh() }
         viewModelScope.launch { loadPacks() }
     }
 
@@ -96,11 +96,9 @@ internal class PaywallViewModel @Inject constructor(
     }
 
     private suspend fun restoredCredits(): Int {
-        check(creditsRepository.refreshConfirmed()) { "balance before restore unavailable" }
-        val before = creditsRepository.observeBalance().first()
-        paymentGateway.restorePurchases()
-        check(creditsRepository.refreshConfirmed()) { "balance after restore unavailable" }
-        return creditsRepository.observeBalance().first() - before
+        val before = paymentGateway.entitlement().totalCredits
+        val restored = paymentGateway.restorePurchases()
+        return restored.totalCredits - before
     }
 
     private suspend fun loadPacks() {
@@ -145,7 +143,6 @@ internal class PaywallViewModel @Inject constructor(
                 ),
             )
         }
-        creditsRepository.refresh()
         eventChannel.send(PaywallEvent.Added(pack.credits))
     }
 }

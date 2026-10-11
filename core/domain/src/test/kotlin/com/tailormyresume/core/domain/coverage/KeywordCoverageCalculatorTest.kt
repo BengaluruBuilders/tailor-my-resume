@@ -1,10 +1,17 @@
 package com.tailormyresume.core.domain.coverage
 
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.domain.offline.SkillLexicon
 import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.BulletDecision
+import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.EntryCategory
+import com.tailormyresume.core.model.EvidenceBullet
+import com.tailormyresume.core.model.FactSource
+import com.tailormyresume.core.model.GuardrailViolation
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.MatchStatus
+import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
 import com.tailormyresume.core.model.RequirementPriority
@@ -14,6 +21,41 @@ import com.tailormyresume.core.model.TailoredResume
 import org.junit.Test
 
 class KeywordCoverageCalculatorTest {
+    private fun compute(
+        matches: List<RequirementMatch>,
+        quickAnswer: QuickAnswer?,
+        tailoredResume: TailoredResume?,
+    ): ApplicationKeywordCoverage {
+        val evidenceEntries = matches.filter { it.status != MatchStatus.GAP }.map { match ->
+            ProfileEntry(
+                match.requirement.id, EntryCategory.EXPERIENCE, "Analyst", "Company", "2020", "2021",
+                listOf(EvidenceBullet(match.requirement.id + "-b1", match.requirement.keywords.joinToString(", ", transform = SkillLexicon::displayName))),
+                FactSource.IMPORTED, true,
+            )
+        }
+        val sourcedResume = tailoredResume?.copy(
+            bullets = tailoredResume.bullets.mapIndexed { index, bullet ->
+                bullet.copy(entryId = "tailored", sourceIds = listOf("tailored-b$index"))
+            },
+            entryIds = listOf("tailored"),
+        )
+        val tailoredEntry = sourcedResume?.let { resume ->
+            ProfileEntry(
+                "tailored", EntryCategory.EXPERIENCE, "Resume", "", "", "",
+                resume.bullets.mapIndexed { index, bullet -> EvidenceBullet("tailored-b$index", bullet.originalText) },
+                FactSource.IMPORTED, true,
+            )
+        }
+        val entries = evidenceEntries + listOfNotNull(tailoredEntry)
+        val profile = CandidateProfile("Candidate", "", "", "", emptyList(), entries)
+        return KeywordCoverageCalculator.compute(
+            matches.map { it.copy(evidenceIds = listOf(it.requirement.id)) },
+            quickAnswer,
+            sourcedResume,
+            profile,
+        )
+    }
+
     private fun requirement(id: String, text: String, vararg keywords: String) = JobRequirement(
         id = id,
         text = text,
@@ -90,7 +132,7 @@ class KeywordCoverageCalculatorTest {
 
     @Test
     fun prototypeJdAnsweredYesPlusDetailAssertsLiteralPercents() {
-        val coverage = KeywordCoverageCalculator.compute(
+        val coverage = compute(
             matches = prototypeMatches,
             quickAnswer = yesOnStakeholder,
             tailoredResume = acceptedResume,
@@ -101,12 +143,12 @@ class KeywordCoverageCalculatorTest {
 
     @Test
     fun finalWithAnswerExceedsFinalWithout() {
-        val withoutStakeholder = KeywordCoverageCalculator.compute(
+        val withoutStakeholder = compute(
             matches = prototypeMatches,
             quickAnswer = yesOnStakeholder,
             tailoredResume = acceptedResume,
         )
-        val withStakeholder = KeywordCoverageCalculator.compute(
+        val withStakeholder = compute(
             matches = prototypeMatches,
             quickAnswer = yesOnStakeholder,
             tailoredResume = resumeOf(
@@ -126,17 +168,17 @@ class KeywordCoverageCalculatorTest {
 
     @Test
     fun nowNeverExceedsUpTo() {
-        val withAnswer = KeywordCoverageCalculator.compute(
+        val withAnswer = compute(
             matches = prototypeMatches,
             quickAnswer = yesOnStakeholder,
             tailoredResume = acceptedResume,
         )
-        val withoutAnswer = KeywordCoverageCalculator.compute(
+        val withoutAnswer = compute(
             matches = prototypeMatches,
             quickAnswer = null,
             tailoredResume = acceptedResume,
         )
-        val noResume = KeywordCoverageCalculator.compute(
+        val noResume = compute(
             matches = prototypeMatches,
             quickAnswer = yesOnStakeholder,
             tailoredResume = null,
@@ -158,7 +200,7 @@ class KeywordCoverageCalculatorTest {
             match(requirement("c3", "Sql reporting", "Sql"), MatchStatus.MET),
         )
 
-        val coverage = KeywordCoverageCalculator.compute(
+        val coverage = compute(
             matches = matches,
             quickAnswer = null,
             tailoredResume = TailoredResume(emptyList()),
@@ -171,12 +213,12 @@ class KeywordCoverageCalculatorTest {
 
     @Test
     fun noKeywordsGivesZeroPercents() {
-        val withoutMatches = KeywordCoverageCalculator.compute(
+        val withoutMatches = compute(
             matches = emptyList(),
             quickAnswer = null,
             tailoredResume = TailoredResume(emptyList()),
         )
-        val withKeywordlessRequirement = KeywordCoverageCalculator.compute(
+        val withKeywordlessRequirement = compute(
             matches = listOf(match(requirement("k1", "Some nice to have"), MatchStatus.GAP)),
             quickAnswer = QuickAnswer("k1", "YES_REGULARLY", stakeholderDetail),
             tailoredResume = TailoredResume(emptyList()),
@@ -206,7 +248,7 @@ class KeywordCoverageCalculatorTest {
             ),
         )
 
-        val coverage = KeywordCoverageCalculator.compute(
+        val coverage = compute(
             matches = matches,
             quickAnswer = QuickAnswer("g3", "A_FEW_TIMES", stakeholderDetail),
             tailoredResume = null,
@@ -218,12 +260,12 @@ class KeywordCoverageCalculatorTest {
 
     @Test
     fun notYetAndSkippedAddNothing() {
-        val notYet = KeywordCoverageCalculator.compute(
+        val notYet = compute(
             matches = prototypeMatches,
             quickAnswer = QuickAnswer("r6", "NOT_YET", stakeholderDetail),
             tailoredResume = null,
         )
-        val skipped = KeywordCoverageCalculator.compute(
+        val skipped = compute(
             matches = prototypeMatches,
             quickAnswer = QuickAnswer("r6", "SKIPPED"),
             tailoredResume = null,
@@ -237,12 +279,12 @@ class KeywordCoverageCalculatorTest {
 
     @Test
     fun gapRequirementKeywordsOnlyViaAnswer() {
-        val confirmed = KeywordCoverageCalculator.compute(
+        val confirmed = compute(
             matches = prototypeMatches,
             quickAnswer = yesOnStakeholder,
             tailoredResume = null,
         )
-        val unknownRequirement = KeywordCoverageCalculator.compute(
+        val unknownRequirement = compute(
             matches = prototypeMatches,
             quickAnswer = QuickAnswer("r99", "YES_REGULARLY", stakeholderDetail),
             tailoredResume = null,
@@ -256,7 +298,7 @@ class KeywordCoverageCalculatorTest {
 
     @Test
     fun finalCountsAcceptedTextOnly() {
-        val coverage = KeywordCoverageCalculator.compute(
+        val coverage = compute(
             matches = prototypeMatches,
             quickAnswer = null,
             tailoredResume = TailoredResume(
@@ -282,7 +324,7 @@ class KeywordCoverageCalculatorTest {
 
     @Test
     fun rejectedChangeContributesOriginalText() {
-        val coverage = KeywordCoverageCalculator.compute(
+        val coverage = compute(
             matches = prototypeMatches,
             quickAnswer = null,
             tailoredResume = resumeOf(
@@ -300,7 +342,7 @@ class KeywordCoverageCalculatorTest {
 
     @Test
     fun pendingChangeContributesOriginalText() {
-        val coverage = KeywordCoverageCalculator.compute(
+        val coverage = compute(
             matches = prototypeMatches,
             quickAnswer = null,
             tailoredResume = resumeOf(
@@ -317,6 +359,25 @@ class KeywordCoverageCalculatorTest {
     }
 
     @Test
+    fun unsafeAcceptedChangeContributesOriginalText() {
+        val matches = listOf(
+            match(requirement("r1", "Strong SQL", "sql"), MatchStatus.MET),
+            match(requirement("r2", "Python", "python"), MatchStatus.GAP),
+        )
+        val resume = resumeOf(
+            bullet(
+                originalText = "Built SQL reports",
+                proposedText = "Built Python reports",
+                decision = BulletDecision.ACCEPTED,
+            ).copy(violations = listOf(GuardrailViolation.MissingSource)),
+        )
+
+        val coverage = compute(matches, null, resume)
+
+        assertThat(coverage.final).isEqualTo(50)
+    }
+
+    @Test
     fun blankDetailAnswerWithoutNamedSkillConfirmsNothing() {
         val experience = JobRequirement(
             id = "x1",
@@ -330,7 +391,7 @@ class KeywordCoverageCalculatorTest {
             match(experience, MatchStatus.GAP),
         )
 
-        val coverage = KeywordCoverageCalculator.compute(matches, QuickAnswer("x1", "A_FEW_TIMES"), null)
+        val coverage = compute(matches, QuickAnswer("x1", "A_FEW_TIMES"), null)
 
         assertThat(coverage.now).isEqualTo(50)
         assertThat(coverage.upTo).isEqualTo(50)
@@ -343,7 +404,7 @@ class KeywordCoverageCalculatorTest {
             match(requirement("r2", "Python", "python"), MatchStatus.GAP),
         )
 
-        val coverage = KeywordCoverageCalculator.compute(matches, QuickAnswer("r2", "YES_REGULARLY"), null)
+        val coverage = compute(matches, QuickAnswer("r2", "YES_REGULARLY"), null)
 
         assertThat(coverage.now).isEqualTo(50)
         assertThat(coverage.upTo).isEqualTo(100)
@@ -362,7 +423,7 @@ class KeywordCoverageCalculatorTest {
             match(requirement("r1", "Strong SQL", "sql"), MatchStatus.MET),
             match(requirement, MatchStatus.GAP),
         )
-        return KeywordCoverageCalculator.compute(matches, QuickAnswer(requirement.id, "YES_REGULARLY", detail), null).upTo
+        return compute(matches, QuickAnswer(requirement.id, "YES_REGULARLY", detail), null).upTo
     }
 
     @Test
@@ -396,8 +457,8 @@ class KeywordCoverageCalculatorTest {
             match(requirement("r2", "Python", "python"), MatchStatus.GAP),
         )
 
-        val sql = KeywordCoverageCalculator.compute(matches, QuickAnswer("r1", "YES_REGULARLY", " "), null)
-        val python = KeywordCoverageCalculator.compute(matches, QuickAnswer("r2", "A_FEW_TIMES"), null)
+        val sql = compute(matches, QuickAnswer("r1", "YES_REGULARLY", " "), null)
+        val python = compute(matches, QuickAnswer("r2", "A_FEW_TIMES"), null)
 
         assertThat(sql.upTo).isEqualTo(50)
         assertThat(python.upTo).isEqualTo(50)

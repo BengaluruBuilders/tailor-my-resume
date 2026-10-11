@@ -13,9 +13,11 @@ import com.tailormyresume.core.designsystem.component.chrome.TmrToastHost
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastState
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
@@ -66,6 +68,7 @@ class ExportedRouteTest {
         return ExportedViewModel(
             applicationRepository = applicationRepository,
             creditsRepository = TestCreditsRepository(),
+            creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(0)),
             exportResume = ExportResumeUseCase(
                 applicationRepository,
                 profileRepository,

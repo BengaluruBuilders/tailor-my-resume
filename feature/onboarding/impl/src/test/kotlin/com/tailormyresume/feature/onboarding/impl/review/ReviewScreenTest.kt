@@ -14,6 +14,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.onboarding.MarkProfileReviewedUseCase
 import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.EntryCategory
+import com.tailormyresume.core.model.EvidenceBullet
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
@@ -75,7 +77,6 @@ class ReviewScreenTest {
             "Jun 2020 – May 2021",
             "Skills · 18",
             "SQL",
-            "+13",
             "Education",
             "B.Com, Finance",
             "Symbiosis College, Pune · 2020",
@@ -91,6 +92,20 @@ class ReviewScreenTest {
         composeRule.onNodeWithText("100%").assertIsDisplayed()
         composeRule.onNodeWithText("Add date").assertDoesNotExist()
         composeRule.onNodeWithText("Add your LinkedIn").assertDoesNotExist()
+    }
+
+    @Test
+    fun showsEveryBulletAndSkillBeforeContinue() {
+        val splitRole = importedRole("r1").copy(bullets = listOf(EvidenceBullet("r1-b1", "First role fact")))
+        val continuation = splitRole.copy(id = "r2", bullets = listOf(EvidenceBullet("r2-b1", "Second role fact")))
+        val education = importedRole("e1", title = "B.Com", organization = "College", startDate = "2018", endDate = "2020")
+            .copy(category = EntryCategory.EDUCATION, bullets = listOf(EvidenceBullet("e1-b1", "Education fact")))
+        showRoute(fixedReviewProfile().copy(entries = listOf(splitRole, continuation, education), skills = listOf("SQL", "Kotlin", "Python", "Room", "Compose", "Coroutines")))
+
+        listOf("• First role fact", "• Second role fact", "• Education fact", "SQL", "Kotlin", "Python", "Room", "Compose", "Coroutines").forEach {
+            composeRule.onNodeWithText(it).performScrollTo().assertIsDisplayed()
+        }
+        composeRule.onNodeWithText("Looks right, continue").assertIsDisplayed()
     }
 
     @Test

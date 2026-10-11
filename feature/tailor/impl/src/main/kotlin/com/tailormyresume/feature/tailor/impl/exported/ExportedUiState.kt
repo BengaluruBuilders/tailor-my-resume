@@ -16,7 +16,7 @@ internal sealed interface ExportedUiState {
         val fileName: String,
         val pageCount: Int,
         val sizeKb: Int,
-        val creditsLeft: Int,
+        val creditsLeft: Int?,
         val freeResumeUsed: Boolean,
         val jobTitle: String,
         val company: String,

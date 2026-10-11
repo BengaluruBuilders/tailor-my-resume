@@ -1,5 +1,7 @@
 package com.tailormyresume.feature.onboarding.impl.review
 
+import com.tailormyresume.core.model.CandidateProfile
+
 internal sealed interface ReviewDates {
     data object None : ReviewDates
 
@@ -14,11 +16,11 @@ internal data class ReviewGap(val entryId: String, val title: String)
 
 internal data class ReviewContact(val name: String, val email: String, val phoneAndCity: String)
 
-internal data class ReviewRole(val title: String, val organization: String, val dates: ReviewDates)
+internal data class ReviewRole(val title: String, val organization: String, val dates: ReviewDates, val bullets: List<String>)
 
-internal data class ReviewEducation(val title: String, val detail: String)
+internal data class ReviewEducation(val title: String, val detail: String, val bullets: List<String>)
 
-internal data class ReviewSkills(val count: Int, val chips: List<String>, val more: Int)
+internal data class ReviewSkills(val count: Int, val chips: List<String>)
 
 internal sealed interface ReviewUiState {
     data object Loading : ReviewUiState
@@ -32,6 +34,7 @@ internal sealed interface ReviewUiState {
         val roles: List<ReviewRole>,
         val skills: ReviewSkills,
         val education: List<ReviewEducation>,
+        val profile: CandidateProfile? = null,
     ) : ReviewUiState {
         val canContinue: Boolean get() = gap == null
     }

@@ -23,6 +23,7 @@ internal fun ApplicationDetailRoute(viewModel: ApplicationDetailViewModel, navig
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val toast = LocalTmrToast.current
+    val balanceUnavailable = stringResource(R.string.feature_applications_impl_credits_unknown)
     val comingSoon = stringResource(R.string.feature_applications_impl_coming_soon)
     val fileMissing = stringResource(R.string.feature_applications_impl_file_missing)
     val openFailed = stringResource(R.string.feature_applications_impl_open_failed)
@@ -32,6 +33,7 @@ internal fun ApplicationDetailRoute(viewModel: ApplicationDetailViewModel, navig
                 is ApplicationDetailEvent.ShareFile -> context.startOrToast(event.intent) { toast.show(openFailed) }
                 is ApplicationDetailEvent.OpenFile -> context.startOrToast(event.intent) { toast.show(openFailed) }
                 ApplicationDetailEvent.FileMissing -> toast.show(fileMissing)
+                ApplicationDetailEvent.BalanceUnavailable -> toast.show(balanceUnavailable)
                 ApplicationDetailEvent.ComingSoon -> toast.show(comingSoon)
                 is ApplicationDetailEvent.StatusSet -> toast.show(
                     context.getString(

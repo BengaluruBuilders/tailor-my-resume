@@ -2,10 +2,21 @@ package com.tailormyresume.feature.tailor.impl.edit
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.domain.ExportCheck
 import com.tailormyresume.core.domain.ExportReadiness
+import com.tailormyresume.core.domain.UpdateBulletDecisionUseCase
+import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
+import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.BulletDecision
+import com.tailormyresume.core.model.GapAnalysis
+import com.tailormyresume.core.model.JobRequirement
+import com.tailormyresume.core.model.KeywordCoverage
+import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.PageSize
+import com.tailormyresume.core.model.RequirementMatch
+import com.tailormyresume.core.model.RequirementPriority
+import com.tailormyresume.core.model.RequirementType
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredText
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
@@ -15,7 +26,6 @@ import com.tailormyresume.core.testing.repository.TestTailoringReviewStateReposi
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.core.testing.util.TestClock
 import com.tailormyresume.feature.tailor.impl.EXPORT_ACCEPTED_AT
-import com.tailormyresume.feature.tailor.impl.HandEditBulletUseCase
 import com.tailormyresume.feature.tailor.impl.acceptedApplication
 import com.tailormyresume.feature.tailor.impl.acceptedBullet
 import com.tailormyresume.feature.tailor.impl.document.ResumeDocumentAssembler
@@ -59,15 +69,17 @@ class EditResumeViewModelTest {
     private val summary = TailoredText(
         text = "Tailored summary",
         original = "Old summary",
+        sourceIds = listOf("profile-summary"),
         decision = BulletDecision.ACCEPTED,
     )
 
-    private fun viewModel() = EditResumeViewModel(
-        applicationRepository = applicationRepository,
+    private fun viewModel(repository: ApplicationRepository = applicationRepository) = EditResumeViewModel(
+        applicationRepository = repository,
         profileRepository = profileRepository,
         settingsRepository = settingsRepository,
         assembler = ResumeDocumentAssembler(TestResumeHeadings),
-        handEditBullet = HandEditBulletUseCase(applicationRepository, reviewStateRepository, clock),
+        reviewState = reviewStateRepository,
+        clock = clock,
         renderer = renderer,
         applicationId = "app-1",
     )
@@ -216,6 +228,87 @@ class EditResumeViewModelTest {
         viewModel.onSave()
 
         assertThat(storedBullet("b1")?.proposedText).isEqualTo("Developed an internal tool")
+    }
+
+    @Test
+    fun savePersistsAllEditsWithCoverageAndManualEditState() = runTest {
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+        val gap = GapAnalysis(
+            matches = listOf(
+                RequirementMatch(
+                    requirement = JobRequirement(
+                        id = "req-sql",
+                        text = "SQL",
+                        type = RequirementType.SKILL,
+                        priority = RequirementPriority.MUST_HAVE,
+                        keywords = listOf("SQL"),
+                    ),
+                    status = MatchStatus.MET,
+                    evidenceIds = listOf("skill:sql"),
+                ),
+            ),
+            keywordCoverage = KeywordCoverage(1, 1),
+        )
+        applicationRepository.sendApplications(
+            listOf(
+                acceptedApplication(listOf(b1, b2), summary = summary).copy(
+                    gapAnalysis = gap,
+                    keywordCoverage = ApplicationKeywordCoverage(now = 100, upTo = 100, final = 100),
+                ),
+            ),
+        )
+        val profile = testProfile(listOf(entryFor("exp-1", b1, b2)))
+        profileRepository.sendProfile(profile)
+
+        viewModel.onSummaryChange("My own summary")
+        viewModel.onSkillsChange("")
+        viewModel.onBulletChange("b1", "My own bullet")
+        viewModel.onSave()
+
+        val resume = checkNotNull(applicationRepository.observeApplication("app-1").first()?.tailoredResume)
+        assertThat(resume.summary).isEqualTo(
+            TailoredText(
+                "My own summary",
+                "Old summary",
+                sourceIds = listOf("profile-summary"),
+                decision = BulletDecision.ACCEPTED,
+            ),
+        )
+        assertThat(resume.skills?.skills).isEmpty()
+        assertThat(resume.skills?.decision).isEqualTo(BulletDecision.ACCEPTED)
+        assertThat(resume.bullets.first { it.id == "b1" }.proposedText).isEqualTo("My own bullet")
+        val stored = checkNotNull(applicationRepository.observeApplication("app-1").first())
+        assertThat(stored.keywordCoverage)
+            .isEqualTo(KeywordCoverageCalculator.compute(gap.matches, null, resume, profile))
+        assertThat(reviewStateRepository.observe("app-1").first().editedBulletIds).containsAtLeast(
+            "b1",
+            UpdateBulletDecisionUseCase.SUMMARY_CHANGE_ID,
+            UpdateBulletDecisionUseCase.SKILLS_CHANGE_ID,
+        )
+    }
+
+    @Test
+    fun failedSaveKeepsTheDraftAndDoesNotReportSuccess() = runTest {
+        val failingRepository = object : ApplicationRepository by applicationRepository {
+            override suspend fun upsertApplication(application: com.tailormyresume.core.model.JobApplication) {
+                error("storage unavailable")
+            }
+        }
+        val viewModel = viewModel(failingRepository)
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+        seed()
+
+        viewModel.events.test {
+            viewModel.onSummaryChange("My own summary")
+            viewModel.onSave()
+
+            assertThat(awaitItem()).isEqualTo(EditResumeEvent.SaveFailed)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        advanceTimeBy(FIT_SETTLE_MS)
+        assertThat(viewModel.ready().summary).isEqualTo("My own summary")
     }
 }
 

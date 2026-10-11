@@ -71,8 +71,7 @@ class SaveImportedProfileUseCase @Inject constructor(
         Identity(name, email, phone, city, linkedinUrl, portfolioUrl, headline, summary)
 
     private fun CandidateProfile.contactIsUserStated(): Boolean {
-        val hadImport = sourceFileName != null || entries.isNotEmpty()
-        return entries.any { it.source != FactSource.IMPORTED } || !hadImport
+        return contactUserStated
     }
 
     private fun reidentify(entry: ProfileEntry, allocated: List<ProfileEntry>): ProfileEntry {

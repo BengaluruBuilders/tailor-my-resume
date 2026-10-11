@@ -105,5 +105,7 @@ private class EmptyProfileRepository(
 
     override suspend fun saveProfile(profile: CandidateProfile) = Unit
 
+    override suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean = false
+
     override suspend fun clearProfile() = Unit
 }
