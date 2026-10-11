@@ -3,7 +3,7 @@ package com.tailormyresume.feature.profile.impl.experience
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ProfileRepository
-import com.tailormyresume.core.domain.fact.FactIdPrefix
+import com.tailormyresume.core.domain.fact.FactIdAllocator
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.EvidenceBullet
@@ -161,7 +161,7 @@ internal class EditRoleViewModel @AssistedInject constructor(
         val edited = if (original != null) {
             roleDraft.toEntry(editedId = original.id, original = original, source = FactSource.USER_EDITED)
         } else {
-            val newId = neverUsedId(roleDraft.title.trim(), profile.entries.mapTo(mutableSetOf()) { it.id })
+            val newId = FactIdAllocator().neverUsedId(EntryCategory.EXPERIENCE, profile.entries, roleDraft.title.trim())
             roleDraft.toEntry(editedId = newId, original = null, source = FactSource.USER_STATED)
         }
         val entries = if (original == null) {
@@ -230,14 +230,6 @@ private fun EditRoleDraft.toBullets(editedId: String, original: ProfileEntry?): 
 private fun randomBulletId(entryId: String, taken: Set<String>): String {
     while (true) {
         val id = "$entryId-b${UUID.randomUUID().toString().take(UNIQUE_SUFFIX_LENGTH)}"
-        if (id !in taken) return id
-    }
-}
-
-private fun neverUsedId(title: String, taken: Set<String>): String {
-    val prefix = FactIdPrefix.of(EntryCategory.EXPERIENCE, title)
-    while (true) {
-        val id = "$prefix-${UUID.randomUUID().toString().take(UNIQUE_SUFFIX_LENGTH)}"
         if (id !in taken) return id
     }
 }

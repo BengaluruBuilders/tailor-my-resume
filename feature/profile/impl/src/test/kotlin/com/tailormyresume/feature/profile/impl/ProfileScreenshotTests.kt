@@ -45,11 +45,11 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-private const val NARROW_QUALIFIERS = "w337dp-h734dp-normal-long-notround-any-480dpi-keyshidden-nonav"
+internal const val NARROW_QUALIFIERS = "w337dp-h734dp-normal-long-notround-any-480dpi-keyshidden-nonav"
 
-private val NARROW_DEVICE = TmrTestDevice("narrow-337-font-200", NARROW_QUALIFIERS, TmrTestDevices.LARGE_FONT_SCALE)
+internal val NARROW_DEVICE = TmrTestDevice("narrow-337-font-200", NARROW_QUALIFIERS, TmrTestDevices.LARGE_FONT_SCALE)
 
-private fun ComposeContentTestRule.setTmrContent(
+internal fun ComposeContentTestRule.setTmrContent(
     device: TmrTestDevice,
     content: @Composable () -> Unit,
 ) {
@@ -65,7 +65,7 @@ private fun ComposeContentTestRule.setTmrContent(
     }
 }
 
-private fun ComposeContentTestRule.capture(
+internal fun ComposeContentTestRule.capture(
     name: String,
     device: TmrTestDevice,
 ) {
@@ -74,15 +74,15 @@ private fun ComposeContentTestRule.capture(
     }
 }
 
-private fun ComposeContentTestRule.assertTexts(vararg texts: String) {
+internal fun ComposeContentTestRule.assertTexts(vararg texts: String) {
     texts.forEach { text -> onNodeWithText(text, substring = true).assertExists() }
 }
 
-private fun ComposeContentTestRule.assertNoText(text: String) {
+internal fun ComposeContentTestRule.assertNoText(text: String) {
     onNodeWithText(text, substring = true).assertDoesNotExist()
 }
 
-private fun ComposeContentTestRule.assertNoTruncatedText() {
+internal fun ComposeContentTestRule.assertNoTruncatedText() {
     textLayouts().forEach { (node, layout) ->
         val text = node.config.getOrNull(SemanticsProperties.Text)?.joinToString(" ") { it.text }.orEmpty()
         val widestLine = (0 until layout.lineCount).maxOf { layout.getLineRight(it) }
@@ -94,7 +94,7 @@ private fun ComposeContentTestRule.assertNoTruncatedText() {
     }
 }
 
-private fun ComposeContentTestRule.textLayouts(): List<Pair<SemanticsNode, TextLayoutResult>> =
+internal fun ComposeContentTestRule.textLayouts(): List<Pair<SemanticsNode, TextLayoutResult>> =
     onAllNodes(SemanticsMatcher("has text layout") { it.config.contains(SemanticsActions.GetTextLayoutResult) })
         .fetchSemanticsNodes()
         .mapNotNull { node ->
