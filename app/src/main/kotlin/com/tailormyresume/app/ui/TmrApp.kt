@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -42,6 +43,7 @@ import com.tailormyresume.core.designsystem.component.chrome.TmrTopBar
 import com.tailormyresume.core.designsystem.component.chrome.TmrTopBarLeading
 import com.tailormyresume.core.designsystem.component.rememberTmrNavTransitions
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.domain.onboarding.StartDestination
 import com.tailormyresume.core.navigation.ChromeActions
 import com.tailormyresume.core.navigation.LocalChromeActions
 import com.tailormyresume.core.navigation.NavigationState
@@ -55,6 +57,7 @@ import com.tailormyresume.feature.applications.api.navigation.DefaultApplication
 import com.tailormyresume.feature.applications.impl.navigation.applicationDetailEntry
 import com.tailormyresume.feature.applications.impl.navigation.applicationsEntry
 import com.tailormyresume.feature.onboarding.api.navigation.DefaultSignInNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import com.tailormyresume.feature.onboarding.impl.navigation.onboardingEntry
 import com.tailormyresume.feature.profile.api.navigation.DefaultProfileNavKey
 import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
@@ -68,56 +71,75 @@ fun TmrApp(
     rootState: AppRootState,
     modifier: Modifier = Modifier,
     hasHome: () -> Boolean = { false },
+    entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
 ) {
     val stores = rememberRootViewModelStores()
     LaunchedEffect(rootState) {
-        when (rootState) {
-            AppRootState.Loading -> Unit
-            AppRootState.FirstRun -> stores.keepOnly(NavigationRoot.FirstRun)
-            AppRootState.Main -> stores.keepOnly(NavigationRoot.Main)
-        }
+        if (rootState is AppRootState.Ready) stores.keepOnly(AccountRoot(rootState.accountId))
     }
     TmrBackground(modifier = modifier) {
         when (rootState) {
             AppRootState.Loading -> Unit
-            AppRootState.FirstRun -> TmrFirstRunRoot(hasHome = hasHome)
-            AppRootState.Main -> TmrMainRoot(hasHome = hasHome)
+            is AppRootState.Ready -> TmrAccountRoot(ready = rootState, hasHome = hasHome, entryProvider = entryProvider)
         }
     }
 }
 
 @Composable
-internal fun TmrFirstRunRoot(
+internal fun TmrAccountRoot(
+    ready: AppRootState.Ready,
     modifier: Modifier = Modifier,
-    startKey: NavKey = DefaultSignInNavKey,
+    hasHome: () -> Boolean = { false },
+    entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
+) {
+    key(ready.accountId) {
+        TmrRoot(
+            root = AccountRoot(ready.accountId),
+            startKey = ready.start.navKey(),
+            modifier = modifier,
+            hasHome = hasHome,
+            entryProvider = entryProvider,
+        )
+    }
+}
+
+private fun StartDestination.navKey(): NavKey = when (this) {
+    StartDestination.SignIn -> DefaultSignInNavKey
+    StartDestination.Upload -> UploadNavKey()
+    StartDestination.Applications -> DefaultApplicationsNavKey
+}
+
+@Composable
+internal fun TmrRoot(
+    root: AccountRoot,
+    startKey: NavKey,
+    modifier: Modifier = Modifier,
     initialKeys: () -> List<NavKey> = PendingNavigation::consume,
     hasHome: () -> Boolean = { false },
+    entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
 ) {
-    WithRootViewModelStore(NavigationRoot.FirstRun) {
+    WithRootViewModelStore(root) {
         val navigationState = rememberNavigationState(startKey)
         val navigator = remember(navigationState) {
-            shellNavigator(navigationState, hasHome).also { it.navigateAll(initialKeys()) }
-        }
-        TmrShell(navigationState = navigationState, navigator = navigator, modifier = modifier)
-    }
-}
-
-@Composable
-internal fun TmrMainRoot(
-    modifier: Modifier = Modifier,
-    initialKeys: () -> List<NavKey> = PendingNavigation::consume,
-    hasHome: () -> Boolean = { true },
-) {
-    WithRootViewModelStore(NavigationRoot.Main) {
-        val navigationState = rememberNavigationState(DefaultApplicationsNavKey)
-        val navigator = remember(navigationState) {
             shellNavigator(navigationState, hasHome).also { navigator ->
-                initialKeys().forEach { key ->
-                    if (key.isTopLevelDestination()) navigator.root(key) else navigator.navigate(key)
+                val pending = initialKeys()
+                if (startKey.isTopLevelDestination()) {
+                    pending.forEach { key ->
+                        if (key.isTopLevelDestination()) navigator.root(key) else navigator.navigate(key)
+                    }
                 }
             }
         }
-        TmrShell(navigationState = navigationState, navigator = navigator, modifier = modifier)
+        if (entryProvider == null) {
+            TmrShell(navigationState = navigationState, navigator = navigator, modifier = modifier)
+        } else {
+            TmrShell(
+                navigationState = navigationState,
+                navigator = navigator,
+                modifier = modifier,
+                entryProvider = entryProvider(navigator),
+            )
+        }
     }
 }
 

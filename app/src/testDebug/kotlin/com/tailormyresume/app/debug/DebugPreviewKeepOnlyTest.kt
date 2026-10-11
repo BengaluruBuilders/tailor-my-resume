@@ -11,8 +11,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.app.ui.AppRootState
-import com.tailormyresume.app.ui.NavigationRoot
 import com.tailormyresume.app.ui.RootViewModelStores
+import com.tailormyresume.core.domain.onboarding.StartDestination
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
@@ -25,7 +25,7 @@ class DebugPreviewKeepOnlyTest {
     @get:Rule
     val composeRule = createEmptyComposeRule()
 
-    private val rootState = MutableStateFlow(AppRootState.Main)
+    private val rootState = MutableStateFlow<AppRootState>(AppRootState.Ready(StartDestination.Applications, "account-1"))
     private val hasAccount = MutableStateFlow(true)
     private val stores = RootViewModelStores()
 
@@ -41,14 +41,14 @@ class DebugPreviewKeepOnlyTest {
             .addActivityIfNotPresent(ComponentName(application, ComponentActivity::class.java))
         ActivityScenario.launch(ComponentActivity::class.java).use { scenario ->
             scenario.onActivity { it.setContent { Preview() } }
-            val mainStore = stores.storeOf(NavigationRoot.Main)
+            val mainStore = stores.storeOf(PreviewRoot.Main.accountRoot)
             composeRule.waitForIdle()
-            assertThat(stores.storeOf(NavigationRoot.Main)).isSameInstanceAs(mainStore)
+            assertThat(stores.storeOf(PreviewRoot.Main.accountRoot)).isSameInstanceAs(mainStore)
 
             hasAccount.value = false
             composeRule.waitForIdle()
 
-            assertThat(stores.storeOf(NavigationRoot.Main)).isNotSameInstanceAs(mainStore)
+            assertThat(stores.storeOf(PreviewRoot.Main.accountRoot)).isNotSameInstanceAs(mainStore)
         }
     }
 }
