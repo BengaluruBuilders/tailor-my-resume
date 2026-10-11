@@ -110,6 +110,49 @@ class TailorResumeUseCaseTest {
     }
 
     @Test
+    fun forgedAnswerIdIsDroppedEvenWhenTheGuardAllowsIt() = runTest {
+        val forged = answerBullet(cfoDetail).copy(sourceIds = listOf("ans-forged"))
+        val tailor = object : ResumeTailor {
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?, runId: String) =
+                TailoredResume(listOf(forged))
+        }
+        val allowAllGuard = object : FabricationGuard {
+            override fun check(proposedText: String, sources: List<EvidenceBullet>, profile: CandidateProfile) = emptyList<GuardrailViolation>()
+        }
+
+        val result = TailorResumeUseCase(tailor, allowAllGuard)(
+            analystProfile,
+            analystJob,
+            emptyGap,
+            "app-1",
+            "run-1",
+            answer(detail = "$cfoDetail at Infosys"),
+        )
+
+        assertThat(result.bullets).isEmpty()
+    }
+
+    @Test
+    fun bulletWithKnownAndUnknownSourceIdsIsDropped() = runTest {
+        val text = "Wrote unit tests with JUnit to improve reliability"
+        val proposed = bullet("t1", "exp-1-b2", text, text).copy(sourceIds = listOf("exp-1-b2", "does-not-exist"))
+
+        val result = useCaseReturning(proposed)(sampleProfile, emptyJob, emptyGap, "app-1", "run-1")
+
+        assertThat(result.bullets).isEmpty()
+    }
+
+    @Test
+    fun bulletCannotMoveEvidenceToAnotherEntry() = runTest {
+        val text = "Wrote unit tests with JUnit to improve reliability"
+        val proposed = bullet("t1", "exp-1-b2", text, text).copy(entryId = "proj-1")
+
+        val result = useCaseReturning(proposed)(sampleProfile, emptyJob, emptyGap, "app-1", "run-1")
+
+        assertThat(result.bullets).isEmpty()
+    }
+
+    @Test
     fun bulletCitingAnUnconfirmedEntryIsDropped() = runTest {
         val text = "Deployed containers with Kubernetes on AWS"
         val result = useCaseReturning(bullet("t1", "unconfirmed-1-b1", text, text))(
@@ -193,7 +236,7 @@ class TailorResumeUseCaseTest {
             override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?, runId: String) = TailoredResume(
                 listOf(
                     bullet("t1", "exp-1-b2", "a", "a1"),
-                    bullet("t2", "proj-1-b2", "b", "b1"),
+                    bullet("t2", "proj-1-b2", "b", "b1").copy(entryId = "proj-1"),
                 ),
             )
         }
@@ -279,15 +322,13 @@ class TailorResumeUseCaseTest {
     }
 
     @Test
-    fun notYetAndSkippedAnswersCreateNoFactAndAnsBulletFailsWithMissingSource() = runTest {
+    fun notYetAndSkippedAnswersCreateNoFactAndDropAnsBullet() = runTest {
         listOf("NOT_YET", "SKIPPED").forEach { choice ->
             val result = run(TailoredResume(listOf(answerBullet(cfoDetail))), answer(choice = choice))
 
-            assertThat(result.bullets.single().violations).containsExactly(GuardrailViolation.MissingSource)
-            assertThat(result.bullets.single().proposedText).isEmpty()
+            assertThat(result.bullets).isEmpty()
         }
-        assertThat(run(TailoredResume(listOf(answerBullet(cfoDetail))), quickAnswer = null).bullets.single().violations)
-            .containsExactly(GuardrailViolation.MissingSource)
+        assertThat(run(TailoredResume(listOf(answerBullet(cfoDetail))), quickAnswer = null).bullets).isEmpty()
     }
 
     @Test
@@ -347,6 +388,20 @@ class TailorResumeUseCaseTest {
         val result = run(TailoredResume(emptyList(), summary = summary("Built Power BI dashboards for monthly reports.")))
 
         assertThat(checkNotNull(result.summary).violations).containsExactly(GuardrailViolation.MissingSource)
+    }
+
+    @Test
+    fun summaryWithKnownAndUnknownSourcesFallsBack() = runTest {
+        val result = run(
+            TailoredResume(
+                emptyList(),
+                summary = summary("Built Power BI dashboards for monthly reports.", "exp-infosys-b1", "does-not-exist"),
+            ),
+        )
+
+        val kept = checkNotNull(result.summary)
+        assertThat(kept.text).isEqualTo(analystProfile.summary)
+        assertThat(kept.violations).contains(GuardrailViolation.MissingSource)
     }
 
     @Test
@@ -410,7 +465,7 @@ class TailorResumeUseCaseTest {
     fun newSuggestionsStartPending() = runTest {
         val result = run(
             TailoredResume(
-                bullets = listOf(bullet("t1", "exp-infosys-b2", "x", "Wrote SQL pipelines for transaction data")),
+                bullets = listOf(bullet("t1", "exp-infosys-b2", "x", "Wrote SQL pipelines for transaction data").copy(entryId = "exp-infosys")),
                 summary = summary("Built Power BI dashboards for monthly reports.", "exp-infosys-b1", decision = BulletDecision.ACCEPTED),
                 skills = TailoredSkills(listOf("SQL"), emptyList(), decision = BulletDecision.ACCEPTED),
             ),
