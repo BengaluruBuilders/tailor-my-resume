@@ -461,6 +461,15 @@ jobs:
       - name: Check release dependency guard
         run: ./gradlew :app:dependencyGuard -PwarningsAsErrors=true
 
+      - name: Upload dependency reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: reports-release-config
+          retention-days: 7
+          if-no-files-found: ignore
+          path: '**/build/reports/dependency-guard/'
+
       - name: Stop Gradle daemon
         if: always()
         run: ./gradlew --stop
@@ -514,7 +523,6 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
           path: |
-            **/build/reports/dependency-guard/
             **/build/outputs/apk/
 
   build:
