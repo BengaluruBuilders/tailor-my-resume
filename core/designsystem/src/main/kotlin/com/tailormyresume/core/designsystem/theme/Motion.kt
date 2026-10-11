@@ -119,7 +119,7 @@ internal object TmrMotionDefaults {
             wobbleOffsetAngularPeriodMs = 210f,
             storyDurationMs = 5000,
             spinnerTurnMs = 900,
-            storyAutoAdvance = false,
+            storyAutoAdvance = true,
             spinnerAnimated = false,
         ),
         reduced = true,

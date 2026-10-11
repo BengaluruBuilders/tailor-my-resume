@@ -73,7 +73,7 @@ If the design changes, export the frames again and replace the folder in one PR.
 - A feature calls an `Tmr*` primitive. It never calls `tween(`, `spring(`, or a numeric duration.
 - If `TmrTheme.motion.reduced` is true, nothing moves. The state change stays visible.
 - In a lazy list, animate `graphicsLayer` alpha, translation, and scale only.
-- `TmrTheme.motion.idle` holds the ambient loops: Paige bob 5 dp, tailoring wobble, 5 s story slides and a 900 ms spinner. With `reduced` they stay still, and story taps still step.
+- `TmrTheme.motion.idle` holds the ambient loops: Paige bob 5 dp, tailoring wobble, 5 s story slides and a 900 ms spinner. With `reduced`, decorative motion and story progress bars stay still. Story slides still advance every 5 s, and taps still step.
 - Do not build the multi-frame sequences of the board.
 - A settled frame must not change. Do not record a screenshot baseline again for a motion change.
 - The table of needs, primitives, and tokens is in `docs/DESIGN_SYSTEM.md`, section "Motion".
