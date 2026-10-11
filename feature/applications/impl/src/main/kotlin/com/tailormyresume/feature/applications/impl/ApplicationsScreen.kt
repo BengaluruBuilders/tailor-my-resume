@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.component.TmrInkButton
+import com.tailormyresume.core.designsystem.component.TmrWholeWordText
 import com.tailormyresume.core.designsystem.component.content.TmrCard
 import com.tailormyresume.core.designsystem.component.content.TmrInitialDisc
 import com.tailormyresume.core.designsystem.component.content.TmrSectionLabel
@@ -259,12 +260,12 @@ private fun ApplicationRowItem(row: ApplicationRow, onClick: () -> Unit) {
                     .align(if (stacked) Alignment.Top else Alignment.CenterVertically),
                 verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                Text(
+                TmrWholeWordText(
                     text = row.title,
                     style = TmrTheme.typography.strongLarge,
                     color = TmrTheme.colors.text,
                 )
-                Text(
+                TmrWholeWordText(
                     text = meta,
                     style = TmrTheme.typography.bodySmall,
                     color = TmrTheme.colors.textMuted,

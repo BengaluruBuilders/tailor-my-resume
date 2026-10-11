@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.component.TmrButtonSize
+import com.tailormyresume.core.designsystem.component.TmrWholeWordText
 import com.tailormyresume.core.designsystem.component.chrome.TmrStatusSheet
 import com.tailormyresume.core.designsystem.component.content.TmrCard
 import com.tailormyresume.core.designsystem.component.content.TmrFileCard
@@ -61,13 +62,13 @@ internal fun ApplicationDetailScreen(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
+                TmrWholeWordText(
                     text = state.title,
                     style = TmrTheme.typography.headline,
                     color = TmrTheme.colors.text,
                     modifier = Modifier.semantics { heading() },
                 )
-                Text(
+                TmrWholeWordText(
                     text = if (state.place.isBlank()) {
                         state.company
                     } else {

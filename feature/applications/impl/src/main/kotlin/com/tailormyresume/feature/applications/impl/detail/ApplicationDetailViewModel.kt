@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -73,8 +74,8 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
     }
 
     fun onSaveStatus() {
+        val pick = statusSheet.getAndUpdate { null } ?: return
         viewModelScope.launch {
-            val pick = statusSheet.value ?: return@launch
             setApplicationStatus(applicationId, pick)
             statusSheet.value = null
             eventChannel.send(ApplicationDetailEvent.StatusSet(pick))

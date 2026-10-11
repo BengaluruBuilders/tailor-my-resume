@@ -12,11 +12,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
 import androidx.test.core.app.ApplicationProvider
 import com.tailormyresume.core.designsystem.component.content.TmrApplicationStatus
@@ -131,6 +133,35 @@ class ApplicationsScreenshots {
         statusSheet = statusSheet,
     )
 
+    private fun longWordRows() =
+        populated().copy(
+            rows = listOf(
+                ApplicationRow(
+                    id = "it",
+                    title = "Internationalization Engineer",
+                    company = "Internationalization Technologies",
+                    keywordPercent = 90,
+                    initial = "I",
+                    colorIndex = 0,
+                    status = TmrApplicationStatus.Applied,
+                ),
+            ),
+        )
+
+    private fun assertNoWordBrokenAcrossLines(text: String) {
+        val results = mutableListOf<TextLayoutResult>()
+        val node = rule.onNodeWithText(text).fetchSemanticsNode()
+        checkNotNull(node.config[SemanticsActions.GetTextLayoutResult].action)(results)
+        val layout = results.single()
+        val full = layout.layoutInput.text.text
+        val broken = (0 until layout.lineCount - 1).any { line ->
+            val end = layout.getLineEnd(line, visibleEnd = false)
+            end in 1 until full.length && !full[end - 1].isWhitespace() && full[end - 1] != '-' && !full[end].isWhitespace()
+        }
+        assertEquals("$text breaks inside a word", false, broken)
+        assertEquals("$text is ellipsized", false, (0 until layout.lineCount).any(layout::isLineEllipsized))
+    }
+
     private fun shootApplications(
         screenName: String,
         state: ApplicationsUiState,
@@ -241,6 +272,26 @@ class ApplicationsScreenshots {
     fun applicationsList_font2_337dp() {
         shootApplications("applications_list", populated(), NARROW_DEVICE)
         assertListTexts()
+    }
+
+    @Test
+    @Config(qualifiers = NARROW_QUALIFIERS)
+    fun applicationsListLongWord_font2_337dp() {
+        shootApplications("applications_list_long_word", longWordRows(), NARROW_DEVICE)
+        assertNoWordBrokenAcrossLines("Internationalization Engineer")
+        assertNoWordBrokenAcrossLines("Internationalization Technologies · 90% keywords")
+    }
+
+    @Test
+    @Config(qualifiers = NARROW_QUALIFIERS)
+    fun applicationDetailLongWord_font2_337dp() {
+        shootDetail(
+            "application_detail_long_word",
+            detail().copy(title = "Internationalization Engineer", company = "Internationalization Technologies"),
+            NARROW_DEVICE,
+        )
+        assertNoWordBrokenAcrossLines("Internationalization Engineer")
+        assertNoWordBrokenAcrossLines("Internationalization Technologies · Mumbai · On-site")
     }
 
     @Test
