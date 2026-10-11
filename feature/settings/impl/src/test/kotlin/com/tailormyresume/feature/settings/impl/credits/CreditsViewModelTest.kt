@@ -3,10 +3,8 @@ package com.tailormyresume.feature.settings.impl.credits
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
-import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
-import com.tailormyresume.core.testing.repository.TestSessionRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.feature.settings.impl.paywall.RecordingCreditsRepository
 import kotlinx.coroutines.launch
@@ -24,7 +22,6 @@ class CreditsViewModelTest {
 
     private val applications = TestApplicationRepository()
     private val ledger = TestCreditsRepository()
-    private val session = TestSessionRepository()
 
     private fun TestScope.collect(viewModel: CreditsViewModel): List<CreditsUiState> {
         val seen = mutableListOf<CreditsUiState>()
@@ -42,7 +39,7 @@ class CreditsViewModelTest {
     @Test
     fun returningLedgerJoinsApplicationsNewestFirst() = runTest {
         seedReturning()
-        val viewModel = CreditsViewModel(ledger, applications, session)
+        val viewModel = CreditsViewModel(ledger, applications)
         collect(viewModel)
 
         val content = viewModel.content()
@@ -61,7 +58,7 @@ class CreditsViewModelTest {
     @Test
     fun goneApplicationGetsGenericLabel() = runTest {
         ledger.sendLedger(returningScenario.ledger)
-        val viewModel = CreditsViewModel(ledger, applications, session)
+        val viewModel = CreditsViewModel(ledger, applications)
         collect(viewModel)
 
         val spends = viewModel.content().history.filter { it.amount < 0 }
@@ -76,7 +73,7 @@ class CreditsViewModelTest {
     @Test
     fun deletingAnApplicationRelabelsItsSpend() = runTest {
         seedReturning()
-        val viewModel = CreditsViewModel(ledger, applications, session)
+        val viewModel = CreditsViewModel(ledger, applications)
         collect(viewModel)
 
         applications.sendApplications(returningScenario.applications.filterNot { it.id == "nw" })
@@ -87,7 +84,7 @@ class CreditsViewModelTest {
     @Test
     fun balanceIsRefreshedOnEntry() = runTest {
         val credits = RecordingCreditsRepository()
-        val viewModel = CreditsViewModel(credits, applications, session)
+        val viewModel = CreditsViewModel(credits, applications)
         collect(viewModel)
 
         assertThat(credits.calls).containsExactly("refresh")
@@ -100,7 +97,7 @@ class CreditsViewModelTest {
         }
         ledger.sendLedger(entries)
         applications.sendApplications(returningScenario.applications)
-        val viewModel = CreditsViewModel(ledger, applications, session)
+        val viewModel = CreditsViewModel(ledger, applications)
         val seen = collect(viewModel)
         val settled = seen.size
 
@@ -109,14 +106,5 @@ class CreditsViewModelTest {
         assertThat(seen.size).isEqualTo(settled + 1)
         assertThat(viewModel.content().history).hasSize(100)
         assertThat(viewModel.content().history.map { it.key }.toSet()).hasSize(100)
-    }
-
-    @Test
-    fun receiptEmailIsTheSignedInAccountEmail() = runTest {
-        session.sendAccount(SignInAccount("uid-1", "Real Name", "real.account@gmail.com"))
-        val viewModel = CreditsViewModel(ledger, applications, session)
-        collect(viewModel)
-
-        assertThat(viewModel.content().receiptEmail).isEqualTo("real.account@gmail.com")
     }
 }
