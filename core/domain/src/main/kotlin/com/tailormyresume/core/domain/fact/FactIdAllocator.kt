@@ -8,6 +8,8 @@ class FactIdAllocator @Inject constructor() {
     fun nextId(category: EntryCategory, existing: Collection<ProfileEntry>, title: String = ""): String =
         nextId(prefixOf(category, title), existing)
 
+    fun neverUsedId(category: EntryCategory, taken: Collection<ProfileEntry>, title: String = ""): String = TODO()
+
     fun nextUncategorisedId(existing: Collection<ProfileEntry>): String =
         nextId(FactIdPrefix.UNCATEGORISED, existing)
 

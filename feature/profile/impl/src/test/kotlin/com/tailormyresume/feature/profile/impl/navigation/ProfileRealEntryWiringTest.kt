@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -26,9 +27,15 @@ import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.core.testing.data.PrototypeFixtures
+import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.FactSource
+import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditRoleNavKey
 import com.tailormyresume.feature.profile.api.navigation.ExperienceNavKey
+import com.tailormyresume.feature.profile.api.navigation.ListEditNavKey
+import com.tailormyresume.feature.profile.api.navigation.ProfileListSection
 import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
+import com.tailormyresume.feature.profile.api.navigation.SkillsNavKey
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -160,6 +167,103 @@ class ProfileRealEntryWiringTest {
         }
 
         assertThat(savedRoles().single { it.title == "Intern" }.organization).isEqualTo("Acme")
+    }
+
+    private fun showEditor(key: NavKey) {
+        navigator.navigate(key)
+        show(key)
+    }
+
+    private fun saveThroughChrome() {
+        composeRule.waitForIdle()
+        composeRule.runOnIdle { checkNotNull(chromeActions.handler).invoke() }
+    }
+
+    private fun awaitProfile(condition: (CandidateProfile) -> Boolean) {
+        composeRule.waitUntil(5_000) {
+            shadowOf(Looper.getMainLooper()).idle()
+            runBlocking { repository.observeProfile().first() }?.let(condition) == true
+        }
+    }
+
+    private fun savedProfile() = checkNotNull(runBlocking { repository.observeProfile().first() })
+
+    @Test
+    fun contactSave_storesFieldsAndGoesBack() {
+        showEditor(EditContactNavKey())
+
+        composeRule.onAllNodes(hasSetTextAction())[3].performTextInput("linkedin.com/in/priya")
+        saveThroughChrome()
+        awaitProfile { it.linkedinUrl == "linkedin.com/in/priya" }
+
+        assertThat(savedProfile().contactUserStated).isTrue()
+        composeRule.waitUntil(5_000) {
+            shadowOf(Looper.getMainLooper()).idle()
+            state.stack.last() == ProfileNavKey()
+        }
+    }
+
+    @Test
+    fun contactSave_isDisabledUntilNameAndPhoneAreValid() {
+        show(EditContactNavKey())
+        val fields = composeRule.onAllNodes(hasSetTextAction())
+        composeRule.waitUntil(5_000) { chromeActions.enabled }
+
+        fields[0].performTextReplacement("")
+        composeRule.waitForIdle()
+        assertThat(chromeActions.enabled).isFalse()
+
+        fields[0].performTextReplacement("Priya")
+        composeRule.waitForIdle()
+        assertThat(chromeActions.enabled).isTrue()
+
+        fields[1].performTextReplacement("call me")
+        composeRule.waitForIdle()
+        assertThat(chromeActions.enabled).isFalse()
+    }
+
+    @Test
+    fun skillsAddThenDone_storesUserStatedSkillAndGoesBack() {
+        showEditor(SkillsNavKey())
+
+        composeRule.onAllNodes(hasSetTextAction())[0].performTextInput("Snowflake")
+        composeRule.onNodeWithText("Add").performClick()
+        saveThroughChrome()
+        awaitProfile { it.skills.firstOrNull() == "Snowflake" }
+
+        assertThat(savedProfile().userStatedSkills).contains("Snowflake")
+        composeRule.waitUntil(5_000) {
+            shadowOf(Looper.getMainLooper()).idle()
+            state.stack.last() == ProfileNavKey()
+        }
+    }
+
+    @Test
+    fun listEditEducationAdd_savesAndGoesBack() {
+        showEditor(ListEditNavKey(ProfileListSection.EDUCATION))
+
+        composeRule.onNodeWithText("+ Add education").performClick()
+        composeRule.waitForIdle()
+        composeRule.onAllNodes(hasSetTextAction())[1].performTextInput("PGDM, IIM Indore")
+        saveThroughChrome()
+        awaitProfile { profile -> profile.entries.any { it.title == "PGDM, IIM Indore" } }
+
+        val added = savedProfile().entries.single { it.title == "PGDM, IIM Indore" }
+        assertThat(added.source).isEqualTo(FactSource.USER_STATED)
+        assertThat(added.category).isEqualTo(EntryCategory.EDUCATION)
+        composeRule.waitUntil(5_000) {
+            shadowOf(Looper.getMainLooper()).idle()
+            state.stack.last() == ProfileNavKey()
+        }
+    }
+
+    @Test
+    fun listEditSummaryEdit_savesTheNewSummary() {
+        show(ListEditNavKey(ProfileListSection.SUMMARY))
+
+        composeRule.onAllNodes(hasSetTextAction())[0].performTextReplacement("Analyst who ships.")
+        saveThroughChrome()
+        awaitProfile { it.summary == "Analyst who ships." }
     }
 
     private fun savedRoles() = runBlocking { repository.observeProfile().first() }
