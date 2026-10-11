@@ -34,6 +34,8 @@ class TailorResumeUseCase @Inject constructor(
         fun resolve(ids: List<String>): List<EvidenceBullet> =
             ids.mapNotNull { profileBullets[it] ?: answerBullets[it] }.distinct()
 
+        fun containsAll(ids: List<String>): Boolean = ids.all { it in profileBullets || it in answerBullets }
+
         fun groupOf(source: EvidenceBullet): String =
             entryOfBullet[source.id] ?: source.id
     }
@@ -65,6 +67,8 @@ class TailorResumeUseCase @Inject constructor(
 
     private fun verified(bullet: TailoredBullet, evidence: Evidence, profile: CandidateProfile): TailoredBullet? {
         val sources = evidence.resolve(bullet.sourceIds)
+        if (!evidence.containsAll(bullet.sourceIds) && !(sources.isEmpty() && bullet.sourceIds.all(AnswerFacts::isAnswerId))) return null
+        if (bullet.sourceIds.any { it in evidence.profileBullets && evidence.entryOfBullet[it] != bullet.entryId }) return null
         val profileText = bullet.sourceIds.firstNotNullOfOrNull(evidence.profileBullets::get)?.text
         val answerBacked = bullet.sourceIds.any { it !in evidence.profileBullets && AnswerFacts.isAnswerId(it) }
         if (answerBacked && evidence.answerFact != null && !isAttachable(bullet, evidence.answerDetail, profile)) return null
@@ -94,7 +98,11 @@ class TailorResumeUseCase @Inject constructor(
 
     private fun verifiedSummary(summary: TailoredText, evidence: Evidence, profile: CandidateProfile): TailoredText {
         val sources = evidence.resolve(summary.sourceIds)
-        val violations = summaryViolations(summary.text, sources, evidence, profile)
+        val violations = if (evidence.containsAll(summary.sourceIds)) {
+            summaryViolations(summary.text, sources, evidence, profile)
+        } else {
+            listOf(GuardrailViolation.MissingSource)
+        }
         if (violations.isEmpty()) {
             return summary.copy(original = profile.summary, violations = emptyList(), decision = BulletDecision.PENDING)
         }
