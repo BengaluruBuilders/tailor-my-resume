@@ -29,6 +29,11 @@ internal fun EditResumeRoute(
         }
     }
     (state as? EditResumeUiState.Ready)?.let { ready ->
-        EditResumeScreen(state = ready, onBulletChange = viewModel::onBulletChange)
+        EditResumeScreen(
+            state = ready,
+            onBulletChange = viewModel::onBulletChange,
+            onSummaryChange = viewModel::onSummaryChange,
+            onSkillsChange = viewModel::onSkillsChange,
+        )
     }
 }

@@ -10,8 +10,8 @@
     <string name="feature_tailor_impl_edit_saved">Changes saved</string>
     <string name="feature_tailor_impl_exported_title">Resume exported</string>
     <plurals name="feature_tailor_impl_exported_file_meta">
-        <item quantity="one">PDF · %1$d page · %2$d KB</item>
-        <item quantity="other">PDF · %1$d pages · %2$d KB</item>
+        <item quantity="one">PDF · %1$d page · %2$d KB</item>
+        <item quantity="other">PDF · %1$d pages · %2$d KB</item>
     </plurals>
     <plurals name="feature_tailor_impl_exported_credits_paid">
         <item quantity="one">%1$d left, was %2$d. Credits never expire.</item>

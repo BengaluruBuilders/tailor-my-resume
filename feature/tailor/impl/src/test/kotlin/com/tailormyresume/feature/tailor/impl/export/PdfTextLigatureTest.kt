@@ -14,8 +14,13 @@ class PdfTextLigatureTest {
         FitPass.entries.forEach { pass ->
             val style = PdfResumeStyle(pass)
             listOf(
-                style.name, style.headline, style.contact, style.sectionHeading,
-                style.entryTitle, style.entryDetail, style.body,
+                style.name,
+                style.headline,
+                style.contact,
+                style.sectionHeading,
+                style.entryTitle,
+                style.entryDetail,
+                style.body,
             ).forEach { paint ->
                 assertThat(paint.fontFeatureSettings).contains("\"liga\" 0")
                 assertThat(paint.fontFeatureSettings).contains("\"clig\" 0")

@@ -27,11 +27,13 @@ internal class PdfResumeStyle(pass: FitPass = FitPass.Regular) {
     private fun textPaint(size: Float, bold: Boolean, color: Int): TextPaint =
         TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             textSize = size
+            fontFeatureSettings = NO_LIGATURES
             this.color = color
             typeface = Typeface.create(Typeface.SANS_SERIF, if (bold) Typeface.BOLD else Typeface.NORMAL)
         }
 
     private companion object {
+        const val NO_LIGATURES = "\"liga\" 0, \"clig\" 0"
         val INK = Color.rgb(17, 17, 17)
         val MUTED = Color.rgb(85, 85, 85)
         val RULE = Color.rgb(170, 170, 170)

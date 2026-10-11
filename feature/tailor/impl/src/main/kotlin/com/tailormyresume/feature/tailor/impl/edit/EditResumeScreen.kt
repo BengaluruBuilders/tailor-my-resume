@@ -38,6 +38,8 @@ internal fun EditResumeScreen(
     state: EditResumeUiState.Ready,
     onBulletChange: (bulletId: String, text: String) -> Unit,
     modifier: Modifier = Modifier,
+    onSummaryChange: (String) -> Unit = {},
+    onSkillsChange: (String) -> Unit = {},
 ) {
     val colors = TmrTheme.colors
     Column(
@@ -76,32 +78,34 @@ internal fun EditResumeScreen(
                 )
             }
         }
-        if (state.summary.isNotBlank()) {
-            TmrSectionLabel(text = stringResource(R.string.feature_tailor_impl_edit_summary_label))
-            TmrCard {
-                Text(
-                    text = state.summary,
-                    style = TmrTheme.typography.body,
-                    color = colors.text,
-                )
-            }
-        }
+        TmrSectionLabel(text = stringResource(R.string.feature_tailor_impl_edit_summary_label))
+        EditTextCard(initial = state.summary, label = stringResource(R.string.feature_tailor_impl_edit_summary_label), onChange = onSummaryChange)
         state.roles.forEach { role ->
             TmrSectionLabel(text = role.label)
             role.bullets.forEach { bullet ->
                 EditBulletCard(bullet = bullet, onBulletChange = onBulletChange)
             }
         }
-        if (state.skills.isNotBlank()) {
-            TmrSectionLabel(text = stringResource(R.string.feature_tailor_impl_edit_skills_label))
-            TmrCard {
-                Text(
-                    text = state.skills,
-                    style = TmrTheme.typography.body,
-                    color = colors.text,
-                )
-            }
-        }
+        TmrSectionLabel(text = stringResource(R.string.feature_tailor_impl_edit_skills_label))
+        EditTextCard(initial = state.skills, label = stringResource(R.string.feature_tailor_impl_edit_skills_label), onChange = onSkillsChange)
+    }
+}
+
+@Composable
+private fun EditTextCard(initial: String, label: String, onChange: (String) -> Unit) {
+    val colors = TmrTheme.colors
+    var text by remember { mutableStateOf(initial) }
+    TmrCard {
+        BasicTextField(
+            value = text,
+            onValueChange = {
+                text = it
+                onChange(it)
+            },
+            textStyle = TmrTheme.typography.body.copy(color = colors.text),
+            cursorBrush = SolidColor(colors.lime),
+            modifier = Modifier.fillMaxWidth().semantics { contentDescription = label },
+        )
     }
 }
 
