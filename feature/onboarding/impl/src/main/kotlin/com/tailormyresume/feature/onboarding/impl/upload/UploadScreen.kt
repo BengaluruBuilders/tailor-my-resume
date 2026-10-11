@@ -4,10 +4,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -40,6 +38,7 @@ import com.tailormyresume.feature.onboarding.api.navigation.ReadingNavKey
 import com.tailormyresume.feature.onboarding.impl.R
 import com.tailormyresume.feature.onboarding.impl.importresume.resumeMimeTypes
 
+private const val STACK_ACTIONS_FONT_SCALE = 1.3f
 private val HERO_MIN_HEIGHT = 290.dp
 private val HERO_EXTRA_PER_FONT_STEP = 140.dp
 
@@ -50,12 +49,12 @@ internal fun UploadScreen(
     onManualClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BoxWithConstraints(modifier.fillMaxSize().background(TmrTheme.colors.background)) {
-        val screenHeight = maxHeight
+    val stackActions = LocalDensity.current.fontScale > STACK_ACTIONS_FONT_SCALE
+    Column(modifier.fillMaxSize().background(TmrTheme.colors.background)) {
         val heroMinHeight = HERO_MIN_HEIGHT + HERO_EXTRA_PER_FONT_STEP * (LocalDensity.current.fontScale - 1f).coerceAtLeast(0f)
         Column(
             Modifier
-                .heightIn(min = screenHeight)
+                .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(start = 14.dp, end = 14.dp, top = 14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -99,32 +98,50 @@ internal fun UploadScreen(
                 hint = stringResource(R.string.feature_onboarding_impl_upload_card_hint),
                 onClick = onUploadClick,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                TmrSecondaryButton(
-                    label = stringResource(R.string.feature_onboarding_impl_upload_paste),
-                    onClick = onPasteClick,
-                    modifier = Modifier.weight(1f),
-                )
-                TmrSecondaryButton(
-                    label = stringResource(R.string.feature_onboarding_impl_upload_manual),
-                    onClick = onManualClick,
-                    modifier = Modifier.weight(1f),
-                )
+            if (stackActions) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PasteAction(onPasteClick, Modifier.fillMaxWidth())
+                    ManualAction(onManualClick, Modifier.fillMaxWidth())
+                }
+                UploadFooter()
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PasteAction(onPasteClick, Modifier.weight(1f))
+                    ManualAction(onManualClick, Modifier.weight(1f))
+                }
             }
-            Spacer(Modifier.weight(1f))
-            Text(
-                text = stringResource(R.string.feature_onboarding_impl_upload_footer),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                style = TmrTheme.typography.caption,
-                color = TmrTheme.colors.textMuted,
-                textAlign = TextAlign.Center,
-            )
         }
+        if (!stackActions) UploadFooter()
     }
 }
+
+@Composable
+private fun UploadFooter() {
+    Text(
+        text = stringResource(R.string.feature_onboarding_impl_upload_footer),
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        style = TmrTheme.typography.caption,
+        color = TmrTheme.colors.textMuted,
+        textAlign = TextAlign.Center,
+    )
+}
+
+@Composable
+private fun PasteAction(onClick: () -> Unit, modifier: Modifier) = TmrSecondaryButton(
+    label = stringResource(R.string.feature_onboarding_impl_upload_paste),
+    onClick = onClick,
+    modifier = modifier,
+)
+
+@Composable
+private fun ManualAction(onClick: () -> Unit, modifier: Modifier) = TmrSecondaryButton(
+    label = stringResource(R.string.feature_onboarding_impl_upload_manual),
+    onClick = onClick,
+    modifier = modifier,
+)
 
 @Composable
 internal fun UploadRoute(

@@ -30,7 +30,7 @@ class UploadScreenTest {
             "DOCX",
             "We read it and fill in your profile. You check it and fix anything we got wrong.",
             "Upload resume",
-            "PDF or DOCX · up to 5 MB",
+            "PDF or DOCX · up to 5\u00A0MB",
             "Paste as text",
             "Fill in myself",
             "Your resume is only used to build your applications. Never shared.",

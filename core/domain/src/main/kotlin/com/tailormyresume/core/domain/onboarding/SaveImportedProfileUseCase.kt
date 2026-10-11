@@ -9,23 +9,27 @@ import com.tailormyresume.core.model.ProfileLimits
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
+private data class Contact(val fullName: String, val email: String, val phone: String, val city: String)
+
 class SaveImportedProfileUseCase @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val factIdAllocator: FactIdAllocator,
 ) {
     suspend operator fun invoke(parsed: CandidateProfile, sourceFileName: String?): CandidateProfile {
         val existing = profileRepository.observeProfile().first() ?: EMPTY_PROFILE
+        val importedName = parsed.fullName.trim().takeIf(::looksLikeName).orEmpty()
+        val contact = chooseContact(existing, parsed, importedName)
         val kept = existing.entries.filter { it.source != FactSource.IMPORTED }
         val allocated = existing.entries.toMutableList()
         val imported = parsed.entries.map { entry ->
             reidentify(entry, allocated).also { allocated += it }
         }
         val saved = existing.copy(
-            fullName = existing.fullName.ifBlank { parsed.fullName },
-            email = existing.email.ifBlank { parsed.email },
-            phone = existing.phone.ifBlank { parsed.phone },
+            fullName = contact.fullName,
+            email = contact.email,
+            phone = contact.phone,
             headline = existing.headline.ifBlank { parsed.headline },
-            city = existing.city.ifBlank { parsed.city },
+            city = contact.city,
             linkedinUrl = existing.linkedinUrl.ifBlank { parsed.linkedinUrl },
             portfolioUrl = existing.portfolioUrl.ifBlank { parsed.portfolioUrl },
             summary = existing.summary.ifBlank { parsed.summary },
@@ -39,6 +43,23 @@ class SaveImportedProfileUseCase @Inject constructor(
         )
         profileRepository.saveProfile(saved)
         return saved
+    }
+
+    private fun chooseContact(existing: CandidateProfile, parsed: CandidateProfile, importedName: String): Contact {
+        val existingContact = Contact(existing.fullName, existing.email, existing.phone, existing.city)
+        val importedContact = Contact(importedName, parsed.email, parsed.phone, parsed.city)
+        val existingIsBlank = listOf(existing.fullName, existing.email, existing.phone, existing.city).all { it.isBlank() }
+        return when {
+            existingIsBlank -> importedContact
+            existing.contactIsUserStated() -> existingContact
+            importedName.isNotEmpty() -> importedContact
+            else -> existingContact
+        }
+    }
+
+    private fun CandidateProfile.contactIsUserStated(): Boolean {
+        val hadImport = sourceFileName != null || entries.isNotEmpty()
+        return entries.any { it.source != FactSource.IMPORTED } || !hadImport
     }
 
     private fun reidentify(entry: ProfileEntry, allocated: List<ProfileEntry>): ProfileEntry {
