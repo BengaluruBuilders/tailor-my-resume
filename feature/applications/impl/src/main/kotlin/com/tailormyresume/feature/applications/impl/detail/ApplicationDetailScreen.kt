@@ -167,15 +167,20 @@ private fun StatusCard(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TmrStatusChip(status = state.status.toTmrStatus())
-                    Text(
-                        text = if (state.appliedOn != null) {
+                    val dateLine = when {
+                        state.appliedOn != null ->
                             stringResource(R.string.feature_applications_impl_applied_on, state.appliedOn)
-                        } else {
+                        state.status == ApplicationStatus.SAVED ->
                             stringResource(R.string.feature_applications_impl_not_applied)
-                        },
-                        style = TmrTheme.typography.bodySmall,
-                        color = TmrTheme.colors.textMuted,
-                    )
+                        else -> null
+                    }
+                    if (dateLine != null) {
+                        Text(
+                            text = dateLine,
+                            style = TmrTheme.typography.bodySmall,
+                            color = TmrTheme.colors.textMuted,
+                        )
+                    }
                 }
             }
             TmrCompactButton(

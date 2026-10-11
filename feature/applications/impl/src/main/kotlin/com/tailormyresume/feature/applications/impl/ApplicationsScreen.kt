@@ -9,13 +9,16 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -78,9 +81,11 @@ private fun ApplicationsHeaderRow(
     onAvatar: () -> Unit,
 ) {
     FlowRow(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.statusBars),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(HEADER_GAP),
         itemVerticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -91,12 +96,14 @@ private fun ApplicationsHeaderRow(
                 .weight(1f, fill = false)
                 .semantics { heading() },
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(HEADER_GAP)) {
             CreditsPill(header.credits, onCredits)
             AvatarDisc(header.initials, onAvatar)
         }
     }
 }
+
+private val HEADER_GAP = 6.dp
 
 @Composable
 private fun CreditsPill(credits: Int, onCredits: () -> Unit) {
@@ -106,15 +113,9 @@ private fun CreditsPill(credits: Int, onCredits: () -> Unit) {
             .background(TmrTheme.colors.fill)
             .clickable(role = Role.Button, onClick = onCredits)
             .heightIn(min = 48.dp)
-            .padding(horizontal = 14.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(7.dp)
-                .background(TmrTheme.colors.lime, CircleShape),
-        )
         Text(
             text = pluralStringResource(R.plurals.feature_applications_impl_credits, credits, credits),
             style = TmrTheme.typography.caption,
