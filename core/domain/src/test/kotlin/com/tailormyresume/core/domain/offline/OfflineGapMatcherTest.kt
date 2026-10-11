@@ -193,6 +193,37 @@ class OfflineGapMatcherTest {
     }
 
     @Test
+    fun mustHaveGapProducesOneQuickQuestionAndReasonsForEveryMatch() = runTest {
+        val (_, gap) = analyse(
+            """
+            Requirements
+            - Strong SQL
+            - Experience presenting to senior leaders
+            """.trimIndent(),
+            profileOf(listOf("SQL")),
+        )
+
+        assertThat(gap.matches.last().status).isEqualTo(MatchStatus.GAP)
+        assertThat(gap.question?.text).isEqualTo("Do you have experience with presenting to senior leaders?")
+        assertThat(gap.question?.why).isEqualTo("It's a must-have for this role, and your resume doesn't mention it.")
+        assertThat(gap.matches.map { it.reason }).doesNotContain(null)
+        assertThat(gap.keywordCoverage.covered).isGreaterThan(0)
+    }
+
+    @Test
+    fun partialMustHaveUsesAQuestionWithoutRepeatingWith() = runTest {
+        val (_, gap) = analyse("Requirements\n- Experience with Kotlin and Kubernetes")
+
+        assertThat(gap.matches.single().status).isEqualTo(MatchStatus.PARTIAL)
+        assertThat(gap.question?.text).isEqualTo("Do you have experience with Kotlin and Kubernetes?")
+        assertThat(gap.question?.why)
+            .isEqualTo(
+                "It's a must-have for this role. Your resume has related evidence, " +
+                    "but it does not fully confirm this requirement.",
+            )
+    }
+
+    @Test
     fun freshersRangeStartingAtZeroYearsCanBeMet() = runTest {
         val (_, gap) = analyse("Requirements\n- 0-2 years of Kotlin experience")
         assertThat(gap.matches.single().status).isEqualTo(MatchStatus.MET)

@@ -176,8 +176,8 @@ class TmrCoverageDeltaTest {
         }
 
         rule.onNodeWithText("Keywords matched", useUnmergedTree = true).assertExists()
-        rule.onNodeWithText("61%", useUnmergedTree = true).assertExists()
-        rule.onNodeWithText("92%", useUnmergedTree = true).assertExists()
+        rule.onNodeWithText("61", useUnmergedTree = true).assertExists()
+        rule.onNodeWithText("92", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Now", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Up to", substring = true, useUnmergedTree = true).assertExists()
 

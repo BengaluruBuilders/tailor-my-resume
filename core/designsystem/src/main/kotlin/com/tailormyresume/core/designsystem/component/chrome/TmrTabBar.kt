@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.collectionInfo
 import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.R
 import com.tailormyresume.core.designsystem.icon.TmrIcons
@@ -41,6 +42,7 @@ enum class TmrTab { Applications, Profile }
 private fun RowScope.TmrTabItem(
     selected: Boolean,
     label: String,
+    fitTexts: List<String>,
     selectedIcon: ImageVector,
     unselectedIcon: ImageVector,
     index: Int,
@@ -65,7 +67,13 @@ private fun RowScope.TmrTabItem(
             modifier = Modifier.size(22.dp),
             tint = tint,
         )
-        TmrCapsText(text = label, style = TmrTheme.typography.label, color = tint)
+        TmrCapsText(
+            text = label,
+            style = if (enlarged) TmrTheme.typography.label.copy(textAlign = TextAlign.Center) else TmrTheme.typography.label,
+            color = tint,
+            modifier = if (enlarged) Modifier.fillMaxWidth() else Modifier,
+            fitTexts = fitTexts,
+        )
     }
 }
 
@@ -79,6 +87,11 @@ fun TmrTabBar(
 ) {
     val colors = TmrTheme.colors
     val spacing = TmrTheme.spacing
+    val enlarged = LocalDensity.current.fontScale > 1f
+    val labels = listOf(
+        stringResource(R.string.core_designsystem_chrome_tab_applications),
+        stringResource(R.string.core_designsystem_chrome_tab_profile),
+    )
     Column(modifier = modifier) {
         Box(
             modifier =
@@ -95,12 +108,13 @@ fun TmrTabBar(
                 .background(colors.background)
                 .padding(top = spacing.sm, bottom = 28.dp, start = spacing.xxl, end = spacing.xxl)
                 .semantics { collectionInfo = CollectionInfo(rowCount = 1, columnCount = 2) },
-            horizontalArrangement = Arrangement.SpaceAround,
+            horizontalArrangement = if (enlarged) Arrangement.spacedBy(8.dp) else Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TmrTabItem(
                 selected = selected == TmrTab.Applications,
-                label = stringResource(R.string.core_designsystem_chrome_tab_applications),
+                label = labels[0],
+                fitTexts = labels,
                 selectedIcon = TmrIcons.Applications,
                 unselectedIcon = TmrIcons.ApplicationsBorder,
                 index = 0,
@@ -126,7 +140,8 @@ fun TmrTabBar(
             }
             TmrTabItem(
                 selected = selected == TmrTab.Profile,
-                label = stringResource(R.string.core_designsystem_chrome_tab_profile),
+                label = labels[1],
+                fitTexts = labels,
                 selectedIcon = TmrIcons.Profile,
                 unselectedIcon = TmrIcons.ProfileBorder,
                 index = 1,

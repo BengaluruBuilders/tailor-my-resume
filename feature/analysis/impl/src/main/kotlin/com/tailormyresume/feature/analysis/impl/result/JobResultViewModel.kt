@@ -10,6 +10,7 @@ import com.tailormyresume.core.domain.coverage.ScreenForKeywords
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.MatchStatus
+import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
 import com.tailormyresume.core.model.RequirementPriority
 import dagger.assisted.Assisted
@@ -90,6 +91,7 @@ private fun toUiState(application: JobApplication?, credits: Int?, profile: Cand
                     status = match.status,
                     reason = match.keepReason(),
                     unclear = application.quickAnswer == null && match.requirement.id == gap.question?.requirementId,
+                    answered = application.quickAnswer.confirms(match.requirement.id),
                 )
             },
         credits = credits,
@@ -99,3 +101,6 @@ private fun toUiState(application: JobApplication?, credits: Int?, profile: Cand
 
 private fun RequirementMatch.keepReason(): String? =
     if (status == MatchStatus.GAP || evidenceIds.isNotEmpty()) reason?.takeIf { it.isNotBlank() } else null
+
+private fun QuickAnswer?.confirms(requirementId: String): Boolean =
+    this?.requirementId == requirementId && choice in setOf("YES_REGULARLY", "A_FEW_TIMES")

@@ -175,10 +175,27 @@ class ReadingViewModelTest {
     }
 
     @Test
-    fun junkSentenceSavesNothingAndShowsTheNeutralLine() = runTest(UnconfinedTestDispatcher()) {
+    fun singleLineJunkSavesNothingAndShowsTheLineBreakHint() = runTest(UnconfinedTestDispatcher()) {
         val repository = TestProfileRepository()
         val draft = draftIn(backgroundScope)
         draft.setText("The quick brown fox jumps over the lazy dog and keeps running.")
+
+        val viewModel = viewModelIn(
+            draft,
+            parser = OfflineResumeTextParser(),
+            profileRepository = repository,
+        )
+
+        viewModel.events.test { assertThat(awaitItem()).isEqualTo(ReadingEvent.Failed) }
+        assertThat(draft.failure.value?.kind).isEqualTo(UploadFailureKind.SingleLinePastedText)
+        assertThat(repository.observeProfile().first()).isNull()
+    }
+
+    @Test
+    fun multilineJunkSavesNothingAndShowsTheNeutralLine() = runTest(UnconfinedTestDispatcher()) {
+        val repository = TestProfileRepository()
+        val draft = draftIn(backgroundScope)
+        draft.setText("The quick brown fox jumps over the lazy dog.\nIt keeps running.")
 
         val viewModel = viewModelIn(
             draft,
@@ -251,7 +268,7 @@ class ReadingViewModelTest {
             }
             add(FailureCase(parserThrows = RuntimeException("boom"), kind = UploadFailureKind.Neutral))
             add(FailureCase(parsed = emptyProfile(), kind = UploadFailureKind.Neutral))
-            add(FailureCase(parsed = emptyProfile(), pasted = true, kind = UploadFailureKind.Neutral))
+            add(FailureCase(parsed = emptyProfile(), pasted = true, kind = UploadFailureKind.SingleLinePastedText))
             add(
                 FailureCase(
                     repository = ThrowingProfileRepository(),

@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SettingsNavKey(
     val scenario: DebugScenario = DebugScenario.defaultValue,
+    val showDeleteAccount: Boolean = false,
 ) : NavKey
 
 @Serializable

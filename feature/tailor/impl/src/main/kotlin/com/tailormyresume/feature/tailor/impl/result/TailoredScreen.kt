@@ -75,11 +75,15 @@ private fun LazyListScope.tailoredItems(
                 color = TmrTheme.colors.text,
             )
             Text(
-                text = stringResource(
-                    R.string.feature_tailor_impl_result_tailored_subtitle,
-                    state.jobTitle,
-                    state.company,
-                ),
+                text = if (state.company.isBlank()) {
+                    stringResource(R.string.feature_tailor_impl_result_tailored_subtitle_without_company, state.jobTitle)
+                } else {
+                    stringResource(
+                        R.string.feature_tailor_impl_result_tailored_subtitle,
+                        state.jobTitle,
+                        state.company,
+                    )
+                },
                 style = TmrTheme.typography.bodySmall,
                 color = TmrTheme.colors.textMuted,
             )

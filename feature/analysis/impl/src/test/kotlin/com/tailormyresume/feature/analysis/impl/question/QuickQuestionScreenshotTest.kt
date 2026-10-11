@@ -14,11 +14,14 @@ import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.screenshot.TmrTestDevice
@@ -96,6 +99,17 @@ class QuickQuestionScreenshotTest {
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
     fun statesAt1x() {
         captureStates(TmrTestDevices.prototype)
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h800dp-normal-long-notround-any-480dpi-keyshidden-nonav")
+    fun longQuestionReservesSpaceAboveMascot() {
+        val question = "Have you managed a complex international supply chain?"
+        shown = NONE_PICKED.copy(question = question)
+        show(TmrTestDevices.prototype)
+        val hero = rule.onNodeWithTag("questionHero", useUnmergedTree = true).getBoundsInRoot()
+        val headline = rule.onNodeWithText(question, useUnmergedTree = true).getBoundsInRoot()
+        assertTrue("The question overlaps the mascot", headline.bottom <= hero.bottom - 120.dp)
     }
 
     @Test

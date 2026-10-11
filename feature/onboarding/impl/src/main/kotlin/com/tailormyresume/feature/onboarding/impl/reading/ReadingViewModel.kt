@@ -99,11 +99,11 @@ internal class ReadingViewModel @Inject constructor(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (failure: Exception) {
-            fail(UploadFailureKind.Neutral, file)
+            fail(failureKind(source), file)
             return
         }
         if (parsed.entries.none { it.category in READABLE_CATEGORIES } && parsed.skills.isEmpty()) {
-            fail(UploadFailureKind.Neutral, file)
+            fail(failureKind(source), file)
             return
         }
         try {
@@ -182,6 +182,13 @@ internal class ReadingViewModel @Inject constructor(
         )
         eventChannel.trySend(ReadingEvent.Failed)
     }
+
+    private fun failureKind(source: ResumeSource): UploadFailureKind =
+        if (source is ResumeSource.PastedText && source.text.none { it == '\n' || it == '\r' }) {
+            UploadFailureKind.SingleLinePastedText
+        } else {
+            UploadFailureKind.Neutral
+        }
 
     private companion object {
         const val READING_PERCENT = 40

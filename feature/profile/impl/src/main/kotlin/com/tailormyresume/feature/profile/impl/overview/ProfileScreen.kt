@@ -8,15 +8,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -70,7 +67,6 @@ internal fun ProfileScreen(
     state: ProfileUiState,
     onOpen: (ProfileTarget) -> Unit,
     modifier: Modifier = Modifier,
-    topInset: WindowInsets = WindowInsets.statusBars,
 ) {
     val colors = TmrTheme.colors
     val typography = TmrTheme.typography
@@ -79,7 +75,6 @@ internal fun ProfileScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .windowInsetsPadding(topInset)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = spacing.gutter),
         verticalArrangement = Arrangement.spacedBy(spacing.md),

@@ -19,6 +19,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTouchHeightIsEqualTo
 import androidx.compose.ui.test.assertTouchWidthIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
@@ -113,6 +114,24 @@ class TmrStepBarTest {
 class TmrTopBarTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun disabledActionExposesDisabledAndIgnoresTap() {
+        var actionClicks = 0
+        composeRule.setContent {
+            TmrPreviewTheme {
+                TmrTopBar(
+                    leading = TmrTopBarLeading.Back,
+                    onLeading = {},
+                    action = "Save",
+                    actionEnabled = false,
+                    onAction = { actionClicks++ },
+                )
+            }
+        }
+        composeRule.onNodeWithTag(TmrChromeTags.TOP_BAR_ACTION).assertIsNotEnabled().performClick()
+        composeRule.runOnIdle { assertEquals(0, actionClicks) }
+    }
 
     @Test
     fun backLeadingHasLabelAndTouchTarget() {

@@ -93,10 +93,11 @@ class OfflineSampleDataController(
     }
 
     private fun reviewed(resume: TailoredResume, plan: ReviewPlan): TailoredResume {
+        if (plan == ReviewPlan.ALL) return resume.withPendingAccepted()
         val reviewedCount = when (plan) {
-            ReviewPlan.ALL -> resume.bullets.size
             ReviewPlan.PARTIAL -> resume.bullets.size / 2
             ReviewPlan.NONE -> 0
+            ReviewPlan.ALL -> error("handled above")
         }
         var changedSeen = 0
         val bullets = resume.bullets.mapIndexed { index, bullet ->

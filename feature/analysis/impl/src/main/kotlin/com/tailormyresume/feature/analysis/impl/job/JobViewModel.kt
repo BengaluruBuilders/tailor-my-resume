@@ -64,6 +64,7 @@ internal class JobViewModel @Inject constructor(
             if (trimmed.length < MIN_JOB_CHARS) {
                 emit(null)
             } else {
+                emit(null)
                 delay(LABEL_DEBOUNCE_MILLIS)
                 emit(proposeJobLabel(trimmed).displayLabel())
             }

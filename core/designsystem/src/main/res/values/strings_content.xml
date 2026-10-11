@@ -4,6 +4,7 @@
     <string name="core_designsystem_content_coverage_now">Now</string>
     <string name="core_designsystem_content_coverage_up_to">Up to, after tailoring</string>
     <string name="core_designsystem_content_coverage_summary">Keywords matched: %1$d%% now, up to %2$d%% after tailoring</string>
+    <string name="core_designsystem_content_coverage_value">%1$d</string>
     <string name="core_designsystem_content_percent">%1$d%%</string>
 
     <string name="core_designsystem_content_status_saved">Saved</string>

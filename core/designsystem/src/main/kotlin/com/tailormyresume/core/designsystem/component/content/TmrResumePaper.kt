@@ -93,7 +93,7 @@ fun TmrResumePaper(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = stringResource(R.string.core_designsystem_content_percent, coveragePercent),
+                    text = stringResource(R.string.core_designsystem_content_coverage_value, coveragePercent),
                     style = TmrTheme.typography.mono15.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.dp.fixedSp(),

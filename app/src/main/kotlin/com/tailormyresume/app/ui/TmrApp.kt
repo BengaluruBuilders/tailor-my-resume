@@ -5,11 +5,9 @@ import androidx.compose.animation.EnterExitState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -21,7 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
@@ -65,6 +66,7 @@ import com.tailormyresume.feature.applications.api.navigation.DefaultApplication
 import com.tailormyresume.feature.applications.impl.navigation.applicationDetailEntry
 import com.tailormyresume.feature.applications.impl.navigation.applicationsEntry
 import com.tailormyresume.feature.onboarding.api.navigation.DefaultSignInNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import com.tailormyresume.feature.onboarding.impl.navigation.onboardingEntry
 import com.tailormyresume.feature.profile.api.navigation.DefaultProfileNavKey
@@ -175,6 +177,7 @@ internal fun TmrShell(
     navigator: Navigator,
     modifier: Modifier = Modifier,
     entryProvider: (NavKey) -> NavEntry<NavKey> = remember(navigator) { sharedEntryProvider(navigator) },
+    systemBarInsets: WindowInsets = WindowInsets.systemBars,
 ) {
     val toastState = remember { TmrToastState() }
     val sheetHost = remember { TmrSheetHostState() }
@@ -187,6 +190,8 @@ internal fun TmrShell(
     val holdLeadingSpace = chrome.leading != target.leading
     val tabsVisible = key.isTopLevelDestination()
     val changesSaved = stringResource(R.string.shell_changes_saved)
+    val density = LocalDensity.current
+    var chromeBottom by remember { mutableStateOf(0.dp) }
     BackHandler(enabled = !navigationState.canGoBack && navigator.canHandleBack) { navigator.goBack() }
     CompositionLocalProvider(
         LocalTmrToast provides toastState,
@@ -194,9 +199,17 @@ internal fun TmrShell(
         LocalChromeActions provides chromeActions,
     ) {
         Box(modifier = modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize().then(
+                    if (key is SignInNavKey) Modifier else Modifier.windowInsetsPadding(systemBarInsets),
+                ),
+            ) {
                 if (chrome.topBar) {
-                    Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+                    Column(
+                        modifier = Modifier.onGloballyPositioned { coordinates ->
+                            chromeBottom = with(density) { (coordinates.positionInRoot().y + coordinates.size.height).toDp() }
+                        },
+                    ) {
                         TmrTopBar(
                             leading = chrome.leading,
                             holdLeadingSpace = holdLeadingSpace,
@@ -233,9 +246,7 @@ internal fun TmrShell(
                 }
                 Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .then(if (chrome.topBar) Modifier.consumeWindowInsets(WindowInsets.statusBars) else Modifier)
-                        .then(if (tabsVisible) Modifier.consumeWindowInsets(WindowInsets.navigationBars) else Modifier),
+                        .weight(1f),
                 ) {
                     TmrNavDisplay(
                         navigationState = navigationState,
@@ -252,12 +263,14 @@ internal fun TmrShell(
                         onApplications = { navigator.root(DefaultApplicationsNavKey) },
                         onAdd = navigator::newApp,
                         onProfile = { navigator.root(DefaultProfileNavKey) },
-                        modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
                     )
                 }
             }
             TmrSheetHost(state = sheetHost)
-            TmrToastHost(state = toastState)
+            TmrToastHost(
+                state = toastState,
+                topPadding = if (chrome.topBar) maxOf(TmrTheme.spacing.toastTop, chromeBottom + TmrTheme.spacing.sm) else null,
+            )
         }
     }
 }

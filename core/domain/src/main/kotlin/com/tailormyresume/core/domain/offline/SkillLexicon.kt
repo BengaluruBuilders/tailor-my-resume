@@ -28,6 +28,13 @@ internal object SkillLexicon {
     fun strictCanonicalsIn(text: String): Set<String> =
         termsIn(text).filterNot(::isLooseAlias).map { it.canonical }.toSet()
 
+    fun looseCanonicalsSharingDisplayStemIn(text: String): Set<String> =
+        termsIn(text)
+            .filter(::isLooseAlias)
+            .filter(::sharesDisplayStem)
+            .map { it.canonical }
+            .toSet()
+
     fun surfaceKeysIn(text: String): Set<String> = termsIn(text).map { keyOf(it.surface) }.toSet()
 
     fun keyOfForm(form: String): String = keyOf(form)
@@ -61,6 +68,11 @@ internal object SkillLexicon {
     fun surfaceMatchesDisplay(term: LexiconTerm): Boolean {
         val entry = entriesByCanonical[term.canonical] ?: return true
         return keyOf(term.surface).trimEnd('s') == keyOf(entry.display).trimEnd('s')
+    }
+
+    private fun sharesDisplayStem(term: LexiconTerm): Boolean {
+        val entry = entriesByCanonical[term.canonical] ?: return false
+        return TextTokens.stems(term.surface).intersect(TextTokens.stems(entry.display)).isNotEmpty()
     }
 
     fun withImplied(canonicals: Collection<String>): Set<String> {

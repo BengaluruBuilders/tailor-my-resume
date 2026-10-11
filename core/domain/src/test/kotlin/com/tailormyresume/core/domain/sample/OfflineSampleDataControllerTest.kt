@@ -82,11 +82,11 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
     fun theNorthwindApplicationIsFullyReviewedAndTheParsiLedgerOneIsPartlyReviewed() = runTest {
         val loaded = loaded()
 
-        val northwind = checkNotNull(loaded.getValue("sample-northwind-associate-analyst").tailoredResume).bullets
+        val northwind = checkNotNull(loaded.getValue("sample-northwind-associate-analyst").tailoredResume)
         val paisa = checkNotNull(loaded.getValue("sample-paisa-ledger-data-analyst-intern").tailoredResume).bullets
         val sahyadri = checkNotNull(loaded.getValue("sample-sahyadri-motors-graduate-engineer-trainee").tailoredResume).bullets
 
-        assertThat(northwind.none { it.decision == BulletDecision.PENDING }).isTrue()
+        assertThat(northwind.decisions).doesNotContain(BulletDecision.PENDING)
         assertThat(paisa.any { it.decision == BulletDecision.PENDING }).isTrue()
         assertThat(paisa.any { it.decision != BulletDecision.PENDING }).isTrue()
         assertThat(sahyadri.all { it.decision == BulletDecision.PENDING }).isTrue()

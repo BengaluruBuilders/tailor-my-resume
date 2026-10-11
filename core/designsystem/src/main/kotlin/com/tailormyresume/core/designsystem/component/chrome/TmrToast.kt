@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import kotlinx.coroutines.delay
@@ -106,6 +107,7 @@ fun TmrToastHost(
     modifier: Modifier = Modifier,
     recommendedTimeoutMillis: (Int, Int) -> Int = defaultRecommendedTimeoutMillis(),
     isScreenReaderEnabled: () -> Boolean = defaultIsScreenReaderEnabled(),
+    topPadding: Dp? = null,
 ) {
     val toast = state.current ?: return
     val motion = TmrTheme.motion
@@ -141,7 +143,7 @@ fun TmrToastHost(
         Row(
             modifier =
             Modifier
-                .padding(top = spacing.toastTop, start = spacing.gutter, end = spacing.gutter)
+                .padding(top = topPadding ?: spacing.toastTop, start = spacing.gutter, end = spacing.gutter)
                 .fillMaxWidth()
                 .graphicsLayer {
                     alpha = progress.value.coerceIn(0f, 1f)

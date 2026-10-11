@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
@@ -117,8 +118,10 @@ private fun QuestionHero(question: String, eyebrow: String, showArt: Boolean) {
         color = TmrHeroColor.Lime,
         label = eyebrow,
         headline = question,
+        contentBottomPadding = if (showArt) 120.dp else 22.dp,
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("questionHero")
             .heightIn(min = 230.dp)
             .semantics { text = AnnotatedString(eyebrow) },
     ) {
@@ -127,7 +130,7 @@ private fun QuestionHero(question: String, eyebrow: String, showArt: Boolean) {
             TmrPaigePose.Question,
             Modifier
                 .align(Alignment.BottomEnd)
-                .offset(y = 40.dp),
+                .offset(y = 50.dp),
         )
     }
 }

@@ -112,12 +112,31 @@ class TmrChromeLargeTextA11yTest {
                 useUnmergedTree = true,
             )
         pills.assertCountEquals(A11Y_STEP_COUNT)
+        val top = pills[0].getBoundsInRoot().top
         for (index in 0 until A11Y_STEP_COUNT) {
             val bounds = pills[index].getBoundsInRoot()
+            assertEquals(top.value, bounds.top.value, 0.5f)
             assertTrue(bounds.left >= parent.left)
             assertTrue(bounds.right <= parent.right)
             assertTrue(bounds.right <= A11Y_PARENT_WIDTH)
         }
+    }
+
+    @Test
+    fun tabLabelsShareOneSizeAndLeaveSpaceForAddAtFontScale2() {
+        setLargeTextContent {
+            TmrTabBar(selected = TmrTab.Applications, onApplications = {}, onAdd = {}, onProfile = {})
+        }
+        val applications = composeRule.textLayoutOf("Applications")
+        val profile = composeRule.textLayoutOf("Profile")
+        assertEquals(applications.layoutInput.style.fontSize, profile.layoutInput.style.fontSize)
+        assertEquals(1, applications.lineCount)
+        assertEquals(1, profile.lineCount)
+        val applicationBounds = composeRule.onNodeWithText("Applications", useUnmergedTree = true).getBoundsInRoot()
+        val profileBounds = composeRule.onNodeWithText("Profile", useUnmergedTree = true).getBoundsInRoot()
+        val addBounds = composeRule.onNodeWithTag(TmrChromeTags.TAB_ADD, useUnmergedTree = true).getBoundsInRoot()
+        assertTrue(addBounds.left - applicationBounds.right >= 8.dp)
+        assertTrue(profileBounds.left - addBounds.right >= 8.dp)
     }
 
     @Test

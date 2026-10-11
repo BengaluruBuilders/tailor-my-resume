@@ -100,7 +100,7 @@ class TailoredPaperMapperTest {
     }
 
     @Test
-    fun summaryBlockComesFirstAndIsHighlighted() {
+    fun headlineAndSummaryBlocksComeFirstAndTheSummaryIsHighlighted() {
         val summary = "Backend engineer with 4 years of SQL and payments work"
         val document = document(bullets = listOf(keywordLine), summary = summary)
         val resume = TailoredResume(
@@ -115,23 +115,21 @@ class TailoredPaperMapperTest {
 
         val blocks = document.toPaperBlocks(resume)
 
-        assertThat(blocks.first().heading).isNull()
-        assertThat(blocks.first().title).isNull()
-        assertThat(blocks.first().lines).hasSize(1)
-        assertThat(blocks.first().lines[0]).hasSize(1)
-        assertThat(blocks.first().lines[0][0].text).isEqualTo(summary)
-        assertThat(blocks.first().lines[0][0].highlight).isEqualTo(TmrPaperHighlight.FromAnswer)
+        assertThat(blocks.take(2).flatMap { it.lines }.flatten().map { it.text })
+            .containsExactly(document.headline, summary)
+            .inOrder()
+        assertThat(blocks[1].lines[0][0].highlight).isEqualTo(TmrPaperHighlight.FromAnswer)
 
         val resumeOnlyFromResume = resume.copy(
             summary = resume.summary?.copy(sourceIds = listOf("src-summary")),
         )
 
-        assertThat(document.toPaperBlocks(resumeOnlyFromResume).first().lines[0][0].highlight)
+        assertThat(document.toPaperBlocks(resumeOnlyFromResume)[1].lines[0][0].highlight)
             .isEqualTo(TmrPaperHighlight.FromResume)
 
         val withoutSummary = document.copy(summary = "")
 
-        assertThat(withoutSummary.toPaperBlocks(resume).first().title)
+        assertThat(withoutSummary.toPaperBlocks(resume)[1].title)
             .isEqualTo("Backend Engineer, Acme")
     }
 
@@ -239,6 +237,7 @@ class TailoredPaperMapperTest {
         val blocks = document.toPaperBlocks(resume)
 
         val expectedLines = listOf(
+            document.headline,
             document.summary,
             keywordLine,
             answerLine,
@@ -260,9 +259,11 @@ class TailoredPaperMapperTest {
 
     @Test
     fun restoredProfileSummaryIsNotHighlightedButAcceptedTailoredSummaryIs() {
-        fun summaryHighlight(decision: BulletDecision) = document(bullets = emptyList(), summary = "Mine")
-            .toPaperBlocks(TailoredResume(bullets = emptyList(), summary = TailoredText("New", "Old", decision = decision)))
-            .first().lines[0][0].highlight
+        fun summaryHighlight(decision: BulletDecision): TmrPaperHighlight {
+            val blocks = document(bullets = emptyList(), summary = "Mine")
+                .toPaperBlocks(TailoredResume(bullets = emptyList(), summary = TailoredText("New", "Old", decision = decision)))
+            return blocks[1].lines[0][0].highlight
+        }
 
         assertThat(summaryHighlight(BulletDecision.REJECTED)).isEqualTo(TmrPaperHighlight.None)
         assertThat(summaryHighlight(BulletDecision.PENDING)).isEqualTo(TmrPaperHighlight.None)

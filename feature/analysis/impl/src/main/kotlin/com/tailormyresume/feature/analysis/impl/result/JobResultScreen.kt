@@ -201,6 +201,7 @@ private fun MustHaveItem(row: MustHaveRow) {
             )
             val detail = when {
                 row.unclear -> stringResource(R.string.feature_analysis_impl_result_unclear)
+                row.answered -> stringResource(R.string.feature_analysis_impl_result_answered)
                 else -> row.reason
             }
             if (detail != null) {
@@ -220,6 +221,7 @@ private fun MustHaveMarker(row: MustHaveRow) {
     val size = Modifier.size(MARKER_SIZE)
     val (fill, glyph) = when (row.marker) {
         MustHaveMarkerKind.UNCLEAR -> colors.amber to stringResource(R.string.feature_analysis_impl_result_unclear_mark)
+        MustHaveMarkerKind.ANSWERED -> colors.amber to stringResource(R.string.feature_analysis_impl_result_met_mark)
         MustHaveMarkerKind.MET -> colors.lime to stringResource(R.string.feature_analysis_impl_result_met_mark)
         MustHaveMarkerKind.PARTIAL -> colors.limeSoft to stringResource(R.string.feature_analysis_impl_result_partial_mark)
         MustHaveMarkerKind.GAP -> colors.coral to stringResource(R.string.feature_analysis_impl_result_unclear_mark)
@@ -227,6 +229,7 @@ private fun MustHaveMarker(row: MustHaveRow) {
     val status = stringResource(
         when (row.marker) {
             MustHaveMarkerKind.UNCLEAR -> R.string.feature_analysis_impl_result_status_unclear
+            MustHaveMarkerKind.ANSWERED -> R.string.feature_analysis_impl_result_answered
             MustHaveMarkerKind.MET -> R.string.feature_analysis_impl_result_legend_have
             MustHaveMarkerKind.PARTIAL -> R.string.feature_analysis_impl_result_status_partial
             MustHaveMarkerKind.GAP -> R.string.feature_analysis_impl_result_legend_missing

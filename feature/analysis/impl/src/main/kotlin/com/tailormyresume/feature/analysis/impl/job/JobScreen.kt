@@ -1,6 +1,7 @@
 package com.tailormyresume.feature.analysis.impl.job
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,6 +63,7 @@ internal fun JobScreen(
     onClear: () -> Unit,
     onAnalyze: () -> Unit,
     modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     val fontScale = LocalDensity.current.fontScale
     val pinBottom = fontScale <= STACKED_BUTTON_FONT_SCALE
@@ -75,7 +77,7 @@ internal fun JobScreen(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = 14.dp)
                 .padding(top = 14.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),

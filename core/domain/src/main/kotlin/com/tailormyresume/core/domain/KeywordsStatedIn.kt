@@ -7,22 +7,27 @@ import com.tailormyresume.core.model.RequirementType
 
 fun keywordsStatedIn(requirement: JobRequirement, statement: String): List<String> {
     val statedCanonicals = SkillLexicon.strictCanonicalsIn(statement)
+    val looseCanonicals = SkillLexicon.looseCanonicalsSharingDisplayStemIn(statement)
     val statedSurfaces = SkillLexicon.surfaceKeysIn(statement)
     val statedStems = TextTokens.stems(statement)
     return requirement.keywords
-        .filter { keyword -> isStated(keyword, statedCanonicals, statedSurfaces, statedStems) }
+        .filter { keyword -> isStated(keyword, statedCanonicals, looseCanonicals, statedSurfaces, statedStems) }
         .map(SkillLexicon::displayName)
 }
 
 private fun isStated(
     keyword: String,
     statedCanonicals: Set<String>,
+    looseCanonicals: Set<String>,
     statedSurfaces: Set<String>,
     statedStems: Set<String>,
-): Boolean = when {
-    SkillLexicon.normaliseStrict(keyword) != null -> SkillLexicon.normaliseStrict(keyword) in statedCanonicals
-    SkillLexicon.normalise(keyword) != null -> SkillLexicon.keyOfForm(keyword) in statedSurfaces
-    else -> TextTokens.stem(keyword) in statedStems
+): Boolean = when (val strictCanonical = SkillLexicon.normaliseStrict(keyword)) {
+    null -> when {
+        SkillLexicon.normalise(keyword) != null -> SkillLexicon.keyOfForm(keyword) in statedSurfaces
+        else -> TextTokens.stem(keyword) in statedStems
+    }
+
+    else -> strictCanonical in statedCanonicals || strictCanonical in looseCanonicals
 }
 
 fun isNamedSkillKeyword(requirement: JobRequirement, keyword: String): Boolean {

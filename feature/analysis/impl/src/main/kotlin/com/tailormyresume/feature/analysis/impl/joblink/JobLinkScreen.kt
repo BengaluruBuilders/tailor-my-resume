@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
@@ -68,6 +70,7 @@ internal fun JobLinkScreen(
                 onValueChange = onLinkChange,
                 label = stringResource(R.string.feature_analysis_impl_joblink_field_label),
                 placeholder = stringResource(R.string.feature_analysis_impl_joblink_placeholder),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = state.importing,
             )
