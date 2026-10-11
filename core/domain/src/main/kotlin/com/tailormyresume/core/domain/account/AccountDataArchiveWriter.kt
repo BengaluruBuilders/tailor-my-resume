@@ -30,7 +30,12 @@ import java.util.zip.ZipOutputStream
 
 class AccountDataArchiveWriter {
 
-    fun write(data: AccountData, target: File, extraEntries: Map<String, String> = emptyMap()) {
+    fun write(
+        data: AccountData,
+        target: File,
+        extraEntries: Map<String, String> = emptyMap(),
+        creditBalance: Int? = null,
+    ) {
         target.parentFile?.mkdirs()
         val temporary = File(target.parentFile, target.name + TEMPORARY_SUFFIX)
         try {
@@ -38,8 +43,8 @@ class AccountDataArchiveWriter {
                 zip.writeEntry(ACCOUNT_ENTRY, accountText(data))
                 zip.writeEntry(PROFILE_ENTRY, profileText(data))
                 zip.writeEntry(APPLICATIONS_ENTRY, applicationsText(data))
-                zip.writeEntry(PURCHASES_ENTRY, purchasesText(data))
-                zip.writeEntry(MY_DATA_ENTRY, myDataJson(data))
+                zip.writeEntry(PURCHASES_ENTRY, purchasesText(data, creditBalance))
+                zip.writeEntry(MY_DATA_ENTRY, myDataJson(data, creditBalance))
                 extraEntries.forEach { (name, body) -> zip.writeEntry(name, body) }
             }
             if (!temporary.renameTo(target)) throw IOException("Could not move the archive to ${target.name}")
@@ -110,9 +115,13 @@ class AccountDataArchiveWriter {
         lines.drop(1).forEach { appendLine("    $it") }
     }
 
-    private fun purchasesText(data: AccountData): String = buildString {
-        appendLine("freeCredits=${data.entitlement.freeCredits}")
-        appendLine("purchasedCredits=${data.entitlement.purchasedCredits}")
+    private fun purchasesText(data: AccountData, creditBalance: Int?): String = buildString {
+        if (creditBalance == null) {
+            appendLine("freeCredits=${data.entitlement.freeCredits}")
+            appendLine("purchasedCredits=${data.entitlement.purchasedCredits}")
+        } else {
+            appendLine("creditBalance=$creditBalance")
+        }
         data.purchases.forEach { purchase ->
             appendLine("${purchase.orderId} | ${purchase.packId} | ${purchase.state} | ${purchase.purchasedAt}")
         }
@@ -121,13 +130,17 @@ class AccountDataArchiveWriter {
         }
     }
 
-    private fun myDataJson(data: AccountData): String = prettyJson.encodeToString(
+    private fun myDataJson(data: AccountData, creditBalance: Int?): String = prettyJson.encodeToString(
         JsonObject.serializer(),
         buildJsonObject {
             put("generatedAt", data.generatedAt.toString())
             data.account?.let { put("account", accountJson(it)) }
             data.profile?.let { put("profile", profileJson(it)) }
-            put("entitlement", entitlementJson(data.entitlement))
+            if (creditBalance == null) {
+                put("entitlement", entitlementJson(data.entitlement))
+            } else {
+                put("creditBalance", creditBalance)
+            }
             put("creditLedger", objects(data.creditLedger, ::ledgerEntryJson))
             put("resumeSettings", resumeSettingsJson(data.resumeSettings))
             put("purchases", objects(data.purchases, ::purchaseJson))

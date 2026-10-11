@@ -33,7 +33,11 @@ class OfflineAccountDataExporter internal constructor(
         val target = File(directory(), FILE_NAME)
         withContext(ioDispatcher) {
             target.parentFile?.listFiles()?.filter { it != target }?.forEach(File::deleteRecursively)
-            AccountDataArchiveWriter().write(data, target)
+            AccountDataArchiveWriter().write(
+                data = data,
+                target = target,
+                creditBalance = data.creditLedger.sumOf { it.amount },
+            )
         }
         return AccountDataArchive(fileName = FILE_NAME, file = target)
     }

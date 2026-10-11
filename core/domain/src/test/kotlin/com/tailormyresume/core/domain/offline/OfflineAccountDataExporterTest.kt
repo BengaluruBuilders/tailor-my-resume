@@ -8,6 +8,8 @@ import com.tailormyresume.core.domain.PurchaseState
 import com.tailormyresume.core.domain.account.AccountData
 import com.tailormyresume.core.domain.account.AccountDataExporter
 import com.tailormyresume.core.model.CreditKind
+import com.tailormyresume.core.model.CreditLedgerEntry
+import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.ExportFormat
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.SignInAccount
@@ -55,6 +57,37 @@ class OfflineAccountDataExporterTest : AccountDataExporterContractTest() {
             assertThat(purchases).contains("order-1")
             val applications = zip.getInputStream(zip.getEntry("applications.txt")).bufferedReader().readText()
             assertThat(applications).contains("a.pdf")
+        }
+    }
+
+    @Test
+    fun archiveUsesTheLedgerBalanceInsteadOfGatewayCreditLines() = runTest {
+        val now = Instant.fromEpochMilliseconds(1_790_000_000_000)
+        val data = AccountData(
+            generatedAt = now,
+            account = null,
+            profile = null,
+            applications = emptyList(),
+            entitlement = PurchaseEntitlement(7, 9, emptyList()),
+            purchases = emptyList(),
+            exports = emptyList(),
+            creditLedger = listOf(
+                CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, 1, null, null, now),
+                CreditLedgerEntry(CreditLedgerKind.PURCHASE, 5, null, "application_pack_5", now),
+                CreditLedgerEntry(CreditLedgerKind.SPEND, -1, "application-1", null, now),
+            ),
+        )
+
+        val archive = createExporter().export(data)
+
+        ZipFile(archive.file).use { zip ->
+            val purchases = zip.getInputStream(zip.getEntry("purchases.txt")).bufferedReader().readText()
+            assertThat(purchases).contains("creditBalance=5")
+            assertThat(purchases).doesNotContain("freeCredits=")
+            assertThat(purchases).doesNotContain("purchasedCredits=")
+            val json = zip.getInputStream(zip.getEntry("my-data.json")).bufferedReader().readText()
+            assertThat(json).contains("\"creditBalance\": 5")
+            assertThat(json).doesNotContain("\"entitlement\"")
         }
     }
 
