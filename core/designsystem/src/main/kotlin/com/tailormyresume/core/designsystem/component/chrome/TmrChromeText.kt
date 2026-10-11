@@ -14,7 +14,9 @@ import androidx.compose.ui.semantics.getTextLayoutResult
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
@@ -33,22 +35,31 @@ private fun TextLayoutResult.splitsWord(): Boolean {
 private class WholeWordAutoSize(
     private val start: TextUnit,
     private val floor: TextUnit,
+    private val fitTexts: List<AnnotatedString>,
+    private val textMeasurer: TextMeasurer,
+    private val style: TextStyle,
 ) : TextAutoSize {
     override fun TextAutoSizeLayoutScope.getFontSize(
         constraints: Constraints,
         text: AnnotatedString,
     ): TextUnit {
         var size = start
-        while (size > floor && performLayout(constraints, text, size).splitsWord()) {
+        while (size > floor && if (fitTexts.isEmpty()) {
+                performLayout(constraints, text, size).splitsWord()
+            } else {
+                fitTexts.any { textMeasurer.measure(it, style.copy(fontSize = size), constraints = constraints).splitsWord() }
+            }
+        ) {
             size = (size.value * SHRINK_STEP).sp.let { if (it < floor) floor else it }
         }
         return size
     }
 
     override fun equals(other: Any?): Boolean =
-        other is WholeWordAutoSize && other.start == start && other.floor == floor
+        other is WholeWordAutoSize && other.start == start && other.floor == floor && other.fitTexts == fitTexts &&
+            other.textMeasurer == textMeasurer && other.style == style
 
-    override fun hashCode(): Int = 31 * start.hashCode() + floor.hashCode()
+    override fun hashCode(): Int = listOf(start, floor, fitTexts, textMeasurer, style).hashCode()
 }
 
 @Composable
@@ -57,12 +68,14 @@ internal fun TmrCapsText(
     style: TextStyle,
     color: Color,
     modifier: Modifier = Modifier,
+    fitTexts: List<String> = emptyList(),
 ) {
     val fontScale = LocalDensity.current.fontScale
     val oneXSize = (style.fontSize.value / fontScale).sp
+    val textMeasurer = rememberTextMeasurer()
     val autoSize =
-        remember(style.fontSize, fontScale) {
-            if (fontScale > 1f) WholeWordAutoSize(style.fontSize, oneXSize) else null
+        remember(style, fontScale, fitTexts, textMeasurer) {
+            if (fontScale > 1f) WholeWordAutoSize(style.fontSize, oneXSize, fitTexts.map { AnnotatedString(it.uppercase()) }, textMeasurer, style) else null
         }
     val layout = remember { arrayOfNulls<TextLayoutResult>(1) }
     key(fontScale) {

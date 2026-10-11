@@ -62,7 +62,7 @@ fun TmrCoverageDelta(now: Int, upTo: Int, modifier: Modifier = Modifier) {
 private fun CoverageValue(percent: Int, caption: String, color: Color) {
     Column(verticalArrangement = Arrangement.spacedBy(TmrTheme.spacing.xxs)) {
         Text(
-            text = stringResource(R.string.core_designsystem_content_percent, percent),
+            text = stringResource(R.string.core_designsystem_content_coverage_value, percent),
             style = TmrTheme.typography.display,
             color = color,
         )
