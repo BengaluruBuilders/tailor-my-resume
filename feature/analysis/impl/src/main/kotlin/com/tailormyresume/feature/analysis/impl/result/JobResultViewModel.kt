@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.CreditsRepository
+import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.domain.coverage.ScreenForKeywords
+import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.RequirementMatch
@@ -27,6 +29,7 @@ import kotlinx.coroutines.launch
 internal class JobResultViewModel @AssistedInject constructor(
     private val applicationRepository: ApplicationRepository,
     private val creditsRepository: CreditsRepository,
+    profileRepository: ProfileRepository,
     @Assisted val applicationId: String,
 ) : ViewModel() {
 
@@ -36,8 +39,9 @@ internal class JobResultViewModel @AssistedInject constructor(
     val uiState: StateFlow<JobResultUiState> = combine(
         applicationRepository.observeApplication(applicationId),
         creditsRepository.observeBalance(),
-    ) { application, credits ->
-        toUiState(application, credits)
+        profileRepository.observeProfile(),
+    ) { application, credits, profile ->
+        toUiState(application, credits, profile)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), JobResultUiState.Loading)
 
     val events: Flow<JobResultEvent> = eventChannel.receiveAsFlow()
@@ -64,10 +68,10 @@ internal class JobResultViewModel @AssistedInject constructor(
     }
 }
 
-private fun toUiState(application: JobApplication?, credits: Int): JobResultUiState {
+private fun toUiState(application: JobApplication?, credits: Int, profile: CandidateProfile?): JobResultUiState {
     val gap = application?.gapAnalysis ?: return JobResultUiState.Unavailable
-    val coverage = KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, null)
-    val screen = ScreenForKeywords(gap.matches)
+    val coverage = KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, null, profile)
+    val screen = ScreenForKeywords(gap.matches, profile)
     return JobResultUiState.Ready(
         title = application.job.title,
         company = application.job.company,

@@ -9,6 +9,7 @@ import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
+import com.tailormyresume.core.testing.repository.TestProfileRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.feature.analysis.impl.ResultTestData
 import kotlinx.coroutines.flow.collect
@@ -274,7 +275,7 @@ class QuickQuestionViewModelTest {
     }
 
     private fun TestScope.viewModel() =
-        QuickQuestionViewModel(applicationRepository, ResultTestData.APP_ID).also {
+        QuickQuestionViewModel(applicationRepository, TestProfileRepository(), ResultTestData.APP_ID).also {
             backgroundScope.launch(UnconfinedTestDispatcher()) { it.uiState.collect() }
         }
 

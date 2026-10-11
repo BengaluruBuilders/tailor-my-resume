@@ -3,6 +3,7 @@ package com.tailormyresume.feature.analysis.impl.question
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
+import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.model.QuickAnswer
 import dagger.assisted.Assisted
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = QuickQuestionViewModel.Factory::class)
 internal class QuickQuestionViewModel @AssistedInject constructor(
     private val applicationRepository: ApplicationRepository,
+    private val profileRepository: ProfileRepository,
     @Assisted val applicationId: String,
 ) : ViewModel() {
 
@@ -93,7 +95,12 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
         applicationRepository.upsertApplication(
             current.copy(
                 quickAnswer = answer,
-                keywordCoverage = KeywordCoverageCalculator.compute(gap.matches, answer, current.tailoredResume),
+                keywordCoverage = KeywordCoverageCalculator.compute(
+                    gap.matches,
+                    answer,
+                    current.tailoredResume,
+                    profileRepository.observeProfile().first(),
+                ),
             ),
         )
         return true

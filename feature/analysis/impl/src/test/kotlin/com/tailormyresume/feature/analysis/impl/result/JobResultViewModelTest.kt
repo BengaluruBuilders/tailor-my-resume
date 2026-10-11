@@ -12,6 +12,7 @@ import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
+import com.tailormyresume.core.testing.repository.TestProfileRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.feature.analysis.impl.ResultTestData
 import kotlinx.coroutines.flow.collect
@@ -234,7 +235,7 @@ class JobResultViewModelTest {
     }
 
     private fun TestScope.viewModel() =
-        JobResultViewModel(applicationRepository, creditsRepository, ResultTestData.APP_ID).also {
+        JobResultViewModel(applicationRepository, creditsRepository, TestProfileRepository(), ResultTestData.APP_ID).also {
             backgroundScope.launch(UnconfinedTestDispatcher()) { it.uiState.collect() }
         }
 

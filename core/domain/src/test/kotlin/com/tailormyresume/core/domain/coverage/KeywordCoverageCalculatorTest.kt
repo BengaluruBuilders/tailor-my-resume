@@ -96,7 +96,7 @@ class KeywordCoverageCalculatorTest {
             tailoredResume = acceptedResume,
         )
 
-        assertThat(coverage).isEqualTo(ApplicationKeywordCoverage(now = 63, upTo = 75, final = 63))
+        assertThat(coverage).isEqualTo(ApplicationKeywordCoverage(now = 50, upTo = 63, final = 63))
     }
 
     @Test
@@ -143,9 +143,9 @@ class KeywordCoverageCalculatorTest {
         )
 
         assertThat(withAnswer.now).isAtMost(withAnswer.upTo)
-        assertThat(withAnswer.now).isEqualTo(63)
-        assertThat(withAnswer.upTo).isEqualTo(75)
-        assertThat(withoutAnswer.now).isEqualTo(63)
+        assertThat(withAnswer.now).isEqualTo(50)
+        assertThat(withAnswer.upTo).isEqualTo(63)
+        assertThat(withoutAnswer.now).isEqualTo(50)
         assertThat(withoutAnswer.upTo).isEqualTo(withoutAnswer.now)
         assertThat(noResume.final).isNull()
     }
@@ -212,8 +212,8 @@ class KeywordCoverageCalculatorTest {
             tailoredResume = null,
         )
 
-        assertThat(coverage.now).isEqualTo(50)
-        assertThat(coverage.upTo).isEqualTo(75)
+        assertThat(coverage.now).isEqualTo(25)
+        assertThat(coverage.upTo).isEqualTo(50)
     }
 
     @Test
@@ -229,9 +229,9 @@ class KeywordCoverageCalculatorTest {
             tailoredResume = null,
         )
 
-        assertThat(notYet.now).isEqualTo(63)
+        assertThat(notYet.now).isEqualTo(50)
         assertThat(notYet.upTo).isEqualTo(notYet.now)
-        assertThat(skipped.now).isEqualTo(63)
+        assertThat(skipped.now).isEqualTo(50)
         assertThat(skipped.upTo).isEqualTo(skipped.now)
     }
 
@@ -248,9 +248,9 @@ class KeywordCoverageCalculatorTest {
             tailoredResume = null,
         )
 
-        assertThat(confirmed.now).isEqualTo(63)
-        assertThat(confirmed.upTo).isEqualTo(75)
-        assertThat(unknownRequirement.now).isEqualTo(63)
+        assertThat(confirmed.now).isEqualTo(50)
+        assertThat(confirmed.upTo).isEqualTo(63)
+        assertThat(unknownRequirement.now).isEqualTo(50)
         assertThat(unknownRequirement.upTo).isEqualTo(unknownRequirement.now)
     }
 

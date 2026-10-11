@@ -7,10 +7,11 @@ import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobRequirement
-import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
+import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
+import com.tailormyresume.core.model.confirmedWithinLimits
 
 object KeywordCoverageCalculator {
     private const val YES_REGULARLY = "YES_REGULARLY"
@@ -24,22 +25,36 @@ object KeywordCoverageCalculator {
     ): ApplicationKeywordCoverage {
         val requirements = matches.map { it.requirement }
         val keywordSet = requirements.flatMap(::keywordsOf).toSet()
-        val metKeywords = matches
-            .filter { it.status == MatchStatus.MET || it.status == MatchStatus.PARTIAL }
-            .flatMap { keywordsOf(it.requirement) }
-            .toSet()
+        val evidence = evidenceTextsOf(profile)
+        val metKeywords = matches.flatMap { it.presentKeywords(evidence) }.map { it.lowercase() }.toSet()
         val answerKeywords = answerKeywords(requirements, quickAnswer)
         return ApplicationKeywordCoverage(
             now = percent(metKeywords.size, keywordSet.size),
             upTo = percent((metKeywords + answerKeywords).size, keywordSet.size),
             final = tailoredResume?.let { resume ->
-                val text = resume.bullets.joinToString("\n") {
-                    if (it.decision == BulletDecision.ACCEPTED) it.proposedText else it.originalText
-                }
+                val text = resumeText(resume, profile)
                 percent(requirements.flatMap { stated(it, text) }.toSet().size, keywordSet.size)
             },
         )
     }
+
+    private fun resumeText(resume: TailoredResume, profile: CandidateProfile?): String {
+        if (profile == null) return resume.bullets.joinToString("\n") { it.acceptedOrOriginalText() }
+        val sendable = profile.confirmedWithinLimits()
+        val applied = resume.bullets.filter { it.decision == BulletDecision.ACCEPTED && it.violations.isEmpty() }
+        val bullets = sendable.entries.flatMap { entry ->
+            entry.bullets.map { source ->
+                applied.firstOrNull { it.entryId == entry.id && source.id in it.sourceIds && it.originalText.trim() == source.text.trim() }
+                    ?.proposedText ?: source.text
+            }
+        }
+        val skills = resume.skills?.takeIf { it.decision == BulletDecision.ACCEPTED }?.skills ?: sendable.skills
+        val summary = resume.summary?.takeIf { it.decision == BulletDecision.ACCEPTED }?.text.orEmpty()
+        return (sendable.entries.map { it.title } + bullets + skills + summary).joinToString("\n")
+    }
+
+    private fun TailoredBullet.acceptedOrOriginalText() =
+        if (decision == BulletDecision.ACCEPTED) proposedText else originalText
 
     private fun keywordOf(keyword: String): String = SkillLexicon.displayName(keyword).lowercase()
 

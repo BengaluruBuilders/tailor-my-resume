@@ -134,7 +134,13 @@ private fun TailoredFooter(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        if (state.accepted) {
+        if (state.changes.isEmpty()) {
+            Text(
+                text = stringResource(R.string.feature_tailor_impl_result_no_changes),
+                style = TmrTheme.typography.body,
+                color = TmrTheme.colors.textMuted,
+            )
+        } else if (state.accepted) {
             AcceptedRow()
         } else {
             TmrSecondaryButton(
