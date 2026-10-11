@@ -11,6 +11,8 @@ import com.tailormyresume.app.ai.RemoteJobAnalysisSource
 import com.tailormyresume.app.ai.RemoteResumeTailor
 import com.tailormyresume.app.ai.candidate
 import com.tailormyresume.app.ai.job
+import com.tailormyresume.app.ai.tailoringBody
+import com.tailormyresume.app.ai.tailoringResult
 import com.tailormyresume.core.domain.GapMatcher
 import com.tailormyresume.core.domain.offline.OfflineJobAnalysisSource
 import com.tailormyresume.core.domain.offline.OfflineJobDescriptionAnalyzer
@@ -32,6 +34,7 @@ class AiBindingsTest {
             GapAnalysis(emptyList(), KeywordCoverage(0, 0))
     }
     private val gap = matcher.match(candidate, job)
+    private val store = TestMockStateStore()
 
     private val analysisSource = GuardedJobAnalysisSource(
         RemoteJobAnalysisSource(backend.api, matcher),
@@ -39,7 +42,7 @@ class AiBindingsTest {
         previewMode,
     )
     private val tailor = GuardedResumeTailor(
-        RemoteResumeTailor(backend.api, PendingTailoringIds(TestMockStateStore(), FixedIds)),
+        RemoteResumeTailor(backend.api, PendingTailoringIds(store, FixedIds)),
         OfflineResumeTailor(),
         previewMode,
     )
@@ -74,5 +77,17 @@ class AiBindingsTest {
         runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }
 
         assertThat(backend.server.requestCount).isEqualTo(2)
+    }
+
+    @Test
+    fun guardedTailorCommitsTheRequestAfterTheResultIsStored() = runBlocking {
+        backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult("Cleaned and checked weekly sales data in Excel.")))
+
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
+        assertThat(store.read("tailoring.request.unfinished.app-1")).isNotNull()
+
+        tailor.resultStored("app-1", "run-1")
+
+        assertThat(store.read("tailoring.request.unfinished.app-1")).isNull()
     }
 }

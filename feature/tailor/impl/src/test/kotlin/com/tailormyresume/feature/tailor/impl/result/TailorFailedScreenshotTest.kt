@@ -24,7 +24,7 @@ class TailorFailedScreenshotTest {
     private fun shoot(device: TmrTestDevice, screenName: String) {
         rule.captureResultScreen(screenName, device) { TailorFailedScreen(onTryAgain = {}, onGoBack = {}) }
         rule.onNodeWithText("Tailoring didn't finish").assertExists()
-        rule.onNodeWithText("Something went wrong on our side. Your credit wasn't used.").assertExists()
+        rule.onNodeWithText("Something went wrong on our side.").assertExists()
         rule.onNodeWithText("Try again").assertExists()
         rule.onNodeWithText("Go back").assertExists()
     }

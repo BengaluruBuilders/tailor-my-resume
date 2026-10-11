@@ -16,13 +16,13 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.time.Clock
 
-internal sealed interface TailoringResult {
+sealed interface TailoringResult {
     data object Success : TailoringResult
 
     data class Failure(val cause: Throwable) : TailoringResult
 }
 
-internal class TailoringRunner @Inject constructor(
+class TailoringRunner @Inject constructor(
     private val applicationRepository: ApplicationRepository,
     private val profileRepository: ProfileRepository,
     private val creditsRepository: CreditsRepository,
@@ -40,6 +40,7 @@ internal class TailoringRunner @Inject constructor(
         }
         val storedForThisRun = application.tailoredResume?.runId == runId
         if (storedForThisRun || alreadySpent) {
+            if (storedForThisRun) tailorResume.resultStored(applicationId, runId)
             if (!alreadySpent) creditsRepository.record(TailoringCreditSpend.spendEntry(applicationId, runId, clock))
             return TailoringResult.Success
         }
@@ -65,6 +66,7 @@ internal class TailoringRunner @Inject constructor(
                         updatedAt = clock.now(),
                     ),
                 )
+                tailorResume.resultStored(applicationId, runId)
             },
         )
         TailoringResult.Success

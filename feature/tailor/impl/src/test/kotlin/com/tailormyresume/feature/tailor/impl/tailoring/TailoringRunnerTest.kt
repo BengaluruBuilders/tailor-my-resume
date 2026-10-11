@@ -1,12 +1,14 @@
 package com.tailormyresume.feature.tailor.impl.tailoring
 
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.GapAnalysis
+import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.KeywordCoverage
@@ -67,7 +69,10 @@ class TailoringRunnerTest {
         profileRepository.sendProfile(profile)
     }
 
-    private fun tailorResumeOf(tailor: suspend () -> TailoredResume) = TailorResumeUseCase(
+    private fun tailorResumeOf(
+        tailor: suspend () -> TailoredResume,
+        stored: suspend (String, String) -> Unit = { _, _ -> },
+    ) = TailorResumeUseCase(
         object : ResumeTailor {
             override suspend fun tailor(
                 profile: CandidateProfile,
@@ -77,6 +82,8 @@ class TailoringRunnerTest {
                 answer: QuickAnswer?,
                 runId: String,
             ): TailoredResume = tailor()
+
+            override suspend fun resultStored(applicationId: String, runId: String) = stored(applicationId, runId)
         },
         CleanFabricationGuard,
     )
@@ -124,6 +131,37 @@ class TailoringRunnerTest {
         assertThat(first).isEqualTo(TailoringResult.Success)
         assertThat(retry).isEqualTo(TailoringResult.Success)
         assertThat(spends()).hasSize(1)
+    }
+
+    @Test
+    fun requestIsCommittedOnlyAfterTheResultIsStored() = runTest(dispatcher) {
+        seed()
+        var committed = false
+        val useCase = tailorResumeOf({ TailoredResume(bullets = listOf(bullet)) }) { applicationId, runId ->
+            assertThat(applicationRepository.observeApplication(applicationId).first()?.tailoredResume?.runId).isEqualTo(runId)
+            committed = true
+        }
+
+        val result = TailoringRunner(applicationRepository, profileRepository, creditsRepository, useCase, clock, dispatcher)("app-1", "run-1")
+
+        assertThat(result).isEqualTo(TailoringResult.Success)
+        assertThat(committed).isTrue()
+    }
+
+    @Test
+    fun failedLocalStoreLeavesTheRequestUncommitted() = runTest(dispatcher) {
+        seed()
+        var committed = false
+        val failingApplications = object : ApplicationRepository by applicationRepository {
+            override suspend fun upsertApplication(application: JobApplication) = error("local storage failed")
+        }
+        val useCase = tailorResumeOf({ TailoredResume(bullets = listOf(bullet)) }) { _, _ -> committed = true }
+
+        val result = TailoringRunner(failingApplications, profileRepository, creditsRepository, useCase, clock, dispatcher)("app-1", "run-1")
+
+        assertThat(result).isInstanceOf(TailoringResult.Failure::class.java)
+        assertThat(committed).isFalse()
+        assertThat(spends()).isEmpty()
     }
 
     @Test
@@ -236,7 +274,7 @@ class TailoringRunnerTest {
             applicationRepository,
             profileRepository,
             failingCredits,
-            tailorResumeOf { tailored },
+            tailorResumeOf(tailor = { tailored }),
             clock,
             dispatcher,
         )("app-1", "run-1")

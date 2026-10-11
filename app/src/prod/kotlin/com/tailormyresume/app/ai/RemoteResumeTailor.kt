@@ -31,6 +31,8 @@ class RemoteResumeTailor @Inject constructor(
     private val api: TailorMyResumeApi,
     private val pending: PendingTailoringIds,
 ) : ResumeTailor {
+    override suspend fun resultStored(applicationId: String, runId: String) = pending.settle(runId, applicationId)
+
     override suspend fun tailor(
         profile: CandidateProfile,
         job: JobDescription,
@@ -54,7 +56,6 @@ class RemoteResumeTailor @Inject constructor(
                     pending.clear(runId, applicationId)
                     throw AiException(finished.failureCode.toAiFailure())
                 }
-            pending.settle(applicationId)
             return result.toTailoredResume(profile)
         } catch (failure: AiException) {
             if (failure.failure !in RESUMABLE) pending.clear(runId, applicationId)
