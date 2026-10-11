@@ -16,8 +16,6 @@ import com.tailormyresume.feature.tailor.impl.document.reviewedEntries
 internal data class TailorInputs(
     val application: JobApplication?,
     val profile: CandidateProfile?,
-    val isOffline: Boolean,
-    val regenerationsUsed: Int,
     val editedBulletIds: Set<String>,
     val reportedIds: Set<String> = emptySet(),
 )
@@ -38,8 +36,6 @@ internal fun buildTailorUiState(inputs: TailorInputs): TailorUiState {
             ?.filter { it.isNotEmpty() }
             .orEmpty(),
         changes = entries.flatMap { it.bullets }.filter { it.isChange },
-        regenerationsLeft = (MAX_REGENERATIONS - inputs.regenerationsUsed).coerceAtLeast(0),
-        isOffline = inputs.isOffline,
         reportedIds = inputs.reportedIds,
     )
 }

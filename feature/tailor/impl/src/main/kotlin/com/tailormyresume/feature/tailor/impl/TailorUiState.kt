@@ -8,8 +8,6 @@ import com.tailormyresume.core.model.GuardrailViolation
 import com.tailormyresume.core.model.ReportedItemKind
 import com.tailormyresume.core.model.TailoredBullet
 
-internal const val MAX_REGENERATIONS = 2
-
 internal fun sectionReportId(sectionKey: String): String = "section:$sectionKey"
 
 internal data class JobHeader(val title: String, val company: String)
@@ -30,8 +28,6 @@ internal sealed interface TailorUiState {
         val sections: List<ReviewSection>,
         val notAdded: List<String>,
         val changes: List<TailorBulletUi>,
-        val regenerationsLeft: Int,
-        val isOffline: Boolean,
         val reportedIds: Set<String> = emptySet(),
     ) : TailorUiState {
         val totalCount: Int get() = changes.size
