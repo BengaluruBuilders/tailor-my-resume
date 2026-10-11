@@ -74,4 +74,13 @@ class ReviewLayoutTest {
         assertLinesEndAtWordBoundaries(longTitle)
         assertLinesEndAtWordBoundaries(longSkill)
     }
+
+    @Test
+    fun requiredBannerMessageWithALongTitleNeverBreaksInsideAWordAtFontScale2() {
+        val longTitle = "Subcontinentalpartnershipmanager"
+        val profile = fixedReviewProfile().withEntries(importedRole("r1", title = longTitle, endDate = ""))
+        composeRule.showFlowScreen(NARROW_DEVICE.fontScale, noopReview(profile.reviewState()))
+
+        assertLinesEndAtWordBoundaries("End date missing for $longTitle")
+    }
 }

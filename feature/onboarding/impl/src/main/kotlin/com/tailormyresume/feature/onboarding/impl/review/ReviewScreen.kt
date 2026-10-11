@@ -232,7 +232,7 @@ private fun RequiredBanner(gap: ReviewGap, onAddDateClick: (String) -> Unit) {
             color = colors.ink,
             modifier = Modifier.readAs(required),
         )
-        Text(
+        TmrFitText(
             text = stringResource(R.string.feature_onboarding_impl_review_end_date_missing, gap.title),
             style = TmrTheme.typography.strongLarge.copy(fontSize = 14.sp, lineHeight = 19.sp),
             color = colors.ink,
