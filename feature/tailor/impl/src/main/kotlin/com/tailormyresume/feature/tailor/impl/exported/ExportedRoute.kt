@@ -12,8 +12,6 @@ import com.tailormyresume.core.designsystem.component.chrome.TmrToastAction
 import com.tailormyresume.core.designsystem.component.content.TmrApplicationStatus
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.feature.tailor.impl.R
-import com.tailormyresume.feature.tailor.impl.export.createPdfShareIntent
-import com.tailormyresume.feature.tailor.impl.export.createPdfViewIntent
 
 @Composable
 internal fun ExportedRoute(
@@ -28,18 +26,14 @@ internal fun ExportedRoute(
     val fileMissing = stringResource(R.string.feature_tailor_impl_exported_file_missing)
     val openFailed = stringResource(R.string.feature_tailor_impl_exported_open_failed)
     val undo = stringResource(R.string.feature_tailor_impl_exported_undo)
-    val shareSubject = stringResource(R.string.feature_tailor_impl_exported_share_subject)
-    val shareTitle = stringResource(R.string.feature_tailor_impl_exported_share_title)
     val notAccepted = stringResource(R.string.feature_tailor_impl_result_export_blocked)
     val exportFailed = stringResource(R.string.feature_tailor_impl_exported_export_failed)
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                is ExportedEvent.Share -> context.startActivity(
-                    createPdfShareIntent(context, event.file, shareSubject, shareTitle),
-                )
+                is ExportedEvent.Share -> context.startActivity(event.intent)
                 is ExportedEvent.Open -> try {
-                    context.startActivity(createPdfViewIntent(context, event.file))
+                    context.startActivity(event.intent)
                 } catch (_: ActivityNotFoundException) {
                     toast.show(openFailed)
                 }

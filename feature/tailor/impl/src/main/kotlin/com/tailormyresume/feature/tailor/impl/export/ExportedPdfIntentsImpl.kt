@@ -26,21 +26,23 @@ internal class ExportedPdfIntentsImpl @Inject constructor(
 
     override suspend fun shareIntent(applicationId: String): Intent? =
         pdfFile(applicationId)?.let { file ->
-            createPdfShareIntent(
-                context,
-                file,
-                subject = context.getString(R.string.feature_tailor_impl_exported_share_subject),
-                chooserTitle = context.getString(R.string.feature_tailor_impl_exported_share_title),
-            )
+            withContext(ioDispatcher) {
+                createPdfShareIntent(
+                    context,
+                    file,
+                    subject = context.getString(R.string.feature_tailor_impl_exported_share_subject),
+                    chooserTitle = context.getString(R.string.feature_tailor_impl_exported_share_title),
+                )
+            }
         }
 
     override suspend fun viewIntent(applicationId: String): Intent? =
-        pdfFile(applicationId)?.let { file -> createPdfViewIntent(context, file) }
+        pdfFile(applicationId)?.let { file -> withContext(ioDispatcher) { createPdfViewIntent(context, file) } }
 
     private suspend fun pdfFile(applicationId: String): File? {
         val application = applicationRepository.observeApplication(applicationId).first() ?: return null
         val stored = application.exportFileName?.let { name -> withContext(ioDispatcher) { fileStore.fileFor(applicationId, name) } }
-        return stored ?: rerender(applicationId)
+        return if (application.exportFileName == null) rerender(applicationId) else stored
     }
 
     private suspend fun rerender(applicationId: String): File? =

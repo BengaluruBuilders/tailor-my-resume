@@ -1,5 +1,6 @@
 package com.tailormyresume.feature.tailor.impl.exported
 
+import android.content.Intent
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -25,6 +26,7 @@ import com.tailormyresume.core.testing.repository.TestProfileRepository
 import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.util.TestClock
 import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
+import com.tailormyresume.feature.tailor.api.ExportedPdfIntents
 import com.tailormyresume.feature.tailor.api.navigation.ExportedNavKey
 import com.tailormyresume.feature.tailor.impl.acceptedApplication
 import com.tailormyresume.feature.tailor.impl.acceptedBullet
@@ -82,6 +84,11 @@ class ExportedRouteTest {
             fileStore = object : ExportedFileStore {
                 override fun fileFor(applicationId: String, fileName: String): File? =
                     ExportDirectory(directory).existing(applicationId, fileName)
+            },
+            exportedPdfIntents = object : ExportedPdfIntents {
+                override suspend fun shareIntent(applicationId: String): Intent? = null
+
+                override suspend fun viewIntent(applicationId: String): Intent? = null
             },
             savedStateHandle = SavedStateHandle(),
             ioDispatcher = UnconfinedTestDispatcher(),

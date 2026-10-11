@@ -13,27 +13,35 @@ class ExportedFilesCleanerTest {
     @get:Rule
     val folder = TemporaryFolder()
 
-    private fun cleaner() = CacheExportedFiles(folder.root, UnconfinedTestDispatcher())
+    private fun cleaner() = CacheExportedFiles(
+        { File(folder.root, "cache") },
+        { File(folder.root, "files") },
+        UnconfinedTestDispatcher(),
+    )
 
-    private fun file(directory: String, name: String) =
-        File(folder.newFolder(directory), name).apply { writeText("x") }
+    private fun file(root: String, directory: String, name: String) =
+        File(folder.newFolder(root, directory), name).apply { writeText("x") }
 
     @Test
-    fun deleteAllRemovesBothDirectories() = runTest {
-        val resume = file("exports", "resume.pdf")
-        val archive = file("data-exports", "my-data.zip")
+    fun deleteAllRemovesSavedAndCachedExports() = runTest {
+        val saved = file("files", "exports", "saved.pdf")
+        val resume = file("cache", "exports", "resume.pdf")
+        val archive = file("cache", "data-exports", "my-data.zip")
 
         cleaner().deleteAll()
 
+        assertThat(saved.exists()).isFalse()
         assertThat(resume.exists()).isFalse()
         assertThat(archive.exists()).isFalse()
-        assertThat(File(folder.root, "exports").exists()).isFalse()
-        assertThat(File(folder.root, "data-exports").exists()).isFalse()
+        assertThat(File(folder.root, "files/exports").exists()).isFalse()
+        assertThat(File(folder.root, "cache/exports").exists()).isFalse()
+        assertThat(File(folder.root, "cache/data-exports").exists()).isFalse()
     }
 
     @Test
     fun deleteAllLeavesOtherCacheFilesAlone() = runTest {
-        file("exports", "resume.pdf")
+        file("cache", "exports", "resume.pdf")
+        file("files", "exports", "saved.pdf")
         val other = File(folder.root, "keep.txt").apply { writeText("x") }
 
         cleaner().deleteAll()
@@ -46,5 +54,27 @@ class ExportedFilesCleanerTest {
         cleaner().deleteAll()
 
         assertThat(folder.root.listFiles()).isEmpty()
+    }
+
+    @Test
+    fun directoriesAreResolvedWhenCleanupRuns() = runTest {
+        val requested = mutableListOf<String>()
+        val cleaner = CacheExportedFiles(
+            {
+                requested += "cache"
+                File(folder.root, "cache")
+            },
+            {
+                requested += "files"
+                File(folder.root, "files")
+            },
+            UnconfinedTestDispatcher(),
+        )
+
+        assertThat(requested).isEmpty()
+
+        cleaner.deleteAll()
+
+        assertThat(requested).containsExactly("cache", "files").inOrder()
     }
 }

@@ -1,5 +1,6 @@
 package com.tailormyresume.feature.tailor.impl.exported
 
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.JobApplication
+import com.tailormyresume.feature.tailor.api.ExportedPdfIntents
 import com.tailormyresume.feature.tailor.impl.export.ExportOutcome
 import com.tailormyresume.feature.tailor.impl.export.ExportResumeUseCase
 import dagger.assisted.Assisted
@@ -32,7 +34,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.io.IOException
 import java.time.Instant
 import java.time.ZoneId
@@ -48,6 +49,7 @@ internal class ExportedViewModel @AssistedInject constructor(
     private val exportResume: ExportResumeUseCase,
     private val setApplicationStatus: SetApplicationStatusUseCase,
     private val fileStore: ExportedFileStore,
+    private val exportedPdfIntents: ExportedPdfIntents,
     private val savedStateHandle: SavedStateHandle,
     @param:Dispatcher(TmrDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     @Assisted val applicationId: String,
@@ -79,7 +81,11 @@ internal class ExportedViewModel @AssistedInject constructor(
     init {
         viewModelScope.launch {
             outcome.value = try {
-                restoredExport() ?: exportResume(applicationId).also(::rememberExported)
+                if (savedStateHandle.get<Boolean>(EXPORTED_KEY) == true) {
+                    restoredExport() ?: ExportOutcome.Failed
+                } else {
+                    exportResume(applicationId).also(::rememberExported)
+                }
             } catch (_: IOException) {
                 ExportOutcome.Failed
             } catch (_: IllegalStateException) {
@@ -89,7 +95,6 @@ internal class ExportedViewModel @AssistedInject constructor(
     }
 
     private suspend fun restoredExport(): ExportOutcome? {
-        if (savedStateHandle.get<Boolean>(EXPORTED_KEY) != true) return null
         return withContext(ioDispatcher) { exportResume.storedExport(applicationId) { fileStore.fileFor(applicationId, it) } }
     }
 
@@ -97,9 +102,9 @@ internal class ExportedViewModel @AssistedInject constructor(
         if (result is ExportOutcome.Exported) savedStateHandle[EXPORTED_KEY] = true
     }
 
-    fun onShare() = resolveFile { file -> ExportedEvent.Share(file) }
+    fun onShare() = resolveIntent(exportedPdfIntents::shareIntent, ExportedEvent::Share)
 
-    fun onOpen() = resolveFile { file -> ExportedEvent.Open(file) }
+    fun onOpen() = resolveIntent(exportedPdfIntents::viewIntent, ExportedEvent::Open)
 
     fun onMarkApplied() {
         viewModelScope.launch {
@@ -144,11 +149,11 @@ internal class ExportedViewModel @AssistedInject constructor(
         eventChannel.trySend(ExportedEvent.ComingSoon)
     }
 
-    private fun resolveFile(event: (File) -> ExportedEvent) {
+    private fun resolveIntent(build: suspend (String) -> Intent?, event: (Intent) -> ExportedEvent) {
         viewModelScope.launch {
-            val ready = state.value as? ExportedUiState.Ready ?: return@launch
-            val file = withContext(ioDispatcher) { fileStore.fileFor(applicationId, ready.fileName) }
-            eventChannel.send(file?.let(event) ?: ExportedEvent.FileMissing)
+            if (state.value !is ExportedUiState.Ready) return@launch
+            val intent = build(applicationId)
+            eventChannel.send(intent?.let(event) ?: ExportedEvent.FileMissing)
         }
     }
 

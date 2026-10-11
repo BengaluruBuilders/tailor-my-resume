@@ -24,12 +24,19 @@ class DataExportsStartTaskTest {
         }
 
     private fun kotlinx.coroutines.test.TestScope.startTask() {
-        DataExportsStartTask(
-            File(folder.root, "data-exports"),
+        val requested = mutableListOf<String>()
+        val task = DataExportsStartTask(
+            {
+                requested += "directory"
+                File(folder.root, "data-exports")
+            },
             UnconfinedTestDispatcher(testScheduler),
             TestScope(testScheduler),
-        ) { now }.start()
+        ) { now }
+        assertThat(requested).isEmpty()
+        task.start()
         testScheduler.advanceUntilIdle()
+        assertThat(requested).containsExactly("directory")
     }
 
     @Test
