@@ -6,6 +6,10 @@ the constitution wins. Update section 2 and the chunk table each time a chunk ch
 
 ## 1. Sources of truth, in order
 
+MVP update, 2026-10-10: the user simplified the MVP and supplied a new design, the prototype in
+`design/prototype-2026-10-10/`. Its scope is `docs/PRD.md` section 6.1.2. The chunks below were
+planned for the 24-screen MVP and are not yet re-planned for it.
+
 Visual update, 2026-10-07: the user requested the Avvio-inspired direction in
 `docs/AVVIO_REDESIGN.md`. It replaces the Jade look in the historical decisions and frame references
 below. Product scope and implementation state are unchanged.

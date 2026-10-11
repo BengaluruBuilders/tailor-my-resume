@@ -23,7 +23,7 @@ These rules come from the core promise in `docs/PRD.md`: "We never invent anythi
 | I.2 | The candidate decides. Every suggestion starts as `PENDING`. Nothing reaches an export without an explicit accept. | `UpdateBulletDecisionUseCaseTest`, `TailorViewModelTest` |
 | I.3 | UI copy never claims an ATS score, an ATS pass, or a job, interview, or placement guarantee. Say "keyword coverage" and "readable by common ATS parsers" (PRD 6.4, 7). | Policy I.3 on `res/values*/*.xml` |
 | I.4 | No API key, token, or private key goes into the app or the repository. Model credentials live on the backend only. | Policy I.4; gitleaks |
-| I.5 | Candidate data leaves the device only to the TailorMyResume backend (`apps-backend`), only in the `prod` flavour, and only after the candidate accepts consent screen S4 (PRD 10.4). The app has one HTTP stack: OkHttp, Retrofit, and kotlinx.serialization. Firebase Auth, Credential Manager (Google sign-in), and Google Play Billing are allowed. The `demo` flavour has no `INTERNET` permission. Backups stay off. Analytics, crash, and ad SDKs stay forbidden. | Policy I.5: `INTERNET` only in `app/src/prod/AndroidManifest.xml`, no `allowBackup="true"`, no analytics, crash, or ad library, network libraries only in `core:network` or as `prodImplementation` in `:app`; Dependency Guard (`dependencyGuard`) locks the release classpath of both flavours |
+| I.5 | Candidate data leaves the device only to the TailorMyResume backend (`apps-backend`), and only in the `prod` flavour. The app has one HTTP stack: OkHttp, Retrofit, and kotlinx.serialization. Firebase Auth, Credential Manager (Google sign-in), and Google Play Billing are allowed. The `demo` flavour has no `INTERNET` permission. Backups stay off. Analytics, crash, and ad SDKs stay forbidden. | Policy I.5: `INTERNET` only in `app/src/prod/AndroidManifest.xml`, no `allowBackup="true"`, no analytics, crash, or ad library, network libraries only in `core:network` or as `prodImplementation` in `:app`; Dependency Guard (`dependencyGuard`) locks the release classpath of both flavours |
 
 ## Article II — Architecture
 
@@ -124,6 +124,12 @@ Kover was chosen over JaCoCo. Roborazzi and Robolectric are build-time test depe
 never reach the app binary, so they do not conflict with I.5. Robolectric downloads its
 `android-all` jars from Maven at test runtime; that is build tooling, not app network access, and
 the release APK still requests no network permission.
+
+### Ledger amendment — 2026-10-10, simplified MVP (I.5)
+
+| Item | Why | Gate |
+|---|---|---|
+| I.5 no longer requires consent screen S4 | The owner cut the consent screen and the 18+ check from the MVP on 2026-10-10 (PRD 6.1.2). The rest of I.5 stands. | `tools/ci/check-constitution.sh` policy I.5 (unchanged; it never checked S4) |
 
 ### Ledger amendment — 2026-10-08, network access for the TailorMyResume backend (I.5)
 

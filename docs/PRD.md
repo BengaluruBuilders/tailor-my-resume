@@ -146,6 +146,39 @@ else enters the MVP without a new decision in this section.
 
 Channel attribution for college groups uses Play Install Referrer links, not a sign-up code.
 
+### 6.1.2 Simplified MVP (2026-10-10)
+
+The user simplified the MVP with the prototype in `design/prototype-2026-10-10/` (screen list and copy
+in its `README.md`). Where this section and 6.1.1 or sections 6.2 to 8 disagree, this section wins.
+The feature sections below are not yet rewritten; read them through this table.
+
+| Area | Simplified MVP | Was |
+|---|---|---|
+| Flow | Sign in → upload resume → review profile → paste job → job analysis → one quick question → tailor → tailored resume → export PDF → Applications | Paste JD first, sign in after first value, consent screen, fact-by-fact confirmation |
+| Sign-in | First screen, three story slides, Google only. 1 free credit at sign-in. No consent screen, no 18+ check. | After first value; consent notice; 18+ check |
+| Profile | Import fills the profile; the user reviews it once and must fix required gaps (e.g. a missing end date) before going on. Paste-as-text and a 6-field manual form are the fallbacks. | Confirm every fact; guided form; fresher evidence path |
+| Gap analysis | Match now → after tailoring, have and missing keywords, must-haves with reasons. Missing skills are added only if the user confirms them. | Met / partly met / to prepare per requirement; "I have this" sheet; prep tasks |
+| Evidence | One quick question per tailoring about an unclear must-have; the answer is a source ("Your answer"). | Evidence path questions in the profile |
+| Tailoring review | A Resume tab and a Changes tab (before, after, source). Edit in one editor. Must fit 1 page. | Per-bullet accept, keep, or edit; 2 regenerations |
+| Export | PDF only, file name `Name_Company_Role.pdf` (format set in Settings), A4 or Letter | PDF and DOCX, preview before the paywall |
+| Prep questions, cover letter | Shown as "Soon". Not in the MVP. | P0 |
+| Share card | Not in the prototype. Not in the MVP. | P0 |
+| Applications | List with a status bar; statuses Saved, Applied, Interview, Offer, Rejected; "Mark as Applied" with Undo; re-tailor for 1 credit | List, status, notes, prep tasks |
+| Pricing | 1 credit = 1 tailored resume, never expire. Packs 5 for ₹199, 15 for ₹449 (best value), 40 for ₹999. Credit history ledger. | Free tier with 3 gap analyses a day, 5-pack at ₹149 |
+| Settings | Credits, page size, file name format, product update toggle, download my data, help, delete account (type DELETE), sign out | Separate Your data and Delete account screens, consent read-only view |
+| Look | Paige mascot and colour-coded hero cards (blue resume, amber job, lime tailor) on black; full-bleed colour sign-in. Space Mono and Space Grotesk. Dark only. | Avvio: dark and light, Manrope and Archivo Black, #AEFF00 |
+
+#### Not in the MVP — decided by the owner on 2026-10-10
+
+Do not build these, and do not raise them again as gaps, open questions, or review findings:
+
+1. No consent notice screen and no 18+ check.
+2. No light theme. The app is dark only.
+3. No "Continue with Apple". Sign-in is Google only, even though the prototype draws an Apple button.
+4. No follow-up reminders. Drop the "Follow-up reminders" toggle the prototype shows in Settings.
+5. No offline states, and no error states beyond the five the prototype draws (sign-in cancelled,
+   unreadable file, not a job post, tailoring failed, payment failed). No separate 200% text frames.
+
 ### 6.2 F1 — Resume import and profile
 
 User story: as a candidate, I import my resume once, so I do not re-enter my background for each job.
@@ -377,8 +410,8 @@ This section is a product reading of the research. It is not legal advice. Get a
 
 **DPDP Act 2023 and DPDP Rules 2025.** The main duties start on 13 May 2027. TailorMyResume processes personal data, because a resume is personal data. The MVP must have:
 
-1. A standalone, itemised consent notice before any upload.
-2. An 18+ confirmation at sign-up.
+1. A standalone, itemised consent notice before any upload. Owner decision 2026-10-10: not in the MVP (6.1.2).
+2. An 18+ confirmation at sign-up. Owner decision 2026-10-10: not in the MVP (6.1.2).
 3. In-app access, correction, and erasure of the user's data.
 4. Account deletion in the app, plus a web link for deletion.
 5. Export of all the user's data.
