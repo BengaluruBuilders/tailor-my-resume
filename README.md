@@ -34,6 +34,4 @@ Offline prototype. The app runs PRD features F1, F2, F3, F4 (PDF only), and F5 w
 
 Rules and CI gates: `docs/CONSTITUTION.md`. Commands: `AGENTS.md`.
 
-Manual emulator testing and story playback: [testing guide](docs/testing/manual-emulator-testing.md).
-
 OpenAI API credits are available for experimentation. Application packs and an active-job-search plan are monetization hypotheses to test with candidates.

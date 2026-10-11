@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 
 class TmrIdleMotionTest {
     @Test
-    fun defaultIdleMatchesPlanAndReducedIsStatic() {
+    fun defaultIdleMatchesPlanAndReducedDisablesDecorativeMotion() {
         val idle = TmrMotionDefaults.Default.idle
         assertEquals(5.dp, idle.bobAmplitude)
         assertEquals(420f, idle.bobAngularPeriodMs)
@@ -27,7 +27,7 @@ class TmrIdleMotionTest {
         assertEquals(0.dp, reduced.bobAmplitude)
         assertEquals(0f, reduced.wobbleDegrees)
         assertEquals(0.dp, reduced.wobbleOffset)
-        assertFalse(reduced.storyAutoAdvance)
+        assertTrue(reduced.storyAutoAdvance)
         assertFalse(reduced.spinnerAnimated)
     }
 

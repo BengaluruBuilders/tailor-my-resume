@@ -149,7 +149,7 @@ private fun StoryPanel(story: SignInStoryState, artHeight: Dp, modifier: Modifie
                 .signInStoryGestures(story)
                 .padding(top = 12.dp),
         ) {
-            TmrStoryBars(SIGN_IN_STORY_COUNT, story.index, if (TmrTheme.motion.idle.storyAutoAdvance) story.fraction else 1f)
+            TmrStoryBars(SIGN_IN_STORY_COUNT, story.index, if (TmrTheme.motion.reduced) 1f else story.fraction)
             Row(
                 Modifier.fillMaxWidth().padding(top = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),

@@ -87,18 +87,18 @@ class SignInScreenTest {
     }
 
     @Test
-    fun reducedMotionNeverAdvancesButTapsStep() {
+    fun reducedMotionAutoAdvancesAndTapsStep() {
         reduceMotion()
         composeRule.mainClock.autoAdvance = false
         composeRule.showSignIn { SignInScreen(SignInUiState.Ready, onContinueWithGoogle = {}) }
 
-        composeRule.mainClock.advanceTimeBy(20_000)
-        composeRule.onNodeWithText("Paige · 1 of 3", ignoreCase = true).assertIsDisplayed()
+        composeRule.mainClock.advanceTimeBy(5_300)
+        composeRule.onNodeWithText("Paige · 2 of 3", ignoreCase = true).assertIsDisplayed()
 
         composeRule.mainClock.autoAdvance = true
         composeRule.onNodeWithTag(SignInTags.STORY_TOUCH, useUnmergedTree = true)
             .performTouchInput { click(percentOffset(0.9f, 0.5f)) }
-        composeRule.onNodeWithText("Paige · 2 of 3", ignoreCase = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Paige · 3 of 3", ignoreCase = true).assertIsDisplayed()
     }
 
     @Test

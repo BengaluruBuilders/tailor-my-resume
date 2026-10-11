@@ -140,8 +140,8 @@ Use `Modifier.tmrShadow(shadow, shape)`.
 phase), `bobAngularPeriodMs` 420 and `bobPhaseMax` 4. Tailoring wobble: `wobbleDegrees` 4 with
 `wobbleAngularPeriodMs` 300, and `wobbleOffset` 6 dp with a 210 ms angular period. Story bars last
 `storyDurationMs` 5000 per slide. The spinner turns once per `spinnerTurnMs` 900. When `reduced` is
-true, every amplitude is 0, the story slides do not auto-advance, the spinner is a static ring, and
-taps still step. `TmrIdleSpecs.bobOffsetDp(timeMs, phase)` is the bob formula.
+true, every amplitude is 0 and the spinner is a static ring. Story slides still advance every
+five seconds without animated progress bars. Taps still step. `TmrIdleSpecs.bobOffsetDp(timeMs, phase)` is the bob formula.
 
 `proofSpecs`: `spatial`, `spatialFast`, `offset`, `size`, `fade`, `color`, `staggerMs`, `staggerMax`.
 `hopSpecs`: `spatial`, `scale`. Use `hopSpecs` only for gap closed, exported, pack purchased,
