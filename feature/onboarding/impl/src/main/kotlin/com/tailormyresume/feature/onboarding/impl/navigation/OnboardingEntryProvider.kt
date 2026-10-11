@@ -1,98 +1,39 @@
 package com.tailormyresume.feature.onboarding.impl.navigation
 
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.tailormyresume.core.domain.onboarding.OnboardingStep
 import com.tailormyresume.core.navigation.Navigator
-import com.tailormyresume.feature.analysis.api.navigation.DefaultAnalysisNavKey
-import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.ConfirmFactsNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.ConsentNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.ImportResumeNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.PasteJobDescriptionNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.WelcomeNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.navigateToConfirmFacts
-import com.tailormyresume.feature.onboarding.api.navigation.navigateToConsent
-import com.tailormyresume.feature.onboarding.api.navigation.navigateToPasteJobDescription
-import com.tailormyresume.feature.onboarding.api.navigation.navigateToSignIn
-import com.tailormyresume.feature.onboarding.api.navigation.navigateToWelcome
-import com.tailormyresume.feature.onboarding.impl.confirmfacts.ConfirmFactsRoute
-import com.tailormyresume.feature.onboarding.impl.consent.ConsentRoute
-import com.tailormyresume.feature.onboarding.impl.importresume.ImportResumeRoute
-import com.tailormyresume.feature.onboarding.impl.pastejd.PasteJobDescriptionRoute
-import com.tailormyresume.feature.onboarding.impl.signin.SignInRoute
-import com.tailormyresume.feature.onboarding.impl.welcome.WelcomeRoute
-import com.tailormyresume.feature.profile.api.navigation.FactEditorNavKey
-import com.tailormyresume.feature.profile.api.navigation.navigateToGuidedProfileForm
 
 fun EntryProviderScope<NavKey>.onboardingEntry(navigator: Navigator) {
     entry<WelcomeNavKey> { key ->
-        WelcomeRoute(
-            key = key,
-            onNavigateToPasteJobDescription = { navigator.navigateToPasteJobDescription() },
-            onNavigateToSignIn = { navigator.navigateToSignIn() },
-            onNavigateToConsent = { navigator.navigateToConsent() },
-        )
-    }
-    entry<PasteJobDescriptionNavKey> { key ->
-        PasteJobDescriptionRoute(
-            key = key,
-            onNavigateBack = { navigator.goBack() },
-            onNavigateToStep = { step -> navigator.navigateToStep(step) },
-        )
+        NavKeyPlaceholder(key)
     }
     entry<SignInNavKey> { key ->
-        SignInRoute(
-            key = key,
-            onBack = { navigator.goBack() },
-            onBackToStart = { navigator.navigateToWelcome() },
-            onNavigateToStep = { step -> navigator.replaceWithStep(step) },
-        )
+        NavKeyPlaceholder(key)
     }
     entry<ConsentNavKey> { key ->
-        ConsentRoute(
-            key = key,
-            onBack = { navigator.goBack() },
-            onBackToStart = { navigator.navigateToWelcome() },
-            onNavigateToStep = { step -> navigator.replaceWithStep(step) },
-        )
+        NavKeyPlaceholder(key)
     }
     entry<ImportResumeNavKey> { key ->
-        ImportResumeRoute(
-            key = key,
-            onBack = { navigator.goBack() },
-            onGoToGuidedForm = { resumedFromScan -> navigator.navigateToGuidedProfileForm(resumedFromScan) },
-            onReviewFacts = { navigator.navigateToConfirmFacts() },
-        )
+        NavKeyPlaceholder(key)
     }
     entry<ConfirmFactsNavKey> { key ->
-        ConfirmFactsRoute(
-            key = key,
-            onBack = { navigator.goBack() },
-            onNavigateToStep = { step -> navigator.navigateToStep(step) },
-            onImportResume = { navigator.replace(ImportResumeNavKey()) },
-            onEditFact = { factId, category ->
-                navigator.navigate(FactEditorNavKey(entryId = factId, entryType = category))
-            },
-        )
+        NavKeyPlaceholder(key)
+    }
+    entry<PasteJobDescriptionNavKey> { key ->
+        NavKeyPlaceholder(key)
     }
 }
 
-private fun Navigator.navigateToStep(step: OnboardingStep) {
-    navigate(step.toNavKey())
-}
-
-private fun Navigator.replaceWithStep(step: OnboardingStep) {
-    replace(step.toNavKey())
-}
-
-private fun OnboardingStep.toNavKey(): NavKey = when (this) {
-    OnboardingStep.SignIn -> SignInNavKey()
-    OnboardingStep.Consent -> ConsentNavKey()
-    OnboardingStep.ImportResume -> ImportResumeNavKey()
-    OnboardingStep.ConfirmFacts -> ConfirmFactsNavKey()
-    is OnboardingStep.GapAnalysis -> DefaultAnalysisNavKey
-    OnboardingStep.PasteJobDescription -> PasteJobDescriptionNavKey()
-    OnboardingStep.Applications -> DefaultApplicationsNavKey
+@Composable
+internal fun NavKeyPlaceholder(key: NavKey) {
+    BasicText(text = key::class.simpleName.orEmpty())
 }

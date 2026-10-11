@@ -38,8 +38,6 @@ class ReviewContinuationTest {
                         tailoredResume = TailoredResume(listOf(first, second), entryIds = entries.map { it.id }),
                     ),
                     profile = testProfile(entries.toList()),
-                    isOffline = false,
-                    regenerationsUsed = 0,
                     editedBulletIds = emptySet(),
                 ),
             ) as TailorUiState.Success

@@ -50,8 +50,6 @@ class ReviewExportConsistencyTest {
                 TailorInputs(
                     application = testApplication(resume.bullets).copy(tailoredResume = resume),
                     profile = profile,
-                    isOffline = false,
-                    regenerationsUsed = 0,
                     editedBulletIds = emptySet(),
                 ),
             ) as TailorUiState.Success
