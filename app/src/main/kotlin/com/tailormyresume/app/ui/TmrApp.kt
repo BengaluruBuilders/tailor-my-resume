@@ -79,12 +79,6 @@ fun TmrApp(
     LaunchedEffect(rootState) {
         if (rootState is AppRootState.Ready) stores.keepOnly(AccountRoot(rootState.accountId))
     }
-    val toastState = remember { TmrToastState() }
-    val context = LocalContext.current
-    val queuedToast = PendingToast.queued
-    LaunchedEffect(queuedToast) {
-        PendingToast.consume()?.let { message -> toastState.show(context.getString(message)) }
-    }
     TmrBackground(modifier = modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
             when (rootState) {
@@ -93,12 +87,22 @@ fun TmrApp(
                     ready = rootState,
                     hasHome = hasHome,
                     entryProvider = entryProvider,
-                    toastState = toastState,
                 )
             }
-            TmrToastHost(state = toastState)
+            PendingToastHost()
         }
     }
+}
+
+@Composable
+internal fun PendingToastHost() {
+    val toastState = remember { TmrToastState() }
+    val context = LocalContext.current
+    val queuedToast = PendingToast.queued
+    LaunchedEffect(queuedToast) {
+        PendingToast.consume()?.let { message -> toastState.show(context.getString(message)) }
+    }
+    TmrToastHost(state = toastState)
 }
 
 @Composable
@@ -107,7 +111,6 @@ internal fun TmrAccountRoot(
     modifier: Modifier = Modifier,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
-    toastState: TmrToastState? = null,
 ) {
     key(ready.accountId) {
         TmrRoot(
@@ -116,7 +119,6 @@ internal fun TmrAccountRoot(
             modifier = modifier,
             hasHome = hasHome,
             entryProvider = entryProvider,
-            toastState = toastState,
         )
     }
 }
@@ -135,7 +137,6 @@ internal fun TmrRoot(
     initialKeys: () -> List<NavKey> = PendingNavigation::consume,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
-    toastState: TmrToastState? = null,
 ) {
     WithRootViewModelStore(root) {
         val navigationState = rememberNavigationState(startKey)
@@ -150,13 +151,12 @@ internal fun TmrRoot(
             }
         }
         if (entryProvider == null) {
-            TmrShell(navigationState = navigationState, navigator = navigator, modifier = modifier, appToastState = toastState)
+            TmrShell(navigationState = navigationState, navigator = navigator, modifier = modifier)
         } else {
             TmrShell(
                 navigationState = navigationState,
                 navigator = navigator,
                 modifier = modifier,
-                appToastState = toastState,
                 entryProvider = entryProvider(navigator),
             )
         }
@@ -168,11 +168,9 @@ internal fun TmrShell(
     navigationState: NavigationState,
     navigator: Navigator,
     modifier: Modifier = Modifier,
-    appToastState: TmrToastState? = null,
     entryProvider: (NavKey) -> NavEntry<NavKey> = remember(navigator) { sharedEntryProvider(navigator) },
 ) {
-    val ownToastState = remember { TmrToastState() }
-    val toastState = appToastState ?: ownToastState
+    val toastState = remember { TmrToastState() }
     val sheetHost = remember { TmrSheetHostState() }
     val chromeActions = remember { ChromeActions() }
     val key = navigationState.currentKey
@@ -242,7 +240,7 @@ internal fun TmrShell(
                 }
             }
             TmrSheetHost(state = sheetHost)
-            if (appToastState == null) TmrToastHost(state = toastState)
+            TmrToastHost(state = toastState)
         }
     }
 }

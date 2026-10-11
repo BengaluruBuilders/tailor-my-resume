@@ -1,6 +1,7 @@
 package com.tailormyresume.app.ui
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,6 +15,8 @@ import androidx.navigation3.runtime.NavKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.app.navigation.registerComposeActivity
+import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
+import com.tailormyresume.core.designsystem.component.chrome.TmrToastAction
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.onboarding.StartDestination
 import com.tailormyresume.core.navigation.Navigator
@@ -242,5 +245,42 @@ class TmrAppRootTest {
 
         rule.onNodeWithText("Signed out").assertIsDisplayed()
         assertThat(PendingToast.queued).isNull()
+    }
+
+    @Test
+    fun actionToastOfTheOutgoingAccountDiesWithItsRoot() {
+        PendingToast.consume()
+        var retries = 0
+        var current by mutableStateOf<AppRootState>(AppRootState.Ready(StartDestination.Applications, "account-1"))
+        rule.setContent {
+            TmrTheme {
+                TmrApp(
+                    rootState = current,
+                    entryProvider = { _ ->
+                        (
+                            { key: NavKey ->
+                                NavEntry(key) {
+                                    val toast = LocalTmrToast.current
+                                    LaunchedEffect(Unit) {
+                                        if (current is AppRootState.Ready && (current as AppRootState.Ready).accountId != null) {
+                                            toast.show("Upload failed", TmrToastAction("Retry") { retries += 1 })
+                                        }
+                                    }
+                                }
+                            }
+                            )
+                    },
+                )
+            }
+        }
+        rule.waitForIdle()
+        rule.onNodeWithText("Retry").assertIsDisplayed()
+
+        current = AppRootState.Ready(StartDestination.SignIn, null)
+        rule.waitForIdle()
+
+        rule.onNodeWithText("Retry").assertDoesNotExist()
+        rule.onNodeWithText("Upload failed").assertDoesNotExist()
+        assertThat(retries).isEqualTo(0)
     }
 }

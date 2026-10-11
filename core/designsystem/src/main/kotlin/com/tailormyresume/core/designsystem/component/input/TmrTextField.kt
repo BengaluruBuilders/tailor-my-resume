@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -80,8 +81,7 @@ private fun TmrFieldBox(
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        enabled = enabled,
-        readOnly = readOnly,
+        readOnly = readOnly || !enabled,
         singleLine = singleLine,
         textStyle = TmrTheme.typography.bodyLarge.copy(color = colors.text),
         cursorBrush = SolidColor(colors.lime),
@@ -90,7 +90,10 @@ private fun TmrFieldBox(
             .heightIn(min = minHeight)
             .background(colors.fill, shape)
             .border(BorderStroke(1.5.dp, if (amber) colors.amber else colors.boundary), shape)
-            .semantics { contentDescription = label },
+            .semantics {
+                contentDescription = label
+                if (!enabled) disabled()
+            },
         decorationBox = { inner ->
             Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
                 if (value.isEmpty()) {
