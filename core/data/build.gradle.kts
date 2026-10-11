@@ -29,5 +29,8 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.room.runtime)
     testImplementation(libs.robolectric)
+    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
+    kspTest(libs.kotlin.metadata)
     testImplementation(projects.core.testing)
 }

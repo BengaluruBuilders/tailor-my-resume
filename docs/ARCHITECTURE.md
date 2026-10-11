@@ -229,50 +229,76 @@ the offline implementations.
 Copy NiA Navigation 3: `NavKey` objects/data classes in each feature `api` module; `EntryProvider`
 extension in each `impl` module; `core:navigation` `Navigator`/`NavigationState`.
 
-### Roots
+### Shell
 
-`AppViewModel` maps the start destination to `AppRootState`. `TmrApp` shows one of two roots.
-It switches when the "onboarding complete" flag or the account of `SessionRepository` changes (Main needs both).
+`AppViewModel` maps the start destination to `AppRootState`. `TmrApp` shows one of two roots and switches when the
+"onboarding complete" flag or the account of `SessionRepository` changes. Both roots render the same shell
+(`TmrShell`) over one back stack in `NavigationState`; the root only picks the first key and owns a `ViewModelStore`
+(`RootViewModelStores`). The app clears the store of a root when it leaves the root.
 
-| Root | Content |
+| Root | First screen |
 |---|---|
-| First run (`TmrFirstRunRoot`) | One back stack that starts at `WelcomeNavKey`. No dock |
-| Main (`TmrMainRoot`) | Three tabs: Applications (start), Profile, Settings. `TmrDock` shows on the three tab screens only |
+| First run (`TmrFirstRunRoot`) | Sign in. The setup flow continues from Review profile to Add job inside the same stack |
+| Main (`TmrMainRoot`) | Applications |
 
-A feature never resets a back stack. To leave the first-run root, call
-`SessionRepository.markOnboardingComplete()`. To return to it, sign out or delete the account.
-Each root has its own `ViewModelStore` (`RootViewModelStores`). The app clears the store of a root when it leaves the root.
-To open the main root with screens on top of Applications, call `PendingNavigation.set(...)` just
-before `markOnboardingComplete()`. `TmrMainRoot` consumes the keys when it starts.
-`docs/REDESIGN.md` section 6 has the full navigation contract.
+To open the main root with screens on top of Applications, call `PendingNavigation.set(...)` just before
+`SessionRepository.markOnboardingComplete()`. `TmrMainRoot` consumes the keys when it starts.
+`docs/REDESIGN.md` section 6 has the earlier navigation contract.
+
+Rules, all in `core:navigation` `Navigator` and the app `ScreenChrome` table:
+
+- **Back.** The top entry pops. With an empty stack, back goes to Applications if the user has an application or a
+  reviewed profile, else to Upload. Sign in and the target itself have no fallback, so back leaves the app.
+  The top bar Back and system back use the same `goBack()`.
+- **Root.** `root(key)` clears the stack to one key. A tab tap, Go to Applications, Close on Exported, the
+  Applications avatar and sign-out or delete-account completion (`navigateToSignIn()`) all use it. Back from the
+  rooted key does not return to the previous flow.
+- **Close.** Close on Exported is root Applications. Close on Paywall is back.
+- **Tab bar.** `TmrTabBar` (Applications, +, Profile) shows only on the Applications and Profile screens. The centre +
+  pushes Add job (`Navigator.newApp()`). Settings opens from the Profile gear and is not a tab.
+- **Chrome.** `chromeFor(key, entriesBelow)` gives each screen its step bar, leading control, title and right action.
+  Upload and Add job show Back only when entries lie below them. An entry may register the right action with
+  `RegisterChromeAction`; otherwise Save and Done go back and show the toast "Changes saved".
+- **Hosts.** `TmrShell` holds one toast host and one bottom-sheet host above the screens. An entry shows a toast or
+  a sheet through `LocalTmrToast` and `LocalTmrSheetHost`; a new one replaces the current one.
 
 ### NavKeys
 
-Each key is registered with one `entry<...>` in its `impl` module.
+Each key is registered with one `entry<...>` in the `impl` module of its feature. The 27 keys below are one per
+prototype screen. W4 replaces each placeholder entry with the real screen.
 
-| Module | Keys |
-|---|---|
-| `feature:onboarding:api` | `WelcomeNavKey`, `PasteJobDescriptionNavKey`, `SignInNavKey`, `ConsentNavKey`, `ImportResumeNavKey`, `ConfirmFactsNavKey` |
-| `feature:analysis:api` | `AnalysisNavKey` |
-| `feature:tailor:api` | `TailorNavKey(applicationId)`, `BulletReviewNavKey`, `CoverLetterNavKey`, `PrepQuestionsNavKey`, `ExportPreviewNavKey`, `PackPurchaseNavKey`, `ExportedNavKey`, `ShareLastExportNavKey(applicationId)`, `CreditsNavKey` |
-| `feature:profile:api` | `ProfileNavKey`, `FactEditorNavKey`, `GuidedProfileFormNavKey`, `FactEvidenceNavKey` |
-| `feature:applications:api` | `ApplicationsNavKey`, `ApplicationDetailNavKey(applicationId)` |
-| `feature:settings:api` | `SettingsNavKey`, `YourDataNavKey`, `DeleteAccountNavKey` |
+| Key | Module | Screen |
+|---|---|---|
+| `SignInNavKey` | `feature/onboarding/api` | Sign in |
+| `UploadNavKey` | `feature/onboarding/api` | Upload resume |
+| `UploadErrorNavKey` | `feature/onboarding/api` | Unreadable file |
+| `PasteResumeNavKey` | `feature/onboarding/api` | Paste resume |
+| `ManualProfileNavKey` | `feature/onboarding/api` | Fill in myself |
+| `ReadingNavKey` | `feature/onboarding/api` | Reading |
+| `ReviewProfileNavKey` | `feature/onboarding/api` | Review profile |
+| `JobNavKey` | `feature/analysis/api` | Add job |
+| `JobLinkNavKey` | `feature/analysis/api` | Import link |
+| `JobResultNavKey(applicationId)` | `feature/analysis/api` | Job analyzed |
+| `QuickQuestionNavKey(applicationId)` | `feature/analysis/api` | Quick question |
+| `TailoringNavKey(applicationId)` | `feature/tailor/api` | Tailoring |
+| `TailorFailedNavKey(applicationId)` | `feature/tailor/api` | Tailoring failed |
+| `TailoredNavKey(applicationId)` | `feature/tailor/api` | Tailored resume |
+| `EditResumeNavKey(applicationId)` | `feature/tailor/api` | Edit resume |
+| `ExportedNavKey(applicationId)` | `feature/tailor/api` | Exported |
+| `ApplicationsNavKey` | `feature/applications/api` | Applications (tab) |
+| `ApplicationDetailNavKey(applicationId)` | `feature/applications/api` | Application |
+| `ProfileNavKey` | `feature/profile/api` | Profile (tab) |
+| `ExperienceNavKey` | `feature/profile/api` | Experience |
+| `EditRoleNavKey(entryId?)` | `feature/profile/api` | Edit role; null adds a role |
+| `EditContactNavKey` | `feature/profile/api` | Contact |
+| `SkillsNavKey` | `feature/profile/api` | Skills |
+| `ListEditNavKey(section)` | `feature/profile/api` | Summary, Education or Achievements (`ProfileListSection`) |
+| `SettingsNavKey` | `feature/settings/api` | Settings |
+| `CreditsNavKey` | `feature/settings/api` | Credits |
+| `PaywallNavKey(returnToApplicationId?)` | `feature/settings/api` | Paywall; after a purchase it replaces itself with Quick question when the id is set, else goes back |
 
-Two keys of the export flow carry extra state.
-
-- `PackPurchaseNavKey.startExportOnReturn` is `true` when Export preview opens the pack screen because no credit is
-  left. When the purchase succeeds and the person goes back, the pack screen asks `PendingExportStart` to start the
-  export of that application.
-- `PendingExportStart` is a `@Singleton` in `feature:tailor:impl`. It holds one application id. Export preview
-  observes it, and for its own application it takes the id once and starts the export.
-- `ShareLastExportNavKey(applicationId)` opens the share sheet for the newest exported file of an application. The
-  workspace "Share again" action calls `navigator.navigateToShareLastExport(applicationId)`. The key has no
-  `DebugScenario`.
-
-Every key (except `ShareLastExportNavKey`) carries an optional `DebugScenario` from `core:model`, defaulting to
-`DebugScenario.DEFAULT`. That is the only mechanism for forcing a screen into a
-loading, empty, offline, error or partial state. A screenshot test can
+Every key carries an optional `DebugScenario` from `core:model`, defaulting to `DebugScenario.DEFAULT`. That is the
+only mechanism for forcing a screen into a loading, empty, offline, error or partial state. A screenshot test can
 navigate straight to a forced state without touching feature business logic.
 
 ### Debug developer menu

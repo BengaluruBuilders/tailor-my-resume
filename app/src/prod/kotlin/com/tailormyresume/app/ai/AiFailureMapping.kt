@@ -13,6 +13,8 @@ internal fun ApiError.toAiFailure(): AiFailure = when (this) {
     ApiError.AccountDeleted -> AiFailure.AccountDeleted
     is ApiError.RateLimited -> AiFailure.RateLimited
     ApiError.AnalysisInProgress -> AiFailure.AnalysisInProgress
+    ApiError.NotAJobPost -> AiFailure.NotAJobPost
+    ApiError.JobImportFailed -> AiFailure.JobImportFailed
     ApiError.QuotaExceeded, ApiError.BudgetExceeded -> AiFailure.QuotaExceeded
     ApiError.Unauthenticated, ApiError.InvalidToken -> AiFailure.SignInRequired
     ApiError.Offline -> AiFailure.Network

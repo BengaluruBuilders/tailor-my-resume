@@ -10,10 +10,10 @@ import com.tailormyresume.core.domain.offline.resourceText
 import com.tailormyresume.core.domain.offline.sampleProfile
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.KeptJobDescription
+import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.TailoredResume
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -59,7 +59,7 @@ class CreateApplicationUseCaseTest {
     @Test
     fun whenTheTailorFails_savesNothingAndRethrowsTheTypedFailure() = runTest {
         val failing = object : ResumeTailor {
-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, section: EntryCategory?): TailoredResume =
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?): TailoredResume =
                 throw AiException(AiFailure.NoCredit)
         }
         val failingUseCase = CreateApplicationUseCase(

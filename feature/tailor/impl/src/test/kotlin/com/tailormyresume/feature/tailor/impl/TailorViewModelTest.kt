@@ -1,6 +1,8 @@
 package com.tailormyresume.feature.tailor.impl
 
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.domain.ExportCheck
+import com.tailormyresume.core.domain.ExportReadiness
 import com.tailormyresume.core.domain.UpdateBulletDecisionUseCase
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.DebugScenario
@@ -292,41 +294,64 @@ class TailorViewModelTest {
     }
 
     @Test
-    fun onAccept_marksTheBulletAcceptedAndCountsItAsReviewed() = runTest {
+    fun onUndoChange_marksTheBulletRejectedAndCountsItAsReviewed() = runTest {
         val viewModel = viewModel()
         collectUiState(viewModel)
         sendData(listOf(reviewable, unchanged))
 
-        viewModel.onAccept("r1")
-
-        assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.ACCEPTED)
-        assertThat(viewModel.success().reviewedCount).isEqualTo(1)
-        assertThat(viewModel.success().isAllReviewed).isTrue()
-    }
-
-    @Test
-    fun onKeepOriginal_marksTheBulletRejectedAndCountsItAsReviewed() = runTest {
-        val viewModel = viewModel()
-        collectUiState(viewModel)
-        sendData(listOf(reviewable, unchanged))
-
-        viewModel.onKeepOriginal("r1")
+        viewModel.onUndoChange("r1")
 
         assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.ORIGINAL_KEPT)
         assertThat(viewModel.success().reviewedCount).isEqualTo(1)
     }
 
     @Test
-    fun onUndo_putsTheBulletBackToReview() = runTest {
+    fun onAcceptChanges_acceptsEveryPendingBulletAndKeepsRejectedOnesRejected() = runTest {
         val viewModel = viewModel()
         collectUiState(viewModel)
-        sendData(listOf(reviewable))
-        viewModel.onAccept("r1")
+        sendData(listOf(reviewable, alreadyRejected, flagged, unchanged))
 
-        viewModel.onUndo("r1")
+        viewModel.onAcceptChanges()
 
-        assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.TO_REVIEW)
-        assertThat(viewModel.success().reviewedCount).isEqualTo(0)
+        assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.ACCEPTED)
+        assertThat(viewModel.bulletOf("f1").state).isEqualTo(BulletReviewState.ACCEPTED)
+        assertThat(viewModel.bulletOf("r2").state).isEqualTo(BulletReviewState.ORIGINAL_KEPT)
+        assertThat(viewModel.bulletOf("u1").state).isEqualTo(BulletReviewState.UNCHANGED)
+        assertThat(viewModel.success().isAllReviewed).isTrue()
+    }
+
+    @Test
+    fun onAcceptChanges_afterAnUndoLeavesTheUndoneBulletRejected() = runTest {
+        val viewModel = viewModel()
+        collectUiState(viewModel)
+        sendData(listOf(reviewable, flagged))
+
+        viewModel.onUndoChange("r1")
+        viewModel.onAcceptChanges()
+
+        assertThat(viewModel.bulletOf("r1").state).isEqualTo(BulletReviewState.ORIGINAL_KEPT)
+        assertThat(viewModel.bulletOf("f1").state).isEqualTo(BulletReviewState.ACCEPTED)
+    }
+
+    @Test
+    fun exportStaysRefusedUntilChangesAreAcceptedThenOpensEvenAfterAnUndo() = runTest {
+        val viewModel = viewModel()
+        collectUiState(viewModel)
+        sendData(listOf(reviewable, flagged))
+        suspend fun check() = ExportReadiness.check(checkNotNull(applicationRepository.observeApplication("app-1").first()))
+
+        assertThat(check()).isEqualTo(ExportCheck.NOT_ACCEPTED)
+
+        viewModel.onUndoChange("r1")
+        assertThat(check()).isEqualTo(ExportCheck.NOT_ACCEPTED)
+
+        viewModel.onAcceptChanges()
+        assertThat(check()).isEqualTo(ExportCheck.ALLOWED)
+        assertThat(checkNotNull(applicationRepository.observeApplication("app-1").first()).changesAcceptedAt)
+            .isEqualTo(testClock.instant)
+
+        viewModel.onUndoChange("f1")
+        assertThat(check()).isEqualTo(ExportCheck.ALLOWED)
     }
 
     @Test

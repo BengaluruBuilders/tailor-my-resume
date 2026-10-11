@@ -4,17 +4,17 @@ import androidx.annotation.StringRes
 import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.app.R
 import com.tailormyresume.core.model.DebugScenario
-import com.tailormyresume.feature.analysis.api.navigation.AnalysisNavKey
+import com.tailormyresume.feature.analysis.api.navigation.JobResultNavKey
 import com.tailormyresume.feature.applications.api.navigation.ApplicationDetailNavKey
 import com.tailormyresume.feature.applications.api.navigation.ApplicationsNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.ImportResumeNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
-import com.tailormyresume.feature.settings.api.navigation.DeleteAccountNavKey
+import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
-import com.tailormyresume.feature.tailor.api.navigation.CreditsNavKey
 import com.tailormyresume.feature.tailor.api.navigation.ExportedNavKey
-import com.tailormyresume.feature.tailor.api.navigation.TailorNavKey
+import com.tailormyresume.feature.tailor.api.navigation.TailoringNavKey
+import java.util.UUID
 
 const val SAMPLE_APPLICATION_ID = "sample-northwind-associate-analyst"
 
@@ -41,15 +41,15 @@ enum class DebugScenarioTarget(
 
     fun navKey(scenario: DebugScenario): NavKey = when (this) {
         SignIn -> SignInNavKey(scenario = scenario)
-        ImportResume -> ImportResumeNavKey(scenario = scenario)
+        ImportResume -> UploadNavKey(scenario = scenario)
         Applications -> ApplicationsNavKey(scenario = scenario)
         ApplicationDetail -> ApplicationDetailNavKey(SAMPLE_APPLICATION_ID, scenario)
         Profile -> ProfileNavKey(scenario = scenario)
-        Analysis -> AnalysisNavKey(scenario = scenario)
-        Tailor -> TailorNavKey(SAMPLE_APPLICATION_ID, scenario)
+        Analysis -> JobResultNavKey(SAMPLE_APPLICATION_ID, scenario)
+        Tailor -> TailoringNavKey(SAMPLE_APPLICATION_ID, UUID.randomUUID().toString(), scenario)
         Exported -> ExportedNavKey(applicationId = SAMPLE_APPLICATION_ID, scenario = scenario)
         Credits -> CreditsNavKey(scenario = scenario)
         Settings -> SettingsNavKey(scenario = scenario)
-        DeleteAccount -> DeleteAccountNavKey(scenario = scenario)
+        DeleteAccount -> SettingsNavKey(scenario = scenario)
     }
 }

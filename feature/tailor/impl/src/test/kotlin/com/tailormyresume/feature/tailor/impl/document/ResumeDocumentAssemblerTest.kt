@@ -291,9 +291,34 @@ class ResumeDocumentAssemblerTest {
 
         assertThat(assembled(BulletDecision.ACCEPTED).summary).isEqualTo("New summary")
         assertThat(assembled(BulletDecision.ACCEPTED).skills).containsExactly("Excel")
+        assertThat(assembled(BulletDecision.PENDING).summary).isEmpty()
         listOf(BulletDecision.PENDING, BulletDecision.REJECTED).forEach { decision ->
-            assertThat(assembled(decision).summary).isEmpty()
             assertThat(assembled(decision).skills).containsExactly("SQL", "Excel").inOrder()
         }
+    }
+
+    @Test
+    fun rejectedSummaryExportsTheProfilesOwnSummary() {
+        val profile = testProfile(emptyList()).copy(summary = "My own words.")
+        val document = assembler.assemble(
+            profile,
+            TailoredResume(emptyList(), summary = TailoredText("New summary", "Old", decision = BulletDecision.REJECTED)),
+        )
+
+        assertThat(document.summary).isEqualTo("My own words.")
+    }
+
+    @Test
+    fun rejectedSkillsExportTheProfileSkills() {
+        val profile = testProfile(emptyList()).copy(skills = listOf("SQL", "Excel"))
+        val document = assembler.assemble(
+            profile,
+            TailoredResume(
+                emptyList(),
+                skills = TailoredSkills(listOf("Excel", "Kafka"), listOf("SQL", "Excel"), decision = BulletDecision.REJECTED),
+            ),
+        )
+
+        assertThat(document.skills).containsExactly("SQL", "Excel").inOrder()
     }
 }

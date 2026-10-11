@@ -11,16 +11,41 @@ data class SignInNavKey(
 ) : NavKey
 
 @Serializable
-data class ImportResumeNavKey(
+data class UploadNavKey(
+    val scenario: DebugScenario = DebugScenario.defaultValue,
+) : NavKey
+
+@Serializable
+data class UploadErrorNavKey(
+    val scenario: DebugScenario = DebugScenario.defaultValue,
+) : NavKey
+
+@Serializable
+data class PasteResumeNavKey(
+    val scenario: DebugScenario = DebugScenario.defaultValue,
+) : NavKey
+
+@Serializable
+data class ManualProfileNavKey(
+    val scenario: DebugScenario = DebugScenario.defaultValue,
+) : NavKey
+
+@Serializable
+data class ReadingNavKey(
+    val scenario: DebugScenario = DebugScenario.defaultValue,
+) : NavKey
+
+@Serializable
+data class ReviewProfileNavKey(
     val scenario: DebugScenario = DebugScenario.defaultValue,
 ) : NavKey
 
 val DefaultSignInNavKey = SignInNavKey()
 
 fun Navigator.navigateToSignIn() {
-    navigate(DefaultSignInNavKey)
+    root(DefaultSignInNavKey)
 }
 
-fun Navigator.navigateToImportResume() {
-    navigate(ImportResumeNavKey())
+fun Navigator.navigateToUpload() {
+    navigate(UploadNavKey())
 }

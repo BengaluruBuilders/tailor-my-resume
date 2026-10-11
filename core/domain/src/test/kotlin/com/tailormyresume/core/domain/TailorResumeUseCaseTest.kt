@@ -55,7 +55,7 @@ class TailorResumeUseCaseTest {
 
     private suspend fun useCaseReturning(vararg bullets: TailoredBullet): TailorResumeUseCase {
         val tailor = object : ResumeTailor {
-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, section: EntryCategory?) =
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?) =
                 TailoredResume(bullets.toList())
         }
         return TailorResumeUseCase(tailor, OfflineFabricationGuard())
@@ -188,7 +188,7 @@ class TailorResumeUseCaseTest {
                 emptyList<GuardrailViolation>().also { calls += proposedText to sources }
         }
         val tailor = object : ResumeTailor {
-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, section: EntryCategory?) = TailoredResume(
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?) = TailoredResume(
                 listOf(
                     bullet("t1", "exp-1-b2", "a", "a1"),
                     bullet("t2", "proj-1-b2", "b", "b1"),
@@ -255,7 +255,7 @@ class TailorResumeUseCaseTest {
         job: JobDescription = analystJob,
     ): TailoredResume {
         val tailor = object : ResumeTailor {
-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, section: EntryCategory?) = proposed
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?) = proposed
         }
         return TailorResumeUseCase(tailor, OfflineFabricationGuard())(analystProfile, job, emptyGap, "app-1", quickAnswer = quickAnswer)
     }

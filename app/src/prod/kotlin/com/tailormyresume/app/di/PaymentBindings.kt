@@ -5,6 +5,8 @@ import com.tailormyresume.app.billing.GooglePlayBilling
 import com.tailormyresume.app.billing.PlayBilling
 import com.tailormyresume.app.billing.PurchaseRestorer
 import com.tailormyresume.app.billing.RemotePaymentGateway
+import com.tailormyresume.app.credits.RemoteCreditsLedgerSource
+import com.tailormyresume.core.data.repository.RemoteLedgerSource
 import com.tailormyresume.core.domain.PaymentGateway
 import dagger.Binds
 import dagger.Module
@@ -20,6 +22,9 @@ interface PaymentBindings {
 
     @Binds
     fun bindPlayBilling(impl: GooglePlayBilling): PlayBilling
+
+    @Binds
+    fun bindRemoteLedgerSource(impl: RemoteCreditsLedgerSource): RemoteLedgerSource
 
     @Binds
     @IntoSet

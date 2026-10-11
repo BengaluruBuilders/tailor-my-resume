@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.app.ui.AppViewModel
+import com.tailormyresume.app.ui.BackTargetViewModel
 import com.tailormyresume.app.ui.TmrApp
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,6 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val appViewModel: AppViewModel by viewModels()
+    private val backTargetViewModel: BackTargetViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT), navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
@@ -26,7 +28,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             TmrTheme {
                 val rootState by appViewModel.rootState.collectAsStateWithLifecycle()
-                TmrApp(rootState = rootState)
+                val hasHome by backTargetViewModel.hasHome.collectAsStateWithLifecycle()
+                TmrApp(rootState = rootState, hasHome = { hasHome })
             }
         }
     }

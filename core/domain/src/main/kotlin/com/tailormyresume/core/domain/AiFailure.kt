@@ -11,6 +11,8 @@ enum class AiFailure {
     AnalysisInProgress,
     QuotaExceeded,
     SignInRequired,
+    NotAJobPost,
+    JobImportFailed,
     Unavailable,
 }
 

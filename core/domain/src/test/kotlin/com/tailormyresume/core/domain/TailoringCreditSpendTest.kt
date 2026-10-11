@@ -13,7 +13,7 @@ class TailoringCreditSpendTest {
     private val ledger = mutableListOf<CreditLedgerEntry>()
 
     private suspend fun <T> spend(tailoring: suspend () -> T): T =
-        TailoringCreditSpend.forSuccess("app-7", clock, { ledger += it }, tailoring)
+        TailoringCreditSpend.forSuccess("app-7", "r1", clock, { ledger += it }, tailoring)
 
     @Test
     fun successSpendsExactlyOneCreditForApplication() = runTest {
@@ -21,7 +21,7 @@ class TailoringCreditSpendTest {
 
         assertThat(result).isEqualTo("tailored")
         assertThat(ledger).containsExactly(
-            CreditLedgerEntry(CreditLedgerKind.SPEND, -1, "app-7", null, clock.instant),
+            CreditLedgerEntry(CreditLedgerKind.SPEND, -1, "app-7", "run-r1", clock.instant),
         )
     }
 

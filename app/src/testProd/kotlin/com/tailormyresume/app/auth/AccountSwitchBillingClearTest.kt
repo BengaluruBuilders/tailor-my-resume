@@ -12,6 +12,7 @@ import com.tailormyresume.app.billing.WalletSource
 import com.tailormyresume.app.billing.idleScope
 import com.tailormyresume.core.data.repository.PendingReportQueue
 import com.tailormyresume.core.testing.mock.TestMockStateStore
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -30,10 +31,10 @@ class AccountSwitchBillingClearTest {
     private val api = server.api()
     private val account = SwitchableUid("uid-0")
     private val billing = FakePlayBilling()
-    private val payments = RemotePaymentGateway(api, WalletSource(api, account), billing, account, idleScope())
+    private val payments = RemotePaymentGateway(api, WalletSource(api, account), billing, account, idleScope(), TestCreditsRepository())
     private val session = TestSessionRepository()
     private val store = TestMockStateStore()
-    private val cleaner = SignOutCleaner(payments, RemoteJobAnalysisSource(api, NoMatcher), PendingReportQueue(store), store)
+    private val cleaner = SignOutCleaner(payments, RemoteJobAnalysisSource(api, NoMatcher), PendingReportQueue(store), store, TestCreditsRepository())
 
     private val purchasesRequests = AtomicInteger()
 

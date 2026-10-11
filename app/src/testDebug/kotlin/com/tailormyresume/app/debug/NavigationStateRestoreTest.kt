@@ -15,8 +15,8 @@ import com.tailormyresume.core.model.DebugScenario
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.rememberNavigationState
 import com.tailormyresume.core.navigation.toEntries
-import com.tailormyresume.feature.onboarding.api.navigation.ImportResumeNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,43 +35,47 @@ class NavigationStateRestoreTest {
     val composeRule = createComposeRule()
 
     private val firstKey: NavKey = SignInNavKey(scenario = DebugScenario.defaultValue)
-    private val otherKey: NavKey = ImportResumeNavKey(scenario = DebugScenario.defaultValue)
-    private var startKey: NavKey = firstKey
+    private val otherKey: NavKey = UploadNavKey(scenario = DebugScenario.defaultValue)
     private lateinit var state: NavigationState
     private var entryCount = 0
 
     @Composable
     private fun Root() {
-        state = rememberNavigationState(startKey, setOf(startKey))
+        state = rememberNavigationState(firstKey)
         entryCount = state.toEntries { key -> NavEntry(key) {} }.size
     }
 
     @Test
-    fun aStackRestoredForAnotherStartKeyOpensTheNewStartKey() {
+    fun stackAndCurrentScreenSurviveRecreation() {
         val tester = StateRestorationTester(composeRule)
         tester.setContent { Root() }
         composeRule.waitForIdle()
+        composeRule.runOnUiThread { state.stack.add(otherKey) }
+        composeRule.waitForIdle()
 
-        startKey = otherKey
         tester.emulateSavedInstanceStateRestore()
         composeRule.waitForIdle()
 
-        assertThat(entryCount).isEqualTo(1)
+        assertThat(state.stack.toList()).containsExactly(firstKey, otherKey).inOrder()
         assertThat(state.currentKey).isEqualTo(otherKey)
+        assertThat(entryCount).isEqualTo(2)
     }
 
     @Test
-    fun aStackRestoredForTheSameKeysIsKept() {
+    fun aRootedStackSurvivesRecreationWithoutTheStartKey() {
         val tester = StateRestorationTester(composeRule)
         tester.setContent { Root() }
         composeRule.waitForIdle()
-        composeRule.runOnUiThread { state.currentSubStack.add(otherKey) }
+        composeRule.runOnUiThread {
+            state.stack.clear()
+            state.stack.add(otherKey)
+        }
         composeRule.waitForIdle()
 
         tester.emulateSavedInstanceStateRestore()
         composeRule.waitForIdle()
 
-        assertThat(state.currentSubStack.toList()).containsExactly(firstKey, otherKey).inOrder()
-        assertThat(entryCount).isEqualTo(2)
+        assertThat(state.stack.toList()).containsExactly(otherKey)
+        assertThat(entryCount).isEqualTo(1)
     }
 }

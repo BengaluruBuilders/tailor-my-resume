@@ -1,6 +1,6 @@
 package com.tailormyresume.core.model
 
-enum class EditType { REWORD, REORDER, SHORTEN, EMPHASISE, MERGE }
+enum class EditType { REWORD, REORDER, SHORTEN, EMPHASISE, MERGE, UNKNOWN }
 
 enum class BulletDecision { PENDING, ACCEPTED, REJECTED }
 

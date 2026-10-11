@@ -1,55 +1,73 @@
 package com.tailormyresume.app.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
-import com.tailormyresume.app.navigation.START_NAV_KEY
-import com.tailormyresume.app.navigation.TOP_LEVEL_NAV_ITEMS
+import com.tailormyresume.app.R
+import com.tailormyresume.app.navigation.TOP_LEVEL_NAV_KEYS
+import com.tailormyresume.app.navigation.chromeFor
 import com.tailormyresume.app.navigation.isTopLevelDestination
-import com.tailormyresume.core.designsystem.component.LocalTmrBottomInset
+import com.tailormyresume.app.navigation.shellNavigator
 import com.tailormyresume.core.designsystem.component.TmrBackground
-import com.tailormyresume.core.designsystem.component.TmrDock
-import com.tailormyresume.core.designsystem.component.TmrDockDefaults
-import com.tailormyresume.core.designsystem.component.TmrDockIcon
-import com.tailormyresume.core.designsystem.component.TmrDockItem
+import com.tailormyresume.core.designsystem.component.TmrVisibility
+import com.tailormyresume.core.designsystem.component.chrome.LocalTmrSheetHost
+import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
+import com.tailormyresume.core.designsystem.component.chrome.TmrSheetHost
+import com.tailormyresume.core.designsystem.component.chrome.TmrSheetHostState
+import com.tailormyresume.core.designsystem.component.chrome.TmrStepBar
+import com.tailormyresume.core.designsystem.component.chrome.TmrTab
+import com.tailormyresume.core.designsystem.component.chrome.TmrTabBar
+import com.tailormyresume.core.designsystem.component.chrome.TmrToastHost
+import com.tailormyresume.core.designsystem.component.chrome.TmrToastState
+import com.tailormyresume.core.designsystem.component.chrome.TmrTopBar
+import com.tailormyresume.core.designsystem.component.chrome.TmrTopBarLeading
 import com.tailormyresume.core.designsystem.component.rememberTmrNavTransitions
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.navigation.ChromeActions
+import com.tailormyresume.core.navigation.LocalChromeActions
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.navigation.PendingNavigation
 import com.tailormyresume.core.navigation.rememberNavigationState
 import com.tailormyresume.core.navigation.toEntries
+import com.tailormyresume.feature.analysis.api.navigation.newApp
 import com.tailormyresume.feature.analysis.impl.navigation.analysisEntry
+import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
 import com.tailormyresume.feature.applications.impl.navigation.applicationDetailEntry
 import com.tailormyresume.feature.applications.impl.navigation.applicationsEntry
 import com.tailormyresume.feature.onboarding.api.navigation.DefaultSignInNavKey
 import com.tailormyresume.feature.onboarding.impl.navigation.onboardingEntry
+import com.tailormyresume.feature.profile.api.navigation.DefaultProfileNavKey
+import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
 import com.tailormyresume.feature.profile.impl.navigation.profileEntry
 import com.tailormyresume.feature.settings.impl.navigation.settingsEntry
+import com.tailormyresume.feature.tailor.api.navigation.ExportedNavKey
 import com.tailormyresume.feature.tailor.impl.navigation.tailorEntry
 
 @Composable
 fun TmrApp(
     rootState: AppRootState,
     modifier: Modifier = Modifier,
+    hasHome: () -> Boolean = { false },
 ) {
     val stores = rememberRootViewModelStores()
     LaunchedEffect(rootState) {
@@ -62,8 +80,8 @@ fun TmrApp(
     TmrBackground(modifier = modifier) {
         when (rootState) {
             AppRootState.Loading -> Unit
-            AppRootState.FirstRun -> TmrFirstRunRoot()
-            AppRootState.Main -> TmrMainRoot()
+            AppRootState.FirstRun -> TmrFirstRunRoot(hasHome = hasHome)
+            AppRootState.Main -> TmrMainRoot(hasHome = hasHome)
         }
     }
 }
@@ -73,18 +91,14 @@ internal fun TmrFirstRunRoot(
     modifier: Modifier = Modifier,
     startKey: NavKey = DefaultSignInNavKey,
     initialKeys: () -> List<NavKey> = PendingNavigation::consume,
+    hasHome: () -> Boolean = { false },
 ) {
     WithRootViewModelStore(NavigationRoot.FirstRun) {
-        val navigationState = rememberNavigationState(startKey, setOf(startKey))
+        val navigationState = rememberNavigationState(startKey)
         val navigator = remember(navigationState) {
-            Navigator(navigationState).also { it.navigateAll(initialKeys()) }
+            shellNavigator(navigationState, hasHome).also { it.navigateAll(initialKeys()) }
         }
-        TmrNavDisplay(
-            navigationState = navigationState,
-            navigator = navigator,
-            dockInset = 0.dp,
-            modifier = modifier,
-        )
+        TmrShell(navigationState = navigationState, navigator = navigator, modifier = modifier)
     }
 }
 
@@ -92,55 +106,99 @@ internal fun TmrFirstRunRoot(
 internal fun TmrMainRoot(
     modifier: Modifier = Modifier,
     initialKeys: () -> List<NavKey> = PendingNavigation::consume,
+    hasHome: () -> Boolean = { true },
 ) {
     WithRootViewModelStore(NavigationRoot.Main) {
-        TmrMainRootContent(modifier = modifier, initialKeys = initialKeys)
-    }
-}
-
-@Composable
-private fun TmrMainRootContent(
-    modifier: Modifier,
-    initialKeys: () -> List<NavKey>,
-) {
-    val navigationState = rememberNavigationState(START_NAV_KEY, TOP_LEVEL_NAV_ITEMS.keys)
-    val navigator = remember(navigationState) {
-        Navigator(navigationState).also { navigator -> initialKeys().forEach(navigator::openInOwnTab) }
-    }
-    Box(modifier = modifier.fillMaxSize()) {
-        TmrNavDisplay(
-            navigationState = navigationState,
-            navigator = navigator,
-            dockInset = TmrDockDefaults.inset,
-        )
-        AnimatedVisibility(
-            visible = navigationState.currentKey.isTopLevelDestination(),
-            modifier = Modifier.align(Alignment.BottomCenter),
-            enter = slideInVertically(TmrTheme.motion.proofSpecs.offset) { it } +
-                fadeIn(TmrTheme.motion.proofSpecs.fade),
-            exit = slideOutVertically(TmrTheme.motion.proofSpecs.offset) { it } +
-                fadeOut(TmrTheme.motion.proofSpecs.fade),
-        ) {
-            TmrMainDock(navigationState = navigationState, navigator = navigator)
+        val navigationState = rememberNavigationState(DefaultApplicationsNavKey)
+        val navigator = remember(navigationState) {
+            shellNavigator(navigationState, hasHome).also { navigator ->
+                initialKeys().forEach { key ->
+                    if (key.isTopLevelDestination()) navigator.root(key) else navigator.navigate(key)
+                }
+            }
         }
+        TmrShell(navigationState = navigationState, navigator = navigator, modifier = modifier)
     }
 }
 
 @Composable
-private fun TmrMainDock(
+internal fun TmrShell(
     navigationState: NavigationState,
     navigator: Navigator,
     modifier: Modifier = Modifier,
+    entryProvider: (NavKey) -> NavEntry<NavKey> = remember(navigator) { sharedEntryProvider(navigator) },
 ) {
-    TmrDock(modifier = modifier) {
-        TOP_LEVEL_NAV_ITEMS.forEach { (navKey, navItem) ->
-            val selected = navKey == navigationState.currentTopLevelKey
-            TmrDockItem(
-                selected = selected,
-                onClick = { navigator.navigate(navKey) },
-                label = stringResource(navItem.labelRes),
-                icon = { TmrDockIcon(if (selected) navItem.selectedIcon else navItem.unselectedIcon) },
-            )
+    val toastState = remember { TmrToastState() }
+    val sheetHost = remember { TmrSheetHostState() }
+    val chromeActions = remember { ChromeActions() }
+    val key = navigationState.currentKey
+    LaunchedEffect(key) { sheetHost.dismiss() }
+    val chrome = chromeFor(key, entriesBelow = navigationState.stack.size - 1)
+    val tabsVisible = key.isTopLevelDestination()
+    val changesSaved = stringResource(R.string.shell_changes_saved)
+    BackHandler(enabled = !navigationState.canGoBack && navigator.canHandleBack) { navigator.goBack() }
+    CompositionLocalProvider(
+        LocalTmrToast provides toastState,
+        LocalTmrSheetHost provides sheetHost,
+        LocalChromeActions provides chromeActions,
+    ) {
+        Box(modifier = modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (chrome.topBar) {
+                    Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+                        TmrTopBar(
+                            leading = chrome.leading,
+                            onLeading = {
+                                if (chrome.leading == TmrTopBarLeading.Close && key is ExportedNavKey) {
+                                    navigator.root(DefaultApplicationsNavKey)
+                                } else {
+                                    navigator.goBack()
+                                }
+                            },
+                            title = chrome.title?.let { stringResource(it) },
+                            action = chrome.action?.let { stringResource(it.label) },
+                            onAction = {
+                                val registered = chromeActions.handler
+                                if (registered != null) {
+                                    registered()
+                                } else {
+                                    navigator.goBack()
+                                    toastState.show(changesSaved)
+                                }
+                            },
+                        )
+                        chrome.step?.let { step ->
+                            TmrStepBar(
+                                current = step,
+                                modifier = Modifier.padding(horizontal = TmrTheme.spacing.gutter, vertical = 6.dp),
+                            )
+                        }
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(if (chrome.topBar) Modifier.consumeWindowInsets(WindowInsets.statusBars) else Modifier)
+                        .then(if (tabsVisible) Modifier.consumeWindowInsets(WindowInsets.navigationBars) else Modifier),
+                ) {
+                    TmrNavDisplay(
+                        navigationState = navigationState,
+                        navigator = navigator,
+                        entryProvider = entryProvider,
+                    )
+                }
+                TmrVisibility(visible = tabsVisible, rise = true) {
+                    TmrTabBar(
+                        selected = if (key is ProfileNavKey) TmrTab.Profile else TmrTab.Applications,
+                        onApplications = { navigator.root(DefaultApplicationsNavKey) },
+                        onAdd = navigator::newApp,
+                        onProfile = { navigator.root(DefaultProfileNavKey) },
+                        modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
+                    )
+                }
+            }
+            TmrSheetHost(state = sheetHost)
+            TmrToastHost(state = toastState)
         }
     }
 }
@@ -149,16 +207,14 @@ private fun TmrMainDock(
 private fun TmrNavDisplay(
     navigationState: NavigationState,
     navigator: Navigator,
-    dockInset: Dp,
+    entryProvider: (NavKey) -> NavEntry<NavKey>,
     modifier: Modifier = Modifier,
 ) {
-    val entryProvider = remember(navigator, dockInset) {
-        withDockInset(sharedEntryProvider(navigator), dockInset)
-    }
+    val tabbedProvider = remember(entryProvider) { withTabMetadata(entryProvider) }
     val transitions = rememberTmrNavTransitions()
     Box(modifier = modifier) {
         NavDisplay(
-            entries = navigationState.toEntries(entryProvider),
+            entries = navigationState.toEntries(tabbedProvider),
             onBack = { navigator.goBack() },
             transitionSpec = {
                 tabDirection(initialState, targetState)?.let { transitions.tab(this, it, pop = false) }
@@ -198,16 +254,12 @@ private fun sharedEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavK
         settingsEntry(navigator)
     }
 
-private fun withDockInset(
+private fun withTabMetadata(
     provider: (NavKey) -> NavEntry<NavKey>,
-    dockInset: Dp,
 ): (NavKey) -> NavEntry<NavKey> = { key ->
     val entry = provider(key)
-    val topLevel = key.isTopLevelDestination()
-    val tabIndex = TOP_LEVEL_NAV_ITEMS.keys.indexOf(key)
-    val metadata = entry.metadata + (TOP_LEVEL_METADATA to topLevel) +
+    val tabIndex = TOP_LEVEL_NAV_KEYS.indexOfFirst { it::class == key::class }
+    val metadata = entry.metadata + (TOP_LEVEL_METADATA to key.isTopLevelDestination()) +
         if (tabIndex >= 0) mapOf(TAB_INDEX_METADATA to tabIndex) else emptyMap()
-    NavEntry(key = key, contentKey = entry.contentKey, metadata = metadata) {
-        CompositionLocalProvider(LocalTmrBottomInset provides if (topLevel) dockInset else 0.dp) { entry.Content() }
-    }
+    NavEntry(key = key, contentKey = entry.contentKey, metadata = metadata) { entry.Content() }
 }

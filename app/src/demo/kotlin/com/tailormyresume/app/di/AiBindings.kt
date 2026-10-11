@@ -1,6 +1,8 @@
 package com.tailormyresume.app.di
 
 import com.tailormyresume.core.domain.JobAnalysisSource
+import com.tailormyresume.core.domain.JobImporter
+import com.tailormyresume.core.domain.OfflineJobImporter
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.ResumeTextParser
 import com.tailormyresume.core.domain.offline.OfflineJobAnalysisSource
@@ -22,4 +24,7 @@ interface AiBindings {
 
     @Binds
     fun bindResumeTextParser(impl: OfflineResumeTextParser): ResumeTextParser
+
+    @Binds
+    fun bindJobImporter(impl: OfflineJobImporter): JobImporter
 }
