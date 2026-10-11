@@ -156,6 +156,20 @@ class ExportResumeUseCaseTest {
     }
 
     @Test
+    fun selectedEntryWithoutTailoredBulletsExportsItsOriginalBullet() = runTest {
+        val application = acceptedApplication(emptyList(), accepted = false).copy(
+            tailoredResume = TailoredResume(emptyList(), entryIds = listOf("exp-1")),
+        )
+        seed(application)
+
+        val outcome = useCase("app-1")
+
+        assertThat(outcome).isInstanceOf(ExportOutcome.Exported::class.java)
+        assertThat(renderer.lastDocument?.sections?.flatMap { it.entries }?.flatMap { it.bullets })
+            .containsExactly(b1.originalText)
+    }
+
+    @Test
     fun missingApplicationOrProfileIsRefused() = runTest {
         assertThat(useCase("app-1")).isEqualTo(ExportOutcome.Refused)
 

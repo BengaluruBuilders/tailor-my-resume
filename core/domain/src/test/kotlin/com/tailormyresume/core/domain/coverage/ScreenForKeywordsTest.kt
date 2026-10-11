@@ -164,4 +164,19 @@ class ScreenForKeywordsTest {
 
         assertThat(coverage.final).isEqualTo(0)
     }
+
+    @Test
+    fun finalCoverageKeepsOriginalBulletsForSelectedEntryWithoutTailoring() {
+        val entry = ProfileEntry(
+            "selected", EntryCategory.EXPERIENCE, "Analyst", "Company", "2020", "2021",
+            listOf(EvidenceBullet("selected-b1", "Built Python tools")), FactSource.IMPORTED, true,
+        )
+        val source = CandidateProfile("Candidate", "", "", "", emptyList(), listOf(entry))
+        val matches = listOf(match("r1", MatchStatus.GAP, "python"))
+        val resume = TailoredResume(bullets = emptyList(), entryIds = listOf(entry.id))
+
+        val coverage = KeywordCoverageCalculator.compute(matches, null, resume, source)
+
+        assertThat(coverage.final).isEqualTo(100)
+    }
 }
