@@ -33,14 +33,22 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
     private var generation = 0
 
     @Volatile
-    private var refreshCancelled = false
+    private var refreshNeeded = false
 
     private fun remoteSnapshots(): Flow<CreditSnapshot> =
         held.map { current -> current?.takeIf { it.owner == remote.owner() }?.snapshot ?: NO_SNAPSHOT }
-            .onStart { if (refreshCancelled) refresh() }
+            .onStart { if (refreshNeeded) refresh() }
 
     override fun observeBalance(): Flow<Int> =
         if (remote.ownsLedger) remoteSnapshots().map { it.balance } else creditLedgerDao.observeBalance().flowOn(ioDispatcher)
+
+    override fun observeKnownBalance(): Flow<Int?> =
+        if (remote.ownsLedger) {
+            held.map { current -> current?.takeIf { it.owner == remote.owner() }?.snapshot?.balance }
+                .onStart { if (refreshNeeded) refresh() }
+        } else {
+            observeBalance().map { it }
+        }
 
     override fun observeLedger(): Flow<List<CreditLedgerEntry>> =
         if (remote.ownsLedger) {
@@ -52,7 +60,18 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
         }
 
     override suspend fun record(entry: CreditLedgerEntry) {
-        if (remote.ownsLedger) scope.launch { refresh() } else creditLedgerDao.insert(entry.asEntity())
+        if (remote.ownsLedger) {
+            val (scheduled, owner) = synchronized(lock) {
+                generation++
+                held.value = null
+                generation to remote.owner()
+            }
+            scope.launch {
+                if (synchronized(lock) { scheduled == generation && owner == remote.owner() }) refresh()
+            }
+        } else {
+            creditLedgerDao.insert(entry.asEntity())
+        }
     }
 
     override suspend fun refresh() {
@@ -69,16 +88,17 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
         val snapshot = try {
             remote.fetch()
         } catch (cancellation: CancellationException) {
-            refreshCancelled = true
+            refreshNeeded = true
             throw cancellation
         } catch (failure: Exception) {
+            refreshNeeded = true
             return false
         }
         return synchronized(lock) {
             val stored = started == generation && owner == remote.owner()
             if (stored) {
                 held.value = Held(owner, snapshot)
-                refreshCancelled = false
+                refreshNeeded = false
             }
             stored
         }

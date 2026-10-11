@@ -53,7 +53,7 @@ class ApplicationsNavigationTest {
         if (withApplications) applicationRepository.sendApplications(scenario.applications)
         val viewModel = ApplicationsViewModel(
             applicationRepository,
-            AccountCreditBalance(TestPaymentGateway().withFreeCredits(3)),
+            AccountCreditBalance(TestPaymentGateway().withFreeCredits(0), creditsRepository),
             profileRepository,
         )
         composeRule.setContent { TmrTheme { ApplicationsRoute(viewModel, navigator) } }

@@ -13,14 +13,13 @@ class ReviewMapperTest {
     private fun skillsOf(count: Int) = freshReviewProfile().copy(skills = List(count) { "Skill $it" })
 
     @Test
-    fun freshProfileMapsToBannerOptionalRowAndAmberDates() {
+    fun freshProfileMapsToRequiredBannerAndAmberDates() {
         val state = freshReviewProfile().toReviewUiState()
 
         assertThat(state.sourceFileName).isEqualTo(SAMPLE_SOURCE_FILE)
-        assertThat(state.percent).isEqualTo(90)
         assertThat(state.gap).isEqualTo(ReviewGap("exp-tata", "Data Analyst Intern"))
         assertThat(state.canContinue).isFalse()
-        assertThat(state.showLinkedinRow).isTrue()
+        assertThat(state.inviteWorkExample).isFalse()
         assertThat(state.contact).isEqualTo(ReviewContact("Priya Deshmukh", "priya.deshmukh@gmail.com", "+91 98200 41736 · Pune"))
         assertThat(state.roles.map { it.title }).containsExactly("Business Analyst", "Data Analyst Intern", "Finance Associate").inOrder()
         assertThat(state.roles.map { it.organization }).containsExactly("Infosys", "Tata Digital", "Bajaj Finserv").inOrder()
@@ -36,16 +35,14 @@ class ReviewMapperTest {
 
         assertThat(state.gap).isNull()
         assertThat(state.canContinue).isTrue()
-        assertThat(state.percent).isEqualTo(96)
         assertThat(state.roles[1].dates).isEqualTo(ReviewDates.Range("Jun 2021", "May 2022"))
     }
 
     @Test
-    fun linkedinHidesTheOptionalRowAndLiftsTheScoreTo100() {
+    fun linkedinDoesNotChangeReviewPrompt() {
         val state = fixedReviewProfile().copy(linkedinUrl = SAMPLE_LINKEDIN).toReviewUiState()
 
-        assertThat(state.showLinkedinRow).isFalse()
-        assertThat(state.percent).isEqualTo(100)
+        assertThat(state.inviteWorkExample).isFalse()
     }
 
     @Test
@@ -130,6 +127,7 @@ class ReviewMapperTest {
                 ProfileEntry("W-1", EntryCategory.EXPERIENCE, "Business Analyst", "Infosys", "", "", emptyList(), FactSource.USER_STATED, true),
             ),
             city = "Pune",
+            contactUserStated = true,
         )
 
         val state = manual.toReviewUiState()
@@ -141,5 +139,21 @@ class ReviewMapperTest {
         assertThat(state.gap).isNull()
         assertThat(state.sourceFileName).isNull()
         assertThat(state.canContinue).isTrue()
+        assertThat(state.inviteWorkExample).isTrue()
+    }
+
+    @Test
+    fun manualWorkExampleHidesInvitation() {
+        val manual = fixedReviewProfile(sourceFileName = null).copy(
+            contactUserStated = true,
+            entries = listOf(
+                ProfileEntry(
+                    "manual-role", EntryCategory.EXPERIENCE, "Analyst", "Example Co", "", "",
+                    listOf(EvidenceBullet("manual-bullet", "Built the monthly report")), FactSource.USER_STATED, true,
+                ),
+            ),
+        )
+
+        assertThat(manual.toReviewUiState().inviteWorkExample).isFalse()
     }
 }

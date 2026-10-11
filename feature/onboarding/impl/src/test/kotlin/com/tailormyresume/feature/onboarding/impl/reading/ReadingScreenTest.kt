@@ -50,7 +50,7 @@ class ReadingScreenTest {
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun showsFileLineTitlePercentRowsAndTime() {
+    fun showsFileLineTitlePercentRowsAndProcessingCopy() {
         composeRule.showFlowScreen { ReadingScreen(readingStateAt(100)) }
 
         listOf(
@@ -58,7 +58,7 @@ class ReadingScreenTest {
             "Priya_Deshmukh_Resume.pdf",
             "PDF · 112 KB",
             "100%",
-            "Takes about 20 seconds",
+            "Reading your details…",
             "Contact details",
             "Work experience",
             "Education",

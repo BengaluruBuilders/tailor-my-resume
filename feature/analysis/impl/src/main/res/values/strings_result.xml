@@ -14,8 +14,8 @@
     <string name="feature_analysis_impl_result_status_partial">Partly in your resume</string>
     <string name="feature_analysis_impl_result_status_unclear">Not clear yet</string>
     <string name="feature_analysis_impl_result_tailor">Tailor my resume</string>
-    <string name="feature_analysis_impl_result_note_credits">Uses 1 credit · you have %1$d</string>
-    <string name="feature_analysis_impl_result_note_no_credits">No credits left · get more to continue</string>
+    <string name="feature_analysis_impl_result_note_credits">A successful tailoring uses 1 credit · you have %1$d</string>
+    <string name="feature_analysis_impl_result_note_no_credits">A successful tailoring uses 1 credit · no credits left</string>
     <string name="feature_analysis_impl_result_unavailable">This job is no longer available.</string>
     <string name="feature_analysis_impl_question_label">One quick question</string>
     <string name="feature_analysis_impl_question_yes_regularly">Yes, regularly</string>
@@ -26,5 +26,5 @@
     <string name="feature_analysis_impl_question_continue">Continue</string>
     <string name="feature_analysis_impl_question_skip">Skip this</string>
     <string name="feature_analysis_impl_question_pick_answer">Pick an answer, or skip</string>
-    <string name="feature_analysis_impl_result_note_unknown_credits">Uses 1 credit · balance unavailable</string>
+    <string name="feature_analysis_impl_result_note_unknown_credits">A successful tailoring uses 1 credit · balance unavailable</string>
 </resources>

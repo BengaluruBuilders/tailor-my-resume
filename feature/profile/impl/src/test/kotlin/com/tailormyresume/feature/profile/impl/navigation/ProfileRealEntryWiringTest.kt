@@ -244,7 +244,7 @@ class ProfileRealEntryWiringTest {
 
         composeRule.onNodeWithText("+ Add education").performClick()
         composeRule.waitForIdle()
-        composeRule.onAllNodes(hasSetTextAction())[1].performTextInput("PGDM, IIM Indore")
+        composeRule.onAllNodes(hasSetTextAction())[4].performTextInput("PGDM, IIM Indore")
         saveThroughChrome()
         awaitProfile { profile -> profile.entries.any { it.title == "PGDM, IIM Indore" } }
 

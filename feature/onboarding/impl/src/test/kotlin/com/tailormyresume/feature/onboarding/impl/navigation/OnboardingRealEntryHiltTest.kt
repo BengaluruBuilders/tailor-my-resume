@@ -142,12 +142,12 @@ class OnboardingRealEntryHiltTest {
     }
 
     @Test
-    fun reviewAddLinkedinOpensEditContact() {
+    fun reviewContactOpensEditContact() {
         val navigator = navigatorOf(ReviewProfileNavKey())
         show(navigator, ReviewProfileNavKey(), seed = freshReviewProfile())
         waitForReview()
 
-        composeRule.onNodeWithText("Add your LinkedIn").performClick()
+        composeRule.onNodeWithText("Priya Deshmukh").performClick()
         composeRule.waitForIdle()
 
         assertThat(navigator.state.stack.toList()).containsExactly(ReviewProfileNavKey(), EditContactNavKey()).inOrder()

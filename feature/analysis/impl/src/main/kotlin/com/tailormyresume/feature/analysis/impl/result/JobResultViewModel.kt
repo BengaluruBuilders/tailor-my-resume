@@ -9,7 +9,6 @@ import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.domain.coverage.ScreenForKeywords
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobApplication
-import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
 import com.tailormyresume.core.model.RequirementPriority
@@ -99,8 +98,7 @@ private fun toUiState(application: JobApplication?, credits: Int?, profile: Cand
     )
 }
 
-private fun RequirementMatch.keepReason(): String? =
-    if (status == MatchStatus.GAP || evidenceIds.isNotEmpty()) reason?.takeIf { it.isNotBlank() } else null
+private fun RequirementMatch.keepReason(): String? = reason?.takeIf { it.isNotBlank() }
 
 private fun QuickAnswer?.confirms(requirementId: String): Boolean =
     this?.requirementId == requirementId && choice in setOf("YES_REGULARLY", "A_FEW_TIMES")

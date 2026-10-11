@@ -12,6 +12,7 @@ import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.account.TestAccountDataExporter
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
+import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
@@ -74,9 +75,9 @@ internal class SettingsFixture(
     val settings = TestResumeSettingsRepository()
     val signIn = CountingSignInGateway(TestSignInGateway(session), gate)
 
-    fun viewModel(): SettingsViewModel = SettingsViewModel(
+    fun viewModel(creditBalance: AccountCreditBalance = testAccountCreditBalance(payment)): SettingsViewModel = SettingsViewModel(
         sessionRepository = session,
-        creditBalance = AccountCreditBalance(payment),
+        creditBalance = creditBalance,
         resumeSettingsRepository = settings,
         exportAccountData = ExportAccountDataUseCase(
             collectAccountData = CollectAccountDataUseCase(

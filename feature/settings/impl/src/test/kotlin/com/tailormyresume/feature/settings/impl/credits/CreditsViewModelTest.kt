@@ -27,7 +27,7 @@ class CreditsViewModelTest {
     private val payment = TestPaymentGateway().withFreeCredits(3)
 
     private fun viewModel(credits: com.tailormyresume.core.data.repository.CreditsRepository = ledger) =
-        CreditsViewModel(credits, AccountCreditBalance(payment), applications)
+        CreditsViewModel(credits, AccountCreditBalance(payment, credits), applications)
 
     private fun TestScope.collect(viewModel: CreditsViewModel): List<CreditsUiState> {
         val seen = mutableListOf<CreditsUiState>()
@@ -88,12 +88,12 @@ class CreditsViewModelTest {
     }
 
     @Test
-    fun balanceComesFromPaymentEntitlement() = runTest {
+    fun balanceComesFromCreditsRepository() = runTest {
         val credits = RecordingCreditsRepository()
         val viewModel = viewModel(credits)
         collect(viewModel)
 
-        assertThat(viewModel.content().credits).isEqualTo(3)
+        assertThat(viewModel.content().credits).isEqualTo(0)
         assertThat(credits.calls).containsExactly("refresh")
     }
 

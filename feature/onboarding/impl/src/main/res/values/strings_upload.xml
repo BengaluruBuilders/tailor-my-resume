@@ -47,7 +47,7 @@
     <string name="feature_onboarding_impl_manual_continue">Continue</string>
 
     <string name="feature_onboarding_impl_reading_title">Reading your resume</string>
-    <string name="feature_onboarding_impl_reading_takes">Takes about 20 seconds</string>
+    <string name="feature_onboarding_impl_reading_takes">Reading your details…</string>
     <string name="feature_onboarding_impl_reading_file_meta">%1$s · %2$s</string>
     <string name="feature_onboarding_impl_reading_pasted_name">Pasted text</string>
     <plurals name="feature_onboarding_impl_reading_pasted_meta">

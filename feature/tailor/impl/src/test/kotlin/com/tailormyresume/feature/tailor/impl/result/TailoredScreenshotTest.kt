@@ -1,6 +1,7 @@
 package com.tailormyresume.feature.tailor.impl.result
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -12,6 +13,7 @@ import com.tailormyresume.core.designsystem.component.chrome.TmrToastState
 import com.tailormyresume.core.designsystem.component.content.TmrPaperBlock
 import com.tailormyresume.core.designsystem.component.content.TmrPaperHighlight
 import com.tailormyresume.core.designsystem.component.content.TmrPaperSpan
+import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.screenshot.TmrTestDevice
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.feature.tailor.impl.NARROW_DEVICE
@@ -141,7 +143,7 @@ class TailoredScreenshotTest {
     @Test
     fun resumeTabWithAnswer() {
         shoot("result_resume_with_answer", ready(), TailoredTab.Resume, TmrTestDevices.prototype)
-        rule.onNodeWithText("92").assertExists()
+        rule.onNodeWithText("Keyword coverage · 92%").assertExists()
         rule.onNodeWithText("From your answer", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Accept changes").assertExists()
     }
@@ -149,7 +151,37 @@ class TailoredScreenshotTest {
     @Test
     fun resumeTabWithoutAnswer() {
         shoot("result_resume_without_answer", ready(withAnswer = false), TailoredTab.Resume, TmrTestDevices.prototype)
-        rule.onNodeWithText("78").assertExists()
+        rule.onNodeWithText("Keyword coverage · 78%").assertExists()
+    }
+
+    @Test
+    fun initialTabShowsChangesWhenAvailableAndResumeWhenThereAreNone() {
+        assertEquals(TailoredTab.Changes, ready().defaultTab())
+        assertEquals(TailoredTab.Resume, ready(changes = emptyList()).defaultTab())
+    }
+
+    @Test
+    fun resumeIsOneTapFromTheInitialComparison() {
+        val tab = mutableStateOf(ready().defaultTab())
+        rule.setContent {
+            TmrTheme {
+                TailoredScreen(
+                    state = ready(),
+                    tab = tab.value,
+                    onTabChange = { tab.value = it },
+                    onUndo = {},
+                    onAcceptChanges = {},
+                    onEdit = {},
+                    onExport = {},
+                )
+            }
+        }
+
+        rule.onNodeWithText("Finance analyst with 4 years of SQL, Power BI and Excel work across banking and retail.")
+            .assertExists()
+        rule.onNodeWithText("Keyword coverage · 92%").assertDoesNotExist()
+        rule.onNodeWithText("Resume").performClick()
+        rule.onNodeWithText("Keyword coverage · 92%").assertExists()
     }
 
     @Test

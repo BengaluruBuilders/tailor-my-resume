@@ -51,6 +51,8 @@ internal fun noopReview(
         onAddDateClick = {},
         onContactClick = {},
         onExperienceClick = {},
+        onAddExampleClick = {},
+        onEducationClick = {},
         onSkillsClick = {},
         onContinueClick = {},
         modifier = modifier,

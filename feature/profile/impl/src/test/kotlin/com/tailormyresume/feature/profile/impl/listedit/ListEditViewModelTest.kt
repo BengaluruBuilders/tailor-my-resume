@@ -207,22 +207,57 @@ class ListEditViewModelTest {
     }
 
     @Test
-    fun changedItemDropsHiddenDetailBecauseTheTextShowedIt() = runTest {
+    fun educationEditKeepsStructuredFieldsBulletsAndFactIds() = runTest {
         val withDetail = profile.copy(
             entries = profile.entries.map {
-                if (it.id == "edu-1") it.copy(organization = "Symbiosis", startDate = "2017", endDate = "2020") else it
+                if (it.id == "edu-1") {
+                    it.copy(
+                        organization = "Symbiosis",
+                        startDate = "2017",
+                        endDate = "2020",
+                        bullets = listOf(EvidenceBullet("edu-1-b1", "Gold medal")),
+                        source = FactSource.IMPORTED,
+                    )
+                } else {
+                    it
+                }
             },
         )
         val viewModel = loaded(ProfileListSection.EDUCATION, withDetail)
-        viewModel.onTextChange(0, "B.Com")
+        viewModel.onEducationChange(0, EducationField.ORGANIZATION, "Symbiosis College")
 
         viewModel.saveAndAwait()
 
         val edited = savedProfile().category(EntryCategory.EDUCATION).single()
-        assertThat(edited.title).isEqualTo("B.Com")
-        assertThat(edited.organization).isEmpty()
-        assertThat(edited.startDate).isEmpty()
-        assertThat(edited.endDate).isEmpty()
+        val original = withDetail.category(EntryCategory.EDUCATION).single()
+        assertThat(edited).isEqualTo(original.copy(organization = "Symbiosis College", source = FactSource.USER_EDITED, isConfirmed = true))
+    }
+
+    @Test
+    fun educationEditUpdatesOneDraftAcrossContinuationChunks() = runTest {
+        val first = profile.category(EntryCategory.EDUCATION).single().copy(
+            bullets = listOf(EvidenceBullet("edu-1-b1", "First achievement")),
+            source = FactSource.IMPORTED,
+        )
+        val continuation = first.copy(
+            id = "edu-1-2",
+            bullets = listOf(EvidenceBullet("edu-1-2-b1", "Second achievement")),
+        )
+        val other = first.copy(id = "edu-other", title = "M.Com", bullets = emptyList())
+        val base = profile.copy(entries = profile.entries.flatMap { if (it.id == first.id) listOf(first, continuation, other) else listOf(it) })
+        val viewModel = loaded(ProfileListSection.EDUCATION, base)
+        assertThat(viewModel.editing().education).hasSize(2)
+
+        viewModel.onEducationChange(0, EducationField.ORGANIZATION, "Symbiosis College")
+        viewModel.saveAndAwait()
+
+        val saved = savedProfile().category(EntryCategory.EDUCATION)
+        assertThat(saved.map { it.id }).containsExactly(first.id, continuation.id, other.id).inOrder()
+        assertThat(saved.take(2)).containsExactly(
+            first.copy(organization = "Symbiosis College", source = FactSource.USER_EDITED, isConfirmed = true),
+            continuation.copy(organization = "Symbiosis College", source = FactSource.USER_EDITED, isConfirmed = true),
+        ).inOrder()
+        assertThat(saved.last()).isEqualTo(other.copy(isConfirmed = true))
     }
 
     @Test
@@ -239,14 +274,17 @@ class ListEditViewModelTest {
     @Test
     fun newItemIsUserStatedConfirmedWithNeverUsedId() = runTest {
         val viewModel = loaded(ProfileListSection.EDUCATION)
-        viewModel.addItem("  PGDM, IIM Indore  ")
-        assertThat(viewModel.editing().texts).hasSize(2)
+        viewModel.onAdd()
+        viewModel.onEducationChange(1, EducationField.TITLE, "  PGDM  ")
+        viewModel.onEducationChange(1, EducationField.ORGANIZATION, "IIM Indore")
+        assertThat(viewModel.editing().education).hasSize(2)
 
         viewModel.saveAndAwait()
 
         val saved = savedProfile()
         val added = saved.category(EntryCategory.EDUCATION).last()
-        assertThat(added.title).isEqualTo("PGDM, IIM Indore")
+        assertThat(added.title).isEqualTo("PGDM")
+        assertThat(added.organization).isEqualTo("IIM Indore")
         assertThat(added.source).isEqualTo(FactSource.USER_STATED)
         assertThat(added.isConfirmed).isTrue()
         assertThat(added.id).matches("E-[0-9a-f]{8}")
@@ -258,8 +296,9 @@ class ListEditViewModelTest {
     @Test
     fun deletedThenAddedNeverReusesTheDeletedId() = runTest {
         val viewModel = loaded(ProfileListSection.EDUCATION)
-        viewModel.onTextChange(0, "")
-        viewModel.addItem("PGDM, IIM Indore")
+        viewModel.onEducationChange(0, EducationField.TITLE, "")
+        viewModel.onAdd()
+        viewModel.onEducationChange(1, EducationField.TITLE, "PGDM, IIM Indore")
 
         viewModel.saveAndAwait()
 

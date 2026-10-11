@@ -27,9 +27,8 @@ internal sealed interface ReviewUiState {
 
     data class Ready(
         val sourceFileName: String?,
-        val percent: Int,
         val gap: ReviewGap?,
-        val showLinkedinRow: Boolean,
+        val inviteWorkExample: Boolean,
         val contact: ReviewContact,
         val roles: List<ReviewRole>,
         val skills: ReviewSkills,

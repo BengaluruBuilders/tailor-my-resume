@@ -7,15 +7,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.PaymentGateway
-import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.core.testing.util.TestClock
 import com.tailormyresume.feature.settings.impl.credits.CreditsScreen
@@ -46,14 +47,13 @@ class CreditBalanceSurfacesTest {
 
     private var surface by mutableIntStateOf(0)
 
-    private suspend fun show(gateway: PaymentGateway) {
+    private suspend fun show(gateway: PaymentGateway, creditSource: CreditsRepository) {
         val fixture = SettingsFixture(payment = gateway)
-        fixture.credits.sendLedger(listOf(CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, 99, null, null, Instant.fromEpochSeconds(0))))
-        val balance = AccountCreditBalance(gateway)
-        val settings = fixture.viewModel()
-        val credits = CreditsViewModel(fixture.credits, balance, TestApplicationRepository())
-        val paywall = PaywallViewModel(gateway, fixture.credits, balance, TestClock())
-        val delete = DeleteFixture(payment = gateway).seed().viewModel()
+        val balance = AccountCreditBalance(gateway, creditSource)
+        val settings = fixture.viewModel(balance)
+        val credits = CreditsViewModel(creditSource, balance, TestApplicationRepository())
+        val paywall = PaywallViewModel(gateway, creditSource, balance, TestClock())
+        val delete = DeleteFixture(payment = gateway).seed().viewModel(balance)
         compose.setContent {
             val settingsState by settings.uiState.collectAsState()
             val creditsState by credits.uiState.collectAsState()
@@ -85,34 +85,33 @@ class CreditBalanceSurfacesTest {
     }
 
     @Test
-    fun demoWalletUpdatesAllFourSurfacesDespiteDifferentLedgerTotal() = runTest {
+    fun demoLedgerUpdatesAllFourSurfacesDespiteStaleGateway() = runTest {
         val gateway = TestPaymentGateway().withFreeCredits(4)
-        show(gateway)
+        val credits = TestCreditsRepository()
+        credits.sendLedger(listOf(CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, 4, null, null, Instant.fromEpochSeconds(0))))
+        show(gateway, credits)
         assertEverySurface(4)
 
-        gateway.unlock("application-1")
+        credits.record(CreditLedgerEntry(CreditLedgerKind.SPEND, -1, "application-1", null, Instant.fromEpochSeconds(1)))
         compose.waitForIdle()
 
         assertEverySurface(3)
     }
 
     @Test
-    fun serverWalletWithoutACacheStaysUnknownUntilTheWalletArrives() = runTest {
-        val gateway = ObservedWalletGateway()
-        show(gateway)
+    fun serverBalanceWithoutASnapshotStaysUnknownUntilTheCreditsArrive() = runTest {
+        val gateway = TestPaymentGateway().withFreeCredits(4)
+        val knownBalance = MutableStateFlow<Int?>(null)
+        val credits = object : CreditsRepository by TestCreditsRepository() {
+            override fun observeKnownBalance() = knownBalance
+            override suspend fun refreshConfirmed() = knownBalance.value != null
+        }
+        show(gateway, credits)
         assertEverySurface(null)
 
-        gateway.wallet.value = PurchaseEntitlement(0, 4, emptyList())
+        knownBalance.value = 4
         compose.waitForIdle()
 
         assertEverySurface(4)
     }
-}
-
-private class ObservedWalletGateway : PaymentGateway by TestPaymentGateway() {
-    val wallet = MutableStateFlow(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
-
-    override fun observeEntitlement() = wallet
-
-    override suspend fun entitlement(): PurchaseEntitlement = wallet.value
 }

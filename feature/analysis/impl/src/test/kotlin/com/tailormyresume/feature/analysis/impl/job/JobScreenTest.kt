@@ -44,6 +44,7 @@ private const val FONT_SCALE_200 = 2.0f
 private const val SCREEN_READER_PERSIST_MS = 60_000L
 private const val MAX_FRAMES = 120
 private const val TOAST_SETTLE_MS = 1_000L
+private const val MINIMUM_HINT = "Use at least 200 characters from the job post. Spaces at the start and end do not count. Include responsibilities and requirements."
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -76,7 +77,7 @@ class JobScreenTest {
         rule.onNodeWithText("Paste from clipboard").assertIsDisplayed()
         rule.onNodeWithText("Use a link").assertIsDisplayed()
         rule
-            .onNodeWithText("Include requirements and responsibilities for the most accurate analysis")
+            .onNodeWithText(MINIMUM_HINT)
             .assertIsDisplayed()
         val config = rule.onNodeWithText("Analyze job").fetchSemanticsNode().config
         assertThat(config.getOrNull(SemanticsProperties.Disabled)).isNotEqualTo(false)
@@ -116,10 +117,25 @@ class JobScreenTest {
     @Test
     fun notAJobPostShowsAmberCard() {
         setScreen(JobUiState.HasText(text = jobText(40), notAJobPost = true))
+        rule.onNodeWithText(MINIMUM_HINT).assertIsDisplayed()
         rule.onNodeWithText("This doesn't look like a job post").assertIsDisplayed()
         rule
             .onNodeWithText("Paste the full listing, including responsibilities and requirements.")
             .assertIsDisplayed()
+    }
+
+    @Test
+    fun minimumHintUsesTheTrimmedBoundary() {
+        val state = mutableStateOf<JobUiState>(JobUiState.HasText(text = "  " + jobText(199) + "  "))
+        rule.setContent {
+            TmrTheme {
+                JobScreen(state = state.value, onTextChange = {}, onPaste = {}, onUseLink = {}, onClear = {}, onAnalyze = {})
+            }
+        }
+
+        rule.onNodeWithText(MINIMUM_HINT).assertIsDisplayed()
+        rule.runOnIdle { state.value = JobUiState.HasText(text = "  " + jobText(200) + "  ") }
+        rule.onNodeWithText(MINIMUM_HINT).assertDoesNotExist()
     }
 
     @Test

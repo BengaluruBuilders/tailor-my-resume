@@ -12,6 +12,7 @@ import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
+import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
@@ -75,7 +76,7 @@ class DeleteAccountUseCasePreviewTest {
         serverAccountDeleter = OfflineServerAccountDeleter(),
         applicationRepository = EmptyApplicationRepository(applications),
         profileRepository = EmptyProfileRepository(profile),
-        creditBalance = AccountCreditBalance(paymentGateway = gateway),
+        creditBalance = testAccountCreditBalance(paymentGateway = gateway),
         latency = NoMockLatency,
         creditsRepository = TestCreditsRepository(),
         resumeSettingsRepository = TestResumeSettingsRepository(),

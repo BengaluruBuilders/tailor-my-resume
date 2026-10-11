@@ -124,6 +124,14 @@ internal fun SignInScreen(
                 Spacer(Modifier.weight(1f))
                 Spacer(Modifier.height(18.dp))
                 Text(
+                    stringResource(R.string.feature_onboarding_impl_signin_prepare),
+                    Modifier.fillMaxWidth(),
+                    TmrTheme.colors.ink,
+                    style = TmrTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
                     stringResource(R.string.feature_onboarding_impl_signin_sign_in_caption),
                     Modifier.fillMaxWidth(),
                     TmrTheme.colors.ink.copy(alpha = HINT_ALPHA),

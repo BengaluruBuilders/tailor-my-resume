@@ -51,6 +51,7 @@ class SignInScreenTest {
             composeRule.onNodeWithText("How it works · ${index + 1} of 3", ignoreCase = true).assertIsDisplayed()
             composeRule.onNodeWithText("Tap · hold", ignoreCase = true).assertIsDisplayed()
             composeRule.onNodeWithText("Sign in to get started.").assertIsDisplayed()
+            composeRule.onNodeWithText("Have your resume or work details and the full job description ready.").assertIsDisplayed()
             composeRule.onNodeWithText("Continue with Google").assertIsDisplayed()
         }
     }

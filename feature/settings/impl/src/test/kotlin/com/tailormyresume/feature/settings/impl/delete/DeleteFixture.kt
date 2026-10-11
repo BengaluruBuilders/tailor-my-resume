@@ -13,6 +13,7 @@ import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.data.sampleApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
+import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
@@ -67,14 +68,14 @@ internal class DeleteFixture(
 
     suspend fun remainingApplications(): Int = applicationRepository.observeApplications().first().size
 
-    fun useCase(): DeleteAccountUseCase = DeleteAccountUseCase(
+    fun useCase(creditBalance: AccountCreditBalance = testAccountCreditBalance(payment)): DeleteAccountUseCase = DeleteAccountUseCase(
         applicationRepository = applicationRepository,
         profileRepository = TestProfileRepository(),
         exportHistoryRepository = TestExportHistoryRepository(),
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
         serverAccountDeleter = deleter,
-        creditBalance = AccountCreditBalance(payment),
+        creditBalance = creditBalance,
         latency = NoMockLatency,
         creditsRepository = TestCreditsRepository(),
         resumeSettingsRepository = TestResumeSettingsRepository(),
@@ -83,5 +84,5 @@ internal class DeleteFixture(
         finishPendingWipe = FinishPendingAccountWipeUseCase(pendingWipe, finisher, deleter),
     )
 
-    fun viewModel(): DeleteAccountViewModel = DeleteAccountViewModel(useCase())
+    fun viewModel(creditBalance: AccountCreditBalance = testAccountCreditBalance(payment)): DeleteAccountViewModel = DeleteAccountViewModel(useCase(creditBalance))
 }

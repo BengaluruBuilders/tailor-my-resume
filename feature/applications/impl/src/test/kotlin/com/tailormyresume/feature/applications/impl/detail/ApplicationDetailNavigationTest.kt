@@ -51,7 +51,7 @@ class ApplicationDetailNavigationTest {
         if (credits > 0) creditsRepository.sendLedger(listOf(grant(credits)))
         val viewModel = ApplicationDetailViewModel(
             applicationRepository = applicationRepository,
-            creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(credits)),
+            creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(0), creditsRepository),
             setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, TestClock()),
             exportedPdfIntents = FakeExportedPdfIntents(),
             applicationId = "kb",

@@ -45,19 +45,20 @@ class ReviewViewModelTest {
     private suspend fun saved() = checkNotNull(store.observeProfile().first())
 
     @Test
-    fun fixedProfileShowsDoneBannerEnabledCtaAnd96And100WithLinkedin() = runTest {
+    fun fixedProfileCanContinueAndLinkedinRemainsInTheProfile() = runTest {
         store.sendProfile(fixedReviewProfile())
         val viewModel = viewModel()
 
         val fixed = viewModel.ready()
         assertThat(fixed.gap).isNull()
         assertThat(fixed.canContinue).isTrue()
-        assertThat(fixed.percent).isEqualTo(96)
 
         viewModel.uiState.test {
             skipItems(1)
             store.sendProfile(fixedReviewProfile().copy(linkedinUrl = SAMPLE_LINKEDIN))
-            assertThat((awaitItem() as ReviewUiState.Ready).percent).isEqualTo(100)
+            val updated = awaitItem() as ReviewUiState.Ready
+            assertThat(updated.canContinue).isTrue()
+            assertThat(updated.profile?.linkedinUrl).isEqualTo(SAMPLE_LINKEDIN)
         }
     }
 
@@ -69,13 +70,13 @@ class ReviewViewModelTest {
         viewModel.uiState.test {
             val first = expectMostRecentItem() as ReviewUiState.Ready
             assertThat(first.gap).isNotNull()
-            assertThat(first.percent).isEqualTo(90)
+            assertThat(first.canContinue).isFalse()
 
             store.sendProfile(fixedReviewProfile())
 
             val second = awaitItem() as ReviewUiState.Ready
             assertThat(second.gap).isNull()
-            assertThat(second.percent).isEqualTo(96)
+            assertThat(second.canContinue).isTrue()
         }
     }
 

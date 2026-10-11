@@ -7,6 +7,7 @@ import com.tailormyresume.core.network.TailorMyResumeApiConfig
 import com.tailormyresume.core.network.tailormyresumeApi
 import com.tailormyresume.core.network.tailormyresumeJson
 import com.tailormyresume.core.network.tailormyresumeOkHttpClient
+import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -61,7 +62,7 @@ class RemotePaymentGatewayTest {
         val entitlement = gateway().observeEntitlement().first()
 
         assertThat(entitlement.hasKnownBalance).isFalse()
-        assertThat(com.tailormyresume.core.domain.account.AccountCreditBalance(gateway()).cachedCredits()).isNull()
+        assertThat(testAccountCreditBalance(gateway()).cachedCredits()).isNull()
     }
 
     @Test

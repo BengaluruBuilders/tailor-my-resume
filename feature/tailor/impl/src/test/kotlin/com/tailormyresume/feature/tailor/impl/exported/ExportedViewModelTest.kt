@@ -3,6 +3,7 @@ package com.tailormyresume.feature.tailor.impl.exported
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
@@ -95,7 +96,7 @@ class ExportedViewModelTest {
 
     private fun viewModel(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        creditBalance: AccountCreditBalance = AccountCreditBalance(paymentGateway),
+        creditBalance: AccountCreditBalance = AccountCreditBalance(paymentGateway, creditsRepository),
     ) = ExportedViewModel(
         applicationRepository = applicationRepository,
         creditsRepository = creditsRepository,
@@ -184,15 +185,15 @@ class ExportedViewModelTest {
     }
 
     @Test
-    fun walletBalanceUpdatesWhileLedgerHistoryStaysStale() = runTest {
+    fun ledgerBalanceUpdatesWhileWalletStaysStale() = runTest {
         paymentGateway.withFreeCredits(3)
-        creditsRepository.sendLedger(listOf(entry(CreditLedgerKind.FREE_GRANT, 99)))
+        creditsRepository.sendLedger(listOf(entry(CreditLedgerKind.FREE_GRANT, 3)))
         seed()
         val viewModel = viewModel()
         backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
 
         assertThat(viewModel.ready().creditsLeft).isEqualTo(3)
-        paymentGateway.unlock("another-application")
+        creditsRepository.record(entry(CreditLedgerKind.SPEND, -1, applicationId = "another-application"))
         assertThat(viewModel.ready().creditsLeft).isEqualTo(2)
     }
 
@@ -203,7 +204,10 @@ class ExportedViewModelTest {
             override fun observeEntitlement() = flowOf(unknown)
         }
         seed()
-        val viewModel = viewModel(creditBalance = AccountCreditBalance(gateway))
+        val unknownCredits = object : CreditsRepository by creditsRepository {
+            override fun observeKnownBalance() = flowOf<Int?>(null)
+        }
+        val viewModel = viewModel(creditBalance = AccountCreditBalance(gateway, unknownCredits))
         backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
 
         assertThat(viewModel.ready().creditsLeft).isNull()
