@@ -3,7 +3,6 @@ package com.tailormyresume.feature.settings.impl.credits
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
@@ -21,7 +20,6 @@ class CreditsViewModelTest {
     @get:Rule
     val mainDispatcher = MainDispatcherRule()
 
-    private val rupee = "₹"
     private val applications = TestApplicationRepository()
     private val ledger = TestCreditsRepository()
 
@@ -41,7 +39,7 @@ class CreditsViewModelTest {
     @Test
     fun returningLedgerJoinsApplicationsNewestFirst() = runTest {
         seedReturning()
-        val viewModel = CreditsViewModel(ledger, applications, TestPaymentGateway())
+        val viewModel = CreditsViewModel(ledger, applications)
         collect(viewModel)
 
         val content = viewModel.content()
@@ -54,13 +52,13 @@ class CreditsViewModelTest {
             HistoryTitle.Tailored("Data Analyst"),
             HistoryTitle.FreeFirstResume,
         ).inOrder()
-        assertThat(content.history[2].detail).isEqualTo(HistoryDetail.Text("${rupee}199"))
+        assertThat(content.history[2].detail).isEqualTo(HistoryDetail.None)
     }
 
     @Test
     fun goneApplicationGetsGenericLabel() = runTest {
         ledger.sendLedger(returningScenario.ledger)
-        val viewModel = CreditsViewModel(ledger, applications, TestPaymentGateway())
+        val viewModel = CreditsViewModel(ledger, applications)
         collect(viewModel)
 
         val spends = viewModel.content().history.filter { it.amount < 0 }
@@ -75,7 +73,7 @@ class CreditsViewModelTest {
     @Test
     fun deletingAnApplicationRelabelsItsSpend() = runTest {
         seedReturning()
-        val viewModel = CreditsViewModel(ledger, applications, TestPaymentGateway())
+        val viewModel = CreditsViewModel(ledger, applications)
         collect(viewModel)
 
         applications.sendApplications(returningScenario.applications.filterNot { it.id == "nw" })
@@ -86,7 +84,7 @@ class CreditsViewModelTest {
     @Test
     fun balanceIsRefreshedOnEntry() = runTest {
         val credits = RecordingCreditsRepository()
-        val viewModel = CreditsViewModel(credits, applications, TestPaymentGateway())
+        val viewModel = CreditsViewModel(credits, applications)
         collect(viewModel)
 
         assertThat(credits.calls).containsExactly("refresh")
@@ -99,7 +97,7 @@ class CreditsViewModelTest {
         }
         ledger.sendLedger(entries)
         applications.sendApplications(returningScenario.applications)
-        val viewModel = CreditsViewModel(ledger, applications, TestPaymentGateway())
+        val viewModel = CreditsViewModel(ledger, applications)
         val seen = collect(viewModel)
         val settled = seen.size
 

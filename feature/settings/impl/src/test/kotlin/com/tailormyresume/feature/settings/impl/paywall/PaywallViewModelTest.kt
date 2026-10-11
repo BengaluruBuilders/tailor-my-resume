@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -204,16 +205,59 @@ class PaywallViewModelTest {
     @Test
     fun restoreThatAddsCreditsToastsAddedAndRefreshes() = runTest {
         val credits = RemoteStyleCreditsRepository(initialBalance = 1)
-        val viewModel = viewModel(credits = credits)
+        val viewModel = viewModel(CountingPaymentGateway(onRestore = { credits.serverBalance = 4 }), credits)
         keepSubscribed(viewModel.uiState)
         val events = collectEvents(viewModel)
-        credits.serverBalance = 4
 
         viewModel.onRestore()
 
         assertThat(events).containsExactly(PaywallEvent.Added(3))
-        assertThat(credits.refreshCalls).isEqualTo(2)
+        assertThat(credits.refreshCalls).isEqualTo(3)
         assertThat(viewModel.uiState.value.credits).isEqualTo(4)
+    }
+
+    @Test
+    fun restoreWithBalanceNotYetLoadedDoesNotClaimTheServerBalanceWasRestored() = runTest {
+        val credits = RemoteStyleCreditsRepository(initialBalance = 0, serverBalance = 3, failingRefreshes = setOf(1))
+        val viewModel = viewModel(credits = credits)
+        keepSubscribed(viewModel.uiState)
+        val events = collectEvents(viewModel)
+        advanceUntilIdle()
+        assertThat(viewModel.uiState.value.credits).isEqualTo(0)
+
+        viewModel.onRestore()
+
+        assertThat(events).containsExactly(PaywallEvent.NothingToRestore)
+        assertThat(viewModel.uiState.value.credits).isEqualTo(3)
+    }
+
+    @Test
+    fun restoreWhoseBalanceCannotBeReadBeforehandReportsFailure() = runTest {
+        val credits = RemoteStyleCreditsRepository(initialBalance = 0, serverBalance = 3, failingRefreshes = setOf(1, 2))
+        val gateway = CountingPaymentGateway()
+        val viewModel = viewModel(gateway, credits)
+        keepSubscribed(viewModel.uiState)
+        val events = collectEvents(viewModel)
+        advanceUntilIdle()
+
+        viewModel.onRestore()
+
+        assertThat(events).containsExactly(PaywallEvent.RestoreFailed)
+        assertThat(gateway.restoreCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun restoreWhoseRefreshFailsReportsFailureNotNoneFound() = runTest {
+        val credits = RemoteStyleCreditsRepository(initialBalance = 1, failingRefreshes = setOf(3))
+        val viewModel = viewModel(CountingPaymentGateway(onRestore = { credits.serverBalance = 4 }), credits)
+        keepSubscribed(viewModel.uiState)
+        val events = collectEvents(viewModel)
+        advanceUntilIdle()
+
+        viewModel.onRestore()
+
+        assertThat(events).containsExactly(PaywallEvent.RestoreFailed)
+        assertThat(viewModel.uiState.value.busy).isFalse()
     }
 
     @Test

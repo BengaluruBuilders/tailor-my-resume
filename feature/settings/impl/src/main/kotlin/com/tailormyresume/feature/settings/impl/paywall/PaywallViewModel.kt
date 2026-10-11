@@ -83,10 +83,7 @@ internal class PaywallViewModel @Inject constructor(
         if (!busy.compareAndSet(expect = false, update = true)) return
         viewModelScope.launch {
             try {
-                val before = creditsRepository.observeBalance().first()
-                paymentGateway.restorePurchases()
-                creditsRepository.refresh()
-                val added = creditsRepository.observeBalance().first() - before
+                val added = restoredCredits()
                 eventChannel.send(if (added > 0) PaywallEvent.Added(added) else PaywallEvent.NothingToRestore)
             } catch (cancellation: CancellationException) {
                 throw cancellation
@@ -96,6 +93,14 @@ internal class PaywallViewModel @Inject constructor(
                 busy.value = false
             }
         }
+    }
+
+    private suspend fun restoredCredits(): Int {
+        check(creditsRepository.refreshConfirmed()) { "balance before restore unavailable" }
+        val before = creditsRepository.observeBalance().first()
+        paymentGateway.restorePurchases()
+        check(creditsRepository.refreshConfirmed()) { "balance after restore unavailable" }
+        return creditsRepository.observeBalance().first() - before
     }
 
     private suspend fun loadPacks() {

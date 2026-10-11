@@ -56,7 +56,11 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
     }
 
     override suspend fun refresh() {
-        if (!remote.ownsLedger) return
+        refreshConfirmed()
+    }
+
+    override suspend fun refreshConfirmed(): Boolean {
+        if (!remote.ownsLedger) return true
         val (started, owner) = synchronized(lock) {
             val current = remote.owner()
             held.update { it?.takeIf { held -> held.owner == current } }
@@ -68,13 +72,14 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
             refreshCancelled = true
             throw cancellation
         } catch (failure: Exception) {
-            return
+            return false
         }
-        synchronized(lock) {
+        return synchronized(lock) {
             if (started == generation && owner == remote.owner()) {
                 held.value = Held(owner, snapshot)
                 refreshCancelled = false
             }
+            held.value?.owner == owner
         }
     }
 

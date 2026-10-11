@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_settings_impl_credits_title">Credits</string>
-    <string name="feature_settings_impl_credits_caption">credits left. They never expire.</string>
+    <plurals name="feature_settings_impl_credits_caption">
+        <item quantity="one">credit left. It never expires.</item>
+        <item quantity="other">credits left. They never expire.</item>
+    </plurals>
     <string name="feature_settings_impl_credits_buy_more">Buy more</string>
     <string name="feature_settings_impl_credits_history">History</string>
     <string name="feature_settings_impl_credits_receipts">Receipts go to your Google email</string>

@@ -47,7 +47,7 @@ class CreditsScreenshotTests {
             "Free first resume",
             "Welcome · 2 Oct",
             "Bought 5 credits",
-            "₹199 · 5 Oct",
+            "5 Oct",
             "Associate Analyst",
             "Northwind GCC · 8 Oct",
             "+5",
@@ -81,5 +81,15 @@ class CreditsScreenshotTests {
         }
 
         rule.assertTexts("0", "Buy more", "Receipts go to your Google email")
+    }
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+    fun singleCreditCaptionIsSingular() {
+        rule.setTmrContent(TmrTestDevices.prototype) {
+            CreditsScreen(CreditsUiState.Content(credits = 1, history = emptyList()), onBuyMore = {})
+        }
+
+        rule.assertTexts("1", "credit left. It never expires.")
     }
 }

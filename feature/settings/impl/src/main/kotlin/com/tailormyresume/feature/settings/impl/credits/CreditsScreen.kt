@@ -90,7 +90,7 @@ private fun BalanceCard(credits: Int, onBuyMore: () -> Unit, modifier: Modifier 
         ) {
             Text(text = credits.toString(), style = TmrTheme.typography.displayLarge, color = colors.lime)
             Text(
-                text = stringResource(R.string.feature_settings_impl_credits_caption),
+                text = pluralStringResource(R.plurals.feature_settings_impl_credits_caption, credits),
                 style = TmrTheme.typography.body,
                 color = colors.textSecondary,
             )

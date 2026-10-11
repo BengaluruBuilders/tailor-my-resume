@@ -20,6 +20,7 @@ internal class CountingPaymentGateway(
     var restoreGate: CompletableDeferred<Unit>? = null,
     var packsFailures: Int = 0,
     var restoreFailure: Exception? = null,
+    var onRestore: () -> Unit = {},
 ) : PaymentGateway by scripted {
     var packsCalls = 0
     var purchaseCalls = 0
@@ -43,6 +44,7 @@ internal class CountingPaymentGateway(
         restoreCalls += 1
         restoreGate?.await()
         restoreFailure?.let { throw it }
+        onRestore()
         return scripted.restorePurchases()
     }
 }
@@ -69,6 +71,7 @@ internal class RemoteStyleCreditsRepository(
     initialBalance: Int,
     var serverBalance: Int = initialBalance,
     var refreshGate: CompletableDeferred<Unit>? = null,
+    var failingRefreshes: Set<Int> = emptySet(),
 ) : CreditsRepository {
     private val balance = MutableStateFlow(initialBalance)
     var recordCalls = 0
@@ -83,9 +86,15 @@ internal class RemoteStyleCreditsRepository(
     }
 
     override suspend fun refresh() {
+        refreshConfirmed()
+    }
+
+    override suspend fun refreshConfirmed(): Boolean {
         refreshCalls += 1
         refreshGate?.await()
+        if (refreshCalls in failingRefreshes) return false
         balance.value = serverBalance
+        return true
     }
 
     override suspend fun clear() = Unit
