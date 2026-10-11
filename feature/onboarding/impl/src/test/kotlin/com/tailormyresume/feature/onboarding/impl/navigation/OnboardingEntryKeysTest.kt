@@ -50,7 +50,6 @@ class OnboardingEntryKeysTest {
 
     private val keys: List<NavKey> =
         listOf(
-            SignInNavKey(),
             UploadNavKey(),
             UploadErrorNavKey(),
             PasteResumeNavKey(),
