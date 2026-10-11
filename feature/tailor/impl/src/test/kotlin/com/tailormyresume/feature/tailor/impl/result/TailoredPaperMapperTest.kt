@@ -259,9 +259,11 @@ class TailoredPaperMapperTest {
 
     @Test
     fun restoredProfileSummaryIsNotHighlightedButAcceptedTailoredSummaryIs() {
-        fun summaryHighlight(decision: BulletDecision) = document(bullets = emptyList(), summary = "Mine")
-            .toPaperBlocks(TailoredResume(bullets = emptyList(), summary = TailoredText("New", "Old", decision = decision)))
-            [1].lines[0][0].highlight
+        fun summaryHighlight(decision: BulletDecision): TmrPaperHighlight {
+            val blocks = document(bullets = emptyList(), summary = "Mine")
+                .toPaperBlocks(TailoredResume(bullets = emptyList(), summary = TailoredText("New", "Old", decision = decision)))
+            return blocks[1].lines[0][0].highlight
+        }
 
         assertThat(summaryHighlight(BulletDecision.REJECTED)).isEqualTo(TmrPaperHighlight.None)
         assertThat(summaryHighlight(BulletDecision.PENDING)).isEqualTo(TmrPaperHighlight.None)

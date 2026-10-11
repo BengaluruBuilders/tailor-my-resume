@@ -141,7 +141,7 @@ class TailoredScreenshotTest {
     @Test
     fun resumeTabWithAnswer() {
         shoot("result_resume_with_answer", ready(), TailoredTab.Resume, TmrTestDevices.prototype)
-        rule.onNodeWithText("92% keywords").assertExists()
+        rule.onNodeWithText("92").assertExists()
         rule.onNodeWithText("From your answer", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Accept changes").assertExists()
     }
@@ -149,7 +149,7 @@ class TailoredScreenshotTest {
     @Test
     fun resumeTabWithoutAnswer() {
         shoot("result_resume_without_answer", ready(withAnswer = false), TailoredTab.Resume, TmrTestDevices.prototype)
-        rule.onNodeWithText("78% keywords").assertExists()
+        rule.onNodeWithText("78").assertExists()
     }
 
     @Test

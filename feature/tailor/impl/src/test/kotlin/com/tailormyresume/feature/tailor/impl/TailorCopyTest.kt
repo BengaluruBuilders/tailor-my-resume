@@ -12,8 +12,8 @@ class TailorCopyTest {
         .orEmpty()
 
     private val stringValues = stringFiles.flatMap { file ->
-        Regex("""<string [^>]*>(.*?)</string>""", RegexOption.DOT_MATCHES_ALL).findAll(file.readText())
-            .map { it.groupValues[1] }
+        Regex("""<(string|item) [^>]*>(.*?)</\1>""", RegexOption.DOT_MATCHES_ALL).findAll(file.readText())
+            .map { it.groupValues[2] }
             .toList()
     }
 
