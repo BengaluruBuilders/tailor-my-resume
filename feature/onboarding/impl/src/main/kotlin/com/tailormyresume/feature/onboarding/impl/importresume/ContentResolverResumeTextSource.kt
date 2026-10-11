@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.util.zip.Inflater
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
 
@@ -35,11 +34,15 @@ class ContentResolverResumeTextSource @Inject constructor(
         if (bytes.isEmpty()) {
             return@withContext ResumeRead.Empty(measured.byteSize)
         }
-        val text = when {
-            isZipContainer(bytes) -> textFromZip(bytes)
-            isPdfContainer(bytes) -> textFromPdf(bytes)
-            else -> textFromPlainBytes(bytes)
-        } ?: return@withContext ResumeRead.NoTextLayer(measured.displayName)
+        if (isPdfContainer(bytes)) {
+            return@withContext when (val pdf = extractPdfText(bytes)) {
+                is PdfText.Found -> ResumeRead.Text(pdf.text)
+                PdfText.ImageOnly -> ResumeRead.NoTextLayer(measured.displayName)
+                PdfText.Corrupt -> ResumeRead.Unreadable(measured.displayName)
+            }
+        }
+        val text = (if (isZipContainer(bytes)) textFromZip(bytes) else textFromPlainBytes(bytes))
+            ?: return@withContext ResumeRead.NoTextLayer(measured.displayName)
         ResumeRead.Text(text)
     }
 
@@ -93,18 +96,13 @@ class ContentResolverResumeTextSource @Inject constructor(
 }
 
 private const val DEFAULT_CHUNK_BYTES = 8 * 1024
-private const val PDF_STREAM_MARKER = "stream"
-private const val PDF_END_STREAM_MARKER = "endstream"
 private const val PDF_HEADER = "%PDF-"
 private const val ZIP_MAGIC_FIRST = 0x50
 private const val ZIP_MAGIC_SECOND = 0x4B
 private const val ZIP_ENTRY_MARKER = "word/document.xml"
 private val XML_TAG = Regex("<[^>]*>")
 private const val XML_PARAGRAPH_END = "</w:p>"
-private val PDF_LITERAL = Regex("\\((?:\\\\.|[^\\\\()])*\\)")
-private val PDF_HEX = Regex("<([0-9A-Fa-f\\s]+)>")
 private val WORD = Regex("[A-Za-z][A-Za-z'\\-]+")
-private const val TEXT_CHARACTERS = " .,;:()'&/\\-–—%+#@"
 private const val PRINTABLE_MIN_RATIO = 0.9
 private const val MIN_TEXT_CHARACTERS = 24
 private const val MIN_TEXT_WORDS = 5
@@ -140,79 +138,6 @@ private fun textFromZip(bytes: ByteArray): String? {
 
 private fun stripXml(xml: String): String =
     xml.replace(XML_PARAGRAPH_END, "\n").replace(XML_TAG, "").replace("&amp;", "&")
-
-private fun textFromPdf(bytes: ByteArray): String? {
-    val tokens = pdfStreams(bytes)
-        .asSequence()
-        .mapNotNull(::inflateOrNull)
-        .map(::pdfTokens)
-        .joinToString(separator = " ")
-    return tokens.takeIf(::looksLikeText)
-}
-
-private fun pdfStreams(bytes: ByteArray): List<String> {
-    val raw = String(bytes, Charsets.ISO_8859_1)
-    val streams = mutableListOf<String>()
-    var cursor = raw.indexOf(PDF_STREAM_MARKER)
-    while (cursor >= 0) {
-        val bodyStart = raw.indexOf('\n', cursor)
-        if (bodyStart < 0) break
-        val bodyEnd = raw.indexOf(PDF_END_STREAM_MARKER, bodyStart)
-        if (bodyEnd < 0) break
-        streams += raw.substring(bodyStart + 1, bodyEnd)
-        cursor = raw.indexOf(PDF_STREAM_MARKER, bodyEnd)
-    }
-    return streams
-}
-
-private fun inflateOrNull(fragment: String): String? {
-    val data = fragment.trim('\r', '\n', ' ').toByteArray(Charsets.ISO_8859_1)
-    return listOf(false, true).firstNotNullOfOrNull { nowrap ->
-        val inflater = Inflater(nowrap)
-        val output = ByteArrayOutputStream()
-        val chunk = ByteArray(4 * 1024)
-        val result = runCatching {
-            inflater.setInput(data)
-            while (!inflater.finished()) {
-                val produced = inflater.inflate(chunk)
-                if (produced == 0) break
-                output.write(chunk, 0, produced)
-            }
-            output.toByteArray().toString(Charsets.ISO_8859_1)
-        }.getOrNull()
-        inflater.end()
-        result?.takeIf { it.isNotBlank() }
-    }
-}
-
-private fun pdfTokens(inflated: String): String {
-    val literals = PDF_LITERAL.findAll(inflated)
-        .map { it.value.removePrefix("(").removeSuffix(")").unescapePdf() }
-    val hex = PDF_HEX.findAll(inflated).map { it.decodeHex() }
-    return (literals + hex)
-        .filter { token -> token.isNotEmpty() && token.all { character -> character.isReadable() } }
-        .joinToString(separator = " ")
-}
-
-private fun String.unescapePdf(): String =
-    replace("\\(", "(").replace("\\)", ")").replace("\\\\", "\\")
-
-private fun Char.isReadable(): Boolean = isLetterOrDigit() || this in TEXT_CHARACTERS
-
-private fun MatchResult.decodeHex(): String {
-    val digits = groupValues[1].filter { character ->
-        character.isDigit() || character in 'a'..'f' || character in 'A'..'F'
-    }
-    if (digits.isEmpty() || digits.length % 2 != 0) return ""
-    val decoded = StringBuilder()
-    var index = 0
-    while (index < digits.length) {
-        val code = digits.substring(index, index + 2).toIntOrNull(16) ?: return ""
-        decoded.append(code.toChar())
-        index += 2
-    }
-    return decoded.toString()
-}
 
 private fun textFromPlainBytes(bytes: ByteArray): String? =
     String(bytes, Charsets.UTF_8).takeIf(::looksLikeText)
