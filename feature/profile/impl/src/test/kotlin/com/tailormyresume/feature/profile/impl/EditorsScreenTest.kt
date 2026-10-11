@@ -100,6 +100,16 @@ class EditorsScreenTest {
     }
 
     @Test
+    fun resumeEmailIsLabelledFromTheResume() {
+        rule.setTmrContent(TmrTestDevices.prototype) {
+            EditContactScreen(state = contactState().copy(emailFromGoogle = false), actions = EditContactActions())
+        }
+
+        rule.assertTexts("Email · from your resume")
+        rule.onNodeWithText("Email · from Google").assertDoesNotExist()
+    }
+
+    @Test
     fun contactFieldsReportTypedText() {
         val names = mutableListOf<String>()
         var linkedin = ""

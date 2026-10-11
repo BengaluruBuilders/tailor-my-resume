@@ -49,4 +49,11 @@ class DebugPreviewNavigationRootTest {
     fun aPreviewOpenedSignedOutKeepsTheMainRoot() {
         assertThat(root(seenAccount = false, hasAccount = false)).isEqualTo(PreviewRoot.Main)
     }
+
+    @Test
+    fun aSignInAfterDeleteAccountReRootsToTheUploadStart() {
+        val shown = root(seenMain = true, rootState = AppRootState.Ready(StartDestination.Upload, "account-2"), seenAccount = true, hasAccount = true)
+
+        assertThat(shown).isEqualTo(PreviewRoot.SignedInFirstRun)
+    }
 }

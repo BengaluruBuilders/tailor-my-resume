@@ -5,6 +5,7 @@
     <string name="feature_profile_impl_contact_phone">Phone</string>
     <string name="feature_profile_impl_contact_city">City</string>
     <string name="feature_profile_impl_contact_email">Email · from Google</string>
+    <string name="feature_profile_impl_contact_email_resume">Email · from your resume</string>
     <string name="feature_profile_impl_contact_linkedin">LinkedIn · optional</string>
     <string name="feature_profile_impl_contact_linkedin_hint">linkedin.com/in/your-name</string>
     <string name="feature_profile_impl_contact_portfolio">Portfolio · optional</string>

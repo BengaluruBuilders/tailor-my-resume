@@ -3,6 +3,7 @@ package com.tailormyresume.feature.profile.impl.contact
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ProfileRepository
+import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.ProfileLimits
 import com.tailormyresume.feature.profile.impl.guidedform.ContactFieldValidator
@@ -36,6 +37,7 @@ internal sealed interface EditContactUiState {
         val draft: EditContactDraft,
         val email: String,
         val canSave: Boolean,
+        val emailFromGoogle: Boolean = true,
     ) : EditContactUiState
 }
 
@@ -44,6 +46,7 @@ internal enum class EditContactEvent { Saved }
 @HiltViewModel
 internal class EditContactViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
+    sessionRepository: SessionRepository,
 ) : ViewModel() {
 
     private val draft = MutableStateFlow<EditContactDraft?>(null)
@@ -59,11 +62,17 @@ internal class EditContactViewModel @Inject constructor(
     val uiState: StateFlow<EditContactUiState> = combine(
         profileRepository.observeProfile(),
         draft,
-    ) { profile, contactDraft ->
+        sessionRepository.observeAccount(),
+    ) { profile, contactDraft, account ->
         if (profile == null || contactDraft == null) {
             EditContactUiState.Loading
         } else {
-            EditContactUiState.Editing(contactDraft, profile.email, contactDraft.isValid())
+            EditContactUiState.Editing(
+                draft = contactDraft,
+                email = profile.email,
+                canSave = contactDraft.isValid(),
+                emailFromGoogle = account != null && profile.email.equals(account.email, ignoreCase = true),
+            )
         }
     }.stateIn(
         scope = viewModelScope,

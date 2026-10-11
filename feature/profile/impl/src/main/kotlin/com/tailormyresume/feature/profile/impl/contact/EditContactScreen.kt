@@ -92,7 +92,7 @@ private fun EditContactForm(
             onValueChange = actions.onCityChange,
             modifier = Modifier.fillMaxWidth(),
         )
-        ReadOnlyEmail(email = state.email)
+        ReadOnlyEmail(email = state.email, fromGoogle = state.emailFromGoogle)
         TmrTextField(
             label = stringResource(R.string.feature_profile_impl_contact_linkedin),
             value = draft.linkedin,
@@ -112,10 +112,12 @@ private fun EditContactForm(
 }
 
 @Composable
-private fun ReadOnlyEmail(email: String, modifier: Modifier = Modifier) {
+private fun ReadOnlyEmail(email: String, fromGoogle: Boolean, modifier: Modifier = Modifier) {
     val colors = TmrTheme.colors
     TmrLabeledField(
-        label = stringResource(R.string.feature_profile_impl_contact_email),
+        label = stringResource(
+            if (fromGoogle) R.string.feature_profile_impl_contact_email else R.string.feature_profile_impl_contact_email_resume,
+        ),
         modifier = modifier.fillMaxWidth(),
     ) {
         Box(
