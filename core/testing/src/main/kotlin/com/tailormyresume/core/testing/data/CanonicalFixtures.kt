@@ -594,7 +594,6 @@ val canonicalApplication = JobApplication(
     id = "application-northwind-1",
     job = canonicalJobDescription,
     status = ApplicationStatus.SAVED,
-    notes = "",
     gapAnalysis = canonicalGapAnalysis,
     tailoredResume = canonicalTailoredResume,
     createdAt = Instant.fromEpochSeconds(1_773_158_400),

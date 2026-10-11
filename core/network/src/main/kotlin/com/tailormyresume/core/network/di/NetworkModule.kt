@@ -1,6 +1,5 @@
 package com.tailormyresume.core.network.di
 
-import com.tailormyresume.core.network.ConsentRequiredListener
 import com.tailormyresume.core.network.IdTokenProvider
 import com.tailormyresume.core.network.SessionExpiredListener
 import com.tailormyresume.core.network.TailorMyResumeApi
@@ -28,8 +27,7 @@ object NetworkModule {
     fun okHttpClient(
         tokens: IdTokenProvider,
         sessionListener: SessionExpiredListener,
-        consentListener: ConsentRequiredListener,
-    ): OkHttpClient = tailormyresumeOkHttpClient(tokens, sessionListener, consentListener)
+    ): OkHttpClient = tailormyresumeOkHttpClient(tokens, sessionListener)
 
     @Provides
     @Singleton

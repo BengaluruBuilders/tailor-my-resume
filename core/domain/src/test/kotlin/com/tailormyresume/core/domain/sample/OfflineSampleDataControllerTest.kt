@@ -3,6 +3,8 @@ package com.tailormyresume.core.domain.sample
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.domain.AnalyzeJobUseCase
+import com.tailormyresume.core.domain.ExportCheck
+import com.tailormyresume.core.domain.ExportReadiness
 import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.offline.OfflineFabricationGuard
 import com.tailormyresume.core.domain.offline.OfflineGapMatcher
@@ -62,7 +64,7 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
             Triple("Associate Analyst", "Northwind GCC", ApplicationStatus.APPLIED),
             Triple("Data Analyst Intern", "Paisa Ledger", ApplicationStatus.INTERVIEW),
             Triple("Graduate Engineer Trainee", "Sahyadri Motors", ApplicationStatus.SAVED),
-            Triple("Business Analyst", "Meridian GCC", ApplicationStatus.NO_RESPONSE),
+            Triple("Business Analyst", "Meridian GCC", ApplicationStatus.APPLIED),
         )
     }
 
@@ -91,6 +93,15 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
     }
 
     @Test
+    fun onlyTheFullyReviewedSampleApplicationIsAcceptedForExport() = runTest {
+        val loaded = loaded()
+
+        assertThat(ExportReadiness.check(loaded.getValue("sample-northwind-associate-analyst"))).isEqualTo(ExportCheck.ALLOWED)
+        assertThat(ExportReadiness.check(loaded.getValue("sample-sahyadri-motors-graduate-engineer-trainee")))
+            .isEqualTo(ExportCheck.NOT_ACCEPTED)
+    }
+
+    @Test
     fun theNorthwindApplicationHasTwoExportsAndOnlyTheFirstSpendsACredit() = runTest {
         controller.load()
 
@@ -108,7 +119,7 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
             ApplicationStatus.SAVED,
             ApplicationStatus.INTERVIEW,
             ApplicationStatus.APPLIED,
-            ApplicationStatus.NO_RESPONSE,
+            ApplicationStatus.APPLIED,
         ).inOrder()
     }
 

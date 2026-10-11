@@ -146,14 +146,8 @@ private class ReversedStack(override val spacing: Dp) : Arrangement.Vertical {
 
 @Preview(showBackground = true)
 @Composable
-private fun TmrBottomActionBarPreview() {
-    TmrPreviewTheme(darkTheme = false) { TmrBottomActionBarSample() }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun TmrBottomActionBarDarkPreview() {
-    TmrPreviewTheme(darkTheme = true) { TmrBottomActionBarSample() }
+    TmrPreviewTheme { TmrBottomActionBarSample() }
 }
 
 @Composable

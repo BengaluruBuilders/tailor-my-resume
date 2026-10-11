@@ -10,6 +10,9 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
+private val SIGNED_OUT = AccountRoot(null)
+private val SIGNED_IN = AccountRoot("account-1")
+
 class RootViewModelStoresTest {
 
     private val stores = RootViewModelStores()
@@ -22,7 +25,7 @@ class RootViewModelStoresTest {
         }
     }
 
-    private fun probeIn(root: NavigationRoot): Probe =
+    private fun probeIn(root: AccountRoot): Probe =
         ViewModelProvider.create(
             stores.storeOf(root),
             viewModelFactory { initializer { Probe() } },
@@ -30,38 +33,38 @@ class RootViewModelStoresTest {
 
     @Test
     fun leavingTheFirstRunRootClearsItsViewModels() {
-        val firstRunProbe = probeIn(NavigationRoot.FirstRun)
+        val firstRunProbe = probeIn(SIGNED_OUT)
 
-        stores.keepOnly(NavigationRoot.Main)
+        stores.keepOnly(SIGNED_IN)
 
         assertThat(firstRunProbe.cleared).isTrue()
     }
 
     @Test
     fun leavingTheFirstRunRootKeepsTheViewModelsOfTheMainRoot() {
-        val mainProbe = probeIn(NavigationRoot.Main)
-        probeIn(NavigationRoot.FirstRun)
+        val mainProbe = probeIn(SIGNED_IN)
+        probeIn(SIGNED_OUT)
 
-        stores.keepOnly(NavigationRoot.Main)
+        stores.keepOnly(SIGNED_IN)
 
         assertThat(mainProbe.cleared).isFalse()
-        assertThat(probeIn(NavigationRoot.Main)).isSameInstanceAs(mainProbe)
+        assertThat(probeIn(SIGNED_IN)).isSameInstanceAs(mainProbe)
     }
 
     @Test
     fun returningToTheFirstRunRootGivesNewViewModels() {
-        val before = probeIn(NavigationRoot.FirstRun)
-        stores.keepOnly(NavigationRoot.Main)
+        val before = probeIn(SIGNED_OUT)
+        stores.keepOnly(SIGNED_IN)
 
-        stores.keepOnly(NavigationRoot.FirstRun)
+        stores.keepOnly(SIGNED_OUT)
 
-        assertThat(probeIn(NavigationRoot.FirstRun)).isNotSameInstanceAs(before)
+        assertThat(probeIn(SIGNED_OUT)).isNotSameInstanceAs(before)
     }
 
     @Test
     fun rootOwnerUsesItsOwnStoreAndTheParentFactory() {
         val parent = ParentOwner()
-        val store = stores.storeOf(NavigationRoot.Main)
+        val store = stores.storeOf(SIGNED_IN)
 
         val owner = RootViewModelStoreOwner(parent, store)
 
@@ -72,8 +75,8 @@ class RootViewModelStoresTest {
 
     @Test
     fun clearingTheHolderClearsEveryRoot() {
-        val first = probeIn(NavigationRoot.FirstRun)
-        val main = probeIn(NavigationRoot.Main)
+        val first = probeIn(SIGNED_OUT)
+        val main = probeIn(SIGNED_IN)
 
         stores.releaseAll()
 

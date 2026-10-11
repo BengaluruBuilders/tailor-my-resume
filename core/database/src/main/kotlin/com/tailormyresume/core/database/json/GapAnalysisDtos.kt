@@ -19,6 +19,7 @@ data class RequirementMatchDto(
     val requirement: JobRequirementDto,
     val status: MatchStatus,
     val evidenceIds: List<String>,
+    val reason: String? = null,
 )
 
 @Serializable
@@ -28,8 +29,16 @@ data class KeywordCoverageDto(
 )
 
 @Serializable
+data class QuickQuestionDto(
+    val requirementId: String,
+    val text: String,
+    val why: String,
+)
+
+@Serializable
 data class GapAnalysisDto(
     val matches: List<RequirementMatchDto>,
     val keywordCoverage: KeywordCoverageDto,
     val generationId: String? = null,
+    val question: QuickQuestionDto? = null,
 )

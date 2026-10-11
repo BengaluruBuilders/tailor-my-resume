@@ -16,7 +16,6 @@ internal enum class ReviewPlan { ALL, PARTIAL, NONE }
 internal data class SampleApplicationPlan(
     val id: String,
     val status: ApplicationStatus,
-    val notes: String,
     val createdDaysAgo: Int,
     val updatedDaysAgo: Int,
     val jobText: String,
@@ -119,7 +118,6 @@ internal object SampleDataSet {
         SampleApplicationPlan(
             id = "sample-northwind-associate-analyst",
             status = ApplicationStatus.APPLIED,
-            notes = "Applied on the company site. Referral from a Saffron Retail colleague.",
             createdDaysAgo = 9,
             updatedDaysAgo = 3,
             review = ReviewPlan.ALL,
@@ -145,7 +143,6 @@ internal object SampleDataSet {
         SampleApplicationPlan(
             id = "sample-paisa-ledger-data-analyst-intern",
             status = ApplicationStatus.INTERVIEW,
-            notes = "First round on Thursday. Prepare one SQL example and the dashboard project.",
             createdDaysAgo = 6,
             updatedDaysAgo = 1,
             review = ReviewPlan.PARTIAL,
@@ -170,7 +167,6 @@ internal object SampleDataSet {
         SampleApplicationPlan(
             id = "sample-sahyadri-motors-graduate-engineer-trainee",
             status = ApplicationStatus.SAVED,
-            notes = "",
             createdDaysAgo = 0,
             updatedDaysAgo = 0,
             review = ReviewPlan.NONE,
@@ -193,8 +189,7 @@ internal object SampleDataSet {
         ),
         SampleApplicationPlan(
             id = "sample-meridian-business-analyst",
-            status = ApplicationStatus.NO_RESPONSE,
-            notes = "No reply after the application. Follow up if there is no news by the end of the month.",
+            status = ApplicationStatus.APPLIED,
             createdDaysAgo = 24,
             updatedDaysAgo = 14,
             review = ReviewPlan.NONE,

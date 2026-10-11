@@ -6,58 +6,46 @@ import com.tailormyresume.core.navigation.Navigator
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class WelcomeNavKey(
-    val scenario: DebugScenario = DebugScenario.defaultValue,
-) : NavKey
-
-@Serializable
-data class PasteJobDescriptionNavKey(
-    val scenario: DebugScenario = DebugScenario.defaultValue,
-) : NavKey
-
-@Serializable
 data class SignInNavKey(
     val scenario: DebugScenario = DebugScenario.defaultValue,
 ) : NavKey
 
 @Serializable
-data class ConsentNavKey(
-    val scenario: DebugScenario = DebugScenario.defaultValue,
-    val readOnly: Boolean = false,
-) : NavKey
-
-@Serializable
-data class ImportResumeNavKey(
+data class UploadNavKey(
     val scenario: DebugScenario = DebugScenario.defaultValue,
 ) : NavKey
 
 @Serializable
-data class ConfirmFactsNavKey(
+data class UploadErrorNavKey(
     val scenario: DebugScenario = DebugScenario.defaultValue,
 ) : NavKey
 
-val DefaultWelcomeNavKey = WelcomeNavKey()
+@Serializable
+data class PasteResumeNavKey(
+    val scenario: DebugScenario = DebugScenario.defaultValue,
+) : NavKey
 
-fun Navigator.navigateToWelcome() {
-    navigate(DefaultWelcomeNavKey)
-}
+@Serializable
+data class ManualProfileNavKey(
+    val scenario: DebugScenario = DebugScenario.defaultValue,
+) : NavKey
 
-fun Navigator.navigateToPasteJobDescription() {
-    navigate(PasteJobDescriptionNavKey())
-}
+@Serializable
+data class ReadingNavKey(
+    val scenario: DebugScenario = DebugScenario.defaultValue,
+) : NavKey
+
+@Serializable
+data class ReviewProfileNavKey(
+    val scenario: DebugScenario = DebugScenario.defaultValue,
+) : NavKey
+
+val DefaultSignInNavKey = SignInNavKey()
 
 fun Navigator.navigateToSignIn() {
-    navigate(SignInNavKey())
+    root(DefaultSignInNavKey)
 }
 
-fun Navigator.navigateToConsent(readOnly: Boolean = false) {
-    navigate(ConsentNavKey(readOnly = readOnly))
-}
-
-fun Navigator.navigateToImportResume() {
-    navigate(ImportResumeNavKey())
-}
-
-fun Navigator.navigateToConfirmFacts() {
-    navigate(ConfirmFactsNavKey())
+fun Navigator.navigateToUpload() {
+    navigate(UploadNavKey())
 }

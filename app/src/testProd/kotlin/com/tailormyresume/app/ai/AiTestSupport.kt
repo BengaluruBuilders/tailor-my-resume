@@ -92,20 +92,6 @@ const val ANALYSIS_RESPONSE = """{"generationId":"g-analysis","job":{"title":"As
 "matches":[{"requirementId":"req-1","status":"MET","evidenceIds":["W-01-b1"]}],
 "allowance":{"analysesLeftToday":2,"day":"2026-10-07","resetsAt":"2026-10-07T18:30:00Z"}}"""
 
-const val PREP_RESPONSE = """{"generationId":"g-prep","questions":[
-{"id":"q-1","kind":"STRENGTH","requirementId":"req-1","prompt":"Tell me about cleaning data.","why":"The role needs SQL.",
-"backingFactIds":["W-01-b1","W-01-b9"],"gapAdvice":null},
-{"id":"q-2","kind":"GAP","requirementId":"req-1","prompt":"How would you learn it?","why":"Not in your record.",
-"backingFactIds":[],"gapAdvice":"Say what you are learning."},
-{"id":"q-3","kind":"CLARIFY","requirementId":"req-1","prompt":"Unknown fact","why":"x","backingFactIds":["nope"],"gapAdvice":null},
-{"id":"q-4","kind":"GAP","requirementId":"req-404","prompt":"Unknown requirement","why":"x","backingFactIds":[],"gapAdvice":"y"}]}"""
-
-const val COVER_LETTER_RESPONSE = """{"generationId":"g-letter","letter":{"greeting":"Dear Hiring Manager,","paragraphs":[
-{"role":"OPENING","text":"I am applying for the role.","sourceIds":[]},
-{"role":"EVIDENCE","text":"I cleaned weekly sales data for 40 stores in Excel.","sourceIds":["W-01-b1"]},
-{"role":"EVIDENCE","text":"It was accurate.","sourceIds":["W-01-b1"]},
-{"role":"CLOSING","text":"Thank you for reading.","sourceIds":[]}],"wordCount":30}}"""
-
 fun tailoringBody(status: String, extra: String = "") =
     """{"tailoring":{"id":"tl_1","status":"$status"$extra}}"""
 

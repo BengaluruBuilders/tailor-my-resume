@@ -3,21 +3,20 @@ package com.tailormyresume.app.navigation
 import androidx.navigation3.runtime.NavKey
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.model.DebugScenario
-import com.tailormyresume.feature.analysis.api.navigation.DefaultAnalysisNavKey
+import com.tailormyresume.feature.analysis.api.navigation.JobResultNavKey
 import com.tailormyresume.feature.applications.api.navigation.ApplicationDetailNavKey
 import com.tailormyresume.feature.applications.api.navigation.ApplicationsNavKey
 import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.DefaultWelcomeNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.DefaultSignInNavKey
 import com.tailormyresume.feature.profile.api.navigation.DefaultProfileNavKey
 import com.tailormyresume.feature.settings.api.navigation.DefaultSettingsNavKey
-import com.tailormyresume.feature.settings.api.navigation.YourDataNavKey
 import org.junit.Test
 
 class TopLevelDestinationTest {
 
     @Test
-    fun theThreeTabKeysAreTopLevel() {
-        listOf<NavKey>(DefaultApplicationsNavKey, DefaultProfileNavKey, DefaultSettingsNavKey)
+    fun theTwoTabKeysAreTopLevel() {
+        listOf<NavKey>(DefaultApplicationsNavKey, DefaultProfileNavKey)
             .forEach { key -> assertThat(key.isTopLevelDestination()).isTrue() }
     }
 
@@ -29,10 +28,10 @@ class TopLevelDestinationTest {
     @Test
     fun pushedAndFirstRunKeysAreNotTopLevel() {
         listOf<NavKey>(
-            DefaultWelcomeNavKey,
-            DefaultAnalysisNavKey,
+            DefaultSignInNavKey,
+            DefaultSettingsNavKey,
+            JobResultNavKey(applicationId = "a-1"),
             ApplicationDetailNavKey(applicationId = "a-1"),
-            YourDataNavKey(),
         ).forEach { key -> assertThat(key.isTopLevelDestination()).isFalse() }
     }
 }

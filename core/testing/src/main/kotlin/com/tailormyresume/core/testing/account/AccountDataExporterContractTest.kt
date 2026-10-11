@@ -19,7 +19,6 @@ abstract class AccountDataExporterContractTest {
     private val data = AccountData(
         generatedAt = Instant.fromEpochMilliseconds(1_790_000_000_000),
         account = SignInAccount.localAccount,
-        consent = null,
         profile = canonicalCandidateProfile,
         applications = listOf(sampleApplication),
         entitlement = PurchaseEntitlement(freeCredits = 1, purchasedCredits = 0, pendingPackIds = emptyList()),

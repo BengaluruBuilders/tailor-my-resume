@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.outlined.Person
@@ -61,6 +62,7 @@ object TmrIcons {
     val Calendar = Icons.Rounded.CalendarMonth
     val CancelCircle = Icons.Rounded.Cancel
     val Chat = Icons.Rounded.ChatBubbleOutline
+    val ChevronRight = Icons.AutoMirrored.Rounded.KeyboardArrowRight
     val Check = Icons.Rounded.Check
     val CheckCircle = Icons.Rounded.CheckCircle
     val Clock = Icons.Rounded.Schedule
@@ -74,6 +76,9 @@ object TmrIcons {
     val ExpandMore = Icons.Rounded.ExpandMore
     val Facts = Icons.Rounded.Badge
     val Flag = Icons.Rounded.Flag
+    val File = Icons.Rounded.Description
+    val Gear = Icons.Rounded.Settings
+    val GoogleG = TmrGoogleGIcon
     val Home = Icons.Rounded.Home
     val Info = Icons.Rounded.Info
     val Link = Icons.Rounded.Link
@@ -82,7 +87,9 @@ object TmrIcons {
     val Offline = Icons.Rounded.WifiOff
     val OfflineCloud = Icons.Rounded.CloudOff
     val OpenInNew = Icons.AutoMirrored.Rounded.OpenInNew
+    val Open = Icons.AutoMirrored.Rounded.OpenInNew
     val Phone = Icons.Rounded.PhoneAndroid
+    val Plus = Icons.Rounded.Add
     val Profile = Icons.Rounded.Person
     val ProfileBorder = Icons.Outlined.Person
     val Refresh = Icons.Rounded.Refresh

@@ -1,5 +1,6 @@
 package com.tailormyresume.core.data.repository
 
+import com.tailormyresume.core.data.mock.MockStateStore
 import javax.inject.Inject
 
 internal fun interface ApplicationCleanup {
@@ -7,15 +8,14 @@ internal fun interface ApplicationCleanup {
 }
 
 internal class StoredApplicationCleanup @Inject constructor(
-    private val prepPlan: PrepPlanRepository,
     private val reports: ContentReportRepository,
     private val reviewState: TailoringReviewStateRepository,
-    private val coverLetters: CoverLetterRepository,
+    private val store: MockStateStore,
 ) : ApplicationCleanup {
     override suspend fun clearFor(applicationId: String) {
-        prepPlan.clearFor(applicationId)
         reports.clearFor(applicationId)
         reviewState.clearFor(applicationId)
-        coverLetters.clearFor(applicationId)
+        store.remove("coverletter.$applicationId")
+        store.remove("prep.plan.$applicationId")
     }
 }

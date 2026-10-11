@@ -1,7 +1,6 @@
 package com.tailormyresume.app.ai
 
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.domain.ImportRemovalNotice
 import com.tailormyresume.core.domain.fact.FactIdAllocator
 import com.tailormyresume.core.model.hasTooLongBullet
 import kotlinx.coroutines.runBlocking
@@ -26,7 +25,7 @@ class RemoteLongBulletImportTest {
         val original = listOf(sentence(299), sentence(299), sentence(300)).joinToString(" ")
         backend.reply(200, response(original))
 
-        val entry = RemoteResumeTextParser(backend.api, FactIdAllocator(), ImportRemovalNotice()).parse("t").entries.single()
+        val entry = RemoteResumeTextParser(backend.api, FactIdAllocator()).parse("t").entries.single()
 
         assertThat(entry.bullets).hasSize(3)
         assertThat(entry.bullets.joinToString(" ") { it.text }).isEqualTo(original)
@@ -38,7 +37,7 @@ class RemoteLongBulletImportTest {
         val original = sentence(450)
         backend.reply(200, response(original))
 
-        val entry = RemoteResumeTextParser(backend.api, FactIdAllocator(), ImportRemovalNotice()).parse("t").entries.single()
+        val entry = RemoteResumeTextParser(backend.api, FactIdAllocator()).parse("t").entries.single()
 
         assertThat(entry.bullets.map { it.text }).containsExactly(original)
         assertThat(entry.hasTooLongBullet).isTrue()

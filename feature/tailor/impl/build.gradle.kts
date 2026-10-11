@@ -24,4 +24,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.truth)
     testImplementation(libs.turbine)
+    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
+    kspTest(libs.kotlin.metadata)
 }

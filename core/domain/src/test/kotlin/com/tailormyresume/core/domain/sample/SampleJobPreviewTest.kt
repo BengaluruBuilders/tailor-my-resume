@@ -77,13 +77,12 @@ class SampleJobPreviewTest {
     }
 
     @Test
-    fun keepingTheSampleJobWithARealFirebaseUserWritesNoSampleAccountConsentOrProfile() = runTest {
+    fun keepingTheSampleJobWithARealFirebaseUserWritesNoSampleAccountOrProfile() = runTest {
         firebaseUid = "real-uid"
 
         controller.keepSampleJobDescription()
 
         assertThat(session.observeAccount().first()).isNull()
-        assertThat(session.observeConsent().first()).isNull()
         assertThat(profiles.observeProfile().first()).isNull()
     }
 }

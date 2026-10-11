@@ -4,11 +4,13 @@ import com.tailormyresume.core.domain.AiException
 import com.tailormyresume.core.domain.AiFailure
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
+import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.TailoredResume
-import com.tailormyresume.core.model.confirmedWithinLimits
+import com.tailormyresume.core.model.TailoredSkills
+import com.tailormyresume.core.model.TailoredText
+import com.tailormyresume.core.model.sendableFacts
 import com.tailormyresume.core.network.ApiError
 import com.tailormyresume.core.network.ApiException
 import com.tailormyresume.core.network.TailorMyResumeApi
@@ -18,6 +20,7 @@ import com.tailormyresume.core.network.dto.TailoringFailureCode
 import com.tailormyresume.core.network.dto.TailoringResultDto
 import com.tailormyresume.core.network.dto.TailoringStartRequest
 import com.tailormyresume.core.network.dto.TailoringStatus
+import com.tailormyresume.core.network.mapper.toAnswerDto
 import com.tailormyresume.core.network.mapper.toDto
 import com.tailormyresume.core.network.mapper.toFactsDto
 import com.tailormyresume.core.network.mapper.toTailoredBullet
@@ -33,24 +36,28 @@ class RemoteResumeTailor @Inject constructor(
         job: JobDescription,
         gap: GapAnalysis,
         applicationId: String,
-        section: EntryCategory?,
+        answer: QuickAnswer?,
+        runId: String,
     ): TailoredResume {
         val request = TailoringStartRequest(
-            requestId = pending.idFor(applicationId, section),
+            requestId = pending.idFor(runId, applicationId),
             applicationId = applicationId,
             job = job.toDto(),
             matches = gap.matches.map { it.toDto() },
             profile = profile.toFactsDto(),
-            section = section,
+            answer = answer?.toAnswerDto(job),
         )
         try {
             val finished = awaitFinished(start(request))
-            pending.clear(applicationId, section)
             val result = finished.result?.takeIf { finished.status == TailoringStatus.SUCCEEDED }
-                ?: throw AiException(finished.failureCode.toAiFailure())
+                ?: run {
+                    pending.clear(runId, applicationId)
+                    throw AiException(finished.failureCode.toAiFailure())
+                }
+            pending.settle(applicationId)
             return result.toTailoredResume(profile)
         } catch (failure: AiException) {
-            if (failure.failure !in RESUMABLE) pending.clear(applicationId, section)
+            if (failure.failure !in RESUMABLE) pending.clear(runId, applicationId)
             throw failure
         }
     }
@@ -89,12 +96,16 @@ class RemoteResumeTailor @Inject constructor(
     }
 
     private fun TailoringResultDto.toTailoredResume(profile: CandidateProfile): TailoredResume {
-        val sourceText = profile.confirmedWithinLimits().entries.flatMap { it.bullets }.associate { it.id to it.text }
+        val sourceText = profile.sendableFacts().entries.flatMap { it.bullets }.associate { it.id to it.text }
         return TailoredResume(
             bullets = bullets.map { bullet ->
                 bullet.toTailoredBullet(bullet.sourceIds.firstNotNullOfOrNull(sourceText::get).orEmpty())
                     .copy(generationId = generationId)
             },
+            summary = summary?.takeIf { it.text.isNotBlank() }
+                ?.let { TailoredText(text = it.text, original = profile.summary, sourceIds = it.sourceIds) },
+            skills = skills?.takeIf { it.ordered.isNotEmpty() }
+                ?.let { TailoredSkills(skills = (it.ordered + it.added).distinct(), original = profile.skills) },
         )
     }
 

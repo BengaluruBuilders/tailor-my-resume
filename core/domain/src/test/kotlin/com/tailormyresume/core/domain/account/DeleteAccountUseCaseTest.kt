@@ -15,8 +15,6 @@ import com.tailormyresume.core.domain.PurchaseResult
 import com.tailormyresume.core.domain.offline.OfflineServerAccountDeleter
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.ConsentPurpose
-import com.tailormyresume.core.model.ConsentRecord
 import com.tailormyresume.core.model.CreditKind
 import com.tailormyresume.core.model.ExportFormat
 import com.tailormyresume.core.model.ExportRecord
@@ -27,7 +25,9 @@ import com.tailormyresume.core.testing.data.sampleApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.mock.TestMockStateStore
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
+import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
@@ -126,6 +126,8 @@ class DeleteAccountUseCaseTest {
             profileRepository = RecordingProfileRepository(profile, calls, { failingProfileClear }),
             creditBalance = AccountCreditBalance(paymentGateway = payment),
             latency = NoMockLatency,
+            creditsRepository = TestCreditsRepository(),
+            resumeSettingsRepository = TestResumeSettingsRepository(),
         )
 
         useCase()
@@ -288,11 +290,10 @@ class DeleteAccountUseCaseTest {
     }
 
     @Test
-    fun deletingSignsOutAndClearsSessionConsentAndExportHistory() = runTest {
+    fun deletingSignsOutAndClearsSessionAndExportHistory() = runTest {
         applications.value = fourApplications()
         profile.value = canonicalCandidateProfile
         session.saveAccount(SignInAccount.localAccount)
-        session.recordConsent(consentRecord())
         session.markOnboardingComplete()
         exportHistory.record(exportRecord())
         val useCase = useCase(gateway = gatewayWith(credits = 2))
@@ -300,7 +301,6 @@ class DeleteAccountUseCaseTest {
         useCase()
 
         assertThat(session.observeAccount().first()).isNull()
-        assertThat(session.observeConsent().first()).isNull()
         assertThat(session.observeOnboardingComplete().first()).isFalse()
         assertThat(exportHistory.observeExports().first()).isEmpty()
     }
@@ -335,12 +335,6 @@ class DeleteAccountUseCaseTest {
         assertThat(exportHistory.observeExports().first()).containsExactly(exportRecord())
     }
 
-    private fun consentRecord() = ConsentRecord(
-        purposes = setOf(ConsentPurpose.READ_AND_BUILD),
-        acceptedAt = kotlin.time.Instant.fromEpochSeconds(1_700_000_000),
-        noticeVersion = ConsentRecord.CURRENT_NOTICE_VERSION,
-    )
-
     private fun exportRecord() = ExportRecord(
         applicationId = "application-1",
         format = ExportFormat.PDF,
@@ -366,6 +360,8 @@ class DeleteAccountUseCaseTest {
         ),
         creditBalance = AccountCreditBalance(paymentGateway = gateway),
         latency = latency,
+        creditsRepository = TestCreditsRepository(),
+        resumeSettingsRepository = TestResumeSettingsRepository(),
     )
 
     private fun fourApplications(): List<JobApplication> = listOf("1", "2", "3", "4").map { index ->
@@ -403,8 +399,6 @@ private class RecordingApplicationRepository(
     }
 
     override suspend fun updateStatus(id: String, status: ApplicationStatus) = Unit
-
-    override suspend fun updateNotes(id: String, notes: String) = Unit
 
     override suspend fun deleteApplication(id: String) {
         if (id in failingIds()) throw IllegalStateException("delete failed for $id")

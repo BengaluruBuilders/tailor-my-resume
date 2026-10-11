@@ -12,6 +12,7 @@ internal data class LexiconEntry(
     val implies: List<String> = emptyList(),
     val blockedPrefixes: List<String> = emptyList(),
     val blockedSuffixes: List<String> = emptyList(),
+    val requiredPrefix: String? = null,
 ) {
     val canonical: String = display.lowercase()
 

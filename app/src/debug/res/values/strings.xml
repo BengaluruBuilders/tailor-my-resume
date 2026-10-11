@@ -2,7 +2,7 @@
 <resources>
     <string name="debug_scenario_activity_label">TailorMyResume dev</string>
     <string name="debug_scenario_title">TailorMyResume dev</string>
-    <string name="debug_scenario_intro">Debug build only. Load data, switch the network, or open one screen in one state.</string>
+    <string name="debug_scenario_intro">Debug build only. Load data or open one screen in one state.</string>
     <string name="debug_data_heading">App data</string>
     <string name="debug_data_load">Load sample data</string>
     <string name="debug_data_reset">Reset app data</string>
@@ -11,34 +11,18 @@
     <string name="debug_data_cleared">App data is reset.</string>
     <string name="debug_data_failed">The action failed. Try again.</string>
     <string name="debug_data_busy">Working</string>
-    <string name="debug_connectivity_heading">Network</string>
-    <string name="debug_connectivity_online">Device is online</string>
-    <string name="debug_connectivity_offline">Device is offline</string>
     <string name="debug_scenario_destination_heading">Destination</string>
     <string name="debug_scenario_state_heading">State</string>
     <string name="debug_scenario_open">Open screen</string>
-    <string name="debug_target_welcome">Welcome</string>
-    <string name="debug_target_paste_job_description">Paste JD</string>
     <string name="debug_target_sign_in">Sign in</string>
-    <string name="debug_target_consent">Consent</string>
     <string name="debug_target_import_resume">Import resume</string>
-    <string name="debug_target_confirm_facts">Confirm facts</string>
     <string name="debug_target_applications">Applications</string>
     <string name="debug_target_application_detail">Application workspace</string>
     <string name="debug_target_profile">Profile</string>
-    <string name="debug_target_fact_editor">Fact editor</string>
-    <string name="debug_target_guided_form">Guided form</string>
-    <string name="debug_target_fact_evidence">Evidence path</string>
     <string name="debug_target_analysis">Gap analysis</string>
     <string name="debug_target_tailor">Tailoring review</string>
-    <string name="debug_target_bullet_review">Bullet review</string>
-    <string name="debug_target_cover_letter">Cover letter</string>
-    <string name="debug_target_prep_questions">Prep questions</string>
-    <string name="debug_target_export_preview">Export preview</string>
-    <string name="debug_target_pack_purchase">Application pack</string>
     <string name="debug_target_exported">Exported</string>
     <string name="debug_target_credits">Credits</string>
     <string name="debug_target_settings">Settings</string>
-    <string name="debug_target_your_data">Your data</string>
     <string name="debug_target_delete_account">Delete account</string>
 </resources>

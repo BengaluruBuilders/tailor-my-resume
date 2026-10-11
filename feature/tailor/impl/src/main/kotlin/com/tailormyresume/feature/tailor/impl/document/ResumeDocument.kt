@@ -9,6 +9,7 @@ internal data class ResumeDocument(
     val skills: List<String>,
     val sections: List<ResumeSection>,
     val skillsHeading: String,
+    val summary: String = "",
 ) {
     val isEmpty: Boolean get() = sections.isEmpty()
 }

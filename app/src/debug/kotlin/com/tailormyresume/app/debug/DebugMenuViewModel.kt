@@ -1,21 +1,14 @@
 package com.tailormyresume.app.debug
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tailormyresume.app.R
-import com.tailormyresume.core.data.connectivity.ConnectivityMonitor
-import com.tailormyresume.core.data.connectivity.MockConnectivityControl
 import com.tailormyresume.core.domain.offline.ForcedPaymentScenario
 import com.tailormyresume.core.domain.sample.SampleDataController
 import com.tailormyresume.core.model.DebugScenario
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,32 +16,19 @@ import javax.inject.Inject
 enum class DebugDataMessage { SampleLoaded, DataReset, Failed }
 
 data class DebugMenuUiState(
-    val online: Boolean = true,
     val busy: Boolean = false,
     val message: DebugDataMessage? = null,
-) {
-    @get:StringRes
-    val connectivityLabel: Int
-        get() = if (online) R.string.debug_connectivity_online else R.string.debug_connectivity_offline
-}
+)
 
 @HiltViewModel
 class DebugMenuViewModel @Inject constructor(
     private val sampleDataController: SampleDataController,
-    private val connectivityControl: MockConnectivityControl,
-    connectivityMonitor: ConnectivityMonitor,
     private val forcedPaymentScenario: ForcedPaymentScenario = ForcedPaymentScenario(),
 ) : ViewModel() {
 
     private val work = MutableStateFlow(DebugMenuUiState())
 
-    val uiState: StateFlow<DebugMenuUiState> = combine(connectivityMonitor.isOnline, work) { online, state ->
-        state.copy(online = online)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-        initialValue = DebugMenuUiState(),
-    )
+    val uiState: StateFlow<DebugMenuUiState> = work
 
     fun loadSampleData() = run(DebugDataMessage.SampleLoaded) { sampleDataController.load() }
 
@@ -75,8 +55,6 @@ class DebugMenuViewModel @Inject constructor(
         if (target.needsSampleJob) viewModelScope.launch { sampleDataController.clearSampleJobDescription() }
     }
 
-    fun setOnline(online: Boolean) = connectivityControl.setOnline(online)
-
     private fun run(success: DebugDataMessage, action: suspend () -> Unit) {
         if (work.value.busy) return
         work.update { DebugMenuUiState(busy = true) }
@@ -91,9 +69,5 @@ class DebugMenuViewModel @Inject constructor(
             }
             work.update { DebugMenuUiState(message = message) }
         }
-    }
-
-    private companion object {
-        const val STOP_TIMEOUT_MILLIS = 5_000L
     }
 }

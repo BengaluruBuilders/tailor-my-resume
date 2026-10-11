@@ -10,6 +10,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,19 +20,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.app.MainActivity
 import com.tailormyresume.app.ai.DebugPreviewMode
+import com.tailormyresume.app.ui.AccountRoot
 import com.tailormyresume.app.ui.AppRootState
 import com.tailormyresume.app.ui.AppViewModel
-import com.tailormyresume.app.ui.NavigationRoot
+import com.tailormyresume.app.ui.PendingToastHost
 import com.tailormyresume.app.ui.RootViewModelStores
-import com.tailormyresume.app.ui.TmrFirstRunRoot
-import com.tailormyresume.app.ui.TmrMainRoot
+import com.tailormyresume.app.ui.TmrRoot
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.designsystem.component.TmrBackground
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.domain.onboarding.StartDestination
 import com.tailormyresume.core.model.DebugScenario
-import com.tailormyresume.feature.onboarding.api.navigation.DefaultWelcomeNavKey
+import com.tailormyresume.core.navigation.Navigator
+import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -97,7 +104,6 @@ class DebugScenarioActivity : ComponentActivity() {
                                 onLoadSampleData = menuViewModel::loadSampleData,
                                 onResetAppData = menuViewModel::resetAppData,
                                 onOpenApp = ::openApp,
-                                onOnlineChange = menuViewModel::setOnline,
                                 onTargetSelected = { target = it },
                                 onScenarioSelected = { scenario = it },
                                 onOpenScreen = ::openPreview,
@@ -120,7 +126,7 @@ class DebugScenarioActivity : ComponentActivity() {
     }
 
     private fun applyEdgeToEdge() {
-        enableEdgeToEdge(statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT))
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT), navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
     }
 
     private fun openPreview() {
@@ -146,20 +152,44 @@ class DebugScenarioActivity : ComponentActivity() {
 }
 
 @Composable
-private fun DebugScenarioPreview(
+internal fun DebugScenarioPreview(
     target: DebugScenarioTarget,
     scenario: DebugScenario,
     rootState: StateFlow<AppRootState>,
     hasAccount: Flow<Boolean>,
     rootStores: RootViewModelStores,
     modifier: Modifier = Modifier,
+    entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
 ) {
     val key = target.navKey(scenario)
     val shownRoot = observePreviewRoot(target.opensFirstRunRoot, rootState, hasAccount, rootStores)
+    Box(modifier = Modifier.fillMaxSize()) {
+        PreviewRootContent(target, key, shownRoot, modifier, entryProvider)
+        PendingToastHost()
+    }
+}
+
+@Composable
+private fun PreviewRootContent(
+    target: DebugScenarioTarget,
+    key: NavKey,
+    shownRoot: PreviewRoot,
+    modifier: Modifier,
+    entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)?,
+) {
     when {
-        target.opensFirstRunRoot -> TmrFirstRunRoot(modifier = modifier, startKey = key)
-        shownRoot == NavigationRoot.FirstRun -> TmrFirstRunRoot(modifier = modifier, startKey = DefaultWelcomeNavKey)
-        else -> TmrMainRoot(modifier = modifier, initialKeys = { listOf(key) })
+        target.opensFirstRunRoot ->
+            TmrRoot(root = PreviewRoot.FirstRun.accountRoot, startKey = key, modifier = modifier, entryProvider = entryProvider)
+        shownRoot == PreviewRoot.FirstRun ->
+            TmrRoot(root = PreviewRoot.FirstRun.accountRoot, startKey = SignInNavKey(), modifier = modifier, entryProvider = entryProvider)
+        else -> TmrRoot(
+            root = PreviewRoot.Main.accountRoot,
+            startKey = DefaultApplicationsNavKey,
+            modifier = modifier,
+            initialKeys = { listOf(key) },
+            hasHome = { true },
+            entryProvider = entryProvider,
+        )
     }
 }
 
@@ -169,24 +199,34 @@ internal fun observePreviewRoot(
     rootState: StateFlow<AppRootState>,
     hasAccount: Flow<Boolean>,
     rootStores: RootViewModelStores,
-): NavigationRoot {
+): PreviewRoot {
     val currentRoot by rootState.collectAsStateWithLifecycle()
     val accountPresent by hasAccount.collectAsStateWithLifecycle(initialValue = false)
     var seenMain by remember { mutableStateOf(false) }
     var seenAccount by remember { mutableStateOf(false) }
     LaunchedEffect(currentRoot) {
-        if (currentRoot == AppRootState.Main) seenMain = true
+        if (currentRoot.isMain()) seenMain = true
     }
     LaunchedEffect(accountPresent) {
         if (accountPresent) seenAccount = true
     }
     val shownRoot = previewNavigationRoot(opensFirstRunRoot, seenMain, currentRoot, seenAccount, accountPresent)
-    LaunchedEffect(shownRoot) { rootStores.keepOnly(shownRoot) }
+    LaunchedEffect(shownRoot) { rootStores.keepOnly(shownRoot.accountRoot) }
     return shownRoot
 }
 
+internal enum class PreviewRoot {
+    FirstRun,
+    Main,
+    ;
+
+    val accountRoot: AccountRoot get() = AccountRoot(name)
+}
+
+private fun AppRootState.isMain(): Boolean = this is AppRootState.Ready && start == StartDestination.Applications
+
 internal fun previewShowsWelcome(seenMain: Boolean, rootState: AppRootState): Boolean =
-    seenMain && rootState == AppRootState.FirstRun
+    seenMain && rootState is AppRootState.Ready && rootState.start != StartDestination.Applications
 
 internal fun previewNavigationRoot(
     opensFirstRunRoot: Boolean,
@@ -194,9 +234,9 @@ internal fun previewNavigationRoot(
     rootState: AppRootState,
     seenAccount: Boolean,
     hasAccount: Boolean,
-): NavigationRoot {
+): PreviewRoot {
     val welcome = previewShowsWelcome(seenMain, rootState) || (seenAccount && !hasAccount)
-    return if (opensFirstRunRoot || welcome) NavigationRoot.FirstRun else NavigationRoot.Main
+    return if (opensFirstRunRoot || welcome) PreviewRoot.FirstRun else PreviewRoot.Main
 }
 
 internal fun opensRealApp(target: DebugScenarioTarget, scenario: DebugScenario): Boolean =

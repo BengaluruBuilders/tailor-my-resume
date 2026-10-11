@@ -155,14 +155,8 @@ private fun List<Placeable>.heightSum(): Int = sumOf { it.height }
 
 @Preview(showBackground = true)
 @Composable
-private fun TmrScreenPreview() {
-    TmrPreviewTheme(darkTheme = false) { TmrScreenSample() }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun TmrScreenDarkPreview() {
-    TmrPreviewTheme(darkTheme = true) { TmrScreenSample() }
+    TmrPreviewTheme { TmrScreenSample() }
 }
 
 @Composable

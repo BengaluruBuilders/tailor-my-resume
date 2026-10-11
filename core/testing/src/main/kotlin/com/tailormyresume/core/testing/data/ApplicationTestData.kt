@@ -55,7 +55,6 @@ val sampleApplication = JobApplication(
     id = "application-1",
     job = sampleJobDescription,
     status = ApplicationStatus.SAVED,
-    notes = "",
     gapAnalysis = sampleGapAnalysis,
     tailoredResume = null,
     createdAt = Instant.fromEpochSeconds(1_700_000_000),

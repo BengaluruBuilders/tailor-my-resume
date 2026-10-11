@@ -23,8 +23,8 @@ The Jade restyle frames (foundations, Flows 1 and 2) are in `design/jade-restyle
 
 **Newest, 2026-10-10:** the clickable prototype in `design/prototype-2026-10-10/` (read its `README.md`)
 is the current design and the simplified MVP flow. Its scope is in `docs/PRD.md` section 6.1.2, which
-wins over 6.1.1. Where it and the Avvio canvas disagree, the prototype wins. The app does not implement
-it yet. Use the Avvio canvas and the older frames only for states the prototype does not draw.
+wins over 6.1.1. Where it and the Avvio canvas disagree, the prototype wins. The GitHub issues labelled `revamp`
+list the values. Use the Avvio canvas and the older frames only for states the prototype does not draw.
 Cut by the owner on 2026-10-10, never to be raised again: consent screen, 18+ check, light theme,
 Apple sign-in, follow-up reminders, offline states, and error states beyond the five the prototype
 draws (PRD 6.1.2).
@@ -66,12 +66,13 @@ If the design changes, export the frames again and replace the folder in one PR.
 
 ## Motion
 
-- Two registers only: `proof` (default) and `hop` (gap closed, exported, pack purchased, first fact confirmed).
+- Two registers for state changes: `proof` (default) and `hop` (gap closed, exported, pack purchased, first fact confirmed).
 - Read specs from `TmrTheme.motion`. Do not add a duration scale or an easing scale.
 - Motion code lives in `core:designsystem`. Navigation wiring lives in `:app`.
 - A feature calls an `Tmr*` primitive. It never calls `tween(`, `spring(`, or a numeric duration.
 - If `TmrTheme.motion.reduced` is true, nothing moves. The state change stays visible.
 - In a lazy list, animate `graphicsLayer` alpha, translation, and scale only.
+- `TmrTheme.motion.idle` holds the ambient loops: Paige bob 5 dp, tailoring wobble, 5 s story slides and a 900 ms spinner. With `reduced` they stay still, and story taps still step.
 - Do not build the multi-frame sequences of the board.
 - A settled frame must not change. Do not record a screenshot baseline again for a motion change.
 - The table of needs, primitives, and tokens is in `docs/DESIGN_SYSTEM.md`, section "Motion".

@@ -1,14 +1,13 @@
 package com.tailormyresume.app.billing
 
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.domain.CreditSpend
 import com.tailormyresume.core.domain.PurchaseFailureReason
 import com.tailormyresume.core.domain.PurchaseResult
-import com.tailormyresume.core.model.CreditKind
 import com.tailormyresume.core.network.TailorMyResumeApiConfig
 import com.tailormyresume.core.network.tailormyresumeApi
 import com.tailormyresume.core.network.tailormyresumeJson
 import com.tailormyresume.core.network.tailormyresumeOkHttpClient
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -47,7 +46,7 @@ class RemotePaymentGatewayTest {
         server.shutdown()
     }
 
-    private fun gateway(uid: String? = "uid-1") = RemotePaymentGateway(api, source, billing, FakeUid(uid), idleScope())
+    private fun gateway(uid: String? = "uid-1") = RemotePaymentGateway(api, source, billing, FakeUid(uid), idleScope(), TestCreditsRepository())
 
     private fun reply(code: Int, body: String) = server.enqueue(MockResponse().setResponseCode(code).setBody(body))
 
@@ -65,22 +64,12 @@ class RemotePaymentGatewayTest {
     }
 
     @Test
-    fun allowanceFallsBackToTheContractDefaultsWhenTheWalletCannotBeFetched() = runTest {
-        server.shutdown()
-        val allowance = WalletUsageAllowance(source)
-
-        assertThat(allowance.observeAnalysesLeft().first()).isEqualTo(3)
-        assertThat(allowance.observeFreeTailoringsLeft().first()).isEqualTo(1)
-    }
-
-    @Test
     fun entitlementComesFromTheWallet() = runTest {
         reply(200, """{"wallet":${walletJson(free = 0, purchased = 4, unlocked = "\"a1\"")}}""")
 
         val entitlement = gateway().entitlement()
 
         assertThat(entitlement.purchasedCredits).isEqualTo(4)
-        assertThat(entitlement.unlockedApplicationIds).containsExactly("a1")
         assertThat(server.takeRequest().path).isEqualTo("/v1/tailormyresume/wallet")
     }
 
@@ -97,27 +86,6 @@ class RemotePaymentGatewayTest {
         assertThat(packs.map { it.id }).containsExactly("application_pack_5")
         assertThat(packs.single().priceInPaise).isEqualTo(14_900)
         assertThat(packs.single().credits).isEqualTo(5)
-    }
-
-    @Test
-    fun firstUnlockReportsTheCreditKindAndARepeatReportsNone() = runTest {
-        val unlock = """{"unlock":{"applicationId":"a1","creditKind":"FREE","unlockedAt":"2026-10-07T09:00:00Z"},"wallet":${walletJson(free = 0, unlocked = "\"a1\"")}}"""
-        reply(201, unlock)
-        reply(200, unlock)
-
-        val first = gateway().unlock("a1") as CreditSpend.Spent
-        val repeat = gateway().unlock("a1") as CreditSpend.Spent
-
-        assertThat(first.kind).isEqualTo(CreditKind.FREE)
-        assertThat(repeat.kind).isNull()
-        assertThat(server.takeRequest().path).isEqualTo("/v1/tailormyresume/applications/a1/unlock")
-    }
-
-    @Test
-    fun unlockWithNoCreditReportsNoCreditLeft() = runTest {
-        reply(402, errorJson("NO_CREDIT"))
-
-        assertThat(gateway().unlock("a1")).isEqualTo(CreditSpend.NoCreditLeft)
     }
 
     @Test
@@ -210,26 +178,6 @@ class RemotePaymentGatewayTest {
         assertThat(server.takeRequest().body.readUtf8()).contains("\"purchaseToken\":\"t1\"")
     }
 
-    @Test
-    fun usageAllowanceReadsTheWallet() = runTest {
-        reply(200, """{"wallet":${walletJson(analyses = 2, tailorings = 0)}}""")
-        reply(200, """{"wallet":${walletJson(analyses = 2, tailorings = 0)}}""")
-        val allowance = WalletUsageAllowance(source)
-
-        assertThat(allowance.consumeFreeTailoring()).isFalse()
-        assertThat(allowance.observeAnalysesLeft().first()).isEqualTo(2)
-    }
-
-    @Test
-    fun consumingAnAllowanceNeverDecrementsLocally() = runTest {
-        repeat(3) { reply(200, "{\"wallet\":${walletJson(analyses = 2, tailorings = 1)}}") }
-        val allowance = WalletUsageAllowance(source)
-
-        assertThat(allowance.consumeAnalysis()).isTrue()
-        assertThat(allowance.consumeFreeTailoring()).isTrue()
-        assertThat(allowance.consumeFreeTailoring()).isTrue()
-    }
-
     private class ScriptedPurchases : Dispatcher() {
         class Step(val response: MockResponse, val gate: CountDownLatch? = null)
 
@@ -253,7 +201,7 @@ class RemotePaymentGatewayTest {
 
     private fun scriptedGateway(): RemotePaymentGateway {
         server.dispatcher = scripted
-        return RemotePaymentGateway(api, wallet, billing, FakeUid("uid-1"), clock)
+        return RemotePaymentGateway(api, wallet, billing, FakeUid("uid-1"), clock, TestCreditsRepository())
     }
 
     private fun recordedStep(gate: CountDownLatch? = null) =
@@ -441,7 +389,7 @@ class RemotePaymentGatewayTest {
     fun concurrentRecordedAndUnconfirmedRemovalsLoseNoConcurrentHold() = runTest {
         server.dispatcher = AnswerByToken(CyclicBarrier(CONCURRENT_REQUESTS))
         val stripedBilling = StripedBilling(billing, RACING_WRITERS)
-        val gateway = RemotePaymentGateway(api, wallet, stripedBilling, FakeUid("uid-1"), clock)
+        val gateway = RemotePaymentGateway(api, wallet, stripedBilling, FakeUid("uid-1"), clock, TestCreditsRepository())
         val settled = List(SETTLED_PACKS) { "settled_$it" }
         val extras = settled.indices.flatMap { index -> List(EXTRAS_PER_PACK) { "extra_${index}_$it" } }
         val filler = List(FILLER_PACKS) { "filler_$it" }
@@ -459,22 +407,6 @@ class RemotePaymentGatewayTest {
         }
 
         assertThat(gateway.observeEntitlement().first().pendingPackIds).containsExactlyElementsIn(filler + extras)
-    }
-
-    @Test
-    fun anUnlockAnsweredAfterSignOutDoesNotRestoreTheOldWallet() = runTest {
-        val unlock = """{"unlock":{"applicationId":"a1","creditKind":"PURCHASED","unlockedAt":"2026-10-07T09:00:00Z"},"wallet":${walletJson(free = 0, purchased = 4, unlocked = "\"a1\"")}}"""
-        val held = HeldAnswer(MockResponse().setResponseCode(201).setBody(unlock)).also { server.dispatcher = it }
-        val gateway = gateway()
-        val spend = async(Dispatchers.Default) { gateway.unlock("a1") }
-        held.awaitRequest()
-
-        gateway.clearCredits()
-        held.release()
-        spend.await()
-
-        assertThat(source.cached).isNull()
-        assertThat(gateway.observeEntitlement().first().totalCredits).isEqualTo(0)
     }
 
     @Test

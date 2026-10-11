@@ -3,10 +3,12 @@ package com.tailormyresume.core.domain.account
 import com.tailormyresume.core.data.mock.MockLatency
 import com.tailormyresume.core.data.mock.MockOperation
 import com.tailormyresume.core.data.repository.ApplicationRepository
+import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.PendingAccountWipe
 import com.tailormyresume.core.data.repository.PendingWipeState
 import com.tailormyresume.core.data.repository.ProfileRepository
+import com.tailormyresume.core.data.repository.ResumeSettingsRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.model.CandidateProfile
@@ -28,6 +30,8 @@ class DeleteAccountUseCase @Inject constructor(
     private val serverAccountDeleter: ServerAccountDeleter,
     private val creditBalance: AccountCreditBalance,
     private val latency: MockLatency,
+    private val creditsRepository: CreditsRepository,
+    private val resumeSettingsRepository: ResumeSettingsRepository,
     private val exportedFiles: ExportedFiles = ExportedFiles.None,
     private val pendingWipe: PendingAccountWipe = PendingAccountWipe.None,
     private val finishPendingWipe: FinishPendingAccountWipeUseCase =
@@ -56,6 +60,7 @@ class DeleteAccountUseCase @Inject constructor(
         val exports = exportHistoryRepository.observeExports().first()
         val counts = countsOf(applications, profile, creditBalance.unusedCredits())
         val tracksPendingWipe = serverAccountDeleter.deletesRemoteData
+        if (tracksPendingWipe && serverAlreadyClosedThisAccount()) return settlePendingWipe(counts, dataIntactIfOpen = false)
         val earlierAttempt = tracksPendingWipe && hasEarlierRequestedAttempt()
         if (tracksPendingWipe && !earlierAttempt && !markRequested()) return AccountDeletionResult.Failed(dataIntact = true)
         val deleteFailure = serverAccountDeleter.delete().exceptionOrNull()
@@ -81,6 +86,8 @@ class DeleteAccountUseCase @Inject constructor(
             startStep(AccountDeletionStep.CLOSING_ACCOUNT, onStep)
             creditsTouched = true
             creditBalance.clearUnusedCredits()
+            creditsRepository.clear()
+            resumeSettingsRepository.clear()
             withContext(NonCancellable) {
                 signInGateway.signOut()
                 sessionRepository.clear()
@@ -107,6 +114,17 @@ class DeleteAccountUseCase @Inject constructor(
             PendingWipeOutcome.NOTHING_PENDING, PendingWipeOutcome.ACCOUNT_KEPT ->
                 AccountDeletionResult.Failed(dataIntact = dataIntactIfOpen)
         }
+
+    private suspend fun serverAlreadyClosedThisAccount(): Boolean = try {
+        val markerOwner = pendingWipe.uid()
+        pendingWipe.state() == PendingWipeState.SERVER_CLOSED &&
+            markerOwner != null &&
+            markerOwner == signInGateway.currentAccount()?.id
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (failure: Exception) {
+        false
+    }
 
     private suspend fun hasEarlierRequestedAttempt(): Boolean = try {
         val markerOwner = pendingWipe.uid()

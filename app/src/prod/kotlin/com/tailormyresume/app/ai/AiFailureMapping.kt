@@ -7,13 +7,14 @@ import com.tailormyresume.core.network.ApiException
 import com.tailormyresume.core.network.apiResult
 
 internal fun ApiError.toAiFailure(): AiFailure = when (this) {
-    ApiError.ConsentRequired -> AiFailure.ConsentRequired
     ApiError.NoCredit -> AiFailure.NoCredit
     ApiError.AllowanceExhausted -> AiFailure.AllowanceExhausted
     ApiError.InvalidInput, ApiError.PayloadTooLarge -> AiFailure.InvalidInput
     ApiError.AccountDeleted -> AiFailure.AccountDeleted
     is ApiError.RateLimited -> AiFailure.RateLimited
     ApiError.AnalysisInProgress -> AiFailure.AnalysisInProgress
+    ApiError.NotAJobPost -> AiFailure.NotAJobPost
+    ApiError.JobImportFailed -> AiFailure.JobImportFailed
     ApiError.QuotaExceeded, ApiError.BudgetExceeded -> AiFailure.QuotaExceeded
     ApiError.Unauthenticated, ApiError.InvalidToken -> AiFailure.SignInRequired
     ApiError.Offline -> AiFailure.Network

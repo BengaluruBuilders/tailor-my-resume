@@ -2,10 +2,14 @@ package com.tailormyresume.feature.tailor.impl
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.ContentReportRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.TailoringReviewStateRepository
+import com.tailormyresume.core.domain.AcceptChangesUseCase
+import com.tailormyresume.core.domain.ExportCheck
+import com.tailormyresume.core.domain.ExportReadiness
 import com.tailormyresume.core.domain.UpdateBulletDecisionUseCase
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
@@ -14,19 +18,31 @@ import com.tailormyresume.core.model.DebugScenario
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.ReportedItemKind
 import com.tailormyresume.core.model.TailoringReviewState
+import com.tailormyresume.feature.tailor.api.navigation.EditResumeNavKey
+import com.tailormyresume.feature.tailor.api.navigation.ExportedNavKey
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
+
+internal sealed interface TailorEvent {
+    data class Navigate(val key: NavKey) : TailorEvent
+
+    data object ExportBlocked : TailorEvent
+}
 
 @HiltViewModel(assistedFactory = TailorViewModel.Factory::class)
 internal class TailorViewModel @AssistedInject constructor(
@@ -42,6 +58,8 @@ internal class TailorViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val decisionMutex = Mutex()
+
+    private val acceptChanges = AcceptChangesUseCase(applicationRepository, clock)
 
     private val activeScenario = MutableStateFlow(scenario)
 
@@ -64,11 +82,31 @@ internal class TailorViewModel @AssistedInject constructor(
         initialValue = TailorUiState.Loading(),
     )
 
-    fun onAccept(bulletId: String) = setDecision(bulletId, BulletDecision.ACCEPTED)
+    private val eventChannel = Channel<TailorEvent>(Channel.BUFFERED)
 
-    fun onKeepOriginal(bulletId: String) = setDecision(bulletId, BulletDecision.REJECTED)
+    val events: Flow<TailorEvent> = eventChannel.receiveAsFlow()
 
-    fun onUndo(bulletId: String) = setDecision(bulletId, BulletDecision.PENDING)
+    fun onUndoChange(changeId: String) {
+        viewModelScope.launch { updateBulletDecision(applicationId, changeId, BulletDecision.REJECTED) }
+    }
+
+    fun onAcceptChanges() {
+        viewModelScope.launch { acceptChanges(applicationId) }
+    }
+
+    fun onExportTapped() {
+        viewModelScope.launch {
+            val application = applicationRepository.observeApplication(applicationId).first()
+            val allowed = application != null && ExportReadiness.check(application) == ExportCheck.ALLOWED
+            eventChannel.send(
+                if (allowed) TailorEvent.Navigate(ExportedNavKey(applicationId)) else TailorEvent.ExportBlocked,
+            )
+        }
+    }
+
+    fun onEditTapped() {
+        eventChannel.trySend(TailorEvent.Navigate(EditResumeNavKey(applicationId)))
+    }
 
     fun onEditByHand(bulletId: String, text: String) {
         viewModelScope.launch {
@@ -98,12 +136,6 @@ internal class TailorViewModel @AssistedInject constructor(
                     generationId = success.reportedGenerationId(kind, itemId),
                 ),
             )
-        }
-    }
-
-    private fun setDecision(bulletId: String, decision: BulletDecision) {
-        viewModelScope.launch {
-            decisionMutex.withLock { updateBulletDecision(applicationId, bulletId, decision) }
         }
     }
 

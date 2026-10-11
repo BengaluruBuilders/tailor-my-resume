@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_tailor_impl_edit_title">Edit resume</string>
+    <string name="feature_tailor_impl_edit_fits">Still fits on 1 page</string>
+    <string name="feature_tailor_impl_edit_summary_label">Summary</string>
+    <string name="feature_tailor_impl_edit_skills_label">Skills line</string>
+    <string name="feature_tailor_impl_edit_bullet_label">Edit bullet</string>
+    <string name="feature_tailor_impl_edit_source_resume">From your resume</string>
+    <string name="feature_tailor_impl_edit_source_answer">From your answer</string>
+    <string name="feature_tailor_impl_edit_saved">Changes saved</string>
+    <string name="feature_tailor_impl_exported_title">Resume exported</string>
+    <plurals name="feature_tailor_impl_exported_file_meta">
+        <item quantity="one">PDF · %1$d page · %2$d KB</item>
+        <item quantity="other">PDF · %1$d pages · %2$d KB</item>
+    </plurals>
+    <plurals name="feature_tailor_impl_exported_credits_paid">
+        <item quantity="one">%1$d left, was %2$d. Credits never expire.</item>
+        <item quantity="other">%1$d left, was %2$d. Credits never expire.</item>
+    </plurals>
+    <string name="feature_tailor_impl_exported_credits_free">Free resume used. 0 credits left. Nothing was charged.</string>
+    <string name="feature_tailor_impl_exported_credits_free_with_balance">Free resume used. Nothing was charged.</string>
+    <string name="feature_tailor_impl_exported_saved_to">Saved to Applications: %1$s, %2$s</string>
+    <string name="feature_tailor_impl_exported_did_you_apply">Did you apply?</string>
+    <string name="feature_tailor_impl_exported_mark_applied">✓ Mark as Applied</string>
+    <string name="feature_tailor_impl_exported_marked_on">Marked on %1$s</string>
+    <string name="feature_tailor_impl_exported_change">Change</string>
+    <string name="feature_tailor_impl_exported_prep_questions">Get prep questions</string>
+    <string name="feature_tailor_impl_exported_cover_letter">Write a cover letter</string>
+    <string name="feature_tailor_impl_exported_go_to_applications">Go to Applications</string>
+    <string name="feature_tailor_impl_exported_coming_soon">Coming soon</string>
+    <string name="feature_tailor_impl_exported_applied_toast">Applied, marked on %1$s</string>
+    <string name="feature_tailor_impl_exported_undo">Undo</string>
+    <string name="feature_tailor_impl_exported_status_set">Status set to %1$s</string>
+    <string name="feature_tailor_impl_exported_file_missing">Couldn\'t find the PDF</string>
+    <string name="feature_tailor_impl_exported_share_subject">Resume</string>
+    <string name="feature_tailor_impl_exported_share_title">Share resume</string>
+    <string name="feature_tailor_impl_exported_open_failed">No app can open PDFs</string>
+    <string name="feature_tailor_impl_exported_export_failed">Couldn\'t export the PDF. Try again.</string>
+</resources>

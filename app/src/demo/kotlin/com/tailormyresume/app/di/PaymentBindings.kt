@@ -1,7 +1,7 @@
 package com.tailormyresume.app.di
 
-import com.tailormyresume.core.data.repository.StoredUsageAllowance
-import com.tailormyresume.core.data.repository.UsageAllowance
+import com.tailormyresume.core.data.repository.NoRemoteLedger
+import com.tailormyresume.core.data.repository.RemoteLedgerSource
 import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.offline.OfflinePaymentGateway
 import dagger.Binds
@@ -16,5 +16,5 @@ interface PaymentBindings {
     fun bindPaymentGateway(impl: OfflinePaymentGateway): PaymentGateway
 
     @Binds
-    fun bindUsageAllowance(impl: StoredUsageAllowance): UsageAllowance
+    fun bindRemoteLedgerSource(impl: NoRemoteLedger): RemoteLedgerSource
 }

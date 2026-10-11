@@ -31,7 +31,7 @@ class RemoteResumeTailorRetryAfterTest {
     fun aRetryAfterOfADaySurfacesRateLimitedAtOnce() = runTest {
         backend.server.enqueue(MockResponse().setResponseCode(429).setHeader("Retry-After", "86400"))
 
-        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
+        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull()
 
         assertThat((failure as AiException).failure).isEqualTo(AiFailure.RateLimited)
         assertThat(currentTime).isEqualTo(0L)
@@ -42,7 +42,7 @@ class RemoteResumeTailorRetryAfterTest {
     fun aRetryAfterOfExactlyAMinuteIsHonoured() = runTest {
         plainRateLimit("60")
 
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat(currentTime).isEqualTo(60_000L)
         assertThat(backend.server.requestCount).isEqualTo(2)
@@ -52,7 +52,7 @@ class RemoteResumeTailorRetryAfterTest {
     fun aRetryAfterOfSixtyOneSecondsSurfacesRateLimitedWithoutSleeping() = runTest {
         backend.server.enqueue(MockResponse().setResponseCode(429).setHeader("Retry-After", "61"))
 
-        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
+        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull()
 
         assertThat((failure as AiException).failure).isEqualTo(AiFailure.RateLimited)
         assertThat(currentTime).isEqualTo(0L)
@@ -63,7 +63,7 @@ class RemoteResumeTailorRetryAfterTest {
     fun aRetryAfterOfZeroFallsBackToTheTenSecondDefault() = runTest {
         plainRateLimit("0")
 
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat(currentTime).isEqualTo(10_000L)
     }

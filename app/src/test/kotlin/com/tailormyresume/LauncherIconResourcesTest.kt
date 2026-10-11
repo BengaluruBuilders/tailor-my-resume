@@ -50,14 +50,52 @@ class LauncherIconResourcesTest {
     }
 
     @Test
-    fun api31_splash_icon_background_is_launcher_lime_in_light_and_night() {
-        listOf("values", "values-night").forEach { dir ->
-            val items = elements("src/main/res/$dir/themes.xml", "item")
-            assertThat(
-                items.filter { it.getAttribute("name") == "android:windowSplashScreenIconBackgroundColor" }
-                    .map { it.textContent.trim() },
-            ).containsExactly("@color/ic_launcher_background")
-        }
+    fun api31_splash_icon_background_is_launcher_lime() {
+        val items = elements("src/main/res/values/themes.xml", "item")
+        assertThat(
+            items.filter { it.getAttribute("name") == "android:windowSplashScreenIconBackgroundColor" }
+                .map { it.textContent.trim() },
+        ).containsExactly("@color/ic_launcher_background")
+    }
+
+    @Test
+    fun theme_keeps_system_bars_dark() {
+        val themeItems =
+            elements("src/main/res/values/themes.xml", "item")
+                .filter { (it.parentNode as Element).getAttribute("name") == "Theme.TailorMyResume" }
+        val byName = themeItems.associate { it.getAttribute("name") to it.textContent.trim() }
+        assertThat(byName["android:windowLightStatusBar"]).isEqualTo("false")
+        assertThat(byName["android:windowLightNavigationBar"]).isEqualTo("false")
+    }
+
+    @Test
+    fun theme_window_background_is_window_background_colour() {
+        val themeItems =
+            elements("src/main/res/values/themes.xml", "item")
+                .filter { (it.parentNode as Element).getAttribute("name") == "Theme.TailorMyResume" }
+        assertThat(
+            themeItems
+                .filter { it.getAttribute("name") == "android:windowBackground" }
+                .map { it.textContent.trim() },
+        ).containsExactly("@color/window_background")
+    }
+
+    @Test
+    fun window_background_colour_is_black() {
+        val colours =
+            elements("src/main/res/values/colors.xml", "color")
+                .filter { it.getAttribute("name") == "window_background" }
+        assertThat(colours.map { it.textContent.trim() }).containsExactly("#000000")
+        val paletteSource =
+            File("../core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/theme/Palette.kt").readText()
+        assertThat(paletteSource.lineSequence().first { it.trim().startsWith("background =") })
+            .contains("Color(0xFF000000)")
+    }
+
+    @Test
+    fun res_has_no_values_night_directory() {
+        assertThat(File("src/main/res").listFiles().orEmpty().filter { it.isDirectory && it.name.startsWith("values-night") })
+            .isEmpty()
     }
 
     private fun elements(path: String, tag: String): List<Element> {

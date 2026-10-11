@@ -2,8 +2,6 @@ package com.tailormyresume.app.debug
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.app.R
-import com.tailormyresume.core.testing.connectivity.TestConnectivityMonitor
 import com.tailormyresume.core.testing.sample.TestSampleDataController
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import kotlinx.coroutines.test.runTest
@@ -16,9 +14,8 @@ class DebugMenuViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val sampleData = TestSampleDataController()
-    private val connectivity = TestConnectivityMonitor()
 
-    private fun viewModel() = DebugMenuViewModel(sampleData, connectivity, connectivity)
+    private fun viewModel() = DebugMenuViewModel(sampleData)
 
     @Test
     fun loadSampleData_callsTheControllerAndReportsIt() = runTest {
@@ -40,28 +37,6 @@ class DebugMenuViewModelTest {
             assertThat(expectMostRecentItem().message).isEqualTo(DebugDataMessage.DataReset)
         }
         assertThat(sampleData.resetCount).isEqualTo(1)
-    }
-
-    @Test
-    fun setOnline_reachesTheConnectivityControlAndTheState() = runTest {
-        val viewModel = viewModel()
-        viewModel.uiState.test {
-            assertThat(awaitItem().online).isTrue()
-            viewModel.setOnline(false)
-            assertThat(awaitItem().online).isFalse()
-        }
-    }
-
-    @Test
-    fun setOnline_changesTheConnectivityLabel() = runTest {
-        val viewModel = viewModel()
-        viewModel.uiState.test {
-            assertThat(awaitItem().connectivityLabel).isEqualTo(R.string.debug_connectivity_online)
-            viewModel.setOnline(false)
-            assertThat(awaitItem().connectivityLabel).isEqualTo(R.string.debug_connectivity_offline)
-            viewModel.setOnline(true)
-            assertThat(awaitItem().connectivityLabel).isEqualTo(R.string.debug_connectivity_online)
-        }
     }
 
     @Test
