@@ -28,22 +28,23 @@ internal class OfflineGapMatcher @Inject constructor() : GapMatcher {
 
     private fun matchRequirement(requirement: JobRequirement, sources: List<EvidenceSource>): RequirementMatch {
         val supporting = sources.filter { source -> requirement.keywords.any { source.index.supports(it) } }
+        val status = cappedByYears(requirement, statusOf(requirement, sources))
         return RequirementMatch(
             requirement = requirement,
-            status = cappedByYears(requirement, statusOf(requirement, sources)),
+            status = status,
             evidenceIds = supporting.map { it.id }.distinct(),
-            reason = reasonFor(requirement, supporting),
+            reason = reasonFor(status),
         )
     }
 
-    private fun reasonFor(requirement: JobRequirement, supporting: List<EvidenceSource>): String = when {
-        supporting.isEmpty() -> "Not in your resume."
-        supporting.any { source -> requirement.keywords.all(source.index::supports) } -> "Found in your resume."
-        else -> "Partly in your resume."
+    private fun reasonFor(status: MatchStatus): String = when (status) {
+        MatchStatus.MET -> "Found in your resume."
+        MatchStatus.PARTIAL -> "Partly in your resume."
+        MatchStatus.GAP -> "Not in your resume."
     }
 
     private fun shouldAskAbout(match: RequirementMatch): Boolean =
-        match.status == MatchStatus.GAP &&
+        match.status != MatchStatus.MET &&
             match.requirement.priority == RequirementPriority.MUST_HAVE &&
             match.requirement.type != RequirementType.EDUCATION
 
@@ -54,16 +55,14 @@ internal class OfflineGapMatcher @Inject constructor() : GapMatcher {
     )
 
     private fun JobRequirement.questionText(): String {
-        val detail = text.removePrefix("Experience ").removePrefix("experience ")
-        return when {
-            detail.startsWith("presenting ", ignoreCase = true) -> "Have you ${detail.lowercaseFirstChar()}?"
-            detail.startsWith("with ", ignoreCase = true) || detail.startsWith("in ", ignoreCase = true) ->
-                "Have you worked ${detail.lowercaseFirstChar()}?"
-            else -> "Have you worked with ${keywords.joinToString(" and ", transform = SkillLexicon::displayName)}?"
-        }
+        val subject = text
+            .trim()
+            .trimEnd('.')
+            .removePrefix("Experience ")
+            .removePrefix("experience ")
+            .ifBlank { keywords.joinToString(" and ", transform = SkillLexicon::displayName) }
+        return "Do you have experience with $subject?"
     }
-
-    private fun String.lowercaseFirstChar(): String = replaceFirstChar { it.lowercase() }
 
     private fun statusOf(requirement: JobRequirement, sources: List<EvidenceSource>): MatchStatus {
         val units = unitsOf(requirement.keywords)

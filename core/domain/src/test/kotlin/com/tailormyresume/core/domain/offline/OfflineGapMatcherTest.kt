@@ -202,7 +202,7 @@ class OfflineGapMatcherTest {
             """.trimIndent(),
         )
 
-        assertThat(gap.question?.text).isEqualTo("Have you presented to senior leaders?")
+        assertThat(gap.question?.text).isEqualTo("Do you have experience with presenting to senior leaders?")
         assertThat(gap.question?.why).isEqualTo("It's a must-have for this role, and your resume doesn't mention it.")
         assertThat(gap.matches.map { it.reason }).doesNotContain(null)
         assertThat(gap.keywordCoverage.covered).isGreaterThan(0)
