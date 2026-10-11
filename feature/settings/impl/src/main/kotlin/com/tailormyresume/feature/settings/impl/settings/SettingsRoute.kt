@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -28,6 +30,7 @@ internal fun SettingsRoute(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
     deleteViewModel: DeleteAccountViewModel = hiltViewModel(),
+    showDeleteAccount: Boolean = false,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -42,6 +45,15 @@ internal fun SettingsRoute(
     val supportSubject = stringResource(R.string.feature_settings_impl_support_subject)
     val supportMissing = stringResource(R.string.feature_settings_impl_toast_support_missing)
     val deleteTitle = stringResource(R.string.feature_settings_impl_delete_title)
+    var deletePreviewOpened by rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    LaunchedEffect(showDeleteAccount) {
+        if (showDeleteAccount && !deletePreviewOpened) {
+            deletePreviewOpened = true
+            sheetHost.show(deleteTitle) {
+                DeleteAccountSheet(viewModel = deleteViewModel, onKeep = sheetHost::dismiss)
+            }
+        }
+    }
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {

@@ -50,6 +50,6 @@ enum class DebugScenarioTarget(
         Exported -> ExportedNavKey(applicationId = SAMPLE_APPLICATION_ID, scenario = scenario)
         Credits -> CreditsNavKey(scenario = scenario)
         Settings -> SettingsNavKey(scenario = scenario)
-        DeleteAccount -> SettingsNavKey(scenario = scenario)
+        DeleteAccount -> SettingsNavKey(scenario = scenario, showDeleteAccount = true)
     }
 }
