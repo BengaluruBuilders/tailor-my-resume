@@ -27,7 +27,7 @@ internal class AndroidPdfResumeRenderer @Inject constructor(
         val fitted = withContext(defaultDispatcher) { fit(document, pageSize) }
         try {
             return withContext(ioDispatcher) {
-                val directory = ExportDirectory(File(context.cacheDir, EXPORT_DIRECTORY))
+                val directory = ExportDirectory(File(context.filesDir, EXPORT_DIRECTORY))
                 val file = directory.write(applicationId, fileName, previousFileName) { fitted.pages.writeTo(it) }
                 RenderedResume(file = file, pageCount = fitted.pageCount, lines = fitted.lines)
             }

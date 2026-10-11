@@ -1,8 +1,8 @@
 package com.tailormyresume.feature.tailor.impl.exported
 
+import android.content.Intent
 import androidx.compose.runtime.Immutable
 import com.tailormyresume.core.model.ApplicationStatus
-import java.io.File
 
 internal sealed interface ExportedUiState {
     data object Loading : ExportedUiState
@@ -27,9 +27,9 @@ internal sealed interface ExportedUiState {
 }
 
 internal sealed interface ExportedEvent {
-    data class Share(val file: File) : ExportedEvent
+    data class Share(val intent: Intent) : ExportedEvent
 
-    data class Open(val file: File) : ExportedEvent
+    data class Open(val intent: Intent) : ExportedEvent
 
     data object FileMissing : ExportedEvent
 

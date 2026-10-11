@@ -24,7 +24,7 @@ class PdfShareIntentTest {
     }
 
     private fun exportedFile(): File {
-        val directory = File(context.cacheDir, "exports").apply { mkdirs() }
+        val directory = File(context.filesDir, "exports").apply { mkdirs() }
         return File(directory, "Priya-Deshmukh_Resume.pdf").apply { writeText("%PDF-1.4") }
     }
 

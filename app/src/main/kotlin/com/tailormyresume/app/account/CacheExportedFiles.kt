@@ -13,7 +13,8 @@ import javax.inject.Singleton
 
 @Singleton
 class CacheExportedFiles internal constructor(
-    private val cacheDirectory: File,
+    private val cacheDirectory: () -> File,
+    private val filesDirectory: () -> File,
     private val ioDispatcher: CoroutineDispatcher,
 ) : ExportedFiles {
 
@@ -21,11 +22,13 @@ class CacheExportedFiles internal constructor(
     constructor(
         @ApplicationContext context: Context,
         @Dispatcher(IO) ioDispatcher: CoroutineDispatcher,
-    ) : this(context.cacheDir, ioDispatcher)
+    ) : this({ context.cacheDir }, { context.filesDir }, ioDispatcher)
 
     override suspend fun deleteAll() {
         withContext(ioDispatcher) {
-            EXPORT_DIRECTORIES.forEach { name -> File(cacheDirectory, name).deleteRecursively() }
+            val cache = cacheDirectory()
+            EXPORT_DIRECTORIES.forEach { name -> File(cache, name).deleteRecursively() }
+            File(filesDirectory(), "exports").deleteRecursively()
         }
     }
 

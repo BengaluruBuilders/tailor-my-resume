@@ -1,6 +1,8 @@
 package com.tailormyresume.feature.tailor.impl.exported
 
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.CreditsRepository
@@ -20,6 +22,7 @@ import com.tailormyresume.core.testing.repository.TestProfileRepository
 import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.core.testing.util.TestClock
+import com.tailormyresume.feature.tailor.api.ExportedPdfIntents
 import com.tailormyresume.feature.tailor.impl.acceptedApplication
 import com.tailormyresume.feature.tailor.impl.acceptedBullet
 import com.tailormyresume.feature.tailor.impl.document.ResumeDocumentAssembler
@@ -40,12 +43,14 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.junit.runner.RunWith
 import java.io.File
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
 
+@RunWith(AndroidJUnit4::class)
 class ExportedViewModelTest {
 
     @get:Rule
@@ -73,6 +78,18 @@ class ExportedViewModelTest {
     private lateinit var directory: File
     private lateinit var renderer: FakeResumePdfRenderer
     private var filesPresent = true
+    private val intentRequests = mutableListOf<String>()
+    private val exportedPdfIntents = object : ExportedPdfIntents {
+        override suspend fun shareIntent(applicationId: String): Intent? {
+            intentRequests += "share:$applicationId"
+            return if (filesPresent) Intent(Intent.ACTION_SEND) else null
+        }
+
+        override suspend fun viewIntent(applicationId: String): Intent? {
+            intentRequests += "view:$applicationId"
+            return if (filesPresent) Intent(Intent.ACTION_VIEW) else null
+        }
+    }
 
     private val fileStore = object : ExportedFileStore {
         override fun fileFor(applicationId: String, fileName: String): File? {
@@ -87,6 +104,7 @@ class ExportedViewModelTest {
         directory = folder.newFolder()
         renderer = FakeResumePdfRenderer(directory)
         filesPresent = true
+        intentRequests.clear()
     }
 
     @After
@@ -112,6 +130,7 @@ class ExportedViewModelTest {
         ),
         setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, clock),
         fileStore = fileStore,
+        exportedPdfIntents = exportedPdfIntents,
         savedStateHandle = savedStateHandle,
         ioDispatcher = UnconfinedTestDispatcher(),
         applicationId = "app-1",
@@ -302,6 +321,22 @@ class ExportedViewModelTest {
     }
 
     @Test
+    fun missingStoredFileAfterProcessDeathDoesNotRerenderCurrentProfile() = runTest {
+        seed()
+        val first = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { first.state.collect() }
+        first.ready()
+        filesPresent = false
+
+        val restored = viewModel(SavedStateHandle(mapOf("exported" to true)))
+        backgroundScope.launch(UnconfinedTestDispatcher()) { restored.state.collect() }
+
+        assertThat(restored.state.value).isEqualTo(ExportedUiState.ExportFailed)
+        assertThat(renderer.renderCalls).isEqualTo(1)
+        assertThat(exportHistory.observeExports("app-1").first()).hasSize(1)
+    }
+
+    @Test
     fun exportingMarksTheSavedStateSoARestoreDoesNotRepeatIt() = runTest {
         seed()
         val handle = SavedStateHandle()
@@ -393,18 +428,18 @@ class ExportedViewModelTest {
         seed()
         val viewModel = viewModel()
         backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
-        val fileName = viewModel.ready().fileName
+        viewModel.ready()
 
         viewModel.events.test {
             viewModel.onShare()
             val share = awaitItem()
             assertThat(share).isInstanceOf(ExportedEvent.Share::class.java)
-            assertThat((share as ExportedEvent.Share).file.name).isEqualTo(fileName)
+            assertThat((share as ExportedEvent.Share).intent.action).isEqualTo(Intent.ACTION_SEND)
 
             viewModel.onOpen()
             val open = awaitItem()
             assertThat(open).isInstanceOf(ExportedEvent.Open::class.java)
-            assertThat((open as ExportedEvent.Open).file.name).isEqualTo(fileName)
+            assertThat((open as ExportedEvent.Open).intent.action).isEqualTo(Intent.ACTION_VIEW)
 
             cancelAndIgnoreRemainingEvents()
         }
@@ -420,6 +455,8 @@ class ExportedViewModelTest {
 
             cancelAndIgnoreRemainingEvents()
         }
+
+        assertThat(intentRequests).containsExactly("share:app-1", "view:app-1", "share:app-1", "view:app-1").inOrder()
     }
 
     @Test

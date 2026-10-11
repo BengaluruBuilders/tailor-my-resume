@@ -1,6 +1,7 @@
 package com.tailormyresume.feature.tailor.impl.export
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
@@ -23,18 +24,21 @@ import com.tailormyresume.feature.tailor.impl.entryFor
 import com.tailormyresume.feature.tailor.impl.exported.CacheExportedFileStore
 import com.tailormyresume.feature.tailor.impl.testProfile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
+import java.util.concurrent.Executors
 
 @RunWith(AndroidJUnit4::class)
 class ExportedPdfIntentsImplTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val exportsDirectory = File(context.cacheDir, "exports")
+    private val exportsDirectory = File(context.filesDir, "exports")
+    private val legacyExportsDirectory = File(context.cacheDir, "exports")
     private val applicationRepository = TestApplicationRepository()
     private val profileRepository = TestProfileRepository()
 
@@ -63,6 +67,7 @@ class ExportedPdfIntentsImplTest {
     @Before
     fun setUp() {
         exportsDirectory.deleteRecursively()
+        legacyExportsDirectory.deleteRecursively()
         val cache = FileProvider::class.java.getDeclaredField("sCache").apply { isAccessible = true }
         (cache.get(null) as MutableMap<*, *>).clear()
     }
@@ -100,7 +105,33 @@ class ExportedPdfIntentsImplTest {
     }
 
     @Test
-    fun missingFileIsRerenderedForThatApplicationOnly() = runTest {
+    fun shareAndOpenBuildTheirFileProviderIntentsOffTheCallerThread() = runTest {
+        seed(application("a", "Northwind GCC"))
+        exportResume("a")
+        val callerThread = Thread.currentThread()
+        val checkedContext = object : ContextWrapper(context) {
+            override fun getPackageName(): String {
+                assertThat(Thread.currentThread()).isNotSameInstanceAs(callerThread)
+                return super.getPackageName()
+            }
+        }
+
+        Executors.newSingleThreadExecutor().asCoroutineDispatcher().use { ioDispatcher ->
+            val checkedIntents = ExportedPdfIntentsImpl(
+                checkedContext,
+                applicationRepository,
+                exportResume,
+                CacheExportedFileStore(checkedContext),
+                ioDispatcher,
+            )
+
+            assertThat(checkedIntents.shareIntent("a")).isNotNull()
+            assertThat(checkedIntents.viewIntent("a")).isNotNull()
+        }
+    }
+
+    @Test
+    fun missingSavedFileDoesNotSilentlyChangeTheExport() = runTest {
         seed(application("a", "Northwind GCC"), application("b", "Kestrel Bank"))
         exportResume("a")
         exportResume("b")
@@ -109,13 +140,30 @@ class ExportedPdfIntentsImplTest {
         check(aFile.delete())
         val rendersBefore = renderer.renderCalls
 
+        val share = intents.shareIntent("a")
+
+        assertThat(share).isNull()
+        assertThat(aFile.isFile).isFalse()
+        assertThat(bFile.isFile).isTrue()
+        assertThat(renderer.renderCalls).isEqualTo(rendersBefore)
+    }
+
+    @Test
+    fun existingCachedPdfMovesToSavedStorage() = runTest {
+        seed(application("a", "Northwind GCC"))
+        exportResume("a")
+        val fileName = exportedFileName("a")
+        val saved = File(File(exportsDirectory, "a"), fileName)
+        val cached = File(File(legacyExportsDirectory, "a").apply { mkdirs() }, fileName)
+        check(saved.copyTo(cached).isFile)
+        check(saved.delete())
+
         val share = checkNotNull(intents.shareIntent("a"))
 
-        assertThat(share.streamedFileName()).isEqualTo(aFile.name)
-        assertThat(aFile.isFile).isTrue()
-        assertThat(bFile.isFile).isTrue()
-        assertThat(renderer.renderCalls).isEqualTo(rendersBefore + 1)
-        assertThat(renderer.renderedFileNames.last()).isEqualTo(aFile.name)
+        assertThat(share.streamedFileName()).isEqualTo(fileName)
+        assertThat(saved.isFile).isTrue()
+        assertThat(cached.exists()).isFalse()
+        assertThat(renderer.renderCalls).isEqualTo(1)
     }
 
     @Test

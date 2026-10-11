@@ -15,7 +15,14 @@ internal class CacheExportedFileStore @Inject constructor(
 ) : ExportedFileStore {
 
     override fun fileFor(applicationId: String, fileName: String): File? =
-        ExportDirectory(File(context.cacheDir, EXPORT_DIRECTORY)).existing(applicationId, fileName)
+        ExportDirectory(File(context.filesDir, EXPORT_DIRECTORY)).let { saved ->
+            saved.existing(applicationId, fileName)
+                ?: ExportDirectory(File(context.cacheDir, EXPORT_DIRECTORY)).existing(applicationId, fileName)?.let { cached ->
+                    runCatching {
+                        saved.write(applicationId, cached.name) { output -> cached.inputStream().use { it.copyTo(output) } }
+                    }.onSuccess { cached.delete() }.getOrDefault(cached)
+                }
+        }
 
     private companion object {
         const val EXPORT_DIRECTORY = "exports"
