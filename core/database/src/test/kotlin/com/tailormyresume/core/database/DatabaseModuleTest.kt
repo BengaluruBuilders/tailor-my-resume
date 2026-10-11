@@ -39,7 +39,7 @@ class DatabaseModuleTest {
         val database = DatabaseModule.providesTmrDatabase(RuntimeEnvironment.getApplication())
         try {
             val version = database.openHelper.writableDatabase.version
-            assertThat(version).isEqualTo(3)
+            assertThat(version).isEqualTo(4)
             database.openHelper.writableDatabase.query("SELECT fullName FROM profile").use { cursor ->
                 assertThat(cursor.moveToFirst()).isTrue()
                 assertThat(cursor.getString(0)).isEqualTo("Priya")

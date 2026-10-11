@@ -20,15 +20,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
+import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.navigation.ChromeActions
 import com.tailormyresume.core.navigation.LocalChromeActions
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.core.testing.data.PrototypeFixtures
-import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditRoleNavKey
 import com.tailormyresume.feature.profile.api.navigation.ExperienceNavKey

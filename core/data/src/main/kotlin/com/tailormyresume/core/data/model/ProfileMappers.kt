@@ -25,6 +25,7 @@ fun CandidateProfile.asEntity() = ProfileEntity(
     summary = summary,
     sourceFileName = sourceFileName,
     reviewedAt = reviewedAt,
+    contactUserStated = contactUserStated,
 )
 
 fun ProfileEntry.asEntity(position: Int) = ProfileEntryEntity(
@@ -68,6 +69,7 @@ fun PopulatedProfile.asExternalModel() = CandidateProfile(
     summary = profile.summary,
     sourceFileName = profile.sourceFileName,
     reviewedAt = profile.reviewedAt,
+    contactUserStated = profile.contactUserStated,
     entries = entries
         .sortedBy(ProfileEntryEntity::position)
         .map(ProfileEntryEntity::asExternalModel),

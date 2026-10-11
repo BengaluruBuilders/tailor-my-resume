@@ -26,6 +26,8 @@ data class ProfileEntity(
     val summary: String = "",
     val sourceFileName: String? = null,
     val reviewedAt: Instant? = null,
+    @ColumnInfo(defaultValue = "0")
+    val contactUserStated: Boolean = false,
 ) {
     companion object {
         const val SINGLETON_ID = 1
