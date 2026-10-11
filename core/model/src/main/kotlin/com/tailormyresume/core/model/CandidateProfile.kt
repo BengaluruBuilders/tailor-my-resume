@@ -16,6 +16,7 @@ data class CandidateProfile(
     val summary: String = "",
     val sourceFileName: String? = null,
     val reviewedAt: Instant? = null,
+    val contactUserStated: Boolean = false,
 )
 
 object ProfileLimits {

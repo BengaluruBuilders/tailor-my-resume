@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_profile_impl_contact_heading">Contact</string>
+    <string name="feature_profile_impl_contact_full_name">Full name</string>
+    <string name="feature_profile_impl_contact_phone">Phone</string>
+    <string name="feature_profile_impl_contact_city">City</string>
+    <string name="feature_profile_impl_contact_email">Email · from Google</string>
+    <string name="feature_profile_impl_contact_linkedin">LinkedIn · optional</string>
+    <string name="feature_profile_impl_contact_linkedin_hint">linkedin.com/in/your-name</string>
+    <string name="feature_profile_impl_contact_portfolio">Portfolio · optional</string>
+    <string name="feature_profile_impl_contact_portfolio_hint">https://</string>
+    <string name="feature_profile_impl_contact_saved">Contact saved</string>
+    <string name="feature_profile_impl_skills_heading">Skills</string>
+    <plurals name="feature_profile_impl_skills_count">
+        <item quantity="one">%1$d skill. Paige picks the most relevant ones for each job.</item>
+        <item quantity="other">%1$d skills. Paige picks the most relevant ones for each job.</item>
+    </plurals>
+    <string name="feature_profile_impl_skills_add_hint">Add a skill</string>
+    <string name="feature_profile_impl_skills_add">Add</string>
+    <string name="feature_profile_impl_skills_remove">Remove %1$s</string>
+    <string name="feature_profile_impl_skills_remove_mark" translatable="false">×</string>
+    <string name="feature_profile_impl_skills_saved">Skills saved</string>
+    <string name="feature_profile_impl_list_summary_heading">Summary</string>
+    <string name="feature_profile_impl_list_summary_note">Your starting point. Each tailored resume adapts it to the job.</string>
+    <string name="feature_profile_impl_list_summary_label">Your summary</string>
+    <string name="feature_profile_impl_list_education_heading">Education</string>
+    <string name="feature_profile_impl_list_education_add">+ Add education</string>
+    <string name="feature_profile_impl_list_achievements_heading">Achievements</string>
+    <string name="feature_profile_impl_list_achievements_note">Numbers help. Paige pulls the most relevant ones into each resume.</string>
+    <string name="feature_profile_impl_list_item_label">Entry %1$d</string>
+    <string name="feature_profile_impl_list_achievements_add">+ Add achievement</string>
+    <string name="feature_profile_impl_list_hint">Write here</string>
+    <string name="feature_profile_impl_list_saved">Saved</string>
+</resources>

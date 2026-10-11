@@ -41,3 +41,9 @@ val MIGRATION_2_3: Migration = object : Migration(2, 3) {
         ).forEach { db.execSQL(it) }
     }
 }
+
+val MIGRATION_3_4: Migration = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE profile ADD COLUMN contactUserStated INTEGER NOT NULL DEFAULT 0")
+    }
+}
