@@ -117,7 +117,7 @@ Adopted in the PR that introduces the design-fidelity UI work.
 | Item | Why | Gate |
 |---|---|---|
 | Coverage report (Kover) | The design-fidelity work is the first large change to `core:domain`, `core:data` and every ViewModel. Adopting coverage only after the fabrication set would have let those modules grow unchecked for five pull requests. | `koverVerify` fails above 80% line coverage on `core:domain` and `core:data`. Every ViewModel test class must exist for a ViewModel that exists. |
-| Roborazzi screenshot tests | Design fidelity is not verifiable by unit tests. The designs in `design/claude-design` are the acceptance criterion, so the only way to prove a screen matches its frame is to compare a rendered screenshot against a committed baseline. | `verifyRoborazziDebug` runs in `tools/ci/verify-local.sh` and in CI with `roborazzi.test.verify=true`. Any unexpected image difference fails the build. |
+| Roborazzi screenshot tests | Design fidelity is not verifiable by unit tests. The prototype in `design/prototype-2026-10-10/`, at 374 x 834 dp, is the acceptance criterion, so the only way to prove a screen matches its frame is to compare a rendered screenshot against a committed baseline. | `verifyRoborazziDebug` runs in `tools/ci/verify-local.sh` and in CI with `roborazzi.test.verify=true`. Any unexpected image difference fails the build. |
 | Design-system import check (II.5) | Part of the custom lint module above, implemented cheaply as a source scan. The full custom lint module is still deferred. | `tools/ci/check-constitution.sh` fails if a feature module imports a raw Material component or reads a design-system token without going through the design system. |
 
 Kover was chosen over JaCoCo. Roborazzi and Robolectric are build-time test dependencies and
@@ -130,6 +130,14 @@ the release APK still requests no network permission.
 | Item | Why | Gate |
 |---|---|---|
 | I.5 no longer requires consent screen S4 | The owner cut the consent screen and the 18+ check from the MVP on 2026-10-10 (PRD 6.1.2). The rest of I.5 stands. | `tools/ci/check-constitution.sh` policy I.5 (unchanged; it never checked S4) |
+
+### Ledger amendment — 2026-10-10, screenshot acceptance source
+
+| Item | Why | Gate |
+|---|---|---|
+| The Roborazzi row now takes the prototype in `design/prototype-2026-10-10/`, at 374 x 834 dp, as its acceptance source | The 2026-10-10 prototype replaces the older design in `design/claude-design`. | `verifyRoborazziDebug` (unchanged) |
+| D4: one explicit "Accept changes" action in the Changes tab, with per-change Undo, satisfies I.2's explicit accept before export | The prototype has one accept control for all changes. Export PDF stays disabled until it is taken, so no export happens without an explicit accept. I.2 is unchanged. | `UpdateBulletDecisionUseCaseTest` and `TailorViewModelTest` (existing) |
+| D5: the before/after number is keyword coverage per PRD 4.2, labelled as keyword coverage, never match, fit or ATS | The prototype shows a before/after number. It is only honest as keyword coverage, so the label says so. I.3 is unchanged. | `tools/ci/check-constitution.sh` policy I.3 |
 
 ### Ledger amendment — 2026-10-08, network access for the TailorMyResume backend (I.5)
 
