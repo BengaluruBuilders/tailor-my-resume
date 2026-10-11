@@ -1,6 +1,8 @@
 package com.tailormyresume.feature.profile.impl.overview
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -26,7 +28,7 @@ class ProfileInsetTest {
                 ProfileScreen(
                     state = ProfileUiState.Loading,
                     onOpen = { opened += it },
-                    topInset = WindowInsets(top = 48.dp),
+                    modifier = Modifier.windowInsetsPadding(WindowInsets(top = 48.dp)),
                 )
             }
         }

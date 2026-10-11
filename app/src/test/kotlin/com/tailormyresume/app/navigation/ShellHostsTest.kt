@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation3.runtime.NavEntry
@@ -20,6 +23,7 @@ import com.tailormyresume.core.designsystem.component.chrome.TmrSheetHostState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.navigation.RegisterChromeAction
 import com.tailormyresume.core.navigation.RegisterChromeBack
+import com.tailormyresume.feature.analysis.api.navigation.JobLinkNavKey
 import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
 import com.tailormyresume.feature.tailor.api.navigation.EditResumeNavKey
 import org.junit.Rule
@@ -47,6 +51,7 @@ class ShellHostsTest {
     private fun provider(
         onSave: () -> Unit = {},
         registerSave: Boolean = false,
+        saveEnabled: Boolean = true,
         onBack: () -> Unit = {},
         registerBack: Boolean = false,
         showHosts: Boolean = false,
@@ -63,7 +68,7 @@ class ShellHostsTest {
                         sheet.show("Sheet B") { Text("sheet body B") }
                     }
                 }
-                if (registerSave && key is EditResumeNavKey) RegisterChromeAction(onSave)
+                if (registerSave && key is EditResumeNavKey) RegisterChromeAction(onSave, enabled = saveEnabled)
                 if (registerBack && key is EditResumeNavKey) RegisterChromeBack(onBack)
                 Column { Text(checkNotNull(key::class.simpleName)) }
             }
@@ -97,6 +102,36 @@ class ShellHostsTest {
 
         assertThat(saved).isEqualTo(1)
         assertThat(shell.stack).containsExactly(DefaultApplicationsNavKey, EditResumeNavKey("app-1")).inOrder()
+    }
+
+    @Test
+    fun aDisabledRegisteredSaveIgnoresTap() {
+        var saved = 0
+        rule.mainClock.autoAdvance = false
+        shell.show(DefaultApplicationsNavKey, provider(onSave = { saved += 1 }, registerSave = true, saveEnabled = false))
+        shell.go(EditResumeNavKey("app-1"))
+        rule.mainClock.advanceTimeBy(1_000)
+        rule.onNodeWithText("Save").assertIsNotEnabled().performClick()
+        assertThat(saved).isEqualTo(0)
+        assertThat(shell.stack).containsExactly(DefaultApplicationsNavKey, EditResumeNavKey("app-1")).inOrder()
+    }
+
+    @Test
+    fun toastClearsTheStepBarAtLargeFontScale() {
+        rule.mainClock.autoAdvance = false
+        shell.show(JobLinkNavKey(), { _ ->
+            { key ->
+                NavEntry(key) {
+                    val toast = LocalTmrToast.current
+                    LaunchedEffect(key) { toast.show("Pick an answer, or skip") }
+                    Text("Content")
+                }
+            }
+        }, fontScale = 2f)
+        rule.mainClock.advanceTimeBy(1_000)
+        val steps = rule.onNodeWithText("3 Tailor", useUnmergedTree = true).getBoundsInRoot()
+        val toast = rule.onNodeWithTag(TOAST_TAG).getBoundsInRoot()
+        assertThat(toast.top.value).isGreaterThan(steps.bottom.value)
     }
 
     @Test
