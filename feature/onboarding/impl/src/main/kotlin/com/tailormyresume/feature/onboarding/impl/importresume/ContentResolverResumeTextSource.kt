@@ -29,6 +29,9 @@ class ContentResolverResumeTextSource @Inject constructor(
             return@withContext ResumeRead.TooLarge(measured.byteSize, RESUME_READ_LIMIT_BYTES)
         }
         val bytes = readBytes(file.uri) ?: return@withContext ResumeRead.Unreadable(measured.displayName)
+        if (bytes.size > RESUME_READ_LIMIT_BYTES) {
+            return@withContext ResumeRead.TooLarge(bytes.size.toLong(), RESUME_READ_LIMIT_BYTES)
+        }
         if (bytes.isEmpty()) {
             return@withContext ResumeRead.Empty(measured.byteSize)
         }

@@ -19,13 +19,8 @@ import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
-import com.tailormyresume.feature.onboarding.api.navigation.ManualProfileNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.PasteResumeNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.ReadingNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.ReviewProfileNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.UploadErrorNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import com.tailormyresume.feature.onboarding.impl.navigation.onboardingEntry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -50,11 +45,6 @@ class OnboardingEntryKeysTest {
 
     private val keys: List<NavKey> =
         listOf(
-            UploadNavKey(),
-            UploadErrorNavKey(),
-            PasteResumeNavKey(),
-            ManualProfileNavKey(),
-            ReadingNavKey(),
             ReviewProfileNavKey(),
         )
 

@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.sp
 import com.tailormyresume.core.designsystem.component.WholeWordAutoSize
 import com.tailormyresume.core.designsystem.component.withBreakOpportunities
 
-internal val TmrFitTextLayoutKey = SemanticsPropertyKey<() -> TextLayoutResult?>("TmrFitTextLayout")
+val TmrFitTextLayoutKey = SemanticsPropertyKey<() -> TextLayoutResult?>("TmrFitTextLayout")
 
 @Composable
-internal fun TmrFitText(
+fun TmrFitText(
     text: String,
     style: TextStyle,
     color: Color,
