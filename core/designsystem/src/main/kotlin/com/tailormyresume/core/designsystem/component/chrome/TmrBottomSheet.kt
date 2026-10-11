@@ -65,7 +65,7 @@ fun TmrBottomSheet(
                             onClick = onDismiss,
                         )
                     } else {
-                        Modifier
+                        Modifier.pointerInput(Unit) { detectTapGestures { } }
                     },
                 ),
         )

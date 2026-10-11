@@ -14,6 +14,7 @@ import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.account.AccountDataExporterContractTest
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.data.sampleApplication
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -21,6 +22,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.util.zip.ZipFile
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Instant
 
 class OfflineAccountDataExporterTest : AccountDataExporterContractTest() {
@@ -74,5 +76,31 @@ class OfflineAccountDataExporterTest : AccountDataExporterContractTest() {
 
         assertThat(earlier.exists()).isFalse()
         assertThat(archive.file.exists()).isTrue()
+    }
+
+    @Test
+    fun theEarlierArchiveIsStillThereWhenTheWorkIsHandedToTheIoDispatcher() = runTest {
+        val earlier = File(folder.root, "earlier-export.zip").apply { writeText("x") }
+        var earlierExistedAtHandOff: Boolean? = null
+        val observingIo = object : CoroutineDispatcher() {
+            override fun dispatch(context: CoroutineContext, block: Runnable) {
+                earlierExistedAtHandOff = earlier.exists()
+                block.run()
+            }
+        }
+        val data = AccountData(
+            generatedAt = Instant.fromEpochMilliseconds(1_790_000_000_000),
+            account = null,
+            profile = null,
+            applications = emptyList(),
+            entitlement = PurchaseEntitlement(0, 0, emptyList()),
+            purchases = emptyList(),
+            exports = emptyList(),
+        )
+
+        OfflineAccountDataExporter({ folder.root }, NoMockLatency, observingIo).export(data)
+
+        assertThat(earlierExistedAtHandOff).isTrue()
+        assertThat(earlier.exists()).isFalse()
     }
 }
