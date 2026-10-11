@@ -18,6 +18,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.tailormyresume.core.designsystem.component.content.TmrFitText
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 
 @Composable
@@ -44,6 +45,34 @@ fun TmrTextField(
 ) {
     TmrLabeledField(label = label, modifier = modifier) {
         TmrFieldBox(value, onValueChange, label, placeholder, readOnly, amber, singleLine = true, minHeight = 56.dp)
+    }
+}
+
+private val EMAIL_BREAK_AFTER = charArrayOf('@', '.')
+
+@Composable
+fun TmrReadOnlyField(
+    value: String,
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    TmrLabeledField(label = label, modifier = modifier) {
+        val shape = TmrTheme.shapes.field
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .background(TmrTheme.colors.fill, shape)
+                .border(BorderStroke(1.5.dp, TmrTheme.colors.boundary), shape)
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+        ) {
+            TmrFitText(
+                text = value,
+                style = TmrTheme.typography.bodyLarge,
+                color = TmrTheme.colors.text,
+                breakAfter = EMAIL_BREAK_AFTER,
+            )
+        }
     }
 }
 

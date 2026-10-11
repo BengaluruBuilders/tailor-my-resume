@@ -31,6 +31,7 @@ import com.tailormyresume.feature.onboarding.impl.importresume.UploadFailureKind
 import com.tailormyresume.feature.onboarding.impl.reading.ReadingRoute
 import com.tailormyresume.feature.onboarding.impl.reading.ReadingViewModel
 import com.tailormyresume.feature.onboarding.impl.signin.reduceMotion
+import com.tailormyresume.feature.onboarding.impl.upload.NoopResumeFileResolver
 import com.tailormyresume.feature.onboarding.impl.upload.UnreadableRoute
 import com.tailormyresume.feature.onboarding.impl.upload.UnreadableViewModel
 import com.tailormyresume.feature.onboarding.impl.upload.showFlowScreen
@@ -119,7 +120,7 @@ class OnboardingNavigationTest {
         val navigator = navigatorOf(UploadNavKey(), UploadErrorNavKey())
         draft.fail(UploadFailure(UploadFailureKind.ImageOnly, "scan.pdf", RESUME_PDF_MIME, 2_048L))
 
-        composeRule.showFlowScreen { UnreadableRoute(UnreadableViewModel(draft), navigator) }
+        composeRule.showFlowScreen { UnreadableRoute(UnreadableViewModel(draft, NoopResumeFileResolver), navigator) }
         composeRule.onNodeWithText("Paste as text").performClick()
         composeRule.waitForIdle()
 

@@ -20,7 +20,7 @@ class UploadViewModelTest {
     @Test
     fun pickedFileGoesToDraftAndNavigatesToReading() = runTest(UnconfinedTestDispatcher()) {
         val draft = ResumeImportDraft(TestSessionRepository(), backgroundScope)
-        val viewModel = UploadViewModel(draft)
+        val viewModel = UploadViewModel(draft, NoopResumeFileResolver)
 
         viewModel.events.test {
             viewModel.onFilePicked(file)
@@ -33,7 +33,7 @@ class UploadViewModelTest {
     @Test
     fun cancelledPickDoesNothing() = runTest(UnconfinedTestDispatcher()) {
         val draft = ResumeImportDraft(TestSessionRepository(), backgroundScope)
-        val viewModel = UploadViewModel(draft)
+        val viewModel = UploadViewModel(draft, NoopResumeFileResolver)
 
         viewModel.events.test {
             viewModel.onFilePicked(null)

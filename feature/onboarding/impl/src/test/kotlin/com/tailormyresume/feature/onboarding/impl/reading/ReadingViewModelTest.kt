@@ -143,11 +143,22 @@ class ReadingViewModelTest {
             ReadingRowState.Done,
             ReadingRowState.Done,
         ).inOrder()
-        assertThat(afterSave.rows.map { it.count }[0]).isNull()
+        assertThat(afterSave.rows.map { it.count }[0]).isEqualTo(3)
         assertThat(afterSave.rows.map { it.count }.drop(1)).containsExactly(2, 1, 3, 1).inOrder()
         assertThat(afterSave.file).isEqualTo(
             ReadingFileUi(file.displayName, file.mimeType, file.byteSize, 0),
         )
+    }
+
+    @Test
+    fun contactRowCountsZeroWhenOnlySkillsWereParsed() = runTest(UnconfinedTestDispatcher()) {
+        val draft = draftIn(backgroundScope)
+        draft.setFile(file)
+        val skillsOnly = emptyProfile().copy(skills = listOf("Kotlin"))
+
+        val viewModel = viewModelIn(draft, FakeResumeTextSource(ResumeRead.Text(text)), FakeResumeTextParser(skillsOnly))
+
+        assertThat(viewModel.uiState.value.rows.first { it.kind == ReadingRowKind.Contact }.count).isEqualTo(0)
     }
 
     @Test
@@ -193,7 +204,7 @@ class ReadingViewModelTest {
                 add(FailureCase(parserThrows = AiException(failure), kind = UploadFailureKind.Neutral))
             }
             add(FailureCase(parserThrows = RuntimeException("boom"), kind = UploadFailureKind.Neutral))
-            add(FailureCase(parsed = emptyProfile(), kind = UploadFailureKind.FileProblem))
+            add(FailureCase(parsed = emptyProfile(), kind = UploadFailureKind.Neutral))
             add(FailureCase(parsed = emptyProfile(), pasted = true, kind = UploadFailureKind.Neutral))
             add(
                 FailureCase(

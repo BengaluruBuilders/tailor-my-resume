@@ -36,7 +36,7 @@ class SaveManualProfileUseCaseTest {
         assertThat(saved.phone).isEqualTo("+91 98000 00000")
         assertThat(saved.city).isEqualTo("Pune")
         val entry = saved.entries.single()
-        assertThat(entry.id).isEqualTo("W-01")
+        assertThat(entry.id).matches("W-[0-9a-f]{8}")
         assertThat(entry.category).isEqualTo(EntryCategory.EXPERIENCE)
         assertThat(entry.title).isEqualTo("Business Analyst")
         assertThat(entry.organization).isEqualTo("Infosys")
@@ -66,9 +66,21 @@ class SaveManualProfileUseCaseTest {
         useCase(contact)
 
         val saved = checkNotNull(repository.observeProfile().first())
-        assertThat(saved.entries.map { it.id }).containsExactly("W-01", "W-02").inOrder()
+        assertThat(saved.entries.first().id).isEqualTo("W-01")
+        assertThat(saved.entries.last().id).isNotEqualTo("W-01")
+        assertThat(saved.entries).hasSize(2)
         assertThat(saved.entries.first()).isEqualTo(kept)
         assertThat(saved.skills).containsExactly("Kotlin")
         assertThat(saved.userStatedSkills).containsExactly("Kotlin")
+    }
+
+    @Test
+    fun deletedRoleIdIsNeverGivenToANewRole() = runTest {
+        val first = useCase(contact).entries.single()
+        repository.sendProfile(checkNotNull(repository.observeProfile().first()).copy(entries = emptyList()))
+
+        val second = useCase(contact).entries.single()
+
+        assertThat(second.id).isNotEqualTo(first.id)
     }
 }

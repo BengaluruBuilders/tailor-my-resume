@@ -101,7 +101,7 @@ internal class ReadingViewModel @Inject constructor(
             return
         }
         if (parsed.entries.isEmpty() && parsed.skills.isEmpty() && parsed.fullName.isBlank()) {
-            fail(if (file == null) UploadFailureKind.Neutral else UploadFailureKind.FileProblem, file)
+            fail(UploadFailureKind.Neutral, file)
             return
         }
         try {
@@ -145,7 +145,7 @@ internal class ReadingViewModel @Inject constructor(
 
     private fun doneRows(parsed: CandidateProfile): List<ReadingRowUi> = ReadingRowKind.entries.map { kind ->
         val count = when (kind) {
-            ReadingRowKind.Contact -> null
+            ReadingRowKind.Contact -> listOf(parsed.fullName, parsed.email, parsed.phone).count { it.isNotBlank() }
             ReadingRowKind.Experience -> parsed.entries.count { it.category == EntryCategory.EXPERIENCE }
             ReadingRowKind.Education -> parsed.entries.count { it.category == EntryCategory.EDUCATION }
             ReadingRowKind.Skills -> parsed.skills.size

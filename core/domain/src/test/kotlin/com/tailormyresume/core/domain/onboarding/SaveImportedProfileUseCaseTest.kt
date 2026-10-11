@@ -15,6 +15,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.time.Instant
 
+private val UNIQUE_WORK_ID = Regex("W-[0-9a-f]{8}")
+
 class SaveImportedProfileUseCaseTest {
 
     private val repository = TestProfileRepository()
@@ -37,7 +39,11 @@ class SaveImportedProfileUseCaseTest {
         useCase.invoke(parsed, "resume.pdf")
 
         val saved = checkNotNull(repository.observeProfile().first())
-        assertThat(saved.entries.map { it.id }).containsExactly("W-01", "W-02", "W-03").inOrder()
+        val ids = saved.entries.map { it.id }
+        assertThat(ids.first()).isEqualTo("W-01")
+        assertThat(ids.drop(1)).containsNoneIn(listOf("W-01"))
+        assertThat(ids.toSet()).hasSize(3)
+        assertThat(ids.drop(1).all { it.matches(UNIQUE_WORK_ID) }).isTrue()
     }
 
     @Test
@@ -54,8 +60,8 @@ class SaveImportedProfileUseCaseTest {
         val entries = checkNotNull(repository.observeProfile().first()).entries
         assertThat(entries).hasSize(2)
         assertThat(entries[1].continues(entries[0])).isTrue()
-        assertThat(entries[0].bullets.map { it.id }).containsExactly("W-01-b1")
-        assertThat(entries[1].bullets.map { it.id }).containsExactly("W-02-b1")
+        assertThat(entries[0].bullets.map { it.id }).containsExactly(entries[0].id + "-b1")
+        assertThat(entries[1].bullets.map { it.id }).containsExactly(entries[1].id + "-b1")
     }
 
     @Test
@@ -98,8 +104,9 @@ class SaveImportedProfileUseCaseTest {
         useCase.invoke(parsed, "resume.pdf")
 
         val saved = checkNotNull(repository.observeProfile().first())
-        assertThat(saved.entries.map { it.id })
-            .containsExactly("W-01", "W-02", "W-03", "W-04").inOrder()
+        assertThat(saved.entries.map { it.id }.take(3)).containsExactly("W-01", "W-02", "W-03").inOrder()
+        assertThat(saved.entries).hasSize(4)
+        assertThat(saved.entries.last().id).isNotEqualTo("W-04")
         assertThat(saved.entries.first().title).isEqualTo("Kept role")
         assertThat(saved.fullName).isEqualTo("Kept Name")
         assertThat(saved.email).isEqualTo("kept@example.com")
@@ -189,13 +196,34 @@ class SaveImportedProfileUseCaseTest {
         useCase.invoke(parsed, "resume-v2.pdf")
 
         val saved = checkNotNull(repository.observeProfile().first())
-        assertThat(saved.entries.map { it.id }).containsExactly("W-01", "W-02").inOrder()
+        assertThat(saved.entries.first().id).isEqualTo("W-01")
+        assertThat(saved.entries.last().id).isNotIn(listOf("W-01", "W-02"))
         assertThat(saved.entries.first().title).isEqualTo("Kept role")
         assertThat(saved.entries.first().source).isEqualTo(FactSource.USER_STATED)
         assertThat(saved.entries.first().isConfirmed).isTrue()
         assertThat(saved.entries.last().title).isEqualTo("New imported role")
         assertThat(saved.sourceFileName).isEqualTo("resume-v2.pdf")
         assertThat(saved.reviewedAt).isNull()
+    }
+
+    @Test
+    fun reimportNeverGivesAnIdThatARemovedFactHad() = runTest {
+        repository.sendProfile(
+            profile(
+                entries = listOf(
+                    entry("W-01", EntryCategory.EXPERIENCE, title = "Old role", source = FactSource.IMPORTED),
+                ),
+            ),
+        )
+        val oldReference = "W-01"
+        val parsed = profile(entries = listOf(entry("y1", EntryCategory.EXPERIENCE, title = "New role")))
+
+        useCase.invoke(parsed, "resume-v2.pdf")
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(saved.entries.map { it.id }).doesNotContain(oldReference)
+        assertThat(saved.entries.firstOrNull { it.id == oldReference }).isNull()
+        assertThat(saved.entries.single().bullets.map { it.id }).doesNotContain("W-01-b1")
     }
 
     private fun entry(

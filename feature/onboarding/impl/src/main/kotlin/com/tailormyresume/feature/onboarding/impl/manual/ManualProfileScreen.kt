@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.designsystem.component.TmrBottomActionBar
 import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
+import com.tailormyresume.core.designsystem.component.input.TmrReadOnlyField
 import com.tailormyresume.core.designsystem.component.input.TmrTextField
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.navigation.Navigator
@@ -62,11 +63,9 @@ internal fun ManualProfileScreen(
                 onValueChange = { onFieldChange(ManualField.FullName, it) },
                 label = stringResource(R.string.feature_onboarding_impl_manual_full_name),
             )
-            TmrTextField(
+            TmrReadOnlyField(
                 value = state.email,
-                onValueChange = {},
                 label = stringResource(R.string.feature_onboarding_impl_manual_email),
-                readOnly = true,
             )
             TmrTextField(
                 value = state.phone,

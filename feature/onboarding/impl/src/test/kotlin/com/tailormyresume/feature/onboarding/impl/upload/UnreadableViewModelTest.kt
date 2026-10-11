@@ -22,7 +22,7 @@ class UnreadableViewModelTest {
     @Test
     fun showsTheFailureHeldByTheDraftAndNeutralWhenNone() = runTest(UnconfinedTestDispatcher()) {
         val draft = ResumeImportDraft(TestSessionRepository(), backgroundScope)
-        val viewModel = UnreadableViewModel(draft)
+        val viewModel = UnreadableViewModel(draft, NoopResumeFileResolver)
         assertThat(viewModel.uiState.value).isEqualTo(UploadFailure(UploadFailureKind.Neutral))
 
         val failure = UploadFailure(UploadFailureKind.ImageOnly, "scan.pdf", RESUME_PDF_MIME, 2_048L)
@@ -34,7 +34,7 @@ class UnreadableViewModelTest {
     @Test
     fun pickReplacesWithReading() = runTest(UnconfinedTestDispatcher()) {
         val draft = ResumeImportDraft(TestSessionRepository(), backgroundScope)
-        val viewModel = UnreadableViewModel(draft)
+        val viewModel = UnreadableViewModel(draft, NoopResumeFileResolver)
 
         viewModel.events.test {
             viewModel.onFilePicked(file)
@@ -47,7 +47,7 @@ class UnreadableViewModelTest {
     @Test
     fun cancelledPickDoesNothing() = runTest(UnconfinedTestDispatcher()) {
         val draft = ResumeImportDraft(TestSessionRepository(), backgroundScope)
-        val viewModel = UnreadableViewModel(draft)
+        val viewModel = UnreadableViewModel(draft, NoopResumeFileResolver)
 
         viewModel.events.test {
             viewModel.onFilePicked(null)
@@ -59,7 +59,7 @@ class UnreadableViewModelTest {
     @Test
     fun pasteReplacesWithPasteResume() = runTest(UnconfinedTestDispatcher()) {
         val draft = ResumeImportDraft(TestSessionRepository(), backgroundScope)
-        val viewModel = UnreadableViewModel(draft)
+        val viewModel = UnreadableViewModel(draft, NoopResumeFileResolver)
 
         viewModel.events.test {
             viewModel.onPasteAsText()

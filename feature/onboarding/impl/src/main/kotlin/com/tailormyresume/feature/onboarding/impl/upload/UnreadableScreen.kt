@@ -20,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,7 +34,6 @@ import com.tailormyresume.feature.onboarding.impl.R
 import com.tailormyresume.feature.onboarding.impl.importresume.ResumeFileCard
 import com.tailormyresume.feature.onboarding.impl.importresume.UploadFailure
 import com.tailormyresume.feature.onboarding.impl.importresume.UploadFailureKind
-import com.tailormyresume.feature.onboarding.impl.importresume.resumeFileFor
 import com.tailormyresume.feature.onboarding.impl.importresume.resumeFileMeta
 import com.tailormyresume.feature.onboarding.impl.importresume.resumeMimeTypes
 
@@ -158,10 +156,7 @@ internal fun UnreadableRoute(
     modifier: Modifier = Modifier,
 ) {
     val failure by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        viewModel.onFilePicked(uri?.let { context.resumeFileFor(it) })
-    }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument(), viewModel::onUriPicked)
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {

@@ -16,7 +16,7 @@ class SaveImportedProfileUseCase @Inject constructor(
     suspend operator fun invoke(parsed: CandidateProfile, sourceFileName: String?): CandidateProfile {
         val existing = profileRepository.observeProfile().first() ?: EMPTY_PROFILE
         val kept = existing.entries.filter { it.source != FactSource.IMPORTED }
-        val allocated = kept.toMutableList()
+        val allocated = existing.entries.toMutableList()
         val imported = parsed.entries.map { entry ->
             reidentify(entry, allocated).also { allocated += it }
         }
@@ -42,7 +42,7 @@ class SaveImportedProfileUseCase @Inject constructor(
     }
 
     private fun reidentify(entry: ProfileEntry, allocated: List<ProfileEntry>): ProfileEntry {
-        val newId = factIdAllocator.nextId(entry.category, allocated, entry.title)
+        val newId = factIdAllocator.neverUsedId(entry.category, allocated, entry.title)
         val oldPrefix = entry.id + "-"
         return entry.copy(
             id = newId,

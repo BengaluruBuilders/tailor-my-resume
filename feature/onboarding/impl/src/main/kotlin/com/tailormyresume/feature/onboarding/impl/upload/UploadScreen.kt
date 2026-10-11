@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,7 +38,6 @@ import com.tailormyresume.feature.onboarding.api.navigation.ManualProfileNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.PasteResumeNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.ReadingNavKey
 import com.tailormyresume.feature.onboarding.impl.R
-import com.tailormyresume.feature.onboarding.impl.importresume.resumeFileFor
 import com.tailormyresume.feature.onboarding.impl.importresume.resumeMimeTypes
 
 private val HERO_MIN_HEIGHT = 290.dp
@@ -134,10 +132,7 @@ internal fun UploadRoute(
     navigator: Navigator,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        viewModel.onFilePicked(uri?.let { context.resumeFileFor(it) })
-    }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument(), viewModel::onUriPicked)
     LaunchedEffect(viewModel) {
         viewModel.events.collect { navigator.navigate(ReadingNavKey()) }
     }

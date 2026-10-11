@@ -59,7 +59,12 @@ private fun readingRowMeta(row: ReadingRowUi): String? {
         ReadingRowState.Active -> stringResource(R.string.feature_onboarding_impl_reading_meta_reading)
         ReadingRowState.Done ->
             when (row.kind) {
-                ReadingRowKind.Contact -> stringResource(R.string.feature_onboarding_impl_reading_meta_found)
+                ReadingRowKind.Contact ->
+                    if (count > 0) {
+                        stringResource(R.string.feature_onboarding_impl_reading_meta_found)
+                    } else {
+                        pluralStringResource(R.plurals.feature_onboarding_impl_reading_meta_found_count, 0, 0)
+                    }
                 ReadingRowKind.Experience ->
                     pluralStringResource(
                         R.plurals.feature_onboarding_impl_reading_meta_roles,

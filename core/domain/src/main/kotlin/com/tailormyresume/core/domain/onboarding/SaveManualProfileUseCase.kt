@@ -32,7 +32,7 @@ class SaveManualProfileUseCase @Inject constructor(
         } else {
             listOf(
                 ProfileEntry(
-                    id = factIdAllocator.nextId(EntryCategory.EXPERIENCE, kept, title),
+                    id = factIdAllocator.neverUsedId(EntryCategory.EXPERIENCE, kept, title),
                     category = EntryCategory.EXPERIENCE,
                     title = title,
                     organization = company,

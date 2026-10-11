@@ -1,10 +1,13 @@
 package com.tailormyresume.feature.onboarding.impl.upload
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import com.tailormyresume.core.screenshot.TmrTestDevice
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.feature.onboarding.impl.importresume.RESUME_PDF_MIME
+import com.tailormyresume.feature.onboarding.impl.importresume.ResumeFile
+import com.tailormyresume.feature.onboarding.impl.importresume.ResumeFileResolver
 import com.tailormyresume.feature.onboarding.impl.importresume.UploadFailure
 import com.tailormyresume.feature.onboarding.impl.importresume.UploadFailureKind
 import com.tailormyresume.feature.onboarding.impl.reading.ReadingFileUi
@@ -29,7 +32,7 @@ internal val SampleReadingFile = ReadingFileUi("Priya_Deshmukh_Resume.pdf", RESU
 
 internal fun readingStateAt(percent: Int): ReadingUiState {
     val kinds = ReadingRowKind.entries
-    val counts = listOf(null, 3, 1, 12, 6)
+    val counts = listOf(3, 3, 1, 12, 6)
     val rows = kinds.mapIndexed { index, kind ->
         when (percent) {
             0 -> ReadingRowUi(kind, if (index == 0) ReadingRowState.Active else ReadingRowState.Pending)
@@ -38,4 +41,8 @@ internal fun readingStateAt(percent: Int): ReadingUiState {
         }
     }
     return ReadingUiState(SampleReadingFile, percent, rows)
+}
+
+internal object NoopResumeFileResolver : ResumeFileResolver {
+    override suspend fun resolve(uri: Uri): ResumeFile = ResumeFile("cv.pdf", RESUME_PDF_MIME, 2_048L, uri.toString())
 }
