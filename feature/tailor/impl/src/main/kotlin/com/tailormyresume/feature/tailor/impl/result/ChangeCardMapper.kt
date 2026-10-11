@@ -1,9 +1,13 @@
 package com.tailormyresume.feature.tailor.impl.result
 
 import com.tailormyresume.core.domain.UpdateBulletDecisionUseCase
+import com.tailormyresume.core.domain.isNamedSkillKeyword
+import com.tailormyresume.core.domain.keywordsStatedIn
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.ProfileEntry
+import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
 import com.tailormyresume.core.model.TailoredSkills
@@ -34,12 +38,16 @@ internal data class ChangeCard(
 private const val ANSWER_ID_PREFIX = "ans-"
 private const val MISSING_ENTRY_LABEL = "Experience"
 
-internal fun TailoredResume.toChangeCards(profile: CandidateProfile): List<ChangeCard> {
+internal fun TailoredResume.toChangeCards(
+    profile: CandidateProfile,
+    quickAnswer: QuickAnswer? = null,
+    requirements: List<JobRequirement> = emptyList(),
+): List<ChangeCard> {
     val entriesById = profile.entries.associateBy { it.id }
     val cards = mutableListOf<ChangeCard>()
     summary?.takeIf { it.text != it.original }?.let { cards.add(it.toSummaryCard()) }
     bullets.filter { it.proposedText != it.originalText }.forEach { cards.add(it.toBulletCard(entriesById)) }
-    skills?.takeIf { it.skills != it.original }?.let { cards.add(it.toSkillsCard()) }
+    skills?.takeIf { it.skills != it.original }?.let { cards.add(it.toSkillsCard(quickAnswer, requirements)) }
     return cards
 }
 
@@ -69,18 +77,28 @@ private fun TailoredBullet.toBulletCard(entriesById: Map<String, ProfileEntry>):
     )
 }
 
-private fun TailoredSkills.toSkillsCard(): ChangeCard {
+private fun TailoredSkills.toSkillsCard(quickAnswer: QuickAnswer?, requirements: List<JobRequirement>): ChangeCard {
     val undone = decision == BulletDecision.REJECTED
     val originalLine = original.joinToString(", ")
     return ChangeCard(
         id = UpdateBulletDecisionUseCase.SKILLS_CHANGE_ID,
         area = ChangeArea.Skills,
         kind = if (skills.sameItemsAs(original)) ChangeKind.Reordered else ChangeKind.Added,
-        source = ChangeSource.YourResume,
+        source = if (answerAddedSkill(quickAnswer, requirements)) ChangeSource.YourAnswer else ChangeSource.YourResume,
         before = if (undone) null else originalLine.takeIf { it.isNotEmpty() },
         after = if (undone) originalLine else skills.joinToString(", "),
         undone = undone,
     )
+}
+
+private fun TailoredSkills.answerAddedSkill(quickAnswer: QuickAnswer?, requirements: List<JobRequirement>): Boolean {
+    if (quickAnswer == null || quickAnswer.choice !in setOf("YES_REGULARLY", "A_FEW_TIMES")) return false
+    val requirement = requirements.firstOrNull { it.id == quickAnswer.requirementId } ?: return false
+    val named = requirement.keywords.filter { isNamedSkillKeyword(requirement, it) }
+    val detailed = keywordsStatedIn(requirement, quickAnswer.detail)
+    val supported = (named + detailed).map(String::lowercase).toSet()
+    return skills.filterNot { skill -> original.any { it.equals(skill, ignoreCase = true) } }
+        .any { skill -> keywordsStatedIn(requirement, skill).any { it.lowercase() in supported } }
 }
 
 private fun List<String>.sameItemsAs(other: List<String>): Boolean =

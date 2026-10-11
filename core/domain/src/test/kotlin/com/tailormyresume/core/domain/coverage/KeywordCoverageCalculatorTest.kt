@@ -8,6 +8,7 @@ import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.EvidenceBullet
 import com.tailormyresume.core.model.FactSource
+import com.tailormyresume.core.model.GuardrailViolation
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.ProfileEntry
@@ -25,15 +26,34 @@ class KeywordCoverageCalculatorTest {
         quickAnswer: QuickAnswer?,
         tailoredResume: TailoredResume?,
     ): ApplicationKeywordCoverage {
-        val entries = matches.filter { it.status != MatchStatus.GAP }.map { match ->
+        val evidenceEntries = matches.filter { it.status != MatchStatus.GAP }.map { match ->
             ProfileEntry(
                 match.requirement.id, EntryCategory.EXPERIENCE, "Analyst", "Company", "2020", "2021",
                 listOf(EvidenceBullet(match.requirement.id + "-b1", match.requirement.keywords.joinToString(", ", transform = SkillLexicon::displayName))),
                 FactSource.IMPORTED, true,
             )
         }
+        val sourcedResume = tailoredResume?.copy(
+            bullets = tailoredResume.bullets.mapIndexed { index, bullet ->
+                bullet.copy(entryId = "tailored", sourceIds = listOf("tailored-b$index"))
+            },
+            entryIds = listOf("tailored"),
+        )
+        val tailoredEntry = sourcedResume?.let { resume ->
+            ProfileEntry(
+                "tailored", EntryCategory.EXPERIENCE, "Resume", "", "", "",
+                resume.bullets.mapIndexed { index, bullet -> EvidenceBullet("tailored-b$index", bullet.originalText) },
+                FactSource.IMPORTED, true,
+            )
+        }
+        val entries = evidenceEntries + listOfNotNull(tailoredEntry)
         val profile = CandidateProfile("Candidate", "", "", "", emptyList(), entries)
-        return KeywordCoverageCalculator.compute(matches.map { it.copy(evidenceIds = listOf(it.requirement.id)) }, quickAnswer, tailoredResume, profile)
+        return KeywordCoverageCalculator.compute(
+            matches.map { it.copy(evidenceIds = listOf(it.requirement.id)) },
+            quickAnswer,
+            sourcedResume,
+            profile,
+        )
     }
 
     private fun requirement(id: String, text: String, vararg keywords: String) = JobRequirement(
@@ -336,6 +356,25 @@ class KeywordCoverageCalculatorTest {
         )
 
         assertThat(coverage.final).isEqualTo(25)
+    }
+
+    @Test
+    fun unsafeAcceptedChangeContributesOriginalText() {
+        val matches = listOf(
+            match(requirement("r1", "Strong SQL", "sql"), MatchStatus.MET),
+            match(requirement("r2", "Python", "python"), MatchStatus.GAP),
+        )
+        val resume = resumeOf(
+            bullet(
+                originalText = "Built SQL reports",
+                proposedText = "Built Python reports",
+                decision = BulletDecision.ACCEPTED,
+            ).copy(violations = listOf(GuardrailViolation.MissingSource)),
+        )
+
+        val coverage = compute(matches, null, resume)
+
+        assertThat(coverage.final).isEqualTo(50)
     }
 
     @Test

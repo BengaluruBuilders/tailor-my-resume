@@ -2,6 +2,7 @@ package com.tailormyresume.core.domain.di
 
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.repository.ApplicationRepository
+import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.SessionRepository
@@ -61,6 +62,7 @@ internal abstract class DomainModule {
             fabricationGuard: FabricationGuard,
             clock: Clock,
             firebaseUid: FirebaseUidProvider,
+            credits: CreditsRepository,
         ): SampleDataController = OfflineSampleDataController(
             store = store,
             sessionRepository = sessionRepository,
@@ -72,6 +74,7 @@ internal abstract class DomainModule {
             tailorResume = TailorResumeUseCase(resumeTailor, fabricationGuard),
             clock = clock,
             firebaseUid = firebaseUid,
+            credits = credits,
         )
     }
 }

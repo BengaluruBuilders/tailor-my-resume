@@ -48,6 +48,14 @@ class ExportReadinessTest {
     }
 
     @Test
+    fun allowedWhenThereAreNoChangesToAccept() {
+        val unchanged = bullet(BulletDecision.PENDING).copy(proposedText = "original")
+
+        assertThat(ExportReadiness.check(application(TailoredResume(listOf(unchanged)), acceptedAt = null)))
+            .isEqualTo(ExportCheck.ALLOWED)
+    }
+
+    @Test
     fun refusedWhenPendingAfterRetailor() {
         val pendingBullet = TailoredResume(listOf(bullet(BulletDecision.PENDING)))
         val pendingSummary = TailoredResume(emptyList(), summary = TailoredText("a", "b"))

@@ -9,6 +9,7 @@ import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
 import com.tailormyresume.core.domain.StatusChange
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
@@ -43,6 +44,7 @@ import kotlin.time.Instant as KotlinInstant
 internal class ExportedViewModel @AssistedInject constructor(
     private val applicationRepository: ApplicationRepository,
     private val creditsRepository: CreditsRepository,
+    private val creditBalance: AccountCreditBalance,
     private val exportResume: ExportResumeUseCase,
     private val setApplicationStatus: SetApplicationStatusUseCase,
     private val fileStore: ExportedFileStore,
@@ -62,6 +64,7 @@ internal class ExportedViewModel @AssistedInject constructor(
     val state: StateFlow<ExportedUiState> = combine(
         applicationRepository.observeApplication(applicationId),
         creditsRepository.observeLedger(),
+        creditBalance.observeCredits(),
         outcome,
         statusSheet,
         ::stateFor,
@@ -152,6 +155,7 @@ internal class ExportedViewModel @AssistedInject constructor(
     private fun stateFor(
         application: JobApplication?,
         ledger: List<CreditLedgerEntry>,
+        creditsLeft: Int?,
         outcome: ExportOutcome?,
         sheet: ApplicationStatus?,
     ): ExportedUiState {
@@ -165,7 +169,7 @@ internal class ExportedViewModel @AssistedInject constructor(
             fileName = exported.fileName,
             pageCount = exported.pageCount,
             sizeKb = wholeKb(exported.sizeBytes),
-            creditsLeft = ledger.sumOf(CreditLedgerEntry::amount).coerceAtLeast(0),
+            creditsLeft = creditsLeft,
             freeResumeUsed = ledger.spendWasFreeFor(applicationId),
             jobTitle = application.job.title,
             company = application.job.company,

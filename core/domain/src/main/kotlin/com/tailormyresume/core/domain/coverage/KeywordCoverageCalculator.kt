@@ -9,7 +9,9 @@ import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
+import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
+import com.tailormyresume.core.model.sendableFacts
 
 object KeywordCoverageCalculator {
     private const val YES_REGULARLY = "YES_REGULARLY"
@@ -35,21 +37,46 @@ object KeywordCoverageCalculator {
         )
     }
 
-    private fun finalText(resume: TailoredResume, profile: CandidateProfile): String = buildList {
-        addAll(
-            resume.bullets.map {
-                if (it.decision == BulletDecision.ACCEPTED && it.violations.isEmpty()) it.proposedText else it.originalText
-            },
-        )
-        add(
-            when (resume.summary?.decision) {
-                BulletDecision.ACCEPTED -> resume.summary?.text.orEmpty()
-                BulletDecision.PENDING -> ""
-                else -> profile.summary
-            },
-        )
-        addAll(resume.skills?.takeIf { it.decision == BulletDecision.ACCEPTED }?.skills ?: profile.skills)
-    }.joinToString("\n")
+    private fun finalText(resume: TailoredResume, profile: CandidateProfile): String {
+        val sendable = profile.sendableFacts()
+        val accepted = resume.bullets.filter { it.decision == BulletDecision.ACCEPTED && it.violations.isEmpty() }
+        val entries = resumeEntries(resume, sendable)
+        val bullets = entries.flatMap { entry ->
+            entry.bullets.map { source -> accepted.appliedText(entry.id, source.id, source.text) }
+        }
+        val summary = resume.summary
+            ?.takeIf { it.decision == BulletDecision.ACCEPTED && it.violations.isEmpty() }
+            ?.text
+            ?: sendable.summary
+        val skills = resume.skills
+            ?.takeIf { it.decision == BulletDecision.ACCEPTED && it.violations.isEmpty() }
+            ?.skills
+            ?: sendable.skills
+        return (entries.map { it.title } + bullets + summary + skills).joinToString("\n")
+    }
+
+    private fun resumeEntries(resume: TailoredResume, profile: CandidateProfile) = buildList {
+        val tailoredByEntry = resume.bullets.groupBy { it.entryId }
+        val recordedIds = resume.entryIds?.toSet()
+        profile.entries.forEach { entry ->
+            val tailored = tailoredByEntry[entry.id]
+            val recorded = recordedIds == null || entry.id in recordedIds
+            if (tailored != null || recorded) {
+                val sourceIds = tailored?.flatMap { it.sourceIds }?.toSet().orEmpty()
+                val bullets = if (recordedIds == null && tailored == null) {
+                    entry.bullets
+                } else {
+                    entry.bullets.filter { it.id in sourceIds }
+                }
+                add(entry.copy(bullets = bullets))
+            }
+        }
+    }
+
+    private fun List<TailoredBullet>.appliedText(entryId: String, sourceId: String, sourceText: String): String =
+        firstOrNull {
+            it.entryId == entryId && sourceId in it.sourceIds && it.originalText.trim() == sourceText.trim()
+        }?.proposedText ?: sourceText
 
     private fun keywordOf(keyword: String): String = SkillLexicon.displayName(keyword).lowercase()
 

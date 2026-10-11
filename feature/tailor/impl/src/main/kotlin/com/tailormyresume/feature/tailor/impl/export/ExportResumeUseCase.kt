@@ -43,12 +43,13 @@ internal class ExportResumeUseCase @Inject constructor(
         val application = applicationRepository.observeApplication(applicationId).first() ?: return ExportOutcome.Refused
         if (ExportReadiness.check(application) != ExportCheck.ALLOWED) return ExportOutcome.Refused
         val resume = application.tailoredResume ?: return ExportOutcome.Refused
+        val exportableResume = if (resume.changeCount == 0) resume.withPendingAccepted() else resume
         val profile = profileRepository.observeProfile().first() ?: return ExportOutcome.Refused
         val settings = settingsRepository.observeSettings().first()
         val fileName = ExportFileName.build(profile, application.job, settings.fileNameFormat.toExportFormat())
         val rendered = renderer.render(
             applicationId,
-            assembler.assemble(profile, resume),
+            assembler.assemble(profile, exportableResume),
             fileName,
             settings.pageSize,
             previousFileName = application.exportFileName,

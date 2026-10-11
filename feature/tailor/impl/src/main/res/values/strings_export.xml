@@ -37,4 +37,5 @@
     <string name="feature_tailor_impl_exported_share_title">Share resume</string>
     <string name="feature_tailor_impl_exported_open_failed">No app can open PDFs</string>
     <string name="feature_tailor_impl_exported_export_failed">Couldn\'t export the PDF. Try again.</string>
+    <string name="feature_tailor_impl_exported_balance_unavailable">Balance unavailable</string>
 </resources>

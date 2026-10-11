@@ -121,6 +121,29 @@ class ChangeCardMapperTest {
     }
 
     @Test
+    fun skillAddedFromTheConfirmedAnswerUsesAnswerProvenance() {
+        val requirement = JobRequirement(
+            id = "req-looker",
+            text = "Experience with Looker",
+            type = RequirementType.SKILL,
+            priority = RequirementPriority.MUST_HAVE,
+            keywords = listOf("looker"),
+        )
+        val resume = TailoredResume(
+            bullets = emptyList(),
+            skills = TailoredSkills(skills = listOf("SQL", "Looker"), original = listOf("SQL")),
+        )
+
+        val cards = resume.toChangeCards(
+            testProfile(entries = emptyList()),
+            QuickAnswer(requirement.id, "YES_REGULARLY", ""),
+            listOf(requirement),
+        )
+
+        assertThat(cards.single().source).isEqualTo(ChangeSource.YourAnswer)
+    }
+
+    @Test
     fun summaryWithBlankOriginalIsNew() {
         val resume = TailoredResume(
             bullets = emptyList(),

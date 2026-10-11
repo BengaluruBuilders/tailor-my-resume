@@ -7,6 +7,8 @@ import com.tailormyresume.core.model.ExportFormat
 import com.tailormyresume.core.model.FileNameFormat
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.PageSize
+import com.tailormyresume.core.model.TailoredResume
+import com.tailormyresume.core.model.TailoredText
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
@@ -136,6 +138,21 @@ class ExportResumeUseCaseTest {
 
         assertThat(stillRefused).isEqualTo(ExportOutcome.Refused)
         assertThat(renderer.renderCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun zeroChangePendingSummaryExportsTheOriginalTextWithoutAcceptance() = runTest {
+        val unchanged = b1.copy(proposedText = b1.originalText, decision = BulletDecision.PENDING)
+        val summary = TailoredText("Original summary", "Original summary")
+        val application = acceptedApplication(listOf(unchanged), accepted = false).copy(
+            tailoredResume = TailoredResume(listOf(unchanged), summary = summary),
+        )
+        seed(application, profile(bullet = unchanged).copy(summary = "Original summary"))
+
+        val outcome = useCase("app-1")
+
+        assertThat(outcome).isInstanceOf(ExportOutcome.Exported::class.java)
+        assertThat(renderer.lastDocument?.summary).isEqualTo("Original summary")
     }
 
     @Test

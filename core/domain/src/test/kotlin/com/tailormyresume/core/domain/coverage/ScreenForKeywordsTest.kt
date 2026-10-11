@@ -92,6 +92,26 @@ class ScreenForKeywordsTest {
     }
 
     @Test
+    fun partialRequirementWithoutCitedEvidenceIsMissing() {
+        val matches = listOf(match("r1", MatchStatus.PARTIAL, "sql", "python").copy(evidenceIds = emptyList()))
+
+        val screen = ScreenForKeywords(matches, profile)
+
+        assertThat(screen.have).isEmpty()
+        assertThat(screen.missing).containsExactly("SQL", "Python").inOrder()
+    }
+
+    @Test
+    fun metRequirementWithUnknownCitedEvidenceIsMissing() {
+        val matches = listOf(match("r1", MatchStatus.MET, "python").copy(evidenceIds = listOf("unknown")))
+
+        val screen = ScreenForKeywords(matches, profile)
+
+        assertThat(screen.have).isEmpty()
+        assertThat(screen.missing).containsExactly("Python")
+    }
+
+    @Test
     fun missingUnconfirmedOrAnswerEvidenceDoesNotClaimResumeKeyword() {
         val entry = ProfileEntry(
             "e1", EntryCategory.EXPERIENCE, "Analyst", "Company", "2020", "2021",
@@ -124,5 +144,24 @@ class ScreenForKeywordsTest {
         assertThat(KeywordCoverageCalculator.compute(matches, null, resume, source).final).isEqualTo(100)
         val cleared = resume.copy(summary = resume.summary?.copy(text = ""), skills = resume.skills?.copy(skills = emptyList()))
         assertThat(KeywordCoverageCalculator.compute(matches, null, cleared, source).final).isEqualTo(0)
+    }
+
+    @Test
+    fun finalCoverageExcludesEntriesThatAreNotInTheTailoredResume() {
+        val included = ProfileEntry(
+            "included", EntryCategory.EXPERIENCE, "Analyst", "Company", "2020", "2021",
+            listOf(EvidenceBullet("included-b1", "Built SQL reports")), FactSource.IMPORTED, true,
+        )
+        val excluded = ProfileEntry(
+            "excluded", EntryCategory.PROJECT, "Python project", "", "", "",
+            listOf(EvidenceBullet("excluded-b1", "Built Python tools")), FactSource.IMPORTED, true,
+        )
+        val source = CandidateProfile("Candidate", "", "", "", emptyList(), listOf(included, excluded))
+        val matches = listOf(match("r1", MatchStatus.GAP, "python"))
+        val resume = TailoredResume(bullets = emptyList(), entryIds = listOf(included.id))
+
+        val coverage = KeywordCoverageCalculator.compute(matches, null, resume, source)
+
+        assertThat(coverage.final).isEqualTo(0)
     }
 }

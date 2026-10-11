@@ -116,6 +116,22 @@ class TailoredViewModelTest {
     }
 
     @Test
+    fun noChangesNeverShowsAcceptedAndCanExportImmediately() = runTest {
+        val unchanged = bullet.copy(proposedText = bullet.originalText)
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+        applicationRepository.sendApplications(listOf(testApplication(listOf(unchanged), gap)))
+        profileRepository.sendProfile(testProfile(listOf(entryFor("exp-1", unchanged))))
+
+        AcceptChangesUseCase(applicationRepository, clock)("app-1")
+
+        val ready = viewModel.ready()
+        assertThat(ready.changes).isEmpty()
+        assertThat(ready.accepted).isFalse()
+        assertThat(ready.exportEnabled).isTrue()
+    }
+
+    @Test
     fun rejectedSummaryShowsTheProfilesOriginalOnTheResumeTab() = runTest {
         val viewModel = viewModel()
         backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
