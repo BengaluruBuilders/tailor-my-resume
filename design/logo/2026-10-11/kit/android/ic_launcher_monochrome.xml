@@ -10,11 +10,11 @@
         android:translateX="19.9574"
         android:translateY="19.9574">
         <path
-            android:fillColor="#FF000000"
+            android:fillColor="#000000"
             android:fillType="evenOdd"
             android:pathData="M78 34H154V62A20 20 0 0 0 174 82H202V198A24 24 0 0 1 178 222H78A24 24 0 0 1 54 198V58A24 24 0 0 1 78 34ZM92 106A12 12 0 0 1 116 106V122A12 12 0 0 1 92 122ZM140 106A12 12 0 0 1 164 106V122A12 12 0 0 1 140 122ZM106 150H150A22 22 0 0 1 106 150Z" />
         <path
-            android:fillColor="#FF000000"
+            android:fillColor="#000000"
             android:pathData="M166 34L202 70H174A8 8 0 0 1 166 62Z" />
     </group>
 </vector>

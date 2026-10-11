@@ -57,7 +57,7 @@ ink or lime container.
 - `android/` — `ic_launcher_foreground.xml`, `ic_launcher_monochrome.xml` (108 dp viewport; the mark is
   39 × 50 dp, inside the 66 dp safe circle), the `ic_launcher_background` colour, and the 512 px Play Store icon.
 - `board/` — presentation board with mockups.
-- `build/` — the Python 3 scripts that generate the masters, lockups and Android vectors (stdlib only; the
+- `scripts/` — the Python 3 scripts that generate the masters, lockups and Android vectors (stdlib only; the
   wordmark reads `core/designsystem/src/main/res/font/space_mono_bold.ttf`).
 - `proof/` — the icon on the emulator launcher and the Android 12+ splash screen.
 
