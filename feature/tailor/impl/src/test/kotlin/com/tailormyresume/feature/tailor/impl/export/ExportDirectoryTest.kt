@@ -16,28 +16,64 @@ class ExportDirectoryTest {
 
     @Test
     fun write_createsTheFileWithTheContent() {
-        val file = ExportDirectory(exportDirectory()).write("resume.pdf") { it.write("pdf".toByteArray()) }
+        val file = ExportDirectory(exportDirectory()).write("app-1", "resume.pdf") { it.write("pdf".toByteArray()) }
 
         assertThat(file.name).isEqualTo("resume.pdf")
         assertThat(file.readText()).isEqualTo("pdf")
     }
 
     @Test
-    fun write_removesOlderExports() {
-        val directory = exportDirectory().also { it.mkdirs() }
-        File(directory, "old.pdf").writeText("old")
+    fun write_keepsOtherApplicationsExports() {
+        val directory = exportDirectory()
+        ExportDirectory(directory).write("app-2", "other.pdf") { it.write(1) }
 
-        ExportDirectory(directory).write("new.pdf") { it.write(1) }
+        ExportDirectory(directory).write("app-1", "new.pdf") { it.write(1) }
 
-        assertThat(directory.list()?.toList()).containsExactly("new.pdf")
+        assertThat(File(directory, "app-1").list()?.toList()).containsExactly("new.pdf")
+        assertThat(File(directory, "app-2").list()?.toList()).containsExactly("other.pdf")
+    }
+
+    @Test
+    fun write_removesOnlyThePreviousFileOfThisApplicationAfterTheRename() {
+        val directory = exportDirectory()
+        val exports = ExportDirectory(directory)
+        exports.write("app-2", "old.pdf") { it.write(1) }
+        exports.write("app-1", "old.pdf") { it.write(1) }
+
+        exports.write("app-1", "new.pdf", previousFileName = "old.pdf") { it.write(1) }
+
+        assertThat(File(directory, "app-1").list()?.toList()).containsExactly("new.pdf")
+        assertThat(File(directory, "app-2").list()?.toList()).containsExactly("old.pdf")
+    }
+
+    @Test
+    fun write_keepsTheFileWhenThePreviousNameIsTheSame() {
+        val directory = exportDirectory()
+
+        val file = ExportDirectory(directory).write("app-1", "same.pdf", previousFileName = "same.pdf") { it.write("pdf".toByteArray()) }
+
+        assertThat(file.readText()).isEqualTo("pdf")
+    }
+
+    @Test
+    fun write_failureKeepsThePreviousFile() {
+        val directory = exportDirectory()
+        ExportDirectory(directory).write("app-1", "old.pdf") { it.write(1) }
+
+        val result = runCatching {
+            ExportDirectory(directory).write("app-1", "new.pdf", previousFileName = "old.pdf") { throw IOException("disk full") }
+        }
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(IOException::class.java)
+        assertThat(File(directory, "app-1").list()?.toList()).containsExactly("old.pdf")
     }
 
     @Test
     fun write_replacesAFileWithTheSameName() {
         val directory = ExportDirectory(exportDirectory())
-        directory.write("resume.pdf") { it.write("first".toByteArray()) }
+        directory.write("app-1", "resume.pdf") { it.write("first".toByteArray()) }
 
-        val file = directory.write("resume.pdf") { it.write("second".toByteArray()) }
+        val file = directory.write("app-1", "resume.pdf") { it.write("second".toByteArray()) }
 
         assertThat(file.readText()).isEqualTo("second")
     }
@@ -47,13 +83,35 @@ class ExportDirectoryTest {
         val directory = exportDirectory()
 
         val result = runCatching {
-            ExportDirectory(directory).write("resume.pdf") {
+            ExportDirectory(directory).write("app-1", "resume.pdf") {
                 it.write("partial".toByteArray())
                 throw IOException("disk full")
             }
         }
 
         assertThat(result.exceptionOrNull()).isInstanceOf(IOException::class.java)
-        assertThat(directory.list()?.toList()).isEmpty()
+        assertThat(File(directory, "app-1").list()?.toList()).isEmpty()
+    }
+
+    @Test
+    fun write_hostileApplicationIdsStayInsideTheExportRoot() {
+        val directory = exportDirectory()
+        val exports = ExportDirectory(directory)
+
+        listOf("../escape", "..", ".", "a/b", "", "/abs").forEach { id ->
+            val file = exports.write(id, "resume.pdf") { it.write(1) }
+            assertThat(file.canonicalPath).startsWith(directory.canonicalPath + File.separator)
+            assertThat(file.parentFile?.parentFile?.canonicalPath).isEqualTo(directory.canonicalPath)
+        }
+        assertThat(folder.root.list()?.toList()).containsExactly("exports")
+    }
+
+    @Test
+    fun existing_findsOnlyTheFileOfThatApplication() {
+        val exports = ExportDirectory(exportDirectory())
+        exports.write("app-1", "resume.pdf") { it.write(1) }
+
+        assertThat(exports.existing("app-1", "resume.pdf")).isNotNull()
+        assertThat(exports.existing("app-2", "resume.pdf")).isNull()
     }
 }

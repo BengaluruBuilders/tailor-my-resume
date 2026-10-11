@@ -5,12 +5,17 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.core.navigation.Navigator
+import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
 import com.tailormyresume.feature.tailor.api.navigation.EditResumeNavKey
 import com.tailormyresume.feature.tailor.api.navigation.ExportedNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailorFailedNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoredNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoringNavKey
 import com.tailormyresume.feature.tailor.impl.TailorViewModel
+import com.tailormyresume.feature.tailor.impl.edit.EditResumeRoute
+import com.tailormyresume.feature.tailor.impl.edit.EditResumeViewModel
+import com.tailormyresume.feature.tailor.impl.exported.ExportedRoute
+import com.tailormyresume.feature.tailor.impl.exported.ExportedViewModel
 import com.tailormyresume.feature.tailor.impl.result.TailorFailedNavigation
 import com.tailormyresume.feature.tailor.impl.result.TailorFailedScreen
 import com.tailormyresume.feature.tailor.impl.result.TailoredRoute
@@ -22,6 +27,10 @@ internal object TailorViewModelKeys {
     fun tailor(applicationId: String) = "tailor-$applicationId"
 
     fun tailored(applicationId: String) = "tailored-$applicationId"
+
+    fun edit(applicationId: String) = "edit-$applicationId"
+
+    fun exported(applicationId: String) = "exported-$applicationId"
 }
 
 fun EntryProviderScope<NavKey>.tailorEntry(navigator: Navigator) {
@@ -49,6 +58,21 @@ fun EntryProviderScope<NavKey>.tailorEntry(navigator: Navigator) {
             onNavigate = navigator::navigate,
         )
     }
-    entry<EditResumeNavKey> { key -> NavKeyPlaceholder(key) }
-    entry<ExportedNavKey> { key -> NavKeyPlaceholder(key) }
+    entry<EditResumeNavKey> { key ->
+        EditResumeRoute(
+            viewModel = hiltViewModel<EditResumeViewModel, EditResumeViewModel.Factory>(key = TailorViewModelKeys.edit(key.applicationId)) { factory ->
+                factory.create(key.applicationId)
+            },
+            onBack = { navigator.goBack() },
+        )
+    }
+    entry<ExportedNavKey> { key ->
+        ExportedRoute(
+            viewModel = hiltViewModel<ExportedViewModel, ExportedViewModel.Factory>(key = TailorViewModelKeys.exported(key.applicationId)) { factory ->
+                factory.create(key.applicationId)
+            },
+            onGoToApplications = { navigator.root(DefaultApplicationsNavKey) },
+            onBack = { navigator.goBack() },
+        )
+    }
 }
