@@ -6,6 +6,7 @@ import com.tailormyresume.core.domain.account.AccountData
 import com.tailormyresume.core.domain.account.AccountDataExporter
 import com.tailormyresume.core.network.tailormyresumeJson
 import com.tailormyresume.core.testing.account.AccountDataExporterContractTest
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -17,6 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.util.zip.ZipFile
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Instant
 
 class RemoteAccountDataExporterTest : AccountDataExporterContractTest() {
@@ -97,5 +99,23 @@ class RemoteAccountDataExporterTest : AccountDataExporterContractTest() {
 
         assertThat(earlier.exists()).isFalse()
         assertThat(archive.file.exists()).isTrue()
+    }
+
+    @Test
+    fun theEarlierArchiveIsStillThereWhenTheWorkIsHandedToTheIoDispatcher() = runTest {
+        server.enqueue(errorResponse(500, "INTERNAL_ERROR"))
+        val earlier = java.io.File(folder.root, "earlier-export.zip").apply { writeText("x") }
+        var earlierExistedAtHandOff: Boolean? = null
+        val observingIo = object : CoroutineDispatcher() {
+            override fun dispatch(context: CoroutineContext, block: Runnable) {
+                earlierExistedAtHandOff = earlier.exists()
+                block.run()
+            }
+        }
+
+        exporter(observingIo).export(data)
+
+        assertThat(earlierExistedAtHandOff).isTrue()
+        assertThat(earlier.exists()).isFalse()
     }
 }
