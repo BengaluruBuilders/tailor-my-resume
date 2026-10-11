@@ -67,7 +67,7 @@ class TailorResumeUseCase @Inject constructor(
 
     private fun verified(bullet: TailoredBullet, evidence: Evidence, profile: CandidateProfile): TailoredBullet? {
         val sources = evidence.resolve(bullet.sourceIds)
-        if (!evidence.containsAll(bullet.sourceIds) && !(sources.isEmpty() && bullet.sourceIds.all(AnswerFacts::isAnswerId))) return null
+        if (!evidence.containsAll(bullet.sourceIds)) return null
         if (bullet.sourceIds.any { it in evidence.profileBullets && evidence.entryOfBullet[it] != bullet.entryId }) return null
         val profileText = bullet.sourceIds.firstNotNullOfOrNull(evidence.profileBullets::get)?.text
         val answerBacked = bullet.sourceIds.any { it !in evidence.profileBullets && AnswerFacts.isAnswerId(it) }

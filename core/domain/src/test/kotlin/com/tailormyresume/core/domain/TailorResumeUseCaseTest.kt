@@ -110,6 +110,24 @@ class TailorResumeUseCaseTest {
     }
 
     @Test
+    fun forgedAnswerIdIsDroppedEvenWhenTheGuardAllowsIt() = runTest {
+        val forged = answerBullet(cfoDetail).copy(sourceIds = listOf("ans-forged"))
+        val tailor = object : ResumeTailor {
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?, runId: String) =
+                TailoredResume(listOf(forged))
+        }
+        val allowAllGuard = object : FabricationGuard {
+            override fun check(proposedText: String, sources: List<EvidenceBullet>, profile: CandidateProfile) = emptyList<GuardrailViolation>()
+        }
+
+        val result = TailorResumeUseCase(tailor, allowAllGuard)(
+            analystProfile, analystJob, emptyGap, "app-1", "run-1", answer(detail = "$cfoDetail at Infosys"),
+        )
+
+        assertThat(result.bullets).isEmpty()
+    }
+
+    @Test
     fun bulletWithKnownAndUnknownSourceIdsIsDropped() = runTest {
         val text = "Wrote unit tests with JUnit to improve reliability"
         val proposed = bullet("t1", "exp-1-b2", text, text).copy(sourceIds = listOf("exp-1-b2", "does-not-exist"))
@@ -299,15 +317,13 @@ class TailorResumeUseCaseTest {
     }
 
     @Test
-    fun notYetAndSkippedAnswersCreateNoFactAndAnsBulletFailsWithMissingSource() = runTest {
+    fun notYetAndSkippedAnswersCreateNoFactAndDropAnsBullet() = runTest {
         listOf("NOT_YET", "SKIPPED").forEach { choice ->
             val result = run(TailoredResume(listOf(answerBullet(cfoDetail))), answer(choice = choice))
 
-            assertThat(result.bullets.single().violations).containsExactly(GuardrailViolation.MissingSource)
-            assertThat(result.bullets.single().proposedText).isEmpty()
+            assertThat(result.bullets).isEmpty()
         }
-        assertThat(run(TailoredResume(listOf(answerBullet(cfoDetail))), quickAnswer = null).bullets.single().violations)
-            .containsExactly(GuardrailViolation.MissingSource)
+        assertThat(run(TailoredResume(listOf(answerBullet(cfoDetail))), quickAnswer = null).bullets).isEmpty()
     }
 
     @Test
