@@ -179,6 +179,7 @@ internal fun TmrShell(
                             },
                             title = chrome.title?.let { stringResource(it) },
                             action = chrome.action?.let { stringResource(it.label) },
+                            actionEnabled = chromeActions.enabled,
                             onAction = {
                                 val registered = chromeActions.handler
                                 if (registered != null) {

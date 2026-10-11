@@ -47,6 +47,7 @@ fun TmrTopBar(
     title: String? = null,
     action: String? = null,
     onAction: () -> Unit = {},
+    actionEnabled: Boolean = true,
 ) {
     val colors = TmrTheme.colors
     val typography = TmrTheme.typography
@@ -139,7 +140,7 @@ fun TmrTopBar(
                     Modifier
                         .minimumInteractiveComponentSize()
                         .testTag(TmrChromeTags.TOP_BAR_ACTION)
-                        .clickable(role = Role.Button, onClick = onAction),
+                        .clickable(enabled = actionEnabled, role = Role.Button, onClick = onAction),
                     contentAlignment = Alignment.Center,
                 ) {
                     Box(
@@ -147,14 +148,14 @@ fun TmrTopBar(
                         Modifier
                             .heightIn(min = spacing.topBarButton)
                             .clip(shapes.pill)
-                            .background(colors.lime)
+                            .background(if (actionEnabled) colors.lime else colors.fill)
                             .padding(horizontal = TOP_BAR_ACTION_PADDING),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = action,
                             style = typography.button,
-                            color = colors.ink,
+                            color = if (actionEnabled) colors.ink else colors.textMuted,
                         )
                     }
                 }

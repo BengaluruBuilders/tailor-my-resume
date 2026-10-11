@@ -9,11 +9,14 @@ import com.tailormyresume.feature.profile.api.navigation.ExperienceNavKey
 import com.tailormyresume.feature.profile.api.navigation.ListEditNavKey
 import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
 import com.tailormyresume.feature.profile.api.navigation.SkillsNavKey
+import com.tailormyresume.feature.profile.impl.experience.EditRoleRoute
+import com.tailormyresume.feature.profile.impl.experience.ExperienceRoute
+import com.tailormyresume.feature.profile.impl.overview.ProfileRoute
 
 fun EntryProviderScope<NavKey>.profileEntry(navigator: Navigator) {
-    entry<ProfileNavKey> { key -> NavKeyPlaceholder(key) }
-    entry<ExperienceNavKey> { key -> NavKeyPlaceholder(key) }
-    entry<EditRoleNavKey> { key -> NavKeyPlaceholder(key) }
+    entry<ProfileNavKey> { ProfileRoute(navigator) }
+    entry<ExperienceNavKey> { ExperienceRoute(navigator) }
+    entry<EditRoleNavKey> { key -> EditRoleRoute(navigator, key.entryId) }
     entry<EditContactNavKey> { key -> NavKeyPlaceholder(key) }
     entry<SkillsNavKey> { key -> NavKeyPlaceholder(key) }
     entry<ListEditNavKey> { key -> NavKeyPlaceholder(key) }
