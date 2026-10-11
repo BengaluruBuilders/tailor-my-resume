@@ -147,6 +147,49 @@ class ListEditViewModelTest {
     }
 
     @Test
+    fun savingWithoutEditsConfirmsUnconfirmedImportedItemsAndChangesNothingElse() = runTest {
+        val imported = profile.entries.map {
+            if (it.category == EntryCategory.ACHIEVEMENT || it.category == EntryCategory.EDUCATION) {
+                it.copy(source = FactSource.IMPORTED, isConfirmed = false)
+            } else {
+                it
+            }
+        }
+        val base = profile.copy(entries = imported)
+        listOf(ProfileListSection.ACHIEVEMENTS, ProfileListSection.EDUCATION).forEach { section ->
+            profileRepository.sendProfile(base)
+            val viewModel = loaded(section, base)
+
+            viewModel.saveAndAwait()
+
+            val category = if (section == ProfileListSection.ACHIEVEMENTS) EntryCategory.ACHIEVEMENT else EntryCategory.EDUCATION
+            val saved = savedProfile().category(category)
+            assertThat(saved).isNotEmpty()
+            assertThat(saved).isEqualTo(base.category(category).map { it.copy(isConfirmed = true) })
+            assertThat(savedProfile().entries.filter { it.category != category }).isEqualTo(base.entries.filter { it.category != category })
+        }
+    }
+
+    @Test
+    fun summarySaveThatChangesTextMarksContactUserStated() = runTest {
+        val viewModel = loaded(ProfileListSection.SUMMARY, profile.copy(contactUserStated = false))
+        viewModel.onTextChange(0, "Analyst who ships.")
+
+        viewModel.saveAndAwait()
+
+        assertThat(savedProfile().contactUserStated).isTrue()
+    }
+
+    @Test
+    fun summarySaveWithoutChangeKeepsContactUserStated() = runTest {
+        val viewModel = loaded(ProfileListSection.SUMMARY, profile.copy(contactUserStated = false))
+
+        viewModel.saveAndAwait()
+
+        assertThat(savedProfile().contactUserStated).isFalse()
+    }
+
+    @Test
     fun changedItemBecomesUserEditedSameId() = runTest {
         val viewModel = loaded(ProfileListSection.ACHIEVEMENTS)
         viewModel.onTextChange(1, "  Built 14 dashboards  ")

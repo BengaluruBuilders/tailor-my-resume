@@ -128,7 +128,12 @@ internal class ListEditViewModel @AssistedInject constructor(
         if (!canSave(listItems)) return
         val profile = profileRepository.observeProfile().first() ?: return
         val updated = when (section) {
-            ProfileListSection.SUMMARY -> profile.copy(summary = listItems.single().text.trim())
+            ProfileListSection.SUMMARY -> listItems.single().let { item ->
+                profile.copy(
+                    summary = item.text.trim(),
+                    contactUserStated = profile.contactUserStated || item.isChanged,
+                )
+            }
             ProfileListSection.EDUCATION -> profile.withListSaved(EntryCategory.EDUCATION, listItems)
             ProfileListSection.ACHIEVEMENTS -> profile.withListSaved(EntryCategory.ACHIEVEMENT, listItems)
         }
@@ -175,7 +180,7 @@ private fun CandidateProfile.withListSaved(category: EntryCategory, items: List<
     items.filter { it.entryId != null }.forEach { item ->
         val text = item.text.trim()
         result = when {
-            !item.isChanged -> result
+            !item.isChanged -> if (text.isEmpty()) result else result.map { if (it.id == item.entryId) it.copy(isConfirmed = true) else it }
             text.isEmpty() -> result.filterNot { it.id == item.entryId }
             else -> result.map { if (it.id == item.entryId) it.asEditedLine(text) else it }
         }
