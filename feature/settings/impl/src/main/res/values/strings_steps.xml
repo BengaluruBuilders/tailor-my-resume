@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="feature_settings_impl_step_done">Done</string>
-    <string name="feature_settings_impl_step_in_progress">In progress</string>
-    <string name="feature_settings_impl_step_waiting">Waiting</string>
-</resources>
