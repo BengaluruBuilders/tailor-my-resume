@@ -3,6 +3,8 @@ package com.tailormyresume.core.domain.sample
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.domain.AnalyzeJobUseCase
+import com.tailormyresume.core.domain.ExportCheck
+import com.tailormyresume.core.domain.ExportReadiness
 import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.offline.OfflineFabricationGuard
 import com.tailormyresume.core.domain.offline.OfflineGapMatcher
@@ -88,6 +90,15 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
         assertThat(paisa.any { it.decision == BulletDecision.PENDING }).isTrue()
         assertThat(paisa.any { it.decision != BulletDecision.PENDING }).isTrue()
         assertThat(sahyadri.all { it.decision == BulletDecision.PENDING }).isTrue()
+    }
+
+    @Test
+    fun onlyTheFullyReviewedSampleApplicationIsAcceptedForExport() = runTest {
+        val loaded = loaded()
+
+        assertThat(ExportReadiness.check(loaded.getValue("sample-northwind-associate-analyst"))).isEqualTo(ExportCheck.ALLOWED)
+        assertThat(ExportReadiness.check(loaded.getValue("sample-sahyadri-motors-graduate-engineer-trainee")))
+            .isEqualTo(ExportCheck.NOT_ACCEPTED)
     }
 
     @Test

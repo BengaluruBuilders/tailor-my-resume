@@ -11,6 +11,10 @@ internal class ResumePdfComposer(
     private val style: PdfResumeStyle,
 ) {
 
+    private val drawn = mutableListOf<String>()
+
+    val lines: List<String> get() = drawn
+
     fun compose(document: ResumeDocument) {
         header(document)
         document.sections.forEach(::section)
@@ -37,6 +41,7 @@ internal class ResumePdfComposer(
     }
 
     private fun heading(text: String) {
+        drawn += text
         writer.space(SECTION_GAP)
         writer.drawBlock(layout(text, style.sectionHeading), keepWithNext = HEADING_KEEP_WITH_NEXT)
         writer.space(RULE_GAP)
@@ -55,24 +60,25 @@ internal class ResumePdfComposer(
     private fun bullet(text: String) {
         val marker = layout(BULLET_MARKER, style.body, width = BULLET_INDENT.toInt())
         val body = layout(text, style.body, width = writer.contentWidth - BULLET_INDENT.toInt())
+        drawn += text
         writer.drawHanging(marker, body, BULLET_INDENT)
         writer.space(BULLET_GAP)
     }
 
     private fun block(text: String, paint: TextPaint, keepWithNext: Float = 0f) {
         if (text.isEmpty()) return
+        drawn += text
         writer.drawBlock(layout(text, paint), keepWithNext)
     }
 
     private fun layout(text: String, paint: TextPaint, width: Int = writer.contentWidth): StaticLayout =
         StaticLayout.Builder.obtain(text, 0, text.length, paint, width)
-            .setLineSpacing(0f, LINE_SPACING)
+            .setLineSpacing(0f, style.lineSpacing)
             .build()
 
     private companion object {
         const val BULLET_MARKER = "•"
         const val BULLET_INDENT = 14f
-        const val LINE_SPACING = 1.12f
         const val SECTION_GAP = 12f
         const val RULE_GAP = 3f
         const val ENTRY_GAP = 6f

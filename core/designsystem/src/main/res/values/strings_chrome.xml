@@ -12,4 +12,6 @@
     <string name="core_designsystem_chrome_tab_profile">Profile</string>
     <string name="core_designsystem_chrome_add_application">New application</string>
     <string name="core_designsystem_chrome_dismiss">Dismiss</string>
+    <string name="core_designsystem_chrome_status_sheet_title">Application status</string>
+    <string name="core_designsystem_chrome_status_sheet_save">Save status</string>
 </resources>
