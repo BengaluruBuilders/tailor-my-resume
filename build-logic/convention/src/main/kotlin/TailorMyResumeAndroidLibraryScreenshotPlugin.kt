@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.tailormyresume.buildlogic.configureAndroidLint
 import com.tailormyresume.buildlogic.configureKotlinAndroid
 import com.tailormyresume.buildlogic.configureSpotlessForAndroid
@@ -30,6 +31,10 @@ class TailorMyResumeAndroidLibraryScreenshotPlugin : Plugin<Project> {
                 resourcePrefix =
                     path.split("""\W""".toRegex()).drop(1).distinct().joinToString(separator = "_")
                         .lowercase() + "_"
+            }
+            val hasAndroidTests = fileTree("src") { include("androidTest*/**/*.kt", "androidTest*/**/*.java") }.files.isNotEmpty()
+            extensions.configure<LibraryAndroidComponentsExtension> {
+                beforeVariants(selector().all()) { it.enableAndroidTest = hasAndroidTests }
             }
             configureSpotlessForAndroid()
 
