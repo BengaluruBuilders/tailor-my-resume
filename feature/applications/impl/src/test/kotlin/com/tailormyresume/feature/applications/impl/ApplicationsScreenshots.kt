@@ -79,41 +79,41 @@ class ApplicationsScreenshots {
             header = ApplicationsHeader(credits = 3, initials = "PD"),
             total = 3,
             statusCounts =
-                mapOf(
-                    TmrApplicationStatus.Applied to 1,
-                    TmrApplicationStatus.Interview to 1,
-                    TmrApplicationStatus.Saved to 1,
-                ),
+            mapOf(
+                TmrApplicationStatus.Applied to 1,
+                TmrApplicationStatus.Interview to 1,
+                TmrApplicationStatus.Saved to 1,
+            ),
             rows =
-                listOf(
-                    ApplicationRow(
-                        id = "nw",
-                        title = "Associate Analyst",
-                        company = "Northwind GCC",
-                        keywordPercent = 92,
-                        initial = "N",
-                        colorIndex = 0,
-                        status = TmrApplicationStatus.Applied,
-                    ),
-                    ApplicationRow(
-                        id = "kb",
-                        title = "Business Analyst",
-                        company = "Kestrel Bank",
-                        keywordPercent = 88,
-                        initial = "K",
-                        colorIndex = 1,
-                        status = TmrApplicationStatus.Interview,
-                    ),
-                    ApplicationRow(
-                        id = "hr",
-                        title = "Data Analyst",
-                        company = "Halden Retail",
-                        keywordPercent = 85,
-                        initial = "H",
-                        colorIndex = 2,
-                        status = TmrApplicationStatus.Saved,
-                    ),
+            listOf(
+                ApplicationRow(
+                    id = "nw",
+                    title = "Associate Analyst",
+                    company = "Northwind GCC",
+                    keywordPercent = 92,
+                    initial = "N",
+                    colorIndex = 0,
+                    status = TmrApplicationStatus.Applied,
                 ),
+                ApplicationRow(
+                    id = "kb",
+                    title = "Business Analyst",
+                    company = "Kestrel Bank",
+                    keywordPercent = 88,
+                    initial = "K",
+                    colorIndex = 1,
+                    status = TmrApplicationStatus.Interview,
+                ),
+                ApplicationRow(
+                    id = "hr",
+                    title = "Data Analyst",
+                    company = "Halden Retail",
+                    keywordPercent = 85,
+                    initial = "H",
+                    colorIndex = 2,
+                    status = TmrApplicationStatus.Saved,
+                ),
+            ),
         )
 
     private fun detail(

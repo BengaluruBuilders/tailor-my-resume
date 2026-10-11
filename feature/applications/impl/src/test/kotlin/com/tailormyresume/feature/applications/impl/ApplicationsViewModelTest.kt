@@ -52,9 +52,12 @@ class ApplicationsViewModelTest {
         assertThat(state.total).isEqualTo(3)
         assertThat(state.header).isEqualTo(ApplicationsHeader(credits = 3, initials = "PD"))
         assertThat(state.statusCounts).containsExactly(
-            TmrApplicationStatus.Saved, 1,
-            TmrApplicationStatus.Applied, 1,
-            TmrApplicationStatus.Interview, 1,
+            TmrApplicationStatus.Saved,
+            1,
+            TmrApplicationStatus.Applied,
+            1,
+            TmrApplicationStatus.Interview,
+            1,
         )
         assertThat(state.rows.map { it.id }).containsExactly("nw", "kb", "hr").inOrder()
         val first = state.rows.first()

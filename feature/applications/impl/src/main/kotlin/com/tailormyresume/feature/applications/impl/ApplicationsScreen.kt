@@ -239,14 +239,14 @@ private fun ApplicationRowItem(row: ApplicationRow, onClick: () -> Unit) {
     val meta = row.keywordPercent?.let { percent ->
         stringResource(R.string.feature_applications_impl_row_meta_keywords, row.company, percent)
     } ?: row.company
-    val stacked = LocalDensity.current.fontScale > ChipStackFontScale
+    val stacked = LocalDensity.current.fontScale > CHIP_STACK_FONT_SCALE
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(TmrTheme.shapes.card)
             .clickable(role = Role.Button, onClick = onClick)
             .heightIn(min = 64.dp)
-            .padding(vertical = 10.dp, horizontal = 4.dp)
+            .padding(vertical = 10.dp, horizontal = 4.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -280,7 +280,7 @@ private fun ApplicationRowItem(row: ApplicationRow, onClick: () -> Unit) {
     }
 }
 
-private const val ChipStackFontScale = 1.3f
+private const val CHIP_STACK_FONT_SCALE = 1.3f
 
 @Composable
 private fun ApplicationRow.discColor(): Color =
