@@ -87,7 +87,7 @@ internal class ExportedViewModel @AssistedInject constructor(
 
     private suspend fun restoredExport(): ExportOutcome? {
         if (savedStateHandle.get<Boolean>(EXPORTED_KEY) != true) return null
-        return withContext(ioDispatcher) { exportResume.storedExport(applicationId, fileStore::fileFor) }
+        return withContext(ioDispatcher) { exportResume.storedExport(applicationId) { fileStore.fileFor(applicationId, it) } }
     }
 
     private fun rememberExported(result: ExportOutcome) {
@@ -144,7 +144,7 @@ internal class ExportedViewModel @AssistedInject constructor(
     private fun resolveFile(event: (File) -> ExportedEvent) {
         viewModelScope.launch {
             val ready = state.value as? ExportedUiState.Ready ?: return@launch
-            val file = withContext(ioDispatcher) { fileStore.fileFor(ready.fileName) }
+            val file = withContext(ioDispatcher) { fileStore.fileFor(applicationId, ready.fileName) }
             eventChannel.send(file?.let(event) ?: ExportedEvent.FileMissing)
         }
     }
@@ -181,12 +181,14 @@ internal class ExportedViewModel @AssistedInject constructor(
         for (entry in sortedBy { it.createdAt }) {
             when (entry.kind) {
                 CreditLedgerKind.FREE_GRANT -> freeBalance += entry.amount
-                CreditLedgerKind.PURCHASE, CreditLedgerKind.REFUND, CreditLedgerKind.MIGRATION -> Unit
+                CreditLedgerKind.PURCHASE -> Unit
+                CreditLedgerKind.REFUND -> Unit
+                CreditLedgerKind.MIGRATION -> Unit
                 CreditLedgerKind.SPEND -> {
                     val cost = -entry.amount
                     val freeUsed = minOf(cost, freeBalance).coerceAtLeast(0)
                     freeBalance -= freeUsed
-                    if (entry.applicationId == applicationId && cost > 0 && freeUsed == cost) fundedByFree = true
+                    if (entry.applicationId == applicationId && cost > 0) fundedByFree = freeUsed == cost
                 }
             }
         }

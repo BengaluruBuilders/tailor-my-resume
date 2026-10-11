@@ -104,8 +104,8 @@ class ExportedPdfIntentsImplTest {
         seed(application("a", "Northwind GCC"), application("b", "Kestrel Bank"))
         exportResume("a")
         exportResume("b")
-        val aFile = File(exportsDirectory, exportedFileName("a"))
-        val bFile = File(exportsDirectory, exportedFileName("b"))
+        val aFile = File(File(exportsDirectory, "a"), exportedFileName("a"))
+        val bFile = File(File(exportsDirectory, "b"), exportedFileName("b"))
         check(aFile.delete())
         val rendersBefore = renderer.renderCalls
 
@@ -133,13 +133,14 @@ class ExportedPdfIntentsImplTest {
         val renderCalls: Int get() = renderedFileNames.size
 
         override suspend fun render(
+            applicationId: String,
             document: ResumeDocument,
             fileName: String,
             pageSize: PageSize,
             previousFileName: String?,
         ): RenderedResume {
             renderedFileNames += fileName
-            val file = directory.write(fileName, previousFileName) { it.write("%PDF-1.4".toByteArray()) }
+            val file = directory.write(applicationId, fileName, previousFileName) { it.write("%PDF-1.4".toByteArray()) }
             return RenderedResume(file = file, pageCount = 1, lines = emptyList())
         }
 

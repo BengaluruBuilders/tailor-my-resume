@@ -171,4 +171,28 @@ class ExportResumeUseCaseTest {
 
         assertThat(renderer.lastPreviousFileName).isEqualTo(first)
     }
+
+    @Test
+    fun applicationsSharingAFileNameKeepTheirOwnPdf() = runTest {
+        settingsRepository.update { it.copy(fileNameFormat = FileNameFormat.NAME_RESUME) }
+        applicationRepository.sendApplications(
+            listOf(acceptedApplication(listOf(b1)), acceptedApplication(listOf(b1)).copy(id = "app-2")),
+        )
+        profileRepository.sendProfile(profile())
+        renderer.content = "render of app-1"
+        val first = useCase("app-1").exported()
+        renderer.content = "render of app-2"
+        val second = useCase("app-2").exported()
+
+        assertThat(second.fileName).isEqualTo(first.fileName)
+        assertThat(first.file.readText()).isEqualTo("render of app-1")
+        assertThat(second.file.readText()).isEqualTo("render of app-2")
+
+        settingsRepository.update { it.copy(fileNameFormat = FileNameFormat.NAME_ROLE) }
+        val reexported = useCase("app-1").exported()
+
+        assertThat(reexported.file.exists()).isTrue()
+        assertThat(first.file.exists()).isFalse()
+        assertThat(second.file.readText()).isEqualTo("render of app-2")
+    }
 }

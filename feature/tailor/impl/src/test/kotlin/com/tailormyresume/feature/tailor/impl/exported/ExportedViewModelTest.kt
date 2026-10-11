@@ -20,6 +20,7 @@ import com.tailormyresume.feature.tailor.impl.acceptedBullet
 import com.tailormyresume.feature.tailor.impl.document.ResumeDocumentAssembler
 import com.tailormyresume.feature.tailor.impl.document.TestResumeHeadings
 import com.tailormyresume.feature.tailor.impl.entryFor
+import com.tailormyresume.feature.tailor.impl.export.ExportDirectory
 import com.tailormyresume.feature.tailor.impl.export.ExportResumeUseCase
 import com.tailormyresume.feature.tailor.impl.export.FakeResumePdfRenderer
 import com.tailormyresume.feature.tailor.impl.testProfile
@@ -67,9 +68,9 @@ class ExportedViewModelTest {
     private var filesPresent = true
 
     private val fileStore = object : ExportedFileStore {
-        override fun fileFor(fileName: String): File? {
+        override fun fileFor(applicationId: String, fileName: String): File? {
             if (!filesPresent) return null
-            return File(directory, fileName).takeIf { it.isFile }
+            return ExportDirectory(directory).existing(applicationId, fileName)
         }
     }
 
@@ -222,6 +223,23 @@ class ExportedViewModelTest {
 
         assertThat(ready.freeResumeUsed).isFalse()
         assertThat(ready.creditsLeft).isEqualTo(2)
+    }
+
+    @Test
+    fun aLaterPaidSpendOfTheSameApplicationClearsTheFreeLine() = runTest {
+        creditsRepository.sendLedger(
+            listOf(
+                entry(CreditLedgerKind.FREE_GRANT, 1),
+                entry(CreditLedgerKind.SPEND, -1, applicationId = "app-1"),
+                entry(CreditLedgerKind.PURCHASE, 5, productId = "pack"),
+                entry(CreditLedgerKind.SPEND, -1, applicationId = "app-1"),
+            ),
+        )
+        seed()
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+
+        assertThat(viewModel.ready().freeResumeUsed).isFalse()
     }
 
     @Test

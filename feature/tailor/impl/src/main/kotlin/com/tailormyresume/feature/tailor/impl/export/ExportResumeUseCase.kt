@@ -47,6 +47,7 @@ internal class ExportResumeUseCase @Inject constructor(
         val settings = settingsRepository.observeSettings().first()
         val fileName = ExportFileName.build(profile, application.job, settings.fileNameFormat.toExportFormat())
         val rendered = renderer.render(
+            applicationId,
             assembler.assemble(profile, resume),
             fileName,
             settings.pageSize,

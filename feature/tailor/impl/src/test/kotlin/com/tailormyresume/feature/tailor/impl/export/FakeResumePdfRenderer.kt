@@ -13,6 +13,7 @@ internal class FakeResumePdfRenderer(
         private set
     var pageCountCalls = 0
         private set
+    var content = "%PDF-1.4"
     var lastFileName: String? = null
         private set
     var lastPreviousFileName: String? = null
@@ -23,6 +24,7 @@ internal class FakeResumePdfRenderer(
         private set
 
     override suspend fun render(
+        applicationId: String,
         document: ResumeDocument,
         fileName: String,
         pageSize: PageSize,
@@ -34,7 +36,7 @@ internal class FakeResumePdfRenderer(
         lastPageSize = pageSize
         lastDocument = document
         directory.mkdirs()
-        val file = File(directory, fileName).apply { writeText("%PDF-1.4") }
+        val file = ExportDirectory(directory).write(applicationId, fileName, previousFileName) { it.write(content.toByteArray()) }
         return RenderedResume(file = file, pageCount = pageCount, lines = emptyList())
     }
 

@@ -45,7 +45,7 @@ internal abstract class TailorHiltTestBindings {
     abstract fun bindExportedPdfIntents(intents: ExportedPdfIntentsImpl): ExportedPdfIntents
 
     @Binds
-    abstract fun bindRemoteLedger(impl: NoRemoteLedger): RemoteLedgerSource
+    abstract fun bindRemoteLedgerSource(impl: NoRemoteLedger): RemoteLedgerSource
 
     companion object {
         @Provides

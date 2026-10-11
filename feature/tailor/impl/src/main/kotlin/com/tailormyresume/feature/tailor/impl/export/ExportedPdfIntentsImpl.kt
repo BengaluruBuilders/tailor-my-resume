@@ -39,7 +39,7 @@ internal class ExportedPdfIntentsImpl @Inject constructor(
 
     private suspend fun pdfFile(applicationId: String): File? {
         val application = applicationRepository.observeApplication(applicationId).first() ?: return null
-        val stored = application.exportFileName?.let { name -> withContext(ioDispatcher) { fileStore.fileFor(name) } }
+        val stored = application.exportFileName?.let { name -> withContext(ioDispatcher) { fileStore.fileFor(applicationId, name) } }
         return stored ?: rerender(applicationId)
     }
 

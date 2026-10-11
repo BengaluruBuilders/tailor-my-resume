@@ -18,6 +18,7 @@ internal class AndroidPdfResumeRenderer @Inject constructor(
 ) : ResumePdfRenderer {
 
     override suspend fun render(
+        applicationId: String,
         document: ResumeDocument,
         fileName: String,
         pageSize: PageSize,
@@ -27,7 +28,7 @@ internal class AndroidPdfResumeRenderer @Inject constructor(
         try {
             return withContext(ioDispatcher) {
                 val directory = ExportDirectory(File(context.cacheDir, EXPORT_DIRECTORY))
-                val file = directory.write(fileName, previousFileName) { fitted.pages.writeTo(it) }
+                val file = directory.write(applicationId, fileName, previousFileName) { fitted.pages.writeTo(it) }
                 RenderedResume(file = file, pageCount = fitted.pageCount, lines = fitted.lines)
             }
         } finally {
