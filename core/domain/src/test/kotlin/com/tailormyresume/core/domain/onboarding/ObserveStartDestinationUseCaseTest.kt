@@ -3,6 +3,7 @@ package com.tailormyresume.core.domain.onboarding
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.model.SignInAccount
+import com.tailormyresume.core.testing.repository.TestProfileRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -10,7 +11,7 @@ import org.junit.Test
 class ObserveStartDestinationUseCaseTest {
 
     private val session = TestSessionRepository()
-    private val useCase = ObserveStartDestinationUseCase(session)
+    private val useCase = ObserveStartDestinationUseCase(session, TestProfileRepository())
 
     @Test
     fun withOnboardingIncompleteTheStartIsSignIn() = runTest {

@@ -2,7 +2,7 @@ package com.tailormyresume.core.model
 
 enum class EntryCategory { EDUCATION, EXPERIENCE, PROJECT, CERTIFICATION, ACHIEVEMENT }
 
-enum class FactSource { IMPORTED, USER_STATED, USER_EDITED }
+enum class FactSource { IMPORTED, USER_STATED, USER_EDITED, USER_ANSWER }
 
 data class EvidenceBullet(val id: String, val text: String)
 

@@ -53,7 +53,6 @@ class AccountDataArchiveWriterTest {
             rawText = "Senior Engineer | Bengaluru | Full-time\nResponsibilities:\nShip Kotlin apps",
             requirements = sampleApplication.job.requirements + terraformRequirement,
         ),
-        notes = "Call the recruiter on Tuesday\nAsk about the 2nd round",
         tailoredResume = TailoredResume(
             entryIds = listOf("entry-1", "entry-2"),
             bullets = listOf(
@@ -125,7 +124,6 @@ class AccountDataArchiveWriterTest {
         assertThat(entry.getValue("role").jsonPrimitive.content).isEqualTo(application.job.title)
         assertThat(entry.getValue("company").jsonPrimitive.content).isEqualTo(application.job.company)
         assertThat(entry.getValue("status").jsonPrimitive.content).isEqualTo("SAVED")
-        assertThat(entry.getValue("notes").jsonPrimitive.content).isEqualTo("Call the recruiter on Tuesday\nAsk about the 2nd round")
         assertThat(entry.getValue("createdAt").jsonPrimitive.content).isEqualTo(application.createdAt.toString())
         assertThat(entry.getValue("updatedAt").jsonPrimitive.content).isEqualTo(application.updatedAt.toString())
 
@@ -226,14 +224,13 @@ class AccountDataArchiveWriterTest {
     }
 
     @Test
-    fun applicationsTextShowsJdAnalysisResumeAndNotes() {
+    fun applicationsTextShowsJdAnalysisAndResume() {
         val text = archive().getValue("applications.txt")
 
         assertThat(text).contains("jobDescription: Senior Engineer | Bengaluru | Full-time")
         assertThat(text).contains("requirement NICE_TO_HAVE TOOL: Terraform pipelines on AWS")
         assertThat(text).contains("MET")
         assertThat(text).contains("Built a Kotlin Android app")
-        assertThat(text).contains("Call the recruiter on Tuesday")
     }
 
     @Test
@@ -245,7 +242,6 @@ class AccountDataArchiveWriterTest {
         assertThat(atColumnZero.single()).startsWith(application.id)
         assertThat(lines).contains("  jobDescription: Senior Engineer | Bengaluru | Full-time")
         assertThat(lines).contains("    Responsibilities:")
-        assertThat(lines).contains("    Ask about the 2nd round")
         assertThat(lines).contains("    Cut cost 30% (was: Moved services)")
     }
 

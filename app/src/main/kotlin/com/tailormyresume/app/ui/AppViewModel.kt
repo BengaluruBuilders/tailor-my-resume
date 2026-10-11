@@ -19,7 +19,7 @@ class AppViewModel @Inject constructor(
     val rootState: StateFlow<AppRootState> = observeStartDestination()
         .map { destination ->
             when (destination) {
-                StartDestination.SignIn -> AppRootState.FirstRun
+                StartDestination.SignIn, StartDestination.Upload -> AppRootState.FirstRun
                 StartDestination.Applications -> AppRootState.Main
             }
         }

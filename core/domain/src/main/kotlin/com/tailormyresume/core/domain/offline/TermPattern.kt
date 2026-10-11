@@ -13,7 +13,7 @@ internal class TermPattern private constructor(
 
         fun compileAll(entry: LexiconEntry): List<TermPattern> = listOfNotNull(
             build(entry, entry.insensitiveForms, ignoreCase = true, suffixes = emptyList()),
-            build(entry, entry.exactForms, ignoreCase = false, suffixes = entry.blockedSuffixes),
+            build(entry, entry.exactForms, ignoreCase = false, suffixes = entry.blockedSuffixes, prefix = entry.requiredPrefix),
         )
 
         private fun build(
@@ -21,6 +21,7 @@ internal class TermPattern private constructor(
             forms: List<String>,
             ignoreCase: Boolean,
             suffixes: List<String>,
+            prefix: String? = null,
         ): TermPattern? {
             if (forms.isEmpty()) return null
             val alternatives = forms.sortedByDescending { it.length }.joinToString("|") { formRegex(it) }
@@ -28,9 +29,10 @@ internal class TermPattern private constructor(
             val before = if (strict) "(?<![$BLOCKED_NEIGHBOUR\\-/.])" else "(?<![$BLOCKED_NEIGHBOUR])"
             val after = if (strict) "(?![$BLOCKED_NEIGHBOUR\\-/]|\\.\\p{L})" else "(?![$BLOCKED_NEIGHBOUR])"
             val blocked = entry.blockedPrefixes.joinToString("") { "(?<!$it)" }
+            val required = prefix?.let { "(?<=$it)" }.orEmpty()
             val blockedAfter = suffixes.joinToString("") { "(?!$it)" }
             val options = if (ignoreCase) setOf(RegexOption.IGNORE_CASE) else emptySet()
-            return TermPattern(entry.canonical, Regex("$before$blocked(?:$alternatives)$after$blockedAfter", options))
+            return TermPattern(entry.canonical, Regex("$before$blocked$required(?:$alternatives)$after$blockedAfter", options))
         }
 
         private fun formRegex(form: String): String =

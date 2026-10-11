@@ -1,8 +1,14 @@
 package com.tailormyresume.core.domain.offline
 
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.domain.AnswerFacts
 import com.tailormyresume.core.model.EvidenceBullet
 import com.tailormyresume.core.model.GuardrailViolation
+import com.tailormyresume.core.model.JobDescription
+import com.tailormyresume.core.model.JobRequirement
+import com.tailormyresume.core.model.QuickAnswer
+import com.tailormyresume.core.model.RequirementPriority
+import com.tailormyresume.core.model.RequirementType
 import org.junit.Test
 
 class OfflineFabricationGuardTest {
@@ -334,5 +340,63 @@ class OfflineFabricationGuardTest {
     fun rewordedAliasIsClean() {
         assertThat(check("Fixing bugs in the JavaScript frontend", "Worked on the task of fixing bugs in the js frontend"))
             .isEmpty()
+    }
+
+    private val answerRequirement = JobRequirement(
+        id = "req-1",
+        text = "Presented quarterly results to the board for 3+ years using Looker",
+        type = RequirementType.EXPERIENCE,
+        priority = RequirementPriority.MUST_HAVE,
+        keywords = listOf("looker"),
+    )
+    private val answerJob = JobDescription("Analyst", "Northwind", "raw", listOf(answerRequirement))
+
+    private fun answerSource(choice: String, detail: String): EvidenceBullet =
+        checkNotNull(AnswerFacts.factOf(QuickAnswer("req-1", choice, detail), answerJob))
+
+    private fun checkAgainstAnswer(proposed: String, detail: String, choice: String = AnswerFacts.YES_REGULARLY) =
+        guard.check(proposed, listOf(answerSource(choice, detail)), profile)
+
+    @Test
+    fun answerBulletFromDetailPasses() {
+        val detail = "Presented the monthly variance report to the CFO"
+
+        assertThat(checkAgainstAnswer(detail, detail)).isEmpty()
+        assertThat(checkAgainstAnswer("Presented the variance report to the CFO", detail)).isEmpty()
+    }
+
+    @Test
+    fun answerBulletAddingTermNumberOrScaleIsFlagged() {
+        val detail = "Presented the monthly variance report to the CFO"
+
+        assertThat(checkAgainstAnswer("$detail using Python", detail)).contains(GuardrailViolation.UnsupportedTerm("Python"))
+        assertThat(checkAgainstAnswer("$detail 12 times", detail)).contains(GuardrailViolation.UnsupportedNumber("12"))
+        assertThat(checkAgainstAnswer("$detail to 500 customers", detail)).isNotEmpty()
+        assertThat(checkAgainstAnswer("Led the monthly variance report to the CFO", detail))
+            .contains(GuardrailViolation.VerbEscalation(from = "none", to = "led"))
+    }
+
+    @Test
+    fun answerWithoutDetailNeverBorrowsRequirementNumbersOrWording() {
+        val violations = checkAgainstAnswer("Presented quarterly results to the board for 3 years", detail = "", A_FEW)
+
+        assertThat(violations).contains(GuardrailViolation.UnsupportedNumber("3"))
+        assertThat(violations).isNotEmpty()
+    }
+
+    @Test
+    fun answerKeywordsGroundANamedToolInGeneralTerms() {
+        assertThat(checkAgainstAnswer("Looker", detail = "", A_FEW)).isEmpty()
+    }
+
+    @Test
+    fun summarySentenceWithoutSourceFallsBack() {
+        assertThat(guard.check("Analyst who builds dashboards.", emptyList(), profile))
+            .containsExactly(GuardrailViolation.MissingSource)
+        assertThat(check("Analyst who builds dashboards in Tableau.", "Built dashboards in Excel")).isNotEmpty()
+    }
+
+    private companion object {
+        const val A_FEW = AnswerFacts.A_FEW_TIMES
     }
 }

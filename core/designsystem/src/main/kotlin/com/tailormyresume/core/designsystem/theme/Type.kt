@@ -4,38 +4,112 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.tailormyresume.core.designsystem.R
 
+@OptIn(ExperimentalTextApi::class)
 object TmrFontFamilies {
-    val sans = FontFamily.Default
-    val display = FontFamily.Default
+    val mono: FontFamily = FontFamily(
+        Font(
+            resId = R.font.space_mono_regular,
+            weight = FontWeight.Normal,
+        ),
+        Font(
+            resId = R.font.space_mono_bold,
+            weight = FontWeight.Bold,
+        ),
+    )
+
+    val grotesk: FontFamily = FontFamily(
+        Font(
+            resId = R.font.space_grotesk,
+            weight = FontWeight.Normal,
+            style = FontStyle.Normal,
+            variationSettings = FontVariation.Settings(FontVariation.weight(400)),
+        ),
+        Font(
+            resId = R.font.space_grotesk,
+            weight = FontWeight.Medium,
+            style = FontStyle.Normal,
+            variationSettings = FontVariation.Settings(FontVariation.weight(500)),
+        ),
+        Font(
+            resId = R.font.space_grotesk,
+            weight = FontWeight.SemiBold,
+            style = FontStyle.Normal,
+            variationSettings = FontVariation.Settings(FontVariation.weight(600)),
+        ),
+        Font(
+            resId = R.font.space_grotesk,
+            weight = FontWeight.Bold,
+            style = FontStyle.Normal,
+            variationSettings = FontVariation.Settings(FontVariation.weight(700)),
+        ),
+    )
+
+    val sans: FontFamily = grotesk
+
+    val display: FontFamily = mono
 }
 
 @Immutable
 class TmrTypography(
-    val displayL: TextStyle,
-    val displayM: TextStyle,
-    val headlineL: TextStyle,
-    val headlineM: TextStyle,
-    val titleL: TextStyle,
-    val titleM: TextStyle,
-    val titleS: TextStyle,
-    val bodyL: TextStyle,
-    val bodyM: TextStyle,
-    val labelL: TextStyle,
-    val labelM: TextStyle,
+    val headline: TextStyle,
+    val headlineSmall: TextStyle,
+    val title: TextStyle,
+    val display: TextStyle,
+    val displayLarge: TextStyle,
+    val label: TextStyle,
+    val labelWide: TextStyle,
     val button: TextStyle,
-    val bodyS: TextStyle,
-    val numeralHero: TextStyle,
-    val numeralM: TextStyle,
-    val factId: TextStyle,
-)
+    val mono15: TextStyle,
+    val mono14: TextStyle,
+    val body: TextStyle,
+    val bodyLarge: TextStyle,
+    val bodySmall: TextStyle,
+    val caption: TextStyle,
+    val strongLarge: TextStyle,
+    val strongSmall: TextStyle,
+) {
+    val displayL: TextStyle get() = display
+
+    val displayM: TextStyle get() = headline
+
+    val headlineL: TextStyle get() = headline
+
+    val headlineM: TextStyle get() = title
+
+    val titleL: TextStyle get() = title
+
+    val titleM: TextStyle get() = strongLarge
+
+    val titleS: TextStyle get() = strongSmall
+
+    val bodyL: TextStyle get() = bodyLarge
+
+    val bodyM: TextStyle get() = body
+
+    val labelL: TextStyle get() = button
+
+    val labelM: TextStyle get() = label
+
+    val bodyS: TextStyle get() = bodySmall
+
+    val numeralHero: TextStyle get() = displayLarge
+
+    val numeralM: TextStyle get() = display
+
+    val factId: TextStyle get() = label
+}
 
 internal object TmrTypographyTokens {
     private val lineHeightStyle = LineHeightStyle(
@@ -43,69 +117,71 @@ internal object TmrTypographyTokens {
         trim = LineHeightStyle.Trim.None,
     )
 
-    private fun sans(
-        size: Int,
-        line: Int,
+    private fun mono(
         weight: FontWeight,
-        tracking: TextUnit,
-    ) = TextStyle(
-        fontFamily = TmrFontFamilies.sans,
+        size: Float,
+        lineHeight: Float?,
+        tracking: Float,
+    ): TextStyle = TextStyle(
+        fontFamily = TmrFontFamilies.mono,
         fontWeight = weight,
         fontSize = size.sp,
-        lineHeight = line.sp,
-        letterSpacing = tracking,
-        fontFeatureSettings = TABULAR_FIGURES,
+        lineHeight = lineHeight?.sp ?: TextUnit.Unspecified,
+        letterSpacing = tracking.sp,
         lineHeightStyle = lineHeightStyle,
     )
 
-    private fun display(size: Int, line: Int) = TextStyle(
-        fontFamily = TmrFontFamilies.display,
-        fontWeight = FontWeight.Black,
+    private fun grotesk(
+        weight: FontWeight,
+        size: Float,
+        lineHeight: Float?,
+        tracking: Float,
+    ): TextStyle = TextStyle(
+        fontFamily = TmrFontFamilies.grotesk,
+        fontWeight = weight,
         fontSize = size.sp,
-        lineHeight = line.sp,
-        letterSpacing = 0.em,
+        lineHeight = lineHeight?.sp ?: TextUnit.Unspecified,
+        letterSpacing = tracking.sp,
         lineHeightStyle = lineHeightStyle,
     )
 
     val Default = TmrTypography(
-        displayL = display(34, 36),
-        displayM = display(30, 32),
-        headlineL = display(28, 30),
-        headlineM = sans(22, 28, FontWeight.ExtraBold, (-0.01).em),
-        titleL = sans(18, 24, FontWeight.ExtraBold, 0.em),
-        titleM = sans(16, 22, FontWeight.ExtraBold, 0.em),
-        titleS = sans(15, 21, FontWeight.Bold, 0.em),
-        bodyL = sans(16, 23, FontWeight.SemiBold, 0.em),
-        bodyM = sans(15, 22, FontWeight.SemiBold, 0.em),
-        labelL = sans(14, 20, FontWeight.ExtraBold, 0.em),
-        labelM = sans(13, 18, FontWeight.Bold, 0.em),
-        button = sans(16, 22, FontWeight.ExtraBold, 0.em),
-        bodyS = sans(13, 18, FontWeight.SemiBold, 0.em),
-        numeralHero = display(52, 52),
-        numeralM = sans(22, 28, FontWeight.ExtraBold, 0.em),
-        factId = sans(12, 16, FontWeight.ExtraBold, 0.05.em),
+        headline = mono(FontWeight.Normal, 28f, 30.8f, -1.0f),
+        headlineSmall = mono(FontWeight.Normal, 26f, 28.6f, -1.0f),
+        title = mono(FontWeight.Normal, 22f, 25.3f, -0.6f),
+        display = mono(FontWeight.Bold, 34f, 34f, -1.5f),
+        displayLarge = mono(FontWeight.Bold, 60f, 60f, -3.0f),
+        label = mono(FontWeight.Normal, 12f, null, 0.6f),
+        labelWide = mono(FontWeight.Normal, 12f, null, 0.8f),
+        button = mono(FontWeight.Normal, 13f, null, 0f),
+        mono15 = mono(FontWeight.Normal, 15f, null, 0f),
+        mono14 = mono(FontWeight.Normal, 14f, null, 0f),
+        body = grotesk(FontWeight.Normal, 15f, 21.75f, 0f),
+        bodyLarge = grotesk(FontWeight.Normal, 16f, null, 0f),
+        bodySmall = grotesk(FontWeight.Normal, 14f, 21f, 0f),
+        caption = grotesk(FontWeight.Normal, 13f, null, 0f),
+        strongLarge = grotesk(FontWeight.SemiBold, 15f, null, 0f),
+        strongSmall = grotesk(FontWeight.Bold, 14f, null, 0f),
     )
 }
-
-private const val TABULAR_FIGURES = "tnum"
 
 val LocalTmrTypography: ProvidableCompositionLocal<TmrTypography> =
     staticCompositionLocalOf { TmrTypographyTokens.Default }
 
 internal fun TmrTypography.toMaterial(): Typography = Typography(
-    displayLarge = displayL,
-    displayMedium = displayM,
-    displaySmall = headlineL,
-    headlineLarge = headlineL,
-    headlineMedium = headlineM,
-    headlineSmall = titleL,
-    titleLarge = titleL,
-    titleMedium = titleM,
-    titleSmall = titleS,
-    bodyLarge = bodyL,
-    bodyMedium = bodyM,
-    bodySmall = bodyS,
-    labelLarge = labelL,
-    labelMedium = labelM,
-    labelSmall = labelM,
+    displayLarge = displayLarge,
+    displayMedium = display,
+    displaySmall = headline,
+    headlineLarge = headline,
+    headlineMedium = headlineSmall,
+    headlineSmall = title,
+    titleLarge = title,
+    titleMedium = strongLarge,
+    titleSmall = strongSmall,
+    bodyLarge = bodyLarge,
+    bodyMedium = body,
+    bodySmall = bodySmall,
+    labelLarge = button,
+    labelMedium = label,
+    labelSmall = label,
 )

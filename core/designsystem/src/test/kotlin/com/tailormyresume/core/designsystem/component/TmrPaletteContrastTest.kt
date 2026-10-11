@@ -11,13 +11,13 @@ import org.junit.Test
 
 class TmrPaletteContrastTest {
     @Test
-    fun appSurfacePaletteMatchesTheClaudeDesignCanvas() {
+    fun appSurfacePaletteMatchesThePaigePrototype() {
         with(TmrDarkColors) {
             assertEquals(Color(0xFF000000), background)
-            assertEquals(Color(0xFF161817), card)
-            assertEquals(Color(0xFF232524), document)
-            assertEquals(Color(0xFFAEFF00), brand)
-            assertEquals(Color(0xFF000000), onBrand)
+            assertEquals(Color(0xFF111111), card)
+            assertEquals(Color(0xFF1C1C1C), document)
+            assertEquals(Color(0xFFA3F43F), brand)
+            assertEquals(Color(0xFF0A0A0A), onBrand)
         }
     }
 
@@ -56,6 +56,10 @@ class TmrPaletteContrastTest {
             Triple("dock", onToolVariant, tool),
             Triple("selected dock", onToolSelected, tool),
             Triple("error action", onError, error),
+            Triple("text secondary", textSecondary, background),
+            Triple("text muted on raised", textMuted, surfaceHigh),
+            Triple("disabled on background", textDisabled, background),
+            Triple("amber on surface", amber, surface),
         )
     }
 

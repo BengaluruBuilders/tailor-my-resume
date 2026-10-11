@@ -6,18 +6,24 @@ import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.domain.DiscardJobDraftsUseCase
 import com.tailormyresume.core.model.ContentReport
 import com.tailormyresume.core.model.CreditKind
+import com.tailormyresume.core.model.CreditLedgerEntry
+import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.ExportFormat
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.KeptJobDescription
+import com.tailormyresume.core.model.PageSize
 import com.tailormyresume.core.model.ReportedItemKind
+import com.tailormyresume.core.model.ResumeSettings
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.data.canonicalApplication
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.mock.TestMockStateStore
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestContentReportRepository
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
+import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -44,6 +50,8 @@ class DeleteMyDataUseCaseTest {
         )
     }
     private val session = TestSessionRepository()
+    private val credits = TestCreditsRepository()
+    private val settings = TestResumeSettingsRepository()
     private val contentReports = TestContentReportRepository()
     private val store = TestMockStateStore()
     private var exportedFilesDeletions = 0
@@ -70,6 +78,8 @@ class DeleteMyDataUseCaseTest {
         },
         transientData = TransientDataCleaner { transientClears++ },
         legacyDataPurge = LegacyDataPurge(store),
+        creditsRepository = credits,
+        resumeSettingsRepository = settings,
     )
 
     private suspend fun keepAccountState() {
@@ -91,6 +101,18 @@ class DeleteMyDataUseCaseTest {
         assertThat(session.observeKeptJobDescription().first()).isNull()
         assertThat(exportedFilesDeletions).isEqualTo(1)
         assertThat(transientClears).isEqualTo(1)
+    }
+
+    @Test
+    fun clearsTheResumeSettingsAndTheLedgerRowsOfDeletedApplications() = runTest {
+        credits.record(CreditLedgerEntry(CreditLedgerKind.SPEND, -1, canonicalApplication.id, null, Instant.fromEpochSeconds(2)))
+        credits.record(CreditLedgerEntry(CreditLedgerKind.PURCHASE, 5, null, "application_pack_5", Instant.fromEpochSeconds(1)))
+        settings.update { it.copy(pageSize = PageSize.LETTER, productUpdates = true) }
+
+        useCase()()
+
+        assertThat(credits.observeLedger().first().map { it.applicationId }).containsExactly(null)
+        assertThat(settings.observeSettings().first()).isEqualTo(ResumeSettings())
     }
 
     @Test

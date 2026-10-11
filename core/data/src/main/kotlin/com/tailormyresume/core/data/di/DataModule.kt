@@ -13,15 +13,19 @@ import com.tailormyresume.core.data.mock.MockLatency
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.repository.ApplicationCleanup
 import com.tailormyresume.core.data.repository.ApplicationRepository
+import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.OfflineFirstApplicationRepository
+import com.tailormyresume.core.data.repository.OfflineFirstCreditsRepository
 import com.tailormyresume.core.data.repository.OfflineFirstProfileRepository
 import com.tailormyresume.core.data.repository.PendingAccountWipe
 import com.tailormyresume.core.data.repository.ProfileRepository
+import com.tailormyresume.core.data.repository.ResumeSettingsRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.data.repository.StoredApplicationCleanup
 import com.tailormyresume.core.data.repository.StoredExportHistoryRepository
 import com.tailormyresume.core.data.repository.StoredPendingAccountWipe
+import com.tailormyresume.core.data.repository.StoredResumeSettingsRepository
 import com.tailormyresume.core.data.repository.StoredSessionRepository
 import com.tailormyresume.core.data.repository.StoredTailoringReviewStateRepository
 import com.tailormyresume.core.data.repository.TailoringReviewStateRepository
@@ -50,6 +54,14 @@ abstract class DataModule {
     internal abstract fun bindsApplicationRepository(
         applicationRepository: OfflineFirstApplicationRepository,
     ): ApplicationRepository
+
+    @Binds
+    internal abstract fun bindsCreditsRepository(repository: OfflineFirstCreditsRepository): CreditsRepository
+
+    @Binds
+    internal abstract fun bindsResumeSettingsRepository(
+        repository: StoredResumeSettingsRepository,
+    ): ResumeSettingsRepository
 
     @Binds
     internal abstract fun bindsMockStateStore(store: DataStoreMockStateStore): MockStateStore

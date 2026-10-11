@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_designsystem_chrome_back">Back</string>
+    <string name="core_designsystem_chrome_close">Close</string>
+    <string name="core_designsystem_chrome_step_profile">Profile</string>
+    <string name="core_designsystem_chrome_step_job">Job</string>
+    <string name="core_designsystem_chrome_step_tailor">Tailor</string>
+    <string name="core_designsystem_chrome_step_done_label">✓ %1$s</string>
+    <string name="core_designsystem_chrome_step_pending_label">%1$d %2$s</string>
+    <string name="core_designsystem_chrome_step_description">Step %1$d of 3, %2$s</string>
+    <string name="core_designsystem_chrome_tab_applications">Applications</string>
+    <string name="core_designsystem_chrome_tab_profile">Profile</string>
+    <string name="core_designsystem_chrome_add_application">New application</string>
+    <string name="core_designsystem_chrome_dismiss">Dismiss</string>
+</resources>

@@ -9,8 +9,8 @@ import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.RequirementMatch
-import com.tailormyresume.core.model.confirmedWithinLimits
 import com.tailormyresume.core.model.evidenceIds
+import com.tailormyresume.core.model.sendableFacts
 import com.tailormyresume.core.network.TailorMyResumeApi
 import com.tailormyresume.core.network.dto.AnalysisRequest
 import com.tailormyresume.core.network.dto.MatchDto
@@ -39,7 +39,7 @@ class RemoteJobAnalysisSource @Inject constructor(
         synchronized(cache) { cache[key] }?.let { return rematch(it, profile) }
         val response = remoteAi { api.analyse(AnalysisRequest(rawJobText, facts)) }
         val job = response.job.toJobDescription(rawJobText)
-        val factIds = profile.confirmedWithinLimits().evidenceIds()
+        val factIds = profile.sendableFacts().evidenceIds()
         val gap = GapAnalysis(
             matches = matchesOf(job, response.matches, factIds),
             keywordCoverage = matcher.match(profile, job).keywordCoverage,
@@ -54,7 +54,7 @@ class RemoteJobAnalysisSource @Inject constructor(
 
     private fun rematch(entry: Entry, profile: CandidateProfile): JobAnalysisResult {
         val job = entry.result.job
-        val factIds = profile.confirmedWithinLimits().evidenceIds()
+        val factIds = profile.sendableFacts().evidenceIds()
         val baseline = matcher.match(entry.baselineProfile, job).matches.associateBy { it.requirement.id }
         val current = matcher.match(profile, job)
         val currentByRequirement = current.matches.associateBy { it.requirement.id }

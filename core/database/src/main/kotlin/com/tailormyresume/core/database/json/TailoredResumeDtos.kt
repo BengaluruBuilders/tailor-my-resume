@@ -43,7 +43,26 @@ data class TailoredBulletDto(
 )
 
 @Serializable
+data class TailoredTextDto(
+    val text: String,
+    val original: String,
+    val sourceIds: List<String> = emptyList(),
+    val violations: List<GuardrailViolationDto> = emptyList(),
+    val decision: BulletDecision = BulletDecision.PENDING,
+)
+
+@Serializable
+data class TailoredSkillsDto(
+    val skills: List<String>,
+    val original: List<String>,
+    val violations: List<GuardrailViolationDto> = emptyList(),
+    val decision: BulletDecision = BulletDecision.PENDING,
+)
+
+@Serializable
 data class TailoredResumeDto(
     val bullets: List<TailoredBulletDto>,
     val entryIds: List<String>? = null,
+    val summary: TailoredTextDto? = null,
+    val skills: TailoredSkillsDto? = null,
 )

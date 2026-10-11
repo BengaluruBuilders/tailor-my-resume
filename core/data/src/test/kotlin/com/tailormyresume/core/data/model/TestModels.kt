@@ -144,7 +144,6 @@ val testApplication = JobApplication(
     id = "app-1",
     job = testJob,
     status = ApplicationStatus.APPLIED,
-    notes = "Referred by a friend",
     gapAnalysis = testGapAnalysis,
     tailoredResume = testTailoredResume,
     createdAt = Instant.fromEpochMilliseconds(1_700_000_000_000),

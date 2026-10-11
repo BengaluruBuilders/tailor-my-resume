@@ -2,13 +2,17 @@ package com.tailormyresume.core.domain.account
 
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.PurchaseRecord
+import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.ProfileEntry
+import com.tailormyresume.core.model.QuickAnswer
+import com.tailormyresume.core.model.ResumeSettings
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
@@ -53,11 +57,20 @@ class AccountDataArchiveWriter {
     private fun accountText(data: AccountData): String = buildString {
         appendLine("generatedAt=${data.generatedAt}")
         appendLine("account=${data.account?.email.orEmpty()}")
+        appendLine("pageSize=${data.resumeSettings.pageSize}")
+        appendLine("fileNameFormat=${data.resumeSettings.fileNameFormat}")
+        appendLine("productUpdates=${data.resumeSettings.productUpdates}")
     }
 
     private fun profileText(data: AccountData): String = buildString {
         val profile = data.profile ?: return@buildString
         appendLine("${profile.fullName} | ${profile.headline} | ${profile.email} | ${profile.phone}")
+        appendLine("city=${profile.city}")
+        appendLine("linkedinUrl=${profile.linkedinUrl}")
+        appendLine("portfolioUrl=${profile.portfolioUrl}")
+        appendLine("sourceFileName=${profile.sourceFileName.orEmpty()}")
+        appendLine("reviewedAt=${profile.reviewedAt?.toString().orEmpty()}")
+        appendIndented("summary", profile.summary)
         appendLine("skills=${profile.skills.joinToString(",")}")
         appendLine("userStatedSkills=${profile.userStatedSkills.joinToString(",")}")
         profile.entries.forEach { entry ->
@@ -69,6 +82,14 @@ class AccountDataArchiveWriter {
     private fun applicationsText(data: AccountData): String = buildString {
         data.applications.forEach { application ->
             appendLine("${application.id} | ${application.job.title} | ${application.job.company} | ${application.status}")
+            appendLine("  location=${application.location}")
+            appendLine("  appliedOn=${application.appliedOn?.toString().orEmpty()}")
+            appendLine("  exportFileName=${application.exportFileName.orEmpty()}")
+            appendLine("  changesAcceptedAt=${application.changesAcceptedAt?.toString().orEmpty()}")
+            if (application.legacyNotes.isNotEmpty()) appendIndented("notes", application.legacyNotes)
+            application.legacyStatus?.let { appendLine("  legacyStatus=$it") }
+            application.keywordCoverage?.let { appendLine("  keywordCoverage now=${it.now} upTo=${it.upTo} final=${it.final ?: ""}") }
+            application.quickAnswer?.let { appendIndented("quickAnswer ${it.requirementId} ${it.choice}", it.detail) }
             appendIndented("jobDescription", application.job.rawText)
             application.job.requirements.forEach { appendLine("  requirement ${it.priority} ${it.type}: ${it.text}") }
             application.gapAnalysis?.let { analysis ->
@@ -78,7 +99,6 @@ class AccountDataArchiveWriter {
             application.tailoredResume?.bullets?.forEach { bullet ->
                 appendIndented("resume ${bullet.decision}", "${bullet.proposedText} (was: ${bullet.originalText})")
             }
-            if (application.notes.isNotBlank()) appendIndented("notes", application.notes)
             val exports = data.exports.filter { it.applicationId == application.id }
             exports.forEach { export -> appendLine("  export ${export.format} ${export.fileName} ${export.exportedAt}") }
         }
@@ -96,6 +116,9 @@ class AccountDataArchiveWriter {
         data.purchases.forEach { purchase ->
             appendLine("${purchase.orderId} | ${purchase.packId} | ${purchase.state} | ${purchase.purchasedAt}")
         }
+        data.creditLedger.forEach { entry ->
+            appendLine("ledger ${entry.createdAt} | ${entry.kind} | ${entry.amount} | ${entry.applicationId.orEmpty()} | ${entry.productId.orEmpty()}")
+        }
     }
 
     private fun myDataJson(data: AccountData): String = prettyJson.encodeToString(
@@ -105,6 +128,8 @@ class AccountDataArchiveWriter {
             data.account?.let { put("account", accountJson(it)) }
             data.profile?.let { put("profile", profileJson(it)) }
             put("entitlement", entitlementJson(data.entitlement))
+            put("creditLedger", objects(data.creditLedger, ::ledgerEntryJson))
+            put("resumeSettings", resumeSettingsJson(data.resumeSettings))
             put("purchases", objects(data.purchases, ::purchaseJson))
             put("applications", objects(data.applications) { applicationJson(it, data) })
         },
@@ -122,6 +147,20 @@ class AccountDataArchiveWriter {
         put("pendingPackIds", strings(entitlement.pendingPackIds))
     }
 
+    private fun ledgerEntryJson(entry: CreditLedgerEntry): JsonObject = buildJsonObject {
+        put("kind", entry.kind.name)
+        put("amount", entry.amount)
+        put("applicationId", entry.applicationId)
+        put("productId", entry.productId)
+        put("createdAt", entry.createdAt.toString())
+    }
+
+    private fun resumeSettingsJson(settings: ResumeSettings): JsonObject = buildJsonObject {
+        put("pageSize", settings.pageSize.name)
+        put("fileNameFormat", settings.fileNameFormat.name)
+        put("productUpdates", settings.productUpdates)
+    }
+
     private fun purchaseJson(purchase: PurchaseRecord): JsonObject = buildJsonObject {
         put("packId", purchase.packId)
         put("orderId", purchase.orderId)
@@ -134,6 +173,12 @@ class AccountDataArchiveWriter {
         put("email", profile.email)
         put("phone", profile.phone)
         put("headline", profile.headline)
+        put("city", profile.city)
+        put("linkedinUrl", profile.linkedinUrl)
+        put("portfolioUrl", profile.portfolioUrl)
+        put("summary", profile.summary)
+        put("sourceFileName", profile.sourceFileName)
+        put("reviewedAt", profile.reviewedAt?.toString())
         put("skills", strings(profile.skills))
         put("userStatedSkills", strings(profile.userStatedSkills))
         put("entries", objects(profile.entries, ::profileEntryJson))
@@ -164,13 +209,32 @@ class AccountDataArchiveWriter {
         put("role", application.job.title)
         put("company", application.job.company)
         put("status", application.status.name)
-        put("notes", application.notes)
+        put("location", application.location)
+        put("appliedOn", application.appliedOn?.toString())
+        put("exportFileName", application.exportFileName)
+        put("changesAcceptedAt", application.changesAcceptedAt?.toString())
+        if (application.legacyNotes.isNotEmpty()) put("notes", application.legacyNotes)
+        application.legacyStatus?.let { put("legacyStatus", it) }
+        application.keywordCoverage?.let { put("keywordCoverage", applicationCoverageJson(it)) }
+        application.quickAnswer?.let { put("quickAnswer", quickAnswerJson(it)) }
         put("createdAt", application.createdAt.toString())
         put("updatedAt", application.updatedAt.toString())
         put("job", jobJson(application.job))
         application.gapAnalysis?.let { put("gapAnalysis", gapAnalysisJson(it)) }
         application.tailoredResume?.let { put("tailoredResume", tailoredResumeJson(it)) }
         put("exports", objects(data.exports.filter { it.applicationId == application.id }, ::exportJson))
+    }
+
+    private fun applicationCoverageJson(coverage: ApplicationKeywordCoverage): JsonObject = buildJsonObject {
+        put("now", coverage.now)
+        put("upTo", coverage.upTo)
+        put("final", coverage.final)
+    }
+
+    private fun quickAnswerJson(answer: QuickAnswer): JsonObject = buildJsonObject {
+        put("requirementId", answer.requirementId)
+        put("choice", answer.choice)
+        put("detail", answer.detail)
     }
 
     private fun jobJson(job: JobDescription): JsonObject = buildJsonObject {

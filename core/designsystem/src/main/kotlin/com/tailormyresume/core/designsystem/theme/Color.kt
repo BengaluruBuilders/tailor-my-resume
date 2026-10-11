@@ -7,64 +7,91 @@ import androidx.compose.ui.graphics.Color
 
 @Immutable
 class TmrColors(
-    val header: Color,
-    val headerShape: Color,
-    val onHeader: Color,
-    val onHeaderVariant: Color,
-    val onHeaderControl: Color,
-    val headerControl: Color,
-    val primary: Color,
-    val onPrimary: Color,
-    val primaryContainer: Color,
-    val onPrimaryContainer: Color,
     val background: Color,
     val surface: Color,
+    val surfaceRaised: Color,
+    val surfaceHigh: Color,
     val sheet: Color,
-    val card: Color,
-    val ground: Color,
-    val document: Color,
-    val tool: Color,
-    val onTool: Color,
-    val onToolVariant: Color,
-    val onToolSelected: Color,
-    val outline: Color,
-    val outlineVariant: Color,
-    val outlineSoft: Color,
-    val boundary: Color,
-    val disabledContent: Color,
-    val onSurface: Color,
-    val onSurfaceVariant: Color,
-    val body: Color,
-    val inverseSurface: Color,
-    val inverseOnSurface: Color,
-    val inversePrimary: Color,
-    val met: Color,
-    val metContainer: Color,
-    val onMetContainer: Color,
-    val partial: Color,
-    val partialContainer: Color,
-    val onPartialContainer: Color,
-    val gap: Color,
-    val gapContainer: Color,
-    val onGapContainer: Color,
-    val evidence: Color,
-    val evidenceLine: Color,
-    val error: Color,
-    val onError: Color,
-    val errorContainer: Color,
-    val onErrorContainer: Color,
-    val brand: Color,
-    val brandPressed: Color,
-    val sheetItemBorder: Color,
-    val onBrand: Color,
-    val coral: Color,
-    val onCoral: Color,
-    val special: Color,
-    val onSpecial: Color,
+    val sheetOption: Color,
+    val uploadCard: Color,
+    val fill: Color,
+    val disabledFill: Color,
+    val line: Color,
+    val lineStrong: Color,
+    val lineHigher: Color,
+    val tabDivider: Color,
+    val text: Color,
+    val textSecondary: Color,
+    val textMuted: Color,
+    val textDisabled: Color,
+    val ink: Color,
+    val lime: Color,
+    val limeSelected: Color,
+    val limeSoft: Color,
+    val amber: Color,
+    val amberHighlight: Color,
+    val blue: Color,
+    val cheek: Color,
+    val paper: Color,
+    val paperFold: Color,
+    val segOffer: Color,
+    val segRejected: Color,
+    val rejectedBorder: Color,
     val scrim: Color,
-    val logoTiles: List<Color>,
-    val onLogoTile: Color,
 ) {
+    val header: Color get() = background
+    val headerShape: Color get() = line
+    val onHeader: Color get() = text
+    val onHeaderVariant: Color get() = textMuted
+    val onHeaderControl: Color get() = text
+    val headerControl: Color get() = surfaceHigh
+    val primary: Color get() = lime
+    val onPrimary: Color get() = ink
+    val primaryContainer: Color get() = surfaceHigh
+    val onPrimaryContainer: Color get() = lime
+    val card: Color get() = surface
+    val ground: Color get() = background
+    val document: Color get() = surfaceHigh
+    val tool: Color get() = surface
+    val onTool: Color get() = text
+    val onToolVariant: Color get() = textSecondary
+    val onToolSelected: Color get() = lime
+    val outline: Color get() = textDisabled
+    val outlineVariant: Color get() = line
+    val outlineSoft: Color get() = line
+    val boundary: Color get() = textDisabled
+    val disabledContent: Color get() = textDisabled
+    val onSurface: Color get() = text
+    val onSurfaceVariant: Color get() = textMuted
+    val body: Color get() = textSecondary
+    val inverseSurface: Color get() = paper
+    val inverseOnSurface: Color get() = ink
+    val inversePrimary: Color get() = ink
+    val met: Color get() = lime
+    val metContainer: Color get() = limeSelected
+    val onMetContainer: Color get() = lime
+    val partial: Color get() = amber
+    val partialContainer: Color get() = surface
+    val onPartialContainer: Color get() = amber
+    val gap: Color get() = textSecondary
+    val gapContainer: Color get() = surfaceHigh
+    val onGapContainer: Color get() = textSecondary
+    val evidence: Color get() = surfaceHigh
+    val evidenceLine: Color get() = lime
+    val error: Color get() = cheek
+    val onError: Color get() = ink
+    val errorContainer: Color get() = surface
+    val onErrorContainer: Color get() = textSecondary
+    val brand: Color get() = lime
+    val brandPressed: Color get() = lime
+    val sheetItemBorder: Color get() = lineHigher
+    val onBrand: Color get() = ink
+    val coral: Color get() = cheek
+    val onCoral: Color get() = ink
+    val special: Color get() = lime
+    val onSpecial: Color get() = ink
+    val onLogoTile: Color get() = ink
+    val logoTiles: List<Color> get() = listOf(blue, amber, lime, cheek)
     val neutralContainer: Color get() = gapContainer
     val onNeutralContainer: Color get() = onGapContainer
 }

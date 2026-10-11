@@ -102,18 +102,6 @@ class OfflineFirstApplicationRepositoryTest {
     }
 
     @Test
-    fun updateNotesChangesNotesAndStampsUpdatedAt() = runTest {
-        val repository = newRepository()
-        repository.upsertApplication(testApplication)
-
-        repository.updateNotes(testApplication.id, "Follow up on Monday")
-
-        val saved = repository.observeApplication(testApplication.id).first()
-        assertThat(saved?.notes).isEqualTo("Follow up on Monday")
-        assertThat(saved?.updatedAt).isEqualTo(now)
-    }
-
-    @Test
     fun deletedApplicationIsGone() = runTest {
         val repository = newRepository()
         repository.upsertApplication(testApplication)

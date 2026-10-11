@@ -28,7 +28,6 @@ class CreateApplicationUseCase @Inject constructor(
             id = applicationId,
             job = job,
             status = ApplicationStatus.SAVED,
-            notes = "",
             gapAnalysis = analysis.gap,
             tailoredResume = tailored,
             createdAt = now,

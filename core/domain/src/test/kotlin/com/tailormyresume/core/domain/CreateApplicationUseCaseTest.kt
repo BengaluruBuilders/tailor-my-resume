@@ -43,7 +43,6 @@ class CreateApplicationUseCaseTest {
         assertThat(id).isEqualTo("app-1")
         val saved = checkNotNull(repository.current(id))
         assertThat(saved.status).isEqualTo(ApplicationStatus.SAVED)
-        assertThat(saved.notes).isEmpty()
         assertThat(saved.job).isEqualTo(analysis.job)
         assertThat(saved.gapAnalysis).isEqualTo(analysis.gap)
     }

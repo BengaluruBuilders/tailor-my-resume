@@ -6,7 +6,6 @@ import com.tailormyresume.core.data.repository.ContentReportRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.data.repository.TailoringReviewStateRepository
-import com.tailormyresume.core.data.repository.UsageAllowance
 import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.account.AccountDataExporter
@@ -26,10 +25,7 @@ import com.tailormyresume.core.testing.repository.TestContentReportRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import com.tailormyresume.core.testing.repository.TestTailoringReviewStateRepository
-import com.tailormyresume.core.testing.repository.TestUsageAllowance
-import com.tailormyresume.core.testing.repository.UsageAllowanceContractTest
 import com.tailormyresume.core.testing.sample.TestSampleDataController
-import com.tailormyresume.core.testing.util.TestClock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -53,10 +49,6 @@ class TestContentReportRepositoryContractTest : ContentReportRepositoryContractT
 class TestTailoringReviewStateRepositoryContractTest : TailoringReviewStateRepositoryContractTest() {
     override fun createTailoringReviewStateRepository(): TailoringReviewStateRepository =
         TestTailoringReviewStateRepository()
-}
-
-class TestUsageAllowanceContractTest : UsageAllowanceContractTest() {
-    override fun createUsageAllowance(clock: TestClock): UsageAllowance = TestUsageAllowance(clock)
 }
 
 class TestAccountDataExporterContractTest : AccountDataExporterContractTest() {

@@ -10,6 +10,8 @@ data class ApplicationPack(
 ) {
     companion object {
         const val APPLICATION_PACK_FIVE = "application_pack_5"
+        const val APPLICATION_PACK_FIFTEEN = "application_pack_15"
+        const val APPLICATION_PACK_FORTY = "application_pack_40"
         const val CURRENCY_INR = "INR"
     }
 }

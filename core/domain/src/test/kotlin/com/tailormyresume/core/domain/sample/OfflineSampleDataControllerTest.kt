@@ -62,7 +62,7 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
             Triple("Associate Analyst", "Northwind GCC", ApplicationStatus.APPLIED),
             Triple("Data Analyst Intern", "Paisa Ledger", ApplicationStatus.INTERVIEW),
             Triple("Graduate Engineer Trainee", "Sahyadri Motors", ApplicationStatus.SAVED),
-            Triple("Business Analyst", "Meridian GCC", ApplicationStatus.NO_RESPONSE),
+            Triple("Business Analyst", "Meridian GCC", ApplicationStatus.APPLIED),
         )
     }
 
@@ -108,7 +108,7 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
             ApplicationStatus.SAVED,
             ApplicationStatus.INTERVIEW,
             ApplicationStatus.APPLIED,
-            ApplicationStatus.NO_RESPONSE,
+            ApplicationStatus.APPLIED,
         ).inOrder()
     }
 

@@ -65,15 +65,6 @@ class RemotePaymentGatewayTest {
     }
 
     @Test
-    fun allowanceFallsBackToTheContractDefaultsWhenTheWalletCannotBeFetched() = runTest {
-        server.shutdown()
-        val allowance = WalletUsageAllowance(source)
-
-        assertThat(allowance.observeAnalysesLeft().first()).isEqualTo(3)
-        assertThat(allowance.observeFreeTailoringsLeft().first()).isEqualTo(1)
-    }
-
-    @Test
     fun entitlementComesFromTheWallet() = runTest {
         reply(200, """{"wallet":${walletJson(free = 0, purchased = 4, unlocked = "\"a1\"")}}""")
 
@@ -208,26 +199,6 @@ class RemotePaymentGatewayTest {
         assertThat(entitlement.purchasedCredits).isEqualTo(5)
         assertThat(server.requestCount).isEqualTo(2)
         assertThat(server.takeRequest().body.readUtf8()).contains("\"purchaseToken\":\"t1\"")
-    }
-
-    @Test
-    fun usageAllowanceReadsTheWallet() = runTest {
-        reply(200, """{"wallet":${walletJson(analyses = 2, tailorings = 0)}}""")
-        reply(200, """{"wallet":${walletJson(analyses = 2, tailorings = 0)}}""")
-        val allowance = WalletUsageAllowance(source)
-
-        assertThat(allowance.consumeFreeTailoring()).isFalse()
-        assertThat(allowance.observeAnalysesLeft().first()).isEqualTo(2)
-    }
-
-    @Test
-    fun consumingAnAllowanceNeverDecrementsLocally() = runTest {
-        repeat(3) { reply(200, "{\"wallet\":${walletJson(analyses = 2, tailorings = 1)}}") }
-        val allowance = WalletUsageAllowance(source)
-
-        assertThat(allowance.consumeAnalysis()).isTrue()
-        assertThat(allowance.consumeFreeTailoring()).isTrue()
-        assertThat(allowance.consumeFreeTailoring()).isTrue()
     }
 
     private class ScriptedPurchases : Dispatcher() {
