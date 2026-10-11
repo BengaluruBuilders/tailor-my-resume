@@ -5,8 +5,10 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.profile.ProfileCompleteness
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.ProfileLimits
+import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.data.PrototypeFixtures
 import com.tailormyresume.core.testing.repository.TestProfileRepository
+import com.tailormyresume.core.testing.repository.TestSessionRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
@@ -23,8 +25,9 @@ class EditContactViewModelTest {
     val dispatcherRule = MainDispatcherRule()
 
     private val profileRepository = TestProfileRepository()
+    private val session = TestSessionRepository()
 
-    private fun viewModel() = EditContactViewModel(profileRepository)
+    private fun viewModel() = EditContactViewModel(profileRepository, session)
 
     private fun TestScope.collectUiState(viewModel: EditContactViewModel) {
         backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.uiState.collect() }
@@ -239,5 +242,25 @@ class EditContactViewModelTest {
         }
 
         assertThat(savedProfile()).isEqualTo(profile)
+    }
+
+    @Test
+    fun emailFromTheResumeIsNotLabelledAsGoogle() = runTest {
+        profileRepository.sendProfile(PrototypeFixtures.returning().profile.copy(email = "sam@resume.example"))
+        session.sendAccount(SignInAccount("uid-1", "Google Name", "google.account@gmail.com"))
+        val viewModel = viewModel()
+        collectUiState(viewModel)
+
+        assertThat(viewModel.editing().emailFromGoogle).isFalse()
+    }
+
+    @Test
+    fun emailEqualToTheSignedInAccountIsLabelledGoogle() = runTest {
+        profileRepository.sendProfile(PrototypeFixtures.returning().profile.copy(email = "Same@Gmail.com"))
+        session.sendAccount(SignInAccount("uid-1", "Google Name", "same@gmail.com"))
+        val viewModel = viewModel()
+        collectUiState(viewModel)
+
+        assertThat(viewModel.editing().emailFromGoogle).isTrue()
     }
 }

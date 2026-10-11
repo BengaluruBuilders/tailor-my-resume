@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.SignInResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -33,7 +36,9 @@ internal class SignInViewModel @Inject constructor(
         if (state.getAndUpdate { SignInUiState.SigningIn } == SignInUiState.SigningIn) return
         viewModelScope.launch {
             val result = try {
-                gateway.signIn()
+                withTimeout(SIGN_IN_TIMEOUT_MILLIS) { gateway.signIn() }
+            } catch (timeout: TimeoutCancellationException) {
+                null
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (failure: Exception) {
@@ -42,7 +47,15 @@ internal class SignInViewModel @Inject constructor(
             if (result !is SignInResult.SignedIn) {
                 state.value = SignInUiState.Cancelled
                 cancelledEvents.trySend(Unit)
+            } else {
+                delay(SIGNED_IN_HANDOVER_MILLIS)
+                state.value = SignInUiState.Ready
             }
         }
+    }
+
+    private companion object {
+        const val SIGN_IN_TIMEOUT_MILLIS = 30_000L
+        const val SIGNED_IN_HANDOVER_MILLIS = 5_000L
     }
 }

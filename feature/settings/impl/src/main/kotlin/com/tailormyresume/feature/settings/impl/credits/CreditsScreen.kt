@@ -77,6 +77,17 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
                 modifier = Modifier.fillMaxWidth().padding(top = spacing.md),
             )
         }
+        if (content.receiptEmail.isNotBlank()) {
+            item(key = "receipt-email") {
+                Text(
+                    text = content.receiptEmail,
+                    style = TmrTheme.typography.caption,
+                    color = TmrTheme.colors.textMuted,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
     }
 }
 
