@@ -17,9 +17,14 @@ dependencies {
     implementation(projects.feature.analysis.api)
     implementation(projects.feature.onboarding.api)
     implementation(projects.feature.profile.api)
+    implementation(projects.feature.settings.api)
     implementation(projects.feature.tailor.api)
 
     testImplementation(projects.core.testing)
     testImplementation(libs.truth)
     testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
+    kspTest(libs.kotlin.metadata)
 }
