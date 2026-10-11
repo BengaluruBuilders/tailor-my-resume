@@ -7,10 +7,12 @@ import com.tailormyresume.feature.analysis.api.navigation.JobLinkNavKey
 import com.tailormyresume.feature.analysis.api.navigation.JobNavKey
 import com.tailormyresume.feature.analysis.api.navigation.JobResultNavKey
 import com.tailormyresume.feature.analysis.api.navigation.QuickQuestionNavKey
+import com.tailormyresume.feature.analysis.impl.job.JobRoute
+import com.tailormyresume.feature.analysis.impl.joblink.JobLinkRoute
 
 fun EntryProviderScope<NavKey>.analysisEntry(navigator: Navigator) {
-    entry<JobNavKey> { key -> NavKeyPlaceholder(key) }
-    entry<JobLinkNavKey> { key -> NavKeyPlaceholder(key) }
+    entry<JobNavKey> { JobRoute(navigator) }
+    entry<JobLinkNavKey> { JobLinkRoute(navigator) }
     entry<JobResultNavKey> { key -> NavKeyPlaceholder(key) }
     entry<QuickQuestionNavKey> { key -> NavKeyPlaceholder(key) }
 }

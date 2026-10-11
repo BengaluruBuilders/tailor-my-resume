@@ -53,8 +53,9 @@ internal object SkillLexicon {
     }
 
     private fun isLooseAlias(term: LexiconTerm): Boolean {
+        val entry = entriesByCanonical[term.canonical] ?: return false
         val surface = keyOf(term.surface)
-        return entriesByCanonical[term.canonical]?.looseAliases?.any { keyOf(it) == surface } == true
+        return entry.looseAliases.any { keyOf(it) == surface } && !" $surface ".contains(" ${keyOf(entry.display)} ")
     }
 
     fun surfaceMatchesDisplay(term: LexiconTerm): Boolean {

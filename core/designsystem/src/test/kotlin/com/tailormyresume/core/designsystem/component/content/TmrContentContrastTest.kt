@@ -62,6 +62,20 @@ class TmrContentContrastTest {
         TmrApplicationStatus.entries.forEach { status ->
             result += TextOnSurface("status bar legend $status", colors.textSecondary, colors.background)
         }
+        result += TextOnSurface("paper badge", colors.lime, colors.ink)
+        val paperBackgrounds = listOf(
+            colors.paper,
+            tmrPaperHighlightColor(TmrPaperHighlight.FromResume, colors),
+            tmrPaperHighlightColor(TmrPaperHighlight.FromAnswer, colors),
+        )
+        paperBackgrounds.forEachIndexed { index, background ->
+            result += TextOnSurface("paper body $index", colors.ink, background)
+        }
+        listOf("lime" to colors.lime, "blue" to colors.blue, "amber" to colors.amber).forEach { (name, disc) ->
+            result += TextOnSurface("initial disc on $name", colors.ink, disc)
+        }
+        result += TextOnSurface("file card button", colors.text, colors.fill)
+        result += TextOnSurface("paper legend", colors.textMuted, colors.background)
         return result
     }
 

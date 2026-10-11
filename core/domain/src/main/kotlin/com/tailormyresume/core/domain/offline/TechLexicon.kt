@@ -1,5 +1,7 @@
 package com.tailormyresume.core.domain.offline
 
+private const val EXACT_FORM_PREFIX = "(?:\\b(?:in|with|using|and|or)\\s|[,/(:]\\s?)"
+
 internal val languageEntries: List<LexiconEntry> = listOf(
     skill("Python", "python3", "python 3", "py"),
     skill("Java", loose = listOf("core java")),
@@ -15,6 +17,7 @@ internal val languageEntries: List<LexiconEntry> = listOf(
         exactForms = listOf("Go"),
         blockedPrefixes = listOf("-"),
         blockedSuffixes = listOf("-", "\\s+(?:live|to\\s+market)"),
+        requiredPrefix = EXACT_FORM_PREFIX,
         matchesCanonical = false,
     ),
     skill("Rust"),
@@ -38,7 +41,7 @@ internal val languageEntries: List<LexiconEntry> = listOf(
 internal val frameworkEntries: List<LexiconEntry> = listOf(
     tool("React", "react.js", "reactjs", "react js"),
     tool("React Native"),
-    tool("Angular", loose = listOf("angularjs", "angular js")),
+    tool("Angular", loose = listOf("angularjs")),
     tool("Vue", "vue.js", "vuejs", "vue js"),
     tool("Next.js", "nextjs"),
     tool("Node.js", "nodejs", "node js"),
@@ -47,6 +50,7 @@ internal val frameworkEntries: List<LexiconEntry> = listOf(
         exactForms = listOf("Express"),
         blockedPrefixes = listOf("-"),
         blockedSuffixes = listOf("-", "\\s+interest"),
+        requiredPrefix = EXACT_FORM_PREFIX,
         matchesCanonical = false,
     ),
     tool("Django"),

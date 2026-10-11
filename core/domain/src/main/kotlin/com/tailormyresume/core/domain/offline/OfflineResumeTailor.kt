@@ -4,12 +4,12 @@ import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EditType
-import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.EvidenceBullet
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.ProfileEntry
+import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementPriority
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
@@ -22,7 +22,7 @@ class OfflineResumeTailor @Inject constructor() : ResumeTailor {
         job: JobDescription,
         gap: GapAnalysis,
         applicationId: String,
-        section: EntryCategory?,
+        answer: QuickAnswer?,
     ): TailoredResume {
         val weights = keywordWeights(gap)
         val rewriter = BulletRewriter(weights.keys)

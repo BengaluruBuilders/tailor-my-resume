@@ -5,7 +5,6 @@ import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.JobRequirement
@@ -252,7 +251,7 @@ class ChangeCardMapperTest {
                 job: JobDescription,
                 gap: GapAnalysis,
                 applicationId: String,
-                section: EntryCategory?,
+                answer: QuickAnswer?,
             ) = proposed
         }
         val useCase = TailorResumeUseCase(tailor, CleanFabricationGuard)

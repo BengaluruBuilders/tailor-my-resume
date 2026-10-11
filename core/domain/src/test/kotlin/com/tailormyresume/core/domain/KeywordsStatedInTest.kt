@@ -79,4 +79,33 @@ class KeywordsStatedInTest {
             assertThat(stated("Express", it)).isEmpty()
         }
     }
+
+    @Test
+    fun looseAliasContainingTheSkillNameStatesTheSkill() {
+        assertThat(stated("Java", "Strong Core Java skills")).containsExactly("Java")
+        assertThat(stated("Tally", "Tally ERP 9")).containsExactly("Tally")
+        assertThat(stated("Excel", "Advanced Excel")).containsExactly("Excel")
+        assertThat(stated("SAP", "SAP FICO")).containsExactly("SAP")
+        assertThat(stated("Angular", "Built angular js apps")).containsExactly("Angular")
+        assertThat(stated("angular js", "Built AngularJS apps")).isEmpty()
+    }
+
+    @Test
+    fun goAndExpressNeedAnIntroducingWord() {
+        assertThat(stated("Go", "Python, Go and SQL")).containsExactly("Go")
+        listOf(
+            "Go to the client site weekly",
+            "Go through reports",
+            "Go above and beyond",
+            "Pokemon Go",
+        ).forEach { assertThat(stated("Go", it)).isEmpty() }
+        listOf(
+            "Express delivery",
+            "American Express",
+            "Express Entry",
+            "Visual Studio Express",
+            "SQL Server Express",
+        ).forEach { assertThat(stated("Express", it)).isEmpty() }
+        assertThat(SkillLexicon.canonicalsIn("Senior Analyst, American Express")).isEmpty()
+    }
 }

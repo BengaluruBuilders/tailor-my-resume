@@ -19,7 +19,6 @@ import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
-import com.tailormyresume.feature.analysis.api.navigation.JobLinkNavKey
 import com.tailormyresume.feature.analysis.api.navigation.JobNavKey
 import com.tailormyresume.feature.analysis.api.navigation.JobResultNavKey
 import com.tailormyresume.feature.analysis.api.navigation.QuickQuestionNavKey
@@ -47,8 +46,6 @@ class AnalysisEntryKeysTest {
 
     private val keys: List<NavKey> =
         listOf(
-            JobNavKey(),
-            JobLinkNavKey(),
             JobResultNavKey("app-1"),
             QuickQuestionNavKey("app-1"),
         )

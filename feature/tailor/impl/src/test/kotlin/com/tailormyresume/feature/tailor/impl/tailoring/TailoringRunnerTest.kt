@@ -6,12 +6,12 @@ import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.CreditLedgerKind
-import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.KeywordCoverage
 import com.tailormyresume.core.model.MatchStatus
+import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
 import com.tailormyresume.core.model.RequirementPriority
 import com.tailormyresume.core.model.RequirementType
@@ -74,7 +74,7 @@ class TailoringRunnerTest {
                 job: JobDescription,
                 gap: GapAnalysis,
                 applicationId: String,
-                section: EntryCategory?,
+                answer: QuickAnswer?,
             ): TailoredResume = tailor()
         },
         CleanFabricationGuard,

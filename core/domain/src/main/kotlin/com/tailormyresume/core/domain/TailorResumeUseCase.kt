@@ -4,7 +4,6 @@ import com.tailormyresume.core.domain.offline.SkillLexicon
 import com.tailormyresume.core.domain.offline.TextTokens
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.EvidenceBullet
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.GuardrailViolation
@@ -44,7 +43,6 @@ class TailorResumeUseCase @Inject constructor(
         job: JobDescription,
         gap: GapAnalysis,
         applicationId: String,
-        section: EntryCategory? = null,
         quickAnswer: QuickAnswer? = null,
     ): TailoredResume {
         val evidence = Evidence(
@@ -55,7 +53,7 @@ class TailorResumeUseCase @Inject constructor(
             entryOfBullet = profile.confirmedWithinLimits().entries
                 .flatMap { entry -> entry.bullets.map { it.id to entry.id } }.toMap(),
         )
-        val proposed = tailor.tailor(profile, job, gap, applicationId, section)
+        val proposed = tailor.tailor(profile, job, gap, applicationId, quickAnswer)
         return TailoredResume(
             bullets = proposed.bullets.mapNotNull { verified(it, evidence, profile) },
             entryIds = profile.entries.filter { it.isConfirmed }.map { it.id },

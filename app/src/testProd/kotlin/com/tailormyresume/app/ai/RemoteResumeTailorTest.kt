@@ -5,7 +5,6 @@ import com.tailormyresume.core.domain.AiException
 import com.tailormyresume.core.domain.AiFailure
 import com.tailormyresume.core.domain.FabricationGuard
 import com.tailormyresume.core.domain.TailorResumeUseCase
-import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.EvidenceBullet
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.GuardrailViolation
@@ -64,12 +63,12 @@ class RemoteResumeTailorTest {
     }
 
     @Test
-    fun aSectionRegenerationSendsTheSection() = runTest {
+    fun aTailoringRequestNeverSendsASection() = runTest {
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
-        tailor.tailor(candidate, job, gap, "app-1", EntryCategory.EXPERIENCE)
+        tailor.tailor(candidate, job, gap, "app-1", null)
 
-        assertThat(backend.server.takeRequest().body.readUtf8()).contains(""""section":"EXPERIENCE"""")
+        assertThat(backend.server.takeRequest().body.readUtf8()).doesNotContain("section")
     }
 
     @Test
@@ -164,7 +163,7 @@ class RemoteResumeTailorTest {
         val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
 
         assertThat((failure as AiException).failure).isEqualTo(AiFailure.NoCredit)
-        assertThat(store.read("tailoring.request.app-1.all")).isNull()
+        assertThat(store.read("tailoring.request.app-1")).isNull()
     }
 
     @Test
@@ -190,7 +189,7 @@ class RemoteResumeTailorTest {
 
         assertThat((failure as AiException).failure).isEqualTo(AiFailure.Timeout)
         assertThat(currentTime).isAtLeast(330_000L)
-        assertThat(store.read("tailoring.request.app-1.all")).isNotNull()
+        assertThat(store.read("tailoring.request.app-1")).isNotNull()
     }
 
     @Test

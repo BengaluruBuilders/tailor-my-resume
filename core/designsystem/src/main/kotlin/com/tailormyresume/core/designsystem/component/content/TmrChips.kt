@@ -21,6 +21,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.R
+import com.tailormyresume.core.designsystem.component.readAs
 import com.tailormyresume.core.designsystem.theme.TmrColors
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 

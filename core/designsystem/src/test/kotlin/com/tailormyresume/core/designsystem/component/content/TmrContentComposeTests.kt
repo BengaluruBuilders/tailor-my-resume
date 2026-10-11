@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -26,8 +29,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tailormyresume.core.designsystem.component.TmrPreviewTheme
+import com.tailormyresume.core.designsystem.component.breaksInsideWord
 import com.tailormyresume.core.designsystem.theme.LocalTmrMotion
 import com.tailormyresume.core.designsystem.theme.TmrMotionDefaults
 import com.tailormyresume.core.designsystem.theme.TmrTheme
@@ -107,9 +112,7 @@ internal fun AndroidComposeTestRule<*, ComponentActivity>.descriptionValues(
     }
 
 private fun assertWrapsAtWordBoundaries(node: SemanticsNode) {
-    val layouts = mutableListOf<TextLayoutResult>()
-    node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts)
-    layouts.forEach { layout ->
+    textLayouts(node).forEach { layout ->
         val text = layout.layoutInput.text.text
         (0 until layout.lineCount).forEach { line ->
             assertFalse("'$text' is ellipsized on line $line", layout.isLineEllipsized(line))
@@ -118,8 +121,13 @@ private fun assertWrapsAtWordBoundaries(node: SemanticsNode) {
     }
 }
 
-private fun textLayouts(node: SemanticsNode): List<TextLayoutResult> =
-    mutableListOf<TextLayoutResult>().also { node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(it) }
+private fun textLayouts(node: SemanticsNode): List<TextLayoutResult> {
+    val fitted = node.config.getOrNull(TmrFitTextLayoutKey)?.invoke()
+    if (fitted != null) return listOf(fitted)
+    return mutableListOf<TextLayoutResult>().also {
+        node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(it)
+    }
+}
 
 private fun AndroidComposeTestRule<*, ComponentActivity>.spinnerAnimated(): Boolean =
     semanticsNodes().mapNotNull { node -> node.config.getOrNull(TmrSpinnerAnimatedKey) }.single()
@@ -569,9 +577,26 @@ class TmrStoryBarsTest {
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+class TmrSectionLabelTest {
+    @get:Rule
+    val rule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun screenReaderReadsTheSourceTextAsAHeading() {
+        rule.setContent { TmrPreviewTheme { TmrSectionLabel(text = "Tailored resumes") } }
+        rule.onNodeWithText("Tailored resumes", useUnmergedTree = true)
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+    }
+}
+
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
 class TmrContentFontScaleTest {
     @get:Rule
     val rule = createAndroidComposeRule<ComponentActivity>()
+
+    private var strongLargeSize = 0.sp
 
     @Test
     fun listRowStaysInsideAtFontScale200() {
@@ -610,15 +635,66 @@ class TmrContentFontScaleTest {
     fun fileNameWithoutSeparatorsShrinksToTheFloorInsteadOfBreaking() {
         val unbroken = "DeshmukhNorthwindResumePdf"
         rule.assertStaysInsideContainer {
+            strongLargeSize = TmrTheme.typography.strongLarge.fontSize
             TmrFileCard(fileName = unbroken, meta = FILE_META, onShare = {}, onOpen = {})
         }
         val layout = rule.semanticsNodes()
             .flatMap { textLayouts(it) }
             .single { it.layoutInput.text.text.replace("\u200B", "") == unbroken }
-        val scaledSize = layout.layoutInput.style.fontSize.value * 2f
-        assertTrue("name did not shrink", layout.layoutInput.style.fontSize.value < scaledSize)
+        val startSize = strongLargeSize.value
+        val fitted = layout.layoutInput.style.fontSize.value
+        assertTrue("name shrank below the 1x floor: $fitted", fitted >= startSize / 2f - 0.01f)
+        assertTrue("name did not shrink: $fitted", fitted < startSize)
         assertFalse(breaksInsideWord(layout))
     }
+
+    @Test
+    fun firstFrameAtFontScale200ShowsNoSplitWord() {
+        val unbroken = "DeshmukhNorthwindResumePdf"
+        rule.mainClock.autoAdvance = false
+        rule.setContent {
+            TmrPreviewTheme {
+                CompositionLocalProvider(
+                    LocalDensity provides Density(LocalDensity.current.density, fontScale = 2f),
+                ) {
+                    Box(Modifier.width(337.dp)) {
+                        TmrFileCard(fileName = unbroken, meta = FILE_META, onShare = {}, onOpen = {})
+                    }
+                }
+            }
+        }
+        rule.mainClock.advanceTimeByFrame()
+        val layout = rule.semanticsNodes().flatMap { textLayouts(it) }.single { it.layoutInput.text.text == unbroken }
+        assertFalse(breaksInsideWord(layout))
+    }
+
+    @Test
+    fun widerContainerLetsTheNameGrowBack() {
+        val unbroken = "DeshmukhNorthwindResumePdf"
+        var width by mutableStateOf(337.dp)
+        rule.setContent {
+            TmrPreviewTheme {
+                CompositionLocalProvider(
+                    LocalDensity provides Density(LocalDensity.current.density, fontScale = 2f),
+                ) {
+                    Box(Modifier.width(width)) {
+                        TmrFileCard(fileName = unbroken, meta = FILE_META, onShare = {}, onOpen = {})
+                    }
+                }
+            }
+        }
+        val narrow = fittedNameSize(unbroken)
+        width = 1000.dp
+        rule.waitForIdle()
+        val wide = fittedNameSize(unbroken)
+        assertTrue("name did not grow back: $narrow -> $wide", wide > narrow)
+    }
+
+    private fun fittedNameSize(name: String): Float =
+        rule.semanticsNodes()
+            .flatMap { textLayouts(it) }
+            .single { it.layoutInput.text.text.replace("\u200B", "") == name }
+            .layoutInput.style.fontSize.value
 
     @Test
     fun coverageDeltaStaysInsideAtFontScale200() {

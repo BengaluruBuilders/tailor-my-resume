@@ -9,7 +9,9 @@ import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.model.fitBulletsToLimit
 import com.tailormyresume.core.model.splitBulletsForEntries
 import com.tailormyresume.core.network.TailorMyResumeApi
+import com.tailormyresume.core.network.dto.LinkKind
 import com.tailormyresume.core.network.dto.ParsedEntryDto
+import com.tailormyresume.core.network.dto.ParsedProfileDto
 import com.tailormyresume.core.network.dto.ResumeParseRequest
 import javax.inject.Inject
 
@@ -29,8 +31,15 @@ class RemoteResumeTextParser @Inject constructor(
             headline = parsed.headline.orEmpty(),
             skills = parsed.skills,
             entries = entriesOf(parsed.entries, keptEntries),
+            city = parsed.location.orEmpty(),
+            linkedinUrl = parsed.linkUrl(LinkKind.LINKEDIN),
+            portfolioUrl = parsed.linkUrl(LinkKind.PORTFOLIO),
+            summary = parsed.summary.orEmpty(),
         )
     }
+
+    private fun ParsedProfileDto.linkUrl(kind: LinkKind): String =
+        links.firstOrNull { it.kind == kind && it.url.isNotBlank() }?.url.orEmpty()
 
     private fun entriesOf(parsed: List<ParsedEntryDto>, keptEntries: Int): List<ProfileEntry> {
         val entries = mutableListOf<ProfileEntry>()
@@ -44,7 +53,7 @@ class RemoteResumeTextParser @Inject constructor(
                     title = entry.title,
                     organization = entry.organization.orEmpty(),
                     startDate = entry.startDate.orEmpty(),
-                    endDate = entry.endDate.orEmpty(),
+                    endDate = if (entry.current) CURRENT_END_DATE else entry.endDate.orEmpty(),
                     bullets = fitBulletsToLimit(chunk).mapIndexed { i, text -> EvidenceBullet("$id-b${i + 1}", text) },
                     source = FactSource.IMPORTED,
                     isConfirmed = false,
@@ -52,5 +61,9 @@ class RemoteResumeTextParser @Inject constructor(
             }
         }
         return entries
+    }
+
+    private companion object {
+        const val CURRENT_END_DATE = "Present"
     }
 }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_analysis_impl_job_hero_label">Paige reads it for you</string>
+    <string name="feature_analysis_impl_job_hero_headline">Paste the job you want</string>
+    <string name="feature_analysis_impl_job_paste">Paste from clipboard</string>
+    <string name="feature_analysis_impl_job_use_link">Use a link</string>
+    <string name="feature_analysis_impl_job_hint">Include requirements and responsibilities for the most accurate analysis</string>
+    <string name="feature_analysis_impl_job_analyze">Analyze job</string>
+    <string name="feature_analysis_impl_job_analyzing">Reading the job… %1$d%%</string>
+    <string name="feature_analysis_impl_job_title">Job description</string>
+    <string name="feature_analysis_impl_job_clear">Clear</string>
+    <string name="feature_analysis_impl_job_field_label">Job post</string>
+    <string name="feature_analysis_impl_job_placeholder">Paste the full job description here…</string>
+    <string name="feature_analysis_impl_job_char_count">%1$s characters</string>
+    <string name="feature_analysis_impl_job_not_a_post_title">This doesn\'t look like a job post</string>
+    <string name="feature_analysis_impl_job_not_a_post_body">Paste the full listing, including responsibilities and requirements.</string>
+    <string name="feature_analysis_impl_job_imported">Imported from %1$s</string>
+    <string name="feature_analysis_impl_job_failed">Couldn\'t read the job. Try again.</string>
+    <string name="feature_analysis_impl_job_retry">Retry</string>
+    <string name="feature_analysis_impl_joblink_title">Import from a link</string>
+    <string name="feature_analysis_impl_joblink_body">Paste a link from a careers page or LinkedIn. We\'ll pull in the description.</string>
+    <string name="feature_analysis_impl_joblink_field_label">Job link</string>
+    <string name="feature_analysis_impl_joblink_placeholder">https://</string>
+    <string name="feature_analysis_impl_joblink_login_hint">If a page is behind a login, copy the text and paste it instead.</string>
+    <string name="feature_analysis_impl_joblink_import">Import job</string>
+</resources>

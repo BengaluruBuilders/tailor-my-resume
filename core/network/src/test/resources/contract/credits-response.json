@@ -1,0 +1,23 @@
+{
+  "credits": {
+    "balance": 6,
+    "entries": [
+      {
+        "id": "7d1e",
+        "kind": "TAILORING",
+        "amount": -1,
+        "applicationId": "4f0c",
+        "productId": null,
+        "createdAt": "2026-10-11T09:00:00.000Z"
+      },
+      {
+        "id": "7d1d",
+        "kind": "PURCHASE",
+        "amount": 5,
+        "applicationId": null,
+        "productId": "application_pack_5",
+        "createdAt": "2026-10-10T09:00:00.000Z"
+      }
+    ]
+  }
+}
