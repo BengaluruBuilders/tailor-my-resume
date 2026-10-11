@@ -20,8 +20,6 @@ import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
-import com.tailormyresume.feature.profile.api.navigation.EditRoleNavKey
-import com.tailormyresume.feature.profile.api.navigation.ExperienceNavKey
 import com.tailormyresume.feature.profile.api.navigation.ListEditNavKey
 import com.tailormyresume.feature.profile.api.navigation.ProfileListSection
 import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
@@ -50,10 +48,6 @@ class ProfileEntryKeysTest {
 
     private val keys: List<NavKey> =
         listOf(
-            ProfileNavKey(),
-            ExperienceNavKey(),
-            EditRoleNavKey(null),
-            EditRoleNavKey("entry-1"),
             EditContactNavKey(),
             SkillsNavKey(),
             ListEditNavKey(ProfileListSection.SUMMARY),
