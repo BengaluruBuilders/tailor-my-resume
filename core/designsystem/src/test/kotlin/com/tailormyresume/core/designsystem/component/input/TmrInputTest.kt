@@ -321,4 +321,12 @@ class TmrInputTest {
         const val MID_BAND_START = 0.55f
         const val MID_BAND_END = 0.62f
     }
+
+    @Test
+    fun destructivePrimaryButtonIsFilledWithTheErrorColour() {
+        System.setProperty("robolectric.useEmbeddedViewRoot", "false")
+        rule.setContent { TmrPreviewTheme { TmrPrimaryButton(label = "Delete account", onClick = {}, destructive = true) } }
+
+        assertEquals(TmrDarkColors.error.toArgb(), fillOf(screenPixels(), "Delete account"))
+    }
 }

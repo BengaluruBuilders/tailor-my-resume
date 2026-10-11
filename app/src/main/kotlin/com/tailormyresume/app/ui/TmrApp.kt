@@ -79,10 +79,24 @@ fun TmrApp(
     LaunchedEffect(rootState) {
         if (rootState is AppRootState.Ready) stores.keepOnly(AccountRoot(rootState.accountId))
     }
+    val toastState = remember { TmrToastState() }
+    val context = LocalContext.current
+    val queuedToast = PendingToast.queued
+    LaunchedEffect(queuedToast) {
+        PendingToast.consume()?.let { message -> toastState.show(context.getString(message)) }
+    }
     TmrBackground(modifier = modifier) {
-        when (rootState) {
-            AppRootState.Loading -> Unit
-            is AppRootState.Ready -> TmrAccountRoot(ready = rootState, hasHome = hasHome, entryProvider = entryProvider)
+        Box(modifier = Modifier.fillMaxSize()) {
+            when (rootState) {
+                AppRootState.Loading -> Unit
+                is AppRootState.Ready -> TmrAccountRoot(
+                    ready = rootState,
+                    hasHome = hasHome,
+                    entryProvider = entryProvider,
+                    toastState = toastState,
+                )
+            }
+            TmrToastHost(state = toastState)
         }
     }
 }
@@ -93,6 +107,7 @@ internal fun TmrAccountRoot(
     modifier: Modifier = Modifier,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
+    toastState: TmrToastState? = null,
 ) {
     key(ready.accountId) {
         TmrRoot(
@@ -101,6 +116,7 @@ internal fun TmrAccountRoot(
             modifier = modifier,
             hasHome = hasHome,
             entryProvider = entryProvider,
+            toastState = toastState,
         )
     }
 }
@@ -119,6 +135,7 @@ internal fun TmrRoot(
     initialKeys: () -> List<NavKey> = PendingNavigation::consume,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
+    toastState: TmrToastState? = null,
 ) {
     WithRootViewModelStore(root) {
         val navigationState = rememberNavigationState(startKey)
@@ -133,13 +150,13 @@ internal fun TmrRoot(
             }
         }
         if (entryProvider == null) {
-            TmrShell(navigationState = navigationState, navigator = navigator, modifier = modifier, accountId = root.accountId)
+            TmrShell(navigationState = navigationState, navigator = navigator, modifier = modifier, appToastState = toastState)
         } else {
             TmrShell(
                 navigationState = navigationState,
                 navigator = navigator,
                 modifier = modifier,
-                accountId = root.accountId,
+                appToastState = toastState,
                 entryProvider = entryProvider(navigator),
             )
         }
@@ -151,19 +168,15 @@ internal fun TmrShell(
     navigationState: NavigationState,
     navigator: Navigator,
     modifier: Modifier = Modifier,
-    accountId: String? = null,
+    appToastState: TmrToastState? = null,
     entryProvider: (NavKey) -> NavEntry<NavKey> = remember(navigator) { sharedEntryProvider(navigator) },
 ) {
-    val toastState = remember { TmrToastState() }
+    val ownToastState = remember { TmrToastState() }
+    val toastState = appToastState ?: ownToastState
     val sheetHost = remember { TmrSheetHostState() }
     val chromeActions = remember { ChromeActions() }
     val key = navigationState.currentKey
     LaunchedEffect(key) { sheetHost.dismiss() }
-    val context = LocalContext.current
-    val queuedToast = PendingToast.queued
-    LaunchedEffect(queuedToast) {
-        PendingToast.consumeFor(accountId)?.let { message -> toastState.show(context.getString(message)) }
-    }
     val chrome = chromeFor(key, entriesBelow = navigationState.stack.size - 1)
     val tabsVisible = key.isTopLevelDestination()
     val changesSaved = stringResource(R.string.shell_changes_saved)
@@ -229,7 +242,7 @@ internal fun TmrShell(
                 }
             }
             TmrSheetHost(state = sheetHost)
-            TmrToastHost(state = toastState)
+            if (appToastState == null) TmrToastHost(state = toastState)
         }
     }
 }

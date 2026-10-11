@@ -41,9 +41,10 @@ fun TmrTextField(
     placeholder: String = "",
     readOnly: Boolean = false,
     amber: Boolean = false,
+    enabled: Boolean = true,
 ) {
     TmrLabeledField(label = label, modifier = modifier) {
-        TmrFieldBox(value, onValueChange, label, placeholder, readOnly, amber, singleLine = true, minHeight = 56.dp)
+        TmrFieldBox(value, onValueChange, label, placeholder, readOnly, amber, singleLine = true, minHeight = 56.dp, enabled = enabled)
     }
 }
 
@@ -72,12 +73,14 @@ private fun TmrFieldBox(
     amber: Boolean,
     singleLine: Boolean,
     minHeight: Dp,
+    enabled: Boolean = true,
 ) {
     val colors = TmrTheme.colors
     val shape = TmrTheme.shapes.field
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         readOnly = readOnly,
         singleLine = singleLine,
         textStyle = TmrTheme.typography.bodyLarge.copy(color = colors.text),

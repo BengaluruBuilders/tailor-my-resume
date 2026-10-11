@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -172,6 +173,8 @@ class DeleteAccountSheetTest {
         rule.waitForIdle()
 
         rule.onNodeWithText("Keep my account").performScrollTo().assertIsNotEnabled()
+        rule.onNodeWithText("Delete account").performScrollTo().assertIsNotEnabled()
+        rule.onNode(hasContentDescription(CONFIRM_FIELD_LABEL)).assertIsNotEnabled()
         rule.onNode(hasTestTag("tmr_chrome_scrim")).performTouchInput { click(Offset(5f, 5f)) }
         rule.waitForIdle()
         assertThat(host.current).isNotNull()
@@ -214,3 +217,5 @@ class DeleteAccountSheetTest {
         deleting = false,
     )
 }
+
+private const val CONFIRM_FIELD_LABEL = "Type DELETE to confirm"

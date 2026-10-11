@@ -4,22 +4,22 @@ import androidx.lifecycle.viewModelScope
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.model.CreditLedgerEntry
-import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.FileNameFormat
 import com.tailormyresume.core.model.PageSize
 import com.tailormyresume.core.navigation.PendingToast
 import com.tailormyresume.core.testing.account.TestAccountDataExporter
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.feature.settings.impl.R
+import com.tailormyresume.feature.settings.impl.delete.DeleteAccountUiState
+import com.tailormyresume.feature.settings.impl.delete.DeleteFixture
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import kotlin.time.Instant
 
 class SettingsViewModelTest {
 
@@ -95,14 +95,26 @@ class SettingsViewModelTest {
             assertThat(content.email).isEqualTo(settingsTestAccount.email)
             assertThat(content.pageSize).isEqualTo(PageSize.LETTER)
             assertThat(content.productUpdates).isTrue()
-            assertThat(content.credits).isEqualTo(0)
+            assertThat(content.credits).isEqualTo(5)
 
-            fixture.credits.record(
-                CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, 3, null, null, Instant.fromEpochSeconds(1_790_000_000)),
-            )
+            fixture.payment.unlock("application-1")
 
-            assertThat(awaitContent().credits).isEqualTo(3)
+            assertThat(awaitContent().credits).isEqualTo(4)
         }
+    }
+
+    @Test
+    fun settingsAndTheDeleteSheetShowTheSameCreditsForOneBalance() = runTest {
+        val fixture = SettingsFixture()
+        fixture.payment.unlock("application-1")
+        val deleteSheet = DeleteFixture(payment = fixture.payment).seed().viewModel()
+
+        val settingsCredits = fixture.viewModel().uiState.first { it is SettingsUiState.Content }
+        val sheetCredits = deleteSheet.uiState.first { it is DeleteAccountUiState.Content }
+
+        assertThat((settingsCredits as SettingsUiState.Content).credits)
+            .isEqualTo((sheetCredits as DeleteAccountUiState.Content).unusedCredits)
+        assertThat(settingsCredits.credits).isEqualTo(4)
     }
 
     @Test

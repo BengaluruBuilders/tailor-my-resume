@@ -27,6 +27,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrSheetHost
@@ -93,6 +95,7 @@ internal fun DeleteAccountSheetContent(
             onValueChange = onTextChanged,
             label = stringResource(R.string.feature_settings_impl_delete_confirm_label),
             placeholder = stringResource(R.string.feature_settings_impl_delete_confirm_placeholder),
+            enabled = !state.deleting,
             modifier = Modifier
                 .bringIntoViewRequester(fieldInView)
                 .onFocusEvent { focus -> if (focus.isFocused) scope.launch { fieldInView.bringIntoView() } },
@@ -102,7 +105,8 @@ internal fun DeleteAccountSheetContent(
                 label = stringResource(R.string.feature_settings_impl_delete_account),
                 onClick = onDelete,
                 enabled = state.canDelete && !state.deleting,
-                modifier = Modifier.fillMaxWidth(),
+                destructive = true,
+                modifier = Modifier.fillMaxWidth().then(if (state.deleting) Modifier.semantics { disabled() } else Modifier),
             )
             TmrSecondaryButton(
                 label = stringResource(R.string.feature_settings_impl_keep_account),

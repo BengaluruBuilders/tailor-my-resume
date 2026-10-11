@@ -9,14 +9,9 @@ object PendingToast {
     var queued: Int? by mutableStateOf(null)
         private set
 
-    private var targetAccountId: String? = null
-
-    fun set(@StringRes message: Int, forAccountId: String? = null) {
-        targetAccountId = forAccountId
+    fun set(@StringRes message: Int) {
         queued = message
     }
-
-    fun consumeFor(accountId: String?): Int? = if (accountId == targetAccountId) consume() else null
 
     fun consume(): Int? = queued.also { queued = null }
 }

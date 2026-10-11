@@ -42,6 +42,7 @@ internal class DeleteFixture(
     private val applications: Int = 3,
     private val credits: Int = 2,
     val deleter: RecordingServerAccountDeleter = RecordingServerAccountDeleter(),
+    private val payment: TestPaymentGateway = TestPaymentGateway().withFreeCredits(credits),
 ) {
     val applicationRepository = TestApplicationRepository()
     val pendingWipe = TestPendingAccountWipe()
@@ -69,7 +70,7 @@ internal class DeleteFixture(
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
         serverAccountDeleter = deleter,
-        creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(credits)),
+        creditBalance = AccountCreditBalance(payment),
         latency = NoMockLatency,
         creditsRepository = TestCreditsRepository(),
         resumeSettingsRepository = TestResumeSettingsRepository(),

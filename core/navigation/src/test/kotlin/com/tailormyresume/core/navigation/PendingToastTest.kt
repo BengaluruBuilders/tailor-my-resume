@@ -36,14 +36,4 @@ class PendingToastTest {
 
         assertThat(PendingToast.consume()).isEqualTo(2)
     }
-
-    @Test
-    fun aToastForTheSignedOutRootIsLeftQueuedForAnAccountRoot() {
-        PendingToast.set(7)
-
-        assertThat(PendingToast.consumeFor("account-1")).isNull()
-        assertThat(PendingToast.queued).isEqualTo(7)
-        assertThat(PendingToast.consumeFor(null)).isEqualTo(7)
-        assertThat(PendingToast.queued).isNull()
-    }
 }

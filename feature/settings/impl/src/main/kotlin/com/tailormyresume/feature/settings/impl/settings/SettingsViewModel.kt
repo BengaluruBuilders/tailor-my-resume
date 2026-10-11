@@ -2,10 +2,10 @@ package com.tailormyresume.feature.settings.impl.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.data.repository.ResumeSettingsRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.domain.SignInGateway
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.account.ExportAccountDataUseCase
 import com.tailormyresume.core.model.FileNameFormat
 import com.tailormyresume.core.model.PageSize
@@ -29,7 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class SettingsViewModel @Inject constructor(
     sessionRepository: SessionRepository,
-    creditsRepository: CreditsRepository,
+    creditBalance: AccountCreditBalance,
     private val resumeSettingsRepository: ResumeSettingsRepository,
     private val exportAccountData: ExportAccountDataUseCase,
     private val signInGateway: SignInGateway,
@@ -37,7 +37,7 @@ internal class SettingsViewModel @Inject constructor(
 
     val uiState: StateFlow<SettingsUiState> = combine(
         sessionRepository.observeAccount(),
-        creditsRepository.observeBalance(),
+        creditBalance.observeCredits(),
         resumeSettingsRepository.observeSettings(),
     ) { account, credits, settings ->
         SettingsUiState.Content(

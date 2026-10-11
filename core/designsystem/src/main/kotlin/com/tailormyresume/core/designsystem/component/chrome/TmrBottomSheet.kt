@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,40 +72,42 @@ fun TmrBottomSheet(
                     },
                 ),
         )
-        Column(
-            Modifier
-                .align(Alignment.BottomCenter)
-                .graphicsLayer { translationY = (1f - progress.value) * size.height }
-                .fillMaxWidth()
-                .testTag(TmrChromeTags.SHEET)
-                .clip(SheetShape)
-                .background(TmrTheme.colors.sheet)
-                .pointerInput(Unit) { detectTapGestures { } }
-                .semantics { paneTitle = title }
-                .padding(top = spacing.sheetPaddingTop),
-        ) {
-            Box(
-                Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .size(spacing.sheetHandleWidth, spacing.sheetHandleHeight)
-                    .background(
-                        TmrTheme.colors.lineHigher,
-                        RoundedCornerShape(2.dp),
-                    )
-                    .testTag(TmrChromeTags.SHEET_HANDLE),
-            )
+        Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars)) {
             Column(
                 Modifier
+                    .align(Alignment.BottomCenter)
+                    .graphicsLayer { translationY = (1f - progress.value) * size.height }
                     .fillMaxWidth()
-                    .padding(
-                        start = spacing.sheetPaddingHorizontal,
-                        end = spacing.sheetPaddingHorizontal,
-                        top = 16.dp,
-                        bottom = spacing.sheetPaddingBottom,
-                    ).testTag(TmrChromeTags.SHEET_CONTENT),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                content = content,
-            )
+                    .testTag(TmrChromeTags.SHEET)
+                    .clip(SheetShape)
+                    .background(TmrTheme.colors.sheet)
+                    .pointerInput(Unit) { detectTapGestures { } }
+                    .semantics { paneTitle = title }
+                    .padding(top = spacing.sheetPaddingTop),
+            ) {
+                Box(
+                    Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .size(spacing.sheetHandleWidth, spacing.sheetHandleHeight)
+                        .background(
+                            TmrTheme.colors.lineHigher,
+                            RoundedCornerShape(2.dp),
+                        )
+                        .testTag(TmrChromeTags.SHEET_HANDLE),
+                )
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = spacing.sheetPaddingHorizontal,
+                            end = spacing.sheetPaddingHorizontal,
+                            top = 16.dp,
+                            bottom = spacing.sheetPaddingBottom,
+                        ).testTag(TmrChromeTags.SHEET_CONTENT),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    content = content,
+                )
+            }
         }
     }
 }

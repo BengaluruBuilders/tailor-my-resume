@@ -158,9 +158,18 @@ class TmrAppRootTest {
         assertThat(accountOneProbe.cleared).isTrue()
     }
 
+    private fun showApp() {
+        rule.setContent {
+            TmrTheme {
+                TmrApp(rootState = ready, entryProvider = { _ -> ({ key: NavKey -> NavEntry(key) {} }) })
+            }
+        }
+        rule.waitForIdle()
+    }
+
     private fun reRootAfterAccountLeaves(queue: () -> Unit) {
         ready = AppRootState.Ready(StartDestination.Applications, "account-1")
-        show()
+        showApp()
         queue()
         ready = AppRootState.Ready(StartDestination.SignIn, null)
         rule.waitForIdle()
@@ -195,7 +204,7 @@ class TmrAppRootTest {
         reRootAfterAccountLeaves {
             PendingToast.set(SettingsR.string.feature_settings_impl_toast_signed_out)
             rule.waitForIdle()
-            assertThat(PendingToast.queued).isNotNull()
+            rule.onNodeWithText("Signed out").assertIsDisplayed()
         }
 
         rule.onNodeWithText("Signed out").assertIsDisplayed()
@@ -210,5 +219,28 @@ class TmrAppRootTest {
 
         rule.onNodeWithText("Signed out").assertDoesNotExist()
         rule.onNodeWithText("Account deleted").assertDoesNotExist()
+    }
+
+    @Test
+    fun toastShownOnTheSignedOutRootSurvivesTheNextReRoot() {
+        PendingToast.consume()
+
+        reRootAfterAccountLeaves { PendingToast.set(SettingsR.string.feature_settings_impl_toast_signed_out) }
+        rule.onNodeWithText("Signed out").assertIsDisplayed()
+        ready = AppRootState.Ready(StartDestination.Applications, "account-2")
+        rule.waitForIdle()
+
+        rule.onNodeWithText("Signed out").assertIsDisplayed()
+    }
+
+    @Test
+    fun signedOutToastShowsOnTheRealSignedOutRoot() {
+        PendingToast.consume()
+        PendingToast.set(SettingsR.string.feature_settings_impl_toast_signed_out)
+        rule.setContent { TmrTheme { TmrApp(rootState = AppRootState.Ready(StartDestination.SignIn, null)) } }
+        rule.waitForIdle()
+
+        rule.onNodeWithText("Signed out").assertIsDisplayed()
+        assertThat(PendingToast.queued).isNull()
     }
 }
