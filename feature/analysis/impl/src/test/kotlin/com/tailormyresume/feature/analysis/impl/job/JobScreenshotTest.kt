@@ -1,9 +1,13 @@
 package com.tailormyresume.feature.analysis.impl.job
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -87,6 +91,7 @@ class JobScreenshotTest {
 
     private fun captureStates(device: TmrTestDevice) {
         var screen by mutableStateOf(SCREENS.first().second)
+        var jobScrollState: ScrollState? = null
         rule.setContent {
             TmrTheme {
                 Box(modifier = Modifier.fillMaxSize().background(TmrTheme.colors.background)) {
@@ -95,14 +100,19 @@ class JobScreenshotTest {
                         LocalDensity provides Density(density.density, device.fontScale),
                     ) {
                         when (val current = screen) {
-                            is Screen.Job -> JobScreen(
-                                state = current.state,
-                                onTextChange = {},
-                                onPaste = {},
-                                onUseLink = {},
-                                onClear = {},
-                                onAnalyze = {},
-                            )
+                            is Screen.Job -> key(current) {
+                                val scrollState = rememberScrollState()
+                                SideEffect { jobScrollState = scrollState }
+                                JobScreen(
+                                    state = current.state,
+                                    onTextChange = {},
+                                    onPaste = {},
+                                    onUseLink = {},
+                                    onClear = {},
+                                    onAnalyze = {},
+                                    scrollState = scrollState,
+                                )
+                            }
 
                             Screen.Link -> JobLinkScreen(
                                 state = JobLinkUiState(link = LINK),
@@ -117,6 +127,9 @@ class JobScreenshotTest {
         SCREENS.forEach { (screenName, next) ->
             screen = next
             rule.waitForIdle()
+            if (screenName == "job_notAJobPost" && device == NARROW_DEVICE) {
+                rule.runOnIdle { jobScrollState?.scrollTo(jobScrollState?.maxValue ?: 0) }
+            }
             runBlocking {
                 rule.captureForDevice(
                     outputDirectory = "src/test/screenshots",

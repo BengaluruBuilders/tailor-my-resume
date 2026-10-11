@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -62,6 +63,7 @@ internal fun JobScreen(
     onClear: () -> Unit,
     onAnalyze: () -> Unit,
     modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     val fontScale = LocalDensity.current.fontScale
     val pinBottom = fontScale <= STACKED_BUTTON_FONT_SCALE
@@ -75,7 +77,7 @@ internal fun JobScreen(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(horizontal = 14.dp)
                 .padding(top = 14.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
