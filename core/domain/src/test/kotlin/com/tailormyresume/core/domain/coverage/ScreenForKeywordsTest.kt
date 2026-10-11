@@ -22,7 +22,7 @@ class ScreenForKeywordsTest {
     )
 
     @Test
-    fun prototypeJdHasFiveHaveThreeMissingCountEight() {
+    fun partialWithoutCitedEvidenceIsMissingSoFourHaveFourMissingCountEight() {
         val screen = ScreenForKeywords(
             listOf(
                 match("r1", MatchStatus.MET, "sql", "excel"),
@@ -34,9 +34,9 @@ class ScreenForKeywordsTest {
             ),
         )
 
-        assertThat(screen.have).containsExactly("SQL", "Excel", "Power BI", "Python", "Forecasting").inOrder()
+        assertThat(screen.have).containsExactly("SQL", "Excel", "Power BI", "Forecasting").inOrder()
         assertThat(screen.missing)
-            .containsExactly("financial reporting", "variance analysis", "Stakeholder Management").inOrder()
+            .containsExactly("Python", "financial reporting", "variance analysis", "Stakeholder Management").inOrder()
         assertThat(screen.count).isEqualTo(8)
     }
 
