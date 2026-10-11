@@ -15,8 +15,6 @@ import com.tailormyresume.core.domain.PurchaseResult
 import com.tailormyresume.core.domain.offline.OfflineServerAccountDeleter
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.ConsentPurpose
-import com.tailormyresume.core.model.ConsentRecord
 import com.tailormyresume.core.model.CreditKind
 import com.tailormyresume.core.model.ExportFormat
 import com.tailormyresume.core.model.ExportRecord
@@ -288,11 +286,10 @@ class DeleteAccountUseCaseTest {
     }
 
     @Test
-    fun deletingSignsOutAndClearsSessionConsentAndExportHistory() = runTest {
+    fun deletingSignsOutAndClearsSessionAndExportHistory() = runTest {
         applications.value = fourApplications()
         profile.value = canonicalCandidateProfile
         session.saveAccount(SignInAccount.localAccount)
-        session.recordConsent(consentRecord())
         session.markOnboardingComplete()
         exportHistory.record(exportRecord())
         val useCase = useCase(gateway = gatewayWith(credits = 2))
@@ -300,7 +297,6 @@ class DeleteAccountUseCaseTest {
         useCase()
 
         assertThat(session.observeAccount().first()).isNull()
-        assertThat(session.observeConsent().first()).isNull()
         assertThat(session.observeOnboardingComplete().first()).isFalse()
         assertThat(exportHistory.observeExports().first()).isEmpty()
     }
@@ -334,12 +330,6 @@ class DeleteAccountUseCaseTest {
         assertThat(result).isEqualTo(AccountDeletionResult.Failed(dataIntact = true))
         assertThat(exportHistory.observeExports().first()).containsExactly(exportRecord())
     }
-
-    private fun consentRecord() = ConsentRecord(
-        purposes = setOf(ConsentPurpose.READ_AND_BUILD),
-        acceptedAt = kotlin.time.Instant.fromEpochSeconds(1_700_000_000),
-        noticeVersion = ConsentRecord.CURRENT_NOTICE_VERSION,
-    )
 
     private fun exportRecord() = ExportRecord(
         applicationId = "application-1",

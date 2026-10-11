@@ -11,9 +11,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
-import com.tailormyresume.feature.profile.api.navigation.FactEditorNavKey
-import com.tailormyresume.feature.profile.api.navigation.FactEvidenceNavKey
-import com.tailormyresume.feature.profile.api.navigation.GuidedProfileFormNavKey
 import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
 import org.junit.Rule
 import org.junit.Test
@@ -40,36 +37,6 @@ class NavKeyPlaceholderEntryTest {
     @Test
     fun profileNavKeyRendersKeySimpleName() {
         val key: NavKey = ProfileNavKey()
-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { profileEntry(navigator) }
-
-        composeRule.setContent { provider(key).Content() }
-
-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
-    }
-
-    @Test
-    fun factEditorNavKeyRendersKeySimpleName() {
-        val key: NavKey = FactEditorNavKey(entryId = null)
-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { profileEntry(navigator) }
-
-        composeRule.setContent { provider(key).Content() }
-
-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
-    }
-
-    @Test
-    fun guidedProfileFormNavKeyRendersKeySimpleName() {
-        val key: NavKey = GuidedProfileFormNavKey()
-        val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { profileEntry(navigator) }
-
-        composeRule.setContent { provider(key).Content() }
-
-        composeRule.onNodeWithText(checkNotNull(key::class.simpleName)).assertIsDisplayed()
-    }
-
-    @Test
-    fun factEvidenceNavKeyRendersKeySimpleName() {
-        val key: NavKey = FactEvidenceNavKey()
         val provider: (NavKey) -> NavEntry<NavKey> = entryProvider { profileEntry(navigator) }
 
         composeRule.setContent { provider(key).Content() }

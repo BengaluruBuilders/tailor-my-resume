@@ -10,9 +10,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.tailormyresume.core.designsystem.theme.TmrLightColors
+import com.tailormyresume.core.designsystem.theme.TmrDarkColors
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -26,9 +25,9 @@ class TmrDisabledButtonTest {
     val rule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun disabledTextButtonLabelIsDimNotPrimaryNorPlaceholder() {
+    fun disabledTextButtonLabelUsesDisabledContentWithReadableContrast() {
         rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
+            TmrPreviewTheme {
                 Column {
                     TmrTextButton(label = "Text on", onClick = {}, enabled = true)
                     TmrTextButton(label = "Text off", onClick = {}, enabled = false)
@@ -37,16 +36,15 @@ class TmrDisabledButtonTest {
         }
         val enabled = labelColor("Text on")
         val disabled = labelColor("Text off")
-        assertEquals(TmrLightColors.primary, enabled)
-        assertEquals(TmrLightColors.disabledContent, disabled)
-        assertNotEquals(TmrLightColors.onSurfaceVariant, disabled)
-        assertTrue(contrast(disabled, TmrLightColors.card) >= 4.5f)
+        assertEquals(TmrDarkColors.primary, enabled)
+        assertEquals(TmrDarkColors.disabledContent, disabled)
+        assertTrue(contrast(disabled, TmrDarkColors.card) >= 4.5f)
     }
 
     @Test
     fun disabledOutlineButtonLabelDiffersFromEnabledAndKeepsPlaceholderContrast() {
         rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
+            TmrPreviewTheme {
                 Column {
                     TmrOutlineButton(label = "Outline on", onClick = {}, enabled = true)
                     TmrOutlineButton(label = "Outline off", onClick = {}, enabled = false)
@@ -55,9 +53,9 @@ class TmrDisabledButtonTest {
         }
         val enabled = labelColor("Outline on")
         val disabled = labelColor("Outline off")
-        assertEquals(TmrLightColors.onSurface, enabled)
-        assertEquals(TmrLightColors.onSurfaceVariant, disabled)
-        assertTrue(contrast(disabled, TmrLightColors.primaryContainer) >= 4.5f)
+        assertEquals(TmrDarkColors.onSurface, enabled)
+        assertEquals(TmrDarkColors.onSurfaceVariant, disabled)
+        assertTrue(contrast(disabled, TmrDarkColors.primaryContainer) >= 4.5f)
     }
 
     private fun labelColor(text: String): Color {

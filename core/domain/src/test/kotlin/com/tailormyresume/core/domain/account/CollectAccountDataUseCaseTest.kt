@@ -4,17 +4,12 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.domain.FakeApplicationRepository
 import com.tailormyresume.core.domain.FakeProfileRepository
-import com.tailormyresume.core.model.PrepPlanItem
 import com.tailormyresume.core.model.SignInAccount
-import com.tailormyresume.core.model.WrittenCoverLetter
-import com.tailormyresume.core.model.WrittenParagraph
 import com.tailormyresume.core.testing.account.TestAccountDataExporter
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.data.sampleApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
-import com.tailormyresume.core.testing.repository.TestCoverLetterRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
-import com.tailormyresume.core.testing.repository.TestPrepPlanRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import com.tailormyresume.core.testing.util.TestClock
 import kotlinx.coroutines.test.runTest
@@ -26,11 +21,9 @@ class CollectAccountDataUseCaseTest {
     private val profiles = FakeProfileRepository(canonicalCandidateProfile)
     private val applications = FakeApplicationRepository()
     private val exports = TestExportHistoryRepository()
-    private val coverLetters = TestCoverLetterRepository()
-    private val prepPlans = TestPrepPlanRepository()
     private val payments = TestPaymentGateway()
     private val clock = TestClock()
-    private val collect = CollectAccountDataUseCase(session, profiles, applications, exports, coverLetters, prepPlans, payments, clock)
+    private val collect = CollectAccountDataUseCase(session, profiles, applications, exports, payments, clock)
 
     @Test
     fun theSnapshotHoldsEverythingTheAccountOwns() = runTest {
@@ -56,21 +49,5 @@ class CollectAccountDataUseCaseTest {
 
         assertThat(exporter.exported).hasSize(1)
         assertThat(archive.file.isFile).isTrue()
-    }
-
-    @Test
-    fun theSnapshotHoldsCoverLettersAndPrepPlansForEveryApplication() = runTest {
-        val second = sampleApplication.copy(id = "application-2")
-        applications.upsertApplication(sampleApplication)
-        applications.upsertApplication(second)
-        val letter = WrittenCoverLetter(listOf(WrittenParagraph("Dear team")), clock.now())
-        coverLetters.save(sampleApplication.id, letter)
-        prepPlans.add(second.id, PrepPlanItem("prep-1", "Read the product blog"))
-
-        val data = collect()
-
-        assertThat(data.coverLetters).containsExactly(sampleApplication.id, letter)
-        assertThat(data.prepPlans).containsKey(second.id)
-        assertThat(data.prepPlans.getValue(second.id)).containsExactly(PrepPlanItem("prep-1", "Read the product blog"))
     }
 }

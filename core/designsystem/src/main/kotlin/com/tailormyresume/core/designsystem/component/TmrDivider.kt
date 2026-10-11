@@ -52,16 +52,8 @@ private const val TMR_DIVIDER_SAMPLE_BODY = "Wrote weekly SQL reports in Postgre
 
 @Preview(showBackground = true)
 @Composable
-private fun TmrDividerPreview() {
-    TmrPreviewTheme(darkTheme = false) {
-        TmrDividerPreviewColumn()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun TmrDividerDarkPreview() {
-    TmrPreviewTheme(darkTheme = true) {
+    TmrPreviewTheme {
         TmrDividerPreviewColumn()
     }
 }

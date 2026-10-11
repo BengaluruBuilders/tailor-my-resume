@@ -50,14 +50,12 @@ class LauncherIconResourcesTest {
     }
 
     @Test
-    fun api31_splash_icon_background_is_launcher_lime_in_light_and_night() {
-        listOf("values", "values-night").forEach { dir ->
-            val items = elements("src/main/res/$dir/themes.xml", "item")
-            assertThat(
-                items.filter { it.getAttribute("name") == "android:windowSplashScreenIconBackgroundColor" }
-                    .map { it.textContent.trim() },
-            ).containsExactly("@color/ic_launcher_background")
-        }
+    fun api31_splash_icon_background_is_launcher_lime() {
+        val items = elements("src/main/res/values/themes.xml", "item")
+        assertThat(
+            items.filter { it.getAttribute("name") == "android:windowSplashScreenIconBackgroundColor" }
+                .map { it.textContent.trim() },
+        ).containsExactly("@color/ic_launcher_background")
     }
 
     private fun elements(path: String, tag: String): List<Element> {

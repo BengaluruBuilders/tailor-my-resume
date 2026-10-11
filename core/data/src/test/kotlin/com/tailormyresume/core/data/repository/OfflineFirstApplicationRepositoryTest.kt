@@ -6,11 +6,8 @@ import com.tailormyresume.core.data.model.testApplication
 import com.tailormyresume.core.data.model.testBareApplication
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.ContentReport
-import com.tailormyresume.core.model.PrepPlanItem
 import com.tailormyresume.core.model.ReportedItemKind
 import com.tailormyresume.core.model.TailoringReviewState
-import com.tailormyresume.core.model.WrittenCoverLetter
-import com.tailormyresume.core.model.WrittenParagraph
 import com.tailormyresume.core.testing.mock.TestMockStateStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -127,42 +124,40 @@ class OfflineFirstApplicationRepositoryTest {
     }
 
     @Test
-    fun deletingAnApplicationClearsItsPrepPlanReportsReviewStateAndCoverLetter() = runTest {
+    fun deletingAnApplicationClearsItsReportsReviewStateAndLegacyKeys() = runTest {
         val store = TestMockStateStore()
-        val prepPlan = StoredPrepPlanRepository(store)
         val reports = StoredContentReportRepository(store)
         val reviewState = StoredTailoringReviewStateRepository(store)
-        val coverLetters = StoredCoverLetterRepository(store)
         val repository = OfflineFirstApplicationRepository(
             jobApplicationDao = FakeJobApplicationDao(),
             clock = fixedClock,
-            cleanup = StoredApplicationCleanup(prepPlan, reports, reviewState, coverLetters),
+            cleanup = StoredApplicationCleanup(reports, reviewState, store),
             ioDispatcher = UnconfinedTestDispatcher(testScheduler),
         )
         repository.upsertApplication(testApplication)
-        prepPlan.add(testApplication.id, PrepPlanItem("p1", "Practise Kotlin"))
         reports.report(ContentReport(testApplication.id, ReportedItemKind.RESUME_BULLET, "b1", "text", now))
         reviewState.recordRegeneration(testApplication.id, "EXPERIENCE")
         reviewState.markEdited(testApplication.id, "b1")
-        coverLetters.save(testApplication.id, WrittenCoverLetter(listOf(WrittenParagraph("Hello.")), now))
+        store.write("coverletter.${testApplication.id}", "letter")
+        store.write("prep.plan.${testApplication.id}", "plan")
+        store.write("coverletter.other", "keep")
 
         repository.deleteApplication(testApplication.id)
 
-        assertThat(prepPlan.observeItems(testApplication.id).first()).isEmpty()
         assertThat(reports.observeReports(testApplication.id).first()).isEmpty()
         assertThat(reviewState.observe(testApplication.id).first()).isEqualTo(TailoringReviewState())
-        assertThat(coverLetters.observeLetter(testApplication.id).first()).isNull()
+        assertThat(store.read("coverletter.${testApplication.id}")).isNull()
+        assertThat(store.read("prep.plan.${testApplication.id}")).isNull()
+        assertThat(store.read("coverletter.other")).isEqualTo("keep")
     }
 
     @Test
     fun whenTheCleanupFailsTheRowStaysAndARetryClearsRowAndKeys() = runTest {
         val store = TestMockStateStore()
-        val prepPlan = StoredPrepPlanRepository(store)
         val storedCleanup = StoredApplicationCleanup(
-            prepPlan,
             StoredContentReportRepository(store),
             StoredTailoringReviewStateRepository(store),
-            StoredCoverLetterRepository(store),
+            store,
         )
         var failuresLeft = 1
         val repository = OfflineFirstApplicationRepository(
@@ -175,7 +170,7 @@ class OfflineFirstApplicationRepositoryTest {
             ioDispatcher = UnconfinedTestDispatcher(testScheduler),
         )
         repository.upsertApplication(testApplication)
-        prepPlan.add(testApplication.id, PrepPlanItem("p1", "Practise Kotlin"))
+        store.write("prep.plan.${testApplication.id}", "plan")
 
         val failed = runCatching { repository.deleteApplication(testApplication.id) }
 
@@ -186,6 +181,6 @@ class OfflineFirstApplicationRepositoryTest {
 
         assertThat(retry.isSuccess).isTrue()
         assertThat(repository.observeApplications().first()).isEmpty()
-        assertThat(prepPlan.observeItems(testApplication.id).first()).isEmpty()
+        assertThat(store.read("prep.plan.${testApplication.id}")).isNull()
     }
 }

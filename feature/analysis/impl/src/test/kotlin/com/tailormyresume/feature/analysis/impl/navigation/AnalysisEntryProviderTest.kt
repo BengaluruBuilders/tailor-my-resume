@@ -40,7 +40,7 @@ class AnalysisEntryProviderTest {
         val key = AnalysisNavKey()
 
         composeRule.setContent {
-            TmrTheme(darkTheme = false) {
+            TmrTheme {
                 provider(key).Content()
             }
         }

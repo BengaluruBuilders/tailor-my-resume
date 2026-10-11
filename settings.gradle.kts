@@ -40,7 +40,6 @@ include(":core:network")
 include(":core:navigation")
 include(":core:screenshot")
 include(":core:testing")
-include(":core:ui")
 
 include(":feature:applications:api")
 include(":feature:applications:impl")

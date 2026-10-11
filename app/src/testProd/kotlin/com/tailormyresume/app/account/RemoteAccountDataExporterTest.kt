@@ -34,7 +34,6 @@ class RemoteAccountDataExporterTest : AccountDataExporterContractTest() {
     private val data = AccountData(
         generatedAt = Instant.fromEpochMilliseconds(1_790_000_000_000),
         account = null,
-        consent = null,
         profile = null,
         applications = emptyList(),
         entitlement = PurchaseEntitlement(freeCredits = 1, purchasedCredits = 0, pendingPackIds = emptyList()),

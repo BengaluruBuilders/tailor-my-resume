@@ -5,8 +5,6 @@ import com.tailormyresume.core.model.KeptJobDescription
 sealed interface OnboardingStep {
     data object SignIn : OnboardingStep
 
-    data object Consent : OnboardingStep
-
     data object ImportResume : OnboardingStep
 
     data object ConfirmFacts : OnboardingStep

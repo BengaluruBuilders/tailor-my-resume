@@ -5,7 +5,6 @@ import com.tailormyresume.app.auth.NoMatcher
 import com.tailormyresume.app.auth.SignOutCleaner
 import com.tailormyresume.app.auth.api
 import com.tailormyresume.core.data.repository.PendingReportQueue
-import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.network.IdTokenProvider
 import com.tailormyresume.core.testing.mock.TestMockStateStore
@@ -61,7 +60,7 @@ internal fun purchaseJson(wallet: String) =
 
 internal fun errorJson(code: String) = """{"error":{"code":"$code","message":"m"}}"""
 
-internal fun MockWebServer.signOutCleaner(session: SessionRepository): SignOutCleaner {
+internal fun MockWebServer.signOutCleaner(): SignOutCleaner {
     val store = TestMockStateStore()
     val api = api()
     return SignOutCleaner(
@@ -69,6 +68,5 @@ internal fun MockWebServer.signOutCleaner(session: SessionRepository): SignOutCl
         RemoteJobAnalysisSource(api, NoMatcher),
         PendingReportQueue(store),
         store,
-        session,
     )
 }

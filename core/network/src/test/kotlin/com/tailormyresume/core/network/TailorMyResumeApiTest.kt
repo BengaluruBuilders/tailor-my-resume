@@ -21,11 +21,10 @@ class TailorMyResumeApiTest {
     @After
     fun tearDown() = runCatching { server.shutdown() }.let { }
 
-    private var consentSignals = 0
     private var expirySignals = 0
 
     private fun api(readTimeoutMillis: Long? = null): TailorMyResumeApi {
-        val base = tailormyresumeOkHttpClient(tokens, sessionListener = { expirySignals++ }) { consentSignals++ }
+        val base = tailormyresumeOkHttpClient(tokens, sessionListener = { expirySignals++ })
         val client = readTimeoutMillis
             ?.let { base.newBuilder().readTimeout(it, TimeUnit.MILLISECONDS).build() }
             ?: base
@@ -41,17 +40,6 @@ class TailorMyResumeApiTest {
     private fun failureOf(block: suspend () -> Any): ApiError {
         val exception = runBlocking { apiResult(block) }.exceptionOrNull()
         return (exception as ApiException).error
-    }
-
-    @Test
-    fun aConsentRequiredAnswerSignalsTheListenerAndOtherForbiddenAnswersDoNot() {
-        server.enqueue(error(403, "FORBIDDEN"))
-        server.enqueue(error(403, "CONSENT_REQUIRED"))
-
-        assertThat(failureOf { api().me() }).isEqualTo(ApiError.Forbidden)
-        assertThat(consentSignals).isEqualTo(0)
-        assertThat(failureOf { api().me() }).isEqualTo(ApiError.ConsentRequired)
-        assertThat(consentSignals).isEqualTo(1)
     }
 
     @Test
@@ -172,7 +160,6 @@ class TailorMyResumeApiTest {
             403 to listOf(
                 "CROSS_APP_TOKEN" to ApiError.CrossAppToken,
                 "FORBIDDEN" to ApiError.Forbidden,
-                "CONSENT_REQUIRED" to ApiError.ConsentRequired,
             ),
             404 to listOf("NOT_FOUND" to ApiError.NotFound),
             405 to listOf("METHOD_NOT_ALLOWED" to ApiError.MethodNotAllowed),

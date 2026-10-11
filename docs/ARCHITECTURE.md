@@ -38,7 +38,6 @@ The current look follows `docs/AVVIO_REDESIGN.md`. `docs/DESIGN_SYSTEM.md` holds
 | `:core:model` | jvm library | Pure Kotlin data models (section 3) |
 | `:core:common` | android library | `Dispatcher` qualifier, `TmrDispatchers`, dispatchers + application-scope DI modules, `Result` wrapper |
 | `:core:designsystem` | library compose | `TmrTheme` with the Avvio-inspired tokens (colour, type, shape, spacing, elevation, motion). `TmrScreen` and the headers `TmrHomeHeader` and `TmrInnerHeader`. `TmrDock`, `TmrBottomActionBar`, sheets, dialogs, cards, chips, and text fields. `docs/DESIGN_SYSTEM.md` lists every component |
-| `:core:ui` | library compose | Shared UI pieces used by more than one feature |
 | `:core:navigation` | library | NiA `Navigator` and `NavigationState` pattern. `PendingNavigation` holds keys to push when the main root opens |
 | `:core:database` | library + room + hilt | Room DB, entities, DAOs, type converters. It holds the profile and the applications |
 | `:core:data` | library + hilt | Repository interfaces and offline-first implementations. `SessionRepository` and `ExportHistoryRepository` store their state in `MockStateStore` (DataStore). `ConnectivityMonitor` reports the network state |

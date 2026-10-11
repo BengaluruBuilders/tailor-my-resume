@@ -2,10 +2,8 @@ package com.tailormyresume.app.ai
 
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.GapMatcher
-import com.tailormyresume.core.domain.ImportRemovalNotice
 import com.tailormyresume.core.domain.JobAnalysisResult
 import com.tailormyresume.core.domain.fact.FactIdAllocator
-import com.tailormyresume.core.domain.prep.PrepQuestionKind
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.GapAnalysis
@@ -34,8 +32,7 @@ class RemoteAiRoutesTest {
     fun resumeParseSendsOnlyTheTextAndGivesEveryEntryAndBulletItsOwnId() = runBlocking<Unit> {
         backend.reply(200, RESUME_PARSE_RESPONSE)
 
-        val notice = ImportRemovalNotice()
-        val profile = RemoteResumeTextParser(backend.api, FactIdAllocator(), notice).parse("resume text")
+        val profile = RemoteResumeTextParser(backend.api, FactIdAllocator()).parse("resume text")
 
         val request = backend.server.takeRequest()
         assertThat(request.path).isEqualTo("/v1/tailormyresume/resume/parse")
@@ -46,7 +43,6 @@ class RemoteAiRoutesTest {
         assertThat(entry.bullets.map { it.id }).containsExactly("W-01-b1")
         assertThat(entry.source).isEqualTo(FactSource.IMPORTED)
         assertThat(entry.isConfirmed).isFalse()
-        assertThat(notice.showsBanner.value).isTrue()
     }
 
     @Test
@@ -58,21 +54,11 @@ class RemoteAiRoutesTest {
 "bullets":[{"ref":"e1b1","text":"Built a dashboard."}]}]},"droppedSensitive":[]}""",
         )
 
-        val profile = RemoteResumeTextParser(backend.api, FactIdAllocator(), ImportRemovalNotice()).parse("resume text")
+        val profile = RemoteResumeTextParser(backend.api, FactIdAllocator()).parse("resume text")
 
         assertThat(profile.fullName).isEmpty()
         assertThat(profile.entries.single().organization).isEmpty()
         assertThat(profile.entries.single().endDate).isEmpty()
-    }
-
-    @Test
-    fun resumeParseHidesTheRemovedBannerWhenNoBirthDateOrPhotoWasDropped() = runBlocking<Unit> {
-        backend.reply(200, RESUME_PARSE_RESPONSE.replace("DATE_OF_BIRTH", "RELIGION"))
-        val notice = ImportRemovalNotice()
-
-        RemoteResumeTextParser(backend.api, FactIdAllocator(), notice).parse("resume text")
-
-        assertThat(notice.showsBanner.value).isFalse()
     }
 
     @Test
@@ -157,56 +143,15 @@ class RemoteAiRoutesTest {
     }
 
     @Test
-    fun prepQuestionsMapTheContractModelAndDropWhatTheDeviceCannotBack() = runBlocking<Unit> {
-        backend.reply(200, PREP_RESPONSE)
-
-        val questions = RemotePrepQuestionSource(backend.api)(analysis, candidate, 20)
-
-        val request = backend.server.takeRequest()
-        assertThat(request.path).isEqualTo("/v1/tailormyresume/prep-questions")
-        assertThat(request.body.readUtf8()).contains(""""limit":12""")
-        assertThat(questions.map { it.id }).containsExactly("q-1", "q-2").inOrder()
-        val strength = questions.first()
-        assertThat(strength.kind).isEqualTo(PrepQuestionKind.STRENGTH)
-        assertThat(strength.requirementText).isEqualTo("Strong SQL")
-        assertThat(strength.backingFactId).isEqualTo(FACT_ID)
-        assertThat(strength.why).isEqualTo("The role needs SQL.")
-        assertThat(strength.generationId).isEqualTo("g-prep")
-        val gap = questions.last()
-        assertThat(gap.backingFactId).isNull()
-        assertThat(gap.gapAdvice).isEqualTo("Say what you are learning.")
-    }
-
-    @Test
-    fun coverLetterMapsRolesAndTheDeviceAddsTheName() = runBlocking<Unit> {
-        backend.reply(200, COVER_LETTER_RESPONSE)
-
-        val draft = RemoteCoverLetterSource(backend.api)(candidate, job, analysis, 3)
-
-        assertThat(backend.server.takeRequest().path).isEqualTo("/v1/tailormyresume/cover-letters")
-        assertThat(draft.greeting).isEqualTo("Dear Hiring Manager,")
-        assertThat(draft.openingParagraph).isEqualTo("I am applying for the role.")
-        assertThat(draft.evidenceParagraph)
-            .isEqualTo("I cleaned weekly sales data for 40 stores in Excel. It was accurate.")
-        assertThat(draft.closingParagraph).isEqualTo("Thank you for reading. Yours sincerely, $CANDIDATE_NAME.")
-        assertThat(draft.generationId).isEqualTo("g-letter")
-        assertThat(draft.citedFactIds).containsExactly(FACT_ID)
-    }
-
-    @Test
     fun aRequestNeverCarriesTheNameTheEmailOrThePhone() = runBlocking<Unit> {
         backend.reply(200, ANALYSIS_RESPONSE)
-        backend.reply(200, PREP_RESPONSE)
-        backend.reply(200, COVER_LETTER_RESPONSE)
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
         source.analyse(candidate, "the raw job text")
-        RemotePrepQuestionSource(backend.api)(analysis, candidate, 6)
-        RemoteCoverLetterSource(backend.api)(candidate, job, analysis, 3)
         RemoteResumeTailor(backend.api, PendingTailoringIds(com.tailormyresume.core.testing.mock.TestMockStateStore(), FixedIds))
             .tailor(candidate, job, analysis.gap, "app-1", null)
 
-        repeat(4) {
+        repeat(2) {
             val body = nextBody()
             assertThat(body).isNotEmpty()
             listOf(CANDIDATE_NAME, "Priya", CANDIDATE_EMAIL, CANDIDATE_PHONE, "98123").forEach {

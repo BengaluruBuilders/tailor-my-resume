@@ -3,7 +3,6 @@ package com.tailormyresume.app.debug
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.offline.ForcedPaymentScenario
 import com.tailormyresume.core.model.DebugScenario
-import com.tailormyresume.core.testing.connectivity.TestConnectivityMonitor
 import com.tailormyresume.core.testing.sample.TestSampleDataController
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import kotlinx.coroutines.launch
@@ -18,17 +17,7 @@ class DebugMenuViewModelForcedPaymentTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val forced = ForcedPaymentScenario()
-    private val connectivity = TestConnectivityMonitor()
-    private fun viewModel() = DebugMenuViewModel(TestSampleDataController(), connectivity, connectivity, forced)
-
-    @Test
-    fun openingThePackScreenForcesTheChosenScenarioBeforeItShows() = runTest {
-        var seenWhenReady: DebugScenario? = null
-
-        viewModel().openPreview(DebugScenarioTarget.PackPurchase, DebugScenario.PENDING) { seenWhenReady = forced.scenario }
-
-        assertThat(seenWhenReady).isEqualTo(DebugScenario.PENDING)
-    }
+    private fun viewModel() = DebugMenuViewModel(TestSampleDataController(), forced)
 
     @Test
     fun openingCreditsForcesTheChosenScenario() = runTest {
@@ -47,9 +36,9 @@ class DebugMenuViewModelForcedPaymentTest {
     @Test
     fun closingThePreviewClearsTheForcedScenario() = runTest {
         val subject = viewModel()
-        subject.openPreview(DebugScenarioTarget.PackPurchase, DebugScenario.FAILED) {}
+        subject.openPreview(DebugScenarioTarget.Credits, DebugScenario.FAILED) {}
 
-        subject.closePreview(DebugScenarioTarget.PackPurchase)
+        subject.closePreview(DebugScenarioTarget.Credits)
 
         assertThat(forced.scenario).isEqualTo(DebugScenario.DEFAULT)
     }

@@ -27,7 +27,7 @@ class TmrDockDefaultsTest {
     @Test
     fun renderedDockOccupiesHeightPlusPadding() {
         rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
+            TmrPreviewTheme {
                 CompositionLocalProvider(LocalDensity provides Density(1f, 1f)) {
                     Box(Modifier.testTag("dockHost")) {
                         TmrDock {

@@ -65,13 +65,7 @@ fun TmrDock(
                 .tmrShadow(TmrTheme.elevation.dock, TmrDockShape)
                 .clip(TmrDockShape)
                 .background(TmrTheme.colors.tool)
-                .then(
-                    if (TmrTheme.isDark) {
-                        Modifier.border(TmrWidthHairline, TmrTheme.colors.outlineSoft, TmrDockShape)
-                    } else {
-                        Modifier
-                    },
-                )
+                .border(TmrWidthHairline, TmrTheme.colors.outlineSoft, TmrDockShape)
                 .padding(TmrDockPadding),
             horizontalArrangement = Arrangement.spacedBy(TmrDockGap),
             verticalAlignment = Alignment.CenterVertically,
@@ -151,14 +145,8 @@ fun TmrDockIcon(icon: ImageVector) {
 
 @Preview(showBackground = true)
 @Composable
-private fun TmrDockPreview() {
-    TmrPreviewTheme(darkTheme = false) { TmrDockSample() }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun TmrDockDarkPreview() {
-    TmrPreviewTheme(darkTheme = true) { TmrDockSample() }
+    TmrPreviewTheme { TmrDockSample() }
 }
 
 @Composable

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import javax.inject.Inject
 
-enum class StartDestination { Welcome, Applications }
+enum class StartDestination { SignIn, Applications }
 
 class ObserveStartDestinationUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
@@ -15,8 +15,7 @@ class ObserveStartDestinationUseCase @Inject constructor(
         combine(
             sessionRepository.observeAccount(),
             sessionRepository.observeOnboardingComplete(),
-            sessionRepository.observeConsent(),
-        ) { account, complete, consent ->
-            if (account != null && complete && consent?.isCurrent == true) StartDestination.Applications else StartDestination.Welcome
+        ) { account, complete ->
+            if (account != null && complete) StartDestination.Applications else StartDestination.SignIn
         }.distinctUntilChanged()
 }

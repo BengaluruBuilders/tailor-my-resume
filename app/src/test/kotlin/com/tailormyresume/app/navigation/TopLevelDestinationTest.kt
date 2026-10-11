@@ -7,10 +7,10 @@ import com.tailormyresume.feature.analysis.api.navigation.DefaultAnalysisNavKey
 import com.tailormyresume.feature.applications.api.navigation.ApplicationDetailNavKey
 import com.tailormyresume.feature.applications.api.navigation.ApplicationsNavKey
 import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.DefaultWelcomeNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.DefaultSignInNavKey
 import com.tailormyresume.feature.profile.api.navigation.DefaultProfileNavKey
 import com.tailormyresume.feature.settings.api.navigation.DefaultSettingsNavKey
-import com.tailormyresume.feature.settings.api.navigation.YourDataNavKey
+import com.tailormyresume.feature.settings.api.navigation.DeleteAccountNavKey
 import org.junit.Test
 
 class TopLevelDestinationTest {
@@ -29,10 +29,10 @@ class TopLevelDestinationTest {
     @Test
     fun pushedAndFirstRunKeysAreNotTopLevel() {
         listOf<NavKey>(
-            DefaultWelcomeNavKey,
+            DefaultSignInNavKey,
             DefaultAnalysisNavKey,
             ApplicationDetailNavKey(applicationId = "a-1"),
-            YourDataNavKey(),
+            DeleteAccountNavKey(),
         ).forEach { key -> assertThat(key.isTopLevelDestination()).isFalse() }
     }
 }

@@ -5,29 +5,23 @@ import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.PurchaseRecord
 import com.tailormyresume.core.domain.PurchaseState
 import com.tailormyresume.core.model.BulletDecision
-import com.tailormyresume.core.model.ConsentPurpose
-import com.tailormyresume.core.model.ConsentRecord
 import com.tailormyresume.core.model.CreditKind
 import com.tailormyresume.core.model.EditType
 import com.tailormyresume.core.model.ExportFormat
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.GuardrailViolation
 import com.tailormyresume.core.model.JobRequirement
-import com.tailormyresume.core.model.PrepPlanItem
 import com.tailormyresume.core.model.RequirementPriority
 import com.tailormyresume.core.model.RequirementType
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
-import com.tailormyresume.core.model.WrittenCoverLetter
-import com.tailormyresume.core.model.WrittenParagraph
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.data.sampleApplication
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -92,7 +86,6 @@ class AccountDataArchiveWriterTest {
     private val data = AccountData(
         generatedAt = now,
         account = SignInAccount.localAccount.copy(id = PLANTED_UID),
-        consent = ConsentRecord(setOf(ConsentPurpose.AI_PROCESSING), now, ConsentRecord.CURRENT_NOTICE_VERSION),
         profile = canonicalCandidateProfile,
         applications = listOf(application),
         entitlement = PurchaseEntitlement(
@@ -103,14 +96,6 @@ class AccountDataArchiveWriterTest {
         ),
         purchases = listOf(PurchaseRecord("application_pack_5", "order-1", now, PurchaseState.COMPLETED)),
         exports = listOf(ExportRecord(application.id, ExportFormat.PDF, "resume.pdf", now, CreditKind.PURCHASED, 2, "Classic")),
-        coverLetters = mapOf(
-            application.id to WrittenCoverLetter(
-                listOf(WrittenParagraph("Dear Example Corp team"), WrittenParagraph("Line one\nLine two")),
-                now,
-                citedFactIds = listOf("bullet-project-1"),
-            ),
-        ),
-        prepPlans = mapOf(application.id to listOf(PrepPlanItem("prep-1", "Revise coroutines", done = true))),
     )
 
     private companion object {
@@ -169,12 +154,6 @@ class AccountDataArchiveWriterTest {
         val resume = entry.getValue("tailoredResume").jsonObject
         assertThat(resume.array("entryIds").map { it.jsonPrimitive.content }).containsExactly("entry-1", "entry-2").inOrder()
 
-        val letter = entry.getValue("coverLetter").jsonObject
-        assertThat(letter.array("citedFactIds").map { it.jsonPrimitive.content }).containsExactly("bullet-project-1")
-        val paragraph = letter.array("paragraphs").first().jsonObject
-        assertThat(paragraph.getValue("text").jsonPrimitive.content).isEqualTo("Dear Example Corp team")
-        val prep = entry.array("prepPlan").single().jsonObject
-        assertThat(prep.getValue("done").jsonPrimitive.boolean).isTrue()
         val export = entry.array("exports").single().jsonObject
         assertThat(export.getValue("fileName").jsonPrimitive.content).isEqualTo("resume.pdf")
         assertThat(export.getValue("creditKind").jsonPrimitive.content).isEqualTo("PURCHASED")
@@ -183,16 +162,12 @@ class AccountDataArchiveWriterTest {
     }
 
     @Test
-    fun myDataJsonHoldsAccountConsentProfileAndPurchases() {
+    fun myDataJsonHoldsAccountProfileAndPurchases() {
         val root = myData()
 
         val account = root.getValue("account").jsonObject
         assertThat(account.getValue("email").jsonPrimitive.content).isEqualTo(SignInAccount.localAccount.email)
         assertThat(account.getValue("displayName").jsonPrimitive.content).isEqualTo(SignInAccount.localAccount.displayName)
-
-        val consent = root.getValue("consent").jsonObject
-        assertThat(consent.array("purposes").map { it.jsonPrimitive.content }).containsExactly("AI_PROCESSING")
-        assertThat(consent.getValue("noticeVersion").jsonPrimitive.content).isEqualTo(ConsentRecord.CURRENT_NOTICE_VERSION)
 
         val profile = root.getValue("profile").jsonObject
         assertThat(profile.getValue("fullName").jsonPrimitive.content).isEqualTo(canonicalCandidateProfile.fullName)
@@ -259,8 +234,6 @@ class AccountDataArchiveWriterTest {
         assertThat(text).contains("MET")
         assertThat(text).contains("Built a Kotlin Android app")
         assertThat(text).contains("Call the recruiter on Tuesday")
-        assertThat(text).contains("Dear Example Corp team")
-        assertThat(text).contains("Revise coroutines")
     }
 
     @Test
@@ -273,7 +246,6 @@ class AccountDataArchiveWriterTest {
         assertThat(lines).contains("  jobDescription: Senior Engineer | Bengaluru | Full-time")
         assertThat(lines).contains("    Responsibilities:")
         assertThat(lines).contains("    Ask about the 2nd round")
-        assertThat(lines).contains("    Line two")
         assertThat(lines).contains("    Cut cost 30% (was: Moved services)")
     }
 

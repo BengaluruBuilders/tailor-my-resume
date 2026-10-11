@@ -1,7 +1,6 @@
 package com.tailormyresume.app.ai
 
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.domain.ImportRemovalNotice
 import com.tailormyresume.core.domain.fact.FactIdAllocator
 import com.tailormyresume.core.model.ProfileLimits
 import com.tailormyresume.core.model.hasTooManyBullets
@@ -24,7 +23,7 @@ class RemoteBulletCapImportTest {
         """{"generationId":"g","profile":{"fullName":null,"email":null,"phone":null,"headline":null,"skills":[],"entries":[${entries.joinToString(",")}]},"droppedSensitive":[]}"""
 
     private fun parse() = runBlocking {
-        RemoteResumeTextParser(backend.api, FactIdAllocator(), ImportRemovalNotice()).parse("t").entries
+        RemoteResumeTextParser(backend.api, FactIdAllocator()).parse("t").entries
     }
 
     @Test

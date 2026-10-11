@@ -149,16 +149,8 @@ object TmrFilterChipDefaults {
 
 @Preview(showBackground = true)
 @Composable
-private fun TmrFilterChipPreview() {
-    TmrPreviewTheme(darkTheme = false) {
-        TmrFilterChipPreviewRow()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun TmrFilterChipDarkPreview() {
-    TmrPreviewTheme(darkTheme = true) {
+    TmrPreviewTheme {
         TmrFilterChipPreviewRow()
     }
 }

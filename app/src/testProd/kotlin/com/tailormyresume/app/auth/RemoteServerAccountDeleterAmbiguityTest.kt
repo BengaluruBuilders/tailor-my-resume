@@ -36,7 +36,6 @@ class RemoteServerAccountDeleterAmbiguityTest {
             ApiError.Unauthenticated,
             ApiError.InvalidToken,
             ApiError.Forbidden,
-            ApiError.ConsentRequired,
             ApiError.Unknown(404),
         ).forEach { error -> assertThat(ambiguous(error)).isFalse() }
         assertThat(deleter.mayHaveReachedServer(IllegalStateException("x"))).isFalse()

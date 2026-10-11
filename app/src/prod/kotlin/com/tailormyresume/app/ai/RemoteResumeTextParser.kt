@@ -1,6 +1,5 @@
 package com.tailormyresume.app.ai
 
-import com.tailormyresume.core.domain.ImportRemovalNotice
 import com.tailormyresume.core.domain.ResumeTextParser
 import com.tailormyresume.core.domain.fact.FactIdAllocator
 import com.tailormyresume.core.model.CandidateProfile
@@ -12,19 +11,16 @@ import com.tailormyresume.core.model.splitBulletsForEntries
 import com.tailormyresume.core.network.TailorMyResumeApi
 import com.tailormyresume.core.network.dto.ParsedEntryDto
 import com.tailormyresume.core.network.dto.ResumeParseRequest
-import com.tailormyresume.core.network.dto.SensitiveField
 import javax.inject.Inject
 
 class RemoteResumeTextParser @Inject constructor(
     private val api: TailorMyResumeApi,
     private val ids: FactIdAllocator,
-    private val removalNotice: ImportRemovalNotice,
 ) : ResumeTextParser {
     override suspend fun parse(rawText: String): CandidateProfile = parse(rawText, keptEntries = 0)
 
     override suspend fun parse(rawText: String, keptEntries: Int): CandidateProfile {
         val response = remoteAi { api.parseResume(ResumeParseRequest(rawText)) }
-        removalNotice.record(response.droppedSensitive.any { it == SensitiveField.DATE_OF_BIRTH || it == SensitiveField.PHOTO })
         val parsed = response.profile
         return CandidateProfile(
             fullName = parsed.fullName.orEmpty(),

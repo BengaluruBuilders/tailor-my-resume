@@ -13,19 +13,15 @@ import com.tailormyresume.core.data.mock.MockLatency
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.repository.ApplicationCleanup
 import com.tailormyresume.core.data.repository.ApplicationRepository
-import com.tailormyresume.core.data.repository.CoverLetterRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.OfflineFirstApplicationRepository
 import com.tailormyresume.core.data.repository.OfflineFirstProfileRepository
 import com.tailormyresume.core.data.repository.PendingAccountWipe
-import com.tailormyresume.core.data.repository.PrepPlanRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.data.repository.StoredApplicationCleanup
-import com.tailormyresume.core.data.repository.StoredCoverLetterRepository
 import com.tailormyresume.core.data.repository.StoredExportHistoryRepository
 import com.tailormyresume.core.data.repository.StoredPendingAccountWipe
-import com.tailormyresume.core.data.repository.StoredPrepPlanRepository
 import com.tailormyresume.core.data.repository.StoredSessionRepository
 import com.tailormyresume.core.data.repository.StoredTailoringReviewStateRepository
 import com.tailormyresume.core.data.repository.TailoringReviewStateRepository
@@ -67,15 +63,9 @@ abstract class DataModule {
     ): ExportHistoryRepository
 
     @Binds
-    internal abstract fun bindsPrepPlanRepository(repository: StoredPrepPlanRepository): PrepPlanRepository
-
-    @Binds
     internal abstract fun bindsTailoringReviewStateRepository(
         repository: StoredTailoringReviewStateRepository,
     ): TailoringReviewStateRepository
-
-    @Binds
-    internal abstract fun bindsCoverLetterRepository(repository: StoredCoverLetterRepository): CoverLetterRepository
 
     @Binds
     internal abstract fun bindsApplicationCleanup(cleanup: StoredApplicationCleanup): ApplicationCleanup

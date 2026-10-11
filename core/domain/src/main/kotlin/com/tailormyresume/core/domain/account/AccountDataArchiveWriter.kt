@@ -3,18 +3,15 @@ package com.tailormyresume.core.domain.account
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.PurchaseRecord
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.ConsentRecord
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.JobRequirement
-import com.tailormyresume.core.model.PrepPlanItem
 import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
-import com.tailormyresume.core.model.WrittenCoverLetter
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -56,9 +53,6 @@ class AccountDataArchiveWriter {
     private fun accountText(data: AccountData): String = buildString {
         appendLine("generatedAt=${data.generatedAt}")
         appendLine("account=${data.account?.email.orEmpty()}")
-        appendLine("consentPurposes=${data.consent?.purposes?.joinToString(",").orEmpty()}")
-        appendLine("consentAcceptedAt=${data.consent?.acceptedAt?.toString().orEmpty()}")
-        appendLine("consentNoticeVersion=${data.consent?.noticeVersion.orEmpty()}")
     }
 
     private fun profileText(data: AccountData): String = buildString {
@@ -85,8 +79,6 @@ class AccountDataArchiveWriter {
                 appendIndented("resume ${bullet.decision}", "${bullet.proposedText} (was: ${bullet.originalText})")
             }
             if (application.notes.isNotBlank()) appendIndented("notes", application.notes)
-            data.coverLetters[application.id]?.paragraphs?.forEach { appendIndented("coverLetter", it.text) }
-            data.prepPlans[application.id].orEmpty().forEach { appendLine("  prep done=${it.done}: ${it.text}") }
             val exports = data.exports.filter { it.applicationId == application.id }
             exports.forEach { export -> appendLine("  export ${export.format} ${export.fileName} ${export.exportedAt}") }
         }
@@ -111,7 +103,6 @@ class AccountDataArchiveWriter {
         buildJsonObject {
             put("generatedAt", data.generatedAt.toString())
             data.account?.let { put("account", accountJson(it)) }
-            data.consent?.let { put("consent", consentJson(it)) }
             data.profile?.let { put("profile", profileJson(it)) }
             put("entitlement", entitlementJson(data.entitlement))
             put("purchases", objects(data.purchases, ::purchaseJson))
@@ -122,12 +113,6 @@ class AccountDataArchiveWriter {
     private fun accountJson(account: SignInAccount): JsonObject = buildJsonObject {
         put("email", account.email)
         put("displayName", account.displayName)
-    }
-
-    private fun consentJson(consent: ConsentRecord): JsonObject = buildJsonObject {
-        put("purposes", strings(consent.purposes.map { it.name }))
-        put("acceptedAt", consent.acceptedAt.toString())
-        put("noticeVersion", consent.noticeVersion)
     }
 
     private fun entitlementJson(entitlement: PurchaseEntitlement): JsonObject = buildJsonObject {
@@ -185,8 +170,6 @@ class AccountDataArchiveWriter {
         put("job", jobJson(application.job))
         application.gapAnalysis?.let { put("gapAnalysis", gapAnalysisJson(it)) }
         application.tailoredResume?.let { put("tailoredResume", tailoredResumeJson(it)) }
-        data.coverLetters[application.id]?.let { put("coverLetter", coverLetterJson(it)) }
-        put("prepPlan", objects(data.prepPlans[application.id].orEmpty(), ::prepItemJson))
         put("exports", objects(data.exports.filter { it.applicationId == application.id }, ::exportJson))
     }
 
@@ -230,27 +213,6 @@ class AccountDataArchiveWriter {
         put("keywordsUsed", strings(bullet.keywordsUsed))
         put("violations", strings(bullet.violations.map { it.toString() }))
         put("decision", bullet.decision.name)
-    }
-
-    private fun coverLetterJson(letter: WrittenCoverLetter): JsonObject = buildJsonObject {
-        put("writtenAt", letter.writtenAt.toString())
-        letter.citedFactIds?.let { put("citedFactIds", strings(it)) }
-        put(
-            "paragraphs",
-            objects(letter.paragraphs) { paragraph ->
-                buildJsonObject {
-                    put("text", paragraph.text)
-                    put("isGreeting", paragraph.isGreeting)
-                    put("isUserEdited", paragraph.isUserEdited)
-                }
-            },
-        )
-    }
-
-    private fun prepItemJson(item: PrepPlanItem): JsonObject = buildJsonObject {
-        put("id", item.id)
-        put("text", item.text)
-        put("done", item.done)
     }
 
     private fun exportJson(export: ExportRecord): JsonObject = buildJsonObject {

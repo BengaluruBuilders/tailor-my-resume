@@ -33,7 +33,7 @@ class AccountSwitchBillingClearTest {
     private val payments = RemotePaymentGateway(api, WalletSource(api, account), billing, account, idleScope())
     private val session = TestSessionRepository()
     private val store = TestMockStateStore()
-    private val cleaner = SignOutCleaner(payments, RemoteJobAnalysisSource(api, NoMatcher), PendingReportQueue(store), store, session)
+    private val cleaner = SignOutCleaner(payments, RemoteJobAnalysisSource(api, NoMatcher), PendingReportQueue(store), store)
 
     private val purchasesRequests = AtomicInteger()
 

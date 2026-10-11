@@ -21,7 +21,6 @@ sealed interface ApiError {
     data object HttpError : ApiError
     data object InternalError : ApiError
     data object NoCredit : ApiError
-    data object ConsentRequired : ApiError
     data object PurchasePending : ApiError
     data object PurchaseInvalid : ApiError
     data object AllowanceExhausted : ApiError
@@ -59,7 +58,6 @@ internal fun apiErrorOf(httpStatus: Int, code: String?, retryAfterSeconds: Int?)
     "HTTP_ERROR" -> ApiError.HttpError
     "INTERNAL_ERROR" -> ApiError.InternalError
     "NO_CREDIT" -> ApiError.NoCredit
-    "CONSENT_REQUIRED" -> ApiError.ConsentRequired
     "PURCHASE_PENDING" -> ApiError.PurchasePending
     "PURCHASE_INVALID" -> ApiError.PurchaseInvalid
     "ALLOWANCE_EXHAUSTED" -> ApiError.AllowanceExhausted
