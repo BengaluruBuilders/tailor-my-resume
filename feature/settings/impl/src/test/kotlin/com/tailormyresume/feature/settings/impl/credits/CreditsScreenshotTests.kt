@@ -52,7 +52,7 @@ class CreditsScreenshotTests {
             "Northwind GCC · 8 Oct",
             "+5",
             "−1",
-            "Receipts go to your Google email",
+            "Receipts go to the email of your Google Play account",
         )
         rule.assertNoTruncatedText()
         rule.capture("credits_returning", TmrTestDevices.prototype)
@@ -68,8 +68,8 @@ class CreditsScreenshotTests {
         rule.assertNoTruncatedText()
         rule.assertNoWordBrokenAcrossLines()
         rule.capture("credits_returning", NARROW_DEVICE)
-        rule.onNodeWithTag(CREDITS_LIST_TAG).performScrollToNode(hasText("Receipts go to your Google email"))
-        rule.assertTexts("Receipts go to your Google email")
+        rule.onNodeWithTag(CREDITS_LIST_TAG).performScrollToNode(hasText("Receipts go to the email of your Google Play account"))
+        rule.assertTexts("Receipts go to the email of your Google Play account")
         rule.assertNoTruncatedText()
     }
 
@@ -80,7 +80,7 @@ class CreditsScreenshotTests {
             CreditsScreen(CreditsUiState.Content(credits = 0, history = emptyList()), onBuyMore = {})
         }
 
-        rule.assertTexts("0", "Buy more", "Receipts go to your Google email")
+        rule.assertTexts("0", "Buy more", "Receipts go to the email of your Google Play account")
     }
 
     @Test

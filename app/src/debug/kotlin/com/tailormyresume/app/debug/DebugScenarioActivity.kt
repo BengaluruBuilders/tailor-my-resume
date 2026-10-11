@@ -38,6 +38,7 @@ import com.tailormyresume.core.model.DebugScenario
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -182,6 +183,8 @@ private fun PreviewRootContent(
             TmrRoot(root = PreviewRoot.FirstRun.accountRoot, startKey = key, modifier = modifier, entryProvider = entryProvider)
         shownRoot == PreviewRoot.FirstRun ->
             TmrRoot(root = PreviewRoot.FirstRun.accountRoot, startKey = SignInNavKey(), modifier = modifier, entryProvider = entryProvider)
+        shownRoot == PreviewRoot.SignedInFirstRun ->
+            TmrRoot(root = PreviewRoot.SignedInFirstRun.accountRoot, startKey = UploadNavKey(), modifier = modifier, entryProvider = entryProvider)
         else -> TmrRoot(
             root = PreviewRoot.Main.accountRoot,
             startKey = DefaultApplicationsNavKey,
@@ -217,6 +220,7 @@ internal fun observePreviewRoot(
 
 internal enum class PreviewRoot {
     FirstRun,
+    SignedInFirstRun,
     Main,
     ;
 
@@ -236,7 +240,13 @@ internal fun previewNavigationRoot(
     hasAccount: Boolean,
 ): PreviewRoot {
     val welcome = previewShowsWelcome(seenMain, rootState) || (seenAccount && !hasAccount)
-    return if (opensFirstRunRoot || welcome) PreviewRoot.FirstRun else PreviewRoot.Main
+    val signedInAtUpload = hasAccount && rootState is AppRootState.Ready && rootState.start == StartDestination.Upload
+    return when {
+        opensFirstRunRoot -> PreviewRoot.FirstRun
+        welcome && signedInAtUpload -> PreviewRoot.SignedInFirstRun
+        welcome -> PreviewRoot.FirstRun
+        else -> PreviewRoot.Main
+    }
 }
 
 internal fun opensRealApp(target: DebugScenarioTarget, scenario: DebugScenario): Boolean =
