@@ -251,7 +251,7 @@ class ReadingViewModelTest {
             }
             add(FailureCase(parserThrows = RuntimeException("boom"), kind = UploadFailureKind.Neutral))
             add(FailureCase(parsed = emptyProfile(), kind = UploadFailureKind.Neutral))
-            add(FailureCase(parsed = emptyProfile(), pasted = true, kind = UploadFailureKind.Neutral))
+            add(FailureCase(parsed = emptyProfile(), pasted = true, kind = UploadFailureKind.SingleLinePastedText))
             add(
                 FailureCase(
                     repository = ThrowingProfileRepository(),

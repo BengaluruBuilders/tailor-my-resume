@@ -18,6 +18,7 @@
     <string name="feature_onboarding_impl_unreadable_explain_file">We couldn\'t open this file or find any text in it.</string>
     <string name="feature_onboarding_impl_unreadable_explain_too_large">This file is bigger than 5 MB.</string>
     <string name="feature_onboarding_impl_unreadable_explain_neutral">Try again, paste the text, or fill it in yourself.</string>
+    <string name="feature_onboarding_impl_unreadable_explain_single_line_paste">Paste each resume section on a new line, then try again.</string>
     <string name="feature_onboarding_impl_unreadable_tips_title">Try one of these</string>
     <string name="feature_onboarding_impl_unreadable_tip_export">Export your resume as PDF from Word or Google Docs</string>
     <string name="feature_onboarding_impl_unreadable_tip_docx">Upload the DOCX file instead</string>

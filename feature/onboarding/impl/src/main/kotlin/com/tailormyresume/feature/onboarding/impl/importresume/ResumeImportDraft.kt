@@ -18,7 +18,7 @@ internal sealed interface ResumeSource {
     data class PastedText(val text: String) : ResumeSource
 }
 
-internal enum class UploadFailureKind { ImageOnly, FileProblem, TooLarge, Neutral }
+internal enum class UploadFailureKind { ImageOnly, FileProblem, TooLarge, SingleLinePastedText, Neutral }
 
 internal data class UploadFailure(
     val kind: UploadFailureKind,

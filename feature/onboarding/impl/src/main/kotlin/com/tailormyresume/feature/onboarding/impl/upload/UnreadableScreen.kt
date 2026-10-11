@@ -58,7 +58,7 @@ internal fun UnreadableScreen(
         ) {
             Text(
                 text = stringResource(
-                    if (failure.kind == UploadFailureKind.Neutral) {
+                    if (failure.kind == UploadFailureKind.Neutral || failure.kind == UploadFailureKind.SingleLinePastedText) {
                         R.string.feature_onboarding_impl_unreadable_title_neutral
                     } else {
                         R.string.feature_onboarding_impl_unreadable_title_file
@@ -84,6 +84,7 @@ internal fun UnreadableScreen(
                             UploadFailureKind.ImageOnly -> R.string.feature_onboarding_impl_unreadable_explain_image_only
                             UploadFailureKind.FileProblem -> R.string.feature_onboarding_impl_unreadable_explain_file
                             UploadFailureKind.TooLarge -> R.string.feature_onboarding_impl_unreadable_explain_too_large
+                            UploadFailureKind.SingleLinePastedText -> R.string.feature_onboarding_impl_unreadable_explain_single_line_paste
                             UploadFailureKind.Neutral -> R.string.feature_onboarding_impl_unreadable_explain_neutral
                         },
                     ),

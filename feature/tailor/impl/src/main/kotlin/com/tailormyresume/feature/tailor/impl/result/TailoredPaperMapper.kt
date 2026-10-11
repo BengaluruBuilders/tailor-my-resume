@@ -12,6 +12,9 @@ private const val ANSWER_ID_PREFIX = "ans-"
 
 internal fun ResumeDocument.toPaperBlocks(resume: TailoredResume): List<TmrPaperBlock> =
     buildList<TmrPaperBlock> {
+        if (headline.isNotBlank()) {
+            add(TmrPaperBlock(lines = listOf(listOf(TmrPaperSpan(headline)))))
+        }
         val acceptedSummary = resume.summary?.takeIf { it.decision == BulletDecision.ACCEPTED }
         val summaryHighlight = when {
             acceptedSummary == null -> TmrPaperHighlight.None

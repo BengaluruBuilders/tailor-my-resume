@@ -88,4 +88,17 @@ class UnreadableScreenTest {
         composeRule.onNodeWithText("We couldn't read your resume").assertIsDisplayed()
         composeRule.onNodeWithText("Resume_scan.pdf").assertDoesNotExist()
     }
+
+    @Test
+    fun singleLinePastedTextExplainsHowToPasteIt() {
+        composeRule.showFlowScreen {
+            UnreadableScreen(
+                failure = UploadFailure(UploadFailureKind.SingleLinePastedText),
+                onChooseAnotherClick = {},
+                onPasteClick = {},
+            )
+        }
+
+        composeRule.onNodeWithText("Paste each resume section on a new line, then try again.").assertIsDisplayed()
+    }
 }
