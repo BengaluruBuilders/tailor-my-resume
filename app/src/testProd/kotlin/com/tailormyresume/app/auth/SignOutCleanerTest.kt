@@ -55,7 +55,7 @@ class SignOutCleanerTest {
         assertThat(wallet.cached).isNull()
         assertThat(credits.observeBalance().first()).isEqualTo(0)
         assertThat(reports.pending()).isEmpty()
-        assertThat(tailoringIds.idFor("run-2", "app-1")).isNotEqualTo(firstId)
+        assertThat(tailoringIds.idFor("run-1", "app-1")).isNotEqualTo(firstId)
         backend.reply(200, ANALYSIS_RESPONSE)
         analysis.analyse(candidate, "the raw job text")
         assertThat(backend.server.requestCount).isEqualTo(3)
