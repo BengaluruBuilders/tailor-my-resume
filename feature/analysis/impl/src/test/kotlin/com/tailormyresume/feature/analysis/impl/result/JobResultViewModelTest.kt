@@ -75,17 +75,19 @@ class JobResultViewModelTest {
     }
 
     @Test
-    fun storedAnswerClearsTheUnclearRowAndShowsItsRealStatus() = runTest {
+    fun positiveStoredAnswerMarksTheQuestionRequirementAsAnswered() = runTest {
         seed(
             ResultTestData.application(
-                quickAnswer = QuickAnswer(ResultTestData.STAKEHOLDER_ID, "NOT_YET", ""),
+                quickAnswer = QuickAnswer(ResultTestData.STAKEHOLDER_ID, "YES_REGULARLY", ""),
             ),
         )
         val state = readyState(viewModel())
 
         assertThat(state.mustHaves.count { it.unclear }).isEqualTo(0)
-        assertThat(state.mustHaves.first { it.requirementId == ResultTestData.STAKEHOLDER_ID }.status)
-            .isEqualTo(MatchStatus.GAP)
+        val answered = state.mustHaves.first { it.requirementId == ResultTestData.STAKEHOLDER_ID }
+        assertThat(answered.status).isEqualTo(MatchStatus.GAP)
+        assertThat(answered.answered).isTrue()
+        assertThat(answered.marker).isEqualTo(MustHaveMarkerKind.ANSWERED)
         assertThat(state.asksQuestion).isFalse()
     }
 

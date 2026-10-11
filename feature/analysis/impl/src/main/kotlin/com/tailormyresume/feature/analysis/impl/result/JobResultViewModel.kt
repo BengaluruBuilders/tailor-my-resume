@@ -90,6 +90,7 @@ private fun toUiState(application: JobApplication?, credits: Int?, profile: Cand
                     status = match.status,
                     reason = match.keepReason(),
                     unclear = application.quickAnswer == null && match.requirement.id == gap.question?.requirementId,
+                    answered = application.quickAnswer.confirms(match.requirement.id),
                 )
             },
         credits = credits,
@@ -99,3 +100,6 @@ private fun toUiState(application: JobApplication?, credits: Int?, profile: Cand
 
 private fun RequirementMatch.keepReason(): String? =
     if (status == MatchStatus.GAP || evidenceIds.isNotEmpty()) reason?.takeIf { it.isNotBlank() } else null
+
+private fun QuickAnswer?.confirms(requirementId: String): Boolean =
+    this?.requirementId == requirementId && choice in setOf("YES_REGULARLY", "A_FEW_TIMES")

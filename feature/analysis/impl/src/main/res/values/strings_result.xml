@@ -7,6 +7,7 @@
     <string name="feature_analysis_impl_result_confirm_first">Missing skills are only added if you confirm you have them.</string>
     <string name="feature_analysis_impl_result_must_haves">Must-haves</string>
     <string name="feature_analysis_impl_result_unclear">Not clear in your resume. We\'ll ask you next.</string>
+    <string name="feature_analysis_impl_result_answered">From your answer</string>
     <string name="feature_analysis_impl_result_unclear_mark">!</string>
     <string name="feature_analysis_impl_result_met_mark">✓</string>
     <string name="feature_analysis_impl_result_partial_mark">~</string>

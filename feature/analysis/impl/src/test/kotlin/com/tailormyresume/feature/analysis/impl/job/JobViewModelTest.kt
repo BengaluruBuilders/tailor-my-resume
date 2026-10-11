@@ -134,6 +134,20 @@ class JobViewModelTest {
     }
 
     @Test
+    fun replacingALongPostHidesTheEarlierDetectedLabelBeforeTheNextDebounce() = runTest(dispatcher) {
+        val viewModel = viewModel()
+
+        viewModel.onTextChange(POST_200)
+        advanceTimeBy(1_000)
+        assertThat((viewModel.uiState.value as JobUiState.HasText).detected).isNotNull()
+
+        viewModel.onTextChange(POST_250)
+        runCurrent()
+
+        assertThat((viewModel.uiState.value as JobUiState.HasText).detected).isNull()
+    }
+
+    @Test
     fun pasteFillsTextAndClearsError() = runTest(dispatcher) {
         val viewModel = viewModel()
 
