@@ -6,7 +6,7 @@
     <string name="feature_onboarding_impl_upload_sticker_docx">DOCX</string>
     <string name="feature_onboarding_impl_upload_intro">We read it and fill in your profile. You check it and fix anything we got wrong.</string>
     <string name="feature_onboarding_impl_upload_card_title">Upload resume</string>
-    <string name="feature_onboarding_impl_upload_card_hint">PDF or DOCX · up to 5 MB</string>
+    <string name="feature_onboarding_impl_upload_card_hint">PDF or DOCX · up to 5 MB</string>
     <string name="feature_onboarding_impl_upload_paste">Paste as text</string>
     <string name="feature_onboarding_impl_upload_manual">Fill in myself</string>
     <string name="feature_onboarding_impl_upload_footer">Your resume is only used to build your applications. Never shared.</string>
@@ -16,7 +16,7 @@
     <string name="feature_onboarding_impl_file_meta_image_only">image only</string>
     <string name="feature_onboarding_impl_unreadable_explain_image_only">It looks like a photo or scan, so there\'s no text for us to read.</string>
     <string name="feature_onboarding_impl_unreadable_explain_file">We couldn\'t open this file or find any text in it.</string>
-    <string name="feature_onboarding_impl_unreadable_explain_too_large">This file is bigger than 5 MB.</string>
+    <string name="feature_onboarding_impl_unreadable_explain_too_large">This file is bigger than 5 MB.</string>
     <string name="feature_onboarding_impl_unreadable_explain_neutral">Try again, paste the text, or fill it in yourself.</string>
     <string name="feature_onboarding_impl_unreadable_tips_title">Try one of these</string>
     <string name="feature_onboarding_impl_unreadable_tip_export">Export your resume as PDF from Word or Google Docs</string>

@@ -88,6 +88,13 @@ class ScreenChromeTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
+    fun readingExposesNoBackOrCloseAtAnyDepth() {
+        (0..4).forEach { below ->
+            assertWithMessage("entriesBelow $below").that(chromeFor(ReadingNavKey(), below).leading).isEqualTo(None)
+        }
+    }
+
+    @Test
     fun chromeMatchesTTableForAll27Keys() {
         assertThat(CHROME_TABLE).hasSize(27)
         assertThat(CHROME_TABLE.map { it.key::class }).containsNoDuplicates()

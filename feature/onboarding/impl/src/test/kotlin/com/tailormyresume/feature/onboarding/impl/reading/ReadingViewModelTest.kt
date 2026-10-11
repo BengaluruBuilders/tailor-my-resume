@@ -7,6 +7,7 @@ import com.tailormyresume.core.domain.AiException
 import com.tailormyresume.core.domain.AiFailure
 import com.tailormyresume.core.domain.ResumeTextParser
 import com.tailormyresume.core.domain.fact.FactIdAllocator
+import com.tailormyresume.core.domain.offline.OfflineResumeTextParser
 import com.tailormyresume.core.domain.onboarding.SaveImportedProfileUseCase
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
@@ -171,6 +172,39 @@ class ReadingViewModelTest {
         val viewModel = viewModelIn(draft, FakeResumeTextSource(ResumeRead.Text(text)), FakeResumeTextParser(skillsOnly))
 
         assertThat(viewModel.uiState.value.rows.first { it.kind == ReadingRowKind.Contact }.count).isEqualTo(0)
+    }
+
+    @Test
+    fun junkSentenceSavesNothingAndShowsTheNeutralLine() = runTest(UnconfinedTestDispatcher()) {
+        val repository = TestProfileRepository()
+        val draft = draftIn(backgroundScope)
+        draft.setText("The quick brown fox jumps over the lazy dog and keeps running.")
+
+        val viewModel = viewModelIn(
+            draft,
+            parser = OfflineResumeTextParser(),
+            profileRepository = repository,
+        )
+
+        viewModel.events.test { assertThat(awaitItem()).isEqualTo(ReadingEvent.Failed) }
+        assertThat(draft.failure.value?.kind).isEqualTo(UploadFailureKind.Neutral)
+        assertThat(repository.observeProfile().first()).isNull()
+    }
+
+    @Test
+    fun nameOnlyParseSavesNothing() = runTest(UnconfinedTestDispatcher()) {
+        val repository = TestProfileRepository()
+        val draft = draftIn(backgroundScope)
+        draft.setText(text)
+
+        val viewModel = viewModelIn(
+            draft,
+            parser = FakeResumeTextParser(emptyProfile().copy(fullName = "Jane Doe")),
+            profileRepository = repository,
+        )
+
+        viewModel.events.test { assertThat(awaitItem()).isEqualTo(ReadingEvent.Failed) }
+        assertThat(repository.observeProfile().first()).isNull()
     }
 
     @Test

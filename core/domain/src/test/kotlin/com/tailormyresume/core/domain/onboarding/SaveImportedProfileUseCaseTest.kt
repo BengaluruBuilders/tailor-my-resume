@@ -121,6 +121,101 @@ class SaveImportedProfileUseCaseTest {
     }
 
     @Test
+    fun sentenceIsNotSavedAsTheName() = runTest {
+        val parsed = profile(
+            fullName = "The quick brown fox jumps over the lazy dog and keeps running.",
+            entries = listOf(entry("x1", EntryCategory.EXPERIENCE)),
+        )
+
+        useCase.invoke(parsed, "resume.pdf")
+
+        assertThat(checkNotNull(repository.observeProfile().first()).fullName).isEmpty()
+    }
+
+    @Test
+    fun userStatedNameKeepsTheWholeExistingContact() = runTest {
+        repository.sendProfile(profile(fullName = "Asha Rao", entries = emptyList()))
+        val parsed = profile(
+            fullName = "Priya Deshmukh",
+            email = "priya@example.com",
+            phone = "+91 98765 43210",
+            city = "Pune",
+            entries = listOf(entry("x1", EntryCategory.EXPERIENCE)),
+        )
+
+        useCase.invoke(parsed, "resume.pdf")
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(listOf(saved.fullName, saved.email, saved.phone, saved.city))
+            .containsExactly("Asha Rao", "", "", "").inOrder()
+    }
+
+    @Test
+    fun importedOnlyContactIsReplacedWholeByTheNewImport() = runTest {
+        repository.sendProfile(
+            profile(
+                fullName = "Asha Rao",
+                email = "asha@example.com",
+                phone = "+91 90000 00000",
+                city = "Mumbai",
+                entries = listOf(entry("W-01", EntryCategory.EXPERIENCE)),
+            ).copy(sourceFileName = "old.pdf"),
+        )
+        val parsed = profile(
+            fullName = "Priya Deshmukh",
+            email = "priya@example.com",
+            phone = "",
+            city = "Pune",
+            entries = listOf(entry("x1", EntryCategory.EXPERIENCE)),
+        )
+
+        useCase.invoke(parsed, "new.pdf")
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(listOf(saved.fullName, saved.email, saved.phone, saved.city))
+            .containsExactly("Priya Deshmukh", "priya@example.com", "", "Pune").inOrder()
+    }
+
+    @Test
+    fun importWithoutAValidNameKeepsTheExistingContact() = runTest {
+        repository.sendProfile(
+            profile(
+                fullName = "Asha Rao",
+                email = "asha@example.com",
+                entries = listOf(entry("W-01", EntryCategory.EXPERIENCE)),
+            ).copy(sourceFileName = "old.pdf"),
+        )
+        val parsed = profile(
+            fullName = "The quick brown fox jumps over the lazy dog and keeps running.",
+            email = "other@example.com",
+            phone = "+91 98765 43210",
+            entries = listOf(entry("x1", EntryCategory.EXPERIENCE)),
+        )
+
+        useCase.invoke(parsed, "new.pdf")
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(listOf(saved.fullName, saved.email, saved.phone))
+            .containsExactly("Asha Rao", "asha@example.com", "").inOrder()
+    }
+
+    @Test
+    fun looksLikeNameAcceptsNamesAndRejectsSentences() {
+        listOf("Priya Deshmukh", "J. R. Smith", "Dr. Asha Rao", "Madonna").forEach {
+            assertThat(looksLikeName(it)).isTrue()
+        }
+        listOf(
+            "",
+            "   ",
+            "The quick brown fox jumps over the lazy dog and keeps running.",
+            "Hello world today.",
+            "Priya D, Pune",
+            "Priya Deshmukh 2026",
+            "one two three four five six",
+        ).forEach { assertThat(looksLikeName(it)).isFalse() }
+    }
+
+    @Test
     fun importedEntriesMarkedImportedAndUnconfirmed() = runTest {
         val parsed = profile(
             entries = listOf(
