@@ -1,5 +1,6 @@
 package com.tailormyresume.feature.tailor.impl.exported
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
@@ -85,7 +86,7 @@ class ExportedViewModelTest {
         TimeZone.setDefault(initialZone)
     }
 
-    private fun viewModel() = ExportedViewModel(
+    private fun viewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) = ExportedViewModel(
         applicationRepository = applicationRepository,
         creditsRepository = creditsRepository,
         exportResume = ExportResumeUseCase(
@@ -99,6 +100,7 @@ class ExportedViewModelTest {
         ),
         setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, clock),
         fileStore = fileStore,
+        savedStateHandle = savedStateHandle,
         ioDispatcher = UnconfinedTestDispatcher(),
         applicationId = "app-1",
     )
@@ -185,6 +187,70 @@ class ExportedViewModelTest {
 
         assertThat(ready.creditsLeft).isEqualTo(0)
         assertThat(ready.freeResumeUsed).isTrue()
+    }
+
+    @Test
+    fun reexportOfTheFreeApplicationAfterAPurchaseStillShowsTheFreeLine() = runTest {
+        creditsRepository.sendLedger(
+            listOf(
+                entry(CreditLedgerKind.FREE_GRANT, 1),
+                entry(CreditLedgerKind.SPEND, -1, applicationId = "app-1"),
+                entry(CreditLedgerKind.PURCHASE, 5, productId = "application_pack_5"),
+                entry(CreditLedgerKind.SPEND, -1, applicationId = "kb"),
+            ),
+        )
+        seed()
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+
+        assertThat(viewModel.ready().freeResumeUsed).isTrue()
+    }
+
+    @Test
+    fun anotherApplicationsSpendDoesNotMakeThisOneFree() = runTest {
+        creditsRepository.sendLedger(
+            listOf(
+                entry(CreditLedgerKind.FREE_GRANT, 3),
+                entry(CreditLedgerKind.SPEND, -1, applicationId = "kb"),
+            ),
+        )
+        seed()
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+
+        val ready = viewModel.ready()
+
+        assertThat(ready.freeResumeUsed).isFalse()
+        assertThat(ready.creditsLeft).isEqualTo(2)
+    }
+
+    @Test
+    fun restoreAfterProcessDeathShowsTheStoredExportWithoutExportingAgain() = runTest {
+        seed()
+        val first = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { first.state.collect() }
+        val exported = first.ready()
+        assertThat(renderer.renderCalls).isEqualTo(1)
+
+        val restored = viewModel(SavedStateHandle(mapOf("exported" to true)))
+        backgroundScope.launch(UnconfinedTestDispatcher()) { restored.state.collect() }
+
+        assertThat(restored.ready().fileName).isEqualTo(exported.fileName)
+        assertThat(restored.ready().pageCount).isEqualTo(exported.pageCount)
+        assertThat(renderer.renderCalls).isEqualTo(1)
+        assertThat(exportHistory.observeExports("app-1").first()).hasSize(1)
+    }
+
+    @Test
+    fun exportingMarksTheSavedStateSoARestoreDoesNotRepeatIt() = runTest {
+        seed()
+        val handle = SavedStateHandle()
+        val viewModel = viewModel(handle)
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+
+        viewModel.ready()
+
+        assertThat(handle.get<Boolean>("exported")).isTrue()
     }
 
     @Test

@@ -6,6 +6,7 @@ import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -140,8 +141,10 @@ class TailorRealEntryHiltTest {
     fun editResumeEntryRendersAndSaves() {
         navigator.navigate(EditResumeNavKey("nw"))
         show(EditResumeNavKey("nw"))
+        waitFor { composeRule.onAllNodesWithText("Edit resume").fetchSemanticsNodes().isNotEmpty() }
 
         composeRule.onNodeWithText("Edit resume").assertExists()
+        assertThat(composeRule.onAllNodesWithContentDescription("Edit bullet").fetchSemanticsNodes()).isNotEmpty()
         composeRule.onNodeWithText("Wrote SQL pipelines over 20M+ rows of transaction data.")
             .performTextReplacement("Wrote SQL pipelines over 25M+ rows.")
         composeRule.waitForIdle()

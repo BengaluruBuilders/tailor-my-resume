@@ -17,12 +17,17 @@ internal class AndroidPdfResumeRenderer @Inject constructor(
     @param:Dispatcher(TmrDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
 ) : ResumePdfRenderer {
 
-    override suspend fun render(document: ResumeDocument, fileName: String, pageSize: PageSize): RenderedResume {
+    override suspend fun render(
+        document: ResumeDocument,
+        fileName: String,
+        pageSize: PageSize,
+        previousFileName: String?,
+    ): RenderedResume {
         val fitted = withContext(defaultDispatcher) { fit(document, pageSize) }
         try {
             return withContext(ioDispatcher) {
                 val directory = ExportDirectory(File(context.cacheDir, EXPORT_DIRECTORY))
-                val file = directory.write(fileName) { fitted.pages.writeTo(it) }
+                val file = directory.write(fileName, previousFileName) { fitted.pages.writeTo(it) }
                 RenderedResume(file = file, pageCount = fitted.pageCount, lines = fitted.lines)
             }
         } finally {

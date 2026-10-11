@@ -3,6 +3,7 @@ package com.tailormyresume.feature.tailor.impl.exported
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -77,6 +78,7 @@ class ExportedRouteTest {
             fileStore = object : ExportedFileStore {
                 override fun fileFor(fileName: String): File? = File(directory, fileName).takeIf { it.isFile }
             },
+            savedStateHandle = SavedStateHandle(),
             ioDispatcher = UnconfinedTestDispatcher(),
             applicationId = "app-1",
         )

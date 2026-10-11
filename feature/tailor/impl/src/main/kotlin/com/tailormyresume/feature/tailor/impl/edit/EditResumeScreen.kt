@@ -23,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.component.content.TmrCard
 import com.tailormyresume.core.designsystem.component.content.TmrSectionLabel
@@ -127,6 +129,7 @@ private fun EditBulletCard(
                 color = colors.text,
             )
         } else {
+            val bulletLabel = stringResource(R.string.feature_tailor_impl_edit_bullet_label)
             var text by remember(bullet.id) { mutableStateOf(bullet.text) }
             BasicTextField(
                 value = text,
@@ -136,7 +139,7 @@ private fun EditBulletCard(
                 },
                 textStyle = TmrTheme.typography.body.copy(color = colors.text),
                 cursorBrush = SolidColor(colors.lime),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().semantics { contentDescription = bulletLabel },
             )
         }
     }

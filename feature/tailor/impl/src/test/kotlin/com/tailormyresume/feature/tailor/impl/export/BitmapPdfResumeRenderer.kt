@@ -11,9 +11,14 @@ internal class BitmapPdfResumeRenderer @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) : ResumePdfRenderer {
 
-    override suspend fun render(document: ResumeDocument, fileName: String, pageSize: PageSize): RenderedResume {
+    override suspend fun render(
+        document: ResumeDocument,
+        fileName: String,
+        pageSize: PageSize,
+        previousFileName: String?,
+    ): RenderedResume {
         val fitted = ResumePdfFit.compose(document, pageSize, ::BitmapPdfPages)
-        val file = ExportDirectory(File(context.cacheDir, "exports")).write(fileName) { it.write("%PDF-1.4".toByteArray()) }
+        val file = ExportDirectory(File(context.cacheDir, "exports")).write(fileName, previousFileName) { it.write("%PDF-1.4".toByteArray()) }
         return RenderedResume(file = file, pageCount = fitted.pageCount, lines = fitted.lines)
     }
 

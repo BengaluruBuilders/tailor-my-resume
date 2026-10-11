@@ -81,6 +81,7 @@ class OfflineSampleDataController(
             tailoredResume = reviewed(tailored, plan.review),
             createdAt = now - plan.createdDaysAgo.days,
             updatedAt = now - plan.updatedDaysAgo.days,
+            changesAcceptedAt = (now - plan.updatedDaysAgo.days).takeIf { plan.review == ReviewPlan.ALL },
         )
     }
 

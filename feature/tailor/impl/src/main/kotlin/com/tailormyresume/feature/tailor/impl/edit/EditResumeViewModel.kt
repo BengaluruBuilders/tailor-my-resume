@@ -21,6 +21,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -100,6 +101,7 @@ internal class EditResumeViewModel @AssistedInject constructor(
     ): EditResumeUiState {
         val resume = application?.tailoredResume
         if (application == null || profile == null || resume == null) return EditResumeUiState.NotFound
+        if (currentDrafts.isNotEmpty()) delay(FIT_DEBOUNCE_MS)
         val edited = applyDrafts(resume.withPendingAccepted(), currentDrafts)
         val document = assembler.assemble(profile, edited)
         val used = mutableSetOf<String>()
@@ -166,3 +168,5 @@ internal class EditResumeViewModel @AssistedInject constructor(
 }
 
 private const val ANSWER_SOURCE_PREFIX = "ans-"
+
+private const val FIT_DEBOUNCE_MS = 300L

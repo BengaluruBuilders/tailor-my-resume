@@ -46,7 +46,12 @@ internal class ExportResumeUseCase @Inject constructor(
         val profile = profileRepository.observeProfile().first() ?: return ExportOutcome.Refused
         val settings = settingsRepository.observeSettings().first()
         val fileName = ExportFileName.build(profile, application.job, settings.fileNameFormat.toExportFormat())
-        val rendered = renderer.render(assembler.assemble(profile, resume), fileName, settings.pageSize)
+        val rendered = renderer.render(
+            assembler.assemble(profile, resume),
+            fileName,
+            settings.pageSize,
+            previousFileName = application.exportFileName,
+        )
         val exportedAt = clock.now()
         applicationRepository.observeApplication(applicationId).first()?.let { latest ->
             applicationRepository.upsertApplication(latest.copy(exportFileName = fileName, updatedAt = exportedAt))
@@ -62,6 +67,16 @@ internal class ExportResumeUseCase @Inject constructor(
             ),
         )
         return ExportOutcome.Exported(fileName, rendered.file, rendered.pageCount, rendered.sizeBytes)
+    }
+
+    suspend fun storedExport(applicationId: String, fileFor: (String) -> File?): ExportOutcome.Exported? {
+        val fileName = applicationRepository.observeApplication(applicationId).first()?.exportFileName ?: return null
+        val record = exportHistory.observeExports(applicationId).first()
+            .filter { it.format == ExportFormat.PDF && it.fileName == fileName }
+            .maxByOrNull { it.exportedAt } ?: return null
+        val pageCount = record.pageCount ?: return null
+        val file = fileFor(fileName) ?: return null
+        return ExportOutcome.Exported(fileName, file, pageCount, file.length())
     }
 
     private fun FileNameFormat.toExportFormat(): ExportFileNameFormat = when (this) {

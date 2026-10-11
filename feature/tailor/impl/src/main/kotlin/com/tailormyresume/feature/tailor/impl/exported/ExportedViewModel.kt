@@ -1,5 +1,6 @@
 package com.tailormyresume.feature.tailor.impl.exported
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.common.network.Dispatcher
@@ -45,6 +46,7 @@ internal class ExportedViewModel @AssistedInject constructor(
     private val exportResume: ExportResumeUseCase,
     private val setApplicationStatus: SetApplicationStatusUseCase,
     private val fileStore: ExportedFileStore,
+    private val savedStateHandle: SavedStateHandle,
     @param:Dispatcher(TmrDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     @Assisted val applicationId: String,
 ) : ViewModel() {
@@ -74,13 +76,22 @@ internal class ExportedViewModel @AssistedInject constructor(
     init {
         viewModelScope.launch {
             outcome.value = try {
-                exportResume(applicationId)
+                restoredExport() ?: exportResume(applicationId).also(::rememberExported)
             } catch (_: IOException) {
                 ExportOutcome.Failed
             } catch (_: IllegalStateException) {
                 ExportOutcome.Failed
             }
         }
+    }
+
+    private suspend fun restoredExport(): ExportOutcome? {
+        if (savedStateHandle.get<Boolean>(EXPORTED_KEY) != true) return null
+        return withContext(ioDispatcher) { exportResume.storedExport(applicationId, fileStore::fileFor) }
+    }
+
+    private fun rememberExported(result: ExportOutcome) {
+        if (result is ExportOutcome.Exported) savedStateHandle[EXPORTED_KEY] = true
     }
 
     fun onShare() = resolveFile { file -> ExportedEvent.Share(file) }
@@ -155,14 +166,31 @@ internal class ExportedViewModel @AssistedInject constructor(
             pageCount = exported.pageCount,
             sizeKb = wholeKb(exported.sizeBytes),
             creditsLeft = ledger.sumOf(CreditLedgerEntry::amount).coerceAtLeast(0),
-            freeResumeUsed = ledger.count { it.kind == CreditLedgerKind.SPEND } == 1 &&
-                ledger.none { it.kind == CreditLedgerKind.PURCHASE },
+            freeResumeUsed = ledger.spendWasFreeFor(applicationId),
             jobTitle = application.job.title,
             company = application.job.company,
             status = application.status,
             markedOn = markedOnOf(application),
             statusSheet = sheet,
         )
+    }
+
+    private fun List<CreditLedgerEntry>.spendWasFreeFor(applicationId: String): Boolean {
+        var freeBalance = 0
+        var fundedByFree = false
+        for (entry in sortedBy { it.createdAt }) {
+            when (entry.kind) {
+                CreditLedgerKind.FREE_GRANT -> freeBalance += entry.amount
+                CreditLedgerKind.PURCHASE -> Unit
+                CreditLedgerKind.SPEND -> {
+                    val cost = -entry.amount
+                    val freeUsed = minOf(cost, freeBalance).coerceAtLeast(0)
+                    freeBalance -= freeUsed
+                    if (entry.applicationId == applicationId && cost > 0 && freeUsed == cost) fundedByFree = true
+                }
+            }
+        }
+        return fundedByFree
     }
 
     private fun markedOnOf(application: JobApplication): String? {
@@ -180,6 +208,7 @@ internal class ExportedViewModel @AssistedInject constructor(
         ((sizeBytes + BYTES_PER_KB - 1) / BYTES_PER_KB).coerceAtLeast(1L).toInt()
 
     private companion object {
+        const val EXPORTED_KEY = "exported"
         const val BYTES_PER_KB = 1024L
         const val DAY_PATTERN = "d MMM"
     }

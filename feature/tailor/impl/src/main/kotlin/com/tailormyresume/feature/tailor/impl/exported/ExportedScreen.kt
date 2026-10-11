@@ -153,7 +153,13 @@ private fun CreditsCard(state: ExportedUiState.Ready) {
                 color = TmrTheme.colors.text,
             )
             val line = if (state.freeResumeUsed) {
-                stringResource(R.string.feature_tailor_impl_exported_credits_free)
+                stringResource(
+                    if (state.creditsLeft == 0) {
+                        R.string.feature_tailor_impl_exported_credits_free
+                    } else {
+                        R.string.feature_tailor_impl_exported_credits_free_with_balance
+                    },
+                )
             } else {
                 pluralStringResource(
                     R.plurals.feature_tailor_impl_exported_credits_paid,

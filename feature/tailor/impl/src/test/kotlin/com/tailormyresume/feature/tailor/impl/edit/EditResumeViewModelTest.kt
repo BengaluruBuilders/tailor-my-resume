@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -152,11 +153,31 @@ class EditResumeViewModelTest {
 
         renderer.pageCount = 2
         viewModel.onBulletChange("b1", "A much longer bullet")
+        advanceTimeBy(FIT_SETTLE_MS)
         assertThat(viewModel.ready().fitsOnOnePage).isFalse()
 
         renderer.pageCount = 1
         viewModel.onBulletChange("b1", "Another long bullet")
+        advanceTimeBy(FIT_SETTLE_MS)
         assertThat(viewModel.ready().fitsOnOnePage).isTrue()
+    }
+
+    @Test
+    fun typingBurstRunsOneFitPassAfterTheLastKeystroke() = runTest {
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+        seed()
+        val passesBefore = renderer.pageCountCalls
+
+        "Typed bullet".forEachIndexed { index, _ ->
+            viewModel.onBulletChange("b1", "Typed bullet".take(index + 1))
+            advanceTimeBy(50)
+        }
+        assertThat(renderer.pageCountCalls).isEqualTo(passesBefore)
+
+        advanceTimeBy(FIT_SETTLE_MS)
+
+        assertThat(renderer.pageCountCalls).isEqualTo(passesBefore + 1)
     }
 
     @Test
@@ -167,6 +188,7 @@ class EditResumeViewModelTest {
         settingsRepository.update { it.copy(pageSize = PageSize.LETTER) }
 
         viewModel.onBulletChange("b1", "A much longer bullet")
+        advanceTimeBy(FIT_SETTLE_MS)
 
         assertThat(renderer.lastPageSize).isEqualTo(PageSize.LETTER)
     }
@@ -196,3 +218,5 @@ class EditResumeViewModelTest {
         assertThat(storedBullet("b1")?.proposedText).isEqualTo("Developed an internal tool")
     }
 }
+
+private const val FIT_SETTLE_MS = 400L

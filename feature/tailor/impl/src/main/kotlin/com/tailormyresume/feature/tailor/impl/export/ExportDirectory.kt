@@ -6,9 +6,8 @@ import java.io.OutputStream
 
 internal class ExportDirectory(private val directory: File) {
 
-    fun write(fileName: String, writeContent: (OutputStream) -> Unit): File {
+    fun write(fileName: String, previousFileName: String? = null, writeContent: (OutputStream) -> Unit): File {
         directory.mkdirs()
-        directory.listFiles()?.forEach { it.delete() }
         val target = File(directory, fileName)
         val temporary = File(directory, "$fileName$TEMPORARY_SUFFIX")
         try {
@@ -17,6 +16,7 @@ internal class ExportDirectory(private val directory: File) {
         } finally {
             temporary.delete()
         }
+        previousFileName?.takeIf { it != fileName }?.let { File(directory, File(it).name).delete() }
         return target
     }
 

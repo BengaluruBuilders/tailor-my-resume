@@ -159,4 +159,16 @@ class ExportResumeUseCaseTest {
         assertThat(exported.pageCount).isEqualTo(renderer.pageCount)
         assertThat(exported.sizeBytes).isEqualTo(exported.file.length())
     }
+
+    @Test
+    fun reexportPassesThePreviousFileNameToTheRenderer() = runTest {
+        seed(acceptedApplication(listOf(b1)))
+        val first = useCase("app-1").exported().fileName
+        assertThat(renderer.lastPreviousFileName).isNull()
+
+        settingsRepository.update { it.copy(fileNameFormat = FileNameFormat.NAME_ROLE) }
+        useCase("app-1").exported()
+
+        assertThat(renderer.lastPreviousFileName).isEqualTo(first)
+    }
 }

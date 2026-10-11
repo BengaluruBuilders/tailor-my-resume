@@ -4,6 +4,7 @@
     <string name="feature_tailor_impl_edit_fits">Still fits on 1 page</string>
     <string name="feature_tailor_impl_edit_summary_label">Summary</string>
     <string name="feature_tailor_impl_edit_skills_label">Skills line</string>
+    <string name="feature_tailor_impl_edit_bullet_label">Edit bullet</string>
     <string name="feature_tailor_impl_edit_source_resume">From your resume</string>
     <string name="feature_tailor_impl_edit_source_answer">From your answer</string>
     <string name="feature_tailor_impl_edit_saved">Changes saved</string>
@@ -17,6 +18,7 @@
         <item quantity="other">%1$d left, was %2$d. Credits never expire.</item>
     </plurals>
     <string name="feature_tailor_impl_exported_credits_free">Free resume used. 0 credits left. Nothing was charged.</string>
+    <string name="feature_tailor_impl_exported_credits_free_with_balance">Free resume used. Nothing was charged.</string>
     <string name="feature_tailor_impl_exported_saved_to">Saved to Applications: %1$s, %2$s</string>
     <string name="feature_tailor_impl_exported_did_you_apply">Did you apply?</string>
     <string name="feature_tailor_impl_exported_mark_applied">✓ Mark as Applied</string>
