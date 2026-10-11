@@ -5,6 +5,7 @@ import com.tailormyresume.core.domain.keywordsStatedIn
 import com.tailormyresume.core.domain.offline.SkillLexicon
 import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.BulletDecision
+import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.QuickAnswer
@@ -19,6 +20,7 @@ object KeywordCoverageCalculator {
         matches: List<RequirementMatch>,
         quickAnswer: QuickAnswer?,
         tailoredResume: TailoredResume?,
+        profile: CandidateProfile? = null,
     ): ApplicationKeywordCoverage {
         val requirements = matches.map { it.requirement }
         val keywordSet = requirements.flatMap(::keywordsOf).toSet()

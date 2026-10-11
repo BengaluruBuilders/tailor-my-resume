@@ -1,6 +1,7 @@
 package com.tailormyresume.core.domain.coverage
 
 import com.tailormyresume.core.domain.offline.SkillLexicon
+import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.RequirementMatch
 
@@ -9,7 +10,7 @@ data class KeywordScreen(val have: List<String>, val missing: List<String>) {
 }
 
 object ScreenForKeywords {
-    operator fun invoke(matches: List<RequirementMatch>): KeywordScreen {
+    operator fun invoke(matches: List<RequirementMatch>, profile: CandidateProfile? = null): KeywordScreen {
         val (haveMatches, missingMatches) = matches.partition {
             it.status == MatchStatus.MET || it.status == MatchStatus.PARTIAL
         }
