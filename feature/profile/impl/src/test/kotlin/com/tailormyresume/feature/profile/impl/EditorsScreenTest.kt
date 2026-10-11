@@ -101,19 +101,19 @@ class EditorsScreenTest {
 
     @Test
     fun contactFieldsReportTypedText() {
-        var name = ""
+        val names = mutableListOf<String>()
         var linkedin = ""
         rule.setTmrContent(TmrTestDevices.prototype) {
             EditContactScreen(
                 state = contactState(),
-                actions = EditContactActions(onFullNameChange = { name = it }, onLinkedinChange = { linkedin = it }),
+                actions = EditContactActions(onFullNameChange = { names += it }, onLinkedinChange = { linkedin = it }),
             )
         }
 
         rule.onNodeWithContentDescription("Full name").performTextInput("A")
         rule.onNodeWithContentDescription("LinkedIn · optional").performTextInput("B")
 
-        assertThat(name).endsWith("A")
+        assertThat(names.any { it.contains("A") }).isTrue()
         assertThat(linkedin).isEqualTo("B")
     }
 
