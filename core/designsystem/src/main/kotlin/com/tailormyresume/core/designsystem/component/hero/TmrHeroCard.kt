@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tailormyresume.core.designsystem.component.WholeWordAutoSize
@@ -28,6 +29,7 @@ fun TmrHeroCard(
     label: String,
     headline: String,
     modifier: Modifier = Modifier,
+    contentBottomPadding: Dp = 22.dp,
     decoration: @Composable BoxScope.() -> Unit = {},
 ) {
     val colors = TmrTheme.colors
@@ -38,7 +40,7 @@ fun TmrHeroCard(
     }
     val shape = TmrTheme.shapes.hero
     Box(modifier = modifier.fillMaxWidth().clip(shape).background(fill, shape)) {
-        Column(modifier = Modifier.padding(22.dp)) {
+        Column(modifier = Modifier.padding(start = 22.dp, top = 22.dp, end = 22.dp, bottom = contentBottomPadding)) {
             Text(text = label.uppercase(), style = TmrTheme.typography.label, color = colors.ink)
             Spacer(modifier = Modifier.height(8.dp))
             val style = TmrTheme.typography.headline

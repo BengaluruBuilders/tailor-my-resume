@@ -1,14 +1,14 @@
 package com.tailormyresume.feature.analysis.impl.job
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.key
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -128,7 +128,10 @@ class JobScreenshotTest {
             screen = next
             rule.waitForIdle()
             if (screenName == "job_notAJobPost" && device == NARROW_DEVICE) {
-                rule.runOnIdle { jobScrollState?.scrollTo(jobScrollState?.maxValue ?: 0) }
+                rule.runOnIdle {
+                    val scrollState = jobScrollState ?: return@runOnIdle
+                    scrollState.dispatchRawDelta(scrollState.maxValue.toFloat())
+                }
             }
             runBlocking {
                 rule.captureForDevice(

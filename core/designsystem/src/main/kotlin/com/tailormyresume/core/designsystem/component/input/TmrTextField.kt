@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -44,9 +45,10 @@ fun TmrTextField(
     readOnly: Boolean = false,
     amber: Boolean = false,
     enabled: Boolean = true,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     TmrLabeledField(label = label, modifier = modifier) {
-        TmrFieldBox(value, onValueChange, label, placeholder, readOnly, amber, singleLine = true, minHeight = 56.dp, enabled = enabled)
+        TmrFieldBox(value, onValueChange, label, placeholder, readOnly, amber, singleLine = true, minHeight = 56.dp, enabled = enabled, keyboardOptions = keyboardOptions)
     }
 }
 
@@ -104,6 +106,7 @@ private fun TmrFieldBox(
     singleLine: Boolean,
     minHeight: Dp,
     enabled: Boolean = true,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     val colors = TmrTheme.colors
     val shape = TmrTheme.shapes.field
@@ -112,6 +115,7 @@ private fun TmrFieldBox(
         onValueChange = onValueChange,
         readOnly = readOnly || !enabled,
         singleLine = singleLine,
+        keyboardOptions = keyboardOptions,
         textStyle = TmrTheme.typography.bodyLarge.copy(color = colors.text),
         cursorBrush = SolidColor(colors.lime),
         modifier = Modifier
