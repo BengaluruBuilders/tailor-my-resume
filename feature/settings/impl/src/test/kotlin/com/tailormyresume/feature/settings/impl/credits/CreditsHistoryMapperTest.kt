@@ -1,9 +1,9 @@
 package com.tailormyresume.feature.settings.impl.credits
 
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.domain.offline.MockPackCatalogue
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
-import com.tailormyresume.core.domain.offline.MockPackCatalogue
 import org.junit.Test
 import java.time.ZoneOffset
 import kotlin.time.Instant

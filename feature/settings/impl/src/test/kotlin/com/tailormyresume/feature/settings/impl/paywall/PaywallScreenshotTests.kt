@@ -1,6 +1,5 @@
 package com.tailormyresume.feature.settings.impl.paywall
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
