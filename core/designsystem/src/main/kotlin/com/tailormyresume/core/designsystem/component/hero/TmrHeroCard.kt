@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.tailormyresume.core.designsystem.component.content.TmrFitText
+import androidx.compose.ui.unit.sp
+import com.tailormyresume.core.designsystem.component.WholeWordAutoSize
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 
 enum class TmrHeroColor { Blue, Amber, Lime }
@@ -37,11 +41,14 @@ fun TmrHeroCard(
         Column(modifier = Modifier.padding(22.dp)) {
             Text(text = label.uppercase(), style = TmrTheme.typography.label, color = colors.ink)
             Spacer(modifier = Modifier.height(8.dp))
-            TmrFitText(
-                text = headline,
-                style = TmrTheme.typography.headline,
-                color = colors.ink,
-            )
+            val style = TmrTheme.typography.headline
+            val fontScale = LocalDensity.current.fontScale
+            val autoSize = remember(style.fontSize, fontScale) {
+                if (fontScale > 1f) WholeWordAutoSize(style.fontSize, (style.fontSize.value / fontScale).sp) else null
+            }
+            key(fontScale) {
+                Text(text = headline, style = style, color = colors.ink, autoSize = autoSize)
+            }
         }
         decoration()
     }

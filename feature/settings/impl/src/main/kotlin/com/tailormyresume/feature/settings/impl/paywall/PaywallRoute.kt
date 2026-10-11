@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,7 +25,7 @@ internal fun PaywallRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val toast = LocalTmrToast.current
     val sheetHost = LocalTmrSheetHost.current
-    val resources = LocalContext.current.resources
+    val resources = LocalResources.current
     val failedTitle = stringResource(R.string.feature_settings_impl_pay_failed_title)
     val pendingMessage = stringResource(R.string.feature_settings_impl_toast_payment_pending)
     val nothingToRestore = stringResource(R.string.feature_settings_impl_toast_no_purchases)

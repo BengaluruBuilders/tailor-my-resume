@@ -152,7 +152,7 @@ private fun PackRow(pack: ApplicationPack, selected: Boolean, enabled: Boolean, 
             RadioDot(selected = selected, outline = outline)
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    text = stringResource(R.string.feature_settings_impl_paywall_pack_credits, pack.credits),
+                    text = pluralStringResource(R.plurals.feature_settings_impl_paywall_pack_credits, pack.credits, pack.credits),
                     style = TmrTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
                     color = colors.text,
                 )
@@ -200,8 +200,9 @@ private fun PaywallBottomBar(state: PaywallUiState, actions: PaywallActions, mod
     val label = when {
         state.busy -> stringResource(R.string.feature_settings_impl_paywall_processing)
         pack == null -> stringResource(R.string.feature_settings_impl_paywall_buy_idle)
-        else -> stringResource(
-            R.string.feature_settings_impl_paywall_buy,
+        else -> pluralStringResource(
+            R.plurals.feature_settings_impl_paywall_buy,
+            pack.credits,
             pack.credits,
             formatPackPrice(pack.priceInPaise, pack.currencyCode),
         )
