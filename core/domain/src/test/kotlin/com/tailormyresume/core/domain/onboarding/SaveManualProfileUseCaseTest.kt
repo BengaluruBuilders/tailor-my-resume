@@ -83,4 +83,19 @@ class SaveManualProfileUseCaseTest {
 
         assertThat(second.id).isNotEqualTo(first.id)
     }
+
+    @Test
+    fun importedRoleWithTheSameShapeIsNeverReplaced() = runTest {
+        val imported = ProfileEntry(
+            "E-01", EntryCategory.EXPERIENCE, "Imported role", "Acme", "", "", emptyList(),
+            FactSource.IMPORTED, isConfirmed = true,
+        )
+        repository.sendProfile(CandidateProfile("Old", "", "", "", emptyList(), listOf(imported)))
+
+        useCase(contact, replacingEntryId = imported.id)
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(saved.entries).hasSize(2)
+        assertThat(saved.entries.first()).isEqualTo(imported)
+    }
 }

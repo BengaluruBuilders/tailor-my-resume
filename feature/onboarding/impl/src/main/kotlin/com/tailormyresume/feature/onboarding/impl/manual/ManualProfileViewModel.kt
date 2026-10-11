@@ -6,6 +6,9 @@ import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.domain.onboarding.ManualContact
 import com.tailormyresume.core.domain.onboarding.SaveManualProfileUseCase
+import com.tailormyresume.core.model.EntryCategory
+import com.tailormyresume.core.model.FactSource
+import com.tailormyresume.core.model.ProfileEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +36,10 @@ internal data class ManualProfileUiState(
 
 internal enum class ManualProfileEvent { Saved }
 
+private fun isManualRole(entry: ProfileEntry): Boolean =
+    entry.category == EntryCategory.EXPERIENCE && entry.source == FactSource.USER_STATED &&
+        entry.bullets.isEmpty() && entry.startDate.isBlank() && entry.endDate.isBlank()
+
 @HiltViewModel
 internal class ManualProfileViewModel @Inject constructor(
     sessionRepository: SessionRepository,
@@ -56,8 +63,12 @@ internal class ManualProfileViewModel @Inject constructor(
         viewModelScope.launch {
             val account = sessionRepository.observeAccount().first()
             val profile = profileRepository.observeProfile().first()
+            val manualRole = profile?.entries.orEmpty().filter(::isManualRole).singleOrNull()
+            savedRoleId = manualRole?.id
             state.update {
                 it.copy(
+                    jobTitle = it.jobTitle.ifBlank { manualRole?.title.orEmpty() },
+                    company = it.company.ifBlank { manualRole?.organization.orEmpty() },
                     fullName = it.fullName.ifBlank { profile?.fullName?.takeIf(String::isNotBlank) ?: account?.displayName.orEmpty() },
                     email = account?.email ?: profile?.email.orEmpty(),
                     phone = it.phone.ifBlank { profile?.phone.orEmpty() },

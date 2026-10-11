@@ -90,4 +90,41 @@ class ManualProfileViewModelTest {
         val roles = checkNotNull(profile.observeProfile().first()).entries.filter { it.category == EntryCategory.EXPERIENCE }
         assertThat(roles.map { it.title }).containsExactly("Business Analyst")
     }
+
+    private suspend fun saveRoleThenReenter(): ManualProfileViewModel {
+        val first = viewModel()
+        first.onFieldChange(ManualField.JobTitle, "Business Analyst")
+        first.onFieldChange(ManualField.Company, "Infosys")
+        first.events.test {
+            first.onContinue()
+            assertThat(awaitItem()).isEqualTo(ManualProfileEvent.Saved)
+        }
+        return viewModel()
+    }
+
+    @Test
+    fun reenteringFillInMyselfPrefillsTheSavedRoleAndContinueKeepsOne() = runTest {
+        val second = saveRoleThenReenter()
+
+        assertThat(second.uiState.value.jobTitle).isEqualTo("Business Analyst")
+        assertThat(second.uiState.value.company).isEqualTo("Infosys")
+        second.events.test {
+            second.onContinue()
+            assertThat(awaitItem()).isEqualTo(ManualProfileEvent.Saved)
+        }
+        val roles = checkNotNull(profile.observeProfile().first()).entries.filter { it.category == EntryCategory.EXPERIENCE }
+        assertThat(roles).hasSize(1)
+    }
+
+    @Test
+    fun severalManualRolesPrefillNothing() = runTest {
+        saveRoleThenReenter()
+        val saved = checkNotNull(profile.observeProfile().first())
+        profile.sendProfile(saved.copy(entries = saved.entries + saved.entries.single().copy(id = "W-other", title = "Analyst II")))
+
+        val third = viewModel()
+
+        assertThat(third.uiState.value.jobTitle).isEmpty()
+        assertThat(third.uiState.value.company).isEmpty()
+    }
 }
