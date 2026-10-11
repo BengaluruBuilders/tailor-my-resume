@@ -1,10 +1,13 @@
 package com.tailormyresume.app.ui
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
@@ -12,9 +15,12 @@ import androidx.navigation3.runtime.NavKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.app.navigation.registerComposeActivity
+import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
+import com.tailormyresume.core.designsystem.component.chrome.TmrToastAction
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.onboarding.StartDestination
 import com.tailormyresume.core.navigation.Navigator
+import com.tailormyresume.core.navigation.PendingToast
 import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.DefaultSignInNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
@@ -23,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.GraphicsMode
+import com.tailormyresume.feature.settings.impl.R as SettingsR
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -152,5 +159,128 @@ class TmrAppRootTest {
         rule.waitForIdle()
 
         assertThat(accountOneProbe.cleared).isTrue()
+    }
+
+    private fun showApp() {
+        rule.setContent {
+            TmrTheme {
+                TmrApp(rootState = ready, entryProvider = { _ -> ({ key: NavKey -> NavEntry(key) {} }) })
+            }
+        }
+        rule.waitForIdle()
+    }
+
+    private fun reRootAfterAccountLeaves(queue: () -> Unit) {
+        ready = AppRootState.Ready(StartDestination.Applications, "account-1")
+        showApp()
+        queue()
+        ready = AppRootState.Ready(StartDestination.SignIn, null)
+        rule.waitForIdle()
+    }
+
+    @Test
+    fun signedOutToastShowsInNewRoot() {
+        PendingToast.consume()
+
+        reRootAfterAccountLeaves {}
+        PendingToast.set(SettingsR.string.feature_settings_impl_toast_signed_out)
+        rule.waitForIdle()
+
+        rule.onNodeWithText("Signed out").assertIsDisplayed()
+        assertThat(PendingToast.queued).isNull()
+    }
+
+    @Test
+    fun accountDeletedToastShowsInNewRoot() {
+        PendingToast.consume()
+
+        reRootAfterAccountLeaves { PendingToast.set(SettingsR.string.feature_settings_impl_toast_account_deleted) }
+
+        rule.onNodeWithText("Account deleted").assertIsDisplayed()
+        assertThat(PendingToast.queued).isNull()
+    }
+
+    @Test
+    fun toastQueuedWhileTheOutgoingRootIsLiveSurvivesToTheNewRoot() {
+        PendingToast.consume()
+
+        reRootAfterAccountLeaves {
+            PendingToast.set(SettingsR.string.feature_settings_impl_toast_signed_out)
+            rule.waitForIdle()
+            rule.onNodeWithText("Signed out").assertIsDisplayed()
+        }
+
+        rule.onNodeWithText("Signed out").assertIsDisplayed()
+        assertThat(PendingToast.queued).isNull()
+    }
+
+    @Test
+    fun noQueuedToastShowsNothing() {
+        PendingToast.consume()
+
+        reRootAfterAccountLeaves {}
+
+        rule.onNodeWithText("Signed out").assertDoesNotExist()
+        rule.onNodeWithText("Account deleted").assertDoesNotExist()
+    }
+
+    @Test
+    fun toastShownOnTheSignedOutRootSurvivesTheNextReRoot() {
+        PendingToast.consume()
+
+        reRootAfterAccountLeaves { PendingToast.set(SettingsR.string.feature_settings_impl_toast_signed_out) }
+        rule.onNodeWithText("Signed out").assertIsDisplayed()
+        ready = AppRootState.Ready(StartDestination.Applications, "account-2")
+        rule.waitForIdle()
+
+        rule.onNodeWithText("Signed out").assertIsDisplayed()
+    }
+
+    @Test
+    fun signedOutToastShowsOnTheRealSignedOutRoot() {
+        PendingToast.consume()
+        PendingToast.set(SettingsR.string.feature_settings_impl_toast_signed_out)
+        rule.setContent { TmrTheme { TmrApp(rootState = AppRootState.Ready(StartDestination.SignIn, null)) } }
+        rule.waitForIdle()
+
+        rule.onNodeWithText("Signed out").assertIsDisplayed()
+        assertThat(PendingToast.queued).isNull()
+    }
+
+    @Test
+    fun actionToastOfTheOutgoingAccountDiesWithItsRoot() {
+        PendingToast.consume()
+        var retries = 0
+        var current by mutableStateOf<AppRootState>(AppRootState.Ready(StartDestination.Applications, "account-1"))
+        rule.setContent {
+            TmrTheme {
+                TmrApp(
+                    rootState = current,
+                    entryProvider = { _ ->
+                        (
+                            { key: NavKey ->
+                                NavEntry(key) {
+                                    val toast = LocalTmrToast.current
+                                    LaunchedEffect(Unit) {
+                                        if (current is AppRootState.Ready && (current as AppRootState.Ready).accountId != null) {
+                                            toast.show("Upload failed", TmrToastAction("Retry") { retries += 1 })
+                                        }
+                                    }
+                                }
+                            }
+                            )
+                    },
+                )
+            }
+        }
+        rule.waitForIdle()
+        rule.onNodeWithText("Retry").assertIsDisplayed()
+
+        current = AppRootState.Ready(StartDestination.SignIn, null)
+        rule.waitForIdle()
+
+        rule.onNodeWithText("Retry").assertDoesNotExist()
+        rule.onNodeWithText("Upload failed").assertDoesNotExist()
+        assertThat(retries).isEqualTo(0)
     }
 }

@@ -258,4 +258,19 @@ class AccountDataArchiveWriterTest {
             "server.json",
         )
     }
+
+    @Test
+    fun writingLeavesSiblingFilesUntouched() {
+        val directory = folder.newFolder("shared")
+        val sibling = File(directory, "someone-elses.txt").apply { writeText("keep") }
+        val siblingFolder = File(directory, "nested").apply { mkdirs() }
+        val target = File(directory, "tailormyresume-my-data.zip")
+
+        AccountDataArchiveWriter().write(data, target)
+
+        assertThat(sibling.readText()).isEqualTo("keep")
+        assertThat(siblingFolder.isDirectory).isTrue()
+        assertThat(target.exists()).isTrue()
+        assertThat(File(directory, target.name + ".tmp").exists()).isFalse()
+    }
 }

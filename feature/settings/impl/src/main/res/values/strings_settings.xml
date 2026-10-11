@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_settings_impl_title">Settings</string>
+    <string name="feature_settings_impl_section_account">Account</string>
+    <string name="feature_settings_impl_section_resume">Resume</string>
+    <string name="feature_settings_impl_section_notifications">Notifications</string>
+    <string name="feature_settings_impl_section_privacy">Privacy &amp; help</string>
+    <string name="feature_settings_impl_signed_in_with_google">Signed in with Google</string>
+    <string name="feature_settings_impl_credits_row">Credits &amp; purchases</string>
+    <plurals name="feature_settings_impl_credits_left">
+        <item quantity="one">%1$d left</item>
+        <item quantity="other">%1$d left</item>
+    </plurals>
+    <string name="feature_settings_impl_page_size">Page size</string>
+    <string name="feature_settings_impl_page_a4" translatable="false">A4</string>
+    <string name="feature_settings_impl_page_letter">Letter</string>
+    <string name="feature_settings_impl_file_name">File name</string>
+    <string name="feature_settings_impl_file_name_company_role" translatable="false">Name_Company_Role</string>
+    <string name="feature_settings_impl_file_name_role" translatable="false">Name_Role</string>
+    <string name="feature_settings_impl_file_name_resume" translatable="false">Name_Resume</string>
+    <string name="feature_settings_impl_product_updates">Product updates</string>
+    <string name="feature_settings_impl_download_data">Download my data</string>
+    <string name="feature_settings_impl_help">Help &amp; feedback</string>
+    <string name="feature_settings_impl_delete_account">Delete account</string>
+    <string name="feature_settings_impl_sign_out">Sign out</string>
+    <string name="feature_settings_impl_footer">Terms · Privacy · v%1$s</string>
+    <string name="feature_settings_impl_toast_signed_out">Signed out</string>
+    <string name="feature_settings_impl_toast_account_deleted">Account deleted</string>
+    <string name="feature_settings_impl_toast_data_ready">Your data is ready to share</string>
+    <string name="feature_settings_impl_toast_data_failed">Couldn\'t prepare your data. Try again.</string>
+    <string name="feature_settings_impl_toast_delete_failed">Couldn\'t delete your account. Try again.</string>
+    <string name="feature_settings_impl_toast_support_missing">Address not set in this build</string>
+    <string name="feature_settings_impl_support_email" translatable="false"></string>
+    <string name="feature_settings_impl_support_subject">TailorMyResume feedback</string>
+    <string name="feature_settings_impl_share_subject">My TailorMyResume data</string>
+    <string name="feature_settings_impl_share_chooser">Share your data</string>
+    <string name="feature_settings_impl_delete_title">Delete your account?</string>
+    <string name="feature_settings_impl_delete_body">This removes your profile, %1$s and your application history. Your %2$s will be lost. This can\'t be undone.</string>
+    <plurals name="feature_settings_impl_delete_resumes">
+        <item quantity="one">%1$d tailored resume</item>
+        <item quantity="other">%1$d tailored resumes</item>
+    </plurals>
+    <plurals name="feature_settings_impl_delete_credits">
+        <item quantity="one">%1$d unused credit</item>
+        <item quantity="other">%1$d unused credits</item>
+    </plurals>
+    <string name="feature_settings_impl_delete_confirm_label">Type DELETE to confirm</string>
+    <string name="feature_settings_impl_delete_confirm_placeholder" translatable="false">DELETE</string>
+    <string name="feature_settings_impl_keep_account">Keep my account</string>
+</resources>

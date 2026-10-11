@@ -60,6 +60,7 @@ class DeleteAccountUseCase @Inject constructor(
         val exports = exportHistoryRepository.observeExports().first()
         val counts = countsOf(applications, profile, creditBalance.unusedCredits())
         val tracksPendingWipe = serverAccountDeleter.deletesRemoteData
+        if (tracksPendingWipe && serverAlreadyClosedThisAccount()) return settlePendingWipe(counts, dataIntactIfOpen = false)
         val earlierAttempt = tracksPendingWipe && hasEarlierRequestedAttempt()
         if (tracksPendingWipe && !earlierAttempt && !markRequested()) return AccountDeletionResult.Failed(dataIntact = true)
         val deleteFailure = serverAccountDeleter.delete().exceptionOrNull()
@@ -113,6 +114,17 @@ class DeleteAccountUseCase @Inject constructor(
             PendingWipeOutcome.NOTHING_PENDING, PendingWipeOutcome.ACCOUNT_KEPT ->
                 AccountDeletionResult.Failed(dataIntact = dataIntactIfOpen)
         }
+
+    private suspend fun serverAlreadyClosedThisAccount(): Boolean = try {
+        val markerOwner = pendingWipe.uid()
+        pendingWipe.state() == PendingWipeState.SERVER_CLOSED &&
+            markerOwner != null &&
+            markerOwner == signInGateway.currentAccount()?.id
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (failure: Exception) {
+        false
+    }
 
     private suspend fun hasEarlierRequestedAttempt(): Boolean = try {
         val markerOwner = pendingWipe.uid()
