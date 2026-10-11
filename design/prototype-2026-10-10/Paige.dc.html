@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;width:124px;height:154px;transform:{{ tf }}">
+  <sc-if value="{{ ticks }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:50%;top:-40px;width:80px;height:34px;transform:translateX(-50%)">
+      <div style="position:absolute;left:6px;top:12px;width:5px;height:18px;border-radius:3px;background:#0A0A0A;transform:rotate(-35deg)"></div>
+      <div style="position:absolute;left:37px;top:0;width:5px;height:20px;border-radius:3px;background:#0A0A0A"></div>
+      <div style="position:absolute;right:6px;top:12px;width:5px;height:18px;border-radius:3px;background:#0A0A0A;transform:rotate(35deg)"></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ arms }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;left:-16px;top:92px;width:22px;height:22px;border-radius:50%;background:#fff;border:2.5px solid #0A0A0A"></div>
+    <div style="position:absolute;right:-16px;top:92px;width:22px;height:22px;border-radius:50%;background:#fff;border:2.5px solid #0A0A0A"></div>
+  </sc-if>
+  <div style="position:absolute;inset:0;background:#fff;border:2.5px solid #0A0A0A;border-radius:16px"></div>
+  <div style="position:absolute;top:2.5px;right:2.5px;width:30px;height:30px;background:#DCDCD5;border-left:2.5px solid #0A0A0A;border-bottom:2.5px solid #0A0A0A;border-radius:0 12px 0 10px"></div>
+  <div style="position:absolute;top:48px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:26px">
+    <div style="width:{{ eyeW }};height:{{ eyeH }};background:#0A0A0A;border-radius:999px;transform:{{ eyeT }}"></div>
+    <div style="width:{{ eyeW }};height:{{ eyeH }};background:#0A0A0A;border-radius:999px;transform:{{ eyeT }}"></div>
+  </div>
+  <sc-if value="{{ happy }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;top:74px;left:16px;width:16px;height:9px;border-radius:50%;background:#FF6A2B"></div>
+    <div style="position:absolute;top:74px;right:16px;width:16px;height:9px;border-radius:50%;background:#FF6A2B"></div>
+    <div style="position:absolute;top:72px;left:50%;transform:translateX(-50%);width:{{ mouthW }};height:{{ mouthH }};border:2.5px solid #0A0A0A;border-top:none;border-radius:0 0 999px 999px"></div>
+  </sc-if>
+  <sc-if value="{{ sad }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;top:78px;left:50%;transform:translateX(-50%);width:20px;height:10px;border:2.5px solid #0A0A0A;border-bottom:none;border-radius:999px 999px 0 0"></div>
+  </sc-if>
+  <div style="position:absolute;left:22px;right:22px;bottom:22px;display:flex;flex-direction:column;gap:7px">
+    <div style="height:4px;border-radius:2px;background:#0A0A0A"></div>
+    <div style="height:4px;border-radius:2px;background:#0A0A0A;width:60%"></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:200,&quot;height&quot;:230},&quot;tf&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;eyeW&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;14px&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;eyeH&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;19px&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;eyeT&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mouthW&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;22px&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mouthH&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;12px&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;ticks&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;arms&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;sad&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    return {
+      tf: p.tf ?? 'none', eyeW: p.eyeW ?? '14px', eyeH: p.eyeH ?? '19px', eyeT: p.eyeT ?? 'none',
+      mouthW: p.mouthW ?? '22px', mouthH: p.mouthH ?? '12px',
+      ticks: !!p.ticks, arms: p.arms ?? true, sad: !!p.sad, happy: !p.sad,
+    };
+  }
+}
+</script>
+</body>
+</html>

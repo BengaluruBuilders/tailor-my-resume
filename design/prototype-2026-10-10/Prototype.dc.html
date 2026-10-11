@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#E9E8E4;font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0A0A0A}a:hover{color:#3A3A3A}
+textarea::placeholder,input::placeholder{color:#7A7A7A}
+</style>
+</helmet>
+<div style="min-height:100vh;box-sizing:border-box;padding:32px 24px;display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start">
+  <div style="width:330px;max-width:100%;display:flex;flex-direction:column;gap:20px;color:#151515">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;letter-spacing:-0.5px">Resume app</div>
+      <div style="font-size:14px;line-height:1.5;color:#55554F">Clickable prototype. Tap through the phone, or jump to any screen.</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onClick="{{ presetNew }}" style="flex:1;height:40px;border-radius:999px;border:1px solid #0A0A0A;background:#0A0A0A;color:#fff;font-family:'Space Mono',monospace;font-size:12px;cursor:pointer">New user</button>
+      <button onClick="{{ presetReturning }}" style="flex:1;height:40px;border-radius:999px;border:1px solid #0A0A0A;background:transparent;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:12px;cursor:pointer">Returning user</button>
+    </div>
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.8px;text-transform:uppercase;color:#6B6B66">{{ g.name }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="6">
+            <button onClick="{{ it.go }}" style="border:1px solid {{ it.bc }};background:{{ it.bg }};color:{{ it.ink }};border-radius:999px;padding:6px 12px;font-family:'Space Grotesk',sans-serif;font-size:13px;cursor:pointer">{{ it.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="width:392px;height:852px;flex:none;background:{{ phoneBg }};border-radius:50px;border:9px solid #111;box-shadow:0 0 0 2px #3A3A3A, 0 40px 80px -40px rgba(0,0,0,0.5);overflow:hidden;display:flex;flex-direction:column;position:relative;color:#fff">
+    <div style="height:40px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:600;color:{{ statusInk }}">
+      <div>10:24</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="width:14px;height:12px;background:{{ statusInk }};clip-path:polygon(100% 0,100% 100%,0 100%)"></div>
+        <div style="width:9px;height:14px;background:{{ statusInk }};border-radius:2px"></div>
+      </div>
+    </div>
+
+    <sc-if value="{{ top.show }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 16px 0;height:50px">
+        <div style="width:44px;height:44px;flex:none">
+          <sc-if value="{{ top.back }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ back }}" style="width:44px;height:44px;border-radius:50%;border:none;background:#1C1C1C;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.8"><path d="M11 3L5 9l6 6"></path></svg></button>
+          </sc-if>
+          <sc-if value="{{ top.close }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ top.onClose }}" style="width:44px;height:44px;border-radius:50%;border:none;background:#1C1C1C;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 3l10 10M13 3L3 13"></path></svg></button>
+          </sc-if>
+        </div>
+        <sc-if value="{{ top.steps }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ steps }}" as="p" hint-placeholder-count="3">
+              <div style="background:{{ p.bg }};color:{{ p.ink }};border-radius:999px;padding:7px 11px;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase">{{ p.label }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ top.hasTitle }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">{{ top.title }}</div>
+        </sc-if>
+        <div style="min-width:44px;display:flex;justify-content:flex-end;flex:none">
+          <sc-if value="{{ top.hasAction }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ top.onAction }}" style="height:44px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;padding:0 18px;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">{{ top.action }}</button>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.signin }}" hint-placeholder-val="{{ true }}">
+      <div onPointerDown="{{ st.onDown }}" onPointerUp="{{ st.onUp }}" onPointerLeave="{{ st.onLeave }}" style="flex:1;display:flex;flex-direction:column;padding:12px 26px 0;user-select:none;cursor:pointer;min-height:0;color:#0A0A0A">
+        <div style="display:flex;gap:5px">
+          <sc-for list="{{ st.bars }}" as="b" hint-placeholder-count="3">
+            <div style="flex:1;height:2px;border-radius:1px;background:rgba(0,0,0,0.16);overflow:hidden"><div style="height:100%;background:#0A0A0A;width:{{ b.w }}"></div></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase">
+          <div>Paige · {{ st.step }}</div>
+          <div style="opacity:0.6">{{ st.hint }}</div>
+        </div>
+        <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:0">
+          <sc-if value="{{ st.s0 }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;left:50%;bottom:4px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center">
+              <div style="width:84px;height:46px;background:#0A0A0A;clip-path:polygon(50% 0,100% 100%,0 100%)"></div>
+              <div style="width:32px;height:44px;background:#0A0A0A"></div>
+            </div>
+            <div style="position:absolute;left:4px;top:30px;background:#fff;border:2.5px solid #0A0A0A;border-radius:999px;padding:6px 14px;font-size:15px;font-weight:700;transform:rotate(-10deg)">PDF</div>
+            <div style="position:absolute;right:4px;top:110px;background:#FF6A2B;border:2.5px solid #0A0A0A;border-radius:999px;padding:6px 14px;font-size:15px;font-weight:700;transform:rotate(8deg)">DOCX</div>
+          </sc-if>
+          <sc-if value="{{ st.s1 }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:0;top:40px;width:150px;background:#fff;border:2.5px solid #0A0A0A;border-radius:14px;transform:rotate(5deg);padding:12px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box">
+              <div style="font-size:13px;font-weight:700">Job post</div>
+              <div style="height:4px;border-radius:2px;background:#0A0A0A"></div>
+              <div style="height:9px;border-radius:3px;background:#FF6A2B;border:2px solid #0A0A0A;width:70%"></div>
+              <div style="height:4px;border-radius:2px;background:#0A0A0A;width:85%"></div>
+              <div style="height:9px;border-radius:3px;background:#FF6A2B;border:2px solid #0A0A0A;width:48%"></div>
+            </div>
+            <div style="position:absolute;left:100px;top:20px;width:58px;height:58px;border-radius:50%;border:3px solid #0A0A0A;background:rgba(255,255,255,0.45)"></div>
+            <div style="position:absolute;left:146px;top:78px;width:32px;height:10px;border-radius:5px;background:#0A0A0A;transform:rotate(45deg)"></div>
+          </sc-if>
+          <sc-if value="{{ st.s2 }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;right:4px;top:14px;width:100px;height:100px;border-radius:50%;background:#0A0A0A;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(10deg);z-index:2">
+              <div style="font-family:'Space Mono',monospace;font-weight:700;font-size:34px;line-height:1;color:#A3F43F">92</div>
+              <div style="font-size:12px;font-weight:600;color:#fff">match</div>
+            </div>
+            <div style="position:absolute;left:30px;top:30px;width:16px;height:16px;background:#0A0A0A;transform:rotate(45deg)"></div>
+            <div style="position:absolute;right:30px;bottom:40px;width:18px;height:18px;background:#FF6A2B;border:2.5px solid #0A0A0A;transform:rotate(45deg)"></div>
+            <div style="position:absolute;left:8px;bottom:34px;background:#fff;border:2.5px solid #0A0A0A;border-radius:999px;padding:6px 14px;font-size:15px;font-weight:700;transform:rotate(-8deg);z-index:2">1 page</div>
+          </sc-if>
+          <dc-import name="Paige" tf="{{ st.pT }}" eye-w="{{ st.eyeW }}" eye-h="{{ st.eyeH }}" eye-t="{{ st.eyeT }}" mouth-w="{{ st.mouthW }}" mouth-h="{{ st.mouthH }}" ticks="{{ true }}" hint-size="124px,154px"></dc-import>
+        </div>
+      </div>
+      <div style="flex:none;padding:6px 26px 34px;display:flex;flex-direction:column;gap:12px;color:#0A0A0A">
+        <sc-if value="{{ st.s0 }}" hint-placeholder-val="{{ true }}">
+          <div style="font-family:'Space Mono',monospace;font-size:34px;line-height:1.08;letter-spacing:-1.2px">Upload your<br>resume</div>
+          <div style="font-size:16px;line-height:1.45">Add <span style="font-weight:700;text-decoration:underline;text-underline-offset:3px">the resume you have</span>. PDF or DOCX, any layout works.</div>
+        </sc-if>
+        <sc-if value="{{ st.s1 }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family:'Space Mono',monospace;font-size:34px;line-height:1.08;letter-spacing:-1.2px">Paste the<br>job you want</div>
+          <div style="font-size:16px;line-height:1.45">Paste any <span style="font-weight:700;text-decoration:underline;text-underline-offset:3px">job description</span> and Paige finds what recruiters screen for.</div>
+        </sc-if>
+        <sc-if value="{{ st.s2 }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family:'Space Mono',monospace;font-size:34px;line-height:1.08;letter-spacing:-1.2px">Get a resume<br>made for it</div>
+          <div style="font-size:16px;line-height:1.45">A <span style="font-weight:700;text-decoration:underline;text-underline-offset:3px">tailored resume</span> matched to the role. Nothing made up.</div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+          <button onClick="{{ st.signIn }}" style="height:56px;border:none;border-radius:999px;background:#0A0A0A;color:#fff;font-family:'Space Mono',monospace;font-size:14px;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer">
+            <div style="width:30px;height:30px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center">
+              <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path></svg>
+            </div>
+            {{ st.gLabel }}
+          </button>
+          <button onClick="{{ st.signIn }}" style="height:56px;border:2px solid #0A0A0A;border-radius:999px;background:#fff;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:14px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer">Continue with Apple</button>
+        </div>
+        <div style="font-size:12px;line-height:1.5;text-align:center;text-wrap:pretty">By continuing you agree to our <a href="#" style="color:inherit;text-decoration:underline">Terms</a> and <a href="#" style="color:inherit;text-decoration:underline">Privacy Policy</a>. Your first tailored resume is free.</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.upload }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:14px 14px 0;gap:14px;min-height:0">
+        <div style="background:#5AA9F8;border-radius:32px;padding:22px 22px 0;color:#0A0A0A;display:flex;flex-direction:column;gap:8px;height:290px;flex:none;position:relative;overflow:hidden">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.8px;text-transform:uppercase">Paige builds your profile</div>
+          <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px">Start with<br>your resume</div>
+          <div style="position:absolute;left:22px;bottom:46px;background:#fff;border:2.5px solid #0A0A0A;border-radius:999px;padding:6px 14px;font-size:14px;font-weight:700;transform:rotate(-10deg)">PDF</div>
+          <div style="position:absolute;left:58px;bottom:100px;background:#FF6A2B;border:2.5px solid #0A0A0A;border-radius:999px;padding:6px 14px;font-size:14px;font-weight:700;transform:rotate(7deg)">DOCX</div>
+          <div style="position:absolute;right:34px;bottom:-26px;width:124px;height:154px">
+            <dc-import name="Paige" tf="{{ bobA }}" ticks="{{ true }}" hint-size="124px,154px"></dc-import>
+          </div>
+        </div>
+        <div style="font-size:14px;line-height:1.5;color:#C8C8C8;padding:0 8px;text-wrap:pretty">We read it and fill in your profile. You check it and fix anything we got wrong.</div>
+        <button onClick="{{ up.onUpload }}" style="border:1.5px dashed #3A3A3A;background:#0D0D0D;border-radius:24px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;color:#fff;font-family:'Space Grotesk',sans-serif" style-hover="border-color:#A3F43F">
+          <div style="width:48px;height:48px;border-radius:50%;background:#A3F43F;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none">
+            <div style="width:18px;height:10px;background:#0A0A0A;clip-path:polygon(50% 0,100% 100%,0 100%)"></div>
+            <div style="width:6px;height:9px;background:#0A0A0A"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <div style="font-size:17px;font-weight:600">Upload resume</div>
+            <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.4px;text-transform:uppercase;color:#A6A6A6">PDF or DOCX · up to 5 MB</div>
+          </div>
+        </button>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ up.onPaste }}" style="flex:1;height:52px;border:none;border-radius:999px;background:#1C1C1C;color:#fff;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Paste as text</button>
+          <button onClick="{{ up.onManual }}" style="flex:1;height:52px;border:none;border-radius:999px;background:#1C1C1C;color:#fff;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Fill in myself</button>
+        </div>
+      </div>
+      <div style="flex:none;padding:12px 30px 38px;font-size:12px;line-height:1.5;color:#9A9A9A;text-align:center;text-wrap:pretty">Your resume is only used to build your applications. Never shared.</div>
+    </sc-if>
+
+    <sc-if value="{{ is.uploadError }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:20px 14px 0;gap:14px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px;padding:0 8px">We couldn't<br>read that file</div>
+        <div style="background:#F7A940;color:#0A0A0A;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#0A0A0A" stroke-width="1.6"><path d="M4 2h7l3 3v11H4z"></path></svg></div>
+            <div style="display:flex;flex-direction:column;gap:2px"><div style="font-size:15px;font-weight:700">Resume_scan.pdf</div><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.4px;text-transform:uppercase">PDF · 1 page · image only</div></div>
+          </div>
+          <div style="font-size:14px;line-height:1.5">It looks like a photo or scan, so there's no text for us to read.</div>
+        </div>
+        <div style="background:#161616;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Try one of these</div>
+          <div style="display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.45"><div style="width:8px;height:8px;border-radius:50%;background:#A3F43F;margin-top:6px;flex:none"></div>Export your resume as PDF from Word or Google Docs</div>
+          <div style="display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.45"><div style="width:8px;height:8px;border-radius:50%;background:#A3F43F;margin-top:6px;flex:none"></div>Upload the DOCX file instead</div>
+          <div style="display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.45"><div style="width:8px;height:8px;border-radius:50%;background:#A3F43F;margin-top:6px;flex:none"></div>Paste the text from your resume</div>
+        </div>
+      </div>
+      <div style="flex:none;padding:12px 16px 36px;display:flex;flex-direction:column;gap:10px">
+        <button onClick="{{ up.onRetry }}" style="height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Choose another file</button>
+        <button onClick="{{ up.onPasteSwap }}" style="height:56px;border:none;border-radius:999px;background:#1C1C1C;color:#fff;font-family:'Space Mono',monospace;font-size:14px;cursor:pointer">Paste as text</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.pasteResume }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:20px 14px 0;gap:12px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px;padding:0 8px">Paste your<br>resume</div>
+        <div style="font-size:14px;line-height:1.5;color:#C8C8C8;padding:0 8px">Copy everything from your resume file and paste it here.</div>
+        <textarea defaultValue="{{ resumeTxt }}" style="flex:1;min-height:0;background:#161616;border:none;border-radius:24px;padding:18px;color:#E6E6E6;font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.55;resize:none;outline:none"></textarea>
+      </div>
+      <div style="flex:none;padding:14px 16px 36px">
+        <button onClick="{{ up.onRead }}" style="width:100%;height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Read text</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.manual }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:20px 14px 0;gap:10px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px;padding:0 8px">Tell us<br>about you</div>
+        <div style="font-size:14px;line-height:1.5;color:#C8C8C8;padding:0 8px 4px">Start with the basics. You can add roles and skills next.</div>
+        <sc-for list="{{ manualFields }}" as="x" hint-placeholder-count="6">
+          <label style="background:#161616;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">{{ x.label }}</div>
+            <input defaultValue="{{ x.value }}" placeholder="{{ x.ph }}" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:16px;padding:2px 0">
+          </label>
+        </sc-for>
+      </div>
+      <div style="flex:none;padding:14px 16px 36px">
+        <button onClick="{{ up.onManualDone }}" style="width:100%;height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Continue</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.reading }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:24px 14px 0;gap:16px;min-height:0">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:0 8px">
+          <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px">Reading<br>your resume</div>
+          <div style="font-family:'Space Mono',monospace;font-size:38px;font-weight:700;color:#A3F43F;letter-spacing:-2px;line-height:1">{{ rd.pct }}</div>
+        </div>
+        <div style="background:#161616;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;border-radius:12px;background:#242424;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.6"><path d="M4 2h7l3 3v11H4z"></path><path d="M7 9h4M7 12h4"></path></svg></div>
+            <div style="display:flex;flex-direction:column;gap:3px;min-width:0"><div style="font-size:15px;font-weight:600">Priya_Deshmukh_Resume.pdf</div><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.4px;text-transform:uppercase;color:#A6A6A6">PDF · 2 pages · 112 KB</div></div>
+          </div>
+          <div style="height:4px;border-radius:2px;background:#2A2A2A;overflow:hidden"><div style="height:100%;background:#A3F43F;width:{{ rd.pct }}"></div></div>
+        </div>
+        <div style="background:#161616;border-radius:24px;padding:4px 16px;display:flex;flex-direction:column">
+          <sc-for list="{{ rd.rows }}" as="r" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid #222">
+              <sc-if value="{{ r.done }}" hint-placeholder-val="{{ false }}"><div style="width:24px;height:24px;border-radius:50%;background:#A3F43F;display:flex;align-items:center;justify-content:center;flex:none"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#0A0A0A" stroke-width="2.2"><path d="M2.5 6.2l2.3 2.3 4.7-5"></path></svg></div></sc-if>
+              <sc-if value="{{ r.active }}" hint-placeholder-val="{{ false }}"><div style="width:24px;height:24px;border-radius:50%;border:2.5px solid #333;border-top-color:#A3F43F;box-sizing:border-box;flex:none;transform:{{ spin }}"></div></sc-if>
+              <sc-if value="{{ r.pending }}" hint-placeholder-val="{{ true }}"><div style="width:24px;height:24px;border-radius:50%;border:2.5px solid #2A2A2A;box-sizing:border-box;flex:none"></div></sc-if>
+              <div style="flex:1;font-size:15px;color:{{ r.c }}">{{ r.name }}</div>
+              <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;color:{{ r.mc }}">{{ r.meta }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="flex:none;padding:12px 30px 38px;font-size:12px;color:#9A9A9A;text-align:center">Takes about 20 seconds</div>
+    </sc-if>
+
+    <sc-if value="{{ is.review }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:20px 14px 16px;gap:12px;min-height:0">
+        <div style="padding:0 8px 4px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px">Your profile</div>
+          <div style="font-size:13px;color:#A6A6A6">From Priya_Deshmukh_Resume.pdf. Tap anything to edit.</div>
+        </div>
+        <div style="background:#161616;border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:14px;flex:none">
+          <div style="font-family:'Space Mono',monospace;font-size:26px;font-weight:700;color:#A3F43F;letter-spacing:-1px">{{ rv.comp }}</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;color:#C8C8C8">Profile complete</div>
+            <div style="height:4px;border-radius:2px;background:#2A2A2A;overflow:hidden"><div style="height:100%;background:#A3F43F;width:{{ rv.comp }}"></div></div>
+          </div>
+        </div>
+        <sc-if value="{{ rv.needFix }}" hint-placeholder-val="{{ true }}">
+          <div style="background:#F7A940;color:#0A0A0A;border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px;flex:none">
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+              <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase">Required</div>
+              <div style="font-size:14px;font-weight:600;line-height:1.35">End date missing for Data Analyst Intern</div>
+            </div>
+            <button onClick="{{ rv.onFix }}" style="border:none;background:#0A0A0A;color:#fff;border-radius:999px;height:44px;padding:0 16px;font-family:'Space Mono',monospace;font-size:12.5px;cursor:pointer;flex:none">Add date</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ rv.isFixed }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#A3F43F;color:#0A0A0A;border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px;flex:none">
+            <svg width="16" height="16" viewBox="0 0 12 12" fill="none" stroke="#0A0A0A" stroke-width="2"><path d="M2.5 6.2l2.3 2.3 4.7-5"></path></svg>
+            <div style="font-size:14px;font-weight:600">All required info is done</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ rv.needLi }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ rv.onContact }}" style="background:#161616;border:1px dashed #3A3A3A;border-radius:20px;padding:0 16px;height:56px;display:flex;align-items:center;gap:12px;flex:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left">
+            <div style="flex:1">Add your LinkedIn</div>
+            <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;color:#A6A6A6">Optional</div>
+          </button>
+        </sc-if>
+        <button onClick="{{ rv.onContact }}" style="background:#161616;border:none;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:6px;flex:none;color:#fff;text-align:left;cursor:pointer;font-family:'Space Grotesk',sans-serif">
+          <div style="display:flex;justify-content:space-between;width:100%;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;margin-bottom:4px"><div>Contact</div><div style="color:#A3F43F">Edit</div></div>
+          <div style="font-size:18px;font-weight:600">Priya Deshmukh</div>
+          <div style="font-size:14px;color:#C8C8C8">priya.deshmukh@gmail.com</div>
+          <div style="font-size:14px;color:#C8C8C8">+91 98200 41736 · Pune, India</div>
+        </button>
+        <button onClick="{{ rv.onExp }}" style="background:#161616;border:none;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:14px;flex:none;color:#fff;text-align:left;cursor:pointer;font-family:'Space Grotesk',sans-serif">
+          <div style="display:flex;justify-content:space-between;width:100%;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6"><div>Experience · 3</div><div style="color:#A3F43F">Edit</div></div>
+          <sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;justify-content:space-between;gap:10px;width:100%">
+              <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">{{ r.title }}</div><div style="font-size:13px;color:#A6A6A6">{{ r.company }}</div></div>
+              <div style="font-size:12px;color:{{ r.dc }};white-space:nowrap">{{ r.dates }}</div>
+            </div>
+          </sc-for>
+        </button>
+        <button onClick="{{ rv.onSkills }}" style="background:#161616;border:none;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;flex:none;color:#fff;text-align:left;cursor:pointer;font-family:'Space Grotesk',sans-serif">
+          <div style="display:flex;justify-content:space-between;width:100%;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6"><div>{{ rv.skillsLabel }}</div><div style="color:#A3F43F">Edit</div></div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:13px">
+            <sc-for list="{{ rv.skills }}" as="k" hint-placeholder-count="5"><div style="background:#242424;border-radius:999px;padding:6px 11px">{{ k }}</div></sc-for>
+            <div style="border:1px solid #3A3A3A;border-radius:999px;padding:5px 11px;color:#A6A6A6">{{ rv.more }}</div>
+          </div>
+        </button>
+        <div style="background:#161616;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:6px;flex:none">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;margin-bottom:4px">Education</div>
+          <div style="font-size:15px;font-weight:600">B.Com, Finance</div>
+          <div style="font-size:13px;color:#A6A6A6">Symbiosis College, Pune · 2020</div>
+        </div>
+      </div>
+      <div style="flex:none;padding:12px 16px 36px;border-top:1px solid #1A1A1A">
+        <button onClick="{{ rv.onContinue }}" style="width:100%;height:56px;border:none;border-radius:999px;background:{{ rv.ctaBg }};color:{{ rv.ctaInk }};font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Looks right, continue</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.job }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:14px 14px 0;gap:12px;min-height:0">
+        <sc-if value="{{ jb.empty }}" hint-placeholder-val="{{ true }}">
+          <div style="background:#F7A940;border-radius:32px;padding:22px 22px 0;color:#0A0A0A;display:flex;flex-direction:column;gap:8px;height:230px;flex:none;position:relative;overflow:hidden">
+            <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.8px;text-transform:uppercase">Paige reads it for you</div>
+            <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px">Paste the job<br>you want</div>
+            <div style="position:absolute;right:30px;bottom:-40px;width:124px;height:154px">
+              <dc-import name="Paige" tf="{{ jb.pT }}" eye-w="11px" eye-h="15px" eye-t="translateX(-4px)" mouth-w="16px" mouth-h="8px" hint-size="124px,154px"></dc-import>
+              <div style="position:absolute;left:-58px;top:56px;width:52px;height:52px;border-radius:50%;border:3px solid #0A0A0A;background:rgba(255,255,255,0.45)"></div>
+              <div style="position:absolute;left:-14px;top:102px;width:28px;height:9px;border-radius:5px;background:#0A0A0A;transform:rotate(45deg)"></div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ jb.hasText }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:8px 8px 0">
+            <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px">Job<br>description</div>
+            <button onClick="{{ jb.onClear }}" style="border:none;background:#1C1C1C;color:#fff;border-radius:999px;height:44px;padding:0 16px;font-family:'Space Mono',monospace;font-size:12.5px;cursor:pointer">Clear</button>
+          </div>
+        </sc-if>
+        <textarea value="{{ jb.text }}" onChange="{{ jb.onText }}" placeholder="Paste the full job description here…" style="flex:1;min-height:0;background:#161616;border:1.5px dashed #333;border-radius:24px;padding:18px;color:#E6E6E6;font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.55;resize:none;outline:none"></textarea>
+        <sc-if value="{{ jb.detected }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 8px;flex:none">
+            <div style="display:flex;align-items:center;gap:8px"><div style="width:20px;height:20px;border-radius:50%;background:#A3F43F;display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#0A0A0A" stroke-width="2.2"><path d="M2.5 6.2l2.3 2.3 4.7-5"></path></svg></div><div style="font-size:14px">Associate Analyst · Northwind GCC</div></div>
+            <div style="font-size:12px;color:#A6A6A6;white-space:nowrap">{{ jb.chars }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ jb.error }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#F7A940;color:#0A0A0A;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;flex:none">
+            <div style="font-size:15px;font-weight:700">This doesn't look like a job post</div>
+            <div style="font-size:14px;line-height:1.45">Paste the full listing, including responsibilities and requirements.</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ jb.empty }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:10px;flex:none">
+            <button onClick="{{ jb.onPaste }}" style="flex:1.5;height:52px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Paste from clipboard</button>
+            <button onClick="{{ jb.onLink }}" style="flex:1;height:52px;border:none;border-radius:999px;background:#1C1C1C;color:#fff;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Use a link</button>
+          </div>
+        </sc-if>
+      </div>
+      <div style="flex:none;padding:14px 16px 36px">
+        <sc-if value="{{ jb.empty }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:12px;line-height:1.5;color:#9A9A9A;text-align:center;padding:4px 14px 8px">Include requirements and responsibilities for the best match</div>
+        </sc-if>
+        <sc-if value="{{ jb.canAnalyze }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ jb.onAnalyze }}" style="width:100%;height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Analyze job</button>
+        </sc-if>
+        <sc-if value="{{ jb.analyzing }}" hint-placeholder-val="{{ false }}">
+          <div style="height:56px;border-radius:999px;background:#1C1C1C;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+            <div style="position:absolute;left:0;top:0;bottom:0;background:#2F3D1A;width:{{ jb.anPct }}"></div>
+            <div style="position:relative;font-family:'Space Mono',monospace;font-size:14px;color:#A3F43F">Reading the job… {{ jb.anPct }}</div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.jobLink }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:20px 14px 0;gap:12px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px;padding:0 8px">Import from<br>a link</div>
+        <div style="font-size:14px;line-height:1.5;color:#C8C8C8;padding:0 8px 4px">Paste a link from a careers page or LinkedIn. We'll pull in the description.</div>
+        <label style="background:#161616;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Job link</div>
+          <input defaultValue="https://careers.northwind.example/associate-analyst" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;padding:2px 0">
+        </label>
+        <div style="font-size:13px;line-height:1.5;color:#A6A6A6;padding:0 8px">If a page is behind a login, copy the text and paste it instead.</div>
+      </div>
+      <div style="flex:none;padding:14px 16px 36px">
+        <button onClick="{{ jb.onImport }}" style="width:100%;height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Import job</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.jobResult }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:20px 14px 16px;gap:12px;min-height:0">
+        <div style="padding:0 8px 4px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px">Associate<br>Analyst</div>
+          <div style="font-size:13px;color:#A6A6A6">Northwind GCC · Bengaluru · Hybrid</div>
+        </div>
+        <div style="background:#161616;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;flex:none">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Your match</div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="display:flex;flex-direction:column;gap:2px"><div style="font-family:'Space Mono',monospace;font-size:34px;font-weight:700;letter-spacing:-1.5px;line-height:1;color:#A6A6A6">61</div><div style="font-size:12px;color:#A6A6A6">Now</div></div>
+            <svg width="34" height="14" viewBox="0 0 34 14" fill="none" stroke="#7A7A7A" stroke-width="1.8"><path d="M1 7h30M25 1l6 6-6 6"></path></svg>
+            <div style="display:flex;flex-direction:column;gap:2px"><div style="font-family:'Space Mono',monospace;font-size:34px;font-weight:700;letter-spacing:-1.5px;line-height:1;color:#A3F43F">92</div><div style="font-size:12px;color:#A3F43F">Up to, after tailoring</div></div>
+          </div>
+          <div style="font-size:13px;line-height:1.5;color:#A6A6A6">We only use what's backed by your experience.</div>
+        </div>
+        <div style="background:#161616;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;flex:none">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">What they screen for · 8</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:13px">
+            <sc-for list="{{ jr.have }}" as="k" hint-placeholder-count="5"><div style="background:#242424;border-radius:999px;padding:6px 11px;display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:#A3F43F"></div>{{ k }}</div></sc-for>
+            <sc-for list="{{ jr.miss }}" as="k" hint-placeholder-count="3"><div style="border:1px solid #F7A940;color:#F7A940;border-radius:999px;padding:5px 11px">{{ k }}</div></sc-for>
+          </div>
+          <div style="display:flex;gap:14px;font-size:12px;color:#A6A6A6">
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:#A3F43F"></div>In your resume</div>
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;border:1px solid #F7A940"></div>Missing</div>
+          </div>
+          <div style="font-size:13px;line-height:1.45;color:#A6A6A6">Missing skills are only added if you confirm you have them.</div>
+        </div>
+        <div style="background:#161616;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:14px;flex:none">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Must-haves</div>
+          <div style="display:flex;align-items:flex-start;gap:12px"><div style="width:20px;height:20px;border-radius:50%;background:#A3F43F;display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#0A0A0A" stroke-width="2.2"><path d="M2.5 6.2l2.3 2.3 4.7-5"></path></svg></div><div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">2+ years in analytics</div><div style="font-size:13px;color:#A6A6A6">You have 4 years</div></div></div>
+          <div style="display:flex;align-items:flex-start;gap:12px"><div style="width:20px;height:20px;border-radius:50%;background:#A3F43F;display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#0A0A0A" stroke-width="2.2"><path d="M2.5 6.2l2.3 2.3 4.7-5"></path></svg></div><div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Strong SQL and Excel</div><div style="font-size:13px;color:#A6A6A6">Used at Infosys and Tata Digital</div></div></div>
+          <div style="display:flex;align-items:flex-start;gap:12px"><div style="width:20px;height:20px;border-radius:50%;background:#F7A940;color:#0A0A0A;display:flex;align-items:center;justify-content:center;flex:none;font-size:12px;font-weight:700">!</div><div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600">Presenting to senior stakeholders</div><div style="font-size:13px;color:#A6A6A6">Not clear in your resume. We'll ask you next.</div></div></div>
+        </div>
+      </div>
+      <div style="flex:none;padding:12px 16px 36px;border-top:1px solid #1A1A1A;display:flex;flex-direction:column;gap:10px">
+        <button onClick="{{ jr.onTailor }}" style="width:100%;height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Tailor my resume</button>
+        <div style="font-size:12px;color:#9A9A9A;text-align:center">{{ jr.note }}</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.question }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:14px 14px 0;gap:12px;min-height:0">
+        <div style="background:#A3F43F;border-radius:32px;padding:22px 22px 0;color:#0A0A0A;display:flex;flex-direction:column;gap:8px;height:230px;flex:none;position:relative;overflow:hidden">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.8px;text-transform:uppercase">One quick question</div>
+          <div style="font-family:'Space Mono',monospace;font-size:22px;line-height:1.15;letter-spacing:-0.8px;max-width:300px">Have you presented to senior leaders?</div>
+          <div style="position:absolute;right:34px;bottom:-50px;width:124px;height:154px">
+            <dc-import name="Paige" tf="{{ q.pT }}" eye-w="13px" eye-h="17px" eye-t="translateY(-3px)" mouth-w="14px" mouth-h="8px" hint-size="124px,154px"></dc-import>
+          </div>
+        </div>
+        <div style="font-size:14px;line-height:1.5;color:#C8C8C8;padding:2px 8px 0">It's a must-have for this role, and your resume doesn't mention it.</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ q.opts }}" as="o" hint-placeholder-count="3">
+            <button onClick="{{ o.onClick }}" style="height:54px;border-radius:18px;border:1.5px solid {{ o.bc }};background:{{ o.bg }};display:flex;align-items:center;gap:14px;padding:0 16px;font-family:'Space Grotesk',sans-serif;font-size:16px;color:#fff;cursor:pointer;text-align:left">
+              <div style="width:22px;height:22px;border-radius:50%;border:2px solid {{ o.bc }};display:flex;align-items:center;justify-content:center;box-sizing:border-box;flex:none"><div style="width:10px;height:10px;border-radius:50%;background:{{ o.dot }}"></div></div>
+              {{ o.label }}
+            </button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ q.showDetail }}" hint-placeholder-val="{{ false }}">
+          <textarea placeholder="One example helps (optional). E.g. presented the monthly variance report to the CFO" style="height:84px;flex:none;background:#161616;border:none;border-radius:18px;padding:14px 16px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5;resize:none;outline:none"></textarea>
+        </sc-if>
+      </div>
+      <div style="flex:none;padding:12px 16px 30px;display:flex;flex-direction:column;gap:4px">
+        <button onClick="{{ q.onContinue }}" style="height:56px;border:none;border-radius:999px;background:{{ q.ctaBg }};color:{{ q.ctaInk }};font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Continue</button>
+        <button onClick="{{ q.onSkip }}" style="height:44px;border:none;background:transparent;color:#A6A6A6;font-family:'Space Mono',monospace;font-size:12.5px;cursor:pointer">Skip this</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.tailoring }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:24px 14px 0;gap:16px;min-height:0">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:0 8px">
+          <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px">Tailoring<br>your resume</div>
+          <div style="font-family:'Space Mono',monospace;font-size:38px;font-weight:700;color:#A3F43F;letter-spacing:-2px;line-height:1">{{ tg.pct }}</div>
+        </div>
+        <div style="background:#A3F43F;border-radius:28px;height:230px;flex:none;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;color:#0A0A0A">
+          <div style="position:absolute;left:20px;top:22px;background:#fff;border:2.5px solid #0A0A0A;border-radius:999px;padding:5px 12px;font-size:14px;font-weight:700;transform:rotate(-8deg)">SQL</div>
+          <div style="position:absolute;right:22px;top:40px;background:#0A0A0A;color:#A3F43F;border-radius:999px;padding:6px 12px;font-size:14px;font-weight:700;transform:rotate(7deg)">Power BI</div>
+          <div style="position:absolute;left:14px;bottom:76px;z-index:1;background:#FF6A2B;border:2.5px solid #0A0A0A;border-radius:999px;padding:5px 12px;font-size:14px;font-weight:700;transform:rotate(5deg)">Stakeholders</div>
+          <div style="margin-bottom:-30px"><dc-import name="Paige" tf="{{ tg.pT }}" eye-w="16px" eye-h="6px" mouth-w="20px" mouth-h="10px" ticks="{{ true }}" arms="{{ false }}" hint-size="124px,154px"></dc-import></div>
+        </div>
+        <div style="background:#161616;border-radius:24px;padding:4px 16px;display:flex;flex-direction:column">
+          <sc-for list="{{ tg.rows }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #222">
+              <sc-if value="{{ r.done }}" hint-placeholder-val="{{ false }}"><div style="width:24px;height:24px;border-radius:50%;background:#A3F43F;display:flex;align-items:center;justify-content:center;flex:none"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#0A0A0A" stroke-width="2.2"><path d="M2.5 6.2l2.3 2.3 4.7-5"></path></svg></div></sc-if>
+              <sc-if value="{{ r.active }}" hint-placeholder-val="{{ false }}"><div style="width:24px;height:24px;border-radius:50%;border:2.5px solid #333;border-top-color:#A3F43F;box-sizing:border-box;flex:none;transform:{{ spin }}"></div></sc-if>
+              <sc-if value="{{ r.pending }}" hint-placeholder-val="{{ true }}"><div style="width:24px;height:24px;border-radius:50%;border:2.5px solid #2A2A2A;box-sizing:border-box;flex:none"></div></sc-if>
+              <div style="flex:1;font-size:15px;color:{{ r.c }}">{{ r.name }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.tailorFail }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:16px 14px 0;gap:16px;min-height:0">
+        <div style="background:#FF6A2B;border-radius:32px;height:230px;flex:none;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center">
+          <div style="margin-bottom:-36px"><dc-import name="Paige" tf="rotate(-5deg)" eye-w="11px" eye-h="13px" eye-t="translateY(4px)" sad="{{ true }}" hint-size="124px,154px"></dc-import></div>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px;padding:0 8px">Tailoring<br>didn't finish</div>
+        <div style="font-size:15px;line-height:1.5;color:#C8C8C8;padding:0 8px">Something went wrong on our side. Your credit wasn't used.</div>
+      </div>
+      <div style="flex:none;padding:12px 16px 36px;display:flex;flex-direction:column;gap:10px">
+        <button onClick="{{ tf.onRetry }}" style="height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Try again</button>
+        <button onClick="{{ back }}" style="height:56px;border:none;border-radius:999px;background:#1C1C1C;color:#fff;font-family:'Space Mono',monospace;font-size:14px;cursor:pointer">Go back</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.tailored }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:20px 14px 14px;gap:14px;min-height:0">
+        <div style="padding:0 8px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px">Your resume<br>is ready</div>
+          <div style="font-size:13px;color:#A6A6A6">For Associate Analyst · Northwind GCC</div>
+        </div>
+        <div style="display:flex;background:#161616;border-radius:999px;padding:4px;flex:none">
+          <button onClick="{{ tr.onTabR }}" style="flex:1;height:44px;border:none;border-radius:999px;background:{{ tr.rBg }};color:{{ tr.rInk }};font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Resume</button>
+          <button onClick="{{ tr.onTabC }}" style="flex:1;height:44px;border:none;border-radius:999px;background:{{ tr.cBg }};color:{{ tr.cInk }};font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">{{ tr.changesLabel }}</button>
+        </div>
+        <sc-if value="{{ tr.isResume }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;flex:none;margin-top:16px">
+            <div style="background:#fff;color:#111;border-radius:14px;padding:20px 18px;font-family:Helvetica,Arial,sans-serif;display:flex;flex-direction:column;gap:9px;box-sizing:border-box">
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:17px;font-weight:700;letter-spacing:-0.3px">Priya Deshmukh</div>
+                <div style="font-size:7.5px;color:#555">priya.deshmukh@gmail.com · +91 98200 41736 · Pune, India</div>
+              </div>
+              <div style="font-size:8px;line-height:1.45;color:#222;padding-right:40px"><span style="background:#E4FBB8">{{ tr.summary }}</span></div>
+              <div style="font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;border-bottom:1px solid #DDD;padding-bottom:3px">Experience</div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="display:flex;justify-content:space-between;font-size:8.5px;font-weight:700"><div>Business Analyst, Infosys</div><div style="font-weight:400;color:#666">2022 – Now</div></div>
+                <div style="font-size:7.5px;line-height:1.45;color:#333">• Built <span style="background:#E4FBB8">Power BI</span> dashboards for monthly <span style="background:#E4FBB8">financial reporting</span>, cutting prep time by 40%.</div>
+                <sc-if value="{{ tr.hasEx }}" hint-placeholder-val="{{ true }}"><div style="font-size:7.5px;line-height:1.45;color:#333">• <span style="background:#FFE2C2">Presented monthly variance analysis to the CFO</span> and regional finance heads.</div></sc-if>
+                <div style="font-size:7.5px;line-height:1.45;color:#333">• Wrote <span style="background:#E4FBB8">SQL</span> pipelines over 20M+ rows of transaction data.</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="display:flex;justify-content:space-between;font-size:8.5px;font-weight:700"><div>Data Analyst Intern, Tata Digital</div><div style="font-weight:400;color:#666">2021 – 2022</div></div>
+                <div style="font-size:7.5px;line-height:1.45;color:#333">• Built <span style="background:#E4FBB8">forecasting</span> models in Python for category demand.</div>
+                <div style="font-size:7.5px;line-height:1.45;color:#333">• Automated weekly Excel reports for 5 business teams.</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="display:flex;justify-content:space-between;font-size:8.5px;font-weight:700"><div>Finance Associate, Bajaj Finserv</div><div style="font-weight:400;color:#666">2020 – 2021</div></div>
+                <div style="font-size:7.5px;line-height:1.45;color:#333">• Reconciled ledgers and prepared month-end close packs.</div>
+              </div>
+              <div style="font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;border-bottom:1px solid #DDD;padding-bottom:3px">Skills</div>
+              <div style="font-size:7.5px;line-height:1.45;color:#333">{{ tr.skillsLine }}</div>
+              <div style="font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;border-bottom:1px solid #DDD;padding-bottom:3px">Education</div>
+              <div style="font-size:7.5px;color:#333">B.Com, Finance · Symbiosis College, Pune · 2020</div>
+            </div>
+            <div style="position:absolute;right:-6px;top:-24px;width:64px;height:64px;border-radius:50%;background:#0A0A0A;border:2.5px solid #A3F43F;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(10deg)">
+              <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:#A3F43F;line-height:1">{{ tr.match }}</div>
+              <div style="font-size:12px">match</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;font-size:12px;color:#A6A6A6;padding:0 8px">
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:3px;background:#E4FBB8"></div>From your resume</div>
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:3px;background:#FFE2C2"></div>From your answer</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ tr.isChanges }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ tr.changes }}" as="x" hint-placeholder-count="4">
+              <div style="background:#161616;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between;gap:8px;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase"><div style="color:#fff">{{ x.area }} · {{ x.kind }}</div><div style="color:{{ x.srcC }}">{{ x.src }}</div></div>
+                <sc-if value="{{ x.hasBefore }}" hint-placeholder-val="{{ false }}"><div style="font-size:14px;line-height:1.5;color:#7A7A7A;text-decoration:line-through">{{ x.before }}</div></sc-if>
+                <div style="font-size:14px;line-height:1.5">{{ x.after }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <div style="flex:none;padding:12px 16px 36px;border-top:1px solid #1A1A1A;display:flex;gap:10px">
+        <button onClick="{{ tr.onEdit }}" style="flex:1;height:56px;border:none;border-radius:999px;background:#1C1C1C;color:#fff;font-family:'Space Mono',monospace;font-size:14px;cursor:pointer">Edit</button>
+        <button onClick="{{ tr.onExport }}" style="flex:2;height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Export PDF</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.editResume }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:18px 14px 30px;gap:12px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px;padding:0 8px">Edit resume</div>
+        <div style="background:#141A0A;border:1px solid #A3F43F;border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:14px;color:#A3F43F"><svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="#A3F43F" stroke-width="2"><path d="M2.5 6.2l2.3 2.3 4.7-5"></path></svg>Still fits on 1 page</div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:6px 8px 0">Summary</div>
+        <textarea defaultValue="{{ tr.summary }}" style="height:96px;flex:none;background:#161616;border:none;border-radius:16px;padding:14px 16px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5;resize:none;outline:none"></textarea>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:6px 8px 0">Business Analyst · Infosys</div>
+        <sc-for list="{{ er.bullets }}" as="b" hint-placeholder-count="3">
+          <div style="background:#161616;border-radius:16px;padding:12px 16px;display:flex;flex-direction:column;gap:6px;flex:none">
+            <div style="font-size:12px;color:{{ b.srcC }}">{{ b.src }}</div>
+            <textarea defaultValue="{{ b.text }}" style="height:64px;background:transparent;border:none;padding:0;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5;resize:none;outline:none"></textarea>
+          </div>
+        </sc-for>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:6px 8px 0">Skills line</div>
+        <textarea defaultValue="{{ tr.skillsLine }}" style="height:70px;flex:none;background:#161616;border:none;border-radius:16px;padding:14px 16px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5;resize:none;outline:none"></textarea>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.exported }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:12px 16px 0;gap:12px;min-height:0">
+        <div style="display:flex;align-items:center;gap:14px;padding:4px 4px 6px">
+          <div style="width:48px;height:48px;border-radius:50%;background:#A3F43F;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 12 12" fill="none" stroke="#0A0A0A" stroke-width="2"><path d="M2.5 6.2l2.3 2.3 4.7-5"></path></svg></div>
+          <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.05;letter-spacing:-1px">Resume<br>exported</div>
+        </div>
+        <div style="background:#161616;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:14px;flex:none">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;border-radius:12px;background:#242424;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.6"><path d="M4 2h7l3 3v11H4z"></path><path d="M7 9h4M7 12h4"></path></svg></div>
+            <div style="display:flex;flex-direction:column;gap:3px;min-width:0"><div style="font-size:14px;font-weight:600;line-height:1.35;word-break:break-all">{{ ex.file }}</div><div style="font-size:12px;color:#A6A6A6">PDF · 1 page · 48 KB</div></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onClick="{{ ex.onShare }}" style="flex:1;height:48px;border:none;border-radius:999px;background:#242424;color:#fff;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Share</button>
+            <button onClick="{{ ex.onOpen }}" style="flex:1;height:48px;border:none;border-radius:999px;background:#242424;color:#fff;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Open</button>
+          </div>
+        </div>
+        <div style="background:#161616;border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:14px;flex:none">
+          <div style="font-family:'Space Mono',monospace;font-size:40px;font-weight:700;line-height:1;letter-spacing:-2px">{{ ex.c }}</div>
+          <div style="font-size:14px;line-height:1.45;font-weight:500">{{ ex.text }}</div>
+        </div>
+        <div style="font-size:13px;line-height:1.45;color:#A6A6A6;padding:0 6px">Saved to Applications: {{ ex.savedTo }}</div>
+        <sc-if value="{{ ex.isSaved }}" hint-placeholder-val="{{ true }}">
+          <div style="background:#161616;border-radius:20px;padding:10px 10px 10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none">
+            <div style="font-size:15px;font-weight:600">Did you apply?</div>
+            <button onClick="{{ ex.onApplied }}" style="height:46px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;padding:0 16px;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">✓ Mark as Applied</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ ex.notSaved }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#161616;border-radius:20px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:10px;flex:none">
+            <div style="font-size:12px;color:{{ ex.sc }};background:{{ ex.sbg }};border:1px solid {{ ex.sbc }};border-radius:999px;padding:5px 10px">{{ ex.status }}</div>
+            <div style="flex:1;font-size:13px;color:#A6A6A6">Marked on {{ ex.on }}</div>
+            <button onClick="{{ ex.onChange }}" style="height:44px;border:none;border-radius:999px;background:#242424;color:#fff;padding:0 14px;font-family:'Space Mono',monospace;font-size:12.5px;cursor:pointer">Change</button>
+          </div>
+        </sc-if>
+        <div style="background:#161616;border-radius:20px;padding:0 16px;display:flex;flex-direction:column;flex:none">
+          <button onClick="{{ ex.onSoon }}" style="display:flex;align-items:center;gap:12px;height:56px;border:none;border-bottom:1px solid #222;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">Get prep questions</div><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;color:#A6A6A6;border:1px solid #3A3A3A;border-radius:999px;padding:3px 8px">Soon</div></button>
+          <button onClick="{{ ex.onSoon }}" style="display:flex;align-items:center;gap:12px;height:56px;border:none;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">Write a cover letter</div><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;color:#A6A6A6;border:1px solid #3A3A3A;border-radius:999px;padding:3px 8px">Soon</div></button>
+        </div>
+      </div>
+      <div style="flex:none;padding:12px 16px 36px">
+        <button onClick="{{ ex.onDone }}" style="width:100%;height:56px;border:none;border-radius:999px;background:#1C1C1C;color:#fff;font-family:'Space Mono',monospace;font-size:14px;cursor:pointer">Go to Applications</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ is.home }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:14px 16px 14px;gap:14px;min-height:0">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-family:'Space Mono',monospace;font-size:26px;letter-spacing:-1px">Applications</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button onClick="{{ hm.onCredits }}" style="height:44px;border:none;border-radius:999px;background:#1C1C1C;color:#fff;padding:0 14px;display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:12px;cursor:pointer"><div style="width:7px;height:7px;border-radius:50%;background:#A3F43F"></div>{{ hm.credits }}</button>
+            <button onClick="{{ hm.onAvatar }}" style="width:44px;height:44px;border-radius:50%;border:none;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;cursor:pointer">PD</button>
+          </div>
+        </div>
+        <sc-if value="{{ hm.empty }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#A3F43F;color:#0A0A0A;border-radius:32px;padding:24px 22px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;height:400px;box-sizing:border-box">
+            <div style="font-family:'Space Mono',monospace;font-size:26px;line-height:1.1;letter-spacing:-1px">No applications<br>yet</div>
+            <div style="font-size:15px;line-height:1.45;max-width:260px">Tailor your resume for a job and it shows up here.</div>
+            <button onClick="{{ hm.onNew }}" style="align-self:flex-start;height:50px;border:none;border-radius:999px;background:#0A0A0A;color:#fff;padding:0 20px;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer;margin-top:6px">Add a job</button>
+            <div style="position:absolute;right:40px;bottom:-30px"><dc-import name="Paige" tf="{{ hm.pT }}" ticks="{{ true }}" hint-size="124px,154px"></dc-import></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hm.has }}" hint-placeholder-val="{{ true }}">
+          <div style="background:#161616;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;flex:none">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Tailored resumes</div>
+              <div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700">{{ hm.count }}</div>
+            </div>
+            <div style="display:flex;gap:4px;height:10px">
+              <sc-for list="{{ hm.segs }}" as="g" hint-placeholder-count="3"><div style="flex:{{ g.n }};border-radius:5px;background:{{ g.color }}"></div></sc-for>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:#C8C8C8">
+              <sc-for list="{{ hm.segs }}" as="g" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:6px"><div style="width:7px;height:7px;border-radius:50%;background:{{ g.color }}"></div>{{ g.label }}</div></sc-for>
+            </div>
+          </div>
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:0 4px">Recent</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ hm.apps }}" as="a" hint-placeholder-count="3">
+              <button onClick="{{ a.onClick }}" style="display:flex;align-items:center;gap:12px;padding:10px 4px;border:none;background:transparent;color:#fff;cursor:pointer;text-align:left;font-family:'Space Grotesk',sans-serif;border-radius:16px" style-hover="background:#111">
+                <div style="width:46px;height:46px;border-radius:14px;background:{{ a.color }};color:#0A0A0A;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:18px;font-weight:700;flex:none">{{ a.initial }}</div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><div style="font-size:15px;font-weight:600">{{ a.title }}</div><div style="font-size:13px;color:#A6A6A6">{{ a.meta }}</div></div>
+                <div style="font-size:12px;color:{{ a.sc }};background:{{ a.sbg }};border:1px solid {{ a.sbc }};border-radius:999px;padding:4px 9px">{{ a.status }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.appDetail }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:18px 14px 30px;gap:12px;min-height:0">
+        <div style="padding:0 8px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-family:'Space Mono',monospace;font-size:28px;line-height:1.1;letter-spacing:-1px">{{ ad.title }}</div>
+          <div style="font-size:13px;color:#A6A6A6">{{ ad.company }} · {{ ad.loc }}</div>
+        </div>
+        <div style="background:#161616;border-radius:20px;padding:12px 12px 12px 16px;display:flex;align-items:center;gap:12px">
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+            <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Status</div>
+            <div style="display:flex;align-items:center;gap:8px"><div style="font-size:12px;color:{{ ad.sc }};background:{{ ad.sbg }};border:1px solid {{ ad.sbc }};border-radius:999px;padding:4px 9px">{{ ad.status }}</div><div style="font-size:13px;color:#A6A6A6">{{ ad.statusLine }}</div></div>
+          </div>
+          <button onClick="{{ ad.onChange }}" style="height:44px;border:none;border-radius:999px;background:#242424;color:#fff;padding:0 16px;font-family:'Space Mono',monospace;font-size:12.5px;cursor:pointer">Change</button>
+        </div>
+        <div style="background:#161616;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;border-radius:12px;background:#242424;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#fff" stroke-width="1.6"><path d="M4 2h7l3 3v11H4z"></path><path d="M7 9h4M7 12h4"></path></svg></div>
+            <div style="display:flex;flex-direction:column;gap:3px;min-width:0"><div style="font-size:14px;font-weight:600;line-height:1.35;word-break:break-all">{{ ad.file }}</div><div style="font-size:12px;color:#A6A6A6">PDF · 1 page · {{ ad.match }} match</div></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onClick="{{ ad.onShare }}" style="flex:1;height:48px;border:none;border-radius:999px;background:#242424;color:#fff;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Share</button>
+            <button onClick="{{ ad.onOpen }}" style="flex:1;height:48px;border:none;border-radius:999px;background:#242424;color:#fff;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Open</button>
+          </div>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:6px 8px 0">Next steps</div>
+        <div style="background:#161616;border-radius:20px;padding:0 16px;display:flex;flex-direction:column">
+          <button onClick="{{ ad.onRetailor }}" style="display:flex;align-items:center;gap:12px;height:56px;border:none;border-bottom:1px solid #222;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">Re-tailor with profile changes</div><div style="font-size:12px;color:#A6A6A6">1 credit</div></button>
+          <button onClick="{{ ad.onViewJob }}" style="display:flex;align-items:center;gap:12px;height:56px;border:none;border-bottom:1px solid #222;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">View job analysis</div><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#A6A6A6" stroke-width="1.8"><path d="M5 2l5 5-5 5"></path></svg></button>
+          <button onClick="{{ ad.onSoon }}" style="display:flex;align-items:center;gap:12px;height:56px;border:none;border-bottom:1px solid #222;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">Get prep questions</div><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;color:#A6A6A6;border:1px solid #3A3A3A;border-radius:999px;padding:3px 8px">Soon</div></button>
+          <button onClick="{{ ad.onSoon }}" style="display:flex;align-items:center;gap:12px;height:56px;border:none;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">Write a cover letter</div><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;color:#A6A6A6;border:1px solid #3A3A3A;border-radius:999px;padding:3px 8px">Soon</div></button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.profile }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:14px 16px 14px;gap:14px;min-height:0">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-family:'Space Mono',monospace;font-size:26px;letter-spacing:-1px">Profile</div>
+          <button onClick="{{ pr.onGear }}" style="height:44px;border:none;border-radius:999px;background:#1C1C1C;color:#fff;padding:0 16px;font-family:'Space Mono',monospace;font-size:12.5px;cursor:pointer">Settings</button>
+        </div>
+        <div style="background:#A3F43F;color:#0A0A0A;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px;flex:none">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:56px;height:56px;border-radius:50%;background:#0A0A0A;color:#A3F43F;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:18px;font-weight:700;flex:none">PD</div>
+            <div style="display:flex;flex-direction:column;gap:3px"><div style="font-size:18px;font-weight:700">Priya Deshmukh</div><div style="font-size:13.5px">Finance analyst · 4 yrs · Pune</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1;height:4px;border-radius:2px;background:rgba(0,0,0,0.15);overflow:hidden"><div style="height:100%;width:{{ pr.comp }};background:#0A0A0A"></div></div>
+            <div style="font-size:13px;font-weight:600">{{ pr.comp }} complete</div>
+          </div>
+        </div>
+        <div style="background:#161616;border-radius:20px;padding:0 16px;display:flex;flex-direction:column;flex:none">
+          <sc-for list="{{ pr.rows }}" as="r" hint-placeholder-count="7">
+            <button onClick="{{ r.onClick }}" style="display:flex;align-items:center;gap:12px;height:54px;border:none;border-bottom:1px solid #222;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0">
+              <div style="flex:1">{{ r.label }}</div>
+              <div style="font-size:13px;color:#A6A6A6">{{ r.meta }}</div>
+              <sc-if value="{{ r.hasTag }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#0A0A0A;background:#F7A940;border-radius:999px;padding:3px 10px">Add</div></sc-if>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#A6A6A6" stroke-width="1.8"><path d="M5 2l5 5-5 5"></path></svg>
+            </button>
+          </sc-for>
+        </div>
+        <button onClick="{{ pr.onReplace }}" style="display:flex;align-items:center;gap:12px;min-height:48px;padding:0 6px;border:none;background:transparent;color:#fff;cursor:pointer;text-align:left;font-family:'Space Grotesk',sans-serif">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#A6A6A6" stroke-width="1.6"><path d="M4 2h7l3 3v11H4z"></path></svg>
+          <div style="flex:1;font-size:13px;color:#A6A6A6">Built from Priya_Deshmukh_Resume.pdf</div>
+          <div style="font-size:13px;color:#A3F43F">Replace</div>
+        </button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.experience }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:18px 14px 30px;gap:10px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;letter-spacing:-1px;padding:0 8px 6px">Experience</div>
+        <sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+          <button onClick="{{ r.onClick }}" style="background:#161616;border:none;border-radius:20px;padding:16px;display:flex;align-items:center;gap:12px;color:#fff;cursor:pointer;text-align:left;font-family:'Space Grotesk',sans-serif">
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px"><div style="font-size:16px;font-weight:600">{{ r.title }}</div><div style="font-size:13px;color:#A6A6A6">{{ r.company }}</div><div style="font-size:12.5px;color:{{ r.dc }}">{{ r.dates }}</div></div>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#A6A6A6" stroke-width="1.8"><path d="M5 2l5 5-5 5"></path></svg>
+          </button>
+        </sc-for>
+        <button onClick="{{ xp.onAdd }}" style="height:56px;border-radius:20px;border:1.5px dashed #333;background:transparent;color:#C8C8C8;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">+ Add role</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.editRole }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:18px 16px 0;gap:10px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;letter-spacing:-1px;padding:0 4px 4px">{{ role.heading }}</div>
+        <label style="background:#161616;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px"><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Job title</div><input defaultValue="{{ role.title }}" placeholder="e.g. Business Analyst" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:16px;padding:2px 0"></label>
+        <label style="background:#161616;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px"><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Company</div><input defaultValue="{{ role.company }}" placeholder="e.g. Infosys" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:16px;padding:2px 0"></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <label style="background:#161616;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px"><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Start</div><input defaultValue="{{ role.start }}" placeholder="Mon YYYY" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:16px;padding:2px 0;width:100%"></label>
+          <label style="background:#161616;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px;opacity:{{ role.endOp }}"><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">End</div><input defaultValue="{{ role.end }}" placeholder="{{ role.endPh }}" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:16px;padding:2px 0;width:100%"></label>
+        </div>
+        <button onClick="{{ role.onToggle }}" style="display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 4px;border:none;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer">
+          <div>I work here now</div>
+          <div style="width:48px;height:28px;border-radius:999px;background:{{ role.tBg }};padding:3px;box-sizing:border-box;display:flex;justify-content:{{ role.tJust }}"><div style="width:22px;height:22px;border-radius:50%;background:{{ role.tKnob }}"></div></div>
+        </button>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:2px 4px 0">What you did</div>
+        <sc-for list="{{ role.bullets }}" as="b" hint-placeholder-count="2">
+          <textarea defaultValue="{{ b.text }}" placeholder="Start with a verb. Add a number if you can." style="height:70px;flex:none;background:#161616;border:none;border-radius:16px;padding:14px 16px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5;resize:none;outline:none"></textarea>
+        </sc-for>
+        <button onClick="{{ role.onAdd }}" style="height:50px;flex:none;border-radius:16px;border:1.5px dashed #333;background:transparent;color:#C8C8C8;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">+ Add bullet</button>
+      </div>
+      <div style="flex:none;padding:8px 16px 34px">
+        <sc-if value="{{ role.canDelete }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ role.onDelete }}" style="width:100%;height:48px;border:none;background:transparent;color:#FF6A2B;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Delete this role</button>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.editContact }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:18px 16px 30px;gap:10px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;letter-spacing:-1px;padding:0 4px 4px">Contact</div>
+        <sc-for list="{{ ct.fields }}" as="x" hint-placeholder-count="3">
+          <label style="background:#161616;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px"><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">{{ x.label }}</div><input defaultValue="{{ x.value }}" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:16px;padding:2px 0"></label>
+        </sc-for>
+        <div style="background:#0D0D0D;border:1px solid #222;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px"><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Email · from Google</div><div style="font-size:16px;color:#C8C8C8;padding:2px 0">priya.deshmukh@gmail.com</div></div>
+        <label style="background:#161616;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px;border:1.5px solid {{ ct.liBorder }}"><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">LinkedIn · optional</div><input value="{{ ct.li }}" onChange="{{ ct.onLi }}" placeholder="linkedin.com/in/your-name" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:16px;padding:2px 0"></label>
+        <label style="background:#161616;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px"><div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Portfolio · optional</div><input placeholder="https://" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:16px;padding:2px 0"></label>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.skills }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:18px 16px 30px;gap:12px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;letter-spacing:-1px;padding:0 4px">Skills</div>
+        <div style="font-size:14px;line-height:1.5;color:#C8C8C8;padding:0 4px">{{ sk.count }}. Paige picks the most relevant ones for each job.</div>
+        <div style="display:flex;gap:8px">
+          <input value="{{ sk.draft }}" onChange="{{ sk.onDraft }}" placeholder="Add a skill" style="flex:1;height:50px;background:#161616;border:none;border-radius:16px;padding:0 16px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;outline:none">
+          <button onClick="{{ sk.onAdd }}" style="height:50px;border:none;border-radius:16px;background:#A3F43F;color:#0A0A0A;padding:0 18px;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">Add</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <sc-for list="{{ sk.chips }}" as="k" hint-placeholder-count="10">
+            <div style="background:#1C1C1C;border-radius:999px;padding:0 4px 0 14px;height:40px;display:flex;align-items:center;gap:4px;font-size:14px">{{ k.label }}<button onClick="{{ k.onRemove }}" style="width:32px;height:32px;border:none;border-radius:50%;background:transparent;color:#A6A6A6;font-size:16px;cursor:pointer">×</button></div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.listEdit }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:18px 16px 30px;gap:10px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;letter-spacing:-1px;padding:0 4px">{{ le.title }}</div>
+        <sc-if value="{{ le.hasNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:14px;line-height:1.5;color:#C8C8C8;padding:0 4px 4px">{{ le.note }}</div></sc-if>
+        <sc-for list="{{ le.items }}" as="x" hint-placeholder-count="3">
+          <textarea defaultValue="{{ x.text }}" placeholder="Write here" style="height:76px;flex:none;background:#161616;border:none;border-radius:16px;padding:14px 16px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:14px;line-height:1.5;resize:none;outline:none"></textarea>
+        </sc-for>
+        <sc-if value="{{ le.canAdd }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ le.onAdd }}" style="height:50px;flex:none;border-radius:16px;border:1.5px dashed #333;background:transparent;color:#C8C8C8;font-family:'Space Mono',monospace;font-size:13px;cursor:pointer">{{ le.add }}</button>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.settings }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:14px 16px 0;gap:8px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;letter-spacing:-1px;padding:0 4px 6px">Settings</div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:2px 6px 0">Account</div>
+        <div style="background:#161616;border-radius:20px;padding:0 16px;display:flex;flex-direction:column;flex:none">
+          <div style="display:flex;align-items:center;gap:12px;min-height:58px;border-bottom:1px solid #222"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:15px">priya.deshmukh@gmail.com</div><div style="font-size:12px;color:#A6A6A6">Signed in with Google</div></div></div>
+          <button onClick="{{ se.onCredits }}" style="display:flex;align-items:center;gap:12px;height:52px;border:none;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">Credits &amp; purchases</div><div style="font-size:13px;color:#A3F43F">{{ se.credits }}</div><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#A6A6A6" stroke-width="1.8"><path d="M5 2l5 5-5 5"></path></svg></button>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:6px 6px 0">Resume</div>
+        <div style="background:#161616;border-radius:20px;padding:0 16px;display:flex;flex-direction:column;flex:none">
+          <button onClick="{{ se.onPage }}" style="display:flex;align-items:center;gap:12px;height:52px;border:none;border-bottom:1px solid #222;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">Page size</div><div style="font-size:13px;color:#A6A6A6">{{ se.page }}</div></button>
+          <button onClick="{{ se.onFmt }}" style="display:flex;align-items:center;gap:12px;height:52px;border:none;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">File name</div><div style="font-size:13px;color:#A6A6A6">{{ se.fmt }}</div></button>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:6px 6px 0">Notifications</div>
+        <div style="background:#161616;border-radius:20px;padding:0 16px;display:flex;flex-direction:column;flex:none">
+          <sc-for list="{{ se.toggles }}" as="g" hint-placeholder-count="2">
+            <button onClick="{{ g.onClick }}" style="display:flex;align-items:center;gap:12px;height:52px;border:none;border-bottom:1px solid #222;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0"><div style="flex:1">{{ g.label }}</div><div style="width:48px;height:28px;border-radius:999px;background:{{ g.bg }};padding:3px;box-sizing:border-box;display:flex;justify-content:{{ g.just }}"><div style="width:22px;height:22px;border-radius:50%;background:{{ g.knob }}"></div></div></button>
+          </sc-for>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:6px 6px 0">Privacy &amp; help</div>
+        <div style="background:#161616;border-radius:20px;padding:0 16px;display:flex;flex-direction:column;flex:none">
+          <button onClick="{{ se.onData }}" style="display:flex;align-items:center;height:52px;border:none;border-bottom:1px solid #222;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0">Download my data</button>
+          <button onClick="{{ se.onHelp }}" style="display:flex;align-items:center;height:52px;border:none;border-bottom:1px solid #222;background:transparent;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0">Help &amp; feedback</button>
+          <button onClick="{{ se.onDelete }}" style="display:flex;align-items:center;height:52px;border:none;background:transparent;color:#FF6A2B;font-family:'Space Grotesk',sans-serif;font-size:15px;cursor:pointer;text-align:left;padding:0">Delete account</button>
+        </div>
+        <button onClick="{{ se.onSignOut }}" style="height:52px;flex:none;border:none;border-radius:999px;background:#1C1C1C;color:#fff;font-family:'Space Mono',monospace;font-size:14px;cursor:pointer;margin-top:6px">Sign out</button>
+        <div style="font-size:12px;color:#7A7A7A;text-align:center;padding:4px 0 36px">Terms · Privacy · v1.0.0</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.credits }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:14px 16px 30px;gap:14px;min-height:0">
+        <div style="font-family:'Space Mono',monospace;font-size:28px;letter-spacing:-1px;padding:0 4px">Credits</div>
+        <div style="background:#161616;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:16px;flex:none">
+          <div style="display:flex;align-items:center;gap:16px">
+            <div style="font-family:'Space Mono',monospace;font-size:60px;font-weight:700;letter-spacing:-3px;line-height:1;color:#A3F43F">{{ cr.c }}</div>
+            <div style="font-size:15px;line-height:1.45;color:#C8C8C8">credits left.<br>They never expire.</div>
+          </div>
+          <button onClick="{{ cr.onBuy }}" style="height:52px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:14px;cursor:pointer">Buy more</button>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6;padding:4px 6px 0">History</div>
+        <div style="background:#161616;border-radius:20px;padding:0 16px;display:flex;flex-direction:column;flex:none">
+          <sc-for list="{{ cr.history }}" as="h" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #222">
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px"><div style="font-size:15px">{{ h.label }}</div><div style="font-size:12.5px;color:#A6A6A6">{{ h.sub }}</div></div>
+              <div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:{{ h.amtC }}">{{ h.amtText }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size:12px;color:#9A9A9A;text-align:center">Receipts go to your Google email</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.paywall }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;overflow:auto;scrollbar-width:none;display:flex;flex-direction:column;padding:10px 14px 0;gap:12px;min-height:0">
+        <div style="background:#F7A940;border-radius:32px;padding:22px 22px 0;color:#0A0A0A;display:flex;flex-direction:column;gap:8px;height:210px;flex:none;position:relative;overflow:hidden">
+          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.8px;text-transform:uppercase">{{ pw.label }}</div>
+          <div style="font-family:'Space Mono',monospace;font-size:26px;line-height:1.1;letter-spacing:-1px">Keep tailoring<br>for every job</div>
+          <div style="position:absolute;right:30px;bottom:-50px"><dc-import name="Paige" tf="{{ pw.pT }}" hint-size="124px,154px"></dc-import></div>
+          <div style="position:absolute;left:24px;bottom:20px;width:54px;height:54px;border-radius:50%;background:#A3F43F;border:2.5px solid #0A0A0A;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:18px;font-weight:700;transform:rotate(-10deg)">+1</div>
+        </div>
+        <div style="font-size:14px;line-height:1.5;color:#C8C8C8;padding:2px 8px 0">1 credit = 1 tailored resume. Credits never expire.</div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding-top:6px">
+          <sc-for list="{{ pw.packs }}" as="p" hint-placeholder-count="3">
+            <button onClick="{{ p.onClick }}" style="height:68px;border-radius:18px;border:1.5px solid {{ p.bc }};background:{{ p.bg }};display:flex;align-items:center;gap:14px;padding:0 16px;color:#fff;cursor:pointer;text-align:left;font-family:'Space Grotesk',sans-serif;position:relative">
+              <div style="width:22px;height:22px;border-radius:50%;border:2px solid {{ p.bc }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex:none"><div style="width:10px;height:10px;border-radius:50%;background:{{ p.dot }}"></div></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px"><div style="font-size:16px;font-weight:600">{{ p.n }} credits</div><div style="font-size:12.5px;color:#A6A6A6">{{ p.per }}</div></div>
+              <div style="font-family:'Space Mono',monospace;font-size:16px;font-weight:700">{{ p.price }}</div>
+              <sc-if value="{{ p.best }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;right:14px;top:-11px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;border-radius:999px;padding:3px 9px">Best value</div></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="flex:none;padding:12px 16px 32px;display:flex;flex-direction:column;gap:6px">
+        <button onClick="{{ pw.onBuy }}" style="height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">{{ pw.buyLabel }}</button>
+        <button onClick="{{ pw.onRestore }}" style="height:44px;border:none;background:transparent;color:#A6A6A6;font-family:'Space Grotesk',sans-serif;font-size:13px;cursor:pointer">One-time payment · Restore purchases</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:none;display:flex;justify-content:space-around;align-items:center;padding:8px 24px 28px;border-top:1px solid #1A1A1A;background:#000">
+        <button onClick="{{ tabs.home }}" style="width:100px;height:54px;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:{{ tabs.homeC }};font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.4px;text-transform:uppercase">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="3" width="14" height="16" rx="2"></rect><path d="M8 8h6M8 12h6"></path></svg>Applications
+        </button>
+        <button onClick="{{ tabs.add }}" style="width:56px;height:56px;border-radius:50%;border:none;background:#A3F43F;display:flex;align-items:center;justify-content:center;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0A0A0A" stroke-width="2.2"><path d="M10 3v14M3 10h14"></path></svg>
+        </button>
+        <button onClick="{{ tabs.profile }}" style="width:100px;height:54px;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:{{ tabs.profC }};font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.4px;text-transform:uppercase">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="8" r="4"></circle><path d="M4 19c1-4 4-6 7-6s6 2 7 6"></path></svg>Profile
+        </button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ toast.show }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:14px;right:14px;top:96px;z-index:9;background:#fff;color:#0A0A0A;border-radius:18px;padding:8px 8px 8px 16px;min-height:44px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,0.45)">
+        <div style="flex:1;font-size:14px;line-height:1.35;padding:6px 0">{{ toast.text }}</div>
+        <sc-if value="{{ toast.hasAction }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ toast.onAction }}" style="border:none;background:#0A0A0A;color:#A3F43F;border-radius:999px;height:40px;padding:0 14px;font-family:'Space Mono',monospace;font-size:12.5px;cursor:pointer">{{ toast.action }}</button>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sh.open }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ sh.close }}" style="position:absolute;inset:0;background:rgba(0,0,0,0.65);z-index:5"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;z-index:6;background:#141414;border-radius:32px 32px 0 0;padding:12px 18px 40px;display:flex;flex-direction:column;gap:16px;color:#fff">
+        <div style="width:44px;height:4px;border-radius:2px;background:#3A3A3A;align-self:center"></div>
+        <sc-if value="{{ sh.isStatus }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family:'Space Mono',monospace;font-size:22px;letter-spacing:-0.6px">Application status</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ sh.opts }}" as="o" hint-placeholder-count="5">
+              <button onClick="{{ o.onClick }}" style="height:54px;border-radius:18px;border:1.5px solid {{ o.bc }};background:{{ o.bg }};display:flex;align-items:center;gap:14px;padding:0 16px;font-family:'Space Grotesk',sans-serif;font-size:16px;color:#fff;cursor:pointer;text-align:left">
+                <div style="flex:1">{{ o.label }}</div>
+                <div style="width:22px;height:22px;border-radius:50%;border:2px solid {{ o.bc }};display:flex;align-items:center;justify-content:center;box-sizing:border-box"><div style="width:10px;height:10px;border-radius:50%;background:{{ o.dot }}"></div></div>
+              </button>
+            </sc-for>
+          </div>
+          <button onClick="{{ sh.onSaveStatus }}" style="height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Save status</button>
+        </sc-if>
+        <sc-if value="{{ sh.isDelete }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#FF6A2B;border-radius:24px;height:140px;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center">
+            <div style="margin-bottom:-44px"><dc-import name="Paige" tf="rotate(-4deg)" eye-w="11px" eye-h="13px" eye-t="translateY(4px)" sad="{{ true }}" arms="{{ false }}" hint-size="124px,154px"></dc-import></div>
+          </div>
+          <div style="font-family:'Space Mono',monospace;font-size:22px;letter-spacing:-0.6px;line-height:1.15">Delete your account?</div>
+          <div style="font-size:14px;line-height:1.5;color:#C8C8C8;text-wrap:pretty">{{ sh.delText }}</div>
+          <label style="background:#000;border:1.5px solid #333;border-radius:16px;padding:10px 16px;display:flex;flex-direction:column;gap:4px">
+            <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.6px;text-transform:uppercase;color:#A6A6A6">Type DELETE to confirm</div>
+            <input value="{{ sh.del }}" onChange="{{ sh.onDel }}" placeholder="DELETE" style="background:transparent;border:none;outline:none;color:#fff;font-family:'Space Mono',monospace;font-size:16px;padding:2px 0">
+          </label>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button onClick="{{ sh.onDelete }}" style="height:56px;border:none;border-radius:999px;background:#FF6A2B;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:14px;cursor:pointer;opacity:{{ sh.delOpacity }}">Delete account</button>
+            <button onClick="{{ sh.close }}" style="height:56px;border:none;border-radius:999px;background:#242424;color:#fff;font-family:'Space Mono',monospace;font-size:14px;cursor:pointer">Keep my account</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sh.isPayFail }}" hint-placeholder-val="{{ false }}">
+          <div style="width:56px;height:56px;border-radius:50%;background:#FF6A2B;color:#0A0A0A;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:26px;font-weight:700">!</div>
+          <div style="font-family:'Space Mono',monospace;font-size:22px;letter-spacing:-0.6px;line-height:1.15">Payment didn't<br>go through</div>
+          <div style="font-size:14px;line-height:1.5;color:#C8C8C8">You weren't charged. Try again, or pick another payment method.</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button onClick="{{ sh.onRetryPay }}" style="height:56px;border:none;border-radius:999px;background:#A3F43F;color:#0A0A0A;font-family:'Space Mono',monospace;font-size:15px;cursor:pointer">Try again</button>
+            <button onClick="{{ sh.close }}" style="height:56px;border:none;border-radius:999px;background:#242424;color:#fff;font-family:'Space Mono',monospace;font-size:14px;cursor:pointer">Cancel</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+    <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:124px;height:4px;border-radius:2px;background:{{ statusInk }};z-index:10"></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;storyDuration&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:5,&quot;min&quot;:3,&quot;max&quot;:10,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;},&quot;autoplay&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  TODAY = '10 Oct';
+  JD = "Associate Analyst, Northwind GCC\nBengaluru · Hybrid · Full-time\n\nAbout the role\nYou'll join the Finance Analytics team supporting business partners across EMEA. You'll build and maintain Power BI dashboards, write SQL against large datasets, and turn findings into clear recommendations for senior stakeholders.\n\nWhat you'll need\n• 2+ years in analytics or finance\n• Strong SQL and Excel\n• Power BI or Tableau\n• Financial reporting and variance analysis\n• Experience presenting to senior stakeholders\n\nNice to have\n• Python\n• Forecasting models";
+  RESUME_TXT = "Priya Deshmukh\npriya.deshmukh@gmail.com · +91 98200 41736 · Pune\n\nBusiness Analyst, Infosys (Jul 2022 – now)\n• Built dashboards in Power BI for monthly reports, cut prep time 40%.\n• Wrote SQL pipelines over 20M+ rows of transaction data.\n\nData Analyst Intern, Tata Digital (Jun 2021 – )\n• Built forecasting models in Python for category demand.\n• Automated weekly Excel reports for 5 business teams.\n\nFinance Associate, Bajaj Finserv (Jun 2020 – May 2021)\n• Reconciled ledgers and prepared month-end close packs.\n\nSkills: SQL, Excel, Power BI, Python, Tableau…";
+  ROLES = [
+    { title: 'Business Analyst', company: 'Infosys', start: 'Jul 2022', end: '', bullets: ['Built dashboards in Power BI for monthly reports, cut prep time 40%.', 'Wrote SQL pipelines over 20M+ rows of transaction data.'] },
+    { title: 'Data Analyst Intern', company: 'Tata Digital', start: 'Jun 2021', end: 'May 2022', bullets: ['Built forecasting models in Python for category demand.', 'Automated weekly Excel reports for 5 business teams.'] },
+    { title: 'Finance Associate', company: 'Bajaj Finserv', start: 'Jun 2020', end: 'May 2021', bullets: ['Reconciled ledgers and prepared month-end close packs.'] },
+  ];
+  SKILLS = ['SQL', 'Excel', 'Power BI', 'Python', 'Forecasting', 'Tableau', 'Financial modelling', 'Data cleaning', 'Dashboards', 'Pandas', 'Reconciliation', 'Month-end close', 'Looker', 'A/B testing', 'Budgeting', 'Reporting', 'Presenting', 'Stakeholder updates'];
+  LISTS = {
+    summary: { title: 'Summary', note: 'Your starting point. Each tailored resume adapts it to the job.', add: '', items: ['Finance analyst with 4 years of SQL, Power BI and Excel work across banking and retail.'] },
+    education: { title: 'Education', note: '', add: '+ Add education', items: ['B.Com, Finance · Symbiosis College, Pune · 2020'] },
+    achievements: { title: 'Achievements', note: 'Numbers help. Paige pulls the most relevant ones into each resume.', add: '+ Add achievement', items: ['Cut monthly reporting prep time by 40%', 'Built 12 dashboards used by 3 regional teams', 'Automated reports for 5 business teams', 'Top performer award, Infosys 2023', 'Led intern onboarding for 6 hires', 'Closed books 2 days faster each month'] },
+  };
+  PACKS = [{ n: 5, price: '₹199', per: '₹40 per resume' }, { n: 15, price: '₹449', per: '₹30 per resume', best: true }, { n: 40, price: '₹999', per: '₹25 per resume' }];
+  STATUSES = ['Saved', 'Applied', 'Interview', 'Offer', 'Rejected'];
+  FMTS = ['Name_Company_Role', 'Name_Role', 'Name_Resume'];
+  NW = { id: 'nw', title: 'Associate Analyst', company: 'Northwind GCC', loc: 'Bengaluru · Hybrid', match: 92, status: 'Saved', on: '', initial: 'N', color: '#F7A940', file: 'Priya-Deshmukh_Northwind-GCC_Associate-Analyst.pdf' };
+
+  fresh() {
+    return { screen: 'signin', stack: [], toast: null, jl: null, idx: 0, t: 0, paused: false, signingIn: false, readP: 0, fixed: false, linkedin: '', liDraft: '', jd: '', jdError: false, analyzing: false, anP: 0, ans: null, tailP: 0, tab: 'resume', apps: [], ledger: [], cur: null, sheet: null, statusPick: 'Saved', del: '', pack: 1, paying: false, followups: true, product: false, pageSize: 'A4', nameFmt: 0, failTailor: false, failPay: false, payReturn: null, exportSnap: { c: 0, free: true }, skills: [...this.SKILLS], skillDraft: '', roleIdx: 0, roleCurrent: true, extraBullets: 0, section: 'summary', extraItems: 0 };
+  }
+  returning() {
+    return { ...this.fresh(), screen: 'home', fixed: true, ans: 'yes', cur: 'nw', exportSnap: { c: 3, free: false },
+      ledger: [
+        { label: 'Free first resume', sub: 'Welcome · 2 Oct', amt: 1 },
+        { label: 'Data Analyst', sub: 'Halden Retail · 4 Oct', amt: -1 },
+        { label: 'Bought 5 credits', sub: '₹199 · 5 Oct', amt: 5 },
+        { label: 'Business Analyst', sub: 'Kestrel Bank · 6 Oct', amt: -1 },
+        { label: 'Associate Analyst', sub: 'Northwind GCC · 8 Oct', amt: -1 },
+      ],
+      apps: [
+        { ...this.NW, status: 'Applied', on: '8 Oct' },
+        { id: 'kb', title: 'Business Analyst', company: 'Kestrel Bank', loc: 'Mumbai · On-site', match: 88, status: 'Interview', on: '6 Oct', initial: 'K', color: '#A3F43F', file: 'Priya-Deshmukh_Kestrel-Bank_Business-Analyst.pdf' },
+        { id: 'hr', title: 'Data Analyst', company: 'Halden Retail', loc: 'Pune · Remote', match: 85, status: 'Saved', on: '', initial: 'H', color: '#5AA9F8', file: 'Priya-Deshmukh_Halden-Retail_Data-Analyst.pdf' },
+      ] };
+  }
+  state = this.fresh();
+  now = performance.now();
+
+  componentDidMount() {
+    let last = performance.now();
+    const loop = (now) => { const dt = Math.min(64, now - last); last = now; this.now = now; this.tick(dt); this.raf = requestAnimationFrame(loop); };
+    this.raf = requestAnimationFrame(loop);
+  }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); clearTimeout(this.tt); clearTimeout(this.st); clearTimeout(this.pt); }
+
+  tick(dt) {
+    const s = this.state, u = {};
+    if (s.screen === 'signin' && !s.paused && !s.signingIn && (this.props.autoplay ?? true)) {
+      const dur = (this.props.storyDuration ?? 5) * 1000;
+      let t = s.t + dt / dur, idx = s.idx;
+      if (t >= 1) { t = 0; idx = (idx + 1) % 3; }
+      u.t = t; u.idx = idx;
+    }
+    if (s.screen === 'reading') { const p = s.readP + dt / 3500; if (p >= 1) { u.readP = 1; u.screen = 'review'; } else u.readP = p; }
+    if (s.analyzing) { const p = s.anP + dt / 2200; if (p >= 1) { u.analyzing = false; u.anP = 0; u.stack = [...s.stack, s.screen]; u.screen = 'jobResult'; } else u.anP = p; }
+    if (s.screen === 'tailoring') { const p = s.tailP + dt / 4000; if (p >= 1) Object.assign(u, this.finishTailor(s)); else u.tailP = p; }
+    this.setState(u);
+  }
+  finishTailor(s) {
+    if (s.failTailor) return { screen: 'tailorFail', tailP: 0, failTailor: false };
+    const hasEx = s.ans === 'yes' || s.ans === 'few';
+    const prev = s.apps.find(a => a.id === 'nw');
+    const nw = { ...(prev || this.NW), match: hasEx ? 92 : 84 };
+    return { screen: 'tailored', tailP: 0, tab: 'resume', cur: 'nw', apps: [nw, ...s.apps.filter(a => a.id !== 'nw')], ledger: [...s.ledger, { label: 'Associate Analyst', sub: 'Northwind GCC · ' + this.TODAY, amt: -1 }] };
+  }
+
+  credits(s = this.state) { return s.ledger.reduce((a, l) => a + l.amt, 0); }
+  curApp(s = this.state) { return s.apps.find(a => a.id === s.cur) || s.apps[0] || null; }
+  go = (screen, extra = {}) => this.setState(s => ({ stack: [...s.stack, s.screen], screen, sheet: null, ...extra }));
+  swap = (screen, extra = {}) => this.setState({ screen, sheet: null, ...extra });
+  back = () => this.setState(s => { const stack = [...s.stack]; const prev = stack.pop(); return { stack, screen: prev || (s.apps.length || s.fixed ? 'home' : 'upload'), sheet: null, analyzing: false, paying: false }; });
+  root = (screen, extra = {}) => this.setState({ stack: [], screen, sheet: null, ...extra });
+  toast = (text, action, onAction) => { clearTimeout(this.tt); this.setState({ toast: { text, action, onAction } }); this.tt = setTimeout(() => this.setState({ toast: null }), 3200); };
+
+  signIn = () => {
+    if (this.state.signingIn) return;
+    this.setState({ signingIn: true });
+    clearTimeout(this.st);
+    this.st = setTimeout(() => {
+      const s = this.state;
+      if (s.apps.length || s.fixed) this.root('home', { signingIn: false });
+      else this.root('upload', { signingIn: false, ledger: s.ledger.length ? s.ledger : [{ label: 'Free first resume', sub: 'Welcome · ' + this.TODAY, amt: 1 }] });
+    }, 900);
+  };
+  setStatus = (id, status) => this.setState(s => ({ apps: s.apps.map(a => a.id === id ? { ...a, status, on: status === 'Saved' ? '' : this.TODAY } : a) }));
+  markApplied = () => {
+    const a = this.curApp(); if (!a) return;
+    const prev = a.status;
+    this.setStatus(a.id, 'Applied');
+    this.toast('Applied, marked on ' + this.TODAY, 'Undo', () => { this.setStatus(a.id, prev); this.setState({ toast: null }); });
+  };
+  startTailor = () => this.credits() > 0 ? this.go('question', { ans: null }) : this.go('paywall', { payReturn: 'question' });
+  newApp = () => this.go('job', { jd: '', jdError: false, ans: null, tab: 'resume' });
+  analyze = () => { if (this.state.jd.trim().length < 200) this.setState({ jdError: true }); else this.setState({ analyzing: true, anP: 0, jdError: false }); };
+  exportPdf = () => {
+    const s = this.state;
+    const spends = s.ledger.filter(l => l.amt < 0).length, bought = s.ledger.some(l => l.label.startsWith('Bought'));
+    this.go('exported', { exportSnap: { c: this.credits(), free: spends === 1 && !bought } });
+  };
+  buy = () => {
+    if (this.state.paying) return;
+    this.setState({ paying: true });
+    clearTimeout(this.pt);
+    this.pt = setTimeout(() => {
+      const s = this.state;
+      if (s.failPay) { this.setState({ paying: false, sheet: 'payFail', failPay: false }); return; }
+      const pk = this.PACKS[s.pack];
+      const ledger = [...s.ledger, { label: `Bought ${pk.n} credits`, sub: `${pk.price} · ${this.TODAY}`, amt: pk.n }];
+      if (s.payReturn) this.setState({ ledger, paying: false, screen: s.payReturn, payReturn: null, ans: null });
+      else this.setState(x => { const stack = [...x.stack]; const prev = stack.pop() || 'home'; return { ledger, paying: false, stack, screen: prev }; });
+      this.toast(`${pk.n} credits added`);
+    }, 1200);
+  };
+  jump = (label, screen, extra = {}, needData = false) => this.setState(s => {
+    const base = needData ? this.returning() : {};
+    return { ...base, screen, toast: null, sheet: null, paused: false, analyzing: false, paying: false, signingIn: false, jl: label, ...extra };
+  });
+
+  index() {
+    const Q = ['job', 'jobResult', 'question'];
+    return [
+      { name: 'Onboarding', items: [
+        ['Sign in', 'signin', () => this.jump('Sign in', 'signin', { stack: [] })],
+        ['Sign-in cancelled', 'signin', () => { this.jump('Sign-in cancelled', 'signin', { stack: [] }); this.toast('Sign-in cancelled. Nothing was saved.', 'Retry', () => { this.setState({ toast: null }); this.signIn(); }); }],
+        ['Upload resume', 'upload', () => this.jump('Upload resume', 'upload', { stack: [] })],
+        ['Unreadable file', 'uploadError', () => this.jump('Unreadable file', 'uploadError', { stack: ['upload'] })],
+        ['Paste resume', 'pasteResume', () => this.jump('Paste resume', 'pasteResume', { stack: ['upload'] })],
+        ['Fill in myself', 'manual', () => this.jump('Fill in myself', 'manual', { stack: ['upload'] })],
+        ['Reading', 'reading', () => this.jump('Reading', 'reading', { stack: ['upload'], readP: 0 })],
+        ['Review profile', 'review', () => this.jump('Review profile', 'review', { stack: ['upload'], fixed: false })],
+      ] },
+      { name: 'Job & tailor', items: [
+        ['Add job', 'job', () => this.jump('Add job', 'job', { stack: [], jd: '', jdError: false })],
+        ['Import link', 'jobLink', () => this.jump('Import link', 'jobLink', { stack: ['job'] })],
+        ['Not a job post', 'job', () => this.jump('Not a job post', 'job', { stack: [], jd: 'Hey Priya! Saw this role at Northwind and thought of you. Want a referral?', jdError: true })],
+        ['Job analyzed', 'jobResult', () => this.jump('Job analyzed', 'jobResult', { stack: ['job'], jd: this.JD }, true)],
+        ['Quick question', 'question', () => this.jump('Quick question', 'question', { stack: ['job', 'jobResult'], ans: null }, true)],
+        ['Tailoring', 'tailoring', () => this.jump('Tailoring', 'tailoring', { stack: Q, tailP: 0, ans: 'yes' }, true)],
+        ['Tailoring failed', 'tailorFail', () => this.jump('Tailoring failed', 'tailorFail', { stack: Q }, true)],
+        ['Tailored resume', 'tailored', () => this.jump('Tailored resume', 'tailored', { stack: Q, ans: 'yes', tab: 'resume', cur: 'nw' }, true)],
+        ['Edit resume', 'editResume', () => this.jump('Edit resume', 'editResume', { stack: [...Q, 'tailored'], ans: 'yes', cur: 'nw' }, true)],
+        ['Exported', 'exported', () => this.setState(s => { const base = this.returning(); const apps = base.apps.map(a => a.id === 'nw' ? { ...a, status: 'Saved', on: '' } : a); return { ...base, apps, screen: 'exported', stack: ['tailored'], cur: 'nw', sheet: null, toast: null, jl: 'Exported', exportSnap: { c: this.credits({ ledger: base.ledger }), free: false } }; })],
+      ] },
+      { name: 'App', items: [
+        ['Home', 'home', () => this.jump('Home', 'home', { stack: [] }, true)],
+        ['Empty home', 'home', () => this.jump('Empty home', 'home', { stack: [], apps: [], fixed: true, ledger: [{ label: 'Free first resume', sub: 'Welcome · ' + this.TODAY, amt: 1 }] })],
+        ['Application', 'appDetail', () => this.jump('Application', 'appDetail', { stack: ['home'], cur: 'nw' }, true)],
+        ['Status sheet', 'appDetail', () => this.jump('Status sheet', 'appDetail', { stack: ['home'], cur: 'kb', sheet: 'status', statusPick: 'Interview' }, true)],
+        ['Profile', 'profile', () => this.jump('Profile', 'profile', { stack: [] }, true)],
+        ['Experience', 'experience', () => this.jump('Experience', 'experience', { stack: ['profile'] }, true)],
+        ['Edit role', 'editRole', () => this.jump('Edit role', 'editRole', { stack: ['profile', 'experience'], roleIdx: 1, roleCurrent: false, extraBullets: 0 }, true)],
+        ['Contact', 'editContact', () => this.jump('Contact', 'editContact', { stack: ['profile'] }, true)],
+        ['Skills', 'skills', () => this.jump('Skills', 'skills', { stack: ['profile'] }, true)],
+        ['Settings', 'settings', () => this.jump('Settings', 'settings', { stack: ['profile'] }, true)],
+        ['Delete account', 'settings', () => this.jump('Delete account', 'settings', { stack: ['profile'], sheet: 'delete', del: '' }, true)],
+        ['Credits', 'credits', () => this.jump('Credits', 'credits', { stack: ['profile', 'settings'] }, true)],
+        ['Out of credits', 'paywall', () => this.setState({ ...this.fresh(), fixed: true, screen: 'paywall', stack: ['job', 'jobResult'], payReturn: 'question', jd: this.JD, jl: 'Out of credits', ledger: [{ label: 'Free first resume', sub: 'Welcome · ' + this.TODAY, amt: 1 }, { label: 'Associate Analyst', sub: 'Northwind GCC · ' + this.TODAY, amt: -1 }], apps: [{ ...this.NW, status: 'Applied', on: this.TODAY }], cur: 'nw', ans: 'yes' })],
+        ['Payment failed', 'paywall', () => this.jump('Payment failed', 'paywall', { stack: ['home'], sheet: 'payFail', payReturn: null }, true)],
+      ] },
+    ];
+  }
+
+  renderVals() {
+    const s = this.state, c = this.credits(), scr = s.screen, noop = () => {};
+    const is = {};
+    ['signin', 'upload', 'uploadError', 'pasteResume', 'manual', 'reading', 'review', 'job', 'jobLink', 'jobResult', 'question', 'tailoring', 'tailorFail', 'tailored', 'editResume', 'exported', 'home', 'appDetail', 'profile', 'experience', 'editRole', 'editContact', 'skills', 'listEdit', 'settings', 'credits', 'paywall'].forEach(k => { is[k] = scr === k; });
+    const hasEx = s.ans === 'yes' || s.ans === 'few';
+    const ap = this.curApp() || this.NW;
+    const SS = { Saved: ['#5AA9F8', 'transparent', '#5AA9F8'], Applied: ['#F7A940', 'transparent', '#F7A940'], Interview: ['#0A0A0A', '#A3F43F', '#A3F43F'], Offer: ['#0A0A0A', '#F7A940', '#F7A940'], Rejected: ['#A6A6A6', 'transparent', '#444'] };
+    const chip = (k) => ({ sc: SS[k][0], sbg: SS[k][1], sbc: SS[k][2] });
+    const bob = (ph) => Math.sin(this.now / 420 + ph) * 5;
+    const bt = (base, ph) => `${base} translateY(${bob(ph).toFixed(1)}px)`;
+    const spin = `rotate(${((this.now / 2.5) % 360).toFixed(0)}deg)`;
+    const comp = (s.fixed ? 96 : 90) + (s.linkedin ? 4 : 0);
+    const SB = ['#5AA9F8', '#F7A940', '#A3F43F'];
+
+    const EX = [
+      { tf: 'rotate(4deg)', lift: -46, ew: 14, eh: 19, ex: 0, mw: 22, mh: 12 },
+      { tf: 'translateX(56px) rotate(-8deg)', lift: 10, ew: 11, eh: 15, ex: -4, mw: 16, mh: 8 },
+      { tf: 'translateX(-30px) rotate(-5deg)', lift: 16, ew: 18, eh: 6, ex: 0, mw: 30, mh: 15 },
+    ];
+    const e = EX[s.idx];
+    const st = {
+      bars: [0, 1, 2].map(i => ({ w: (i < s.idx ? 100 : i === s.idx ? s.t * 100 : 0) + '%' })),
+      s0: s.idx === 0, s1: s.idx === 1, s2: s.idx === 2, step: (s.idx + 1) + ' of 3',
+      hint: s.paused ? 'Paused' : 'Tap · hold',
+      pT: `${e.tf} translateY(${(e.lift + bob(0)).toFixed(1)}px)`,
+      eyeW: e.ew + 'px', eyeH: e.eh + 'px', eyeT: `translateX(${e.ex}px)`, mouthW: e.mw + 'px', mouthH: e.mh + 'px',
+      gLabel: s.signingIn ? 'Signing in…' : 'Continue with Google',
+      onDown: () => { this.downAt = performance.now(); this.setState({ paused: true }); },
+      onUp: (ev) => {
+        const held = performance.now() - (this.downAt || 0);
+        const r = ev.currentTarget.getBoundingClientRect();
+        const d = (ev.clientX - r.left) < r.width / 3 ? -1 : 1;
+        this.setState(x => held < 250 ? { paused: false, idx: (x.idx + d + 3) % 3, t: 0 } : { paused: false });
+      },
+      onLeave: () => this.state.paused && this.setState({ paused: false }),
+      signIn: this.signIn,
+    };
+
+    const T = {
+      upload: { steps: 1 }, uploadError: { steps: 1, back: 1 }, pasteResume: { steps: 1, back: 1 }, manual: { steps: 1, back: 1 }, reading: { steps: 1, noBack: 1 }, review: { steps: 1, back: 1 },
+      job: { steps: 2 }, jobLink: { steps: 2, back: 1 }, jobResult: { steps: 2, back: 1 }, question: { steps: 3, back: 1 }, tailoring: { steps: 3, noBack: 1 }, tailorFail: { steps: 3, back: 1 }, tailored: { steps: 3, back: 1 },
+      editResume: { back: 1, title: 'Resume', action: 'Save', onAction: () => { this.back(); this.toast('Changes saved'); } },
+      exported: { close: 1, onClose: () => this.root('home') },
+      appDetail: { back: 1, title: 'Application' }, experience: { back: 1, title: 'Profile' },
+      editRole: { back: 1, title: 'Experience', action: 'Save', onAction: () => { this.back(); this.toast('Role saved'); } },
+      editContact: { back: 1, title: 'Profile', action: 'Save', onAction: () => { this.setState(x => ({ linkedin: x.liDraft })); this.back(); this.toast('Contact saved'); } },
+      skills: { back: 1, title: 'Profile', action: 'Done', onAction: () => { this.back(); this.toast('Skills saved'); } },
+      listEdit: { back: 1, title: 'Profile', action: 'Save', onAction: () => { this.back(); this.toast('Saved'); } },
+      settings: { back: 1, title: 'Profile' }, credits: { back: 1, title: 'Settings' },
+      paywall: { close: 1, onClose: this.back },
+    };
+    const tc = T[scr];
+    const top = tc ? {
+      show: true, back: !tc.noBack && !tc.close && (!!tc.back || s.stack.length > 0), close: !!tc.close, onClose: tc.onClose || noop,
+      steps: !!tc.steps, hasTitle: !!tc.title, title: tc.title || '', hasAction: !!tc.action, action: tc.action || '', onAction: tc.onAction || noop,
+    } : { show: false };
+    const steps = ['Profile', 'Job', 'Tailor'].map((l, i) => {
+      const n = i + 1, cur = tc && tc.steps;
+      return n < cur ? { label: '✓ ' + l, bg: '#1C1C1C', ink: '#A3F43F' } : n === cur ? { label: n + ' ' + l, bg: '#A3F43F', ink: '#0A0A0A' } : { label: n + ' ' + l, bg: '#1C1C1C', ink: '#A6A6A6' };
+    });
+
+    const up = {
+      onUpload: () => this.go('reading', { readP: 0 }), onRetry: () => this.swap('reading', { readP: 0 }),
+      onPaste: () => this.go('pasteResume'), onPasteSwap: () => this.swap('pasteResume'), onManual: () => this.go('manual'),
+      onRead: () => this.swap('reading', { readP: 0 }), onManualDone: () => this.go('review'),
+    };
+    const manualFields = [
+      { label: 'Full name', value: 'Priya Deshmukh', ph: '' }, { label: 'Email', value: 'priya.deshmukh@gmail.com', ph: '' },
+      { label: 'Phone', value: '', ph: '+91' }, { label: 'City', value: '', ph: 'e.g. Pune' },
+      { label: 'Current or last job title', value: '', ph: 'e.g. Business Analyst' }, { label: 'Company', value: '', ph: 'e.g. Infosys' },
+    ];
+    const RR = [['Contact details', 'Found'], ['Work experience', '3 roles'], ['Education', '1 degree'], ['Skills', s.skills.length + ' found'], ['Achievements', '6 found']];
+    const rd = {
+      pct: Math.round(s.readP * 100) + '%',
+      rows: RR.map(([name, m], i) => { const done = s.readP >= (i + 1) / 5, active = !done && s.readP >= i / 5; return { name, meta: done ? m : active ? 'Reading…' : '', done, active, pending: !done && !active, c: done || active ? '#fff' : '#7A7A7A', mc: done ? '#A3F43F' : '#A6A6A6' }; }),
+    };
+    const roles = this.ROLES.map((r, i) => {
+      const missing = i === 1 && !s.fixed;
+      return { ...r, dates: missing ? 'Jun 2021 – end date?' : `${r.start} – ${r.end || 'Now'}`, dc: missing ? '#F7A940' : '#A6A6A6', onClick: () => this.go('editRole', { roleIdx: i, roleCurrent: !r.end, extraBullets: 0 }) };
+    });
+    const goContact = () => this.go('editContact', { liDraft: this.state.linkedin });
+    const rv = {
+      comp: comp + '%', needFix: !s.fixed, isFixed: s.fixed, needLi: !s.linkedin,
+      skills: s.skills.slice(0, 5), more: '+' + Math.max(0, s.skills.length - 5), skillsLabel: 'Skills · ' + s.skills.length,
+      onFix: () => this.setState({ fixed: true }), onContact: goContact, onExp: () => this.go('experience'), onSkills: () => this.go('skills'),
+      ctaBg: s.fixed ? '#A3F43F' : '#222', ctaInk: s.fixed ? '#0A0A0A' : '#7A7A7A',
+      onContinue: () => this.state.fixed ? this.go('job', { jd: '', jdError: false }) : this.toast('Add the missing end date first'),
+    };
+
+    const hasText = s.jd.length > 0;
+    const jb = {
+      text: s.jd, empty: !hasText, hasText, detected: hasText && !s.jdError && s.jd.trim().length >= 200, error: s.jdError,
+      chars: s.jd.length.toLocaleString() + ' characters', analyzing: s.analyzing, canAnalyze: hasText && !s.analyzing,
+      anPct: Math.round(s.anP * 100) + '%', pT: bt('rotate(-6deg)', 1),
+      onText: (ev) => this.setState({ jd: ev.target.value, jdError: false }),
+      onPaste: () => this.setState({ jd: this.JD, jdError: false }), onLink: () => this.go('jobLink'),
+      onClear: () => this.setState({ jd: '', jdError: false }), onAnalyze: this.analyze,
+      onImport: () => { this.setState(x => ({ jd: this.JD, jdError: false, screen: 'job', stack: x.stack.slice(0, -1) })); this.toast('Imported from careers.northwind.example'); },
+    };
+    const jr = {
+      have: ['SQL', 'Power BI', 'Excel', 'Python', 'Forecasting'], miss: ['Stakeholder mgmt', 'Financial reporting', 'Variance analysis'],
+      note: c > 0 ? `Uses 1 credit · you have ${c}` : 'No credits left · get more to continue', onTailor: this.startTailor,
+    };
+    const q = {
+      opts: [['yes', 'Yes, regularly'], ['few', 'A few times'], ['no', 'Not yet']].map(([k, l]) => ({ label: l, bc: s.ans === k ? '#A3F43F' : '#2A2A2A', bg: s.ans === k ? '#141A0A' : '#111', dot: s.ans === k ? '#A3F43F' : 'transparent', onClick: () => this.setState({ ans: k }) })),
+      showDetail: hasEx, ctaBg: s.ans && s.ans !== 'skip' ? '#A3F43F' : '#222', ctaInk: s.ans && s.ans !== 'skip' ? '#0A0A0A' : '#7A7A7A', pT: bt('rotate(6deg)', 2),
+      onContinue: () => this.state.ans && this.state.ans !== 'skip' ? this.go('tailoring', { tailP: 0 }) : this.toast('Pick an answer, or skip'),
+      onSkip: () => this.go('tailoring', { ans: 'skip', tailP: 0 }),
+    };
+    const TS = ['Matching 8 keywords', 'Rewriting bullets', hasEx ? 'Adding your example' : 'Checking must-haves', 'Fitting to 1 page'];
+    const tg = {
+      pct: Math.round(s.tailP * 100) + '%',
+      rows: TS.map((name, i) => { const done = s.tailP >= (i + 1) / 4, active = !done && s.tailP >= i / 4; return { name, done, active, pending: !done && !active, c: done || active ? '#fff' : '#7A7A7A' }; }),
+      pT: `rotate(${(Math.sin(this.now / 300) * 4).toFixed(1)}deg) translateY(${(Math.sin(this.now / 210) * 6).toFixed(1)}px)`,
+    };
+    const tf = { onRetry: () => this.swap('tailoring', { tailP: 0 }) };
+    const summary = hasEx ? 'Finance analyst with 4 years turning SQL and Power BI work into decisions for senior stakeholders.' : 'Finance analyst with 4 years turning SQL and Power BI work into clear decisions for finance teams.';
+    const changes = [
+      { area: 'Summary', kind: 'New', hasBefore: false, before: '', after: summary, src: hasEx ? 'Your answer' : 'Your resume', srcC: hasEx ? '#F7A940' : '#A3F43F' },
+      { area: 'Infosys', kind: 'Rewritten', hasBefore: true, before: this.ROLES[0].bullets[0], after: 'Built Power BI dashboards for monthly financial reporting, cutting prep time by 40%.', src: 'Your resume', srcC: '#A3F43F' },
+      ...(hasEx ? [{ area: 'Infosys', kind: 'Added', hasBefore: false, before: '', after: 'Presented monthly variance analysis to the CFO and regional finance heads.', src: 'Your answer', srcC: '#F7A940' }] : []),
+      { area: 'Skills', kind: hasEx ? 'Reordered' : 'Reordered', hasBefore: false, before: '', after: hasEx ? 'SQL, Power BI and Excel moved up. Variance analysis added.' : 'SQL, Power BI and Excel moved to the top.', src: hasEx ? 'Your answer' : 'Your resume', srcC: hasEx ? '#F7A940' : '#A3F43F' },
+    ];
+    const tr = {
+      match: hasEx ? '92' : '84', hasEx, summary, changes, changesLabel: 'Changes · ' + changes.length,
+      skillsLine: hasEx ? 'SQL · Power BI · Excel · Variance analysis · Python · Forecasting · Tableau' : 'SQL · Power BI · Excel · Python · Forecasting · Tableau',
+      isResume: s.tab === 'resume', isChanges: s.tab === 'changes',
+      rBg: s.tab === 'resume' ? '#fff' : 'transparent', rInk: s.tab === 'resume' ? '#0A0A0A' : '#C8C8C8',
+      cBg: s.tab === 'changes' ? '#fff' : 'transparent', cInk: s.tab === 'changes' ? '#0A0A0A' : '#C8C8C8',
+      onTabR: () => this.setState({ tab: 'resume' }), onTabC: () => this.setState({ tab: 'changes' }),
+      onEdit: () => this.go('editResume'), onExport: this.exportPdf,
+    };
+    const er = { bullets: [
+      { text: 'Built Power BI dashboards for monthly financial reporting, cutting prep time by 40%.', src: 'From your resume', srcC: '#A3F43F' },
+      ...(hasEx ? [{ text: 'Presented monthly variance analysis to the CFO and regional finance heads.', src: 'From your answer', srcC: '#F7A940' }] : []),
+      { text: 'Wrote SQL pipelines over 20M+ rows of transaction data.', src: 'From your resume', srcC: '#A3F43F' },
+    ] };
+    const soon = () => this.toast('Coming soon');
+    const openStatus = () => this.setState({ sheet: 'status', statusPick: (this.curApp() || this.NW).status });
+    const ex = {
+      c: String(s.exportSnap.c),
+      text: s.exportSnap.free ? 'Free resume used. 0 credits left. Nothing was charged.' : `${s.exportSnap.c} left, was ${s.exportSnap.c + 1}. Credits never expire.`,
+      file: ap.file, savedTo: `${ap.title}, ${ap.company}`, isSaved: ap.status === 'Saved', notSaved: ap.status !== 'Saved', status: ap.status, on: ap.on, ...chip(ap.status),
+      onApplied: this.markApplied, onChange: openStatus, onShare: () => this.toast('Opening share options…'), onOpen: () => this.toast('Opening PDF…'), onSoon: soon, onDone: () => this.root('home'),
+    };
+
+    const SEGC = { Saved: '#5AA9F8', Applied: '#F7A940', Interview: '#A3F43F', Offer: '#E9E8E4', Rejected: '#555' };
+    const hm = {
+      empty: s.apps.length === 0, has: s.apps.length > 0, count: String(s.apps.length), credits: c + (c === 1 ? ' credit' : ' credits'),
+      segs: this.STATUSES.map(k => ({ k, n: s.apps.filter(a => a.status === k).length })).filter(x => x.n).map(x => ({ n: x.n, color: SEGC[x.k], label: `${x.k} ${x.n}` })),
+      apps: s.apps.map(a => ({ ...a, ...chip(a.status), meta: `${a.company} · ${a.match} match`, onClick: () => this.go('appDetail', { cur: a.id }) })),
+      onCredits: () => this.go('credits'), onAvatar: () => this.root('profile'), onNew: this.newApp, pT: bt('rotate(5deg)', 3),
+    };
+    const ad = {
+      ...ap, ...chip(ap.status), statusLine: ap.on ? 'on ' + ap.on : 'Not applied yet',
+      onChange: openStatus, onShare: () => this.toast('Opening share options…'), onOpen: () => this.toast('Opening PDF…'),
+      onRetailor: this.startTailor, onViewJob: () => this.go('jobResult', { jd: this.JD }), onSoon: soon,
+    };
+    const openList = (k) => () => this.go('listEdit', { section: k, extraItems: 0 });
+    const pr = {
+      comp: comp + '%', onGear: () => this.go('settings'), onReplace: () => this.go('upload'),
+      rows: [
+        { label: 'Contact', meta: '', hasTag: false, onClick: goContact },
+        { label: 'Summary', meta: '', hasTag: false, onClick: openList('summary') },
+        { label: 'Experience', meta: '3', hasTag: false, onClick: () => this.go('experience') },
+        { label: 'Education', meta: '1', hasTag: false, onClick: openList('education') },
+        { label: 'Skills', meta: String(s.skills.length), hasTag: false, onClick: () => this.go('skills') },
+        { label: 'Achievements', meta: '6', hasTag: false, onClick: openList('achievements') },
+        { label: 'LinkedIn & links', meta: s.linkedin ? 'Added' : '', hasTag: !s.linkedin, onClick: goContact },
+      ],
+    };
+    const xp = { onAdd: () => this.go('editRole', { roleIdx: -1, roleCurrent: false, extraBullets: 0 }) };
+    const R = s.roleIdx >= 0 ? this.ROLES[s.roleIdx] : { title: '', company: '', start: '', end: '', bullets: [''] };
+    const role = {
+      heading: s.roleIdx >= 0 ? 'Edit role' : 'Add role', title: R.title, company: R.company, start: R.start,
+      end: s.roleCurrent ? '' : (s.roleIdx === 1 && !s.fixed ? '' : R.end), endPh: s.roleCurrent ? 'Present' : 'Mon YYYY', endOp: s.roleCurrent ? '0.4' : '1',
+      tBg: s.roleCurrent ? '#A3F43F' : '#333', tJust: s.roleCurrent ? 'flex-end' : 'flex-start', tKnob: s.roleCurrent ? '#0A0A0A' : '#A6A6A6',
+      onToggle: () => this.setState(x => ({ roleCurrent: !x.roleCurrent })),
+      bullets: [...R.bullets, ...Array(s.extraBullets).fill('')].map(t => ({ text: t })),
+      onAdd: () => this.setState(x => ({ extraBullets: x.extraBullets + 1 })),
+      canDelete: s.roleIdx >= 0, onDelete: () => { this.back(); this.toast('Role deleted'); },
+    };
+    const ct = {
+      fields: [{ label: 'Full name', value: 'Priya Deshmukh' }, { label: 'Phone', value: '+91 98200 41736' }, { label: 'City', value: 'Pune, India' }],
+      li: s.liDraft, onLi: (ev) => this.setState({ liDraft: ev.target.value }), liBorder: s.linkedin ? 'transparent' : '#F7A940',
+    };
+    const sk = {
+      count: s.skills.length + ' skills', draft: s.skillDraft, onDraft: (ev) => this.setState({ skillDraft: ev.target.value }),
+      onAdd: () => { const v = this.state.skillDraft.trim(); if (v) this.setState(x => ({ skills: [v, ...x.skills], skillDraft: '' })); },
+      chips: s.skills.map((k, i) => ({ label: k, onRemove: () => this.setState(x => ({ skills: x.skills.filter((_, j) => j !== i) })) })),
+    };
+    const L = this.LISTS[s.section] || this.LISTS.summary;
+    const le = { title: L.title, note: L.note, hasNote: !!L.note, add: L.add, canAdd: !!L.add, items: [...L.items, ...Array(s.extraItems).fill('')].map(t => ({ text: t })), onAdd: () => this.setState(x => ({ extraItems: x.extraItems + 1 })) };
+    const tog = (on) => ({ bg: on ? '#A3F43F' : '#333', just: on ? 'flex-end' : 'flex-start', knob: on ? '#0A0A0A' : '#A6A6A6' });
+    const se = {
+      credits: c + ' left', page: s.pageSize, fmt: this.FMTS[s.nameFmt],
+      toggles: [
+        { label: 'Follow-up reminders', ...tog(s.followups), onClick: () => this.setState(x => ({ followups: !x.followups })) },
+        { label: 'Product updates', ...tog(s.product), onClick: () => this.setState(x => ({ product: !x.product })) },
+      ],
+      onCredits: () => this.go('credits'), onPage: () => this.setState(x => ({ pageSize: x.pageSize === 'A4' ? 'Letter' : 'A4' })),
+      onFmt: () => this.setState(x => ({ nameFmt: (x.nameFmt + 1) % this.FMTS.length })),
+      onData: () => this.toast("We'll email your data to priya.deshmukh@gmail.com within 24 hours"),
+      onHelp: () => this.toast('Opening email to support…'), onDelete: () => this.setState({ sheet: 'delete', del: '' }),
+      onSignOut: () => { this.root('signin', { idx: 0, t: 0 }); this.toast('Signed out'); },
+    };
+    const cr = {
+      c: String(c), onBuy: () => this.go('paywall', { payReturn: null }),
+      history: [...s.ledger].reverse().map(l => ({ ...l, amtText: (l.amt > 0 ? '+' : '−') + Math.abs(l.amt), amtC: l.amt > 0 ? '#A3F43F' : '#fff' })),
+    };
+    const pk = this.PACKS[s.pack];
+    const pw = {
+      label: c === 0 ? '0 credits left' : `${c} credit${c === 1 ? '' : 's'} left`, pT: bt('rotate(5deg)', 4),
+      packs: this.PACKS.map((p, i) => ({ ...p, best: !!p.best, bc: s.pack === i ? '#A3F43F' : '#2A2A2A', bg: s.pack === i ? '#141A0A' : '#111', dot: s.pack === i ? '#A3F43F' : 'transparent', onClick: () => this.setState({ pack: i }) })),
+      buyLabel: s.paying ? 'Processing…' : `Buy ${pk.n} credits · ${pk.price}`, onBuy: this.buy, onRestore: () => this.toast('No previous purchases found'),
+    };
+    const delOk = s.del.trim().toUpperCase() === 'DELETE';
+    const n = s.apps.length;
+    const sh = {
+      open: !!s.sheet, isStatus: s.sheet === 'status', isDelete: s.sheet === 'delete', isPayFail: s.sheet === 'payFail',
+      close: () => this.setState({ sheet: null }),
+      opts: this.STATUSES.map(k => ({ label: k, bc: s.statusPick === k ? '#A3F43F' : '#3A3A3A', bg: s.statusPick === k ? '#141A0A' : '#1A1A1A', dot: s.statusPick === k ? '#A3F43F' : 'transparent', onClick: () => this.setState({ statusPick: k }) })),
+      onSaveStatus: () => { const a = this.curApp(); const pick = this.state.statusPick; if (a) this.setStatus(a.id, pick); this.setState({ sheet: null }); this.toast('Status set to ' + pick); },
+      del: s.del, onDel: (ev) => this.setState({ del: ev.target.value }), delOpacity: delOk ? '1' : '0.4',
+      delText: `This removes your profile, ${n} tailored resume${n === 1 ? '' : 's'} and your application history. Your ${c} unused credit${c === 1 ? '' : 's'} will be lost. This can't be undone.`,
+      onDelete: () => { if (!this.state.del.trim() || this.state.del.trim().toUpperCase() !== 'DELETE') return; this.setState(this.fresh()); this.toast('Account deleted'); },
+      onRetryPay: () => { this.setState({ sheet: null }); this.buy(); },
+    };
+    const toast = s.toast ? { show: true, text: s.toast.text, hasAction: !!s.toast.action, action: s.toast.action || '', onAction: s.toast.onAction || noop } : { show: false, text: '', hasAction: false, action: '', onAction: noop };
+    const showTabs = is.home || is.profile;
+    const tabs = { home: () => this.root('home'), add: this.newApp, profile: () => this.root('profile'), homeC: is.home ? '#A3F43F' : '#7A7A7A', profC: is.profile ? '#A3F43F' : '#7A7A7A' };
+
+    const groups = this.index().map(g => ({
+      name: g.name,
+      items: g.items.map(([label, screen, fn], _, arr) => {
+        const matches = arr.filter(x => x[1] === s.screen).map(x => x[0]);
+        const active = screen === s.screen && (s.jl === label || (!matches.includes(s.jl) && matches[0] === label));
+        return { label, go: fn, bg: active ? '#0A0A0A' : '#fff', ink: active ? '#fff' : '#1A1A1A', bc: active ? '#0A0A0A' : '#D6D5D0' };
+      }),
+    }));
+
+    return {
+      is, st, top, steps, up, manualFields, rd, roles, rv, jb, jr, q, tg, tf, tr, er, ex, hm, ad, pr, xp, role, ct, sk, le, se, cr, pw, sh, toast, tabs, showTabs, groups, spin,
+      resumeTxt: this.RESUME_TXT, bobA: bt('rotate(4deg)', 0), back: this.back,
+      phoneBg: is.signin ? SB[s.idx] : '#000', statusInk: is.signin ? '#0A0A0A' : '#fff',
+      presetNew: () => this.setState(this.fresh()), presetReturning: () => this.setState({ ...this.returning(), jl: 'Home' }),
+    };
+  }
+}
+</script>
+</body>
+</html>
