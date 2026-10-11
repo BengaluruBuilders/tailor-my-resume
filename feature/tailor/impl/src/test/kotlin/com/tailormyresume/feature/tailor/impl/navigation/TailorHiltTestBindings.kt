@@ -1,12 +1,14 @@
 package com.tailormyresume.feature.tailor.impl.navigation
 
 import com.tailormyresume.core.data.repository.ContentReportRepository
+import com.tailormyresume.core.data.repository.NoRemoteLedger
+import com.tailormyresume.core.data.repository.RemoteLedgerSource
 import com.tailormyresume.core.data.repository.StoredContentReportRepository
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
+import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.TailoredResume
 import com.tailormyresume.feature.tailor.impl.document.AndroidResumeHeadings
 import com.tailormyresume.feature.tailor.impl.document.ResumeHeadings
@@ -37,6 +39,9 @@ internal abstract class TailorHiltTestBindings {
     @Binds
     abstract fun bindContentReports(impl: StoredContentReportRepository): ContentReportRepository
 
+    @Binds
+    abstract fun bindRemoteLedgerSource(impl: NoRemoteLedger): RemoteLedgerSource
+
     companion object {
         @Provides
         fun provideResumeTailor(): ResumeTailor = object : ResumeTailor {
@@ -45,7 +50,7 @@ internal abstract class TailorHiltTestBindings {
                 job: JobDescription,
                 gap: GapAnalysis,
                 applicationId: String,
-                section: EntryCategory?,
+                answer: QuickAnswer?,
             ): TailoredResume = error("tailoring is not part of this test")
         }
     }

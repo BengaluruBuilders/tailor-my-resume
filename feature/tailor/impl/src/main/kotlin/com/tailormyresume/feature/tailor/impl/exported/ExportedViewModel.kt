@@ -182,6 +182,8 @@ internal class ExportedViewModel @AssistedInject constructor(
             when (entry.kind) {
                 CreditLedgerKind.FREE_GRANT -> freeBalance += entry.amount
                 CreditLedgerKind.PURCHASE -> Unit
+                CreditLedgerKind.REFUND -> Unit
+                CreditLedgerKind.MIGRATION -> Unit
                 CreditLedgerKind.SPEND -> {
                     val cost = -entry.amount
                     val freeUsed = minOf(cost, freeBalance).coerceAtLeast(0)
