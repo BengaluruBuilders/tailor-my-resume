@@ -1,8 +1,10 @@
 package com.tailormyresume.feature.onboarding.impl.signin
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tailormyresume.core.domain.SignInResult
 import org.junit.Rule
@@ -33,6 +35,24 @@ class SignInNarrowScreenshotTest {
 
     @Test
     fun story1() = captureStory(0)
+
+    @Test
+    fun story2() = captureStory(1)
+
+    @Test
+    fun story2KeepsSignInAvailableAtNarrowFont200() {
+        val story = SignInStoryState()
+        composeRule.showSignIn(fontScale = NARROW_DEVICE.fontScale) {
+            SignInScreen(SignInUiState.Ready, onContinueWithGoogle = {}, story = story)
+        }
+        composeRule.runOnIdle { story.step(1) }
+
+        composeRule.onNodeWithText(
+            "We compare your profile with the job description to show relevant skills and gaps.",
+        ).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Sign in to get started.").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Continue with Google").performScrollTo().assertIsDisplayed()
+    }
 
     @Test
     fun story3() = captureStory(2)

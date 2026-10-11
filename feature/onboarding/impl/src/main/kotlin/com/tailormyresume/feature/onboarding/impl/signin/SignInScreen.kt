@@ -1,6 +1,8 @@
 package com.tailormyresume.feature.onboarding.impl.signin
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
@@ -37,15 +41,20 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastAction
@@ -61,6 +70,17 @@ internal object SignInTags {
 private const val HINT_ALPHA = 0.6f
 private const val ART_HEIGHT_FRACTION = 0.4f
 private val ART_MIN_HEIGHT = 300.dp
+private val GOOGLE_OUTLINE = Color(0xFF747775)
+private val GOOGLE_TEXT = Color(0xFF1F1F1F)
+
+@OptIn(ExperimentalTextApi::class)
+private val googleSans = FontFamily(
+    Font(
+        R.font.google_sans,
+        weight = FontWeight.Medium,
+        variationSettings = FontVariation.Settings(FontVariation.weight(500)),
+    ),
+)
 
 @Composable
 internal fun SignInRoute(
@@ -103,6 +123,14 @@ internal fun SignInScreen(
                 StoryPanel(story, (screenHeight * ART_HEIGHT_FRACTION).coerceAtLeast(ART_MIN_HEIGHT))
                 Spacer(Modifier.weight(1f))
                 Spacer(Modifier.height(18.dp))
+                Text(
+                    stringResource(R.string.feature_onboarding_impl_signin_sign_in_caption),
+                    Modifier.fillMaxWidth(),
+                    TmrTheme.colors.ink.copy(alpha = HINT_ALPHA),
+                    style = TmrTheme.typography.label,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(8.dp))
                 GoogleButton(uiState, onContinueWithGoogle)
                 Spacer(Modifier.height(10.dp))
                 Footer(Modifier.padding(bottom = 34.dp))
@@ -154,7 +182,7 @@ private fun StoryPanel(story: SignInStoryState, artHeight: Dp, modifier: Modifie
                 Modifier.fillMaxWidth().padding(top = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(label.uppercase(), Modifier.weight(1f), ink, style = typography.label)
+                Text(label.uppercase(), Modifier.weight(2f), ink, style = typography.label)
                 Text(
                     hint.uppercase(),
                     Modifier.weight(1f),
@@ -172,40 +200,37 @@ private fun StoryPanel(story: SignInStoryState, artHeight: Dp, modifier: Modifie
 
 @Composable
 private fun GoogleButton(uiState: SignInUiState, onClick: () -> Unit) {
-    val colors = TmrTheme.colors
     val signingIn = uiState == SignInUiState.SigningIn
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .clip(CircleShape)
-            .background(colors.ink)
+            .background(Color.White)
+            .border(1.dp, GOOGLE_OUTLINE, CircleShape)
             .clickable(enabled = !signingIn, role = Role.Button, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(30.dp).background(colors.paper, CircleShape), contentAlignment = Alignment.Center) {
-            Text(
-                stringResource(R.string.feature_onboarding_impl_signin_google_mark),
-                color = GOOGLE_BLUE,
-                style = TmrTheme.typography.mono14,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+        Image(
+            painterResource(R.drawable.feature_onboarding_impl_google_g_logo),
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            contentScale = ContentScale.Fit,
+        )
         Text(
             stringResource(
                 if (signingIn) R.string.feature_onboarding_impl_signin_signing_in else R.string.feature_onboarding_impl_signin_google,
             ),
-            Modifier.weight(1f, fill = false),
-            colors.paper,
-            style = TmrTheme.typography.mono14,
-            textAlign = TextAlign.Center,
+            color = GOOGLE_TEXT,
+            fontFamily = googleSans,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            lineHeight = 20.sp,
         )
     }
 }
-
-private val GOOGLE_BLUE = Color(0xFF4285F4)
 
 @Composable
 private fun Footer(modifier: Modifier = Modifier) {

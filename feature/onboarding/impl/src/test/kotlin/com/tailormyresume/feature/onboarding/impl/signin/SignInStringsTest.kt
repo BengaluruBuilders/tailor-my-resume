@@ -16,8 +16,8 @@ class SignInStringsTest {
     }
 
     @Test
-    fun keywordStickerNamesKeywordsNotMatch() {
-        assertThat(strings).contains("92% keywords")
+    fun jobStickerDoesNotPromiseAResult() {
+        assertThat(strings).contains("For this job")
     }
 
     @Test

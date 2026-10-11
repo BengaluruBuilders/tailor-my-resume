@@ -26,7 +26,11 @@ class SignInScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private val headlines = listOf("Upload your resume", "Paste the job you want", "Get a resume made for it")
+    private val headlines = listOf(
+        "Your experience, in one place",
+        "What the job needs",
+        "A resume tailored to the job",
+    )
 
     private fun show(story: SignInStoryState, uiState: SignInUiState = SignInUiState.Ready, onContinue: () -> Unit = {}) =
         composeRule.showSignIn { SignInScreen(uiState, onContinue, story = story) }
@@ -44,8 +48,10 @@ class SignInScreenTest {
         headlines.forEachIndexed { index, headline ->
             stepTo(story, index)
             composeRule.onNodeWithText(headline).assertIsDisplayed()
-            composeRule.onNodeWithText("Paige · ${index + 1} of 3", ignoreCase = true).assertIsDisplayed()
+            composeRule.onNodeWithText("How it works · ${index + 1} of 3", ignoreCase = true).assertIsDisplayed()
             composeRule.onNodeWithText("Tap · hold", ignoreCase = true).assertIsDisplayed()
+            composeRule.onNodeWithText("Sign in to get started.").assertIsDisplayed()
+            composeRule.onNodeWithText("Continue with Google").assertIsDisplayed()
         }
     }
 
@@ -56,7 +62,7 @@ class SignInScreenTest {
 
         composeRule.mainClock.advanceTimeBy(5_300)
 
-        composeRule.onNodeWithText("Paige · 2 of 3", ignoreCase = true).assertIsDisplayed()
+        composeRule.onNodeWithText("How it works · 2 of 3", ignoreCase = true).assertIsDisplayed()
     }
 
     @Test
@@ -66,7 +72,7 @@ class SignInScreenTest {
 
         composeRule.mainClock.advanceTimeBy(12_000)
 
-        composeRule.onNodeWithText("Paige · 1 of 3", ignoreCase = true).assertIsDisplayed()
+        composeRule.onNodeWithText("How it works · 1 of 3", ignoreCase = true).assertIsDisplayed()
     }
 
     @Test
@@ -93,12 +99,12 @@ class SignInScreenTest {
         composeRule.showSignIn { SignInScreen(SignInUiState.Ready, onContinueWithGoogle = {}) }
 
         composeRule.mainClock.advanceTimeBy(5_300)
-        composeRule.onNodeWithText("Paige · 2 of 3", ignoreCase = true).assertIsDisplayed()
+        composeRule.onNodeWithText("How it works · 2 of 3", ignoreCase = true).assertIsDisplayed()
 
         composeRule.mainClock.autoAdvance = true
         composeRule.onNodeWithTag(SignInTags.STORY_TOUCH, useUnmergedTree = true)
             .performTouchInput { click(percentOffset(0.9f, 0.5f)) }
-        composeRule.onNodeWithText("Paige · 3 of 3", ignoreCase = true).assertIsDisplayed()
+        composeRule.onNodeWithText("How it works · 3 of 3", ignoreCase = true).assertIsDisplayed()
     }
 
     @Test
@@ -109,18 +115,18 @@ class SignInScreenTest {
         composeRule.onNodeWithTag(SignInTags.STORY_TOUCH, useUnmergedTree = true)
             .performTouchInput { click(percentOffset(0.1f, 0.5f)) }
 
-        composeRule.onNodeWithText("Paige · 3 of 3", ignoreCase = true).assertIsDisplayed()
+        composeRule.onNodeWithText("How it works · 3 of 3", ignoreCase = true).assertIsDisplayed()
     }
 
     @Test
-    fun story3ShowsKeywordSticker() {
+    fun story3ShowsJobPurposeSticker() {
         val story = SignInStoryState()
         show(story)
-        composeRule.onNodeWithText("92% keywords").assertDoesNotExist()
+        composeRule.onNodeWithText("For this job").assertDoesNotExist()
 
         stepTo(story, 2)
 
-        composeRule.onNodeWithText("92% keywords").assertIsDisplayed()
+        composeRule.onNodeWithText("For this job").assertIsDisplayed()
         composeRule.onNodeWithText("match", substring = true, ignoreCase = true).assertDoesNotExist()
     }
 
@@ -140,6 +146,16 @@ class SignInScreenTest {
         composeRule.onNodeWithText("Continue with Google").performTouchInput { click() }
 
         assertThat(taps).isEqualTo(1)
+    }
+
+    @Test
+    fun signingInDoesNotTapContinue() {
+        var taps = 0
+        show(SignInStoryState(), SignInUiState.SigningIn) { taps += 1 }
+
+        composeRule.onNodeWithText("Signing in…").performTouchInput { click() }
+
+        assertThat(taps).isEqualTo(0)
     }
 
     @Test
@@ -164,7 +180,7 @@ class SignInScreenTest {
     fun noEllipsisAtFont200() {
         composeRule.showSignIn(fontScale = 2f) { SignInScreen(SignInUiState.Ready, onContinueWithGoogle = {}) }
 
-        val node = composeRule.onNodeWithText("Upload your resume").fetchSemanticsNode()
+        val node = composeRule.onNodeWithText("Your experience, in one place").fetchSemanticsNode()
         val layouts = mutableListOf<TextLayoutResult>()
         node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts)
         assertThat(layouts).isNotEmpty()
@@ -178,8 +194,8 @@ class SignInScreenTest {
 
         val config = composeRule.onNodeWithTag(SignInTags.STORY).fetchSemanticsNode().config
         val description = config[SemanticsProperties.ContentDescription].joinToString(" ")
-        assertThat(description).contains("Upload your resume")
-        assertThat(description).contains("PDF or DOCX")
+        assertThat(description).contains("Your experience, in one place")
+        assertThat(description).contains("We build your profile from your resume")
         assertThat(description).contains("1 of 3")
         val labels = config[SemanticsActions.CustomActions].map { it.label }
         assertThat(labels).containsExactly("Next story", "Previous story")
@@ -187,7 +203,7 @@ class SignInScreenTest {
         composeRule.runOnUiThread {
             config[SemanticsActions.CustomActions].first { it.label == "Next story" }.action()
         }
-        composeRule.onNodeWithText("Paige · 2 of 3", ignoreCase = true).assertIsDisplayed()
+        composeRule.onNodeWithText("How it works · 2 of 3", ignoreCase = true).assertIsDisplayed()
     }
 
     private fun tapFooterWord(word: String) {

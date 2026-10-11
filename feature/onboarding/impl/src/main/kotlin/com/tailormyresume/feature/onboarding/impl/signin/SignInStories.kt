@@ -162,7 +162,7 @@ private fun HighlightBar(fraction: Float) {
 private fun BoxScope.TailoredArt() {
     val colors = TmrTheme.colors
     TmrSticker(
-        stringResource(R.string.feature_onboarding_impl_signin_sticker_keywords),
+        stringResource(R.string.feature_onboarding_impl_signin_sticker_for_job),
         Modifier.align(Alignment.TopEnd).offset(y = 14.dp),
         rotationDegrees = 10f,
     )
