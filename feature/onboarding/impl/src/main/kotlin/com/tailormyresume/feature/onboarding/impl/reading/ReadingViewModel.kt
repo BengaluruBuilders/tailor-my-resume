@@ -6,7 +6,7 @@ import com.tailormyresume.core.common.network.TmrDispatchers
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.domain.ResumeTextParser
 import com.tailormyresume.core.domain.onboarding.SaveImportedProfileUseCase
-import com.tailormyresume.core.domain.onboarding.looksLikeName
+import com.tailormyresume.core.domain.onboarding.personNameOrNull
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.FactSource
@@ -148,7 +148,7 @@ internal class ReadingViewModel @Inject constructor(
 
     private fun doneRows(parsed: CandidateProfile): List<ReadingRowUi> = ReadingRowKind.entries.map { kind ->
         val count = when (kind) {
-            ReadingRowKind.Contact -> listOf(parsed.fullName.takeIf(::looksLikeName).orEmpty(), parsed.email, parsed.phone).count { it.isNotBlank() }
+            ReadingRowKind.Contact -> listOf(personNameOrNull(parsed.fullName).orEmpty(), parsed.email, parsed.phone).count { it.isNotBlank() }
             ReadingRowKind.Experience -> parsed.entries.countRoles(EntryCategory.EXPERIENCE)
             ReadingRowKind.Education -> parsed.entries.countRoles(EntryCategory.EDUCATION)
             ReadingRowKind.Skills -> parsed.skills.size

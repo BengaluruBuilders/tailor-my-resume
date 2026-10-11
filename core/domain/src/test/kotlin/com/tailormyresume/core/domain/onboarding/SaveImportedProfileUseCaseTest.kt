@@ -200,6 +200,62 @@ class SaveImportedProfileUseCaseTest {
     }
 
     @Test
+    fun userStatedContactKeepsItsBlankLinksHeadlineAndSummary() = runTest {
+        repository.sendProfile(profile(fullName = "Asha Rao", entries = emptyList()))
+        val parsed = profile(
+            fullName = "Priya Deshmukh",
+            linkedinUrl = "https://linkedin.example.com/priya",
+            portfolioUrl = "https://portfolio.example.com/priya",
+            headline = "Product Analyst",
+            summary = "Priya's summary.",
+            entries = listOf(entry("x1", EntryCategory.EXPERIENCE)),
+        )
+
+        useCase.invoke(parsed, "resume.pdf")
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(listOf(saved.fullName, saved.linkedinUrl, saved.portfolioUrl, saved.headline, saved.summary))
+            .containsExactly("Asha Rao", "", "", "", "").inOrder()
+    }
+
+    @Test
+    fun importedOnlyIdentityIsReplacedWholeIncludingLinksHeadlineAndSummary() = runTest {
+        repository.sendProfile(
+            profile(
+                fullName = "Asha Rao",
+                linkedinUrl = "https://linkedin.example.com/asha",
+                portfolioUrl = "https://portfolio.example.com/asha",
+                headline = "Old headline",
+                summary = "Asha's summary.",
+                entries = listOf(entry("W-01", EntryCategory.EXPERIENCE)),
+            ).copy(sourceFileName = "old.pdf"),
+        )
+        val parsed = profile(
+            fullName = "Priya Deshmukh",
+            linkedinUrl = "https://linkedin.example.com/priya",
+            entries = listOf(entry("x1", EntryCategory.EXPERIENCE)),
+        )
+
+        useCase.invoke(parsed, "new.pdf")
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(listOf(saved.fullName, saved.linkedinUrl, saved.portfolioUrl, saved.headline, saved.summary))
+            .containsExactly("Priya Deshmukh", "https://linkedin.example.com/priya", "", "", "").inOrder()
+    }
+
+    @Test
+    fun nameLineWithATitleAfterADashKeepsOnlyTheName() = runTest {
+        val parsed = profile(
+            fullName = "Priya Deshmukh - Product Analyst",
+            entries = listOf(entry("x1", EntryCategory.EXPERIENCE)),
+        )
+
+        useCase.invoke(parsed, "resume.pdf")
+
+        assertThat(checkNotNull(repository.observeProfile().first()).fullName).isEqualTo("Priya Deshmukh")
+    }
+
+    @Test
     fun looksLikeNameAcceptsNamesAndRejectsSentences() {
         listOf("Priya Deshmukh", "J. R. Smith", "Dr. Asha Rao", "Madonna").forEach {
             assertThat(looksLikeName(it)).isTrue()
@@ -213,6 +269,27 @@ class SaveImportedProfileUseCaseTest {
             "Priya Deshmukh 2026",
             "one two three four five six",
         ).forEach { assertThat(looksLikeName(it)).isFalse() }
+    }
+
+    @Test
+    fun personNameOrNullSplitsAtAStandaloneDashAndKeepsHyphens() {
+        mapOf(
+            "Priya Deshmukh - Product Analyst" to "Priya Deshmukh",
+            "Priya Deshmukh \u2013 Product Analyst" to "Priya Deshmukh",
+            "Priya Deshmukh \u2014 Product Analyst, Pune" to "Priya Deshmukh",
+            "Mary-Jane Watson" to "Mary-Jane Watson",
+        ).forEach { (line, name) -> assertThat(personNameOrNull(line)).isEqualTo(name) }
+        assertThat(personNameOrNull("- Product Analyst")).isNull()
+    }
+
+    @Test
+    fun personNameOrNullAcceptsDottedInitialsAndTitles() {
+        listOf("R.K. Sharma", "A.P.J. Abdul Kalam", "Prof. Asha Rao", "Smt. Lata Rao", "Mrs. Asha Rao").forEach {
+            assertThat(personNameOrNull(it)).isEqualTo(it)
+        }
+        listOf("Sharma. Rao", "Priya Deshmukh did this.", "Abcd.Efgh Rao").forEach {
+            assertThat(personNameOrNull(it)).isNull()
+        }
     }
 
     @Test
