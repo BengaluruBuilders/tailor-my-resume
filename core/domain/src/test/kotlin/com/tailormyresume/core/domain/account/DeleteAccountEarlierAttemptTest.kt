@@ -31,12 +31,14 @@ class DeleteAccountEarlierAttemptTest {
     private var deleteResult: Result<Unit> = Result.success(Unit)
     private var probe: Result<Boolean> = Result.success(true)
     private var uidAtServerCall: String? = null
+    private var serverDeleteCalls = 0
 
     private val deleter = object : ServerAccountDeleter {
         override val deletesRemoteData = true
 
         override suspend fun delete(): Result<Unit> {
             uidAtServerCall = marker.markerUid
+            serverDeleteCalls++
             return deleteResult
         }
 
@@ -105,6 +107,34 @@ class DeleteAccountEarlierAttemptTest {
         assertThat(result).isInstanceOf(AccountDeletionResult.Deleted::class.java)
         assertThat(finisher.runs).isEqualTo(1)
         assertThat(marker.current).isEqualTo(PendingWipeState.NONE)
+    }
+
+    @Test
+    fun retryAfterTheServerClosedTheAccountOnlyRetriesTheLocalWipe() = runTest {
+        marker.current = PendingWipeState.SERVER_CLOSED
+        marker.markerUid = "uid-a"
+        deleteResult = Result.failure(java.io.IOException("offline"))
+        probe = Result.failure(java.io.IOException("offline"))
+
+        val result = useCase()()
+
+        assertThat(result).isInstanceOf(AccountDeletionResult.Deleted::class.java)
+        assertThat(marker.history).doesNotContain(PendingWipeState.REQUESTED)
+        assertThat(finisher.runs).isEqualTo(1)
+        assertThat(marker.current).isEqualTo(PendingWipeState.NONE)
+    }
+
+    @Test
+    fun anOwnerlessServerClosedMarkerStillRunsTheServerDeleteForTheSignedInAccount() = runTest {
+        session.sendAccount(SignInAccount(id = "uid-b", displayName = "B", email = "b@example.com"))
+        marker.current = PendingWipeState.SERVER_CLOSED
+        marker.markerUid = null
+
+        val result = useCase()()
+
+        assertThat(serverDeleteCalls).isEqualTo(1)
+        assertThat(uidAtServerCall).isEqualTo("uid-b")
+        assertThat(result).isInstanceOf(AccountDeletionResult.Deleted::class.java)
     }
 
     @Test

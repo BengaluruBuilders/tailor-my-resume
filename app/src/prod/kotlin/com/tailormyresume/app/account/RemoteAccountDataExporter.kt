@@ -38,6 +38,7 @@ class RemoteAccountDataExporter internal constructor(
             onFailure = { UNAVAILABLE_PART },
         )
         val target = File(directory(), FILE_NAME)
+        target.parentFile?.listFiles()?.filter { it != target }?.forEach(File::deleteRecursively)
         withContext(ioDispatcher) { AccountDataArchiveWriter().write(data, target, mapOf(SERVER_ENTRY to serverPart)) }
         return AccountDataArchive(fileName = FILE_NAME, file = target)
     }

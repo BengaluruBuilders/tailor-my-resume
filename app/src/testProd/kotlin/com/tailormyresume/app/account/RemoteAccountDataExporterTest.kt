@@ -87,4 +87,15 @@ class RemoteAccountDataExporterTest : AccountDataExporterContractTest() {
 
         assertThat(entries(archive.file).getValue("server.json")).contains("could not be fetched")
     }
+
+    @Test
+    fun exportingRemovesAnEarlierArchiveFromItsOwnDirectory() = runTest {
+        server.enqueue(errorResponse(500, "INTERNAL_ERROR"))
+        val earlier = java.io.File(folder.root, "earlier-export.zip").apply { writeText("x") }
+
+        val archive = exporter(StandardTestDispatcher(testScheduler)).export(data)
+
+        assertThat(earlier.exists()).isFalse()
+        assertThat(archive.file.exists()).isTrue()
+    }
 }

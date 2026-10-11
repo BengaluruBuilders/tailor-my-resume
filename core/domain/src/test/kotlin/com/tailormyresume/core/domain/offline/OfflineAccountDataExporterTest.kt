@@ -19,6 +19,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
 import java.util.zip.ZipFile
 import kotlin.time.Instant
 
@@ -53,5 +54,25 @@ class OfflineAccountDataExporterTest : AccountDataExporterContractTest() {
             val applications = zip.getInputStream(zip.getEntry("applications.txt")).bufferedReader().readText()
             assertThat(applications).contains("a.pdf")
         }
+    }
+
+    @Test
+    fun exportingRemovesAnEarlierArchiveFromItsOwnDirectory() = runTest {
+        val earlier = File(folder.root, "earlier-export.zip").apply { writeText("x") }
+        val now = Instant.fromEpochMilliseconds(1_790_000_000_000)
+        val data = AccountData(
+            generatedAt = now,
+            account = null,
+            profile = null,
+            applications = emptyList(),
+            entitlement = PurchaseEntitlement(0, 0, emptyList()),
+            purchases = emptyList(),
+            exports = emptyList(),
+        )
+
+        val archive = createExporter().export(data)
+
+        assertThat(earlier.exists()).isFalse()
+        assertThat(archive.file.exists()).isTrue()
     }
 }

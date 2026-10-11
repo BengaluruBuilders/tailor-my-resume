@@ -39,6 +39,7 @@ fun TmrBottomSheet(
     onDismiss: () -> Unit,
     title: String,
     modifier: Modifier = Modifier,
+    dismissible: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val spacing = TmrTheme.spacing
@@ -54,12 +55,18 @@ fun TmrBottomSheet(
                 .fillMaxSize()
                 .background(TmrTheme.colors.scrim)
                 .testTag(TmrChromeTags.SCRIM)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClickLabel = stringResource(R.string.core_designsystem_chrome_dismiss),
-                    role = Role.Button,
-                    onClick = onDismiss,
+                .then(
+                    if (dismissible) {
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClickLabel = stringResource(R.string.core_designsystem_chrome_dismiss),
+                            role = Role.Button,
+                            onClick = onDismiss,
+                        )
+                    } else {
+                        Modifier
+                    },
                 ),
         )
         Column(
