@@ -121,7 +121,12 @@ class TailorResumeUseCaseTest {
         }
 
         val result = TailorResumeUseCase(tailor, allowAllGuard)(
-            analystProfile, analystJob, emptyGap, "app-1", "run-1", answer(detail = "$cfoDetail at Infosys"),
+            analystProfile,
+            analystJob,
+            emptyGap,
+            "app-1",
+            "run-1",
+            answer(detail = "$cfoDetail at Infosys"),
         )
 
         assertThat(result.bullets).isEmpty()
