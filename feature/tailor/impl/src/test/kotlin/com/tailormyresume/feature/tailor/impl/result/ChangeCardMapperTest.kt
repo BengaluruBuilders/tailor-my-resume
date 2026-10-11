@@ -252,17 +252,19 @@ class ChangeCardMapperTest {
                 gap: GapAnalysis,
                 applicationId: String,
                 answer: QuickAnswer?,
+                runId: String,
             ) = proposed
         }
         val useCase = TailorResumeUseCase(tailor, CleanFabricationGuard)
         val gap = GapAnalysis(emptyList(), KeywordCoverage(0, 0))
 
-        val unnamed = useCase(profile, job, gap, "app-1", quickAnswer = QuickAnswer("req-1", "YES_REGULARLY", detail))
+        val unnamed = useCase(profile, job, gap, "app-1", "run-1", quickAnswer = QuickAnswer("req-1", "YES_REGULARLY", detail))
         val named = useCase(
             profile,
             job,
             gap,
             "app-1",
+            "run-1",
             quickAnswer = QuickAnswer("req-1", "YES_REGULARLY", "$detail at Infosys"),
         )
 

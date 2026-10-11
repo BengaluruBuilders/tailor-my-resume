@@ -35,9 +35,9 @@ class RemoteResumeTailorV2ResultTest {
         backend.reply(202, result(""","summary":null""", ""","skills":{"ordered":[],"added":["Power BI"]}"""))
         backend.reply(202, result("", ""))
 
-        val full = tailor.tailor(profile, job, gap, "app-1", null)
-        val emptySkills = tailor.tailor(profile, job, gap, "app-1", null)
-        val missing = tailor.tailor(profile, job, gap, "app-1", null)
+        val full = tailor.tailor(profile, job, gap, "app-1", null, "run-1")
+        val emptySkills = tailor.tailor(profile, job, gap, "app-1", null, "run-1")
+        val missing = tailor.tailor(profile, job, gap, "app-1", null, "run-1")
 
         val summary = checkNotNull(full.summary)
         val skills = checkNotNull(full.skills)
@@ -62,7 +62,7 @@ class RemoteResumeTailorV2ResultTest {
             ),
         )
 
-        val resume = TailorResumeUseCase(tailor, AllowAllGuard)(profile, job, gap, "app-1")
+        val resume = TailorResumeUseCase(tailor, AllowAllGuard)(profile, job, gap, "app-1", "run-1")
 
         val summary = checkNotNull(resume.summary)
         assertThat(summary.text).isEqualTo("Data analyst with Excel.")
@@ -73,7 +73,7 @@ class RemoteResumeTailorV2ResultTest {
     fun aResolvableSummaryPassesThroughTheDeviceGuard() = runTest {
         backend.reply(202, result(summaryJson, ""))
 
-        val resume = TailorResumeUseCase(tailor, AllowAllGuard)(profile, job, gap, "app-1")
+        val resume = TailorResumeUseCase(tailor, AllowAllGuard)(profile, job, gap, "app-1", "run-1")
 
         val summary = checkNotNull(resume.summary)
         assertThat(summary.violations).isEmpty()
@@ -84,7 +84,7 @@ class RemoteResumeTailorV2ResultTest {
     fun unknownEditTypeDecodesAndIsDropped() = runTest {
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT).replace("\"REWORD\"", "\"SIMPLIFY\",\"REWORD\"")))
 
-        val bullet = tailor.tailor(profile, job, gap, "app-1", null).bullets.single()
+        val bullet = tailor.tailor(profile, job, gap, "app-1", null, "run-1").bullets.single()
 
         assertThat(bullet.editTypes).containsExactly(EditType.REWORD)
     }

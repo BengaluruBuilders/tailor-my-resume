@@ -88,6 +88,7 @@ fun TailoredResume.asDto() = TailoredResumeDto(
     entryIds = entryIds,
     summary = summary?.asDto(),
     skills = skills?.asDto(),
+    runId = runId,
 )
 
 fun TailoredResumeDto.asExternalModel() = TailoredResume(
@@ -95,4 +96,5 @@ fun TailoredResumeDto.asExternalModel() = TailoredResume(
     entryIds = entryIds,
     summary = summary?.asExternalModel(),
     skills = skills?.asExternalModel(),
+    runId = runId,
 )

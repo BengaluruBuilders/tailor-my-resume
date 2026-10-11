@@ -23,6 +23,7 @@ class OfflineResumeTailor @Inject constructor() : ResumeTailor {
         gap: GapAnalysis,
         applicationId: String,
         answer: QuickAnswer?,
+        runId: String,
     ): TailoredResume {
         val weights = keywordWeights(gap)
         val rewriter = BulletRewriter(weights.keys)

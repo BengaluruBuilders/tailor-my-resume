@@ -59,7 +59,7 @@ class CreateApplicationUseCaseTest {
     @Test
     fun whenTheTailorFails_savesNothingAndRethrowsTheTypedFailure() = runTest {
         val failing = object : ResumeTailor {
-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?): TailoredResume =
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?, runId: String): TailoredResume =
                 throw AiException(AiFailure.NoCredit)
         }
         val failingUseCase = CreateApplicationUseCase(

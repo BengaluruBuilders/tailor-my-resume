@@ -20,10 +20,11 @@ class GuardedResumeTailor @Inject constructor(
         gap: GapAnalysis,
         applicationId: String,
         answer: QuickAnswer?,
+        runId: String,
     ): TailoredResume =
         if (previewMode.active) {
-            offline.tailor(profile, job, gap, applicationId, answer)
+            offline.tailor(profile, job, gap, applicationId, answer, runId)
         } else {
-            remote.tailor(profile, job, gap, applicationId, answer)
+            remote.tailor(profile, job, gap, applicationId, answer, runId)
         }
 }

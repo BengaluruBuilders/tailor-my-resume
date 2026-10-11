@@ -55,7 +55,7 @@ class TailorResumeUseCaseTest {
 
     private suspend fun useCaseReturning(vararg bullets: TailoredBullet): TailorResumeUseCase {
         val tailor = object : ResumeTailor {
-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?) =
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?, runId: String) =
                 TailoredResume(bullets.toList())
         }
         return TailorResumeUseCase(tailor, OfflineFabricationGuard())
@@ -65,7 +65,7 @@ class TailorResumeUseCaseTest {
     fun cleanBulletKeepsProposedTextAndEditTypes() = runTest {
         val result = useCaseReturning(
             bullet("t1", "exp-1-b2", "Wrote unit tests with JUnit to improve reliability", "Wrote unit tests with JUnit to improve reliability"),
-        )(sampleProfile, emptyJob, emptyGap, "app-1")
+        )(sampleProfile, emptyJob, emptyGap, "app-1", "run-1")
 
         assertThat(result.bullets.single().violations).isEmpty()
         assertThat(result.bullets.single().editTypes).containsExactly(EditType.REWORD)
@@ -76,7 +76,7 @@ class TailorResumeUseCaseTest {
         val original = "Wrote unit tests with JUnit to improve reliability"
         val result = useCaseReturning(
             bullet("t1", "exp-1-b2", original, "Wrote 200 unit tests with JUnit to improve reliability"),
-        )(sampleProfile, emptyJob, emptyGap, "app-1")
+        )(sampleProfile, emptyJob, emptyGap, "app-1", "run-1")
 
         val fallback = result.bullets.single()
         assertThat(fallback.proposedText).isEqualTo(original)
@@ -89,7 +89,7 @@ class TailorResumeUseCaseTest {
         val original = "Assisted senior developers with code reviews on Git"
         val result = useCaseReturning(
             bullet("t1", "exp-1-b3", original, "Led senior developers with code reviews on Git"),
-        )(sampleProfile, emptyJob, emptyGap, "app-1")
+        )(sampleProfile, emptyJob, emptyGap, "app-1", "run-1")
 
         assertThat(result.bullets.single().proposedText).isEqualTo(original)
         assertThat(result.bullets.single().violations)
@@ -103,6 +103,7 @@ class TailorResumeUseCaseTest {
             emptyJob,
             emptyGap,
             "app-1",
+            "run-1",
         )
 
         assertThat(result.bullets).isEmpty()
@@ -116,6 +117,7 @@ class TailorResumeUseCaseTest {
             emptyJob,
             emptyGap,
             "app-1",
+            "run-1",
         )
 
         assertThat(result.bullets).isEmpty()
@@ -123,7 +125,7 @@ class TailorResumeUseCaseTest {
 
     @Test
     fun resultRecordsTheIdsOfTheConfirmedEntriesUsed() = runTest {
-        val result = useCaseReturning()(sampleProfile, emptyJob, emptyGap, "app-1")
+        val result = useCaseReturning()(sampleProfile, emptyJob, emptyGap, "app-1", "run-1")
 
         assertThat(result.entryIds).containsExactlyElementsIn(sampleProfile.entries.filter { it.isConfirmed }.map { it.id })
         assertThat(result.entryIds).doesNotContain("unconfirmed-1")
@@ -136,7 +138,7 @@ class TailorResumeUseCaseTest {
             bullet("t1", "exp-1-b2", text, text).copy(sourceIds = emptyList()),
             bullet("t2", "does-not-exist", "x", "y"),
             bullet("t3", "exp-1-b2", text, text),
-        )(sampleProfile, emptyJob, emptyGap, "app-1")
+        )(sampleProfile, emptyJob, emptyGap, "app-1", "run-1")
 
         assertThat(result.bullets.map { it.id }).containsExactly("t3")
     }
@@ -147,7 +149,7 @@ class TailorResumeUseCaseTest {
         val lying = bullet("t1", "exp-1-b2", "Led a team of 5", "Led a team of 50 to write tests")
             .copy(keywordsUsed = listOf("junit"))
 
-        val fallback = useCaseReturning(lying)(sampleProfile, emptyJob, emptyGap, "app-1").bullets.single()
+        val fallback = useCaseReturning(lying)(sampleProfile, emptyJob, emptyGap, "app-1", "run-1").bullets.single()
 
         assertThat(fallback.originalText).isEqualTo(profileText)
         assertThat(fallback.proposedText).isEqualTo(profileText)
@@ -161,7 +163,7 @@ class TailorResumeUseCaseTest {
         val profileText = "Wrote unit tests with JUnit to improve reliability"
         val clean = bullet("t1", "exp-1-b2", "tailor supplied text", profileText)
 
-        val result = useCaseReturning(clean)(sampleProfile, emptyJob, emptyGap, "app-1").bullets.single()
+        val result = useCaseReturning(clean)(sampleProfile, emptyJob, emptyGap, "app-1", "run-1").bullets.single()
 
         assertThat(result.originalText).isEqualTo(profileText)
         assertThat(result.violations).isEmpty()
@@ -173,7 +175,7 @@ class TailorResumeUseCaseTest {
         val result = useCaseReturning(
             bullet("t1", "exp-1-b2", cleanText, cleanText),
             bullet("t2", "exp-1-b3", "Assisted senior developers with code reviews on Git", "Managed senior developers with code reviews on Git"),
-        )(sampleProfile, emptyJob, emptyGap, "app-1")
+        )(sampleProfile, emptyJob, emptyGap, "app-1", "run-1")
 
         assertThat(result.bullets.map { it.violations.isEmpty() }).containsExactly(true, false).inOrder()
         assertThat(result.bullets[0].editTypes).containsExactly(EditType.REWORD)
@@ -188,7 +190,7 @@ class TailorResumeUseCaseTest {
                 emptyList<GuardrailViolation>().also { calls += proposedText to sources }
         }
         val tailor = object : ResumeTailor {
-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?) = TailoredResume(
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?, runId: String) = TailoredResume(
                 listOf(
                     bullet("t1", "exp-1-b2", "a", "a1"),
                     bullet("t2", "proj-1-b2", "b", "b1"),
@@ -196,7 +198,7 @@ class TailorResumeUseCaseTest {
             )
         }
 
-        TailorResumeUseCase(tailor, guard)(sampleProfile, emptyJob, emptyGap, "app-1")
+        TailorResumeUseCase(tailor, guard)(sampleProfile, emptyJob, emptyGap, "app-1", "run-1")
 
         assertThat(calls.map { it.first }).containsExactly("a1", "b1").inOrder()
         assertThat(calls.map { it.second.single().id }).containsExactly("exp-1-b2", "proj-1-b2").inOrder()
@@ -209,7 +211,7 @@ class TailorResumeUseCaseTest {
         val useCase = TailorResumeUseCase(OfflineResumeTailor(), OfflineFabricationGuard())
         jobDescriptionResources.forEach { resource ->
             val job = analyzer.analyze(resourceText(resource))
-            val resume = useCase(sampleProfile, job, matcher.match(sampleProfile, job), "app-1")
+            val resume = useCase(sampleProfile, job, matcher.match(sampleProfile, job), "app-1", "run-1")
             assertThat(resume.bullets).isNotEmpty()
             resume.bullets.forEach { assertThat(it.violations).isEmpty() }
         }
@@ -255,9 +257,9 @@ class TailorResumeUseCaseTest {
         job: JobDescription = analystJob,
     ): TailoredResume {
         val tailor = object : ResumeTailor {
-            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?) = proposed
+            override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?, runId: String) = proposed
         }
-        return TailorResumeUseCase(tailor, OfflineFabricationGuard())(analystProfile, job, emptyGap, "app-1", quickAnswer = quickAnswer)
+        return TailorResumeUseCase(tailor, OfflineFabricationGuard())(analystProfile, job, emptyGap, "app-1", "run-1", quickAnswer = quickAnswer)
     }
 
     private fun summary(text: String, vararg sourceIds: String, decision: BulletDecision = BulletDecision.PENDING) =

@@ -47,7 +47,7 @@ class SignOutCleanerTest {
         analysis.analyse(candidate, "the raw job text")
         reports.add(ContentReport("app-1", ReportedItemKind.REQUIREMENT, "req-1", "text", Instant.fromEpochMilliseconds(1), null))
         val tailoringIds = PendingTailoringIds(store, FixedIds)
-        val firstId = tailoringIds.idFor("app-1")
+        val firstId = tailoringIds.idFor("run-1", "app-1")
 
         credits.sendLedger(listOf(CreditLedgerEntry(CreditLedgerKind.PURCHASE, 5, null, "application_pack_5", Instant.fromEpochMilliseconds(1))))
         cleaner.clear()
@@ -55,7 +55,7 @@ class SignOutCleanerTest {
         assertThat(wallet.cached).isNull()
         assertThat(credits.observeBalance().first()).isEqualTo(0)
         assertThat(reports.pending()).isEmpty()
-        assertThat(tailoringIds.idFor("app-1")).isNotEqualTo(firstId)
+        assertThat(tailoringIds.idFor("run-1", "app-1")).isNotEqualTo(firstId)
         backend.reply(200, ANALYSIS_RESPONSE)
         analysis.analyse(candidate, "the raw job text")
         assertThat(backend.server.requestCount).isEqualTo(3)

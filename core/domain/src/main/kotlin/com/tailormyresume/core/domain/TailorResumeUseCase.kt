@@ -43,6 +43,7 @@ class TailorResumeUseCase @Inject constructor(
         job: JobDescription,
         gap: GapAnalysis,
         applicationId: String,
+        runId: String,
         quickAnswer: QuickAnswer? = null,
     ): TailoredResume {
         val evidence = Evidence(
@@ -53,7 +54,7 @@ class TailorResumeUseCase @Inject constructor(
             entryOfBullet = profile.confirmedWithinLimits().entries
                 .flatMap { entry -> entry.bullets.map { it.id to entry.id } }.toMap(),
         )
-        val proposed = tailor.tailor(profile, job, gap, applicationId, quickAnswer)
+        val proposed = tailor.tailor(profile, job, gap, applicationId, quickAnswer, runId)
         return TailoredResume(
             bullets = proposed.bullets.mapNotNull { verified(it, evidence, profile) },
             entryIds = profile.entries.filter { it.isConfirmed }.map { it.id },

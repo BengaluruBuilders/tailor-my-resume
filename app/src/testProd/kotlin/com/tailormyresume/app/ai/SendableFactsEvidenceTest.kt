@@ -48,7 +48,7 @@ class SendableFactsEvidenceTest {
         val gap = GapAnalysis(listOf(matchOf(evidence = arrayOf(FACT_ID))), KeywordCoverage(1, 1))
         val tailor = RemoteResumeTailor(backend.api, PendingTailoringIds(TestMockStateStore(), FixedIds))
 
-        val resume = tailor.tailor(crowdedProfile, job, gap, "app-1", null)
+        val resume = tailor.tailor(crowdedProfile, job, gap, "app-1", null, "run-1")
 
         assertThat(resume.bullets.single().originalText).isEqualTo(FACT_TEXT)
     }

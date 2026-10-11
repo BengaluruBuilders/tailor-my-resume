@@ -13,5 +13,6 @@ interface ResumeTailor {
         gap: GapAnalysis,
         applicationId: String,
         answer: QuickAnswer?,
+        runId: String,
     ): TailoredResume
 }
