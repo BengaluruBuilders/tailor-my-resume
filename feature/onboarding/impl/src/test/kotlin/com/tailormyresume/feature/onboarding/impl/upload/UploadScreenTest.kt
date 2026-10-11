@@ -1,12 +1,14 @@
 package com.tailormyresume.feature.onboarding.impl.upload
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.screenshot.TmrTestDevices
+import com.tailormyresume.feature.onboarding.impl.signin.NARROW_QUALIFIERS
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,5 +55,18 @@ class UploadScreenTest {
         composeRule.onNodeWithText("Fill in myself").performClick()
 
         assertThat(calls).containsExactly("upload", "paste", "manual").inOrder()
+    }
+
+    @Test
+    @Config(qualifiers = NARROW_QUALIFIERS)
+    fun textActionsStackOnANarrowScreenAtFontScale115() {
+        composeRule.showFlowScreen(fontScale = 1.15f) {
+            UploadScreen(onUploadClick = {}, onPasteClick = {}, onManualClick = {})
+        }
+
+        val paste = composeRule.onNodeWithText("Paste as text").getUnclippedBoundsInRoot()
+        val manual = composeRule.onNodeWithText("Fill in myself").getUnclippedBoundsInRoot()
+        assertThat(manual.top).isGreaterThan(paste.top)
+        assertThat(manual.left).isEqualTo(paste.left)
     }
 }

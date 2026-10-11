@@ -38,7 +38,7 @@ import com.tailormyresume.feature.onboarding.api.navigation.ReadingNavKey
 import com.tailormyresume.feature.onboarding.impl.R
 import com.tailormyresume.feature.onboarding.impl.importresume.resumeMimeTypes
 
-private const val STACK_ACTIONS_FONT_SCALE = 1.3f
+private const val STACK_ACTIONS_FONT_SCALE = 1.1f
 private val HERO_MIN_HEIGHT = 290.dp
 private val HERO_EXTRA_PER_FONT_STEP = 140.dp
 
