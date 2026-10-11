@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_onboarding_impl_review_title">Your profile</string>
+    <string name="feature_onboarding_impl_review_source_file">From %1$s. Tap anything to edit.</string>
+    <string name="feature_onboarding_impl_review_source_none">Tap anything to edit.</string>
+    <string name="feature_onboarding_impl_review_complete">Profile complete</string>
+    <string name="feature_onboarding_impl_review_required">Required</string>
+    <string name="feature_onboarding_impl_review_end_date_missing">End date missing for %1$s</string>
+    <string name="feature_onboarding_impl_review_add_date">Add date</string>
+    <string name="feature_onboarding_impl_review_all_done">All required info is done</string>
+    <string name="feature_onboarding_impl_review_add_linkedin">Add your LinkedIn</string>
+    <string name="feature_onboarding_impl_review_optional">Optional</string>
+    <string name="feature_onboarding_impl_review_contact">Contact</string>
+    <string name="feature_onboarding_impl_review_experience">Experience · %1$d</string>
+    <string name="feature_onboarding_impl_review_skills">Skills · %1$d</string>
+    <string name="feature_onboarding_impl_review_education">Education</string>
+    <string name="feature_onboarding_impl_review_edit">Edit</string>
+    <string name="feature_onboarding_impl_review_skills_more">+%1$d</string>
+    <string name="feature_onboarding_impl_review_dates_range">%1$s – %2$s</string>
+    <string name="feature_onboarding_impl_review_dates_current">%1$s – Now</string>
+    <string name="feature_onboarding_impl_review_dates_end_missing">%1$s – end date?</string>
+    <string name="feature_onboarding_impl_review_continue">Looks right, continue</string>
+    <string name="feature_onboarding_impl_review_missing_end_date_toast">Add the missing end date first</string>
+</resources>

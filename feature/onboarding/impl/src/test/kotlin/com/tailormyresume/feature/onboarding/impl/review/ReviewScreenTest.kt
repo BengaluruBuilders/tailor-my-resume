@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -78,8 +79,8 @@ class ReviewScreenTest {
             "Education",
             "B.Com, Finance",
             "Symbiosis College, Pune · 2020",
-            "Looks right, continue",
-        ).forEach { composeRule.onNodeWithText(it).assertIsDisplayed() }
+        ).forEach { composeRule.onNodeWithText(it).performScrollTo().assertIsDisplayed() }
+        composeRule.onNodeWithText("Looks right, continue").assertIsDisplayed()
     }
 
     @Test

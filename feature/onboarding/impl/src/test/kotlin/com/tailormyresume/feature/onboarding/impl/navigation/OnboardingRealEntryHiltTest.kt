@@ -2,6 +2,7 @@ package com.tailormyresume.feature.onboarding.impl.navigation
 
 import android.app.Application
 import android.content.ComponentName
+import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -130,8 +131,13 @@ class OnboardingRealEntryHiltTest {
     }
 
     private fun waitForReview() {
+        waitUntilIdling { composeRule.onAllNodesWithText("Your profile").fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    private fun waitUntilIdling(condition: () -> Boolean) {
         composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule.onAllNodesWithText("Your profile").fetchSemanticsNodes().isNotEmpty()
+            shadowOf(Looper.getMainLooper()).idle()
+            condition()
         }
     }
 
@@ -154,7 +160,7 @@ class OnboardingRealEntryHiltTest {
         waitForReview()
 
         composeRule.onNodeWithText("Looks right, continue").performClick()
-        composeRule.waitUntil(timeoutMillis = 10_000) { navigator.state.currentKey == JobNavKey() }
+        waitUntilIdling { navigator.state.currentKey == JobNavKey() }
 
         assertThat(runBlocking { profileRepository.observeProfile().first() }?.reviewedAt).isNotNull()
     }
