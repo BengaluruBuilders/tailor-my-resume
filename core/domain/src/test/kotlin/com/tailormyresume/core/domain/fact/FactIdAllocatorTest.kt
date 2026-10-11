@@ -95,6 +95,27 @@ class FactIdAllocatorTest {
         assertThat(allocator.nextId(EntryCategory.EXPERIENCE, existing)).isEqualTo("W-03")
     }
 
+    @Test
+    fun neverUsedIdSkipsTakenAndKeepsPrefix() {
+        val taken = listOf(entry("E-01"), entry("X-0123abcd"))
+
+        val education = allocator.neverUsedId(EntryCategory.EDUCATION, taken)
+        val achievement = allocator.neverUsedId(EntryCategory.ACHIEVEMENT, taken)
+        val intern = allocator.neverUsedId(EntryCategory.EXPERIENCE, taken, "Data Intern")
+
+        assertThat(education).matches("E-[0-9a-f]{8}")
+        assertThat(achievement).matches("X-[0-9a-f]{8}")
+        assertThat(intern).matches("I-[0-9a-f]{8}")
+        assertThat(setOf(education, achievement, intern) intersect taken.map { it.id }.toSet()).isEmpty()
+    }
+
+    @Test
+    fun neverUsedIdIsDifferentEachCall() {
+        val ids = (1..50).map { allocator.neverUsedId(EntryCategory.EDUCATION, emptyList()) }
+
+        assertThat(ids.toSet()).hasSize(50)
+    }
+
     private fun nextId(category: EntryCategory) = allocator.nextId(category, emptyList())
 
     private fun entry(id: String) = ProfileEntry(

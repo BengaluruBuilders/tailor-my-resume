@@ -40,7 +40,7 @@ class PendingMarkerAccountSwitchTest {
         ScriptedFirebase(),
         accountOnlyApi(),
         session,
-        server.signOutCleaner(session),
+        server.signOutCleaner(),
         wiper,
         marker,
     )

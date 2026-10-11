@@ -78,7 +78,6 @@ internal fun testApplication(
     id = "app-1",
     job = JobDescription(title = "Backend Engineer", company = "Acme", rawText = "", requirements = emptyList()),
     status = ApplicationStatus.SAVED,
-    notes = "",
     gapAnalysis = gapAnalysis,
     tailoredResume = TailoredResume(bullets, entryIds),
     createdAt = Instant.fromEpochSeconds(0),

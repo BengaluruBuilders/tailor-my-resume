@@ -102,14 +102,8 @@ private fun TmrInnerHeaderTitle(
 
 @Preview(showBackground = true)
 @Composable
-private fun TmrInnerHeaderPreview() {
-    TmrPreviewTheme(darkTheme = false) { TmrInnerHeaderSample() }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun TmrInnerHeaderDarkPreview() {
-    TmrPreviewTheme(darkTheme = true) { TmrInnerHeaderSample() }
+    TmrPreviewTheme { TmrInnerHeaderSample() }
 }
 
 @Composable

@@ -33,14 +33,8 @@ fun TmrSheet(
 
 @Preview(showBackground = true)
 @Composable
-private fun TmrSheetPreview() {
-    TmrPreviewTheme(darkTheme = false) { TmrSheetSample() }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun TmrSheetDarkPreview() {
-    TmrPreviewTheme(darkTheme = true) { TmrSheetSample() }
+    TmrPreviewTheme { TmrSheetSample() }
 }
 
 @Composable

@@ -7,6 +7,7 @@ import com.tailormyresume.core.network.TailorMyResumeApiConfig
 import com.tailormyresume.core.network.tailormyresumeApi
 import com.tailormyresume.core.network.tailormyresumeJson
 import com.tailormyresume.core.network.tailormyresumeOkHttpClient
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,7 @@ class PurchaseRestorerTest {
     }
 
     private fun restorer(): PurchaseRestorer {
-        val gateway: PaymentGateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), idleScope())
+        val gateway: PaymentGateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), idleScope(), TestCreditsRepository())
         return PurchaseRestorer({ gateway }, { billing }, session, scope)
     }
 

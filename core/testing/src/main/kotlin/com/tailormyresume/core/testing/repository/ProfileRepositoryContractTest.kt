@@ -3,11 +3,13 @@ package com.tailormyresume.core.testing.repository
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.data.canonicalProfileWithoutEntries
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.time.Instant
 
 abstract class ProfileRepositoryContractTest {
 
@@ -94,5 +96,23 @@ abstract class ProfileRepositoryContractTest {
         repository.saveProfile(canonicalProfileWithoutEntries)
 
         assertThat(repository.observeProfile().first()).isEqualTo(canonicalProfileWithoutEntries)
+    }
+
+    @Test
+    fun roundTripsEveryNewProfileField() = runTest {
+        val repository = createProfileRepository()
+        val profile = canonicalCandidateProfile.copy(
+            city = "Pune",
+            linkedinUrl = "https://www.linkedin.com/in/priya",
+            portfolioUrl = "https://priya.example.com",
+            summary = "Finance analyst with four years of SQL work.",
+            sourceFileName = "Priya_Resume.pdf",
+            reviewedAt = Instant.parse("2026-10-02T09:30:00Z"),
+            entries = canonicalCandidateProfile.entries.map { it.copy(source = FactSource.USER_ANSWER) },
+        )
+
+        repository.saveProfile(profile)
+
+        assertThat(repository.observeProfile().first()).isEqualTo(profile)
     }
 }

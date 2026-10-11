@@ -7,6 +7,7 @@ import com.tailormyresume.core.network.TailorMyResumeApiConfig
 import com.tailormyresume.core.network.tailormyresumeApi
 import com.tailormyresume.core.network.tailormyresumeJson
 import com.tailormyresume.core.network.tailormyresumeOkHttpClient
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -25,7 +26,7 @@ class PurchaseSettleTest {
     private val server = MockWebServer().apply { start() }
     private val billing = FakePlayBilling()
     private val api = tailormyresumeApi(TailorMyResumeApiConfig(server.url("/").toString()), tailormyresumeOkHttpClient(FixedToken), tailormyresumeJson())
-    private val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), idleScope())
+    private val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), idleScope(), TestCreditsRepository())
     private val ownedToken = PlayPurchase("application_pack_5", "token-1", PlayPurchaseState.PURCHASED)
 
     @After
@@ -148,7 +149,7 @@ class PurchaseSettleTest {
 
     @Test
     fun aHeldPurchaseIsPostedAgainByTheAppScopedJobAndCompletes() = runTest {
-        val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), backgroundScope)
+        val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), backgroundScope, TestCreditsRepository())
         played()
         playUnavailable(times = 3)
         reply(201, purchaseJson(walletJson(purchased = 5)))
@@ -163,7 +164,7 @@ class PurchaseSettleTest {
 
     @Test
     fun theAppScopedJobGivesUpAfterABoundedNumberOfPostsAndKeepsThePackPending() = runTest {
-        val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), backgroundScope)
+        val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), backgroundScope, TestCreditsRepository())
         played()
         playUnavailable(times = 20)
 
@@ -176,7 +177,7 @@ class PurchaseSettleTest {
 
     @Test
     fun theAppScopedJobStopsOnARejectionAndTheResultIsNotPending() = runTest {
-        val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), backgroundScope)
+        val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), backgroundScope, TestCreditsRepository())
         played()
         playUnavailable(times = 3)
         reply(400, errorJson("PURCHASE_INVALID"))
@@ -190,7 +191,7 @@ class PurchaseSettleTest {
 
     @Test
     fun cancellingTheCallerMidPurchaseStillHoldsThePackAndKeepsPosting() = runTest {
-        val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), backgroundScope)
+        val gateway = RemotePaymentGateway(api, WalletSource(api), billing, FakeUid("uid-1"), backgroundScope, TestCreditsRepository())
         played()
         playUnavailable(times = 1)
         reply(201, purchaseJson(walletJson(purchased = 5)))

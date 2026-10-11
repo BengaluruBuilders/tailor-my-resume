@@ -26,7 +26,7 @@ class TestApplicationRepositoryTest {
 
     @Test
     fun upsertApplication_replacesApplicationWithSameId() = runTest {
-        val edited = sampleApplication.copy(notes = "Follow up on Monday")
+        val edited = sampleApplication.copy(location = "Pune")
         repository.upsertApplication(sampleApplication)
 
         repository.upsertApplication(edited)
@@ -59,16 +59,6 @@ class TestApplicationRepositoryTest {
 
         val updated = repository.observeApplication(sampleApplication.id).first()
         assertThat(updated).isEqualTo(sampleApplication.copy(status = ApplicationStatus.INTERVIEW))
-    }
-
-    @Test
-    fun updateNotes_changesOnlyNotes() = runTest {
-        repository.upsertApplication(sampleApplication)
-
-        repository.updateNotes(sampleApplication.id, "Referred by a friend")
-
-        val updated = repository.observeApplication(sampleApplication.id).first()
-        assertThat(updated).isEqualTo(sampleApplication.copy(notes = "Referred by a friend"))
     }
 
     @Test

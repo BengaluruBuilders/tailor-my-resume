@@ -12,7 +12,9 @@ import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
+import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,6 +77,8 @@ class DeleteAccountUseCasePreviewTest {
         profileRepository = EmptyProfileRepository(profile),
         creditBalance = AccountCreditBalance(paymentGateway = gateway),
         latency = NoMockLatency,
+        creditsRepository = TestCreditsRepository(),
+        resumeSettingsRepository = TestResumeSettingsRepository(),
     )
 }
 
@@ -89,8 +93,6 @@ private class EmptyApplicationRepository(
     override suspend fun upsertApplication(application: JobApplication) = Unit
 
     override suspend fun updateStatus(id: String, status: ApplicationStatus) = Unit
-
-    override suspend fun updateNotes(id: String, notes: String) = Unit
 
     override suspend fun deleteApplication(id: String) = Unit
 }

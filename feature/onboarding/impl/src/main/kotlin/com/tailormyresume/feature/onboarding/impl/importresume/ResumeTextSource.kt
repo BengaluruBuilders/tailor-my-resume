@@ -20,7 +20,11 @@ interface ResumeTextSource {
     suspend fun read(file: ResumeFile): ResumeRead
 }
 
-const val RESUME_READ_LIMIT_BYTES: Long = 8L * 1024L * 1024L
+const val RESUME_READ_LIMIT_BYTES: Long = 5L * 1024L * 1024L
+
+const val MIN_PASTED_RESUME_CHARS: Int = 50
+
+const val MAX_RESUME_CHARS: Int = 30_000
 
 const val RESUME_PDF_MIME: String = "application/pdf"
 

@@ -30,6 +30,16 @@ data class TmrSpacing(
     val cardPadding: Dp,
     val sectionGap: Dp,
     val touch: Dp,
+    val topBarButton: Dp,
+    val primaryButtonHeight: Dp,
+    val tabItem: Dp,
+    val tabCentreDisc: Dp,
+    val toastTop: Dp,
+    val sheetPaddingTop: Dp,
+    val sheetPaddingHorizontal: Dp,
+    val sheetPaddingBottom: Dp,
+    val sheetHandleWidth: Dp,
+    val sheetHandleHeight: Dp,
 )
 
 val LocalTmrSpacing = staticCompositionLocalOf { TmrSpacingDefaults.Default }
@@ -55,9 +65,19 @@ internal object TmrSpacingDefaults {
         d40 = 40.dp,
         d48 = 48.dp,
         d64 = 64.dp,
-        gutter = 16.dp,
+        gutter = 14.dp,
         cardPadding = 16.dp,
         sectionGap = 24.dp,
         touch = 48.dp,
+        topBarButton = 44.dp,
+        primaryButtonHeight = 56.dp,
+        tabItem = 54.dp,
+        tabCentreDisc = 56.dp,
+        toastTop = 96.dp,
+        sheetPaddingTop = 12.dp,
+        sheetPaddingHorizontal = 18.dp,
+        sheetPaddingBottom = 40.dp,
+        sheetHandleWidth = 44.dp,
+        sheetHandleHeight = 4.dp,
     )
 }

@@ -9,9 +9,11 @@ import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestPendingAccountWipe
 import com.tailormyresume.core.testing.repository.TestProfileRepository
+import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
@@ -29,12 +31,14 @@ class DeleteAccountEarlierAttemptTest {
     private var deleteResult: Result<Unit> = Result.success(Unit)
     private var probe: Result<Boolean> = Result.success(true)
     private var uidAtServerCall: String? = null
+    private var serverDeleteCalls = 0
 
     private val deleter = object : ServerAccountDeleter {
         override val deletesRemoteData = true
 
         override suspend fun delete(): Result<Unit> {
             uidAtServerCall = marker.markerUid
+            serverDeleteCalls++
             return deleteResult
         }
 
@@ -50,6 +54,8 @@ class DeleteAccountEarlierAttemptTest {
         serverAccountDeleter = deleter,
         creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(2)),
         latency = NoMockLatency,
+        creditsRepository = TestCreditsRepository(),
+        resumeSettingsRepository = TestResumeSettingsRepository(),
         pendingWipe = pendingWipe,
         finishPendingWipe = FinishPendingAccountWipeUseCase(pendingWipe, finisher, deleter),
     )
@@ -101,6 +107,34 @@ class DeleteAccountEarlierAttemptTest {
         assertThat(result).isInstanceOf(AccountDeletionResult.Deleted::class.java)
         assertThat(finisher.runs).isEqualTo(1)
         assertThat(marker.current).isEqualTo(PendingWipeState.NONE)
+    }
+
+    @Test
+    fun retryAfterTheServerClosedTheAccountOnlyRetriesTheLocalWipe() = runTest {
+        marker.current = PendingWipeState.SERVER_CLOSED
+        marker.markerUid = "uid-a"
+        deleteResult = Result.failure(java.io.IOException("offline"))
+        probe = Result.failure(java.io.IOException("offline"))
+
+        val result = useCase()()
+
+        assertThat(result).isInstanceOf(AccountDeletionResult.Deleted::class.java)
+        assertThat(marker.history).doesNotContain(PendingWipeState.REQUESTED)
+        assertThat(finisher.runs).isEqualTo(1)
+        assertThat(marker.current).isEqualTo(PendingWipeState.NONE)
+    }
+
+    @Test
+    fun anOwnerlessServerClosedMarkerStillRunsTheServerDeleteForTheSignedInAccount() = runTest {
+        session.sendAccount(SignInAccount(id = "uid-b", displayName = "B", email = "b@example.com"))
+        marker.current = PendingWipeState.SERVER_CLOSED
+        marker.markerUid = null
+
+        val result = useCase()()
+
+        assertThat(serverDeleteCalls).isEqualTo(1)
+        assertThat(uidAtServerCall).isEqualTo("uid-b")
+        assertThat(result).isInstanceOf(AccountDeletionResult.Deleted::class.java)
     }
 
     @Test

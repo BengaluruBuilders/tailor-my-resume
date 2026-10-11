@@ -1,5 +1,7 @@
 package com.tailormyresume.core.model
 
+import kotlin.time.Instant
+
 data class CandidateProfile(
     val fullName: String,
     val email: String,
@@ -8,6 +10,13 @@ data class CandidateProfile(
     val skills: List<String>,
     val entries: List<ProfileEntry>,
     val userStatedSkills: List<String> = emptyList(),
+    val city: String = "",
+    val linkedinUrl: String = "",
+    val portfolioUrl: String = "",
+    val summary: String = "",
+    val sourceFileName: String? = null,
+    val reviewedAt: Instant? = null,
+    val contactUserStated: Boolean = false,
 )
 
 object ProfileLimits {
@@ -40,6 +49,9 @@ fun CandidateProfile.confirmedWithinLimits(): CandidateProfile {
         .take(ProfileLimits.MAX_SKILLS)
     return copy(skills = limitedSkills, entries = limited)
 }
+
+fun CandidateProfile.sendableFacts(): CandidateProfile =
+    copy(entries = entries.filter { it.source != FactSource.USER_ANSWER }).confirmedWithinLimits()
 
 fun CandidateProfile.isSkillUserStated(skill: String): Boolean =
     userStatedSkills.any { it.equals(skill, ignoreCase = true) }

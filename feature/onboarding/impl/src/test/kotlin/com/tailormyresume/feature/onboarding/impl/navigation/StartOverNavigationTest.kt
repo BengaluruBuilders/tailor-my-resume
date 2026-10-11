@@ -5,29 +5,21 @@ import androidx.navigation3.runtime.NavKey
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
-import com.tailormyresume.feature.onboarding.api.navigation.DefaultWelcomeNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.PasteJobDescriptionNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.navigateToWelcome
+import com.tailormyresume.feature.onboarding.api.navigation.DefaultSignInNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.navigateToSignIn
 import org.junit.Test
 
 class StartOverNavigationTest {
 
     @Test
-    fun navigateToWelcome_dropsPasteJobDescriptionAndSignInFromTheStack() {
-        val subStack = NavBackStack<NavKey>(DefaultWelcomeNavKey)
-        val navigator = Navigator(
-            NavigationState(
-                startKey = DefaultWelcomeNavKey,
-                topLevelStack = NavBackStack(DefaultWelcomeNavKey),
-                subStacks = mapOf(DefaultWelcomeNavKey to subStack),
-            ),
-        )
-        navigator.navigate(PasteJobDescriptionNavKey())
-        navigator.navigate(SignInNavKey())
+    fun navigateToSignIn_dropsUploadFromTheStack() {
+        val stack = NavBackStack<NavKey>(DefaultSignInNavKey)
+        val navigator = Navigator(NavigationState(stack))
+        navigator.navigate(UploadNavKey())
 
-        navigator.navigateToWelcome()
+        navigator.navigateToSignIn()
 
-        assertThat(subStack.toList()).containsExactly(DefaultWelcomeNavKey)
+        assertThat(stack.toList()).containsExactly(DefaultSignInNavKey)
     }
 }

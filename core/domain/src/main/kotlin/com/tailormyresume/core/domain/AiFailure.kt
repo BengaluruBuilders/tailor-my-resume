@@ -3,7 +3,6 @@ package com.tailormyresume.core.domain
 enum class AiFailure {
     Network,
     Timeout,
-    ConsentRequired,
     NoCredit,
     AllowanceExhausted,
     InvalidInput,
@@ -12,6 +11,8 @@ enum class AiFailure {
     AnalysisInProgress,
     QuotaExceeded,
     SignInRequired,
+    NotAJobPost,
+    JobImportFailed,
     Unavailable,
 }
 

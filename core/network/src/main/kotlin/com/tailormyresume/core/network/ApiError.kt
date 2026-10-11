@@ -21,11 +21,12 @@ sealed interface ApiError {
     data object HttpError : ApiError
     data object InternalError : ApiError
     data object NoCredit : ApiError
-    data object ConsentRequired : ApiError
     data object PurchasePending : ApiError
     data object PurchaseInvalid : ApiError
     data object AllowanceExhausted : ApiError
     data object AnalysisInProgress : ApiError
+    data object NotAJobPost : ApiError
+    data object JobImportFailed : ApiError
     data object PlayUnavailable : ApiError
     data object Offline : ApiError
     data object Timeout : ApiError
@@ -59,11 +60,12 @@ internal fun apiErrorOf(httpStatus: Int, code: String?, retryAfterSeconds: Int?)
     "HTTP_ERROR" -> ApiError.HttpError
     "INTERNAL_ERROR" -> ApiError.InternalError
     "NO_CREDIT" -> ApiError.NoCredit
-    "CONSENT_REQUIRED" -> ApiError.ConsentRequired
     "PURCHASE_PENDING" -> ApiError.PurchasePending
     "PURCHASE_INVALID" -> ApiError.PurchaseInvalid
     "ALLOWANCE_EXHAUSTED" -> ApiError.AllowanceExhausted
     "ANALYSIS_IN_PROGRESS" -> ApiError.AnalysisInProgress
+    "NOT_A_JOB_POST" -> ApiError.NotAJobPost
+    "JOB_IMPORT_FAILED" -> ApiError.JobImportFailed
     "PLAY_UNAVAILABLE" -> ApiError.PlayUnavailable
     else -> when (httpStatus) {
         HTTP_PAYMENT_REQUIRED -> ApiError.NoCredit

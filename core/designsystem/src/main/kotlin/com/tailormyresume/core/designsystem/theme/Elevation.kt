@@ -32,7 +32,7 @@ class TmrElevation(
     val modal: TmrShadow get() = level4
 }
 
-val LocalTmrElevation = staticCompositionLocalOf { TmrElevationDefaults.Light }
+val LocalTmrElevation = staticCompositionLocalOf { TmrElevationDefaults.Dark }
 
 fun Modifier.tmrShadow(shadow: TmrShadow, shape: Shape): Modifier =
     if (shadow.elevation == 0.dp) {
@@ -56,16 +56,7 @@ internal object TmrElevationDefaults {
         spotColor = ink.copy(alpha = alpha),
     )
 
-    private val LightInk = Color(0xFF000000)
     private val DarkInk = Color(0xFF000000)
-
-    val Light = TmrElevation(
-        level0 = step(0, 0, 0, 0f, LightInk),
-        level1 = step(0, 0, 0, 0f, LightInk),
-        level2 = step(3, 3, 12, 0.08f, LightInk),
-        level3 = step(4, 4, 16, 0.16f, LightInk),
-        level4 = step(8, 8, 24, 0.20f, LightInk),
-    )
 
     val Dark = TmrElevation(
         level0 = step(0, 0, 0, 0f, DarkInk),

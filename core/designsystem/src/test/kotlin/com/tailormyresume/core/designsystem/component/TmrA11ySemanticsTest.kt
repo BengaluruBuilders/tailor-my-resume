@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -15,7 +13,6 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.text.TextLayoutResult
@@ -38,7 +35,7 @@ class TmrA11ySemanticsTest {
     @Test
     fun innerHeaderTitleIsHeading() {
         rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
+            TmrPreviewTheme {
                 TmrInnerHeader(title = "Fit for Kestrel Labs")
             }
         }
@@ -50,7 +47,7 @@ class TmrA11ySemanticsTest {
     @Test
     fun innerHeaderLongTitleWrapsAtLargeFontScale() {
         rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
+            TmrPreviewTheme {
                 CompositionLocalProvider(LocalDensity provides Density(1f, 2f)) {
                     Box(Modifier.width(320.dp)) {
                         TmrInnerHeader(
@@ -71,53 +68,9 @@ class TmrA11ySemanticsTest {
     }
 
     @Test
-    fun confirmDialogPanelTitleIsHeadingWithPaneTitle() {
-        rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
-                TmrConfirmPanel(
-                    title = "Delete your account?",
-                    message = null,
-                    confirmLabel = "Delete",
-                    cancelLabel = "Keep",
-                    onConfirm = {},
-                    onCancel = {},
-                    destructive = true,
-                )
-            }
-        }
-        rule
-            .onNodeWithText("Delete your account?")
-            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Heading, Unit))
-        rule
-            .onNode(
-                SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Delete your account?"),
-                useUnmergedTree = true,
-            ).assertExists()
-    }
-
-    @Test
-    fun loadingWheelIsIndeterminateProgressWithLiveRegion() {
-        rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
-                TmrLoadingWheel(contentDesc = "Loading")
-            }
-        }
-        val wheel = rule.onNode(hasTestTag("loadingWheel"), useUnmergedTree = true)
-        wheel.assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo.Indeterminate))
-        wheel.assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
-        val description =
-            wheel
-                .fetchSemanticsNode()
-                .config
-                .getOrNull(SemanticsProperties.ContentDescription)
-                ?.joinToString(separator = " ")
-        assertTrue(description != null && description.contains("Loading"))
-    }
-
-    @Test
     fun singleSelectChipIsRadioButton() {
         rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
+            TmrPreviewTheme {
                 TmrFilterChip(label = "Skills", selected = true, onClick = {}, singleSelect = true)
             }
         }
@@ -129,7 +82,7 @@ class TmrA11ySemanticsTest {
     @Test
     fun multiSelectChipStaysCheckbox() {
         rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
+            TmrPreviewTheme {
                 TmrFilterChip(label = "Skills", selected = true, onClick = {})
             }
         }
@@ -141,7 +94,7 @@ class TmrA11ySemanticsTest {
     @Test
     fun longChipLabelWraps() {
         rule.setContent {
-            TmrPreviewTheme(darkTheme = false) {
+            TmrPreviewTheme {
                 CompositionLocalProvider(LocalDensity provides Density(1f, 2f)) {
                     Box(Modifier.width(160.dp)) {
                         TmrFilterChip(label = "Quantified achievements and metrics", selected = false, onClick = {})

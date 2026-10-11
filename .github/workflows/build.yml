@@ -189,7 +189,6 @@ jobs:
           :core:navigation:testDebugUnitTest
           :core:screenshot:testDebugUnitTest
           :core:testing:testDebugUnitTest
-          :core:ui:testDebugUnitTest
           :core:domain:koverVerify
           :core:data:koverVerify
           -PwarningsAsErrors=true

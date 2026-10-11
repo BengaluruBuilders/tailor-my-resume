@@ -1,15 +1,13 @@
 package com.tailormyresume.app.di
 
 import com.tailormyresume.core.domain.JobAnalysisSource
+import com.tailormyresume.core.domain.JobImporter
+import com.tailormyresume.core.domain.OfflineJobImporter
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.ResumeTextParser
-import com.tailormyresume.core.domain.coverletter.CoverLetterSource
-import com.tailormyresume.core.domain.coverletter.GenerateCoverLetterUseCase
 import com.tailormyresume.core.domain.offline.OfflineJobAnalysisSource
 import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.domain.offline.OfflineResumeTextParser
-import com.tailormyresume.core.domain.prep.GeneratePrepQuestionsUseCase
-import com.tailormyresume.core.domain.prep.PrepQuestionSource
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -28,8 +26,5 @@ interface AiBindings {
     fun bindResumeTextParser(impl: OfflineResumeTextParser): ResumeTextParser
 
     @Binds
-    fun bindCoverLetterSource(impl: GenerateCoverLetterUseCase): CoverLetterSource
-
-    @Binds
-    fun bindPrepQuestionSource(impl: GeneratePrepQuestionsUseCase): PrepQuestionSource
+    fun bindJobImporter(impl: OfflineJobImporter): JobImporter
 }

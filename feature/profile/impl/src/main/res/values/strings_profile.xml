@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_profile_impl_title">Profile</string>
+    <string name="feature_profile_impl_settings">Settings</string>
+    <string name="feature_profile_impl_percent_complete">%1$d%% complete</string>
+    <string name="feature_profile_impl_subtitle_separator" translatable="false">" · "</string>
+    <plurals name="feature_profile_impl_years">
+        <item quantity="one">%1$d yr</item>
+        <item quantity="other">%1$d yrs</item>
+    </plurals>
+    <string name="feature_profile_impl_row_contact">Contact</string>
+    <string name="feature_profile_impl_row_summary">Summary</string>
+    <string name="feature_profile_impl_row_experience">Experience</string>
+    <string name="feature_profile_impl_row_education">Education</string>
+    <string name="feature_profile_impl_row_skills">Skills</string>
+    <string name="feature_profile_impl_row_achievements">Achievements</string>
+    <string name="feature_profile_impl_row_linkedin">LinkedIn &amp; links</string>
+    <string name="feature_profile_impl_linkedin_added">Added</string>
+    <string name="feature_profile_impl_built_from">Built from %1$s</string>
+    <string name="feature_profile_impl_replace">Replace</string>
+    <string name="feature_profile_impl_experience_heading">Experience</string>
+    <string name="feature_profile_impl_add_role">+ Add role</string>
+    <string name="feature_profile_impl_dates">%1$s – %2$s</string>
+    <string name="feature_profile_impl_dates_now">Present</string>
+    <string name="feature_profile_impl_end_date_missing">end date?</string>
+    <string name="feature_profile_impl_role_heading_edit">Edit role</string>
+    <string name="feature_profile_impl_role_heading_add">Add role</string>
+    <string name="feature_profile_impl_role_job_title">Job title</string>
+    <string name="feature_profile_impl_role_job_title_hint">e.g. Business Analyst</string>
+    <string name="feature_profile_impl_role_company">Company</string>
+    <string name="feature_profile_impl_role_company_hint">e.g. Infosys</string>
+    <string name="feature_profile_impl_role_start">Start</string>
+    <string name="feature_profile_impl_role_end">End</string>
+    <string name="feature_profile_impl_role_date_hint">Mon YYYY</string>
+    <string name="feature_profile_impl_role_present_hint">Present</string>
+    <string name="feature_profile_impl_role_current">I work here now</string>
+    <string name="feature_profile_impl_role_what_you_did">What you did</string>
+    <string name="feature_profile_impl_role_bullet_label">Bullet %1$d</string>
+    <string name="feature_profile_impl_role_bullet_hint">Start with a verb. Add a number if you can.</string>
+    <string name="feature_profile_impl_role_add_bullet">+ Add bullet</string>
+    <string name="feature_profile_impl_role_delete">Delete this role</string>
+    <string name="feature_profile_impl_role_saved">Role saved</string>
+    <string name="feature_profile_impl_role_deleted">Role deleted</string>
+</resources>

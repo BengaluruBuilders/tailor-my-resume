@@ -3,7 +3,6 @@ package com.tailormyresume.core.domain.onboarding
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.ConsentRecord
 import com.tailormyresume.core.model.KeptJobDescription
 import com.tailormyresume.core.model.SignInAccount
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +19,6 @@ class NextOnboardingStepUseCase @Inject constructor(
 
     fun observe(): Flow<OnboardingStep> = combine(
         sessionRepository.observeAccount(),
-        sessionRepository.observeConsent(),
         sessionRepository.observeOnboardingComplete(),
         sessionRepository.observeKeptJobDescription(),
         profileRepository.observeProfile(),
@@ -29,7 +27,6 @@ class NextOnboardingStepUseCase @Inject constructor(
 
     private fun decide(
         account: SignInAccount?,
-        consent: ConsentRecord?,
         onboardingComplete: Boolean,
         keptJob: KeptJobDescription?,
         profile: CandidateProfile?,
@@ -37,7 +34,6 @@ class NextOnboardingStepUseCase @Inject constructor(
         val entries = profile?.entries.orEmpty()
         return when {
             account == null -> OnboardingStep.SignIn
-            consent?.isCurrent != true -> OnboardingStep.Consent
             entries.isEmpty() -> OnboardingStep.ImportResume
             entries.none { it.isConfirmed } -> OnboardingStep.ConfirmFacts
             keptJob != null -> OnboardingStep.GapAnalysis(keptJob)

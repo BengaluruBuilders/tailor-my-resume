@@ -3,12 +3,6 @@ package com.tailormyresume.core.designsystem.component
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-object TmrDockDefaults {
-    val height: Dp = 68.dp
-    val verticalPadding: Dp = 8.dp
-    val inset: Dp = height + verticalPadding * 2 + 8.dp
-}
-
 object TmrOverlap {
     val Sheet: Dp = 24.dp
 }

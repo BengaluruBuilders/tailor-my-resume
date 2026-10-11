@@ -3,19 +3,14 @@ package com.tailormyresume.core.network
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.network.dto.AnalysisRequest
 import com.tailormyresume.core.network.dto.AnalysisResponse
-import com.tailormyresume.core.network.dto.ConsentRequest
-import com.tailormyresume.core.network.dto.ConsentResponse
 import com.tailormyresume.core.network.dto.ContentReportRequest
 import com.tailormyresume.core.network.dto.ContentReportResponse
-import com.tailormyresume.core.network.dto.CoverLetterRequest
-import com.tailormyresume.core.network.dto.CoverLetterResponse
+import com.tailormyresume.core.network.dto.CreditsResponse
 import com.tailormyresume.core.network.dto.DeletionResponse
 import com.tailormyresume.core.network.dto.JobDto
 import com.tailormyresume.core.network.dto.MatchDto
 import com.tailormyresume.core.network.dto.MeResponse
 import com.tailormyresume.core.network.dto.PacksResponse
-import com.tailormyresume.core.network.dto.PrepQuestionsRequest
-import com.tailormyresume.core.network.dto.PrepQuestionsResponse
 import com.tailormyresume.core.network.dto.ProfileFactsDto
 import com.tailormyresume.core.network.dto.PurchaseRequest
 import com.tailormyresume.core.network.dto.PurchaseResponse
@@ -25,7 +20,6 @@ import com.tailormyresume.core.network.dto.ResumeParseResponse
 import com.tailormyresume.core.network.dto.ServerExportResponse
 import com.tailormyresume.core.network.dto.TailoringResponse
 import com.tailormyresume.core.network.dto.TailoringStartRequest
-import com.tailormyresume.core.network.dto.UnlockResponse
 import com.tailormyresume.core.network.dto.WalletResponse
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
@@ -47,8 +41,6 @@ class DtoRoundTripTest {
         roundTrip<JobDto>("job")
         roundTrip<MatchDto>("match")
         roundTrip<MeResponse>("me-response")
-        roundTrip<ConsentRequest>("consent-request")
-        roundTrip<ConsentResponse>("consent-response")
         roundTrip<DeletionResponse>("deletion-response")
         roundTrip<ResumeParseRequest>("resume-parse-request")
         roundTrip<ResumeParseResponse>("resume-parse-response")
@@ -57,12 +49,8 @@ class DtoRoundTripTest {
         roundTrip<TailoringStartRequest>("tailoring-start-request")
         roundTrip<TailoringResponse>("tailoring-start-response")
         roundTrip<TailoringResponse>("tailoring-poll-response")
-        roundTrip<PrepQuestionsRequest>("prep-questions-request")
-        roundTrip<PrepQuestionsResponse>("prep-questions-response")
-        roundTrip<CoverLetterRequest>("cover-letter-request")
-        roundTrip<CoverLetterResponse>("cover-letter-response")
         roundTrip<WalletResponse>("wallet-response")
-        roundTrip<UnlockResponse>("unlock-response")
+        roundTrip<CreditsResponse>("credits-response")
         roundTrip<PacksResponse>("packs-response")
         roundTrip<PurchaseRequest>("purchase-request")
         roundTrip<PurchaseResponse>("purchase-response")
@@ -73,10 +61,13 @@ class DtoRoundTripTest {
     }
 
     @Test
-    fun nullFieldsAreSentOnTheWireBecauseTheBackendRequiresThem() {
+    fun tailoringRequestsOmitNullOptionalFieldsAndNeverSendSection() {
         val request = decode<TailoringStartRequest>("tailoring-start-request")
-        assertThat(request.section).isNull()
-        assertThat(json.encodeToString(TailoringStartRequest.serializer(), request)).contains("\"section\":null")
+        val wire = json.encodeToString(TailoringStartRequest.serializer(), request)
+        assertThat(request.answer).isNull()
+        assertThat(wire).doesNotContain("section")
+        assertThat(wire).doesNotContain("answer")
+        assertThat(wire).doesNotContain("null")
     }
 
     private inline fun <reified T> roundTrip(name: String) {

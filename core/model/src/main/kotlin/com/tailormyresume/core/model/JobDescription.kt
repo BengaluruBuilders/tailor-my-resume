@@ -17,4 +17,5 @@ data class JobDescription(
     val company: String,
     val rawText: String,
     val requirements: List<JobRequirement>,
+    val location: String? = null,
 )

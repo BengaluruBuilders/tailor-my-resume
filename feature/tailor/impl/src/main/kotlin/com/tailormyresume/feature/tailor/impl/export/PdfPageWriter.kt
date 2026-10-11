@@ -1,18 +1,28 @@
 package com.tailormyresume.feature.tailor.impl.export
 
+import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.pdf.PdfDocument
 import android.text.StaticLayout
+import com.tailormyresume.core.model.PageSize
 
-internal class PdfPageWriter(private val pdf: PdfDocument) {
+internal class PdfPageWriter(private val pages: PdfPages, pageSize: PageSize) {
+
+    private val pageWidth: Float = when (pageSize) {
+        PageSize.A4 -> A4_WIDTH
+        PageSize.LETTER -> LETTER_WIDTH
+    }
+    private val pageHeight: Float = when (pageSize) {
+        PageSize.A4 -> A4_HEIGHT
+        PageSize.LETTER -> LETTER_HEIGHT
+    }
 
     private var pageNumber = 0
     private var cursorY = MARGIN
-    private var page: PdfDocument.Page = startPage()
+    private var canvas: Canvas = startPage()
 
     val pageCount: Int get() = pageNumber
 
-    val contentWidth: Int get() = (PAGE_WIDTH - 2 * MARGIN).toInt()
+    val contentWidth: Int get() = (pageWidth - 2 * MARGIN).toInt()
 
     fun drawBlock(layout: StaticLayout, keepWithNext: Float = 0f) {
         drawLines(layout, MARGIN, marker = null, keepWithNext = keepWithNext)
@@ -23,7 +33,7 @@ internal class PdfPageWriter(private val pdf: PdfDocument) {
     }
 
     fun drawRule(paint: Paint) {
-        page.canvas.drawLine(MARGIN, cursorY, PAGE_WIDTH - MARGIN, cursorY, paint)
+        canvas.drawLine(MARGIN, cursorY, pageWidth - MARGIN, cursorY, paint)
     }
 
     fun space(points: Float) {
@@ -31,7 +41,7 @@ internal class PdfPageWriter(private val pdf: PdfDocument) {
     }
 
     fun finish() {
-        pdf.finishPage(page)
+        pages.finishPage()
     }
 
     private fun drawLines(layout: StaticLayout, x: Float, marker: StaticLayout?, keepWithNext: Float) {
@@ -52,7 +62,6 @@ internal class PdfPageWriter(private val pdf: PdfDocument) {
     private fun drawChunk(layout: StaticLayout, chunk: LineChunk, x: Float, marker: StaticLayout?) {
         val top = layout.getLineTop(chunk.firstLine).toFloat()
         val bottom = layout.getLineBottom(chunk.endLine - 1).toFloat()
-        val canvas = page.canvas
         marker?.let {
             canvas.save()
             canvas.translate(MARGIN, cursorY)
@@ -70,24 +79,25 @@ internal class PdfPageWriter(private val pdf: PdfDocument) {
     private fun pageSpace(): PageSpace = PageSpace(
         cursorY = cursorY,
         pageTop = MARGIN,
-        pageBottom = PAGE_HEIGHT - MARGIN,
+        pageBottom = pageHeight - MARGIN,
     )
 
     private fun nextPage() {
-        pdf.finishPage(page)
-        page = startPage()
+        pages.finishPage()
+        canvas = startPage()
     }
 
-    private fun startPage(): PdfDocument.Page {
+    private fun startPage(): Canvas {
         pageNumber += 1
         cursorY = MARGIN
-        val info = PdfDocument.PageInfo.Builder(PAGE_WIDTH.toInt(), PAGE_HEIGHT.toInt(), pageNumber).create()
-        return pdf.startPage(info)
+        return pages.startPage(pageWidth.toInt(), pageHeight.toInt(), pageNumber)
     }
 
     companion object {
-        const val PAGE_WIDTH = 595f
-        const val PAGE_HEIGHT = 842f
+        const val A4_WIDTH = 595f
+        const val A4_HEIGHT = 842f
+        const val LETTER_WIDTH = 612f
+        const val LETTER_HEIGHT = 792f
         const val MARGIN = 48f
     }
 }

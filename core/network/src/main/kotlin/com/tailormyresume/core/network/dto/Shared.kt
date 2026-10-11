@@ -24,12 +24,16 @@ data class FactEntryDto(
     val bullets: List<BulletDto>,
 )
 
+@Serializable
+data class SummaryFactDto(val id: String, val text: String)
+
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class ProfileFactsDto(
     val skills: List<String>,
     val entries: List<FactEntryDto>,
     @EncodeDefault(EncodeDefault.Mode.NEVER) val userStatedSkills: List<String> = emptyList(),
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val summary: SummaryFactDto? = null,
 )
 
 @Serializable
@@ -41,8 +45,20 @@ data class RequirementDto(
     val keywords: List<String>,
 )
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
-data class JobDto(val title: String, val company: String, val requirements: List<RequirementDto>)
+data class JobDto(
+    val title: String,
+    val company: String,
+    val requirements: List<RequirementDto>,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val location: String? = null,
+)
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
-data class MatchDto(val requirementId: String, val status: MatchStatus, val evidenceIds: List<String>)
+data class MatchDto(
+    val requirementId: String,
+    val status: MatchStatus,
+    val evidenceIds: List<String>,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val reason: String? = null,
+)

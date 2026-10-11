@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_analysis_impl_result_backed">We only use what\'s backed by your experience.</string>
+    <string name="feature_analysis_impl_result_screen_for">What they screen for · %1$d</string>
+    <string name="feature_analysis_impl_result_legend_have">In your resume</string>
+    <string name="feature_analysis_impl_result_legend_missing">Missing</string>
+    <string name="feature_analysis_impl_result_confirm_first">Missing skills are only added if you confirm you have them.</string>
+    <string name="feature_analysis_impl_result_must_haves">Must-haves</string>
+    <string name="feature_analysis_impl_result_unclear">Not clear in your resume. We\'ll ask you next.</string>
+    <string name="feature_analysis_impl_result_unclear_mark">!</string>
+    <string name="feature_analysis_impl_result_met_mark">✓</string>
+    <string name="feature_analysis_impl_result_partial_mark">~</string>
+    <string name="feature_analysis_impl_result_status_partial">Partly in your resume</string>
+    <string name="feature_analysis_impl_result_status_unclear">Not clear yet</string>
+    <string name="feature_analysis_impl_result_tailor">Tailor my resume</string>
+    <string name="feature_analysis_impl_result_note_credits">Uses 1 credit · you have %1$d</string>
+    <string name="feature_analysis_impl_result_note_no_credits">No credits left · get more to continue</string>
+    <string name="feature_analysis_impl_result_unavailable">This job is no longer available.</string>
+    <string name="feature_analysis_impl_question_label">One quick question</string>
+    <string name="feature_analysis_impl_question_yes_regularly">Yes, regularly</string>
+    <string name="feature_analysis_impl_question_a_few_times">A few times</string>
+    <string name="feature_analysis_impl_question_not_yet">Not yet</string>
+    <string name="feature_analysis_impl_question_detail_label">Example (optional)</string>
+    <string name="feature_analysis_impl_question_detail_placeholder">One example helps (optional). E.g. presented the monthly variance report to the CFO</string>
+    <string name="feature_analysis_impl_question_continue">Continue</string>
+    <string name="feature_analysis_impl_question_skip">Skip this</string>
+    <string name="feature_analysis_impl_question_pick_answer">Pick an answer, or skip</string>
+</resources>

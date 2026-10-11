@@ -31,7 +31,10 @@ class OfflineAccountDataExporter internal constructor(
     override suspend fun export(data: AccountData): AccountDataArchive {
         latency.await(MockOperation.EXPORT_DATA)
         val target = File(directory(), FILE_NAME)
-        withContext(ioDispatcher) { AccountDataArchiveWriter().write(data, target) }
+        withContext(ioDispatcher) {
+            target.parentFile?.listFiles()?.filter { it != target }?.forEach(File::deleteRecursively)
+            AccountDataArchiveWriter().write(data, target)
+        }
         return AccountDataArchive(fileName = FILE_NAME, file = target)
     }
 

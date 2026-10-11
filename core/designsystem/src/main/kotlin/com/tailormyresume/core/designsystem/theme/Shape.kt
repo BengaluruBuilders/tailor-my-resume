@@ -23,6 +23,12 @@ class TmrShapes(
     val modalSheet: Shape,
     val monogram: Shape,
     val logoTile: Shape,
+    val hero: Shape,
+    val cardLarge: Shape,
+    val cardSmall: Shape,
+    val toast: Shape,
+    val paperCorner: Shape,
+    val bar: Shape,
 )
 
 internal object TmrShapesDefaults {
@@ -39,6 +45,12 @@ internal object TmrShapesDefaults {
         modalSheet = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         monogram = RoundedCornerShape(14.dp),
         logoTile = RoundedCornerShape(11.dp),
+        hero = RoundedCornerShape(32.dp),
+        cardLarge = RoundedCornerShape(24.dp),
+        cardSmall = RoundedCornerShape(16.dp),
+        toast = RoundedCornerShape(18.dp),
+        paperCorner = RoundedCornerShape(12.dp),
+        bar = RoundedCornerShape(2.dp),
     )
 }
 

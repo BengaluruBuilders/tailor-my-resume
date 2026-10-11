@@ -5,6 +5,7 @@ import com.tailormyresume.core.network.TailorMyResumeApiConfig
 import com.tailormyresume.core.network.tailormyresumeApi
 import com.tailormyresume.core.network.tailormyresumeJson
 import com.tailormyresume.core.network.tailormyresumeOkHttpClient
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -21,7 +22,7 @@ class WalletSourceAccountSwitchTest {
     private val api = tailormyresumeApi(TailorMyResumeApiConfig(server.url("/").toString()), tailormyresumeOkHttpClient(FixedToken), tailormyresumeJson())
     private val account = SwitchableUid("uid-1")
     private val source = WalletSource(api, account)
-    private val gateway = RemotePaymentGateway(api, source, FakePlayBilling(), account, idleScope())
+    private val gateway = RemotePaymentGateway(api, source, FakePlayBilling(), account, idleScope(), TestCreditsRepository())
 
     @After
     fun tearDown() {

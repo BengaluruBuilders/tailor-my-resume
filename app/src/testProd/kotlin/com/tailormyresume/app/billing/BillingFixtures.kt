@@ -5,10 +5,10 @@ import com.tailormyresume.app.auth.NoMatcher
 import com.tailormyresume.app.auth.SignOutCleaner
 import com.tailormyresume.app.auth.api
 import com.tailormyresume.core.data.repository.PendingReportQueue
-import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.network.IdTokenProvider
 import com.tailormyresume.core.testing.mock.TestMockStateStore
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -61,14 +61,14 @@ internal fun purchaseJson(wallet: String) =
 
 internal fun errorJson(code: String) = """{"error":{"code":"$code","message":"m"}}"""
 
-internal fun MockWebServer.signOutCleaner(session: SessionRepository): SignOutCleaner {
+internal fun MockWebServer.signOutCleaner(): SignOutCleaner {
     val store = TestMockStateStore()
     val api = api()
     return SignOutCleaner(
-        RemotePaymentGateway(api, WalletSource(api), FakePlayBilling(), FakeUid("uid-1"), idleScope()),
+        RemotePaymentGateway(api, WalletSource(api), FakePlayBilling(), FakeUid("uid-1"), idleScope(), TestCreditsRepository()),
         RemoteJobAnalysisSource(api, NoMatcher),
         PendingReportQueue(store),
         store,
-        session,
+        TestCreditsRepository(),
     )
 }

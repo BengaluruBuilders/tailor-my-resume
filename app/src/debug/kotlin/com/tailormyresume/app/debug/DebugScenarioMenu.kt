@@ -1,10 +1,8 @@
 package com.tailormyresume.app.debug
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.tailormyresume.app.R
@@ -22,7 +19,6 @@ import com.tailormyresume.core.designsystem.component.TmrInnerHeader
 import com.tailormyresume.core.designsystem.component.TmrOutlineButton
 import com.tailormyresume.core.designsystem.component.TmrPrimaryButton
 import com.tailormyresume.core.designsystem.component.TmrScreen
-import com.tailormyresume.core.designsystem.component.TmrSwitch
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.model.DebugScenario
 
@@ -30,7 +26,6 @@ data class DebugMenuActions(
     val onLoadSampleData: () -> Unit,
     val onResetAppData: () -> Unit,
     val onOpenApp: () -> Unit,
-    val onOnlineChange: (Boolean) -> Unit,
     val onTargetSelected: (DebugScenarioTarget) -> Unit,
     val onScenarioSelected: (DebugScenario) -> Unit,
     val onOpenScreen: () -> Unit,
@@ -63,7 +58,6 @@ fun DebugScenarioMenu(
             verticalArrangement = Arrangement.spacedBy(TmrTheme.spacing.md),
         ) {
             DebugDataCard(uiState = uiState, actions = actions)
-            DebugConnectivityCard(online = uiState.online, label = uiState.connectivityLabel, onOnlineChange = actions.onOnlineChange)
             DebugScenarioCard(
                 selectedTarget = selectedTarget,
                 selectedScenario = selectedScenario,
@@ -107,29 +101,6 @@ private fun DebugDataCard(
             onClick = actions.onOpenApp,
             modifier = Modifier.fillMaxWidth(),
         )
-    }
-}
-
-@Composable
-private fun DebugConnectivityCard(
-    online: Boolean,
-    @StringRes label: Int,
-    onOnlineChange: (Boolean) -> Unit,
-) {
-    TmrCard(modifier = Modifier.fillMaxWidth()) {
-        DebugHeading(R.string.debug_connectivity_heading)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(label),
-                style = TmrTheme.typography.bodyL,
-                color = TmrTheme.colors.onSurface,
-            )
-            TmrSwitch(checked = online, onCheckedChange = onOnlineChange)
-        }
     }
 }
 

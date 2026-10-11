@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shell_action_save">Save</string>
+    <string name="shell_action_done">Done</string>
+    <string name="shell_title_resume">Resume</string>
+    <string name="shell_title_application">Application</string>
+    <string name="shell_title_experience">Experience</string>
+    <string name="shell_title_profile">Profile</string>
+    <string name="shell_title_settings">Settings</string>
+    <string name="shell_changes_saved">Changes saved</string>
+</resources>

@@ -89,17 +89,6 @@ internal class JobApplicationDaoTest : DatabaseTest() {
     }
 
     @Test
-    fun updateNotes_changesNotesAndUpdatedAt() = runTest {
-        jobApplicationDao.upsertApplication(testApplication("a1", updatedAtMillis = 1))
-
-        jobApplicationDao.updateNotes("a1", "Call on Friday", Instant.fromEpochMilliseconds(77))
-
-        val saved = jobApplicationDao.observeApplication("a1").first()
-        assertEquals("Call on Friday", saved?.notes)
-        assertEquals(Instant.fromEpochMilliseconds(77), saved?.updatedAt)
-    }
-
-    @Test
     fun deleteApplication_removesOnlyThatRow() = runTest {
         jobApplicationDao.upsertApplication(testApplication("a1", updatedAtMillis = 1))
         jobApplicationDao.upsertApplication(testApplication("a2", updatedAtMillis = 2))

@@ -23,13 +23,12 @@ abstract class SampleDataControllerContractTest {
     protected abstract fun createFixture(): Fixture
 
     @Test
-    fun loadSignsInAnAccountWithConsentAndCompleteOnboarding() = runTest {
+    fun loadSignsInAnAccountAndCompletesOnboarding() = runTest {
         val fixture = createFixture()
 
         fixture.controller.load()
 
         assertThat(fixture.sessionRepository.observeAccount().first()).isNotNull()
-        assertThat(fixture.sessionRepository.observeConsent().first()).isNotNull()
         assertThat(fixture.sessionRepository.observeOnboardingComplete().first()).isTrue()
     }
 

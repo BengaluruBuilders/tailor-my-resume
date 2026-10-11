@@ -13,21 +13,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 
-internal enum class NavigationRoot { FirstRun, Main }
+internal data class AccountRoot(val accountId: String?)
 
 internal class RootViewModelStores : ViewModel() {
 
-    private val stores = mutableMapOf<NavigationRoot, ViewModelStore>()
+    private val stores = mutableMapOf<AccountRoot, ViewModelStore>()
 
-    fun storeOf(root: NavigationRoot): ViewModelStore = stores.getOrPut(root) { ViewModelStore() }
+    fun storeOf(root: AccountRoot): ViewModelStore = stores.getOrPut(root) { ViewModelStore() }
 
-    fun release(root: NavigationRoot) {
+    fun release(root: AccountRoot) {
         stores.remove(root)?.clear()
     }
 
-    fun releaseAll() = NavigationRoot.entries.forEach(::release)
+    fun releaseAll() = stores.keys.toList().forEach(::release)
 
-    fun keepOnly(root: NavigationRoot) = NavigationRoot.entries.filter { it != root }.forEach(::release)
+    fun keepOnly(root: AccountRoot) = stores.keys.filter { it != root }.forEach(::release)
 
     override fun onCleared() = releaseAll()
 
@@ -48,7 +48,7 @@ internal fun rememberRootViewModelStores(): RootViewModelStores =
 
 @Composable
 internal fun WithRootViewModelStore(
-    root: NavigationRoot,
+    root: AccountRoot,
     content: @Composable () -> Unit,
 ) {
     val parent = checkNotNull(LocalViewModelStoreOwner.current)

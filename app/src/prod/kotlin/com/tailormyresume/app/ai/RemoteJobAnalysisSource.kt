@@ -8,9 +8,10 @@ import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.MatchStatus
+import com.tailormyresume.core.model.QuickQuestion
 import com.tailormyresume.core.model.RequirementMatch
-import com.tailormyresume.core.model.confirmedWithinLimits
 import com.tailormyresume.core.model.evidenceIds
+import com.tailormyresume.core.model.sendableFacts
 import com.tailormyresume.core.network.TailorMyResumeApi
 import com.tailormyresume.core.network.dto.AnalysisRequest
 import com.tailormyresume.core.network.dto.MatchDto
@@ -39,11 +40,13 @@ class RemoteJobAnalysisSource @Inject constructor(
         synchronized(cache) { cache[key] }?.let { return rematch(it, profile) }
         val response = remoteAi { api.analyse(AnalysisRequest(rawJobText, facts)) }
         val job = response.job.toJobDescription(rawJobText)
-        val factIds = profile.confirmedWithinLimits().evidenceIds()
+        val factIds = profile.sendableFacts().evidenceIds()
+        val matches = matchesOf(job, response.matches, factIds)
         val gap = GapAnalysis(
-            matches = matchesOf(job, response.matches, factIds),
+            matches = matches,
             keywordCoverage = matcher.match(profile, job).keywordCoverage,
             generationId = response.generationId,
+            question = response.question?.let { QuickQuestion(it.requirementId, it.text, it.why) }.stillOpenIn(matches),
         )
         val entry = Entry(JobAnalysisResult(job, gap, clock.now()), profile)
         synchronized(cache) { cache[key] = entry }
@@ -54,7 +57,7 @@ class RemoteJobAnalysisSource @Inject constructor(
 
     private fun rematch(entry: Entry, profile: CandidateProfile): JobAnalysisResult {
         val job = entry.result.job
-        val factIds = profile.confirmedWithinLimits().evidenceIds()
+        val factIds = profile.sendableFacts().evidenceIds()
         val baseline = matcher.match(entry.baselineProfile, job).matches.associateBy { it.requirement.id }
         val current = matcher.match(profile, job)
         val currentByRequirement = current.matches.associateBy { it.requirement.id }
@@ -62,11 +65,22 @@ class RemoteJobAnalysisSource @Inject constructor(
             val evidence = server.evidenceIds.filter { it in factIds }
             val effectiveServerStatus =
                 server.status.takeUnless { it != MatchStatus.GAP && evidence.isEmpty() } ?: MatchStatus.GAP
-            val effective = RequirementMatch(server.requirement, effectiveServerStatus, evidence)
+            val effective = RequirementMatch(
+                server.requirement,
+                effectiveServerStatus,
+                evidence,
+                server.reason.takeIf { effectiveServerStatus == server.status && evidence == server.evidenceIds },
+            )
             upgradedMatch(effective, currentByRequirement[server.requirement.id], baseline[server.requirement.id])
                 ?: effective
         }
-        return JobAnalysisResult(job, GapAnalysis(matches, current.keywordCoverage, entry.result.gap.generationId), entry.result.analysedAt)
+        val gap = GapAnalysis(
+            matches,
+            current.keywordCoverage,
+            entry.result.gap.generationId,
+            entry.result.gap.question.stillOpenIn(matches),
+        )
+        return JobAnalysisResult(job, gap, entry.result.analysedAt)
     }
 
     private fun matchesOf(job: JobDescription, matches: List<MatchDto>, factIds: Set<String>): List<RequirementMatch> {
@@ -75,9 +89,15 @@ class RemoteJobAnalysisSource @Inject constructor(
             val match = byRequirement[requirement.id]
             val evidence = match?.evidenceIds.orEmpty().filter { it in factIds }
             val status = match?.status?.takeUnless { it != MatchStatus.GAP && evidence.isEmpty() } ?: MatchStatus.GAP
-            RequirementMatch(requirement, status, evidence)
+            RequirementMatch(requirement, status, evidence, match?.reason.takeIf { match?.status == status })
         }
     }
+
+    private fun QuickQuestion?.stillOpenIn(matches: List<RequirementMatch>): QuickQuestion? =
+        this?.takeIf { question ->
+            question.text.isNotBlank() &&
+                matches.any { it.requirement.id == question.requirementId && it.status != MatchStatus.MET }
+        }
 
     private fun cacheKey(rawJobText: String): String =
         sha256(rawJobText.trim().replace(WHITESPACE, " "))

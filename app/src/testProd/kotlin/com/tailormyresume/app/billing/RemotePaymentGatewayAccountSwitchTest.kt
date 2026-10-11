@@ -5,6 +5,7 @@ import com.tailormyresume.core.network.TailorMyResumeApiConfig
 import com.tailormyresume.core.network.tailormyresumeApi
 import com.tailormyresume.core.network.tailormyresumeJson
 import com.tailormyresume.core.network.tailormyresumeOkHttpClient
+import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,7 +31,7 @@ class RemotePaymentGatewayAccountSwitchTest {
     private val source = WalletSource(api, account)
     private val billing = FakePlayBilling()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val gateway = RemotePaymentGateway(api, source, billing, account, scope)
+    private val gateway = RemotePaymentGateway(api, source, billing, account, scope, TestCreditsRepository())
 
     @After
     fun tearDown() {

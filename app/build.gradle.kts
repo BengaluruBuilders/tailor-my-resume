@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.tailormyresume.android.application.compose)
     alias(libs.plugins.tailormyresume.hilt)
     alias(libs.plugins.dependency.guard)
+    id("io.github.takahirom.roborazzi")
 }
 
 fun releaseSetting(name: String): String? =
@@ -162,7 +163,6 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.model)
     implementation(projects.core.navigation)
-    implementation(projects.core.ui)
 
     "prodImplementation"(projects.core.network)
     "prodImplementation"(libs.room.runtime)
@@ -181,6 +181,9 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
 
     testImplementation(projects.core.testing)
+    testImplementation(projects.core.screenshot)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
     "testProdImplementation"(libs.okhttp.mockwebserver)
@@ -191,6 +194,10 @@ dependencies {
     testImplementation(libs.androidx.compose.ui.testManifest)
     testImplementation(libs.androidx.test.ext.junit)
 }
+
+tasks.register("recordRoborazziDebug") { dependsOn("recordRoborazziDemoDebug") }
+
+tasks.register("verifyRoborazziDebug") { dependsOn("verifyRoborazziDemoDebug") }
 
 dependencyGuard {
     configuration("demoReleaseRuntimeClasspath")
