@@ -10,10 +10,12 @@ import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.TailoredResume
+import com.tailormyresume.feature.tailor.api.ExportedPdfIntents
 import com.tailormyresume.feature.tailor.impl.document.AndroidResumeHeadings
 import com.tailormyresume.feature.tailor.impl.document.ResumeHeadings
 import com.tailormyresume.feature.tailor.impl.export.BitmapPdfResumeRenderer
 import com.tailormyresume.feature.tailor.impl.export.ExportModule
+import com.tailormyresume.feature.tailor.impl.export.ExportedPdfIntentsImpl
 import com.tailormyresume.feature.tailor.impl.export.ResumePdfRenderer
 import com.tailormyresume.feature.tailor.impl.exported.CacheExportedFileStore
 import com.tailormyresume.feature.tailor.impl.exported.ExportedFileStore
@@ -38,6 +40,9 @@ internal abstract class TailorHiltTestBindings {
 
     @Binds
     abstract fun bindContentReports(impl: StoredContentReportRepository): ContentReportRepository
+
+    @Binds
+    abstract fun bindExportedPdfIntents(intents: ExportedPdfIntentsImpl): ExportedPdfIntents
 
     @Binds
     abstract fun bindRemoteLedgerSource(impl: NoRemoteLedger): RemoteLedgerSource
