@@ -16,7 +16,7 @@ class TooLongBulletNeverUsedTest {
     fun offlineTailorNeverTailorsATooLongBullet() = runTest {
         val job = OfflineJobDescriptionAnalyzer().analyze("Requirements\n- Kotlin")
 
-        val resume = OfflineResumeTailor().tailor(profile, job, OfflineGapMatcher().match(profile, job), "app-1", null)
+        val resume = OfflineResumeTailor().tailor(profile, job, OfflineGapMatcher().match(profile, job), "app-1", null, "run-1")
 
         assertThat(resume.bullets.flatMap { it.sourceIds }).containsExactly("L-1-b2")
     }

@@ -20,14 +20,14 @@ class RemoteResumeTailorFailureTest {
     fun tearDown() = backend.shutdown()
 
     private suspend fun failureOfNextAttempt() =
-        (runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull() as AiException).failure
+        (runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull() as AiException).failure
 
     @Test
     fun noCreditClearsRequestId() = runTest {
         backend.fail(402, "NO_CREDIT")
 
         assertThat(failureOfNextAttempt()).isEqualTo(AiFailure.NoCredit)
-        assertThat(store.read("tailoring.request.app-1")).isNull()
+        assertThat(store.read("tailoring.request.run-1")).isNull()
         assertThat(backend.server.requestCount).isEqualTo(1)
     }
 
@@ -38,7 +38,7 @@ class RemoteResumeTailorFailureTest {
             backend.reply(200, tailoringBody("FAILED", ""","failureCode":"$code""""))
 
             assertThat(failureOfNextAttempt()).isEqualTo(AiFailure.Unavailable)
-            assertThat(store.read("tailoring.request.app-1")).isNull()
+            assertThat(store.read("tailoring.request.run-1")).isNull()
         }
     }
 
@@ -57,7 +57,7 @@ class RemoteResumeTailorFailureTest {
         backend.reply(202, tailoringBody("PAUSED"))
 
         assertThat(failureOfNextAttempt()).isEqualTo(AiFailure.Unavailable)
-        assertThat(store.read("tailoring.request.app-1")).isNull()
+        assertThat(store.read("tailoring.request.run-1")).isNull()
         assertThat(backend.server.requestCount).isEqualTo(1)
     }
 
@@ -67,7 +67,7 @@ class RemoteResumeTailorFailureTest {
         backend.reply(200, tailoringBody("PAUSED"))
 
         assertThat(failureOfNextAttempt()).isEqualTo(AiFailure.Unavailable)
-        assertThat(store.read("tailoring.request.app-1")).isNull()
+        assertThat(store.read("tailoring.request.run-1")).isNull()
         assertThat(backend.server.requestCount).isEqualTo(2)
     }
 }

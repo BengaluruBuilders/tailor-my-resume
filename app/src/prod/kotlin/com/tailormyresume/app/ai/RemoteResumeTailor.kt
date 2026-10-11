@@ -37,9 +37,10 @@ class RemoteResumeTailor @Inject constructor(
         gap: GapAnalysis,
         applicationId: String,
         answer: QuickAnswer?,
+        runId: String,
     ): TailoredResume {
         val request = TailoringStartRequest(
-            requestId = pending.idFor(applicationId),
+            requestId = pending.idFor(runId, applicationId),
             applicationId = applicationId,
             job = job.toDto(),
             matches = gap.matches.map { it.toDto() },
@@ -48,12 +49,15 @@ class RemoteResumeTailor @Inject constructor(
         )
         try {
             val finished = awaitFinished(start(request))
-            pending.clear(applicationId)
             val result = finished.result?.takeIf { finished.status == TailoringStatus.SUCCEEDED }
-                ?: throw AiException(finished.failureCode.toAiFailure())
+                ?: run {
+                    pending.clear(runId, applicationId)
+                    throw AiException(finished.failureCode.toAiFailure())
+                }
+            pending.settle(applicationId)
             return result.toTailoredResume(profile)
         } catch (failure: AiException) {
-            if (failure.failure !in RESUMABLE) pending.clear(applicationId)
+            if (failure.failure !in RESUMABLE) pending.clear(runId, applicationId)
             throw failure
         }
     }

@@ -34,7 +34,7 @@ class AiFailureMappingTest {
         return mapOf(
             "parse" to { RemoteResumeTextParser(backend.api, FactIdAllocator()).parse("x".repeat(60)) },
             "analyse" to { RemoteJobAnalysisSource(backend.api, matcher).analyse(candidate, "jd text") },
-            "tailor" to { tailor.tailor(candidate, job, analysis.gap, "app-1", null) },
+            "tailor" to { tailor.tailor(candidate, job, analysis.gap, "app-1", null, "run-1") },
         )
     }
 

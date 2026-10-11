@@ -65,4 +65,5 @@ data class TailoredResumeDto(
     val entryIds: List<String>? = null,
     val summary: TailoredTextDto? = null,
     val skills: TailoredSkillsDto? = null,
+    val runId: String? = null,
 )

@@ -60,7 +60,7 @@ class AiBindingsTest {
         previewMode.active = true
 
         analysisSource.analyse(candidate, "Associate Analyst at Northwind\nSQL reports")
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat(backend.server.requestCount).isEqualTo(0)
     }
@@ -71,7 +71,7 @@ class AiBindingsTest {
         backend.reply(500, """{"error":{"code":"AI_PROVIDER_ERROR","message":"x"}}""")
 
         runCatching { analysisSource.analyse(candidate, "text") }
-        runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }
+        runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }
 
         assertThat(backend.server.requestCount).isEqualTo(2)
     }

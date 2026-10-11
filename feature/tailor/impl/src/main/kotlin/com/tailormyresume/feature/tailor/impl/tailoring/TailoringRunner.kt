@@ -38,7 +38,11 @@ internal class TailoringRunner @Inject constructor(
         val alreadySpent = creditsRepository.observeLedger().first().any {
             it.kind == CreditLedgerKind.SPEND && it.productId == runKey
         }
-        if (alreadySpent) return TailoringResult.Success
+        val storedForThisRun = application.tailoredResume?.runId == runId
+        if (storedForThisRun || alreadySpent) {
+            if (!alreadySpent) creditsRepository.record(TailoringCreditSpend.spendEntry(applicationId, runId, clock))
+            return TailoringResult.Success
+        }
         TailoringCreditSpend.forSuccess(
             applicationId = applicationId,
             runId = runId,
@@ -46,11 +50,11 @@ internal class TailoringRunner @Inject constructor(
             record = creditsRepository::record,
             tailoring = {
                 val tailored = withContext(dispatcher) {
-                    tailorResume(profile, application.job, gap, applicationId, quickAnswer = application.quickAnswer)
+                    tailorResume(profile, application.job, gap, applicationId, runId, quickAnswer = application.quickAnswer)
                 }
                 applicationRepository.upsertApplication(
                     application.copy(
-                        tailoredResume = tailored,
+                        tailoredResume = tailored.copy(runId = runId),
                         keywordCoverage = KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, tailored),
                         changesAcceptedAt = null,
                         updatedAt = clock.now(),

@@ -20,7 +20,7 @@ class RemoteResumeTailorAnswerTest {
 
     private suspend fun bodyFor(answer: QuickAnswer?): String {
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
-        tailor.tailor(candidate, job, gap, "app-1", answer)
+        tailor.tailor(candidate, job, gap, "app-1", answer, "run-1")
         return backend.server.takeRequest().body.readUtf8()
     }
 
@@ -58,6 +58,7 @@ class RemoteResumeTailorAnswerTest {
             job,
             gap,
             "app-1",
+            "run-1",
             quickAnswer = QuickAnswer("req-1", "YES_REGULARLY", "Led SQL reporting."),
         )
 

@@ -46,7 +46,7 @@ class OfflineRobustnessTest {
             val job = analyzer.analyze(it)
             val gap = matcher.match(sampleProfile, job)
             assertThat(gap.matches).hasSize(job.requirements.size)
-            assertThat(tailor.tailor(sampleProfile, job, gap, "app-1", null).bullets).isNotEmpty()
+            assertThat(tailor.tailor(sampleProfile, job, gap, "app-1", null, "run-1").bullets).isNotEmpty()
         }
     }
 

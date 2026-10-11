@@ -45,6 +45,7 @@ data class TailoredResume(
     val entryIds: List<String>? = null,
     val summary: TailoredText? = null,
     val skills: TailoredSkills? = null,
+    val runId: String? = null,
 ) {
     val changeCount: Int
         get() = bullets.count { it.proposedText != it.originalText } +

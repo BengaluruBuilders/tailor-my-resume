@@ -149,7 +149,7 @@ class RemoteAiRoutesTest {
 
         source.analyse(candidate, "the raw job text")
         RemoteResumeTailor(backend.api, PendingTailoringIds(com.tailormyresume.core.testing.mock.TestMockStateStore(), FixedIds))
-            .tailor(candidate, job, analysis.gap, "app-1", null)
+            .tailor(candidate, job, analysis.gap, "app-1", null, "run-1")
 
         repeat(2) {
             val body = nextBody()

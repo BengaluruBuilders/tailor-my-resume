@@ -23,8 +23,8 @@ class RemoteResumeTailorRequestIdTest {
     fun retrySendsSameRequestIdWithoutSection() = runTest {
         backend.reply(202, tailoringBody("RUNNING"))
         repeat(100) { backend.reply(200, tailoringBody("RUNNING")) }
-        runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }
-        val keyAfterGiveUp = store.read("tailoring.request.app-1")
+        runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }
+        val keyAfterGiveUp = store.read("tailoring.request.run-1")
         val firstBody = backend.server.takeRequest().body.readUtf8()
 
         assertThat(keyAfterGiveUp).isEqualTo(requestIdOf(firstBody))
@@ -34,10 +34,10 @@ class RemoteResumeTailorRequestIdTest {
     @Test
     fun aRetryAfterANetworkDropSendsTheSameRequestId() = runTest {
         backend.reply(502, """{"error":{"code":"AI_PROVIDER_ERROR","message":"x"}}""")
-        runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }
+        runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         val first = backend.server.takeRequest().body.readUtf8()
         val second = backend.server.takeRequest().body.readUtf8()

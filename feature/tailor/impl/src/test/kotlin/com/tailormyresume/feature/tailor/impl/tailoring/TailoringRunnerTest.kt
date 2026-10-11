@@ -75,6 +75,7 @@ class TailoringRunnerTest {
                 gap: GapAnalysis,
                 applicationId: String,
                 answer: QuickAnswer?,
+                runId: String,
             ): TailoredResume = tailor()
         },
         CleanFabricationGuard,

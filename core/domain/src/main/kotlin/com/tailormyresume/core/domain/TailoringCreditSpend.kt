@@ -15,7 +15,10 @@ object TailoringCreditSpend {
         tailoring: suspend () -> T,
     ): T {
         val result = tailoring()
-        record(CreditLedgerEntry(CreditLedgerKind.SPEND, -1, applicationId, runKey(runId), clock.now()))
+        record(spendEntry(applicationId, runId, clock))
         return result
     }
+
+    fun spendEntry(applicationId: String, runId: String, clock: Clock) =
+        CreditLedgerEntry(CreditLedgerKind.SPEND, -1, applicationId, runKey(runId), clock.now())
 }

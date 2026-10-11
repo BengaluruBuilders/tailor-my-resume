@@ -80,6 +80,7 @@ class TailoringViewModelTest {
             gap: GapAnalysis,
             applicationId: String,
             answer: QuickAnswer?,
+            runId: String,
         ): TailoredResume {
             delay(tailorMillis)
             if (failing) error("tailor failed")

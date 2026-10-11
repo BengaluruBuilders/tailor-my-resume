@@ -35,7 +35,7 @@ class RemoteResumeTailorTest {
         backend.reply(200, tailoringBody("RUNNING"))
         backend.reply(200, tailoringBody("SUCCEEDED", tailoringResult("Cleaned and checked weekly sales data in Excel.")))
 
-        val resume = tailor.tailor(candidate, job, gap, "app-1", null)
+        val resume = tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         val start = backend.server.takeRequest()
         assertThat(start.method).isEqualTo("POST")
@@ -55,7 +55,7 @@ class RemoteResumeTailorTest {
         backend.reply(200, tailoringBody("RUNNING"))
         backend.reply(200, tailoringBody("SUCCEEDED", tailoringResult("Cleaned and checked weekly sales data in Excel.")))
 
-        val resume = tailor.tailor(candidate, job, gap, "app-1", null)
+        val resume = tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat(backend.server.takeRequest().method).isEqualTo("POST")
         assertThat(backend.server.takeRequest().path).isEqualTo("/v1/tailormyresume/tailorings/tl_1")
@@ -66,7 +66,7 @@ class RemoteResumeTailorTest {
     fun aTailoringRequestNeverSendsASection() = runTest {
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat(backend.server.takeRequest().body.readUtf8()).doesNotContain("section")
     }
@@ -75,10 +75,10 @@ class RemoteResumeTailorTest {
     fun aRetryAfterATransientFailureReusesTheRequestId() = runTest {
         backend.reply(202, tailoringBody("RUNNING"))
         backend.fail(502, "AI_PROVIDER_ERROR")
-        val first = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
+        val first = runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull()
         backend.reply(200, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat((first as AiException).failure).isEqualTo(AiFailure.Unavailable)
         val firstId = requestIdOf(backend.server.takeRequest().body.readUtf8())
@@ -94,10 +94,10 @@ class RemoteResumeTailorTest {
                     .setBody("""{"error":{"code":"RATE_LIMITED","message":"x"}}"""),
             )
         }
-        val first = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
+        val first = runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull()
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat((first as AiException).failure).isEqualTo(AiFailure.RateLimited)
         val ids = List(4) { requestIdOf(backend.server.takeRequest().body.readUtf8()) }
@@ -105,15 +105,15 @@ class RemoteResumeTailorTest {
     }
 
     @Test
-    fun aFinishedJobForgetsItsRequestId() = runTest {
+    fun aSucceededJobKeepsItsRequestIdForTheSameRun() = runTest {
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
-        tailor.tailor(candidate, job, gap, "app-1", null)
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         val ids = List(2) { requestIdOf(backend.server.takeRequest().body.readUtf8()) }
-        assertThat(ids.distinct()).hasSize(2)
+        assertThat(ids.distinct()).hasSize(1)
     }
 
     @Test
@@ -122,8 +122,8 @@ class RemoteResumeTailorTest {
         backend.reply(200, tailoringBody("FAILED", ""","failureCode":"INTERRUPTED""""))
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
-        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull()
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat((failure as AiException).failure).isEqualTo(AiFailure.Unavailable)
         val ids = listOf(
@@ -139,8 +139,8 @@ class RemoteResumeTailorTest {
         backend.reply(200, tailoringBody("FAILED", ""","failureCode":"QUOTA_EXCEEDED""""))
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
-        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull()
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat((failure as AiException).failure).isEqualTo(AiFailure.QuotaExceeded)
         val ids = List(2) { requestIdOf(backend.server.takeRequest().body.readUtf8()) }
@@ -151,7 +151,7 @@ class RemoteResumeTailorTest {
     fun aJobThatEndsOnTheBudgetIsQuotaExceeded() = runTest {
         backend.reply(200, tailoringBody("FAILED", ""","failureCode":"BUDGET_EXCEEDED""""))
 
-        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
+        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull()
 
         assertThat((failure as AiException).failure).isEqualTo(AiFailure.QuotaExceeded)
     }
@@ -160,10 +160,10 @@ class RemoteResumeTailorTest {
     fun noCreditEndsTheAttemptAndForgetsItsRequestId() = runTest {
         backend.fail(402, "NO_CREDIT")
 
-        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
+        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull()
 
         assertThat((failure as AiException).failure).isEqualTo(AiFailure.NoCredit)
-        assertThat(store.read("tailoring.request.app-1")).isNull()
+        assertThat(store.read("tailoring.request.run-1")).isNull()
     }
 
     @Test
@@ -174,7 +174,7 @@ class RemoteResumeTailorTest {
         )
         backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult(FACT_TEXT)))
 
-        tailor.tailor(candidate, job, gap, "app-1", null)
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
 
         assertThat(currentTime).isEqualTo(10_000L)
         assertThat(backend.server.requestCount).isEqualTo(2)
@@ -185,11 +185,11 @@ class RemoteResumeTailorTest {
         backend.reply(202, tailoringBody("RUNNING"))
         repeat(100) { backend.reply(200, tailoringBody("RUNNING")) }
 
-        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null) }.exceptionOrNull()
+        val failure = runCatching { tailor.tailor(candidate, job, gap, "app-1", null, "run-1") }.exceptionOrNull()
 
         assertThat((failure as AiException).failure).isEqualTo(AiFailure.Timeout)
         assertThat(currentTime).isAtLeast(330_000L)
-        assertThat(store.read("tailoring.request.app-1")).isNotNull()
+        assertThat(store.read("tailoring.request.run-1")).isNotNull()
     }
 
     @Test
@@ -200,7 +200,7 @@ class RemoteResumeTailorTest {
                 if ("4000" in proposedText) listOf(GuardrailViolation.UnsupportedNumber("4000")) else emptyList()
         }
 
-        val resume = TailorResumeUseCase(tailor, guard)(candidate, job, gap, "app-1")
+        val resume = TailorResumeUseCase(tailor, guard)(candidate, job, gap, "app-1", "run-1")
 
         val bullet = resume.bullets.single()
         assertThat(bullet.proposedText).isEqualTo(FACT_TEXT)
