@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_onboarding_impl_signin_story_label">Paige · %1$d of %2$d</string>
+    <string name="feature_onboarding_impl_signin_hint_idle">Tap · hold</string>
+    <string name="feature_onboarding_impl_signin_hint_paused">Paused</string>
+    <string name="feature_onboarding_impl_signin_story1_headline">Upload your resume</string>
+    <string name="feature_onboarding_impl_signin_story1_subline">Add the resume you have. PDF or DOCX, any layout works.</string>
+    <string name="feature_onboarding_impl_signin_story2_headline">Paste the job you want</string>
+    <string name="feature_onboarding_impl_signin_story2_subline">Paste any job description and Paige finds the keywords it asks for.</string>
+    <string name="feature_onboarding_impl_signin_story3_headline">Get a resume made for it</string>
+    <string name="feature_onboarding_impl_signin_story3_subline">A tailored resume that uses those keywords. Nothing made up.</string>
+    <string name="feature_onboarding_impl_signin_action_next">Next story</string>
+    <string name="feature_onboarding_impl_signin_action_previous">Previous story</string>
+    <string name="feature_onboarding_impl_signin_art_pdf">PDF</string>
+    <string name="feature_onboarding_impl_signin_art_docx">DOCX</string>
+    <string name="feature_onboarding_impl_signin_art_job_post">Job post</string>
+    <string name="feature_onboarding_impl_signin_art_one_page">1 page</string>
+    <string name="feature_onboarding_impl_signin_sticker_keywords" formatted="false">92% keywords</string>
+    <string name="feature_onboarding_impl_signin_google">Continue with Google</string>
+    <string name="feature_onboarding_impl_signin_signing_in">Signing in…</string>
+    <string name="feature_onboarding_impl_signin_google_mark">G</string>
+    <string name="feature_onboarding_impl_signin_terms">Terms</string>
+    <string name="feature_onboarding_impl_signin_privacy">Privacy Policy</string>
+    <string name="feature_onboarding_impl_signin_footer">By continuing you agree to our %1$s and %2$s. Your first tailored resume is free.</string>
+    <string name="feature_onboarding_impl_signin_address_not_set">Address not set in this build</string>
+    <string name="feature_onboarding_impl_signin_cancelled">Sign-in cancelled. Nothing was saved.</string>
+    <string name="feature_onboarding_impl_signin_retry">Retry</string>
+</resources>
