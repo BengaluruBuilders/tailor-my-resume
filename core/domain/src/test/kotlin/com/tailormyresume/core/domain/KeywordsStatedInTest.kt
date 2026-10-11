@@ -81,12 +81,18 @@ class KeywordsStatedInTest {
     }
 
     @Test
-    fun looseAliasContainingTheSkillNameStatesTheSkill() {
+    fun looseAliasesSharingADisplayStemStateTheSkill() {
         assertThat(stated("Java", "Strong Core Java skills")).containsExactly("Java")
         assertThat(stated("Tally", "Tally ERP 9")).containsExactly("Tally")
         assertThat(stated("Excel", "Advanced Excel")).containsExactly("Excel")
         assertThat(stated("SAP", "SAP FICO")).containsExactly("SAP")
-        assertThat(stated("Angular", "Built angular js apps")).containsExactly("Angular")
+        assertThat(stated("REST API", "Built REST APIs")).containsExactly("REST API")
+        assertThat(stated("Unit Testing", "Wrote unit tests")).containsExactly("Unit Testing")
+        assertThat(stated("Attention to Detail", "I am detail oriented")).containsExactly("Attention to Detail")
+        assertThat(stated("Master's Degree", "I have a postgraduate degree")).containsExactly("Master's Degree")
+        assertThat(stated("Angular", "Built angular js apps")).isEmpty()
+        assertThat(stated("Angular", "Built AngularJS 1.x apps")).isEmpty()
+        assertThat(stated("Angular", "Built angular.js apps")).isEmpty()
         assertThat(stated("angular js", "Built AngularJS apps")).isEmpty()
     }
 

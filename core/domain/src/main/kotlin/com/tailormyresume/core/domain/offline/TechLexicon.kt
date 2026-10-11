@@ -41,7 +41,7 @@ internal val languageEntries: List<LexiconEntry> = listOf(
 internal val frameworkEntries: List<LexiconEntry> = listOf(
     tool("React", "react.js", "reactjs", "react js"),
     tool("React Native"),
-    tool("Angular", loose = listOf("angularjs")),
+    tool("Angular", loose = listOf("angularjs")).copy(blockedSuffixes = listOf("\\s*js\\b")),
     tool("Vue", "vue.js", "vuejs", "vue js"),
     tool("Next.js", "nextjs"),
     tool("Node.js", "nodejs", "node js"),

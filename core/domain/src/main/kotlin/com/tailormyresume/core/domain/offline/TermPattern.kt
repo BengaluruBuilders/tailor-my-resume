@@ -12,7 +12,7 @@ internal class TermPattern private constructor(
         private val wordSeparators = Regex("[\\s\\-]+")
 
         fun compileAll(entry: LexiconEntry): List<TermPattern> = listOfNotNull(
-            build(entry, entry.insensitiveForms, ignoreCase = true, suffixes = emptyList()),
+            build(entry, entry.insensitiveForms, ignoreCase = true, suffixes = entry.blockedSuffixes),
             build(entry, entry.exactForms, ignoreCase = false, suffixes = entry.blockedSuffixes, prefix = entry.requiredPrefix),
         )
 
