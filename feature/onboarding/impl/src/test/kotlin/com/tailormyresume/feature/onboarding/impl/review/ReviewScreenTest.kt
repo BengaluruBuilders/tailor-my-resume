@@ -60,13 +60,9 @@ class ReviewScreenTest {
         listOf(
             "Your profile",
             "From Priya_Deshmukh_Resume.pdf. Tap anything to edit.",
-            "90%",
-            "Profile complete",
-            "Required",
+            "REQUIRED",
             "End date missing for Data Analyst Intern",
             "Add date",
-            "Add your LinkedIn",
-            "Optional",
             "Priya Deshmukh",
             "priya.deshmukh@gmail.com",
             "+91 98200 41736 · Pune",
@@ -89,7 +85,7 @@ class ReviewScreenTest {
         showRoute(fixedReviewProfile().copy(linkedinUrl = SAMPLE_LINKEDIN))
 
         composeRule.onNodeWithText("All required info is done").assertIsDisplayed()
-        composeRule.onNodeWithText("100%").assertIsDisplayed()
+        composeRule.onNodeWithText("Profile complete").assertDoesNotExist()
         composeRule.onNodeWithText("Add date").assertDoesNotExist()
         composeRule.onNodeWithText("Add your LinkedIn").assertDoesNotExist()
     }

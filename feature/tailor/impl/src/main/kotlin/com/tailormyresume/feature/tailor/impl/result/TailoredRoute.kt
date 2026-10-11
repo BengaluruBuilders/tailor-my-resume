@@ -21,7 +21,7 @@ internal fun TailoredRoute(
     onNavigate: (NavKey) -> Unit,
 ) {
     val state by tailoredViewModel.state.collectAsStateWithLifecycle()
-    var tab by rememberSaveable { mutableStateOf(TailoredTab.Resume) }
+    var tab by rememberSaveable { mutableStateOf<TailoredTab?>(null) }
     val toast = LocalTmrToast.current
     val exportBlocked = stringResource(R.string.feature_tailor_impl_result_export_blocked)
     LaunchedEffect(tailorViewModel) {
@@ -35,7 +35,7 @@ internal fun TailoredRoute(
     (state as? TailoredUiState.Ready)?.let { ready ->
         TailoredScreen(
             state = ready,
-            tab = tab,
+            tab = tab ?: ready.defaultTab(),
             onTabChange = { tab = it },
             onUndo = tailorViewModel::onUndoChange,
             onAcceptChanges = tailorViewModel::onAcceptChanges,

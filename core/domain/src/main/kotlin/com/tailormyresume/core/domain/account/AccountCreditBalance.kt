@@ -1,24 +1,26 @@
 package com.tailormyresume.core.domain.account
 
+import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class AccountCreditBalance @Inject constructor(
     private val paymentGateway: PaymentGateway,
+    private val creditsRepository: CreditsRepository,
 ) {
 
-    suspend fun unusedCredits(): Int = knownEntitlement().totalCredits
+    suspend fun unusedCredits(): Int {
+        check(creditsRepository.refreshConfirmed()) { "The credit balance is unavailable." }
+        return checkNotNull(creditsRepository.observeKnownBalance().first()) { "The credit balance is unavailable." }
+    }
 
     suspend fun cachedCredits(): Int? = observeCredits().first()
 
-    fun observeCredits(): Flow<Int?> = paymentGateway.observeEntitlement().map { entitlement ->
-        entitlement.totalCredits.takeIf { entitlement.hasKnownBalance }
-    }
+    fun observeCredits(): Flow<Int?> = creditsRepository.observeKnownBalance()
 
     suspend fun creditLine(): AccountCreditLine {
         val entitlement = knownEntitlement()

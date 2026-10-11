@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -113,7 +114,7 @@ private fun JobBottom(state: JobUiState, onAnalyze: () -> Unit) {
         when (state) {
             JobUiState.Empty -> {
                 Text(
-                    text = stringResource(R.string.feature_analysis_impl_job_hint),
+                    text = pluralStringResource(R.plurals.feature_analysis_impl_job_hint, MIN_JOB_CHARS, MIN_JOB_CHARS),
                     style = TmrTheme.typography.caption,
                     color = TmrTheme.colors.textMuted,
                     textAlign = TextAlign.Center,
@@ -131,6 +132,15 @@ private fun JobBottom(state: JobUiState, onAnalyze: () -> Unit) {
 
             is JobUiState.HasText -> Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 JobStatusRow(state)
+                if (!isPlausibleJobPost(state.text)) {
+                    Text(
+                        text = pluralStringResource(R.plurals.feature_analysis_impl_job_hint, MIN_JOB_CHARS, MIN_JOB_CHARS),
+                        style = TmrTheme.typography.caption,
+                        color = TmrTheme.colors.textMuted,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
                 if (state.notAJobPost) JobNotAPostCard()
                 TmrPrimaryButton(
                     label = stringResource(R.string.feature_analysis_impl_job_analyze),

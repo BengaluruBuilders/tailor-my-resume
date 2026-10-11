@@ -12,6 +12,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.onboarding.MarkProfileReviewedUseCase
 import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.EntryCategory
+import com.tailormyresume.core.model.FactSource
+import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
@@ -24,6 +27,8 @@ import com.tailormyresume.feature.onboarding.impl.upload.showFlowScreen
 import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditRoleNavKey
 import com.tailormyresume.feature.profile.api.navigation.ExperienceNavKey
+import com.tailormyresume.feature.profile.api.navigation.ListEditNavKey
+import com.tailormyresume.feature.profile.api.navigation.ProfileListSection
 import com.tailormyresume.feature.profile.api.navigation.SkillsNavKey
 import org.junit.Rule
 import org.junit.Test
@@ -61,13 +66,9 @@ class ReviewRouteNavigationTest {
     }
 
     @Test
-    fun contactAndLinkedinOpenEditContact() {
+    fun contactOpensEditContact() {
         show(freshReviewProfile())
 
-        tap("Add your LinkedIn")
-        assertThat(navigator.state.currentKey).isEqualTo(EditContactNavKey())
-
-        navigator.goBack()
         tap("Priya Deshmukh")
         assertThat(navigator.state.currentKey).isEqualTo(EditContactNavKey())
     }
@@ -92,12 +93,33 @@ class ReviewRouteNavigationTest {
     }
 
     @Test
-    fun educationCardIsNotTappable() {
+    fun educationCardOpensEditor() {
         show(freshReviewProfile())
 
+        composeRule.onNodeWithText("B.Com, Finance").performScrollTo()
         tap("B.Com, Finance")
 
-        assertThat(navigator.state.currentKey).isEqualTo(ReviewProfileNavKey())
+        assertThat(navigator.state.currentKey).isEqualTo(ListEditNavKey(ProfileListSection.EDUCATION))
+    }
+
+    @Test
+    fun manualProfileWithoutBulletsOffersExistingRoleEditorAndCanContinue() {
+        val manual = fixedReviewProfile(sourceFileName = null).copy(
+            contactUserStated = true,
+            entries = listOf(
+                ProfileEntry(
+                    "manual-role", EntryCategory.EXPERIENCE, "Analyst", "Example Co", "", "", emptyList(), FactSource.USER_STATED, true,
+                ),
+            ),
+        )
+        show(manual)
+
+        composeRule.onNodeWithText("Add a work example").performClick()
+
+        assertThat(navigator.state.currentKey).isEqualTo(EditRoleNavKey(entryId = "manual-role"))
+        navigator.goBack()
+        tap("Looks right, continue")
+        composeRule.waitUntil(timeoutMillis = 5_000) { navigator.state.currentKey == JobNavKey() }
     }
 
     @Test

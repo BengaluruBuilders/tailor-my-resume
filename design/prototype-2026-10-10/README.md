@@ -1,5 +1,9 @@
 # Prototype 2026-10-10 — current design and simplified MVP
 
+The owner-approved [activation delta of 2026-10-12](../activation-2026-10-12/README.md) overrides
+the specific first-use states it lists. This export remains unchanged. Use the prototype for all
+other states and visual tokens.
+
 Claude Design project "Resume Onboarding Flow", received 2026-10-10:
 https://claude.ai/design/p/69e938ce-29b9-400c-ab69-5da2975dbeae?file=Prototype.dc.html
 

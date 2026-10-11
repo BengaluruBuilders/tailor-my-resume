@@ -22,6 +22,7 @@
     <string name="feature_onboarding_impl_signin_terms">Terms</string>
     <string name="feature_onboarding_impl_signin_privacy">Privacy Policy</string>
     <string name="feature_onboarding_impl_signin_footer">By continuing you agree to our %1$s and %2$s. Your first tailored resume is free.</string>
+    <string name="feature_onboarding_impl_signin_prepare">Have your resume or work details and the full job description ready.</string>
     <string name="feature_onboarding_impl_signin_address_not_set">Address not set in this build</string>
     <string name="feature_onboarding_impl_signin_cancelled">Sign-in cancelled. Nothing was saved.</string>
     <string name="feature_onboarding_impl_signin_retry">Retry</string>

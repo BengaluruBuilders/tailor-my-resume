@@ -16,6 +16,7 @@ import com.tailormyresume.feature.profile.impl.contact.EditContactActions
 import com.tailormyresume.feature.profile.impl.contact.EditContactDraft
 import com.tailormyresume.feature.profile.impl.contact.EditContactScreen
 import com.tailormyresume.feature.profile.impl.contact.EditContactUiState
+import com.tailormyresume.feature.profile.impl.listedit.EducationDraft
 import com.tailormyresume.feature.profile.impl.listedit.ListEditActions
 import com.tailormyresume.feature.profile.impl.listedit.ListEditScreen
 import com.tailormyresume.feature.profile.impl.listedit.ListEditUiState
@@ -67,6 +68,7 @@ internal fun listState(section: ProfileListSection): ListEditUiState.Editing = w
         listOf("B.Com, Finance · Symbiosis College, Pune · 2020"),
         canSave = true,
         canAdd = true,
+        education = listOf(EducationDraft("B.Com, Finance", "Symbiosis College, Pune", "", "2020")),
     )
     ProfileListSection.ACHIEVEMENTS -> ListEditUiState.Editing(section, ACHIEVEMENT_TEXTS, canSave = true, canAdd = true)
 }
@@ -191,7 +193,8 @@ class EditorsScreenTest {
             ListEditScreen(state = listState(ProfileListSection.EDUCATION), actions = ListEditActions(onAdd = { added++ }))
         }
 
-        rule.assertTexts("Education", "B.Com, Finance")
+        rule.assertTexts("Education", "B.Com, Finance", "Symbiosis College, Pune", "Degree or qualification", "School or institution")
+        assertThat(rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes()).hasSize(4)
         rule.assertNoText("Your starting point")
         rule.assertNoText("Numbers help")
         rule.onNodeWithText("+ Add education").performClick()

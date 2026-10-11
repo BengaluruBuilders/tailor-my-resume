@@ -5,9 +5,9 @@ import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.PurchaseFailureReason
 import com.tailormyresume.core.domain.PurchaseOutcome
-import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.offline.MockPackCatalogue
 import com.tailormyresume.core.model.CreditLedgerKind
+import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.core.testing.util.TestClock
 import kotlinx.coroutines.CompletableDeferred
@@ -31,7 +31,7 @@ class PaywallViewModelTest {
     private fun viewModel(
         gateway: CountingPaymentGateway = CountingPaymentGateway(),
         credits: com.tailormyresume.core.data.repository.CreditsRepository = RecordingCreditsRepository(),
-    ) = PaywallViewModel(gateway, credits, AccountCreditBalance(gateway), clock)
+    ) = PaywallViewModel(gateway, credits, testAccountCreditBalance(gateway), clock)
 
     private fun TestScope.keepSubscribed(flow: Flow<*>) {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { flow.collect {} }

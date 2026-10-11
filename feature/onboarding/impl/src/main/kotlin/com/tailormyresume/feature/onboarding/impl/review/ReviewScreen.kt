@@ -10,13 +10,11 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -31,16 +29,12 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.text
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,6 +46,7 @@ import com.tailormyresume.core.designsystem.component.content.TmrSectionLabel
 import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
 import com.tailormyresume.core.designsystem.icon.TmrIcons
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.feature.analysis.api.navigation.JobNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
@@ -59,6 +54,8 @@ import com.tailormyresume.feature.onboarding.impl.R
 import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditRoleNavKey
 import com.tailormyresume.feature.profile.api.navigation.ExperienceNavKey
+import com.tailormyresume.feature.profile.api.navigation.ListEditNavKey
+import com.tailormyresume.feature.profile.api.navigation.ProfileListSection
 import com.tailormyresume.feature.profile.api.navigation.SkillsNavKey
 
 private const val STACKED_MIN_FONT_SCALE = 1.3f
@@ -73,6 +70,8 @@ internal fun ReviewScreen(
     onAddDateClick: (entryId: String) -> Unit,
     onContactClick: () -> Unit,
     onExperienceClick: () -> Unit,
+    onAddExampleClick: () -> Unit,
+    onEducationClick: () -> Unit,
     onSkillsClick: () -> Unit,
     onContinueClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -90,21 +89,18 @@ internal fun ReviewScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Header(state.sourceFileName)
-            CompletenessCard(state.percent)
             if (state.gap != null) {
                 RequiredBanner(state.gap, onAddDateClick)
             } else {
                 DoneBanner()
             }
-            if (state.showLinkedinRow) {
-                LinkedinRow(onContactClick)
+            if (state.inviteWorkExample) {
+                WorkExampleInvitation(onAddExampleClick)
             }
             ContactCard(state.contact, onContactClick)
             ExperienceCard(state.roles, onExperienceClick)
             SkillsCard(state.skills, onSkillsClick)
-            if (state.education.isNotEmpty()) {
-                EducationCard(state.education)
-            }
+            EducationCard(state.education, onEducationClick)
         }
         TmrBottomActionBar {
             TmrPrimaryButton(
@@ -145,14 +141,17 @@ internal fun ReviewRoute(
             onAddDateClick = { navigator.navigate(EditRoleNavKey(entryId = it)) },
             onContactClick = { navigator.navigate(EditContactNavKey()) },
             onExperienceClick = { navigator.navigate(ExperienceNavKey()) },
+            onAddExampleClick = {
+                val roleId = current.profile?.entries?.firstOrNull { it.category == EntryCategory.EXPERIENCE }?.id
+                navigator.navigate(EditRoleNavKey(entryId = roleId))
+            },
+            onEducationClick = { navigator.navigate(ListEditNavKey(ProfileListSection.EDUCATION)) },
             onSkillsClick = { navigator.navigate(SkillsNavKey()) },
             onContinueClick = { viewModel.onContinue(current.profile) },
             modifier = modifier,
         )
     }
 }
-
-private fun Modifier.readAs(value: String): Modifier = semantics { text = AnnotatedString(value) }
 
 @Composable
 private fun Header(sourceFileName: String?) {
@@ -180,48 +179,6 @@ private fun Header(sourceFileName: String?) {
 }
 
 @Composable
-private fun CompletenessCard(percent: Int) {
-    val colors = TmrTheme.colors
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .background(colors.surfaceRaised, TmrTheme.shapes.card)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Text(
-            text = "$percent%",
-            style = TmrTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            color = colors.lime,
-        )
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            val label = stringResource(R.string.feature_onboarding_impl_review_complete)
-            Text(
-                text = label.uppercase(),
-                style = TmrTheme.typography.label,
-                color = colors.textSecondary,
-                modifier = Modifier.readAs(label),
-            )
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(colors.line),
-            ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth(fraction = percent.coerceIn(0, 100) / 100f)
-                        .height(4.dp)
-                        .background(colors.lime),
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun RequiredBanner(gap: ReviewGap, onAddDateClick: (String) -> Unit) {
     val colors = TmrTheme.colors
     val required = stringResource(R.string.feature_onboarding_impl_review_required)
@@ -230,7 +187,6 @@ private fun RequiredBanner(gap: ReviewGap, onAddDateClick: (String) -> Unit) {
             text = required.uppercase(),
             style = TmrTheme.typography.label,
             color = colors.ink,
-            modifier = Modifier.readAs(required),
         )
         TmrWholeWordText(
             text = stringResource(R.string.feature_onboarding_impl_review_end_date_missing, gap.title),
@@ -293,42 +249,12 @@ private fun DoneBanner() {
 }
 
 @Composable
-private fun LinkedinRow(onClick: () -> Unit) {
-    val colors = TmrTheme.colors
-    val shape = TmrTheme.shapes.card
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .background(colors.surfaceRaised, shape)
-            .drawBehind {
-                val stroke = 1.dp.toPx()
-                drawRoundRect(
-                    color = colors.lineHigher,
-                    topLeft = Offset(stroke / 2, stroke / 2),
-                    size = Size(size.width - stroke, size.height - stroke),
-                    cornerRadius = CornerRadius(20.dp.toPx() - stroke / 2),
-                    style = Stroke(width = stroke, pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))),
-                )
-            }
-            .clip(shape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+private fun WorkExampleInvitation(onClick: () -> Unit) {
+    EditableCard(stringResource(R.string.feature_onboarding_impl_review_example_title), onClick) {
         Text(
-            text = stringResource(R.string.feature_onboarding_impl_review_add_linkedin),
-            style = TmrTheme.typography.bodyLarge,
-            color = colors.text,
-            modifier = Modifier.weight(1f),
-        )
-        val optional = stringResource(R.string.feature_onboarding_impl_review_optional)
-        Text(
-            text = optional.uppercase(),
-            style = TmrTheme.typography.label,
-            color = colors.textMuted,
-            modifier = Modifier.readAs(optional),
+            text = stringResource(R.string.feature_onboarding_impl_review_example_body),
+            style = TmrTheme.typography.bodySmall,
+            color = TmrTheme.colors.textSecondary,
         )
     }
 }
@@ -463,8 +389,8 @@ private fun SkillChip(label: String, content: Color, fill: Color, border: Color)
 }
 
 @Composable
-private fun EducationCard(education: List<ReviewEducation>) {
-    EditableCard(stringResource(R.string.feature_onboarding_impl_review_education), onClick = null) {
+private fun EducationCard(education: List<ReviewEducation>, onClick: () -> Unit) {
+    EditableCard(stringResource(R.string.feature_onboarding_impl_review_education), onClick) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             education.forEach {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

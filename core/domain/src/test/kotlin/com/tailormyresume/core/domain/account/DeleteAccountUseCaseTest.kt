@@ -24,6 +24,7 @@ import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.data.sampleApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
+import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.mock.TestMockStateStore
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
@@ -124,7 +125,7 @@ class DeleteAccountUseCaseTest {
             serverAccountDeleter = OfflineServerAccountDeleter(),
             applicationRepository = RecordingApplicationRepository(applications, calls, { failingApplicationIds }),
             profileRepository = RecordingProfileRepository(profile, calls, { failingProfileClear }),
-            creditBalance = AccountCreditBalance(paymentGateway = payment),
+            creditBalance = testAccountCreditBalance(paymentGateway = payment),
             latency = NoMockLatency,
             creditsRepository = TestCreditsRepository(),
             resumeSettingsRepository = TestResumeSettingsRepository(),
@@ -358,7 +359,7 @@ class DeleteAccountUseCaseTest {
             calls = calls,
             shouldFailOnClear = { failingProfileClear },
         ),
-        creditBalance = AccountCreditBalance(paymentGateway = gateway),
+        creditBalance = testAccountCreditBalance(paymentGateway = gateway),
         latency = latency,
         creditsRepository = TestCreditsRepository(),
         resumeSettingsRepository = TestResumeSettingsRepository(),

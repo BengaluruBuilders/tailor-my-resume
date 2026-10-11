@@ -23,7 +23,7 @@ class ApplicationsViewModelTest {
     private val applicationRepository = TestApplicationRepository()
     private val creditsRepository = TestCreditsRepository()
     private val paymentGateway = TestPaymentGateway().withFreeCredits(3)
-    private val creditBalance = AccountCreditBalance(paymentGateway)
+    private val creditBalance = AccountCreditBalance(paymentGateway, creditsRepository)
     private val profileRepository = TestProfileRepository()
     private val scenario = PrototypeFixtures.returning()
 
@@ -42,7 +42,7 @@ class ApplicationsViewModelTest {
     @Test
     fun noApplicationsEmitsEmptyWithCreditsAndInitials() = runTest {
         profileRepository.sendProfile(scenario.profile)
-        creditsRepository.sendLedger(listOf(grant(99)))
+        creditsRepository.sendLedger(listOf(grant(1)))
         paymentGateway.withFreeCredits(1)
 
         val state = viewModel().settled()

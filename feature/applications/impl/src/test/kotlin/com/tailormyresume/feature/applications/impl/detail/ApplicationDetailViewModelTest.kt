@@ -3,6 +3,7 @@ package com.tailormyresume.feature.applications.impl.detail
 import android.content.Intent
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
@@ -36,7 +37,7 @@ class ApplicationDetailViewModelTest {
     private val applicationRepository = TestApplicationRepository()
     private val creditsRepository = TestCreditsRepository()
     private val paymentGateway = TestPaymentGateway().withFreeCredits(0)
-    private val creditBalance = AccountCreditBalance(paymentGateway)
+    private val creditBalance = AccountCreditBalance(paymentGateway, creditsRepository)
     private val intents = FakeExportedPdfIntents()
     private val clock = TestClock()
     private val initialZone: TimeZone = TimeZone.getDefault()
@@ -220,7 +221,10 @@ class ApplicationDetailViewModelTest {
         val gateway = object : PaymentGateway by paymentGateway {
             override fun observeEntitlement() = flowOf(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
         }
-        val viewModel = viewModel(balance = AccountCreditBalance(gateway))
+        val unknownCredits = object : CreditsRepository by creditsRepository {
+            override fun observeKnownBalance() = flowOf<Int?>(null)
+        }
+        val viewModel = viewModel(balance = AccountCreditBalance(gateway, unknownCredits))
         viewModel.ready()
 
         viewModel.events.test {

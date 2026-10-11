@@ -1,9 +1,9 @@
 package com.tailormyresume.feature.onboarding.impl.review
 
-import com.tailormyresume.core.domain.profile.ProfileCompleteness
 import com.tailormyresume.core.domain.profile.RequiredGaps
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
+import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.model.continues
 
@@ -15,9 +15,9 @@ internal fun CandidateProfile.toReviewUiState(): ReviewUiState.Ready =
     ReviewUiState.Ready(
         profile = this,
         sourceFileName = sourceFileName?.takeIf(String::isNotBlank),
-        percent = ProfileCompleteness.percent(this),
         gap = RequiredGaps.of(this).firstOrNull()?.let { ReviewGap(it.entryId, it.title) },
-        showLinkedinRow = linkedinUrl.isBlank(),
+        inviteWorkExample = contactUserStated && sourceFileName.isNullOrBlank() && entries.none { it.source == FactSource.IMPORTED } &&
+            entries.none { it.category == EntryCategory.EXPERIENCE && it.bullets.any { bullet -> bullet.text.isNotBlank() } },
         contact = ReviewContact(
             name = fullName,
             email = email,

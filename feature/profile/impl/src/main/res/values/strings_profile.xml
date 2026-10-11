@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="feature_profile_impl_education_title">Degree or qualification</string>
+    <string name="feature_profile_impl_education_school">School or institution</string>
+    <string name="feature_profile_impl_education_start">Start date</string>
+    <string name="feature_profile_impl_education_end">End date</string>
     <string name="feature_profile_impl_title">Profile</string>
     <string name="feature_profile_impl_settings">Settings</string>
     <string name="feature_profile_impl_percent_complete">%1$d%% complete</string>

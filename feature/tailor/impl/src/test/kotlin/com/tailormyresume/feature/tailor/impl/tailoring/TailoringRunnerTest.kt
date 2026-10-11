@@ -114,6 +114,19 @@ class TailoringRunnerTest {
     }
 
     @Test
+    fun successfulTailoringWithNoChangesStillSpendsOnce() = runTest(dispatcher) {
+        seed()
+        val noChanges = TailoredResume(bullets = emptyList())
+
+        val first = runner { noChanges }("app-1", "run-1")
+        val retry = runner { error("same run must not rerun") }("app-1", "run-1")
+
+        assertThat(first).isEqualTo(TailoringResult.Success)
+        assertThat(retry).isEqualTo(TailoringResult.Success)
+        assertThat(spends()).hasSize(1)
+    }
+
+    @Test
     fun failureRecordsNoSpendAndLeavesApplicationUnchanged() = runTest(dispatcher) {
         seed()
         val before = applicationRepository.observeApplication("app-1").first()

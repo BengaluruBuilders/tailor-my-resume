@@ -148,6 +148,12 @@ Channel attribution for college groups uses Play Install Referrer links, not a s
 
 ### 6.1.2 Simplified MVP (2026-10-10)
 
+The owner approved the [first-use activation delta](../design/activation-2026-10-12/README.md) on
+2026-10-12. It refines this flow with preparation guidance, optional manual evidence entry,
+focused profile review and education correction, clearer job input, evidence before coverage,
+consistent credit disclosure, and Changes-first result review. It adds no top-level screen and
+preserves the cuts below. The delta wins where it changes the states in the prototype.
+
 The user simplified the MVP with the prototype in `design/prototype-2026-10-10/` (screen list and copy
 in its `README.md`). Where this section and 6.1.1 or sections 6.2 to 8 disagree, this section wins.
 The feature sections below are not yet rewritten; read them through this table.

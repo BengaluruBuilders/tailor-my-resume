@@ -24,8 +24,8 @@ class ResultCopyTest {
     fun drawnCopyIsPresent() {
         listOf(
             "Tailor my resume",
-            "Uses 1 credit · you have %1\$d",
-            "No credits left · get more to continue",
+            "A successful tailoring uses 1 credit · you have %1\$d",
+            "A successful tailoring uses 1 credit · no credits left",
             "One quick question",
             "Pick an answer, or skip",
             "Skip this",

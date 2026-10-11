@@ -9,6 +9,7 @@ import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.model.ProfileLimits
+import com.tailormyresume.core.model.continues
 import com.tailormyresume.feature.profile.api.navigation.ProfileListSection
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -37,9 +38,19 @@ private data class ListEditItem(
     val entryId: String?,
     val originalText: String,
     val text: String,
+    val education: EducationDraft? = null,
+    val originalEducation: EducationDraft? = null,
+    val continuationIds: Set<String> = emptySet(),
 ) {
-    val isChanged: Boolean get() = text.trim() != originalText.trim()
+    val isChanged: Boolean get() = if (education != null) education != originalEducation else text.trim() != originalText.trim()
 }
+
+internal data class EducationDraft(val title: String, val organization: String, val startDate: String, val endDate: String) {
+    val isBlank: Boolean get() = listOf(title, organization, startDate, endDate).all(String::isBlank)
+    val isValid: Boolean get() = listOf(title, organization, startDate, endDate).all { it.trim().length <= ProfileLimits.MAX_TEXT_LENGTH }
+}
+
+internal enum class EducationField { TITLE, ORGANIZATION, START_DATE, END_DATE }
 
 internal sealed interface ListEditUiState {
     data object Loading : ListEditUiState
@@ -49,6 +60,7 @@ internal sealed interface ListEditUiState {
         val texts: List<String>,
         val canSave: Boolean,
         val canAdd: Boolean,
+        val education: List<EducationDraft> = emptyList(),
     ) : ListEditUiState
 }
 
@@ -80,6 +92,7 @@ internal class ListEditViewModel @AssistedInject constructor(
             ListEditUiState.Editing(
                 section = section,
                 texts = listItems.map { it.text },
+                education = listItems.mapNotNull { it.education },
                 canSave = canSave(listItems),
                 canAdd = section != ProfileListSection.SUMMARY &&
                     profile.entries.size + listItems.count { it.entryId == null } < ProfileLimits.MAX_ENTRIES,
@@ -99,15 +112,43 @@ internal class ListEditViewModel @AssistedInject constructor(
     }
 
     fun onTextChange(index: Int, value: String) {
+        if (section == ProfileListSection.EDUCATION) return
         items.update { listItems ->
             listItems?.takeIf { index in it.indices }?.toMutableList()?.apply { set(index, this[index].copy(text = value)) }
                 ?: listItems
         }
     }
 
+    fun onEducationChange(index: Int, field: EducationField, value: String) {
+        if (section != ProfileListSection.EDUCATION) return
+        items.update { listItems ->
+            listItems?.takeIf { index in it.indices }?.toMutableList()?.apply {
+                val item = this[index]
+                val draft = item.education ?: return@apply
+                set(
+                    index,
+                    item.copy(
+                        education = when (field) {
+                            EducationField.TITLE -> draft.copy(title = value)
+                            EducationField.ORGANIZATION -> draft.copy(organization = value)
+                            EducationField.START_DATE -> draft.copy(startDate = value)
+                            EducationField.END_DATE -> draft.copy(endDate = value)
+                        },
+                    ),
+                )
+            } ?: listItems
+        }
+    }
+
     fun onAdd() {
         items.update { listItems ->
-            if (section == ProfileListSection.SUMMARY) listItems else listItems?.plus(ListEditItem(null, "", ""))
+            if (section == ProfileListSection.SUMMARY) {
+                listItems
+            } else {
+                listItems?.plus(
+                    ListEditItem(null, "", "", education = if (section == ProfileListSection.EDUCATION) EducationDraft("", "", "", "") else null),
+                )
+            }
         }
     }
 
@@ -134,7 +175,7 @@ internal class ListEditViewModel @AssistedInject constructor(
                     contactUserStated = profile.contactUserStated || item.isChanged,
                 )
             }
-            ProfileListSection.EDUCATION -> profile.withListSaved(EntryCategory.EDUCATION, listItems)
+            ProfileListSection.EDUCATION -> profile.withEducationSaved(listItems)
             ProfileListSection.ACHIEVEMENTS -> profile.withListSaved(EntryCategory.ACHIEVEMENT, listItems)
         }
         finished = true
@@ -150,6 +191,7 @@ internal class ListEditViewModel @AssistedInject constructor(
 
     private fun canSave(listItems: List<ListEditItem>): Boolean = when (section) {
         ProfileListSection.SUMMARY -> listItems.all { it.text.trim().length <= MAX_SUMMARY_LENGTH }
+        ProfileListSection.EDUCATION -> listItems.all { it.education?.isValid == true }
         else -> listItems.all { !it.isChanged || it.text.trim().length <= ProfileLimits.MAX_TEXT_LENGTH }
     }
 
@@ -159,11 +201,75 @@ internal class ListEditViewModel @AssistedInject constructor(
     }
 }
 
-private fun CandidateProfile.entryItems(category: EntryCategory): List<ListEditItem> =
-    entries.filter { it.category == category }.map { entry ->
-        val line = entry.toLine()
-        ListEditItem(entryId = entry.id, originalText = line, text = line)
+private fun CandidateProfile.entryItems(category: EntryCategory): List<ListEditItem> {
+    val groups = mutableListOf<MutableList<ProfileEntry>>()
+    var previous: ProfileEntry? = null
+    entries.forEach { entry ->
+        if (entry.category == category) {
+            if (category == EntryCategory.EDUCATION && previous?.let(entry::continues) == true) {
+                groups.last().add(entry)
+            } else {
+                groups.add(mutableListOf(entry))
+            }
+        }
+        previous = entry
     }
+    return groups.map { group ->
+        val entry = group.first()
+        val line = entry.toLine()
+        val education = if (category == EntryCategory.EDUCATION) {
+            EducationDraft(entry.title, entry.organization, entry.startDate, entry.endDate)
+        } else {
+            null
+        }
+        ListEditItem(
+            entryId = entry.id,
+            originalText = line,
+            text = line,
+            education = education,
+            originalEducation = education,
+            continuationIds = group.drop(1).mapTo(mutableSetOf()) { it.id },
+        )
+    }
+}
+
+private fun CandidateProfile.withEducationSaved(items: List<ListEditItem>): CandidateProfile {
+    val allocator = FactIdAllocator()
+    var updated = entries
+    items.filter { it.entryId != null }.forEach { item ->
+        val draft = checkNotNull(item.education)
+        val ids = item.continuationIds + checkNotNull(item.entryId)
+        updated = when {
+            draft.isBlank -> updated.filterNot { it.id in ids }
+            !item.isChanged -> updated.map { if (it.id in ids) it.copy(isConfirmed = true) else it }
+            else -> updated.map {
+                if (it.id in ids) {
+                    it.copy(
+                        title = draft.title.trim(),
+                        organization = draft.organization.trim(),
+                        startDate = draft.startDate.trim(),
+                        endDate = draft.endDate.trim(),
+                        source = FactSource.USER_EDITED,
+                        isConfirmed = true,
+                    )
+                } else {
+                    it
+                }
+            }
+        }
+    }
+    items.filter { it.entryId == null }.mapNotNull { it.education?.takeUnless(EducationDraft::isBlank) }.forEach { draft ->
+        val id = allocator.neverUsedId(EntryCategory.EDUCATION, entries + updated, draft.title.trim())
+        updated = updated.withInsertedAfterLast(
+            EntryCategory.EDUCATION,
+            ProfileEntry(
+                id, EntryCategory.EDUCATION, draft.title.trim(), draft.organization.trim(), draft.startDate.trim(), draft.endDate.trim(),
+                emptyList(), FactSource.USER_STATED, true,
+            ),
+        )
+    }
+    return copy(entries = updated)
+}
 
 private fun ProfileEntry.toLine(): String {
     val dates = listOf(startDate, endDate).map { it.trim() }.filter { it.isNotEmpty() }.joinToString(DATE_SEPARATOR)

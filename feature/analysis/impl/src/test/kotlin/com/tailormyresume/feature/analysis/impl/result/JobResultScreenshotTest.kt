@@ -16,6 +16,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.text.TextLayoutResult
@@ -115,6 +116,28 @@ class JobResultScreenshotTest {
         assertNoTruncatedText()
     }
 
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+    fun evidenceAndReasonsComeBeforeCoverageAndStayWithStatuses() {
+        val state = CREDITS_STATE.copy(
+            mustHaves = CREDITS_STATE.mustHaves.map { row ->
+                if (row.unclear) row.copy(reason = "No presentation example in your resume") else row
+            } + listOf(
+                MustHaveRow("r6", "Team reporting", MatchStatus.GAP, "No report in your resume", false, true),
+            ),
+        )
+        setContent(state, TmrTestDevices.prototype)
+
+        rule.onNodeWithText("No presentation example in your resume").assertExists()
+        rule.onNodeWithText("No report in your resume").assertExists()
+        rule.onNodeWithText("From your answer").assertExists()
+        val keywordsY = rule.onNodeWithText("What they screen for · 8").getUnclippedBoundsInRoot().top
+        val reasonsY = rule.onNodeWithText("Must-haves").getUnclippedBoundsInRoot().top
+        val coverageY = rule.onNodeWithText("Keywords matched").getUnclippedBoundsInRoot().top
+        assertTrue(keywordsY < reasonsY)
+        assertTrue(reasonsY < coverageY)
+    }
+
     private fun captureStates(device: TmrTestDevice) {
         var screen by mutableStateOf(SCREENS.first().second)
         rule.setContent { ResultContent(screen, device) }
@@ -160,9 +183,9 @@ class JobResultScreenshotTest {
         rule.onNodeWithText("Must-haves", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Not clear in your resume. We'll ask you next.", useUnmergedTree = true).assertExists()
         if ((state.credits ?: 0) > 0) {
-            rule.onNodeWithText("Uses 1 credit · you have ${state.credits}", useUnmergedTree = true).assertExists()
+            rule.onNodeWithText("A successful tailoring uses 1 credit · you have ${state.credits}", useUnmergedTree = true).assertExists()
         } else {
-            rule.onNodeWithText("No credits left · get more to continue", useUnmergedTree = true).assertExists()
+            rule.onNodeWithText("A successful tailoring uses 1 credit · no credits left", useUnmergedTree = true).assertExists()
         }
         rule.onNodeWithText(state.title, useUnmergedTree = true).assertExists()
         rule.onNodeWithText("${state.company} · ${state.location}", useUnmergedTree = true).assertExists()

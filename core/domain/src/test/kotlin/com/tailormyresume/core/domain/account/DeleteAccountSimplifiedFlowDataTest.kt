@@ -9,6 +9,7 @@ import com.tailormyresume.core.model.PageSize
 import com.tailormyresume.core.model.ResumeSettings
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
+import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
@@ -45,7 +46,7 @@ class DeleteAccountSimplifiedFlowDataTest {
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
         serverAccountDeleter = deleter,
-        creditBalance = AccountCreditBalance(TestPaymentGateway()),
+        creditBalance = testAccountCreditBalance(TestPaymentGateway()),
         latency = NoMockLatency,
         creditsRepository = credits,
         resumeSettingsRepository = settings,

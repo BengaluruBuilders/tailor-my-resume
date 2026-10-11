@@ -27,6 +27,7 @@ import com.tailormyresume.feature.profile.impl.experience.DashedAddButton
 
 internal data class ListEditActions(
     val onTextChange: (Int, String) -> Unit = { _, _ -> },
+    val onEducationChange: (Int, EducationField, String) -> Unit = { _, _, _ -> },
     val onAdd: () -> Unit = {},
 )
 
@@ -98,20 +99,48 @@ private fun ListEditForm(
                 color = TmrTheme.colors.textSecondary,
             )
         }
-        state.texts.forEachIndexed { index, text ->
-            TmrTextArea(
-                label = stringResource(copy.itemLabel, index + 1),
-                value = text,
-                onValueChange = { actions.onTextChange(index, it) },
-                placeholder = hint,
-                modifier = Modifier.fillMaxWidth(),
-            )
+        if (state.section == ProfileListSection.EDUCATION) {
+            state.education.forEachIndexed { index, draft ->
+                EducationFields(index, draft, actions)
+            }
+        } else {
+            state.texts.forEachIndexed { index, text ->
+                TmrTextArea(
+                    label = stringResource(copy.itemLabel, index + 1),
+                    value = text,
+                    onValueChange = { actions.onTextChange(index, it) },
+                    placeholder = hint,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
         if (state.canAdd) {
             copy.addLabel?.let { addLabel ->
                 DashedAddButton(label = stringResource(addLabel), onClick = actions.onAdd)
             }
         }
+    }
+}
+
+@Composable
+private fun EducationFields(index: Int, draft: EducationDraft, actions: ListEditActions) {
+    Text(
+        text = stringResource(R.string.feature_profile_impl_list_item_label, index + 1),
+        style = TmrTheme.typography.label,
+        color = TmrTheme.colors.textSecondary,
+    )
+    listOf(
+        Triple(EducationField.TITLE, R.string.feature_profile_impl_education_title, draft.title),
+        Triple(EducationField.ORGANIZATION, R.string.feature_profile_impl_education_school, draft.organization),
+        Triple(EducationField.START_DATE, R.string.feature_profile_impl_education_start, draft.startDate),
+        Triple(EducationField.END_DATE, R.string.feature_profile_impl_education_end, draft.endDate),
+    ).forEach { (field, label, value) ->
+        TmrTextArea(
+            label = stringResource(label),
+            value = value,
+            onValueChange = { actions.onEducationChange(index, field, it.replace('\n', ' ')) },
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -139,7 +168,11 @@ internal fun ListEditRoute(
     }
     ListEditScreen(
         state = state,
-        actions = ListEditActions(onTextChange = viewModel::onTextChange, onAdd = viewModel::onAdd),
+        actions = ListEditActions(
+            onTextChange = viewModel::onTextChange,
+            onEducationChange = viewModel::onEducationChange,
+            onAdd = viewModel::onAdd,
+        ),
         modifier = modifier,
     )
 }

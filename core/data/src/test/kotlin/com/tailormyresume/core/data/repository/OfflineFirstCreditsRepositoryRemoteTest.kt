@@ -28,11 +28,13 @@ private class ScriptedRemote(var owner: String? = "uid-1") : RemoteLedgerSource 
     var failure: Exception? = null
     var gate: CompletableDeferred<Unit>? = null
     var fetches = 0
+    val fetchedOwners = mutableListOf<String?>()
 
     override fun owner() = owner
 
     override suspend fun fetch(): CreditSnapshot {
         fetches++
+        fetchedOwners += owner
         gate?.await()
         failure?.let { throw it }
         return snapshot
@@ -68,6 +70,21 @@ class OfflineFirstCreditsRepositoryRemoteTest {
 
         assertThat(repository.observeBalance().first()).isEqualTo(7)
         assertThat(repository.observeLedger().first().map { it.amount }).containsExactly(5, 1).inOrder()
+    }
+
+    @Test
+    fun unknownRemoteBalanceStaysUnavailableUntilARealSnapshotArrives() = runTest {
+        val repository = repository()
+        assertThat(repository.observeKnownBalance().first()).isNull()
+
+        remote.failure = java.io.IOException("offline")
+        repository.refresh()
+        assertThat(repository.observeKnownBalance().first()).isNull()
+
+        remote.failure = null
+        remote.snapshot = CreditSnapshot(0, emptyList())
+        repository.refresh()
+        assertThat(repository.observeKnownBalance().first()).isEqualTo(0)
     }
 
     @Test
@@ -111,8 +128,15 @@ class OfflineFirstCreditsRepositoryRemoteTest {
         remote.owner = "uid-2"
         remote.gate?.complete(Unit)
         late.join()
+        remote.failure = java.io.IOException("uid-2 offline")
+        assertThat(repository.observeKnownBalance().first()).isNull()
         assertThat(repository.observeBalance().first()).isEqualTo(0)
         assertThat(repository.observeLedger().first()).isEmpty()
+        assertThat(remote.fetchedOwners.last()).isEqualTo("uid-2")
+
+        remote.failure = null
+        remote.snapshot = CreditSnapshot(4, listOf(entry(CreditLedgerKind.PURCHASE, 4, 4)))
+        assertThat(repository.observeKnownBalance().first()).isEqualTo(4)
 
         remote.owner = "uid-1"
         repository.refresh()
@@ -159,6 +183,7 @@ class OfflineFirstCreditsRepositoryRemoteTest {
         repository.refresh()
 
         assertThat(seen.last()).isEqualTo(0)
+        assertThat(repository.observeKnownBalance().first()).isNull()
     }
 
     @Test
@@ -212,10 +237,28 @@ class OfflineFirstCreditsRepositoryRemoteTest {
         remote.gate = CompletableDeferred()
 
         repository.record(entry(CreditLedgerKind.SPEND, -1, 4))
-        assertThat(repository.observeBalance().first()).isEqualTo(6)
+        assertThat(repository.observeKnownBalance().first()).isNull()
 
         remote.gate?.complete(Unit)
-        assertThat(repository.observeBalance().first()).isEqualTo(5)
+        assertThat(repository.observeKnownBalance().first()).isEqualTo(5)
+    }
+
+    @Test
+    fun failedRefreshAfterRemoteSpendDoesNotPresentTheOldBalanceAsCurrent() = runTest {
+        remote.snapshot = CreditSnapshot(1, emptyList())
+        val repository = repository()
+        repository.refresh()
+        remote.failure = java.io.IOException("offline")
+
+        repository.record(entry(CreditLedgerKind.SPEND, -1, 4))
+
+        assertThat(repository.observeKnownBalance().first()).isNull()
+        assertThat(repository.observeLedger().first()).isEmpty()
+
+        remote.failure = null
+        remote.snapshot = CreditSnapshot(0, listOf(entry(CreditLedgerKind.SPEND, -1, 4)))
+        assertThat(repository.observeKnownBalance().first()).isEqualTo(0)
+        assertThat(repository.observeLedger().first()).hasSize(1)
     }
 
     @Test

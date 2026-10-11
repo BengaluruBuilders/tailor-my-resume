@@ -5,6 +5,9 @@ import com.tailormyresume.core.designsystem.component.content.TmrPaperBlock
 
 internal enum class TailoredTab { Resume, Changes }
 
+internal fun TailoredUiState.Ready.defaultTab(): TailoredTab =
+    if (changes.isEmpty()) TailoredTab.Resume else TailoredTab.Changes
+
 internal sealed interface TailoredUiState {
     data object Loading : TailoredUiState
 

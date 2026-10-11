@@ -78,9 +78,9 @@ internal fun JobResultScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     ResultHeader(state)
-                    CoverageCard(state)
                     KeywordsCard(state)
                     MustHavesCard(state)
+                    CoverageCard(state)
                 }
                 JobResultBottom(state, onTailor)
             }
@@ -199,14 +199,21 @@ private fun MustHaveItem(row: MustHaveRow) {
                 style = TmrTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
                 color = TmrTheme.colors.text,
             )
-            val detail = when {
+            row.reason?.let { reason ->
+                TmrWholeWordText(
+                    text = reason,
+                    style = TmrTheme.typography.caption,
+                    color = TmrTheme.colors.textMuted,
+                )
+            }
+            val status = when {
                 row.unclear -> stringResource(R.string.feature_analysis_impl_result_unclear)
                 row.answered -> stringResource(R.string.feature_analysis_impl_result_answered)
-                else -> row.reason
+                else -> null
             }
-            if (detail != null) {
+            if (status != null) {
                 TmrWholeWordText(
-                    text = detail,
+                    text = status,
                     style = TmrTheme.typography.caption,
                     color = TmrTheme.colors.textMuted,
                 )
