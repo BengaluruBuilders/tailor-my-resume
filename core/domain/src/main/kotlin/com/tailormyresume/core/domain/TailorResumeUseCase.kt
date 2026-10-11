@@ -21,6 +21,8 @@ class TailorResumeUseCase @Inject constructor(
     private val tailor: ResumeTailor,
     private val guard: FabricationGuard,
 ) {
+    suspend fun resultStored(applicationId: String, runId: String) = tailor.resultStored(applicationId, runId)
+
     private class Evidence(
         val profileBullets: Map<String, EvidenceBullet>,
         val answerFact: EvidenceBullet?,

@@ -16,10 +16,13 @@ class PendingTailoringIds @Inject constructor(
         return id
     }
 
-    suspend fun settle(applicationId: String) = store.remove(unfinishedKeyOf(applicationId))
+    suspend fun settle(runId: String, applicationId: String) {
+        val requestId = store.read(keyOf(runId)) ?: return
+        if (store.read(unfinishedKeyOf(applicationId)) == requestId) store.remove(unfinishedKeyOf(applicationId))
+    }
 
     suspend fun clear(runId: String, applicationId: String) {
-        settle(applicationId)
+        settle(runId, applicationId)
         store.remove(keyOf(runId))
     }
 

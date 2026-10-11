@@ -41,6 +41,7 @@ class RemoteResumeTailorRunIdTest {
         succeed()
 
         tailorOverStore().tailor(candidate, job, gap, "app-1", null, "run-1")
+        tailorOverStore().resultStored("app-1", "run-1")
         tailorOverStore().tailor(candidate, job, gap, "app-1", null, "run-2")
 
         val ids = List(2) { requestIdOf(backend.server.takeRequest().body.readUtf8()) }
@@ -68,10 +69,23 @@ class RemoteResumeTailorRunIdTest {
         succeed()
 
         tailorOverStore().tailor(candidate, job, gap, "app-1", null, "run-1")
+        tailorOverStore().resultStored("app-1", "run-1")
         tailorOverStore().tailor(candidate, job, gap, "app-1", null, "run-2")
 
         val ids = List(2) { requestIdOf(backend.server.takeRequest().body.readUtf8()) }
         assertThat(ids.distinct()).hasSize(2)
+    }
+
+    @Test
+    fun aNewRunIdBeforeTheResultIsStoredReusesTheSucceededRequest() = runTest {
+        succeed()
+        succeed()
+
+        tailorOverStore().tailor(candidate, job, gap, "app-1", null, "run-1")
+        tailorOverStore().tailor(candidate, job, gap, "app-1", null, "run-2")
+
+        val ids = List(2) { requestIdOf(backend.server.takeRequest().body.readUtf8()) }
+        assertThat(ids.distinct()).hasSize(1)
     }
 
     @Test
@@ -112,6 +126,7 @@ class RemoteResumeTailorRunIdTest {
         succeed()
         tailorOverStore().tailor(candidate, job, gap, "app-1", null, "run-1")
         val afterSuccess = store.read("tailoring.request.run-1")
+        tailorOverStore().resultStored("app-1", "run-1")
         backend.reply(200, tailoringBody("FAILED", ""","failureCode":"INTERRUPTED""""))
 
         val failure = runCatching { tailorOverStore().tailor(candidate, job, gap, "app-1", null, "run-2") }.exceptionOrNull()

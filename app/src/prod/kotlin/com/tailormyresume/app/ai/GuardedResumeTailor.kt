@@ -14,6 +14,10 @@ class GuardedResumeTailor @Inject constructor(
     private val offline: OfflineResumeTailor,
     private val previewMode: DebugPreviewMode,
 ) : ResumeTailor {
+    override suspend fun resultStored(applicationId: String, runId: String) {
+        if (!previewMode.active) remote.resultStored(applicationId, runId)
+    }
+
     override suspend fun tailor(
         profile: CandidateProfile,
         job: JobDescription,

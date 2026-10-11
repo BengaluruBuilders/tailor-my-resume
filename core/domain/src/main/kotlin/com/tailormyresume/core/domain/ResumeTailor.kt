@@ -15,4 +15,6 @@ interface ResumeTailor {
         answer: QuickAnswer?,
         runId: String,
     ): TailoredResume
+
+    suspend fun resultStored(applicationId: String, runId: String) = Unit
 }

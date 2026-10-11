@@ -11,7 +11,7 @@
     <string name="feature_tailor_impl_result_tailoring_row_checking">Checking must-haves</string>
     <string name="feature_tailor_impl_result_tailoring_row_fitting">Fitting to 1 page</string>
     <string name="feature_tailor_impl_result_failed_title">Tailoring didn\'t finish</string>
-    <string name="feature_tailor_impl_result_failed_body">Something went wrong on our side. Your credit wasn\'t used.</string>
+    <string name="feature_tailor_impl_result_failed_body">Something went wrong on our side.</string>
     <string name="feature_tailor_impl_result_failed_retry">Try again</string>
     <string name="feature_tailor_impl_result_failed_back">Go back</string>
     <string name="feature_tailor_impl_result_tailored_title">Your resume is ready</string>
