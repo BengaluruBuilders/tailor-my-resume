@@ -14,6 +14,7 @@ import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import com.tailormyresume.feature.onboarding.impl.manual.ManualProfileRoute
 import com.tailormyresume.feature.onboarding.impl.paste.PasteResumeRoute
 import com.tailormyresume.feature.onboarding.impl.reading.ReadingRoute
+import com.tailormyresume.feature.onboarding.impl.review.ReviewRoute
 import com.tailormyresume.feature.onboarding.impl.signin.SignInRoute
 import com.tailormyresume.feature.onboarding.impl.upload.UnreadableRoute
 import com.tailormyresume.feature.onboarding.impl.upload.UploadRoute
@@ -25,5 +26,5 @@ fun EntryProviderScope<NavKey>.onboardingEntry(navigator: Navigator) {
     entry<PasteResumeNavKey> { PasteResumeRoute(hiltViewModel(), navigator) }
     entry<ManualProfileNavKey> { ManualProfileRoute(hiltViewModel(), navigator) }
     entry<ReadingNavKey> { ReadingRoute(hiltViewModel(), navigator) }
-    entry<ReviewProfileNavKey> { key -> NavKeyPlaceholder(key) }
+    entry<ReviewProfileNavKey> { ReviewRoute(hiltViewModel(), navigator) }
 }
