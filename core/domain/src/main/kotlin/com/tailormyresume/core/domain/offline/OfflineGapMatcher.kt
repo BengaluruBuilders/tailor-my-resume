@@ -51,8 +51,15 @@ internal class OfflineGapMatcher @Inject constructor() : GapMatcher {
     private fun RequirementMatch.question(): QuickQuestion = QuickQuestion(
         requirementId = requirement.id,
         text = requirement.questionText(),
-        why = "It's a must-have for this role, and your resume doesn't mention it.",
+        why = whyFor(status),
     )
+
+    private fun whyFor(status: MatchStatus): String = when (status) {
+        MatchStatus.PARTIAL -> "It's a must-have for this role. Your resume has related evidence, " +
+            "but it does not fully confirm this requirement."
+        MatchStatus.GAP -> "It's a must-have for this role, and your resume doesn't mention it."
+        MatchStatus.MET -> error("A met requirement does not need a question.")
+    }
 
     private fun JobRequirement.questionText(): String {
         val subject = text
@@ -60,6 +67,10 @@ internal class OfflineGapMatcher @Inject constructor() : GapMatcher {
             .trimEnd('.')
             .removePrefix("Experience ")
             .removePrefix("experience ")
+            .removePrefix("with ")
+            .removePrefix("With ")
+            .removePrefix("in ")
+            .removePrefix("In ")
             .ifBlank { keywords.joinToString(" and ", transform = SkillLexicon::displayName) }
         return "Do you have experience with $subject?"
     }

@@ -209,6 +209,19 @@ class OfflineGapMatcherTest {
     }
 
     @Test
+    fun partialMustHaveUsesAQuestionWithoutRepeatingWith() = runTest {
+        val (_, gap) = analyse("Requirements\n- Experience with Kotlin and Kubernetes")
+
+        assertThat(gap.matches.single().status).isEqualTo(MatchStatus.PARTIAL)
+        assertThat(gap.question?.text).isEqualTo("Do you have experience with Kotlin and Kubernetes?")
+        assertThat(gap.question?.why)
+            .isEqualTo(
+                "It's a must-have for this role. Your resume has related evidence, " +
+                    "but it does not fully confirm this requirement.",
+            )
+    }
+
+    @Test
     fun freshersRangeStartingAtZeroYearsCanBeMet() = runTest {
         val (_, gap) = analyse("Requirements\n- 0-2 years of Kotlin experience")
         assertThat(gap.matches.single().status).isEqualTo(MatchStatus.MET)

@@ -12,6 +12,7 @@ import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.RequirementMatch
 import com.tailormyresume.core.model.RequirementPriority
+import com.tailormyresume.core.model.QuickAnswer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
