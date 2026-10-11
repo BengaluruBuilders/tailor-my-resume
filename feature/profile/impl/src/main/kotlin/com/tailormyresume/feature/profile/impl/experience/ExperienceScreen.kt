@@ -88,11 +88,17 @@ internal fun ExperienceScreen(
                                 row.needsEndDate -> stringResource(R.string.feature_profile_impl_end_date_missing)
                                 else -> row.end
                             }
-                            Text(
-                                text = stringResource(R.string.feature_profile_impl_dates, row.start, endLabel),
-                                style = typography.caption,
-                                color = if (row.needsEndDate) colors.amber else colors.textMuted,
-                            )
+                            if (row.start.isNotBlank() || endLabel.isNotBlank()) {
+                                Text(
+                                    text = when {
+                                        row.start.isBlank() -> endLabel
+                                        endLabel.isBlank() -> row.start
+                                        else -> stringResource(R.string.feature_profile_impl_dates, row.start, endLabel)
+                                    },
+                                    style = typography.caption,
+                                    color = if (row.needsEndDate) colors.amber else colors.textMuted,
+                                )
+                            }
                         }
                         Icon(
                             imageVector = TmrIcons.ChevronRight,
