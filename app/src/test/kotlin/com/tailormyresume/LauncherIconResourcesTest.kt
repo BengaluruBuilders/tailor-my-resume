@@ -9,20 +9,24 @@ import javax.xml.parsers.DocumentBuilderFactory
 class LauncherIconResourcesTest {
 
     @Test
-    fun foreground_has_no_H_path_and_draws_arrow() {
-        val paths = elements("src/main/res/drawable/ic_launcher_foreground.xml", "path")
-        assertThat(paths.map { it.getAttribute("android:pathData") })
-            .doesNotContain("M38,34h8v14h16v-14h8v40h-8v-18h-16v18h-8z")
-        assertThat(paths.map { it.getAttribute("android:pathData") }.any { it.startsWith("M5,13h11.17") })
-            .isTrue()
+    fun foreground_draws_paige_not_the_placeholder_arrow() {
+        val pathData = elements(FOREGROUND, "path").map { it.getAttribute("android:pathData") }
+        assertThat(pathData.none { it.startsWith("M5,13h11.17") || it.startsWith("M38,34h8") }).isTrue()
+        assertThat(pathData.any { it.startsWith(PAIGE_PAGE) }).isTrue()
+        assertThat(elements(FOREGROUND, "path").map { it.getAttribute("android:fillColor") }.distinct())
+            .containsExactly("#0A0A0A")
     }
 
     @Test
-    fun background_is_canvas_lime() {
+    fun background_is_palette_lime() {
         val colors =
             elements("src/main/res/values/colors.xml", "color")
                 .filter { it.getAttribute("name") == "ic_launcher_background" }
-        assertThat(colors.map { it.textContent.trim() }).containsExactly("#AEFF00")
+        assertThat(colors.map { it.textContent.trim() }).containsExactly("#A3F43F")
+        val paletteSource =
+            File("../core/designsystem/src/main/kotlin/com/tailormyresume/core/designsystem/theme/Palette.kt").readText()
+        assertThat(paletteSource.lineSequence().first { it.trim().startsWith("lime =") })
+            .contains("Color(0xFFA3F43F)")
     }
 
     @Test
@@ -39,14 +43,15 @@ class LauncherIconResourcesTest {
     }
 
     @Test
-    fun monochrome_drawable_is_single_colour_arrow() {
+    fun monochrome_drawable_is_single_colour_paige_matching_foreground() {
         val path = "src/main/res/drawable/ic_launcher_monochrome.xml"
         assertThat(File(path).exists()).isTrue()
         val paths = elements(path, "path")
         assertThat(paths).isNotEmpty()
         assertThat(paths.map { it.getAttribute("android:fillColor") }.distinct()).containsExactly("#000000")
-        assertThat(paths.map { it.getAttribute("android:pathData") }.any { it.startsWith("M5,13h11.17") })
-            .isTrue()
+        assertThat(paths.map { it.getAttribute("android:pathData") })
+            .containsExactlyElementsIn(elements(FOREGROUND, "path").map { it.getAttribute("android:pathData") })
+            .inOrder()
     }
 
     @Test
@@ -104,5 +109,10 @@ class LauncherIconResourcesTest {
         val document = factory.newDocumentBuilder().parse(File(path))
         val nodes = document.getElementsByTagName(tag)
         return (0 until nodes.length).map { nodes.item(it) as Element }
+    }
+
+    private companion object {
+        const val FOREGROUND = "src/main/res/drawable/ic_launcher_foreground.xml"
+        const val PAIGE_PAGE = "M78 34H154V62A20 20 0 0 0 174 82H202"
     }
 }
