@@ -12,6 +12,11 @@ interface CreditsRepository {
 
     suspend fun refresh()
 
+    suspend fun refreshConfirmed(): Boolean {
+        refresh()
+        return true
+    }
+
     suspend fun clear()
 
     suspend fun removeForApplication(applicationId: String)

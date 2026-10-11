@@ -6,10 +6,12 @@ import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
 import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
+import com.tailormyresume.feature.settings.impl.credits.CreditsRoute
+import com.tailormyresume.feature.settings.impl.paywall.PaywallRoute
 import com.tailormyresume.feature.settings.impl.settings.SettingsRoute
 
 fun EntryProviderScope<NavKey>.settingsEntry(navigator: Navigator) {
     entry<SettingsNavKey> { SettingsRoute(navigator) }
-    entry<CreditsNavKey> { key -> NavKeyPlaceholder(key) }
-    entry<PaywallNavKey> { key -> NavKeyPlaceholder(key) }
+    entry<CreditsNavKey> { CreditsRoute(navigator) }
+    entry<PaywallNavKey> { key -> PaywallRoute(navigator, key.returnToApplicationId) }
 }
