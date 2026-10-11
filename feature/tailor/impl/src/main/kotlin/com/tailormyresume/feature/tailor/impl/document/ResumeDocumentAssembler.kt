@@ -29,8 +29,17 @@ internal class ResumeDocumentAssembler @Inject constructor(
                     ?.let { ResumeSection(category, headings.forCategory(category), it) }
             },
             skillsHeading = headings.skills,
-            summary = resume.summary?.takeIf { it.decision == BulletDecision.ACCEPTED }?.text?.trim().orEmpty(),
+            summary = summaryFor(profile, resume),
         )
+    }
+
+    private fun summaryFor(profile: CandidateProfile, resume: TailoredResume): String {
+        val tailored = resume.summary ?: return profile.summary.trim()
+        return when (tailored.decision) {
+            BulletDecision.ACCEPTED -> tailored.text.trim()
+            BulletDecision.REJECTED -> profile.summary.trim()
+            BulletDecision.PENDING -> ""
+        }
     }
 
     private fun acceptedSkills(profile: CandidateProfile, resume: TailoredResume): List<String> =

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_tailor_impl_result_tailoring_label">Working on it</string>
+    <string name="feature_tailor_impl_result_tailoring_headline">Tailoring your resume</string>
+    <plurals name="feature_tailor_impl_result_tailoring_row_matching">
+        <item quantity="one">Matching %1$d keyword</item>
+        <item quantity="other">Matching %1$d keywords</item>
+    </plurals>
+    <string name="feature_tailor_impl_result_tailoring_row_rewriting">Rewriting bullets</string>
+    <string name="feature_tailor_impl_result_tailoring_row_adding_example">Adding your example</string>
+    <string name="feature_tailor_impl_result_tailoring_row_checking">Checking must-haves</string>
+    <string name="feature_tailor_impl_result_tailoring_row_fitting">Fitting to 1 page</string>
+    <string name="feature_tailor_impl_result_failed_title">Tailoring didn\'t finish</string>
+    <string name="feature_tailor_impl_result_failed_body">Something went wrong on our side. Your credit wasn\'t used.</string>
+    <string name="feature_tailor_impl_result_failed_retry">Try again</string>
+    <string name="feature_tailor_impl_result_failed_back">Go back</string>
+    <string name="feature_tailor_impl_result_tailored_title">Your resume is ready</string>
+    <string name="feature_tailor_impl_result_tailored_subtitle">For %1$s · %2$s</string>
+    <string name="feature_tailor_impl_result_tab_resume">Resume</string>
+    <string name="feature_tailor_impl_result_tab_changes">Changes · %1$d</string>
+    <string name="feature_tailor_impl_result_coverage">%1$d%% keywords</string>
+    <string name="feature_tailor_impl_result_area_summary">Summary</string>
+    <string name="feature_tailor_impl_result_area_skills">Skills</string>
+    <string name="feature_tailor_impl_result_undo">Undo</string>
+    <string name="feature_tailor_impl_result_undone">Undone</string>
+    <string name="feature_tailor_impl_result_accept">Accept changes</string>
+    <string name="feature_tailor_impl_result_accepted">Changes accepted</string>
+    <string name="feature_tailor_impl_result_edit">Edit</string>
+    <string name="feature_tailor_impl_result_export">Export PDF</string>
+    <string name="feature_tailor_impl_result_export_blocked">Accept the changes first</string>
+    <string name="feature_tailor_impl_result_no_changes">No changes to review</string>
+</resources>

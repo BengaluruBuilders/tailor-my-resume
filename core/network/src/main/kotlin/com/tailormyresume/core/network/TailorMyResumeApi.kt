@@ -4,7 +4,10 @@ import com.tailormyresume.core.network.dto.AnalysisRequest
 import com.tailormyresume.core.network.dto.AnalysisResponse
 import com.tailormyresume.core.network.dto.ContentReportRequest
 import com.tailormyresume.core.network.dto.ContentReportResponse
+import com.tailormyresume.core.network.dto.CreditsResponse
 import com.tailormyresume.core.network.dto.DeletionResponse
+import com.tailormyresume.core.network.dto.JobImportRequest
+import com.tailormyresume.core.network.dto.JobImportResponse
 import com.tailormyresume.core.network.dto.MeResponse
 import com.tailormyresume.core.network.dto.PacksResponse
 import com.tailormyresume.core.network.dto.PurchaseRequest
@@ -15,9 +18,7 @@ import com.tailormyresume.core.network.dto.ResumeParseResponse
 import com.tailormyresume.core.network.dto.ServerExportResponse
 import com.tailormyresume.core.network.dto.TailoringResponse
 import com.tailormyresume.core.network.dto.TailoringStartRequest
-import com.tailormyresume.core.network.dto.UnlockResponse
 import com.tailormyresume.core.network.dto.WalletResponse
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -37,6 +38,9 @@ interface TailorMyResumeApi {
     @POST("v1/tailormyresume/analyses")
     suspend fun analyse(@Body body: AnalysisRequest): AnalysisResponse
 
+    @POST("v1/tailormyresume/job-imports")
+    suspend fun jobImport(@Body body: JobImportRequest): JobImportResponse
+
     @POST("v1/tailormyresume/tailorings")
     suspend fun startTailoring(@Body body: TailoringStartRequest): TailoringResponse
 
@@ -46,8 +50,8 @@ interface TailorMyResumeApi {
     @GET("v1/tailormyresume/wallet")
     suspend fun wallet(): WalletResponse
 
-    @POST("v1/tailormyresume/applications/{applicationId}/unlock")
-    suspend fun unlock(@Path("applicationId") applicationId: String): Response<UnlockResponse>
+    @GET("v1/tailormyresume/credits")
+    suspend fun credits(): CreditsResponse
 
     @GET("v1/tailormyresume/packs")
     suspend fun packs(): PacksResponse

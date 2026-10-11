@@ -34,7 +34,7 @@ A feature must change these things when it adopts the integration changes.
    fraction and the bar (Gap analysis: "You cover 9 of 14 key terms"). 
 7. Home header. A home screen with a list uses `TmrCollapsingHomeHeader`. Do not swap two headers on a scroll position. The swap moves the list by
    the height difference in one frame, and the list flickers.
-8. Dock constants. Use `TmrDockDefaults.height` and `inset`. Do not repeat the arithmetic.
+8. Tab bar. `TmrShell` in `:app` lays `TmrTabBar` out under the screen, so a screen needs no bottom clearance for it and `LocalTmrBottomInset` stays 0 dp.
 9. Motion. `TmrTheme.motion` has `proofSpecs`, `hopSpecs`, and `reduced`. The old Int durations and easings are gone.
 10. Fact ids. Show `FactDisplayIds` (module `core:domain`) values, not raw bullet ids. See
     `docs/MOCK_BACKEND.md`.
@@ -162,10 +162,9 @@ The primitives are in `component/TmrMotion.kt`. A feature calls a primitive. A f
 | List enter: 12 dp rise, 30 ms stagger, first 6 items | `rememberTmrListEnterState()`, then `Modifier.tmrListEnter(state, index)` on each item | `spatial`, `staggerMs`, `staggerMax` |
 | Navigation forward: the new screen rises 48 dp over the old screen | `rememberTmrNavTransitions().forward(scope, hierarchical = true)` | `fade`, `offset` |
 | Navigation back and predictive back: the screen sinks 48 dp | `rememberTmrNavTransitions().back(hierarchical = true)` | `fade`, `offset` |
-| Dock tab switch: the new screen fades in and shifts 24 dp from the side of the tapped tab | `tab(scope, direction, pop)`. `direction` is the sign of the tab index change | `fade`, `offset` |
+| Tab switch: the new screen fades in and shifts 24 dp from the side of the tapped tab | `tab(scope, direction, pop)`. `direction` is the sign of the tab index change | `fade`, `offset` |
 | A tab screen reached from a pushed screen: fade only | `forward(scope, hierarchical = false)` and `back(hierarchical = false)` | `fade` |
 | Selected colour of a chip or a checkbox | Built into `TmrFilterChip`, `TmrCheckbox` | `color` |
-| Dock selection: the icon and label of the selected item change tint | Built into `TmrDockItem` | `color`, `spatialFast` |
 | Progress moment | `Animatable` with a `hopSpecs` value | `hopSpecs.scale`, `hopSpecs.spatial` |
 
 Rules of the primitives:
@@ -212,19 +211,17 @@ background still fill the area behind the zone.
 | Header and `sheet = true` | 24 dp | see below |
 | Header and `sheet = false` | 0 dp | see below |
 | `bottomBar` or `bottomBarNotice` set | as above | 20 dp (`spacing.gutter`), the gap above the last item |
-| Neither set, no dock | as above | navigation bar inset |
-| Neither set, dock inset provided (`LocalTmrBottomInset`) | as above | navigation bar inset plus 88 dp; add 48 dp at 150% font scale or more |
+| Neither set, no inset | as above | navigation bar inset |
+| Neither set, bottom inset provided (`LocalTmrBottomInset`) | as above | navigation bar inset plus the provided inset |
 
 The old bottom padding was the bar height plus the gutter. It is now 20 dp, because the content area
 no longer reaches under the bar. A feature that passed the `PaddingValues` to its list needs no
 change. A feature that added its own bar clearance must remove it, or the clearance is doubled.
 
 `bottomBarNotice` is placed directly above the bar with a 20 dp side gutter and an 8 dp gap to the
-bar. Put a notice card or a reason line in it. Without a bar, it sits above the dock inset. The
+bar. Put a notice card or a reason line in it. Without a bar, it sits above the bottom inset. The
 `snackbarHost` and `floatingAction` lift above the notice.
 
-Content runs behind the floating dock. It is not clipped. The bottom padding above lets the last item scroll
-clear of the dock.
 
 ```kotlin
 fun TmrCollapsingHomeHeader(collapse: TmrHeaderCollapseState, title: String, greeting: String, headline: String,
@@ -256,21 +253,6 @@ fun TmrSheet(modifier, contentPadding: PaddingValues = ..., content: @Composable
 Surface with 24 dp top corners.
 
 ```kotlin
-fun TmrDock(modifier, content: @Composable RowScope.() -> Unit)
-fun RowScope.TmrDockItem(selected: Boolean, onClick: () -> Unit, label: String, modifier,
-    icon: @Composable () -> Unit)
-fun TmrDockIcon(icon: ImageVector)
-```
-Floating 64 dp `tool` pill, inset by the gutter at the sides and 8 dp below, for the three top-level tabs only.
-Each item is an icon above a `labelM` label and takes an equal share of the width. The selected item is
-`onToolSelected` (lime), the others `onToolVariant`. In dark the pill has an `outlineSoft` hairline.
-At 150% font scale or more, the dock grows to 112 dp, adds 16 dp interior side padding,
-and lets each label wrap to two lines. `TmrScreen`
-adds the matching 48 dp to the dock clearance so the last list item remains reachable.
-`TmrDock` applies the navigation bar inset. Do not add it in `:app`.
-Put each `TmrDockItem` inside `TmrDock`; it is a `RowScope` extension.
-
-```kotlin
 fun TmrBottomActionBar(modifier, contentPadding: PaddingValues? = null,
     creditDisclosure: (@Composable () -> Unit)? = null, actions: @Composable RowScope.() -> Unit)
 ```
@@ -288,10 +270,6 @@ action comes last in the row, so it comes first in the stack. The default turns 
 a font scale of 1.5 or more. Pass `stacked = true` or `false` to force a mode. Pass `primaryLast = false` when
 the first action is the primary one (Welcome); the stack then keeps the order given.
 
-```kotlin
-object TmrDockDefaults { val height: Dp /* 64 */; val inset: Dp /* 88 */ }
-```
-`inset` is `LocalTmrBottomInset` for a tab screen. `:app` uses these values.
 
 ## Actions
 All buttons are 60 dp pills with the `button` type style. A disabled filled button is grey (`outlineVariant`
@@ -390,7 +368,7 @@ fun TmrLoadingWheel(contentDesc: String, modifier)
 Board: Text field, Consent row, Bottom sheet, Dialog, Offline banner and snackbar.
 
 Toast. `TmrToastHost(state)` shows one toast at a time as the inverse-surface snackbar of the board.
-Pass it as `TmrScreen(snackbarHost = { TmrToastHost(state) })`. Call `state.show(...)` from a coroutine.
+Pass it as `TmrScreen(snackbarHost = { TmrToastHost(state) })`. Inside the app shell, show a toast with `LocalTmrToast.current.show(message, action)` and a sheet with `LocalTmrSheetHost.current.show(title) { ... }`; `TmrShell` hosts one of each above the screens and a new one replaces the current one. Call `state.show(...)` from a coroutine.
 `show` returns `ActionPerformed` when the person taps the action label (for example "Undo").
 The public API has no `androidx.compose.material3.Snackbar*` type, so a feature can use it under
 Constitution II.5. `TmrSnackbar` and `showTmrSnackbar` are the parts of the toast. A feature must not call them.

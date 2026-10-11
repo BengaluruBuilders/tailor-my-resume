@@ -7,7 +7,6 @@ internal fun WalletDto.toEntitlement(pendingPackIds: List<String>) = PurchaseEnt
     freeCredits = freeCredits,
     purchasedCredits = purchasedCredits,
     pendingPackIds = pendingPackIds,
-    unlockedApplicationIds = unlockedApplicationIds.toSet(),
 )
 
 internal val NO_CREDITS = PurchaseEntitlement(freeCredits = 0, purchasedCredits = 0, pendingPackIds = emptyList())

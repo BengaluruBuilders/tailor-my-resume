@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.tailormyresume.core.database.TmrDatabase
 import com.tailormyresume.core.database.createInMemoryTmrDatabase
 import com.tailormyresume.core.testing.repository.CreditsRepositoryContractTest
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Before
@@ -25,5 +26,5 @@ class OfflineFirstCreditsRepositoryTest : CreditsRepositoryContractTest() {
     fun closeDatabase() = database.close()
 
     override fun createCreditsRepository(): CreditsRepository =
-        OfflineFirstCreditsRepository(database.creditLedgerDao(), UnconfinedTestDispatcher())
+        OfflineFirstCreditsRepository(database.creditLedgerDao(), UnconfinedTestDispatcher(), CoroutineScope(UnconfinedTestDispatcher()))
 }

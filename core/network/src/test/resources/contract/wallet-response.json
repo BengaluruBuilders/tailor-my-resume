@@ -1,11 +1,10 @@
 {
   "wallet": {
+    "credits": 1,
     "freeCredits": 1,
     "purchasedCredits": 0,
     "analysesLeftToday": 3,
-    "freeTailoringsLeftToday": 1,
     "day": "2026-10-07",
-    "resetsAt": "2026-10-07T18:30:00Z",
-    "unlockedApplicationIds": []
+    "resetsAt": "2026-10-07T18:30:00Z"
   }
 }
