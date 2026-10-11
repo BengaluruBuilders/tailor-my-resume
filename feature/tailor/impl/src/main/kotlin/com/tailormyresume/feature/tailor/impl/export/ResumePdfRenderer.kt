@@ -5,6 +5,7 @@ import com.tailormyresume.feature.tailor.impl.document.ResumeDocument
 
 internal interface ResumePdfRenderer {
     suspend fun render(
+        applicationId: String,
         document: ResumeDocument,
         fileName: String,
         pageSize: PageSize,

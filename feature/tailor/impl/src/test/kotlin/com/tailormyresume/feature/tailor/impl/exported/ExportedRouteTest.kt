@@ -29,6 +29,7 @@ import com.tailormyresume.feature.tailor.impl.acceptedBullet
 import com.tailormyresume.feature.tailor.impl.document.ResumeDocumentAssembler
 import com.tailormyresume.feature.tailor.impl.document.TestResumeHeadings
 import com.tailormyresume.feature.tailor.impl.entryFor
+import com.tailormyresume.feature.tailor.impl.export.ExportDirectory
 import com.tailormyresume.feature.tailor.impl.export.ExportResumeUseCase
 import com.tailormyresume.feature.tailor.impl.export.FakeResumePdfRenderer
 import com.tailormyresume.feature.tailor.impl.testProfile
@@ -76,7 +77,8 @@ class ExportedRouteTest {
             ),
             setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, clock),
             fileStore = object : ExportedFileStore {
-                override fun fileFor(fileName: String): File? = File(directory, fileName).takeIf { it.isFile }
+                override fun fileFor(applicationId: String, fileName: String): File? =
+                    ExportDirectory(directory).existing(applicationId, fileName)
             },
             savedStateHandle = SavedStateHandle(),
             ioDispatcher = UnconfinedTestDispatcher(),
