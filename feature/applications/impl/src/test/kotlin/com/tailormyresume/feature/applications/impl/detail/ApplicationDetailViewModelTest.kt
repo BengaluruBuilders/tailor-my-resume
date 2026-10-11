@@ -237,6 +237,28 @@ class ApplicationDetailViewModelTest {
     }
 
     @Test
+    fun tapsWhileAFileRequestRunsAreIgnored() = runTest {
+        seed(prototypeApplication("kb"))
+        intents.share = Intent("share")
+        intents.view = Intent("view")
+        intents.latencyMs = 50L
+        val viewModel = viewModel()
+        viewModel.ready()
+
+        viewModel.events.test {
+            viewModel.onShare()
+            viewModel.onShare()
+            viewModel.onOpen()
+            testScheduler.advanceUntilIdle()
+
+            assertThat(awaitItem()).isInstanceOf(ApplicationDetailEvent.ShareFile::class.java)
+            expectNoEvents()
+        }
+        assertThat(intents.shareRequests).containsExactly("kb")
+        assertThat(intents.viewRequests).isEmpty()
+    }
+
+    @Test
     fun shareAndOpenEmitIntentEvents() = runTest {
         seed(prototypeApplication("kb"))
         val share = Intent("share")

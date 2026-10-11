@@ -29,6 +29,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Instant as KotlinInstant
 
 @HiltViewModel(assistedFactory = ApplicationDetailViewModel.Factory::class)
@@ -41,6 +42,8 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val statusSheet = MutableStateFlow<ApplicationStatus?>(null)
+
+    private val fileRequestRunning = AtomicBoolean(false)
 
     private val eventChannel = Channel<ApplicationDetailEvent>(Channel.BUFFERED)
 
@@ -104,9 +107,14 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
         build: suspend (String) -> Intent?,
         event: (Intent) -> ApplicationDetailEvent,
     ) {
+        if (!fileRequestRunning.compareAndSet(false, true)) return
         viewModelScope.launch {
-            val intent = build(applicationId)
-            eventChannel.send(intent?.let(event) ?: ApplicationDetailEvent.FileMissing)
+            try {
+                val intent = build(applicationId)
+                eventChannel.send(intent?.let(event) ?: ApplicationDetailEvent.FileMissing)
+            } finally {
+                fileRequestRunning.set(false)
+            }
         }
     }
 
