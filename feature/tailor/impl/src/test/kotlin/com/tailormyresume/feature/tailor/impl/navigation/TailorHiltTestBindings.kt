@@ -1,6 +1,8 @@
 package com.tailormyresume.feature.tailor.impl.navigation
 
 import com.tailormyresume.core.data.repository.ContentReportRepository
+import com.tailormyresume.core.data.repository.NoRemoteLedger
+import com.tailormyresume.core.data.repository.RemoteLedgerSource
 import com.tailormyresume.core.data.repository.StoredContentReportRepository
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.model.CandidateProfile
@@ -36,6 +38,9 @@ internal abstract class TailorHiltTestBindings {
 
     @Binds
     abstract fun bindContentReports(impl: StoredContentReportRepository): ContentReportRepository
+
+    @Binds
+    abstract fun bindRemoteLedger(impl: NoRemoteLedger): RemoteLedgerSource
 
     companion object {
         @Provides
