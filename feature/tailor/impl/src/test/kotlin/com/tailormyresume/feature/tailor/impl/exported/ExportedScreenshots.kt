@@ -79,7 +79,7 @@ class ExportedScreenshots {
     private fun assertPaidTexts() {
         rule.onNodeWithText("Resume exported").assertExists()
         rule.onNodeWithText("Priya-Deshmukh_Northwind-GCC_Associate-Analyst.pdf").assertExists()
-        rule.onNodeWithText("PDF · 1 page · 48 KB").assertExists()
+        rule.onNodeWithText("PDF · 1 page · 48\u00a0KB").assertExists()
         rule.onNodeWithText("Share").assertExists()
         rule.onNodeWithText("Open").assertExists()
         rule.onNodeWithText("2 left, was 3. Credits never expire.").assertExists()
