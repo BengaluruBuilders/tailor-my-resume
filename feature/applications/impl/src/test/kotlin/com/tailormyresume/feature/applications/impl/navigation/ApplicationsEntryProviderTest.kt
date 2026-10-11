@@ -48,7 +48,7 @@ class ApplicationsEntryProviderTest {
             }
 
         composeRule.setContent {
-            TmrTheme(darkTheme = false) {
+            TmrTheme {
                 provider(key).Content()
             }
         }
@@ -67,7 +67,7 @@ class ApplicationsEntryProviderTest {
             }
 
         composeRule.setContent {
-            TmrTheme(darkTheme = false) {
+            TmrTheme {
                 provider(key).Content()
             }
         }

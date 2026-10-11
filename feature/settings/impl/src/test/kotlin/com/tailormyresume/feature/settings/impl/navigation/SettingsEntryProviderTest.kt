@@ -13,10 +13,8 @@ import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
-import com.tailormyresume.feature.settings.api.navigation.AccountDeletedNavKey
 import com.tailormyresume.feature.settings.api.navigation.DeleteAccountNavKey
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
-import com.tailormyresume.feature.settings.api.navigation.YourDataNavKey
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,13 +40,11 @@ class SettingsEntryProviderTest {
         val provider = entryProvider { settingsEntry(navigator) }
         val keys = listOf<NavKey>(
             SettingsNavKey(),
-            YourDataNavKey(),
             DeleteAccountNavKey(),
-            AccountDeletedNavKey,
         )
 
         composeRule.setContent {
-            TmrTheme(darkTheme = false) {
+            TmrTheme {
                 Column {
                     keys.forEach { navKey ->
                         key(navKey) { provider(navKey).Content() }

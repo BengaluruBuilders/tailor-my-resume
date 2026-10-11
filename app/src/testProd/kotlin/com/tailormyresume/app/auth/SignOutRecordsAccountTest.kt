@@ -2,7 +2,6 @@ package com.tailormyresume.app.auth
 
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.app.billing.signOutCleaner
-import com.tailormyresume.core.model.CareerStage
 import com.tailormyresume.core.model.KeptJobDescription
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.repository.TestSessionRepository
@@ -26,7 +25,7 @@ class SignOutRecordsAccountTest {
     fun tearDown() = runCatching { server.shutdown() }.let { }
 
     private fun gateway() =
-        RemoteSignInGateway(completeConfig, ScriptedCredentials(), firebase, server.api(), session, server.signOutCleaner(session), wiper)
+        RemoteSignInGateway(completeConfig, ScriptedCredentials(), firebase, server.api(), session, server.signOutCleaner(), wiper)
 
     private suspend fun signedInAtUpgrade(uid: String) =
         session.saveAccount(SignInAccount(id = uid, displayName = "Old", email = "old@example.com"))
@@ -63,13 +62,11 @@ class SignOutRecordsAccountTest {
         val job = KeptJobDescription(text = "Analyst role", company = "Northwind", role = "Analyst")
         session.saveLastAccountId("uid-0")
         session.keepJobDescription(job)
-        session.saveCareerStage(CareerStage.entries.first())
 
         gateway().signIn()
 
         assertThat(wipes).isEqualTo(1)
         assertThat(session.observeKeptJobDescription().first()).isEqualTo(job)
-        assertThat(session.observeCareerStage().first()).isEqualTo(CareerStage.entries.first())
         assertThat(session.lastAccountId()).isEqualTo("uid-1")
     }
 }

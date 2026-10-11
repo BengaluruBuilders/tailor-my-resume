@@ -15,8 +15,8 @@ import com.tailormyresume.core.model.DebugScenario
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.rememberNavigationState
 import com.tailormyresume.core.navigation.toEntries
-import com.tailormyresume.feature.onboarding.api.navigation.ConfirmFactsNavKey
-import com.tailormyresume.feature.onboarding.api.navigation.ConsentNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.ImportResumeNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,8 +34,8 @@ class NavigationStateRestoreTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private val firstKey: NavKey = ConfirmFactsNavKey(scenario = DebugScenario.defaultValue)
-    private val otherKey: NavKey = ConsentNavKey(scenario = DebugScenario.defaultValue)
+    private val firstKey: NavKey = SignInNavKey(scenario = DebugScenario.defaultValue)
+    private val otherKey: NavKey = ImportResumeNavKey(scenario = DebugScenario.defaultValue)
     private var startKey: NavKey = firstKey
     private lateinit var state: NavigationState
     private var entryCount = 0

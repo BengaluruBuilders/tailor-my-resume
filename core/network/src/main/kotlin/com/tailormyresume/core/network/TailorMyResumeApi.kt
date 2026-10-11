@@ -2,17 +2,11 @@ package com.tailormyresume.core.network
 
 import com.tailormyresume.core.network.dto.AnalysisRequest
 import com.tailormyresume.core.network.dto.AnalysisResponse
-import com.tailormyresume.core.network.dto.ConsentRequest
-import com.tailormyresume.core.network.dto.ConsentResponse
 import com.tailormyresume.core.network.dto.ContentReportRequest
 import com.tailormyresume.core.network.dto.ContentReportResponse
-import com.tailormyresume.core.network.dto.CoverLetterRequest
-import com.tailormyresume.core.network.dto.CoverLetterResponse
 import com.tailormyresume.core.network.dto.DeletionResponse
 import com.tailormyresume.core.network.dto.MeResponse
 import com.tailormyresume.core.network.dto.PacksResponse
-import com.tailormyresume.core.network.dto.PrepQuestionsRequest
-import com.tailormyresume.core.network.dto.PrepQuestionsResponse
 import com.tailormyresume.core.network.dto.PurchaseRequest
 import com.tailormyresume.core.network.dto.PurchaseResponse
 import com.tailormyresume.core.network.dto.PurchasesResponse
@@ -34,9 +28,6 @@ interface TailorMyResumeApi {
     @GET("v1/me")
     suspend fun me(): MeResponse
 
-    @POST("v1/me/consents")
-    suspend fun recordConsent(@Body body: ConsentRequest): ConsentResponse
-
     @DELETE("v1/me")
     suspend fun deleteMe(): DeletionResponse
 
@@ -51,12 +42,6 @@ interface TailorMyResumeApi {
 
     @GET("v1/tailormyresume/tailorings/{id}")
     suspend fun tailoring(@Path("id") id: String): TailoringResponse
-
-    @POST("v1/tailormyresume/prep-questions")
-    suspend fun prepQuestions(@Body body: PrepQuestionsRequest): PrepQuestionsResponse
-
-    @POST("v1/tailormyresume/cover-letters")
-    suspend fun coverLetter(@Body body: CoverLetterRequest): CoverLetterResponse
 
     @GET("v1/tailormyresume/wallet")
     suspend fun wallet(): WalletResponse

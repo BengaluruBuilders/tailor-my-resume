@@ -3,19 +3,13 @@ package com.tailormyresume.core.network
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.network.dto.AnalysisRequest
 import com.tailormyresume.core.network.dto.AnalysisResponse
-import com.tailormyresume.core.network.dto.ConsentRequest
-import com.tailormyresume.core.network.dto.ConsentResponse
 import com.tailormyresume.core.network.dto.ContentReportRequest
 import com.tailormyresume.core.network.dto.ContentReportResponse
-import com.tailormyresume.core.network.dto.CoverLetterRequest
-import com.tailormyresume.core.network.dto.CoverLetterResponse
 import com.tailormyresume.core.network.dto.DeletionResponse
 import com.tailormyresume.core.network.dto.JobDto
 import com.tailormyresume.core.network.dto.MatchDto
 import com.tailormyresume.core.network.dto.MeResponse
 import com.tailormyresume.core.network.dto.PacksResponse
-import com.tailormyresume.core.network.dto.PrepQuestionsRequest
-import com.tailormyresume.core.network.dto.PrepQuestionsResponse
 import com.tailormyresume.core.network.dto.ProfileFactsDto
 import com.tailormyresume.core.network.dto.PurchaseRequest
 import com.tailormyresume.core.network.dto.PurchaseResponse
@@ -47,8 +41,6 @@ class DtoRoundTripTest {
         roundTrip<JobDto>("job")
         roundTrip<MatchDto>("match")
         roundTrip<MeResponse>("me-response")
-        roundTrip<ConsentRequest>("consent-request")
-        roundTrip<ConsentResponse>("consent-response")
         roundTrip<DeletionResponse>("deletion-response")
         roundTrip<ResumeParseRequest>("resume-parse-request")
         roundTrip<ResumeParseResponse>("resume-parse-response")
@@ -57,10 +49,6 @@ class DtoRoundTripTest {
         roundTrip<TailoringStartRequest>("tailoring-start-request")
         roundTrip<TailoringResponse>("tailoring-start-response")
         roundTrip<TailoringResponse>("tailoring-poll-response")
-        roundTrip<PrepQuestionsRequest>("prep-questions-request")
-        roundTrip<PrepQuestionsResponse>("prep-questions-response")
-        roundTrip<CoverLetterRequest>("cover-letter-request")
-        roundTrip<CoverLetterResponse>("cover-letter-response")
         roundTrip<WalletResponse>("wallet-response")
         roundTrip<UnlockResponse>("unlock-response")
         roundTrip<PacksResponse>("packs-response")

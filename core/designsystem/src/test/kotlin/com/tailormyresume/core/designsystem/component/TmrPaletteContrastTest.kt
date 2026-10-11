@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import com.tailormyresume.core.designsystem.theme.TmrColors
 import com.tailormyresume.core.designsystem.theme.TmrDarkColors
-import com.tailormyresume.core.designsystem.theme.TmrLightColors
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -13,13 +12,6 @@ import org.junit.Test
 class TmrPaletteContrastTest {
     @Test
     fun appSurfacePaletteMatchesTheClaudeDesignCanvas() {
-        with(TmrLightColors) {
-            assertEquals(Color(0xFFFFFFFF), background)
-            assertEquals(Color(0xFFF4F6F1), card)
-            assertEquals(Color(0xFFFFFFFF), header)
-            assertEquals(Color(0xFFAEFF00), brand)
-            assertEquals(Color(0xFF000000), onBrand)
-        }
         with(TmrDarkColors) {
             assertEquals(Color(0xFF000000), background)
             assertEquals(Color(0xFF161817), card)
@@ -31,7 +23,7 @@ class TmrPaletteContrastTest {
 
     @Test
     fun textAndActionPairsMeetNormalTextContrast() {
-        listOf("light" to TmrLightColors, "dark" to TmrDarkColors).forEach { (mode, colors) ->
+        listOf("dark" to TmrDarkColors).forEach { (mode, colors) ->
             pairs(colors).forEach { (name, foreground, background) ->
                 val ratio = contrast(foreground, background)
                 assertTrue("$mode $name contrast was $ratio", ratio >= 4.5f)
@@ -41,8 +33,6 @@ class TmrPaletteContrastTest {
 
     @Test
     fun statusBarIconPolarityFollowsTheTopSurface() {
-        assertTrue(tmrDarkStatusBarIcons(lightTop = true, colors = TmrLightColors))
-        assertTrue(tmrDarkStatusBarIcons(lightTop = false, colors = TmrLightColors))
         assertFalse(tmrDarkStatusBarIcons(lightTop = true, colors = TmrDarkColors))
         assertFalse(tmrDarkStatusBarIcons(lightTop = false, colors = TmrDarkColors))
     }

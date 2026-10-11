@@ -23,7 +23,7 @@ class AccountSwitchSignInTest {
     fun tearDown() = runCatching { server.shutdown() }.let { }
 
     private fun gateway() =
-        RemoteSignInGateway(completeConfig, credentials, firebase, server.api(), session, server.signOutCleaner(session), wiper)
+        RemoteSignInGateway(completeConfig, credentials, firebase, server.api(), session, server.signOutCleaner(), wiper)
 
     @Test
     fun differentUidSignInWipesPreviousAccountDataBeforeReturningSignedIn() = runTest {

@@ -7,8 +7,6 @@ import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.domain.SignInAccount
 import com.tailormyresume.core.domain.SignInOutcome
-import com.tailormyresume.core.model.ConsentPurpose
-import com.tailormyresume.core.model.ConsentRecord
 import com.tailormyresume.core.testing.mock.TestMockStateStore
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import com.tailormyresume.core.testing.util.TestClock
@@ -44,18 +42,14 @@ class OfflineSignInGatewayStateTest {
     }
 
     @Test
-    fun signOutKeepsTheConsentAndTheOnboardingFlag() = runTest {
+    fun signOutKeepsTheOnboardingFlag() = runTest {
         val gateway = OfflineSignInGateway(session, NoMockLatency, TestMockStateStore())
         gateway.signIn()
-        session.recordConsent(
-            ConsentRecord(setOf(ConsentPurpose.READ_AND_BUILD), Instant.fromEpochSeconds(1), "1"),
-        )
         session.markOnboardingComplete()
 
         gateway.signOut()
 
         assertThat(session.observeAccount().first()).isNull()
-        assertThat(session.observeConsent().first()).isNotNull()
         assertThat(session.observeOnboardingComplete().first()).isTrue()
     }
 

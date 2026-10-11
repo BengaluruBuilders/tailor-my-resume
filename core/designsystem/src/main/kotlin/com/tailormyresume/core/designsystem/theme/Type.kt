@@ -4,38 +4,17 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.tailormyresume.core.designsystem.R
 
-@OptIn(ExperimentalTextApi::class)
-private fun manrope(weight: FontWeight) = Font(
-    R.font.core_designsystem_manrope,
-    weight,
-    variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)),
-)
-
-@OptIn(ExperimentalTextApi::class)
 object TmrFontFamilies {
-    val sans = FontFamily(
-        manrope(FontWeight.Normal),
-        manrope(FontWeight.Medium),
-        manrope(FontWeight.SemiBold),
-        manrope(FontWeight.Bold),
-        manrope(FontWeight.ExtraBold),
-    )
-
-    val display = FontFamily(
-        Font(R.font.core_designsystem_archivo_black, FontWeight.Black),
-    )
+    val sans = FontFamily.Default
+    val display = FontFamily.Default
 }
 
 @Immutable

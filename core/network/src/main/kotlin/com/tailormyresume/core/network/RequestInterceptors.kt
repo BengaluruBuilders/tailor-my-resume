@@ -66,24 +66,3 @@ internal class AuthInterceptor(
 fun interface SessionExpiredListener {
     fun onSessionExpired(accountGone: Boolean)
 }
-
-fun interface ConsentRequiredListener {
-    fun onConsentRequired()
-}
-
-internal class ConsentRequiredInterceptor(private val listener: ConsentRequiredListener) : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val response = chain.proceed(chain.request())
-        if (response.code == HTTP_FORBIDDEN && response.carriesConsentRequired()) listener.onConsentRequired()
-        return response
-    }
-
-    private fun Response.carriesConsentRequired(): Boolean = runCatching {
-        errorJson.decodeFromString<ErrorEnvelope>(peekBody(PEEK_LIMIT_BYTES).string()).error?.code == "CONSENT_REQUIRED"
-    }.getOrDefault(false)
-
-    private companion object {
-        const val HTTP_FORBIDDEN = 403
-        const val PEEK_LIMIT_BYTES = 4096L
-    }
-}

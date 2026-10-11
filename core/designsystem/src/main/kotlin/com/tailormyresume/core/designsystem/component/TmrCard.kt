@@ -52,7 +52,7 @@ fun TmrHeroCard(
     val surfaceModifier = (if (onClick == null) modifier else modifier.tmrPressScale(source))
         .fillMaxWidth()
         .tmrShadow(TmrTheme.elevation.hero, shape)
-    val border = if (TmrTheme.isDark) BorderStroke(TmrWidthHairline, colors.outlineVariant) else null
+    val border = BorderStroke(TmrWidthHairline, colors.outlineVariant)
     if (onClick == null) {
         Surface(modifier = surfaceModifier, shape = shape, color = colors.document, border = border) {
             TmrCardBody(contentPadding, null, content)
@@ -124,14 +124,8 @@ private const val TMR_CARD_SAMPLE_BODY = "Kestrel Labs · 1 to 2 years"
 
 @Preview(showBackground = true)
 @Composable
-private fun TmrCardPreview() {
-    TmrPreviewTheme(darkTheme = false) { TmrCardPreviewColumn() }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun TmrCardDarkPreview() {
-    TmrPreviewTheme(darkTheme = true) { TmrCardPreviewColumn() }
+    TmrPreviewTheme { TmrCardPreviewColumn() }
 }
 
 @Composable

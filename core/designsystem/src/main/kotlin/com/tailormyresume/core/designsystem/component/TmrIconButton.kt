@@ -98,14 +98,8 @@ private const val DISABLED_ALPHA = 0.38f
 
 @Preview(showBackground = true)
 @Composable
-private fun TmrIconButtonPreview() {
-    TmrPreviewTheme(darkTheme = false) { TmrIconButtonPreviewRow() }
-}
-
-@Preview(showBackground = true)
-@Composable
 private fun TmrIconButtonDarkPreview() {
-    TmrPreviewTheme(darkTheme = true) { TmrIconButtonPreviewRow() }
+    TmrPreviewTheme { TmrIconButtonPreviewRow() }
 }
 
 @Composable

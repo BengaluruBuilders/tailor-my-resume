@@ -1,24 +1,22 @@
 package com.tailormyresume.core.domain.account
 
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.data.mock.LegacyDataPurge
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.domain.DiscardJobDraftsUseCase
-import com.tailormyresume.core.model.ConsentPurpose
-import com.tailormyresume.core.model.ConsentRecord
 import com.tailormyresume.core.model.ContentReport
 import com.tailormyresume.core.model.CreditKind
 import com.tailormyresume.core.model.ExportFormat
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.KeptJobDescription
-import com.tailormyresume.core.model.PrepPlanItem
 import com.tailormyresume.core.model.ReportedItemKind
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.data.canonicalApplication
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
+import com.tailormyresume.core.testing.mock.TestMockStateStore
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestContentReportRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
-import com.tailormyresume.core.testing.repository.TestPrepPlanRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.flow.first
@@ -46,8 +44,8 @@ class DeleteMyDataUseCaseTest {
         )
     }
     private val session = TestSessionRepository()
-    private val prepPlan = TestPrepPlanRepository()
     private val contentReports = TestContentReportRepository()
+    private val store = TestMockStateStore()
     private var exportedFilesDeletions = 0
     private var transientClears = 0
     private var failingApplicationIds: Set<String> = emptySet()
@@ -65,17 +63,17 @@ class DeleteMyDataUseCaseTest {
         profileRepository = profiles,
         exportHistoryRepository = exportHistory,
         sessionRepository = session,
-        discardJobDrafts = DiscardJobDraftsUseCase(prepPlan, contentReports),
+        discardJobDrafts = DiscardJobDraftsUseCase(contentReports),
         exportedFiles = ExportedFiles {
             if (failingExportedFiles) throw IllegalStateException("cache locked")
             exportedFilesDeletions++
         },
         transientData = TransientDataCleaner { transientClears++ },
+        legacyDataPurge = LegacyDataPurge(store),
     )
 
     private suspend fun keepAccountState() {
         session.saveAccount(SignInAccount.localAccount)
-        session.recordConsent(ConsentRecord(setOf(ConsentPurpose.AI_PROCESSING), Instant.fromEpochSeconds(1), "2026-10-b"))
         session.markOnboardingComplete()
         session.keepJobDescription(KeptJobDescription(text = "jd", company = "Acme", role = "Analyst"))
     }
@@ -96,13 +94,12 @@ class DeleteMyDataUseCaseTest {
     }
 
     @Test
-    fun keepsTheAccountConsentAndOnboardingFlag() = runTest {
+    fun keepsTheAccountAndOnboardingFlag() = runTest {
         keepAccountState()
 
         useCase()()
 
         assertThat(session.observeAccount().first()).isEqualTo(SignInAccount.localAccount)
-        assertThat(session.observeConsent().first()).isNotNull()
         assertThat(session.observeOnboardingComplete().first()).isTrue()
     }
 
@@ -151,10 +148,9 @@ class DeleteMyDataUseCaseTest {
     }
 
     @Test
-    fun clearsThePrepPlanAndReportsOfTheKeptJobDescription() = runTest {
+    fun clearsTheReportsOfTheKeptJobDescription() = runTest {
         val kept = KeptJobDescription(text = "jd", company = "Acme", role = "Analyst")
         session.keepJobDescription(kept)
-        prepPlan.add(kept.draftKey, PrepPlanItem("p1", "Practise Kotlin"))
         contentReports.report(
             ContentReport(kept.draftKey, ReportedItemKind.RESUME_BULLET, "b1", "text", Instant.fromEpochSeconds(1)),
         )
@@ -162,7 +158,19 @@ class DeleteMyDataUseCaseTest {
         val result = useCase()()
 
         assertThat(result.isSuccess).isTrue()
-        assertThat(prepPlan.observeItems(kept.draftKey).first()).isEmpty()
         assertThat(contentReports.observeReports(kept.draftKey).first()).isEmpty()
+    }
+
+    @Test
+    fun removesLegacyPrepPlanStoredUnderTheJobDraftKey() = runTest {
+        val kept = KeptJobDescription(text = "jd", company = "Acme", role = "Analyst")
+        session.keepJobDescription(kept)
+        store.write("prep.plan.${kept.draftKey}", "plan")
+        store.write("coverletter.${canonicalApplication.id}", "letter")
+
+        useCase()()
+
+        assertThat(store.read("prep.plan.${kept.draftKey}")).isNull()
+        assertThat(store.read("coverletter.${canonicalApplication.id}")).isNull()
     }
 }

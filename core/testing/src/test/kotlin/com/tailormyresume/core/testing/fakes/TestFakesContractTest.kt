@@ -3,9 +3,7 @@ package com.tailormyresume.core.testing.fakes
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.repository.ContentReportRepository
-import com.tailormyresume.core.data.repository.CoverLetterRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
-import com.tailormyresume.core.data.repository.PrepPlanRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.data.repository.TailoringReviewStateRepository
 import com.tailormyresume.core.data.repository.UsageAllowance
@@ -14,8 +12,6 @@ import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.account.AccountDataExporter
 import com.tailormyresume.core.testing.account.AccountDataExporterContractTest
 import com.tailormyresume.core.testing.account.TestAccountDataExporter
-import com.tailormyresume.core.testing.connectivity.ConnectivityMonitorContractTest
-import com.tailormyresume.core.testing.connectivity.TestConnectivityMonitor
 import com.tailormyresume.core.testing.gateway.PaymentGatewayContractTest
 import com.tailormyresume.core.testing.gateway.SignInGatewayContractTest
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
@@ -23,15 +19,11 @@ import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.mock.MockStateStoreContractTest
 import com.tailormyresume.core.testing.mock.TestMockStateStore
 import com.tailormyresume.core.testing.repository.ContentReportRepositoryContractTest
-import com.tailormyresume.core.testing.repository.CoverLetterRepositoryContractTest
 import com.tailormyresume.core.testing.repository.ExportHistoryRepositoryContractTest
-import com.tailormyresume.core.testing.repository.PrepPlanRepositoryContractTest
 import com.tailormyresume.core.testing.repository.SessionRepositoryContractTest
 import com.tailormyresume.core.testing.repository.TailoringReviewStateRepositoryContractTest
 import com.tailormyresume.core.testing.repository.TestContentReportRepository
-import com.tailormyresume.core.testing.repository.TestCoverLetterRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
-import com.tailormyresume.core.testing.repository.TestPrepPlanRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import com.tailormyresume.core.testing.repository.TestTailoringReviewStateRepository
 import com.tailormyresume.core.testing.repository.TestUsageAllowance
@@ -54,14 +46,6 @@ class TestExportHistoryRepositoryContractTest : ExportHistoryRepositoryContractT
     override fun createExportHistoryRepository(): ExportHistoryRepository = TestExportHistoryRepository()
 }
 
-class TestCoverLetterRepositoryContractTest : CoverLetterRepositoryContractTest() {
-    override fun createCoverLetterRepository(): CoverLetterRepository = TestCoverLetterRepository()
-}
-
-class TestPrepPlanRepositoryContractTest : PrepPlanRepositoryContractTest() {
-    override fun createPrepPlanRepository(): PrepPlanRepository = TestPrepPlanRepository()
-}
-
 class TestContentReportRepositoryContractTest : ContentReportRepositoryContractTest() {
     override fun createContentReportRepository(): ContentReportRepository = TestContentReportRepository()
 }
@@ -73,13 +57,6 @@ class TestTailoringReviewStateRepositoryContractTest : TailoringReviewStateRepos
 
 class TestUsageAllowanceContractTest : UsageAllowanceContractTest() {
     override fun createUsageAllowance(clock: TestClock): UsageAllowance = TestUsageAllowance(clock)
-}
-
-class TestConnectivityMonitorContractTest : ConnectivityMonitorContractTest() {
-    override fun createFixture(): Fixture {
-        val monitor = TestConnectivityMonitor()
-        return Fixture(monitor, monitor)
-    }
 }
 
 class TestAccountDataExporterContractTest : AccountDataExporterContractTest() {

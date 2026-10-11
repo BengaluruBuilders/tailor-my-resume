@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,8 +23,8 @@ class TmrStatusBarIconsTest {
     @get:Rule
     val rule = createAndroidComposeRule<ComponentActivity>()
 
-    private fun darkIconsAfter(darkTheme: Boolean, screen: @Composable () -> Unit): Boolean {
-        rule.setContent { TmrPreviewTheme(darkTheme = darkTheme, content = screen) }
+    private fun darkIconsAfter(screen: @Composable () -> Unit): Boolean {
+        rule.setContent { TmrPreviewTheme(content = screen) }
         rule.waitForIdle()
         val window = rule.activity.window
         return WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars
@@ -37,27 +36,7 @@ class TmrStatusBarIconsTest {
     }
 
     @Test
-    fun headerlessWhiteTopInLightThemeUsesDarkIcons() {
-        assertTrue(darkIconsAfter(darkTheme = false) { TmrScreen { } })
-    }
-
-    @Test
-    fun whiteInnerHeaderInLightThemeUsesDarkIcons() {
-        assertTrue(darkIconsAfter(darkTheme = false) { TmrScreen(header = { TmrInnerHeader(title = "T") }) { } })
-    }
-
-    @Test
-    fun lightThemeHeaderTopUsesDarkIcons() {
-        assertTrue(darkIconsAfter(darkTheme = false) { TmrScreen(lightTop = false) { } })
-    }
-
-    @Test
-    fun whiteHeaderWithLightTopTrueUsesDarkIcons() {
-        assertTrue(darkIconsAfter(darkTheme = false) { TmrScreen(lightTop = true, header = { WhiteBar() }) { } })
-    }
-
-    @Test
     fun darkThemeUsesLightIcons() {
-        assertFalse(darkIconsAfter(darkTheme = true) { TmrScreen(lightTop = true, header = { WhiteBar() }) { } })
+        assertFalse(darkIconsAfter { TmrScreen(lightTop = true, header = { WhiteBar() }) { } })
     }
 }

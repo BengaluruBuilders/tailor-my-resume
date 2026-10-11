@@ -3,26 +3,20 @@ package com.tailormyresume.core.domain.account
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.PurchaseRecord
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.model.ConsentRecord
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.JobApplication
-import com.tailormyresume.core.model.PrepPlanItem
 import com.tailormyresume.core.model.SignInAccount
-import com.tailormyresume.core.model.WrittenCoverLetter
 import java.io.File
 import kotlin.time.Instant
 
 data class AccountData(
     val generatedAt: Instant,
     val account: SignInAccount?,
-    val consent: ConsentRecord?,
     val profile: CandidateProfile?,
     val applications: List<JobApplication>,
     val entitlement: PurchaseEntitlement,
     val purchases: List<PurchaseRecord>,
     val exports: List<ExportRecord>,
-    val coverLetters: Map<String, WrittenCoverLetter> = emptyMap(),
-    val prepPlans: Map<String, List<PrepPlanItem>> = emptyMap(),
 )
 
 data class AccountDataArchive(val fileName: String, val file: File)

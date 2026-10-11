@@ -36,7 +36,6 @@ class OfflineAccountDataExporterTest : AccountDataExporterContractTest() {
         val data = AccountData(
             generatedAt = now,
             account = SignInAccount.localAccount,
-            consent = null,
             profile = canonicalCandidateProfile,
             applications = listOf(sampleApplication),
             entitlement = PurchaseEntitlement(0, 4, emptyList()),

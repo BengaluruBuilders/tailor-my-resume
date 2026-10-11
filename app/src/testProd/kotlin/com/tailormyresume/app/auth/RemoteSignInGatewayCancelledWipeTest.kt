@@ -38,7 +38,7 @@ class RemoteSignInGatewayCancelledWipeTest {
             ScriptedFirebase(),
             server.api(),
             session,
-            server.signOutCleaner(session),
+            server.signOutCleaner(),
             wiper,
         )
 

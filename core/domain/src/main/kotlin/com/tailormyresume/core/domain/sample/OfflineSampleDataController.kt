@@ -13,8 +13,6 @@ import com.tailormyresume.core.domain.offline.OfflinePaymentGateway
 import com.tailormyresume.core.domain.onboarding.NextOnboardingStepUseCase
 import com.tailormyresume.core.domain.onboarding.OnboardingStep
 import com.tailormyresume.core.model.BulletDecision
-import com.tailormyresume.core.model.ConsentPurpose
-import com.tailormyresume.core.model.ConsentRecord
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.TailoredBullet
@@ -40,7 +38,7 @@ class OfflineSampleDataController(
     override suspend fun load() {
         reset()
         val now = clock.now()
-        signInSampleCandidate(now)
+        signInSampleCandidate()
         paymentGateway.purchase(SampleDataSet.PURCHASED_PACK_ID)
         SampleDataSet.applications.forEach { plan -> applicationRepository.upsertApplication(build(plan, now)) }
         SampleDataSet.exports.forEach { plan -> recordExport(plan, now) }
@@ -60,18 +58,11 @@ class OfflineSampleDataController(
     override suspend fun keepSampleJobDescription() {
         sessionRepository.keepJobDescription(SampleDataSet.keptJob)
         val next = NextOnboardingStepUseCase(sessionRepository, profileRepository)()
-        if (next !is OnboardingStep.GapAnalysis && firebaseUid.uid() == null) signInSampleCandidate(clock.now())
+        if (next !is OnboardingStep.GapAnalysis && firebaseUid.uid() == null) signInSampleCandidate()
     }
 
-    private suspend fun signInSampleCandidate(now: Instant) {
+    private suspend fun signInSampleCandidate() {
         sessionRepository.saveAccount(SampleDataSet.account)
-        sessionRepository.recordConsent(
-            ConsentRecord(
-                purposes = ConsentPurpose.entries.toSet(),
-                acceptedAt = now - CONSENT_DAYS_AGO.days,
-                noticeVersion = ConsentRecord.CURRENT_NOTICE_VERSION,
-            ),
-        )
         profileRepository.saveProfile(SampleDataSet.profile)
     }
 
@@ -126,7 +117,6 @@ class OfflineSampleDataController(
     }
 
     private companion object {
-        const val CONSENT_DAYS_AGO = 30
         const val REJECT_EVERY = 4
     }
 }

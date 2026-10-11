@@ -7,7 +7,6 @@ import com.tailormyresume.core.network.ApiException
 import com.tailormyresume.core.network.apiResult
 
 internal fun ApiError.toAiFailure(): AiFailure = when (this) {
-    ApiError.ConsentRequired -> AiFailure.ConsentRequired
     ApiError.NoCredit -> AiFailure.NoCredit
     ApiError.AllowanceExhausted -> AiFailure.AllowanceExhausted
     ApiError.InvalidInput, ApiError.PayloadTooLarge -> AiFailure.InvalidInput

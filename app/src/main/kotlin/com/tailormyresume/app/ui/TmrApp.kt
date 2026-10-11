@@ -40,7 +40,7 @@ import com.tailormyresume.core.navigation.toEntries
 import com.tailormyresume.feature.analysis.impl.navigation.analysisEntry
 import com.tailormyresume.feature.applications.impl.navigation.applicationDetailEntry
 import com.tailormyresume.feature.applications.impl.navigation.applicationsEntry
-import com.tailormyresume.feature.onboarding.api.navigation.DefaultWelcomeNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.DefaultSignInNavKey
 import com.tailormyresume.feature.onboarding.impl.navigation.onboardingEntry
 import com.tailormyresume.feature.profile.impl.navigation.profileEntry
 import com.tailormyresume.feature.settings.impl.navigation.settingsEntry
@@ -71,7 +71,7 @@ fun TmrApp(
 @Composable
 internal fun TmrFirstRunRoot(
     modifier: Modifier = Modifier,
-    startKey: NavKey = DefaultWelcomeNavKey,
+    startKey: NavKey = DefaultSignInNavKey,
     initialKeys: () -> List<NavKey> = PendingNavigation::consume,
 ) {
     WithRootViewModelStore(NavigationRoot.FirstRun) {

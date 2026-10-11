@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertWithMessage
 import com.tailormyresume.core.domain.AiException
 import com.tailormyresume.core.domain.AiFailure
 import com.tailormyresume.core.domain.GapMatcher
-import com.tailormyresume.core.domain.ImportRemovalNotice
 import com.tailormyresume.core.domain.JobAnalysisResult
 import com.tailormyresume.core.domain.fact.FactIdAllocator
 import com.tailormyresume.core.model.GapAnalysis
@@ -33,11 +32,9 @@ class AiFailureMappingTest {
         }
         val tailor = RemoteResumeTailor(backend.api, PendingTailoringIds(TestMockStateStore(), FixedIds))
         return mapOf(
-            "parse" to { RemoteResumeTextParser(backend.api, FactIdAllocator(), ImportRemovalNotice()).parse("x".repeat(60)) },
+            "parse" to { RemoteResumeTextParser(backend.api, FactIdAllocator()).parse("x".repeat(60)) },
             "analyse" to { RemoteJobAnalysisSource(backend.api, matcher).analyse(candidate, "jd text") },
             "tailor" to { tailor.tailor(candidate, job, analysis.gap, "app-1", null) },
-            "prep" to { RemotePrepQuestionSource(backend.api)(analysis, candidate, 6) },
-            "letter" to { RemoteCoverLetterSource(backend.api)(candidate, job, analysis, 3) },
         )
     }
 
@@ -47,7 +44,6 @@ class AiFailureMappingTest {
     @Test
     fun everyRouteMapsEveryErrorCode() {
         val expected = mapOf(
-            (403 to "CONSENT_REQUIRED") to AiFailure.ConsentRequired,
             (402 to "NO_CREDIT") to AiFailure.NoCredit,
             (429 to "ALLOWANCE_EXHAUSTED") to AiFailure.AllowanceExhausted,
             (400 to "INVALID_INPUT") to AiFailure.InvalidInput,
@@ -87,7 +83,6 @@ class AiFailureMappingTest {
             Triple(500, "HTTP_ERROR", AiFailure.Unavailable),
             Triple(500, "INTERNAL_ERROR", AiFailure.Unavailable),
             Triple(402, "NO_CREDIT", AiFailure.NoCredit),
-            Triple(403, "CONSENT_REQUIRED", AiFailure.ConsentRequired),
             Triple(409, "PURCHASE_PENDING", AiFailure.Unavailable),
             Triple(400, "PURCHASE_INVALID", AiFailure.Unavailable),
             Triple(429, "ALLOWANCE_EXHAUSTED", AiFailure.AllowanceExhausted),

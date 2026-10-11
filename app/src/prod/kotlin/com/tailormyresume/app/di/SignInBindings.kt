@@ -2,7 +2,6 @@ package com.tailormyresume.app.di
 
 import com.tailormyresume.app.AppStartTask
 import com.tailormyresume.app.BuildConfig
-import com.tailormyresume.app.auth.ConsentRevoker
 import com.tailormyresume.app.auth.CredentialManagerGoogleSource
 import com.tailormyresume.app.auth.FirebaseAuthClient
 import com.tailormyresume.app.auth.FirebaseConfig
@@ -13,17 +12,14 @@ import com.tailormyresume.app.auth.GoogleCredentialSource
 import com.tailormyresume.app.auth.LocalDataWiper
 import com.tailormyresume.app.auth.PendingWipeStartTask
 import com.tailormyresume.app.auth.RemoteAccountWipeFinisher
-import com.tailormyresume.app.auth.RemoteConsentUploader
 import com.tailormyresume.app.auth.RemoteServerAccountDeleter
 import com.tailormyresume.app.auth.RemoteSignInGateway
 import com.tailormyresume.app.auth.RoomLocalDataWiper
 import com.tailormyresume.app.auth.SessionExpiryHandler
-import com.tailormyresume.core.domain.ConsentUploader
 import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.account.AccountWipeFinisher
 import com.tailormyresume.core.domain.account.ServerAccountDeleter
-import com.tailormyresume.core.network.ConsentRequiredListener
 import com.tailormyresume.core.network.IdTokenProvider
 import com.tailormyresume.core.network.SessionExpiredListener
 import dagger.Binds
@@ -53,12 +49,6 @@ interface SignInBindings {
 
     @Binds
     fun bindFirebaseUidProvider(impl: FirebaseAuthClient): FirebaseUidProvider
-
-    @Binds
-    fun bindConsentUploader(impl: RemoteConsentUploader): ConsentUploader
-
-    @Binds
-    fun bindConsentRequiredListener(impl: ConsentRevoker): ConsentRequiredListener
 
     @Binds
     fun bindSessionExpiredListener(impl: SessionExpiryHandler): SessionExpiredListener

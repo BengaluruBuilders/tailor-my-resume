@@ -30,7 +30,7 @@ import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.designsystem.component.TmrBackground
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.model.DebugScenario
-import com.tailormyresume.feature.onboarding.api.navigation.DefaultWelcomeNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -97,7 +97,6 @@ class DebugScenarioActivity : ComponentActivity() {
                                 onLoadSampleData = menuViewModel::loadSampleData,
                                 onResetAppData = menuViewModel::resetAppData,
                                 onOpenApp = ::openApp,
-                                onOnlineChange = menuViewModel::setOnline,
                                 onTargetSelected = { target = it },
                                 onScenarioSelected = { scenario = it },
                                 onOpenScreen = ::openPreview,
@@ -120,7 +119,7 @@ class DebugScenarioActivity : ComponentActivity() {
     }
 
     private fun applyEdgeToEdge() {
-        enableEdgeToEdge(statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT))
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT), navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
     }
 
     private fun openPreview() {
@@ -158,7 +157,7 @@ private fun DebugScenarioPreview(
     val shownRoot = observePreviewRoot(target.opensFirstRunRoot, rootState, hasAccount, rootStores)
     when {
         target.opensFirstRunRoot -> TmrFirstRunRoot(modifier = modifier, startKey = key)
-        shownRoot == NavigationRoot.FirstRun -> TmrFirstRunRoot(modifier = modifier, startKey = DefaultWelcomeNavKey)
+        shownRoot == NavigationRoot.FirstRun -> TmrFirstRunRoot(modifier = modifier, startKey = SignInNavKey())
         else -> TmrMainRoot(modifier = modifier, initialKeys = { listOf(key) })
     }
 }

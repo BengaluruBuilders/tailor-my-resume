@@ -70,4 +70,4 @@ class TmrColors(
 }
 
 val LocalTmrColors: ProvidableCompositionLocal<TmrColors> =
-    staticCompositionLocalOf { TmrLightColors }
+    staticCompositionLocalOf { TmrDarkColors }

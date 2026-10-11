@@ -11,26 +11,14 @@ data class SettingsNavKey(
 ) : NavKey
 
 @Serializable
-data class YourDataNavKey(
-    val scenario: DebugScenario = DebugScenario.defaultValue,
-) : NavKey
-
-@Serializable
 data class DeleteAccountNavKey(
     val scenario: DebugScenario = DebugScenario.defaultValue,
 ) : NavKey
-
-@Serializable
-data object AccountDeletedNavKey : NavKey
 
 val DefaultSettingsNavKey = SettingsNavKey()
 
 fun Navigator.navigateToSettings() {
     navigate(SettingsNavKey())
-}
-
-fun Navigator.navigateToYourData() {
-    navigate(YourDataNavKey())
 }
 
 fun Navigator.navigateToDeleteAccount() {

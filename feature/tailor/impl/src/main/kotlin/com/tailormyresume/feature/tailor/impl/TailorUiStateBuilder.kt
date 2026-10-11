@@ -1,7 +1,7 @@
 package com.tailormyresume.feature.tailor.impl
 
+import com.tailormyresume.core.domain.RequirementPhrase
 import com.tailormyresume.core.domain.fact.FactDisplayIds
-import com.tailormyresume.core.domain.prep.RequirementPhrase
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.JobApplication
