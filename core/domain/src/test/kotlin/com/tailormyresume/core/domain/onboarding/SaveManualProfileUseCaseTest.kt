@@ -98,4 +98,30 @@ class SaveManualProfileUseCaseTest {
         assertThat(saved.entries).hasSize(2)
         assertThat(saved.entries.first()).isEqualTo(imported)
     }
+
+    @Test
+    fun doesNotReplaceARoleThatHasDatesEvenIfUserStated() = runTest {
+        val dated = ProfileEntry(
+            "W-01", EntryCategory.EXPERIENCE, "Business Analyst", "Infosys", "Jul 2022", "Present", emptyList(),
+            FactSource.USER_STATED, isConfirmed = true,
+        )
+        repository.sendProfile(CandidateProfile("Old", "", "", "", emptyList(), listOf(dated)))
+
+        useCase(contact, replacingEntryId = dated.id)
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(saved.entries).hasSize(2)
+        assertThat(saved.entries.first()).isEqualTo(dated)
+    }
+
+    @Test
+    fun stillReplacesTheUntouchedManualRole() = runTest {
+        val first = useCase(contact).entries.single()
+
+        useCase(contact.copy(jobTitle = "Senior Analyst"), replacingEntryId = first.id)
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(saved.entries.single().id).isEqualTo(first.id)
+        assertThat(saved.entries.single().title).isEqualTo("Senior Analyst")
+    }
 }

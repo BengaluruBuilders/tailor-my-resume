@@ -5,6 +5,7 @@ import android.content.ComponentName
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -14,17 +15,23 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.ResumeTextParser
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
+import com.tailormyresume.feature.analysis.api.navigation.JobNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.PasteResumeNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.ReadingNavKey
+import com.tailormyresume.feature.onboarding.api.navigation.ReviewProfileNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
+import com.tailormyresume.feature.onboarding.impl.review.fixedReviewProfile
+import com.tailormyresume.feature.onboarding.impl.review.freshReviewProfile
 import com.tailormyresume.feature.onboarding.impl.signin.reduceMotion
+import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,6 +40,8 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExternalResource
@@ -40,6 +49,7 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class OnboardingEntryHostActivity : ComponentActivity()
@@ -59,6 +69,9 @@ object FixedResumeParserModule {
 @Config(application = HiltTestApplication::class, qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
 class OnboardingRealEntryHiltTest {
 
+    @Inject
+    lateinit var profileRepository: ProfileRepository
+
     private val hiltRule = HiltAndroidRule(this)
     private val composeRule = createAndroidComposeRule<OnboardingEntryHostActivity>()
 
@@ -73,8 +86,9 @@ class OnboardingRealEntryHiltTest {
     @get:Rule
     val rules: RuleChain = RuleChain.outerRule(hiltRule).around(registerActivity).around(composeRule)
 
-    private fun show(navigator: Navigator, key: NavKey) {
+    private fun show(navigator: Navigator, key: NavKey, seed: CandidateProfile? = null) {
         hiltRule.inject()
+        if (seed != null) runBlocking { profileRepository.saveProfile(seed) }
         reduceMotion()
         val provider = entryProvider { onboardingEntry(navigator) }
         composeRule.setContent { TmrTheme { provider(key).Content() } }
@@ -113,5 +127,35 @@ class OnboardingRealEntryHiltTest {
         composeRule.waitForIdle()
 
         assertThat(navigator.state.stack.toList()).containsExactly(SignInNavKey(), UploadNavKey()).inOrder()
+    }
+
+    private fun waitForReview() {
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Your profile").fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    fun reviewAddLinkedinOpensEditContact() {
+        val navigator = navigatorOf(ReviewProfileNavKey())
+        show(navigator, ReviewProfileNavKey(), seed = freshReviewProfile())
+        waitForReview()
+
+        composeRule.onNodeWithText("Add your LinkedIn").performClick()
+        composeRule.waitForIdle()
+
+        assertThat(navigator.state.stack.toList()).containsExactly(ReviewProfileNavKey(), EditContactNavKey()).inOrder()
+    }
+
+    @Test
+    fun reviewContinueSetsReviewedAtAndOpensJob() {
+        val navigator = navigatorOf(ReviewProfileNavKey())
+        show(navigator, ReviewProfileNavKey(), seed = fixedReviewProfile())
+        waitForReview()
+
+        composeRule.onNodeWithText("Looks right, continue").performClick()
+        composeRule.waitUntil(timeoutMillis = 10_000) { navigator.state.currentKey == JobNavKey() }
+
+        assertThat(runBlocking { profileRepository.observeProfile().first() }?.reviewedAt).isNotNull()
     }
 }

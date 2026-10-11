@@ -15,6 +15,8 @@ fun ProfileEntry.continues(previous: ProfileEntry): Boolean =
         startDate.trim() == previous.startDate.trim() &&
         endDate.trim() == previous.endDate.trim()
 
+fun List<ProfileEntry>.countLogicalEntries(category: EntryCategory): Int = 0
+
 fun splitBulletsForEntries(bullets: List<String>, entriesBefore: Int, entriesAfter: Int): List<List<String>> {
     val chunks = bullets.chunked(ProfileLimits.MAX_BULLETS_PER_ENTRY)
     val fits = entriesBefore + chunks.size + entriesAfter <= ProfileLimits.MAX_ENTRIES
