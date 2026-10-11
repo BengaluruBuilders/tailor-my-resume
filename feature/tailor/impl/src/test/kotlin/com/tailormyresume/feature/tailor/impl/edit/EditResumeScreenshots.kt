@@ -62,9 +62,9 @@ class EditResumeScreenshots {
     private fun assertReadyTexts() {
         rule.onNodeWithText("Edit resume").assertExists()
         rule.onNodeWithText("Still fits on 1 page").assertExists()
-        rule.onNodeWithText("SUMMARY").assertExists()
-        rule.onNodeWithText("BUSINESS ANALYST · INFOSYS").assertExists()
-        rule.onNodeWithText("SKILLS LINE").assertExists()
+        rule.onNodeWithText("Summary").assertExists()
+        rule.onNodeWithText("Business Analyst · Infosys").assertExists()
+        rule.onNodeWithText("Skills line").assertExists()
         rule.onNodeWithText(SUMMARY).assertExists()
         rule.onNodeWithText(BULLET_B1).assertExists()
         rule.onNodeWithText(BULLET_B2).assertExists()
