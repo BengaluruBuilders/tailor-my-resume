@@ -56,6 +56,7 @@ internal abstract class TailorHiltTestBindings {
                 gap: GapAnalysis,
                 applicationId: String,
                 answer: QuickAnswer?,
+                runId: String,
             ): TailoredResume = error("tailoring is not part of this test")
         }
     }

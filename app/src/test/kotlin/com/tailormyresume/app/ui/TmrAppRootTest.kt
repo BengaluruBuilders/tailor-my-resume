@@ -240,7 +240,14 @@ class TmrAppRootTest {
     fun signedOutToastShowsOnTheRealSignedOutRoot() {
         PendingToast.consume()
         PendingToast.set(SettingsR.string.feature_settings_impl_toast_signed_out)
-        rule.setContent { TmrTheme { TmrApp(rootState = AppRootState.Ready(StartDestination.SignIn, null)) } }
+        rule.setContent {
+            TmrTheme {
+                TmrApp(
+                    rootState = AppRootState.Ready(StartDestination.SignIn, null),
+                    entryProvider = { _ -> ({ key: NavKey -> NavEntry(key) {} }) },
+                )
+            }
+        }
         rule.waitForIdle()
 
         rule.onNodeWithText("Signed out").assertIsDisplayed()
