@@ -64,7 +64,7 @@ internal class ReviewViewModel @Inject constructor(
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (failure: Exception) {
-                return@launch
+                eventChannel.trySend(ReviewEvent.SaveFailed)
             } finally {
                 continuing.set(false)
             }

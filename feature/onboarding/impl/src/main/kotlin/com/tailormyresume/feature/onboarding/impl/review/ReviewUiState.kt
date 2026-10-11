@@ -43,4 +43,6 @@ internal sealed interface ReviewEvent {
     data object NothingToReview : ReviewEvent
 
     data object MissingEndDate : ReviewEvent
+
+    data object SaveFailed : ReviewEvent
 }

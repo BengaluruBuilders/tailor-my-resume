@@ -15,8 +15,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = NARROW_QUALIFIERS)
 class ReviewLayoutTest {
 
@@ -24,7 +26,7 @@ class ReviewLayoutTest {
     val composeRule = createComposeRule()
 
     private fun layoutOf(text: String): TextLayoutResult {
-        val config = composeRule.onNodeWithText(text).fetchSemanticsNode().config
+        val config = composeRule.onNodeWithText(text, useUnmergedTree = true).fetchSemanticsNode().config
         config.getOrNull(TmrFitTextLayoutKey)?.invoke()?.let { return it }
         val layouts = mutableListOf<TextLayoutResult>()
         checkNotNull(config.getOrNull(SemanticsActions.GetTextLayoutResult)).action?.invoke(layouts)
@@ -51,5 +53,25 @@ class ReviewLayoutTest {
         assertLinesEndAtWordBoundaries("Add date")
         assertLinesEndAtWordBoundaries("From Priya_Deshmukh_Resume_Final_2026.pdf. Tap anything to edit.")
         assertLinesEndAtWordBoundaries("Looks right, continue")
+    }
+
+    @Test
+    fun contactRoleAndChipTextNeverBreakInsideAWordAtFontScale2() {
+        val longOrganization = "Internationalcorporationlimited"
+        val longTitle = "Subcontinentalpartnershipmanager"
+        val longSkill = "Electroencephalographyanalysis"
+        val email = "priya.deshmukh.analytics@gmail.com"
+        val base = fixedReviewProfile()
+        val profile = base.copy(
+            email = email,
+            skills = listOf(longSkill),
+            entries = listOf(importedRole("r1", title = longTitle, organization = longOrganization)),
+        )
+        composeRule.showFlowScreen(NARROW_DEVICE.fontScale, noopReview(profile.reviewState()))
+
+        assertLinesEndAtWordBoundaries(email)
+        assertLinesEndAtWordBoundaries(longOrganization)
+        assertLinesEndAtWordBoundaries(longTitle)
+        assertLinesEndAtWordBoundaries(longSkill)
     }
 }

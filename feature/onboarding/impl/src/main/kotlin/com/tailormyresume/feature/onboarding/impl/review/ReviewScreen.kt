@@ -65,6 +65,8 @@ private const val STACKED_MIN_FONT_SCALE = 1.3f
 
 private val FILE_NAME_BREAKS = charArrayOf('_', '.', '-', '/')
 
+private val EMAIL_BREAKS = charArrayOf('@', '.')
+
 @Composable
 internal fun ReviewScreen(
     state: ReviewUiState.Ready,
@@ -125,12 +127,14 @@ internal fun ReviewRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val toast = LocalTmrToast.current
     val missingEndDate = stringResource(R.string.feature_onboarding_impl_review_missing_end_date_toast)
+    val saveFailed = stringResource(R.string.feature_onboarding_impl_review_save_failed_toast)
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
                 ReviewEvent.Continue -> navigator.navigate(JobNavKey())
                 ReviewEvent.NothingToReview -> navigator.replace(UploadNavKey())
                 ReviewEvent.MissingEndDate -> toast.show(missingEndDate)
+                ReviewEvent.SaveFailed -> toast.show(saveFailed)
             }
         }
     }
@@ -356,14 +360,14 @@ private fun ContactCard(contact: ReviewContact, onClick: () -> Unit) {
     EditableCard(stringResource(R.string.feature_onboarding_impl_review_contact), onClick) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             if (contact.name.isNotBlank()) {
-                Text(
+                TmrFitText(
                     text = contact.name,
                     style = TmrTheme.typography.strongLarge.copy(fontSize = 18.sp),
                     color = TmrTheme.colors.text,
                 )
             }
             listOf(contact.email, contact.phoneAndCity).filter(String::isNotBlank).forEach {
-                Text(text = it, style = TmrTheme.typography.bodySmall, color = TmrTheme.colors.textSecondary)
+                TmrFitText(text = it, style = TmrTheme.typography.bodySmall, color = TmrTheme.colors.textSecondary, breakAfter = EMAIL_BREAKS)
             }
         }
     }
@@ -384,9 +388,9 @@ private fun RoleRow(role: ReviewRole) {
     val dates = role.dates.label()
     val datesColor = if (role.dates is ReviewDates.EndMissing) colors.amber else colors.textMuted
     val details: @Composable () -> Unit = {
-        Text(text = role.title, style = TmrTheme.typography.strongLarge, color = colors.text)
+        TmrFitText(text = role.title, style = TmrTheme.typography.strongLarge, color = colors.text)
         if (role.organization.isNotBlank()) {
-            Text(text = role.organization, style = TmrTheme.typography.caption, color = colors.textMuted)
+            TmrFitText(text = role.organization, style = TmrTheme.typography.caption, color = colors.textMuted)
         }
     }
     val datesText: @Composable () -> Unit = {
@@ -451,7 +455,7 @@ private fun SkillChip(label: String, content: Color, fill: Color, border: Color)
             }
             .padding(horizontal = 11.dp, vertical = 6.dp),
     ) {
-        Text(text = label, style = TmrTheme.typography.caption, color = content)
+        TmrFitText(text = label, style = TmrTheme.typography.caption, color = content)
     }
 }
 
@@ -461,9 +465,9 @@ private fun EducationCard(education: List<ReviewEducation>) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             education.forEach {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(text = it.title, style = TmrTheme.typography.strongLarge, color = TmrTheme.colors.text)
+                    TmrFitText(text = it.title, style = TmrTheme.typography.strongLarge, color = TmrTheme.colors.text)
                     if (it.detail.isNotBlank()) {
-                        Text(text = it.detail, style = TmrTheme.typography.caption, color = TmrTheme.colors.textMuted)
+                        TmrFitText(text = it.detail, style = TmrTheme.typography.caption, color = TmrTheme.colors.textMuted)
                     }
                 }
             }

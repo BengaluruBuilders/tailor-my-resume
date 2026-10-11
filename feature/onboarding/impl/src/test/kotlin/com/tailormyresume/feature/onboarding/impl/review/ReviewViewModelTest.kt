@@ -125,6 +125,31 @@ class ReviewViewModelTest {
     }
 
     @Test
+    fun saveFailureEmitsSaveFailedAndContinueWorksAgain() = runTest {
+        store.sendProfile(fixedReviewProfile())
+        val failing = object : ProfileRepository by store {
+            var failNext = true
+
+            override suspend fun saveProfile(profile: CandidateProfile) {
+                if (failNext) {
+                    failNext = false
+                    error("disk full")
+                }
+                store.saveProfile(profile)
+            }
+        }
+        val viewModel = viewModel(failing)
+
+        viewModel.events.test {
+            viewModel.onContinue()
+            assertThat(awaitItem()).isEqualTo(ReviewEvent.SaveFailed)
+
+            viewModel.onContinue()
+            assertThat(awaitItem()).isEqualTo(ReviewEvent.Continue)
+        }
+    }
+
+    @Test
     fun doubleTapContinuesOnce() = runTest {
         store.sendProfile(fixedReviewProfile())
         val gate = CompletableDeferred<Unit>()

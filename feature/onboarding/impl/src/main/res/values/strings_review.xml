@@ -21,4 +21,5 @@
     <string name="feature_onboarding_impl_review_dates_end_missing">%1$s – end date?</string>
     <string name="feature_onboarding_impl_review_continue">Looks right, continue</string>
     <string name="feature_onboarding_impl_review_missing_end_date_toast">Add the missing end date first</string>
+    <string name="feature_onboarding_impl_review_save_failed_toast">Couldn\'t save. Try again.</string>
 </resources>
