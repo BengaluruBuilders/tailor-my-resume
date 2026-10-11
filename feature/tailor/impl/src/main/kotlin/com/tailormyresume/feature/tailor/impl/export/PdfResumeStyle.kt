@@ -5,14 +5,20 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.text.TextPaint
 
-internal class PdfResumeStyle {
+internal enum class FitPass(val bodySize: Float, val lineSpacing: Float) {
+    Regular(bodySize = 10.5f, lineSpacing = 1.12f),
+    Compact(bodySize = 9.5f, lineSpacing = 1.04f),
+}
+
+internal class PdfResumeStyle(pass: FitPass = FitPass.Regular) {
+    val lineSpacing: Float = pass.lineSpacing
     val name: TextPaint = textPaint(size = 22f, bold = true, color = INK)
     val headline: TextPaint = textPaint(size = 11f, bold = false, color = INK)
     val contact: TextPaint = textPaint(size = 10f, bold = false, color = MUTED)
     val sectionHeading: TextPaint = textPaint(size = 12.5f, bold = true, color = INK)
     val entryTitle: TextPaint = textPaint(size = 11f, bold = true, color = INK)
     val entryDetail: TextPaint = textPaint(size = 10f, bold = false, color = MUTED)
-    val body: TextPaint = textPaint(size = 10.5f, bold = false, color = INK)
+    val body: TextPaint = textPaint(size = pass.bodySize, bold = false, color = INK)
     val rule: Paint = Paint().apply {
         color = RULE
         strokeWidth = 0.8f
