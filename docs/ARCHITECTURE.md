@@ -304,7 +304,7 @@ navigate straight to a forced state without touching feature business logic.
 ### Debug developer menu
 
 The `debug` source set of `:app` holds the developer menu. Release builds cannot reach it.
-It adds a second launcher entry, "TailorMyResume dev" (`DebugScenarioActivity`). The menu can:
+Long-press the app launcher icon to open its "Dev console" shortcut (`DebugScenarioActivity`). The menu can:
 
 - load the sample data and reset the app data (`SampleDataController`);
 - switch the mock connectivity between online and offline;

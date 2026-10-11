@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="dev_console"
+        android:shortcutLongLabel="@string/debug_scenario_activity_label"
+        android:shortcutShortLabel="@string/debug_scenario_activity_label">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.tailormyresume.app.debug.DebugScenarioActivity"
+            android:targetPackage="com.tailormyresume.app" />
+    </shortcut>
+
+</shortcuts>

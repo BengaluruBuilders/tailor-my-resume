@@ -104,8 +104,8 @@ the TailorMyResume backend (Constitution I.5). The debug build below belongs to 
 
 ## Debug build
 
-The debug build installs a second launcher entry, "TailorMyResume dev". It loads sample data, resets the app,
-and switches the app offline. It also opens any screen in a forced state.
+The debug build adds a "Dev console" app shortcut. Long-press the TailorMyResume launcher icon to open it.
+It loads sample data, resets the app, and switches the app offline. It also opens any screen in a forced state.
 
 ## Continuous integration
 
