@@ -22,9 +22,11 @@ class SaveManualProfileUseCase @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val factIdAllocator: FactIdAllocator,
 ) {
-    suspend operator fun invoke(contact: ManualContact): CandidateProfile {
+    suspend operator fun invoke(contact: ManualContact, replacingEntryId: String? = null): CandidateProfile {
         val existing = profileRepository.observeProfile().first()
-        val kept = existing?.entries.orEmpty()
+        val all = existing?.entries.orEmpty()
+        val replaced = all.firstOrNull { it.id == replacingEntryId && it.isManualRole() }
+        val kept = all
         val title = contact.jobTitle.trim()
         val company = contact.company.trim()
         val added = if (title.isEmpty() && company.isEmpty()) {
@@ -32,7 +34,7 @@ class SaveManualProfileUseCase @Inject constructor(
         } else {
             listOf(
                 ProfileEntry(
-                    id = factIdAllocator.neverUsedId(EntryCategory.EXPERIENCE, kept, title),
+                    id = replaced?.id ?: factIdAllocator.neverUsedId(EntryCategory.EXPERIENCE, kept, title),
                     category = EntryCategory.EXPERIENCE,
                     title = title,
                     organization = company,
@@ -49,12 +51,15 @@ class SaveManualProfileUseCase @Inject constructor(
             email = contact.email.trim(),
             phone = contact.phone.trim(),
             city = contact.city.trim(),
-            entries = kept + added,
+            entries = if (replaced == null) kept + added else kept.flatMap { if (it.id == replaced.id) added else listOf(it) },
             reviewedAt = null,
         )
         profileRepository.saveProfile(saved)
         return saved
     }
+
+    private fun ProfileEntry.isManualRole(): Boolean =
+        category == EntryCategory.EXPERIENCE && source == FactSource.USER_STATED && bullets.isEmpty()
 
     private companion object {
         val EMPTY_PROFILE = CandidateProfile(

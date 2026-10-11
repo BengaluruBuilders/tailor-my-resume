@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.fact.FactIdAllocator
 import com.tailormyresume.core.domain.onboarding.SaveManualProfileUseCase
+import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.repository.TestProfileRepository
@@ -71,5 +72,22 @@ class ManualProfileViewModelTest {
         }
 
         assertThat(checkNotNull(profile.observeProfile().first()).entries).isEmpty()
+    }
+
+    @Test
+    fun continuingAgainAfterEditingTheRoleReplacesItInsteadOfAddingASecond() = runTest {
+        val viewModel = viewModel()
+        viewModel.onFieldChange(ManualField.JobTitle, "Busines Analyst")
+        viewModel.onFieldChange(ManualField.Company, "Infosys")
+        viewModel.events.test {
+            viewModel.onContinue()
+            assertThat(awaitItem()).isEqualTo(ManualProfileEvent.Saved)
+            viewModel.onFieldChange(ManualField.JobTitle, "Business Analyst")
+            viewModel.onContinue()
+            assertThat(awaitItem()).isEqualTo(ManualProfileEvent.Saved)
+        }
+
+        val roles = checkNotNull(profile.observeProfile().first()).entries.filter { it.category == EntryCategory.EXPERIENCE }
+        assertThat(roles.map { it.title }).containsExactly("Business Analyst")
     }
 }

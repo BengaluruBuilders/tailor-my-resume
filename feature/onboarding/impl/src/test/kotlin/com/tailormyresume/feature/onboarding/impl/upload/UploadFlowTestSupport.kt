@@ -28,6 +28,8 @@ internal val ImageOnlyFailure = UploadFailure(UploadFailureKind.ImageOnly, "Resu
 
 internal val NeutralFailure = UploadFailure(UploadFailureKind.Neutral, "Priya_Deshmukh_Resume.pdf", RESUME_PDF_MIME, 112L * 1024L)
 
+internal val UnseparatedNameFailure = UploadFailure(UploadFailureKind.Neutral, "PriyaDeshmukhResume2026.pdf", RESUME_PDF_MIME, 112L * 1024L)
+
 internal val SampleReadingFile = ReadingFileUi("Priya_Deshmukh_Resume.pdf", RESUME_PDF_MIME, 112L * 1024L, 0)
 
 internal fun readingStateAt(percent: Int): ReadingUiState {

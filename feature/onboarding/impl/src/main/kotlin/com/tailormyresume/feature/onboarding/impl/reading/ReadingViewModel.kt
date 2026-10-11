@@ -9,6 +9,8 @@ import com.tailormyresume.core.domain.onboarding.SaveImportedProfileUseCase
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.FactSource
+import com.tailormyresume.core.model.ProfileEntry
+import com.tailormyresume.core.model.continues
 import com.tailormyresume.feature.onboarding.impl.importresume.MAX_RESUME_CHARS
 import com.tailormyresume.feature.onboarding.impl.importresume.ResumeFile
 import com.tailormyresume.feature.onboarding.impl.importresume.ResumeImportDraft
@@ -146,13 +148,18 @@ internal class ReadingViewModel @Inject constructor(
     private fun doneRows(parsed: CandidateProfile): List<ReadingRowUi> = ReadingRowKind.entries.map { kind ->
         val count = when (kind) {
             ReadingRowKind.Contact -> listOf(parsed.fullName, parsed.email, parsed.phone).count { it.isNotBlank() }
-            ReadingRowKind.Experience -> parsed.entries.count { it.category == EntryCategory.EXPERIENCE }
-            ReadingRowKind.Education -> parsed.entries.count { it.category == EntryCategory.EDUCATION }
+            ReadingRowKind.Experience -> parsed.entries.countRoles(EntryCategory.EXPERIENCE)
+            ReadingRowKind.Education -> parsed.entries.countRoles(EntryCategory.EDUCATION)
             ReadingRowKind.Skills -> parsed.skills.size
-            ReadingRowKind.Achievements -> parsed.entries.count { it.category == EntryCategory.ACHIEVEMENT }
+            ReadingRowKind.Achievements -> parsed.entries.countRoles(EntryCategory.ACHIEVEMENT)
         }
         ReadingRowUi(kind = kind, state = ReadingRowState.Done, count = count)
     }
+
+    private fun List<ProfileEntry>.countRoles(category: EntryCategory): Int =
+        withIndex().count { (index, entry) ->
+            entry.category == category && (index == 0 || !entry.continues(this[index - 1]))
+        }
 
     private fun fileUi(source: ResumeSource): ReadingFileUi = when (source) {
         is ResumeSource.PickedFile -> ReadingFileUi(

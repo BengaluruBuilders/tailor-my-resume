@@ -36,7 +36,7 @@ internal enum class ManualProfileEvent { Saved }
 @HiltViewModel
 internal class ManualProfileViewModel @Inject constructor(
     sessionRepository: SessionRepository,
-    profileRepository: ProfileRepository,
+    private val profileRepository: ProfileRepository,
     private val saveManualProfile: SaveManualProfileUseCase,
 ) : ViewModel() {
 
@@ -45,6 +45,8 @@ internal class ManualProfileViewModel @Inject constructor(
     private val eventChannel = Channel<ManualProfileEvent>(Channel.BUFFERED)
 
     private val saving = AtomicBoolean(false)
+
+    private var savedRoleId: String? = null
 
     val uiState: StateFlow<ManualProfileUiState> = state.asStateFlow()
 
@@ -82,9 +84,12 @@ internal class ManualProfileViewModel @Inject constructor(
         val current = state.value
         viewModelScope.launch {
             try {
-                saveManualProfile(
+                val idsBefore = profileRepository.observeProfile().first()?.entries.orEmpty().map { it.id }.toSet()
+                val saved = saveManualProfile(
                     ManualContact(current.fullName, current.email, current.phone, current.city, current.jobTitle, current.company),
+                    savedRoleId,
                 )
+                savedRoleId = saved.entries.firstOrNull { it.id !in idsBefore }?.id ?: savedRoleId.takeIf { id -> saved.entries.any { it.id == id } }
                 eventChannel.trySend(ManualProfileEvent.Saved)
             } catch (cancellation: CancellationException) {
                 throw cancellation

@@ -151,6 +151,18 @@ class ReadingViewModelTest {
     }
 
     @Test
+    fun experienceCountSkipsEntriesThatContinueThePreviousOne() = runTest(UnconfinedTestDispatcher()) {
+        val first = entry("e1", EntryCategory.EXPERIENCE)
+        val parsed = parsedProfile().copy(entries = listOf(first, first.copy(id = "e1b")))
+        val draft = draftIn(backgroundScope)
+        draft.setFile(file)
+
+        val viewModel = viewModelIn(draft, FakeResumeTextSource(ResumeRead.Text(text)), FakeResumeTextParser(parsed))
+
+        assertThat(viewModel.uiState.value.rows.first { it.kind == ReadingRowKind.Experience }.count).isEqualTo(1)
+    }
+
+    @Test
     fun contactRowCountsZeroWhenOnlySkillsWereParsed() = runTest(UnconfinedTestDispatcher()) {
         val draft = draftIn(backgroundScope)
         draft.setFile(file)

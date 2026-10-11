@@ -48,6 +48,11 @@ class UploadNarrowScreenshotTest {
     }
 
     @Test
+    fun uploadErrorUnseparatedFileName() = capture("uploadError_longName") {
+        UnreadableScreen(failure = UnseparatedNameFailure, onChooseAnotherClick = {}, onPasteClick = {})
+    }
+
+    @Test
     fun pasteResume() = capture("pasteResume") {
         PasteResumeScreen(PasteResumeUiState(SAMPLE_RESUME_TEXT, canRead = true), onTextChange = {}, onReadClick = {})
     }

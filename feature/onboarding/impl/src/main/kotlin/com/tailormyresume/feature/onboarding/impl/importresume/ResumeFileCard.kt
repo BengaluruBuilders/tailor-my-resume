@@ -15,23 +15,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.text
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import com.tailormyresume.core.designsystem.component.content.TmrFitText
 import com.tailormyresume.core.designsystem.icon.TmrIcons
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 
-private const val ZERO_WIDTH_SPACE = '​'
 private const val AMBER_TILE_ALPHA = 0.12f
 private val NAME_SEPARATORS = charArrayOf('_', '.', '-', '/')
-
-private fun String.breakableAfterSeparators(): String = buildString {
-    for (character in this@breakableAfterSeparators) {
-        append(character)
-        if (character in NAME_SEPARATORS) append(ZERO_WIDTH_SPACE)
-    }
-}
 
 @Composable
 internal fun ResumeFileCard(
@@ -74,11 +64,11 @@ internal fun ResumeFileCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(3.dp),
                 ) {
-                    Text(
-                        text = name.breakableAfterSeparators(),
+                    TmrFitText(
+                        text = name,
                         style = TmrTheme.typography.strongLarge,
                         color = titleColor,
-                        modifier = Modifier.semantics { text = AnnotatedString(name) },
+                        breakAfter = NAME_SEPARATORS,
                     )
                     if (meta.isNotBlank()) {
                         Text(text = meta, style = TmrTheme.typography.caption, color = metaColor)
