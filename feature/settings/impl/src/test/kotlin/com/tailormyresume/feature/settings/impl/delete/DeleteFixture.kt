@@ -6,6 +6,8 @@ import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.account.DeleteAccountUseCase
 import com.tailormyresume.core.domain.account.ExportedFiles
 import com.tailormyresume.core.domain.account.ServerAccountDeleter
+import com.tailormyresume.core.model.CreditLedgerEntry
+import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.data.sampleApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
@@ -19,6 +21,7 @@ import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
+import kotlin.time.Instant
 
 internal class RecordingServerAccountDeleter(
     var failure: Throwable? = null,
@@ -42,7 +45,10 @@ internal class DeleteFixture(
     private val applications: Int = 3,
     private val credits: Int = 2,
     val deleter: RecordingServerAccountDeleter = RecordingServerAccountDeleter(),
-    private val payment: TestPaymentGateway = TestPaymentGateway().withFreeCredits(credits),
+    private val payment: TestPaymentGateway = TestPaymentGateway(),
+    val creditsRepository: TestCreditsRepository = TestCreditsRepository().apply {
+        sendLedger(listOf(CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, credits, null, null, Instant.fromEpochSeconds(1))))
+    },
 ) {
     val applicationRepository = TestApplicationRepository()
     val pendingWipe = TestPendingAccountWipe()
@@ -70,9 +76,9 @@ internal class DeleteFixture(
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
         serverAccountDeleter = deleter,
-        creditBalance = AccountCreditBalance(payment),
+        creditBalance = AccountCreditBalance(payment, creditsRepository),
         latency = NoMockLatency,
-        creditsRepository = TestCreditsRepository(),
+        creditsRepository = creditsRepository,
         resumeSettingsRepository = TestResumeSettingsRepository(),
         exportedFiles = ExportedFiles { exportedFilesCleared += 1 },
         pendingWipe = pendingWipe,

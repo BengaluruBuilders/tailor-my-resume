@@ -106,7 +106,7 @@ private fun ApplicationsHeaderRow(
 private val HEADER_GAP = 6.dp
 
 @Composable
-private fun CreditsPill(credits: Int, onCredits: () -> Unit) {
+private fun CreditsPill(credits: Int?, onCredits: () -> Unit) {
     Row(
         modifier = Modifier
             .clip(TmrTheme.shapes.pill)
@@ -117,7 +117,11 @@ private fun CreditsPill(credits: Int, onCredits: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = pluralStringResource(R.plurals.feature_applications_impl_credits, credits, credits),
+            text = if (credits == null) {
+                stringResource(R.string.feature_applications_impl_credits_unknown)
+            } else {
+                pluralStringResource(R.plurals.feature_applications_impl_credits, credits, credits)
+            },
             style = TmrTheme.typography.caption,
             color = TmrTheme.colors.text,
         )

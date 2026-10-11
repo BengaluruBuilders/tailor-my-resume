@@ -15,6 +15,7 @@
     <string name="feature_analysis_impl_result_tailor">Tailor my resume</string>
     <string name="feature_analysis_impl_result_note_credits">Uses 1 credit · you have %1$d</string>
     <string name="feature_analysis_impl_result_note_no_credits">No credits left · get more to continue</string>
+    <string name="feature_analysis_impl_result_note_unknown">Uses 1 credit</string>
     <string name="feature_analysis_impl_result_unavailable">This job is no longer available.</string>
     <string name="feature_analysis_impl_question_label">One quick question</string>
     <string name="feature_analysis_impl_question_yes_regularly">Yes, regularly</string>

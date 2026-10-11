@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.model.CreditLedgerEntry
+import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.FileNameFormat
 import com.tailormyresume.core.model.PageSize
 import com.tailormyresume.core.navigation.PendingToast
@@ -20,8 +22,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Instant
 
 class SettingsViewModelTest {
+
+    private fun spendOne() = CreditLedgerEntry(CreditLedgerKind.SPEND, -1, "application-1", null, Instant.fromEpochSeconds(2))
 
     @get:Rule
     val mainDispatcher = MainDispatcherRule()
@@ -97,7 +102,7 @@ class SettingsViewModelTest {
             assertThat(content.productUpdates).isTrue()
             assertThat(content.credits).isEqualTo(5)
 
-            fixture.payment.unlock("application-1")
+            fixture.credits.record(spendOne())
 
             assertThat(awaitContent().credits).isEqualTo(4)
         }
@@ -106,8 +111,8 @@ class SettingsViewModelTest {
     @Test
     fun settingsAndTheDeleteSheetShowTheSameCreditsForOneBalance() = runTest {
         val fixture = SettingsFixture()
-        fixture.payment.unlock("application-1")
-        val deleteSheet = DeleteFixture(payment = fixture.payment).seed().viewModel()
+        fixture.credits.record(spendOne())
+        val deleteSheet = DeleteFixture(creditsRepository = fixture.credits).seed().viewModel()
 
         val settingsCredits = fixture.viewModel().uiState.first { it is SettingsUiState.Content }
         val sheetCredits = deleteSheet.uiState.first { it is DeleteAccountUiState.Content }

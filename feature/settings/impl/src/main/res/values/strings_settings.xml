@@ -11,6 +11,8 @@
         <item quantity="one">%1$d left</item>
         <item quantity="other">%1$d left</item>
     </plurals>
+    <string name="feature_settings_impl_credits_unknown">—</string>
+    <string name="feature_settings_impl_delete_credits_unknown">any unused credits</string>
     <string name="feature_settings_impl_page_size">Page size</string>
     <string name="feature_settings_impl_page_a4" translatable="false">A4</string>
     <string name="feature_settings_impl_page_letter">Letter</string>

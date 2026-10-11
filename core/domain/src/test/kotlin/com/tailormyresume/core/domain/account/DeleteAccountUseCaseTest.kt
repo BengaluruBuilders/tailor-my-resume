@@ -16,6 +16,8 @@ import com.tailormyresume.core.domain.offline.OfflineServerAccountDeleter
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.CreditKind
+import com.tailormyresume.core.model.CreditLedgerEntry
+import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.ExportFormat
 import com.tailormyresume.core.model.ExportRecord
 import com.tailormyresume.core.model.JobApplication
@@ -33,8 +35,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -124,7 +126,7 @@ class DeleteAccountUseCaseTest {
             serverAccountDeleter = OfflineServerAccountDeleter(),
             applicationRepository = RecordingApplicationRepository(applications, calls, { failingApplicationIds }),
             profileRepository = RecordingProfileRepository(profile, calls, { failingProfileClear }),
-            creditBalance = AccountCreditBalance(paymentGateway = payment),
+            creditBalance = AccountCreditBalance(payment, TestCreditsRepository()),
             latency = NoMockLatency,
             creditsRepository = TestCreditsRepository(),
             resumeSettingsRepository = TestResumeSettingsRepository(),
@@ -262,16 +264,12 @@ class DeleteAccountUseCaseTest {
     }
 
     @Test
-    fun anUnreachableWalletFallsBackToTheCachedCreditsInsteadOfCrashing() = runTest {
-        val gateway = object : PaymentGateway by gatewayWith(credits = 4) {
-            override suspend fun entitlement(): PurchaseEntitlement = throw java.io.IOException("offline")
+    fun anUnknownBalanceIsReportedAsUnknownInsteadOfCrashing() = runTest {
+        val credits = TestCreditsRepository().apply { sendUnknown() }
 
-            override fun observeEntitlement(): Flow<PurchaseEntitlement> = flowOf(PurchaseEntitlement(0, 3, emptyList()))
-        }
+        val counts = useCase(gateway = gatewayWith(credits = 4), credits = credits).preview()
 
-        val counts = useCase(gateway = gateway).preview()
-
-        assertThat(counts.unusedCredits).isEqualTo(3)
+        assertThat(counts.unusedCredits).isNull()
     }
 
     @Test
@@ -343,7 +341,11 @@ class DeleteAccountUseCaseTest {
         creditKind = CreditKind.FREE,
     )
 
-    private fun useCase(gateway: PaymentGateway, latency: MockLatency = NoMockLatency): DeleteAccountUseCase = DeleteAccountUseCase(
+    private fun useCase(
+        gateway: PaymentGateway,
+        latency: MockLatency = NoMockLatency,
+        credits: TestCreditsRepository = creditsOf(gateway),
+    ): DeleteAccountUseCase = DeleteAccountUseCase(
         exportHistoryRepository = exportHistory,
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
@@ -358,11 +360,15 @@ class DeleteAccountUseCaseTest {
             calls = calls,
             shouldFailOnClear = { failingProfileClear },
         ),
-        creditBalance = AccountCreditBalance(paymentGateway = gateway),
+        creditBalance = AccountCreditBalance(gateway, credits),
         latency = latency,
-        creditsRepository = TestCreditsRepository(),
+        creditsRepository = credits,
         resumeSettingsRepository = TestResumeSettingsRepository(),
     )
+
+    private fun creditsOf(gateway: PaymentGateway) = TestCreditsRepository().apply {
+        sendLedger(listOf(CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, runBlocking { gateway.entitlement().totalCredits }, null, null, kotlin.time.Instant.fromEpochSeconds(1))))
+    }
 
     private fun fourApplications(): List<JobApplication> = listOf("1", "2", "3", "4").map { index ->
         sampleApplication.copy(id = "application-$index", status = ApplicationStatus.SAVED)

@@ -5,6 +5,7 @@
         <item quantity="one">%d credit</item>
         <item quantity="other">%d credits</item>
     </plurals>
+    <string name="feature_applications_impl_credits_unknown">—</string>
     <string name="feature_applications_impl_profile">Profile</string>
     <string name="feature_applications_impl_empty_title">No applications yet</string>
     <string name="feature_applications_impl_empty_body">Tailor your resume for a job and it shows up here.</string>

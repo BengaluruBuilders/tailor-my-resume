@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.CreditsRepository
+import com.tailormyresume.core.data.repository.balanceAfterRefreshIfUnknown
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
@@ -87,8 +88,9 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
 
     fun onRetailor() {
         viewModelScope.launch {
+            val credits = creditsRepository.balanceAfterRefreshIfUnknown()
             val event = when {
-                creditsRepository.observeBalance().first() <= 0 -> ApplicationDetailEvent.OpenPaywall(applicationId)
+                credits != null && credits <= 0 -> ApplicationDetailEvent.OpenPaywall(applicationId)
                 hasQuestion() -> ApplicationDetailEvent.OpenQuickQuestion(applicationId)
                 else -> ApplicationDetailEvent.StartTailoring(applicationId)
             }

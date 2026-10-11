@@ -39,6 +39,7 @@ internal const val CREDITS_LIST_TAG = "credits-list"
 private val CardRadius = 20.dp
 private val RowMinHeight = 68.dp
 private val BalanceGap = 16.dp
+private const val UNKNOWN_CREDITS_PLURAL = 2
 
 @Composable
 internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifier: Modifier = Modifier) {
@@ -81,7 +82,7 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
 }
 
 @Composable
-private fun BalanceCard(credits: Int, onBuyMore: () -> Unit, modifier: Modifier = Modifier) {
+private fun BalanceCard(credits: Int?, onBuyMore: () -> Unit, modifier: Modifier = Modifier) {
     TmrCard(modifier = modifier) {
         BalanceHero(credits = credits)
         TmrPrimaryButton(
@@ -93,22 +94,23 @@ private fun BalanceCard(credits: Int, onBuyMore: () -> Unit, modifier: Modifier 
 }
 
 @Composable
-private fun BalanceHero(credits: Int) {
+private fun BalanceHero(credits: Int?) {
     val colors = TmrTheme.colors
     val numberStyle = TmrTheme.typography.displayLarge
     val captionStyle = TmrTheme.typography.body
-    val caption = pluralStringResource(R.plurals.feature_settings_impl_credits_caption, credits)
+    val caption = pluralStringResource(R.plurals.feature_settings_impl_credits_caption, credits ?: UNKNOWN_CREDITS_PLURAL)
+    val shownCredits = credits?.toString() ?: stringResource(R.string.feature_settings_impl_credits_unknown)
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val gapPx = with(density) { BalanceGap.roundToPx() }
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val sideBySide = remember(credits, caption, numberStyle, captionStyle, constraints.maxWidth, gapPx, density) {
-            val numberWidth = measurer.measure(credits.toString(), numberStyle).size.width
+        val sideBySide = remember(shownCredits, caption, numberStyle, captionStyle, constraints.maxWidth, gapPx, density) {
+            val numberWidth = measurer.measure(shownCredits, numberStyle).size.width
             val longestWord = caption.split(' ').maxOf { measurer.measure(it, captionStyle).size.width }
             numberWidth + gapPx + longestWord <= constraints.maxWidth
         }
         val number: @Composable () -> Unit = {
-            Text(text = credits.toString(), style = numberStyle, color = colors.lime)
+            Text(text = shownCredits, style = numberStyle, color = colors.lime)
         }
         val captionText: @Composable (Modifier) -> Unit = { captionModifier ->
             Text(text = caption, style = captionStyle, color = colors.textSecondary, modifier = captionModifier)

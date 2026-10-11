@@ -52,7 +52,7 @@ class DeleteAccountEarlierAttemptTest {
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
         serverAccountDeleter = deleter,
-        creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(2)),
+        creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(2), TestCreditsRepository()),
         latency = NoMockLatency,
         creditsRepository = TestCreditsRepository(),
         resumeSettingsRepository = TestResumeSettingsRepository(),

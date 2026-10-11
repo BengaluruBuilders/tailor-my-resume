@@ -9,6 +9,8 @@ import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.offline.OfflineServerAccountDeleter
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.CreditLedgerEntry
+import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
@@ -18,9 +20,9 @@ import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.time.Instant
 
 class DeleteAccountUseCasePreviewTest {
 
@@ -30,9 +32,9 @@ class DeleteAccountUseCasePreviewTest {
     private val exportHistory = TestExportHistoryRepository()
 
     @Test
-    fun previewUsesCachedCredits() = runTest {
+    fun previewReadsTheCreditsRepositoryWithoutCallingTheWallet() = runTest {
         var entitlementCalls = 0
-        val delegate = TestPaymentGateway().withFreeCredits(4)
+        val delegate = TestPaymentGateway().withFreeCredits(9)
         val gateway = object : PaymentGateway by delegate {
             override suspend fun entitlement(): PurchaseEntitlement {
                 entitlementCalls++
@@ -40,44 +42,46 @@ class DeleteAccountUseCasePreviewTest {
             }
         }
 
-        val counts = useCase(gateway).preview()
+        val counts = useCase(gateway, creditsOf(4)).preview()
 
         assertThat(counts.unusedCredits).isEqualTo(4)
         assertThat(entitlementCalls).isEqualTo(0)
     }
 
     @Test
-    fun refreshedPreviewUsesTheFreshEntitlement() = runTest {
-        val gateway = TestPaymentGateway().withFreeCredits(4)
+    fun refreshedPreviewRefreshesAnUnknownBalanceFirst() = runTest {
+        val credits = TestCreditsRepository().apply {
+            sendUnknown()
+            revealOnRefresh(ledgerOf(4))
+        }
 
-        val counts = useCase(gateway).refreshedPreview()
+        val counts = useCase(TestPaymentGateway(), credits).refreshedPreview()
 
         assertThat(counts.unusedCredits).isEqualTo(4)
     }
 
     @Test
-    fun refreshedPreviewFallsBackToTheCachedCreditsWhenTheWalletFails() = runTest {
-        val gateway = object : PaymentGateway by TestPaymentGateway().withFreeCredits(4) {
-            override suspend fun entitlement(): PurchaseEntitlement = throw java.io.IOException("offline")
-
-            override fun observeEntitlement(): Flow<PurchaseEntitlement> = flowOf(PurchaseEntitlement(0, 3, emptyList()))
-        }
-
-        val counts = useCase(gateway).refreshedPreview()
+    fun refreshedPreviewKeepsTheKnownBalanceWhenNothingChanges() = runTest {
+        val counts = useCase(TestPaymentGateway(), creditsOf(3)).refreshedPreview()
 
         assertThat(counts.unusedCredits).isEqualTo(3)
     }
 
-    private fun useCase(gateway: PaymentGateway): DeleteAccountUseCase = DeleteAccountUseCase(
+    private fun ledgerOf(amount: Int) =
+        listOf(CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, amount, null, null, Instant.fromEpochSeconds(1)))
+
+    private fun creditsOf(amount: Int) = TestCreditsRepository().apply { sendLedger(ledgerOf(amount)) }
+
+    private fun useCase(gateway: PaymentGateway, credits: TestCreditsRepository): DeleteAccountUseCase = DeleteAccountUseCase(
         exportHistoryRepository = exportHistory,
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
         serverAccountDeleter = OfflineServerAccountDeleter(),
         applicationRepository = EmptyApplicationRepository(applications),
         profileRepository = EmptyProfileRepository(profile),
-        creditBalance = AccountCreditBalance(paymentGateway = gateway),
+        creditBalance = AccountCreditBalance(gateway, credits),
         latency = NoMockLatency,
-        creditsRepository = TestCreditsRepository(),
+        creditsRepository = credits,
         resumeSettingsRepository = TestResumeSettingsRepository(),
     )
 }

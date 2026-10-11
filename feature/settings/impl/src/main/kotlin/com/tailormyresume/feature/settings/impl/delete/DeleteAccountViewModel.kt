@@ -27,7 +27,7 @@ internal sealed interface DeleteAccountUiState {
 
     data class Content(
         val applications: Int,
-        val unusedCredits: Int,
+        val unusedCredits: Int?,
         val typed: String,
         val canDelete: Boolean,
         val deleting: Boolean,
@@ -50,7 +50,11 @@ internal class DeleteAccountViewModel @Inject constructor(
     private val eventChannel = Channel<DeleteAccountEvent>(Channel.BUFFERED)
 
     val uiState: StateFlow<DeleteAccountUiState> = combine(
-        flow { emit(deleteAccount.preview()) },
+        flow {
+            val cached = deleteAccount.preview()
+            emit(cached)
+            if (cached.unusedCredits == null) emit(deleteAccount.refreshedPreview())
+        },
         typed,
         deleting,
     ) { counts, text, inFlight ->

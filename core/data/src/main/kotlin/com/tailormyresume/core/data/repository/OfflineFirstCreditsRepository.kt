@@ -35,16 +35,18 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
     @Volatile
     private var refreshCancelled = false
 
-    private fun remoteSnapshots(): Flow<CreditSnapshot> =
-        held.map { current -> current?.takeIf { it.owner == remote.owner() }?.snapshot ?: NO_SNAPSHOT }
+    private fun remoteSnapshots(): Flow<CreditSnapshot?> =
+        held.map { current -> current?.takeIf { it.owner == remote.owner() }?.snapshot }
             .onStart { if (refreshCancelled) refresh() }
 
-    override fun observeBalance(): Flow<Int> =
-        if (remote.ownsLedger) remoteSnapshots().map { it.balance } else creditLedgerDao.observeBalance().flowOn(ioDispatcher)
+    override fun observeBalance(): Flow<Int> = observeKnownBalance().map { it ?: 0 }
+
+    override fun observeKnownBalance(): Flow<Int?> =
+        if (remote.ownsLedger) remoteSnapshots().map { it?.balance } else creditLedgerDao.observeBalance().flowOn(ioDispatcher)
 
     override fun observeLedger(): Flow<List<CreditLedgerEntry>> =
         if (remote.ownsLedger) {
-            remoteSnapshots().map { it.entries }
+            remoteSnapshots().map { it?.entries.orEmpty() }
         } else {
             creditLedgerDao.observeLedger()
                 .map { entities -> entities.map(CreditLedgerEntity::asExternalModel) }
@@ -93,10 +95,6 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
     }
 
     override suspend fun removeForApplication(applicationId: String) = creditLedgerDao.deleteForApplication(applicationId)
-
-    private companion object {
-        val NO_SNAPSHOT = CreditSnapshot(balance = 0, entries = emptyList())
-    }
 }
 
 private fun CreditLedgerEntry.asEntity() = CreditLedgerEntity(

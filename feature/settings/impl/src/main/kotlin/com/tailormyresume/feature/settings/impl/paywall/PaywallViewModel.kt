@@ -41,7 +41,7 @@ internal class PaywallViewModel @Inject constructor(
     val events: Flow<PaywallEvent> = eventChannel.receiveAsFlow()
 
     val uiState: StateFlow<PaywallUiState> = combine(
-        creditsRepository.observeBalance(),
+        creditsRepository.observeKnownBalance(),
         packs,
         chosenPackId,
         busy,

@@ -95,11 +95,12 @@ internal fun PaywallScreen(state: PaywallUiState, actions: PaywallActions, modif
 }
 
 @Composable
-private fun PaywallHero(credits: Int) {
+private fun PaywallHero(credits: Int?) {
     val showArt = LocalDensity.current.fontScale <= ART_MAX_FONT_SCALE
     TmrHeroCard(
         color = TmrHeroColor.Amber,
-        label = pluralStringResource(R.plurals.feature_settings_impl_paywall_credits_left, credits, credits),
+        label = credits?.let { pluralStringResource(R.plurals.feature_settings_impl_paywall_credits_left, it, it) }
+            ?: stringResource(R.string.feature_settings_impl_paywall_credits_unknown),
         headline = stringResource(R.string.feature_settings_impl_paywall_headline),
         modifier = Modifier.fillMaxWidth().heightIn(min = HeroMinHeight),
     ) {

@@ -36,7 +36,7 @@ class DeleteAccountArtefactRestoreTest {
         sessionRepository = TestSessionRepository(),
         signInGateway = TestSignInGateway(TestSessionRepository()),
         serverAccountDeleter = OfflineServerAccountDeleter(),
-        creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(2)),
+        creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(2), TestCreditsRepository()),
         latency = NoMockLatency,
         creditsRepository = TestCreditsRepository(),
         resumeSettingsRepository = TestResumeSettingsRepository(),

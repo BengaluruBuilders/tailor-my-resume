@@ -20,7 +20,7 @@ internal class CreditsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<CreditsUiState> = combine(
-        creditsRepository.observeBalance(),
+        creditsRepository.observeKnownBalance(),
         creditsRepository.observeLedger(),
         applicationRepository.observeApplications(),
     ) { credits, entries, applications ->

@@ -46,7 +46,7 @@ class DeleteAccountUseCase @Inject constructor(
 
     suspend fun refreshedPreview(): AccountDeletionCounts = previewWith(creditBalance.unusedCredits())
 
-    private suspend fun previewWith(credits: Int): AccountDeletionCounts {
+    private suspend fun previewWith(credits: Int?): AccountDeletionCounts {
         val applications = applicationRepository.observeApplications().first()
         val profile = profileRepository.observeProfile().first()
         return countsOf(applications, profile, credits)
@@ -167,7 +167,7 @@ class DeleteAccountUseCase @Inject constructor(
     private suspend fun countsOf(
         applications: List<JobApplication>,
         profile: CandidateProfile?,
-        credits: Int,
+        credits: Int?,
     ) = AccountDeletionCounts(
         profileFacts = profile?.factCounts()?.total ?: 0,
         applications = applications.size,

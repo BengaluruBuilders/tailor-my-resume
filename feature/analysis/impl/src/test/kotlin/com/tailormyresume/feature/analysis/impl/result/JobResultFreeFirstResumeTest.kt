@@ -50,7 +50,7 @@ class JobResultFreeFirstResumeTest {
     }
 
     @Test
-    fun aNewUserWithTheWelcomeGrantSeesOneCreditAndTailorsWithoutThePaywall() = runBlocking {
+    fun aNewUserWithTheWelcomeGrantSeesOneCreditAndTailorsWithoutThePaywall() = runBlocking<Unit> {
         credits.sendLedger(listOf(welcomeGrant()))
         val viewModel = viewModel()
         val state = readyState(viewModel)
@@ -67,7 +67,7 @@ class JobResultFreeFirstResumeTest {
     }
 
     @Test
-    fun anUnknownBalanceNeverSaysNoCreditsLeft() = runBlocking {
+    fun anUnknownBalanceNeverSaysNoCreditsLeft() = runBlocking<Unit> {
         credits.sendUnknown()
         val state = readyState(viewModel())
 
@@ -79,7 +79,7 @@ class JobResultFreeFirstResumeTest {
     }
 
     @Test
-    fun tailorOnAnUnknownBalanceRefreshesFirstAndAPayingUserSkipsThePaywall() = runBlocking {
+    fun tailorOnAnUnknownBalanceRefreshesFirstAndAPayingUserSkipsThePaywall() = runBlocking<Unit> {
         credits.sendUnknown()
         credits.revealOnRefresh(listOf(welcomeGrant().copy(amount = 4)))
         val viewModel = viewModel()
@@ -93,7 +93,7 @@ class JobResultFreeFirstResumeTest {
     }
 
     @Test
-    fun aRefreshThatShowsZeroOpensThePaywall() = runBlocking {
+    fun aRefreshThatShowsZeroOpensThePaywall() = runBlocking<Unit> {
         credits.sendUnknown()
         credits.revealOnRefresh(emptyList())
         val viewModel = viewModel()
@@ -106,7 +106,7 @@ class JobResultFreeFirstResumeTest {
     }
 
     @Test
-    fun aBalanceThatStaysUnknownNeverOpensThePaywall() = runBlocking {
+    fun aBalanceThatStaysUnknownNeverOpensThePaywall() = runBlocking<Unit> {
         credits.sendUnknown()
         val viewModel = viewModel()
         readyState(viewModel)

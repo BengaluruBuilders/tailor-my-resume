@@ -65,7 +65,7 @@ class DeleteAccountPendingWipeTest {
             sessionRepository = session,
             signInGateway = failingSignIn,
             serverAccountDeleter = deleter,
-            creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(2)),
+            creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(2), TestCreditsRepository()),
             latency = NoMockLatency,
             creditsRepository = TestCreditsRepository(),
             resumeSettingsRepository = TestResumeSettingsRepository(),

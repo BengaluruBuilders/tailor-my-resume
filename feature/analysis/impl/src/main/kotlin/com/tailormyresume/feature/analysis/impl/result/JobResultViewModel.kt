@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.CreditsRepository
+import com.tailormyresume.core.data.repository.balanceAfterRefreshIfUnknown
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.domain.coverage.ScreenForKeywords
 import com.tailormyresume.core.model.JobApplication
@@ -35,7 +36,7 @@ internal class JobResultViewModel @AssistedInject constructor(
 
     val uiState: StateFlow<JobResultUiState> = combine(
         applicationRepository.observeApplication(applicationId),
-        creditsRepository.observeBalance(),
+        creditsRepository.observeKnownBalance(),
     ) { application, credits ->
         toUiState(application, credits)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), JobResultUiState.Loading)
@@ -46,12 +47,15 @@ internal class JobResultViewModel @AssistedInject constructor(
         val state = uiState.value
         if (state !is JobResultUiState.Ready || tailorTapped) return
         tailorTapped = true
-        val event = when {
-            state.credits <= 0 -> JobResultEvent.Paywall(applicationId)
-            state.asksQuestion -> JobResultEvent.QuickQuestion(applicationId)
-            else -> JobResultEvent.Tailor(applicationId)
+        viewModelScope.launch {
+            val credits = state.credits ?: creditsRepository.balanceAfterRefreshIfUnknown()
+            val event = when {
+                credits != null && credits <= 0 -> JobResultEvent.Paywall(applicationId)
+                state.asksQuestion -> JobResultEvent.QuickQuestion(applicationId)
+                else -> JobResultEvent.Tailor(applicationId)
+            }
+            eventChannel.send(event)
         }
-        viewModelScope.launch { eventChannel.send(event) }
     }
 
     fun onShown() {
@@ -64,7 +68,7 @@ internal class JobResultViewModel @AssistedInject constructor(
     }
 }
 
-private fun toUiState(application: JobApplication?, credits: Int): JobResultUiState {
+private fun toUiState(application: JobApplication?, credits: Int?): JobResultUiState {
     val gap = application?.gapAnalysis ?: return JobResultUiState.Unavailable
     val coverage = KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, null)
     val screen = ScreenForKeywords(gap.matches)

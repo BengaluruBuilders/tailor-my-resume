@@ -254,10 +254,11 @@ private fun MarkerGlyph(glyph: String) {
 
 @Composable
 private fun JobResultBottom(state: JobResultUiState.Ready, onTailor: () -> Unit) {
-    val note = if (state.credits > 0) {
-        stringResource(R.string.feature_analysis_impl_result_note_credits, state.credits)
-    } else {
-        stringResource(R.string.feature_analysis_impl_result_note_no_credits)
+    val credits = state.credits
+    val note = when {
+        credits == null -> stringResource(R.string.feature_analysis_impl_result_note_unknown)
+        credits > 0 -> stringResource(R.string.feature_analysis_impl_result_note_credits, credits)
+        else -> stringResource(R.string.feature_analysis_impl_result_note_no_credits)
     }
     TmrBottomActionBar(
         creditDisclosure = {

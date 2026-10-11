@@ -7,6 +7,8 @@ import com.tailormyresume.core.domain.account.AccountDataArchive
 import com.tailormyresume.core.domain.account.AccountDataExporter
 import com.tailormyresume.core.domain.account.CollectAccountDataUseCase
 import com.tailormyresume.core.domain.account.ExportAccountDataUseCase
+import com.tailormyresume.core.model.CreditLedgerEntry
+import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.account.TestAccountDataExporter
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
@@ -20,12 +22,16 @@ import com.tailormyresume.core.testing.repository.TestSessionRepository
 import com.tailormyresume.core.testing.util.TestClock
 import kotlinx.coroutines.CompletableDeferred
 import java.io.File
+import kotlin.time.Instant
 
 internal val settingsTestAccount = SignInAccount(
     id = "account-1",
     displayName = "Priya Deshmukh",
     email = "priya.deshmukh@gmail.com",
 )
+
+internal fun welcomeGrant(amount: Int) =
+    CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, amount, null, null, Instant.fromEpochSeconds(1))
 
 internal class GatedExporter : AccountDataExporter {
     val gate = CompletableDeferred<Unit>()
@@ -68,14 +74,14 @@ internal class SettingsFixture(
     gate: CompletableDeferred<Unit>? = null,
 ) {
     val session = TestSessionRepository()
-    val credits = TestCreditsRepository()
+    val credits = TestCreditsRepository().apply { sendLedger(listOf(welcomeGrant(5))) }
     val payment = TestPaymentGateway().withFreeCredits(5)
     val settings = TestResumeSettingsRepository()
     val signIn = CountingSignInGateway(TestSignInGateway(session), gate)
 
     fun viewModel(): SettingsViewModel = SettingsViewModel(
         sessionRepository = session,
-        creditBalance = AccountCreditBalance(payment),
+        creditBalance = AccountCreditBalance(payment, credits),
         resumeSettingsRepository = settings,
         exportAccountData = ExportAccountDataUseCase(
             collectAccountData = CollectAccountDataUseCase(

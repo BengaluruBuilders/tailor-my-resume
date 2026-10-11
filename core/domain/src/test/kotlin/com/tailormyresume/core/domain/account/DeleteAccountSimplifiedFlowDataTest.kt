@@ -45,7 +45,7 @@ class DeleteAccountSimplifiedFlowDataTest {
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
         serverAccountDeleter = deleter,
-        creditBalance = AccountCreditBalance(TestPaymentGateway()),
+        creditBalance = AccountCreditBalance(TestPaymentGateway(), credits),
         latency = NoMockLatency,
         creditsRepository = credits,
         resumeSettingsRepository = settings,

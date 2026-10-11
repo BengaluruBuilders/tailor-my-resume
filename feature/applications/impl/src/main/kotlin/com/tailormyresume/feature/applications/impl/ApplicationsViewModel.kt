@@ -23,7 +23,7 @@ internal class ApplicationsViewModel @Inject constructor(
 
     val state: StateFlow<ApplicationsUiState> = combine(
         applicationRepository.observeApplications(),
-        creditsRepository.observeBalance(),
+        creditsRepository.observeKnownBalance(),
         profileRepository.observeProfile(),
         ::stateFor,
     ).stateIn(
@@ -34,10 +34,10 @@ internal class ApplicationsViewModel @Inject constructor(
 
     private fun stateFor(
         applications: List<JobApplication>,
-        credits: Int,
+        credits: Int?,
         profile: CandidateProfile?,
     ): ApplicationsUiState {
-        val header = ApplicationsHeader(credits = credits.coerceAtLeast(0), initials = initialsOf(profile?.fullName.orEmpty()))
+        val header = ApplicationsHeader(credits = credits?.coerceAtLeast(0), initials = initialsOf(profile?.fullName.orEmpty()))
         if (applications.isEmpty()) return ApplicationsUiState.Empty(header)
         val rows = applications.sortedByDescending { it.updatedAt }.map(::rowFor)
         return ApplicationsUiState.Populated(

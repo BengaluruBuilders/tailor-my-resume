@@ -29,7 +29,7 @@ class DeleteAccountExportedFilesTest {
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
         serverAccountDeleter = serverAccountDeleter,
-        creditBalance = AccountCreditBalance(paymentGateway = TestPaymentGateway()),
+        creditBalance = AccountCreditBalance(TestPaymentGateway(), TestCreditsRepository()),
         latency = NoMockLatency,
         creditsRepository = TestCreditsRepository(),
         resumeSettingsRepository = TestResumeSettingsRepository(),

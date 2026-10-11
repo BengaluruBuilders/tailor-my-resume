@@ -10,9 +10,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.domain.account.AccountCreditBalance
+import com.tailormyresume.core.domain.account.CollectAccountDataUseCase
 import com.tailormyresume.core.domain.account.DeleteAccountUseCase
 import com.tailormyresume.core.domain.account.ExportAccountDataUseCase
-import com.tailormyresume.core.domain.account.CollectAccountDataUseCase
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.screenshot.TmrTestDevices
@@ -34,9 +34,9 @@ import com.tailormyresume.feature.settings.impl.credits.CreditsViewModel
 import com.tailormyresume.feature.settings.impl.delete.DeleteAccountSheetContent
 import com.tailormyresume.feature.settings.impl.delete.DeleteAccountUiState
 import com.tailormyresume.feature.settings.impl.delete.DeleteAccountViewModel
+import com.tailormyresume.feature.settings.impl.delete.RecordingServerAccountDeleter
 import com.tailormyresume.feature.settings.impl.paywall.PaywallActions
 import com.tailormyresume.feature.settings.impl.paywall.PaywallScreen
-import com.tailormyresume.feature.settings.impl.paywall.PaywallUiState
 import com.tailormyresume.feature.settings.impl.paywall.PaywallViewModel
 import com.tailormyresume.feature.settings.impl.setTmrContent
 import com.tailormyresume.feature.settings.impl.settings.SettingsActions
@@ -99,7 +99,7 @@ class OneBalanceAcrossScreensTest {
             exportHistoryRepository = TestExportHistoryRepository(),
             sessionRepository = session,
             signInGateway = TestSignInGateway(session),
-            serverAccountDeleter = com.tailormyresume.feature.settings.impl.delete.RecordingServerAccountDeleter(),
+            serverAccountDeleter = RecordingServerAccountDeleter(),
             creditBalance = AccountCreditBalance(staleGateway, credits),
             latency = NoMockLatency,
             creditsRepository = credits,
@@ -122,7 +122,9 @@ class OneBalanceAcrossScreensTest {
         runBlocking { applications.upsertApplication(sampleApplication.copy(id = "one")) }
         val settingsState = stateOf<SettingsUiState.Content> { settingsViewModel().uiState }
         val creditsState = stateOf<CreditsUiState.Content> { CreditsViewModel(credits, applications).uiState }
-        val paywallState = stateOf<PaywallUiState> { PaywallViewModel(staleGateway, credits, TestClock()).uiState }
+        val paywallState = runBlocking {
+            PaywallViewModel(staleGateway, credits, TestClock()).uiState.first { it.credits != null }
+        }
         val deleteState = stateOf<DeleteAccountUiState.Content> { deleteViewModel().uiState }
         var shown by mutableIntStateOf(0)
         rule.setTmrContent(TmrTestDevices.prototype) {
@@ -138,7 +140,7 @@ class OneBalanceAcrossScreensTest {
         shown = 1
         rule.onAllNodesWithText("13").assertCountAtLeast(1)
         shown = 2
-        rule.onNodeWithText("13 credits left").assertExists()
+        rule.onNodeWithText("13 credits left", ignoreCase = true).assertExists()
         shown = 3
         rule.onNodeWithText("13 unused credits", substring = true).assertExists()
 
