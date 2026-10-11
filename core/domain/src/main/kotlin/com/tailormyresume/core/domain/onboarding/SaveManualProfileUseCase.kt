@@ -59,7 +59,8 @@ class SaveManualProfileUseCase @Inject constructor(
     }
 
     private fun ProfileEntry.isManualRole(): Boolean =
-        category == EntryCategory.EXPERIENCE && source == FactSource.USER_STATED && bullets.isEmpty()
+        category == EntryCategory.EXPERIENCE && source == FactSource.USER_STATED && bullets.isEmpty() &&
+            startDate.isBlank() && endDate.isBlank()
 
     private companion object {
         val EMPTY_PROFILE = CandidateProfile(
