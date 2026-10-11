@@ -1,0 +1,34 @@
+{
+  "brand": "TailorMyResume",
+  "tagline": "Your real story, fitted to the job",
+  "brief": "An Android app that turns a candidate's confirmed background and a job description into a tailored application, without inventing anything. Job seekers apply to many roles on their phone; the app should feel honest, friendly and quick, not like another grey document tool.",
+  "adjectives": ["honest", "made-to-measure", "friendly", "quick", "confident"],
+  "criteria": "Success: reads at 16 px, works in one colour, matches the in-app mascot Paige, stands apart from blue document-and-checkmark resume tools.",
+  "industry": "consumer-app",
+  "nav": ["How it works", "Pricing", "Get the app"],
+  "brand_color": "#A3F43F",
+  "tile_color": "#A3F43F",
+  "greyscale": false,
+  "final": true,
+  "designer": "TailorMyResume",
+  "concepts": [
+    {
+      "name": "Paige",
+      "symbol": "../master/paige-symbol.svg",
+      "lockup": "../master/lockup-horizontal.svg",
+      "stacked": "../master/lockup-stacked.svg",
+      "symbol_on_tile": "../master/paige-symbol.svg",
+      "stacked_on_tile": "../master/lockup-stacked.svg",
+      "symbol_on_dark": "../master/paige-symbol-lime.svg",
+      "lockup_on_dark": "../master/lockup-horizontal-lime.svg",
+      "stacked_on_dark": "../master/lockup-stacked-lime.svg",
+      "idea": "Paige, the app's own resume page with a face, is the brand: your story, friendly and true.",
+      "rationale": [
+        "Same character the user meets on sign-in, job paste and tailoring, so the icon and the app tell one story",
+        "A face on a page is warmer than the category's grey documents, checkmarks and pencils",
+        "Solid silhouette with real cut-outs: survives 16 px, one colour and the Android themed icon"
+      ]
+    }
+  ],
+  "recommendation": "Ship Paige as the launcher icon (ink on lime), use the lime-on-black lockup in the app and store listing, and the ink lockup on light surfaces."
+}

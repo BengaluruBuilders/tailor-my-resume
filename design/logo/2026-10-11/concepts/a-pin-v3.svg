@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <title>TailorMyResume pin</title><g transform="translate(8 0)">
+  <path fill="#000" fill-rule="evenodd" d="M78 34H156V80H202V198A24 24 0 0 1 178 222H78A24 24 0 0 1 54 198V58A24 24 0 0 1 78 34Z M54 92A40 40 0 0 0 94 52A40 40 0 0 0 86 34H78A24 24 0 0 0 54 58Z M88 74L178 178L74 88Z"/>
+  <path fill="#000" d="M166 34L202 70H174A8 8 0 0 1 166 62Z"/>
+  <circle cx="62" cy="60" r="24" fill="#000"/>
+</g></svg>
