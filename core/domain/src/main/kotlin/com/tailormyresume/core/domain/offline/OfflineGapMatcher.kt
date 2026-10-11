@@ -7,8 +7,10 @@ import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.KeywordCoverage
 import com.tailormyresume.core.model.MatchStatus
+import com.tailormyresume.core.model.QuickQuestion
 import com.tailormyresume.core.model.RequirementMatch
 import com.tailormyresume.core.model.RequirementType
+import com.tailormyresume.core.model.RequirementPriority
 import javax.inject.Inject
 
 internal class OfflineGapMatcher @Inject constructor() : GapMatcher {
@@ -17,7 +19,11 @@ internal class OfflineGapMatcher @Inject constructor() : GapMatcher {
         val matches = job.requirements.map { matchRequirement(it, sources) }
         val keywords = job.requirements.flatMap { it.keywords }.distinct()
         val covered = keywords.count { keyword -> sources.any { it.index.supports(keyword) } }
-        return GapAnalysis(matches, KeywordCoverage(covered = covered, total = keywords.size))
+        return GapAnalysis(
+            matches,
+            KeywordCoverage(covered = covered, total = keywords.size),
+            question = matches.firstOrNull(::shouldAskAbout)?.question(),
+        )
     }
 
     private fun matchRequirement(requirement: JobRequirement, sources: List<EvidenceSource>): RequirementMatch {
@@ -26,8 +32,38 @@ internal class OfflineGapMatcher @Inject constructor() : GapMatcher {
             requirement = requirement,
             status = cappedByYears(requirement, statusOf(requirement, sources)),
             evidenceIds = supporting.map { it.id }.distinct(),
+            reason = reasonFor(requirement, supporting),
         )
     }
+
+    private fun reasonFor(requirement: JobRequirement, supporting: List<EvidenceSource>): String = when {
+        supporting.isEmpty() -> "Not in your resume."
+        supporting.any { source -> requirement.keywords.all(source.index::supports) } -> "Found in your resume."
+        else -> "Partly in your resume."
+    }
+
+    private fun shouldAskAbout(match: RequirementMatch): Boolean =
+        match.status == MatchStatus.GAP &&
+            match.requirement.priority == RequirementPriority.MUST_HAVE &&
+            match.requirement.type != RequirementType.EDUCATION
+
+    private fun RequirementMatch.question(): QuickQuestion = QuickQuestion(
+        requirementId = requirement.id,
+        text = requirement.questionText(),
+        why = "It's a must-have for this role, and your resume doesn't mention it.",
+    )
+
+    private fun JobRequirement.questionText(): String {
+        val detail = text.removePrefix("Experience ").removePrefix("experience ")
+        return when {
+            detail.startsWith("presenting ", ignoreCase = true) -> "Have you ${detail.lowercaseFirstChar()}?"
+            detail.startsWith("with ", ignoreCase = true) || detail.startsWith("in ", ignoreCase = true) ->
+                "Have you worked ${detail.lowercaseFirstChar()}?"
+            else -> "Have you worked with ${keywords.joinToString(" and ", transform = SkillLexicon::displayName)}?"
+        }
+    }
+
+    private fun String.lowercaseFirstChar(): String = replaceFirstChar { it.lowercase() }
 
     private fun statusOf(requirement: JobRequirement, sources: List<EvidenceSource>): MatchStatus {
         val units = unitsOf(requirement.keywords)
