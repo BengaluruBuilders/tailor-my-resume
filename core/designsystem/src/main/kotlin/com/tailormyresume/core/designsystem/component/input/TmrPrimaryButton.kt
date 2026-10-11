@@ -25,6 +25,7 @@ fun TmrPrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    destructive: Boolean = false,
     onDisabledClick: () -> Unit = {},
 ) {
     val colors = TmrTheme.colors
@@ -33,7 +34,16 @@ fun TmrPrimaryButton(
         modifier = modifier
             .heightIn(min = 56.dp)
             .clip(TmrTheme.shapes.pill)
-            .background(if (enabled) colors.lime else colors.disabledFill, TmrTheme.shapes.pill)
+            .background(
+                if (!enabled) {
+                    colors.disabledFill
+                } else if (destructive) {
+                    colors.error
+                } else {
+                    colors.lime
+                },
+                TmrTheme.shapes.pill,
+            )
             .clickable(role = Role.Button, onClick = if (enabled) onClick else onDisabledClick)
             .semantics { if (!enabled) stateDescription = unavailable }
             .padding(horizontal = 24.dp, vertical = 8.dp),

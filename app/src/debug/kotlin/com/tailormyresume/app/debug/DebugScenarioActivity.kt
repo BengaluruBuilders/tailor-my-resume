@@ -10,6 +10,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,11 +20,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.app.MainActivity
 import com.tailormyresume.app.ai.DebugPreviewMode
 import com.tailormyresume.app.ui.AccountRoot
 import com.tailormyresume.app.ui.AppRootState
 import com.tailormyresume.app.ui.AppViewModel
+import com.tailormyresume.app.ui.PendingToastHost
 import com.tailormyresume.app.ui.RootViewModelStores
 import com.tailormyresume.app.ui.TmrRoot
 import com.tailormyresume.core.data.repository.SessionRepository
@@ -30,6 +35,7 @@ import com.tailormyresume.core.designsystem.component.TmrBackground
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.onboarding.StartDestination
 import com.tailormyresume.core.model.DebugScenario
+import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
 import dagger.hilt.android.AndroidEntryPoint
@@ -146,27 +152,43 @@ class DebugScenarioActivity : ComponentActivity() {
 }
 
 @Composable
-private fun DebugScenarioPreview(
+internal fun DebugScenarioPreview(
     target: DebugScenarioTarget,
     scenario: DebugScenario,
     rootState: StateFlow<AppRootState>,
     hasAccount: Flow<Boolean>,
     rootStores: RootViewModelStores,
     modifier: Modifier = Modifier,
+    entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
 ) {
     val key = target.navKey(scenario)
     val shownRoot = observePreviewRoot(target.opensFirstRunRoot, rootState, hasAccount, rootStores)
+    Box(modifier = Modifier.fillMaxSize()) {
+        PreviewRootContent(target, key, shownRoot, modifier, entryProvider)
+        PendingToastHost()
+    }
+}
+
+@Composable
+private fun PreviewRootContent(
+    target: DebugScenarioTarget,
+    key: NavKey,
+    shownRoot: PreviewRoot,
+    modifier: Modifier,
+    entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)?,
+) {
     when {
         target.opensFirstRunRoot ->
-            TmrRoot(root = PreviewRoot.FirstRun.accountRoot, startKey = key, modifier = modifier)
+            TmrRoot(root = PreviewRoot.FirstRun.accountRoot, startKey = key, modifier = modifier, entryProvider = entryProvider)
         shownRoot == PreviewRoot.FirstRun ->
-            TmrRoot(root = PreviewRoot.FirstRun.accountRoot, startKey = SignInNavKey(), modifier = modifier)
+            TmrRoot(root = PreviewRoot.FirstRun.accountRoot, startKey = SignInNavKey(), modifier = modifier, entryProvider = entryProvider)
         else -> TmrRoot(
             root = PreviewRoot.Main.accountRoot,
             startKey = DefaultApplicationsNavKey,
             modifier = modifier,
             initialKeys = { listOf(key) },
             hasHome = { true },
+            entryProvider = entryProvider,
         )
     }
 }

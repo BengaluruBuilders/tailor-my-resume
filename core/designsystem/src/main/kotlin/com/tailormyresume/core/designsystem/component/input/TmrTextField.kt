@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -41,9 +42,10 @@ fun TmrTextField(
     placeholder: String = "",
     readOnly: Boolean = false,
     amber: Boolean = false,
+    enabled: Boolean = true,
 ) {
     TmrLabeledField(label = label, modifier = modifier) {
-        TmrFieldBox(value, onValueChange, label, placeholder, readOnly, amber, singleLine = true, minHeight = 56.dp)
+        TmrFieldBox(value, onValueChange, label, placeholder, readOnly, amber, singleLine = true, minHeight = 56.dp, enabled = enabled)
     }
 }
 
@@ -72,13 +74,14 @@ private fun TmrFieldBox(
     amber: Boolean,
     singleLine: Boolean,
     minHeight: Dp,
+    enabled: Boolean = true,
 ) {
     val colors = TmrTheme.colors
     val shape = TmrTheme.shapes.field
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        readOnly = readOnly,
+        readOnly = readOnly || !enabled,
         singleLine = singleLine,
         textStyle = TmrTheme.typography.bodyLarge.copy(color = colors.text),
         cursorBrush = SolidColor(colors.lime),
@@ -87,7 +90,10 @@ private fun TmrFieldBox(
             .heightIn(min = minHeight)
             .background(colors.fill, shape)
             .border(BorderStroke(1.5.dp, if (amber) colors.amber else colors.boundary), shape)
-            .semantics { contentDescription = label },
+            .semantics {
+                contentDescription = label
+                if (!enabled) disabled()
+            },
         decorationBox = { inner ->
             Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
                 if (value.isEmpty()) {

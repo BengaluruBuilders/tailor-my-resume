@@ -18,15 +18,18 @@ class TmrSheetHostState {
     var current: TmrHostedSheet? by mutableStateOf<TmrHostedSheet?>(null)
         private set
 
+    var dismissible: Boolean by mutableStateOf(true)
+
     fun show(
         title: String,
         content: @Composable ColumnScope.() -> Unit,
     ) {
+        dismissible = true
         current = TmrHostedSheet(title, content)
     }
 
     fun dismiss() {
-        current = null
+        if (dismissible) current = null
     }
 }
 
@@ -35,5 +38,5 @@ val LocalTmrSheetHost = staticCompositionLocalOf { TmrSheetHostState() }
 @Composable
 fun TmrSheetHost(state: TmrSheetHostState) {
     val sheet = state.current ?: return
-    TmrBottomSheet(onDismiss = state::dismiss, title = sheet.title, content = sheet.content)
+    TmrBottomSheet(onDismiss = state::dismiss, title = sheet.title, dismissible = state.dismissible, content = sheet.content)
 }

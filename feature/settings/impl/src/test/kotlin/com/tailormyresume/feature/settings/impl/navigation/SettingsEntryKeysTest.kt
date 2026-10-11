@@ -46,7 +46,6 @@ class SettingsEntryKeysTest {
 
     private val keys: List<NavKey> =
         listOf(
-            SettingsNavKey(),
             CreditsNavKey(),
             PaywallNavKey(null),
             PaywallNavKey("app-1"),
