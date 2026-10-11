@@ -4,6 +4,7 @@ import com.tailormyresume.feature.tailor.impl.document.AndroidResumeHeadings
 import com.tailormyresume.feature.tailor.impl.document.ResumeHeadings
 import com.tailormyresume.feature.tailor.impl.exported.CacheExportedFileStore
 import com.tailormyresume.feature.tailor.impl.exported.ExportedFileStore
+import com.tailormyresume.feature.tailor.api.ExportedPdfIntents
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,4 +22,7 @@ internal interface ExportModule {
 
     @Binds
     fun bindResumeHeadings(headings: AndroidResumeHeadings): ResumeHeadings
+
+    @Binds
+    fun bindExportedPdfIntents(intents: ExportedPdfIntentsImpl): ExportedPdfIntents
 }

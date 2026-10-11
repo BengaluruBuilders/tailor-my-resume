@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_applications_impl_title">Applications</string>
+    <plurals name="feature_applications_impl_credits">
+        <item quantity="one">%d credit</item>
+        <item quantity="other">%d credits</item>
+    </plurals>
+    <string name="feature_applications_impl_profile">Profile</string>
+    <string name="feature_applications_impl_empty_title">No applications yet</string>
+    <string name="feature_applications_impl_empty_body">Tailor your resume for a job and it shows up here.</string>
+    <string name="feature_applications_impl_add_job">Add a job</string>
+    <string name="feature_applications_impl_total_label">Tailored resumes</string>
+    <string name="feature_applications_impl_recent_label">Recent</string>
+    <string name="feature_applications_impl_row_meta_keywords">%1$s · %2$d%% keywords</string>
+    <string name="feature_applications_impl_company_place">%1$s · %2$s</string>
+    <string name="feature_applications_impl_status_label">Status</string>
+    <string name="feature_applications_impl_applied_on">on %1$s</string>
+    <string name="feature_applications_impl_not_applied">Not applied yet</string>
+    <string name="feature_applications_impl_change">Change</string>
+    <string name="feature_applications_impl_file_meta_pdf">PDF</string>
+    <string name="feature_applications_impl_file_meta_keywords">PDF · %1$d%% keywords</string>
+    <string name="feature_applications_impl_next_steps">Next steps</string>
+    <string name="feature_applications_impl_retailor">Re-tailor with profile changes</string>
+    <string name="feature_applications_impl_retailor_cost">1 credit</string>
+    <string name="feature_applications_impl_view_job">View job analysis</string>
+    <string name="feature_applications_impl_prep_questions">Get prep questions</string>
+    <string name="feature_applications_impl_cover_letter">Write a cover letter</string>
+    <string name="feature_applications_impl_status_set">Status set to %1$s</string>
+    <string name="feature_applications_impl_coming_soon">Coming soon</string>
+    <string name="feature_applications_impl_file_missing">Couldn\'t find the PDF</string>
+    <string name="feature_applications_impl_open_failed">No app can open PDFs</string>
+</resources>

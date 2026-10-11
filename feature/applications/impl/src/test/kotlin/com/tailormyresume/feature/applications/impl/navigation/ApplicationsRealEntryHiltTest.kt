@@ -164,7 +164,7 @@ class ApplicationsRealEntryHiltTest {
 
         assertThat(hasText("Recent")).isTrue()
         composeRule.onNodeWithText("Kestrel Bank", substring = true).performClick()
-        waitFor { state.currentKey == ApplicationDetailNavKey("kb") && hasText("Mumbai · On-site") }
+        waitFor { state.currentKey == ApplicationDetailNavKey("kb") && hasText("Mumbai · On-site", substring = true) }
 
         composeRule.onNodeWithText("Change").performClick()
         waitFor { hasText("Save status") }

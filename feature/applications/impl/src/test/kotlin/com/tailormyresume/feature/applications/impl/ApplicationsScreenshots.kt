@@ -7,10 +7,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Density
@@ -306,11 +310,12 @@ class ApplicationsScreenshots {
         var avatar = 0
         var addJob = 0
         val opened = mutableListOf<String>()
+        var state by mutableStateOf<ApplicationsUiState>(populated())
 
         rule.setContent {
             TmrTheme {
                 ApplicationsScreen(
-                    state = populated(),
+                    state = state,
                     onCredits = { credits += 1 },
                     onAvatar = { avatar += 1 },
                     onAddJob = { addJob += 1 },
@@ -320,15 +325,18 @@ class ApplicationsScreenshots {
         }
         rule.waitForIdle()
 
-        rule.onNodeWithText("Add a job").performClick()
         rule.onNodeWithText("3 credits").performClick()
+        rule.onNodeWithContentDescription("Profile").performClick()
         rule.onNodeWithText("Business Analyst").performClick()
+        state = empty()
+        rule.waitForIdle()
+        rule.onNodeWithText("Add a job").performClick()
         rule.waitForIdle()
 
         assertEquals(1, addJob)
         assertEquals(1, credits)
+        assertEquals(1, avatar)
         assertEquals(listOf("kb"), opened)
-        assertEquals(0, avatar)
     }
 
     @Test
@@ -342,11 +350,12 @@ class ApplicationsScreenshots {
         var analyses = 0
         var soon = 0
         val picked = mutableListOf<ApplicationStatus>()
+        var sheet by mutableStateOf<ApplicationStatus?>(null)
 
         rule.setContent {
             TmrTheme {
                 ApplicationDetailScreen(
-                    state = detail(statusSheet = ApplicationStatus.INTERVIEW),
+                    state = detail(statusSheet = sheet),
                     onChangeStatus = { changed += 1 },
                     onPickStatus = { picked.add(it) },
                     onDismissStatusSheet = { dismissed += 1 },
@@ -368,6 +377,8 @@ class ApplicationsScreenshots {
         rule.onNodeWithText("View job analysis").performClick()
         rule.onNodeWithText("Get prep questions").performClick()
         rule.onNodeWithText("Write a cover letter").performClick()
+        sheet = ApplicationStatus.INTERVIEW
+        rule.waitForIdle()
         rule.onNodeWithText("Offer").performClick()
         rule.onNodeWithText("Save status").performClick()
         rule.waitForIdle()
