@@ -10,6 +10,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import java.io.ByteArrayOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 @RunWith(AndroidJUnit4::class)
 class ContentResolverResumeTextSourceTest {
@@ -76,5 +79,42 @@ class ContentResolverResumeTextSourceTest {
         val read = runBlocking { ContentResolverResumeTextSource(context, Dispatchers.IO).read(file) }
 
         assertThat(read).isEqualTo(ResumeRead.TooLarge(oversize, RESUME_READ_LIMIT_BYTES))
+    }
+
+    @Test
+    fun compressedDocxWithOversizeDocumentIsUnreadable() {
+        val output = ByteArrayOutputStream()
+        ZipOutputStream(output).use { zip ->
+            zip.putNextEntry(ZipEntry("word/document.xml"))
+            zip.write(ByteArray((RESUME_READ_LIMIT_BYTES + 1L).toInt()) { 'a'.code.toByte() })
+            zip.closeEntry()
+        }
+        val bytes = output.toByteArray()
+        shadowOf(context.contentResolver).registerInputStream(uri, bytes.inputStream())
+        val file = ResumeFile("large.docx", RESUME_DOCX_MIME, bytes.size.toLong(), uri.toString())
+
+        val read = runBlocking { ContentResolverResumeTextSource(context, Dispatchers.IO).read(file) }
+
+        assertThat(read).isEqualTo(ResumeRead.Unreadable("large.docx"))
+    }
+
+    @Test
+    fun compressedDocxWithOversizeEntryBeforeDocumentIsUnreadable() {
+        val output = ByteArrayOutputStream()
+        ZipOutputStream(output).use { zip ->
+            zip.putNextEntry(ZipEntry("word/media/large.bin"))
+            zip.write(ByteArray((RESUME_READ_LIMIT_BYTES + 1L).toInt()) { 'a'.code.toByte() })
+            zip.closeEntry()
+            zip.putNextEntry(ZipEntry("word/document.xml"))
+            zip.write("<w:p><w:t>Sample Candidate worked at Example Company building finance reports.</w:t></w:p>".toByteArray())
+            zip.closeEntry()
+        }
+        val bytes = output.toByteArray()
+        shadowOf(context.contentResolver).registerInputStream(uri, bytes.inputStream())
+        val file = ResumeFile("large.docx", RESUME_DOCX_MIME, bytes.size.toLong(), uri.toString())
+
+        val read = runBlocking { ContentResolverResumeTextSource(context, Dispatchers.IO).read(file) }
+
+        assertThat(read).isEqualTo(ResumeRead.Unreadable("large.docx"))
     }
 }
