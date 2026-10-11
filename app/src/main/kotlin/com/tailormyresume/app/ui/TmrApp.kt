@@ -1,6 +1,7 @@
 package com.tailormyresume.app.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.EnterExitState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -13,8 +14,12 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -23,6 +28,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.scene.Scene
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
 import com.tailormyresume.app.R
 import com.tailormyresume.app.navigation.TOP_LEVEL_NAV_KEYS
@@ -175,7 +181,10 @@ internal fun TmrShell(
     val chromeActions = remember { ChromeActions() }
     val key = navigationState.currentKey
     LaunchedEffect(key) { sheetHost.dismiss() }
-    val chrome = chromeFor(key, entriesBelow = navigationState.stack.size - 1)
+    val target = chromeFor(key, entriesBelow = navigationState.stack.size - 1)
+    var settled by remember { mutableStateOf(SettledScreen(key, target.leading)) }
+    val chrome = if (settled.key == key) target else target.copy(leading = settled.steadyLeading(target.leading))
+    val holdLeadingSpace = chrome.leading != target.leading
     val tabsVisible = key.isTopLevelDestination()
     val changesSaved = stringResource(R.string.shell_changes_saved)
     BackHandler(enabled = !navigationState.canGoBack && navigator.canHandleBack) { navigator.goBack() }
@@ -190,6 +199,7 @@ internal fun TmrShell(
                     Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
                         TmrTopBar(
                             leading = chrome.leading,
+                            holdLeadingSpace = holdLeadingSpace,
                             onLeading = {
                                 if (chrome.leading == TmrTopBarLeading.Close && key is ExportedNavKey) {
                                     navigator.root(DefaultApplicationsNavKey)
@@ -228,6 +238,9 @@ internal fun TmrShell(
                         navigationState = navigationState,
                         navigator = navigator,
                         entryProvider = entryProvider,
+                        onSettled = { settledKey ->
+                            if (settledKey == navigationState.currentKey) settled = SettledScreen(settledKey, target.leading)
+                        },
                     )
                 }
                 TmrVisibility(visible = tabsVisible, rise = true) {
@@ -251,9 +264,11 @@ private fun TmrNavDisplay(
     navigationState: NavigationState,
     navigator: Navigator,
     entryProvider: (NavKey) -> NavEntry<NavKey>,
+    onSettled: (NavKey) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val tabbedProvider = remember(entryProvider) { withTabMetadata(entryProvider) }
+    val currentOnSettled by rememberUpdatedState(onSettled)
+    val tabbedProvider = remember(entryProvider) { withTabMetadata(entryProvider) { currentOnSettled(it) } }
     val transitions = rememberTmrNavTransitions()
     Box(modifier = modifier) {
         NavDisplay(
@@ -297,12 +312,28 @@ private fun sharedEntryProvider(navigator: Navigator): (NavKey) -> NavEntry<NavK
         settingsEntry(navigator)
     }
 
+private data class SettledScreen(val key: NavKey, val leading: TmrTopBarLeading) {
+    fun steadyLeading(target: TmrTopBarLeading): TmrTopBarLeading =
+        if (leading == TmrTopBarLeading.None || target == TmrTopBarLeading.None) TmrTopBarLeading.None else target
+}
+
+@Composable
+private fun ReportWhenSettled(key: NavKey, onSettled: (NavKey) -> Unit) {
+    val transition = LocalNavAnimatedContentScope.current.transition
+    val settled = transition.currentState == EnterExitState.Visible && transition.targetState == EnterExitState.Visible
+    LaunchedEffect(settled) { if (settled) onSettled(key) }
+}
+
 private fun withTabMetadata(
     provider: (NavKey) -> NavEntry<NavKey>,
+    onSettled: (NavKey) -> Unit,
 ): (NavKey) -> NavEntry<NavKey> = { key ->
     val entry = provider(key)
     val tabIndex = TOP_LEVEL_NAV_KEYS.indexOfFirst { it::class == key::class }
     val metadata = entry.metadata + (TOP_LEVEL_METADATA to key.isTopLevelDestination()) +
         if (tabIndex >= 0) mapOf(TAB_INDEX_METADATA to tabIndex) else emptyMap()
-    NavEntry(key = key, contentKey = entry.contentKey, metadata = metadata) { entry.Content() }
+    NavEntry(key = key, contentKey = entry.contentKey, metadata = metadata) {
+        ReportWhenSettled(key, onSettled)
+        entry.Content()
+    }
 }
