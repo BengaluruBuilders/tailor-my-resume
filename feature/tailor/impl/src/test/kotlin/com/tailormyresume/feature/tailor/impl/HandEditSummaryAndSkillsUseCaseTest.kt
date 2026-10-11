@@ -18,7 +18,7 @@ class HandEditSummaryAndSkillsUseCaseTest {
     private val useCase = HandEditSummaryAndSkillsUseCase(applicationRepository, TestClock())
     private val bullet = acceptedBullet("b1", original = "Built a tool", proposed = "Developed a tool")
 
-    private suspend fun stored() = applicationRepository.observeApplication("app-1").first()!!.tailoredResume!!
+    private suspend fun stored() = checkNotNull(applicationRepository.observeApplication("app-1").first()?.tailoredResume)
 
     @Test
     fun summaryEditIsStoredAsTheUsersAcceptedTextKeepingTheOriginal() = runTest {
@@ -110,7 +110,7 @@ class HandEditSummaryAndSkillsUseCaseTest {
         useCase.summary("app-1", "Mine", profileSummary = "p")
         useCase.skills("app-1", "Go", profileSkills = listOf("Kotlin"))
 
-        val application = applicationRepository.observeApplication("app-1").first()!!
+        val application = checkNotNull(applicationRepository.observeApplication("app-1").first())
         assertThat(ExportReadiness.check(application)).isEqualTo(ExportCheck.ALLOWED)
         assertThat(application.changesAcceptedAt).isEqualTo(EXPORT_ACCEPTED_AT)
     }

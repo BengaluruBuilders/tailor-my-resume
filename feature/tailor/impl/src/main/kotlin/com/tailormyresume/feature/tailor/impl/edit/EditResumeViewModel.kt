@@ -102,9 +102,8 @@ internal class EditResumeViewModel @AssistedInject constructor(
                     if (edited == bullet.effectiveText()) continue
                     handEditBullet(applicationId, bulletId, edited)
                 }
-                if (profile != null && application?.tailoredResume != null) {
-                    saveSummaryAndSkills(application, profile, current)
-                }
+                val resume = application?.tailoredResume
+                if (profile != null && resume != null) saveSummaryAndSkills(resume, profile, current)
                 drafts.value = EditDrafts()
                 eventChannel.send(EditResumeEvent.Saved)
             }
@@ -146,8 +145,8 @@ internal class EditResumeViewModel @AssistedInject constructor(
         )
     }
 
-    private suspend fun saveSummaryAndSkills(application: JobApplication, profile: CandidateProfile, drafts: EditDrafts) {
-        val shown = assembler.assemble(profile, application.tailoredResume!!.withPendingAccepted())
+    private suspend fun saveSummaryAndSkills(resume: TailoredResume, profile: CandidateProfile, drafts: EditDrafts) {
+        val shown = assembler.assemble(profile, resume.withPendingAccepted())
         drafts.summary?.trim()?.takeIf { it.isNotEmpty() && it != shown.summary }?.let {
             handEditSummaryAndSkills.summary(applicationId, it, profile.summary)
         }
