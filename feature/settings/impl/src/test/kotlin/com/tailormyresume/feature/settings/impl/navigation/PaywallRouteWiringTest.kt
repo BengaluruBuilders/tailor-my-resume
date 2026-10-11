@@ -37,7 +37,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import javax.inject.Inject
 
-private const val BUY_FIFTEEN = "Buy 15 credits · ₹449"
+private const val BUY_FIFTEEN = "Buy 15 credits ·\u00A0₹449"
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -131,7 +131,7 @@ class PaywallRouteWiringTest {
 
         buy()
 
-        harness.waitFor { composeRule.onAllNodesWithText("Payment didn't go through").fetchSemanticsNodes().isNotEmpty() }
+        harness.waitFor { composeRule.onAllNodesWithText("Payment didn't\ngo through").fetchSemanticsNodes().isNotEmpty() }
         assertThat(harness.state.stack.last()).isEqualTo(PaywallNavKey(null))
         (gateway as TestPaymentGateway).withOutcome(ApplicationPack.APPLICATION_PACK_FIFTEEN, PurchaseOutcome.Success)
         composeRule.onNodeWithText("Try again").performClick()

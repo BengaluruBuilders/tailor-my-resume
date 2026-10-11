@@ -50,7 +50,7 @@ class PaywallScreenshotTests {
         TmrTestDevices.prototype,
         { PaywallScreen(paywallState(), noActions) },
         "0 credits left",
-        "Buy 15 credits · ₹449",
+        "Buy 15 credits ·\u00A0₹449",
     )
 
     @Test
@@ -68,7 +68,7 @@ class PaywallScreenshotTests {
         "credits_paywall_paymentFailed",
         TmrTestDevices.prototype,
         paywallWithFailedSheet(),
-        "Payment didn't go through",
+        "Payment didn't\ngo through",
         "Try again",
         "Cancel",
     )
@@ -88,7 +88,7 @@ class PaywallScreenshotTests {
         "credits_paywall_paymentFailed",
         NARROW_DEVICE,
         paywallWithFailedSheet(),
-        "Payment didn't go through",
+        "Payment didn't\ngo through",
         "Try again",
     )
 }

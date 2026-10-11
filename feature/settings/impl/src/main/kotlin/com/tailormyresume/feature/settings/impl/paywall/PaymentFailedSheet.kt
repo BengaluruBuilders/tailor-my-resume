@@ -48,7 +48,7 @@ internal fun ColumnScope.PaymentFailedSheetContent(
             )
         }
         Text(
-            text = stringResource(R.string.feature_settings_impl_pay_failed_title),
+            text = stringResource(R.string.feature_settings_impl_pay_failed_title_broken),
             style = typography.title,
             color = colors.text,
         )

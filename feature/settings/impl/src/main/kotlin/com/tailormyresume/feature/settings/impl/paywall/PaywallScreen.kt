@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -50,7 +51,8 @@ internal class PaywallActions(
 )
 
 private const val ART_MAX_FONT_SCALE = 1.15f
-private val HeroMinHeight = 210.dp
+internal const val PAYWALL_ART_TAG = "paywall-art"
+private val HeroMinHeight = 236.dp
 private val PackMinHeight = 68.dp
 private val BadgeSize = 54.dp
 
@@ -110,7 +112,7 @@ private fun BoxScope.HeroArt() {
     val colors = TmrTheme.colors
     TmrPaige(
         pose = TmrPaigePose.Paywall,
-        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 30.dp).offset(y = 50.dp),
+        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 30.dp).offset(y = 50.dp).testTag(PAYWALL_ART_TAG),
     )
     Box(
         modifier = Modifier

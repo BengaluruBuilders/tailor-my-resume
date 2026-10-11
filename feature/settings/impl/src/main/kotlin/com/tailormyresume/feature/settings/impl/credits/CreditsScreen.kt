@@ -2,9 +2,8 @@ package com.tailormyresume.feature.settings.impl.credits
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,13 +15,16 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.component.TmrDivider
@@ -36,6 +38,7 @@ internal const val CREDITS_LIST_TAG = "credits-list"
 
 private val CardRadius = 20.dp
 private val RowMinHeight = 68.dp
+private val BalanceGap = 16.dp
 
 @Composable
 internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifier: Modifier = Modifier) {
@@ -77,29 +80,50 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun BalanceCard(credits: Int, onBuyMore: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = TmrTheme.colors
     TmrCard(modifier = modifier) {
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = credits.toString(), style = TmrTheme.typography.displayLarge, color = colors.lime)
-            Text(
-                text = pluralStringResource(R.plurals.feature_settings_impl_credits_caption, credits),
-                style = TmrTheme.typography.body,
-                color = colors.textSecondary,
-            )
-        }
+        BalanceHero(credits = credits)
         TmrPrimaryButton(
             label = stringResource(R.string.feature_settings_impl_credits_buy_more),
             onClick = onBuyMore,
             modifier = Modifier.fillMaxWidth(),
         )
+    }
+}
+
+@Composable
+private fun BalanceHero(credits: Int) {
+    val colors = TmrTheme.colors
+    val numberStyle = TmrTheme.typography.displayLarge
+    val captionStyle = TmrTheme.typography.body
+    val caption = pluralStringResource(R.plurals.feature_settings_impl_credits_caption, credits)
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val gapPx = with(density) { BalanceGap.roundToPx() }
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val sideBySide = remember(credits, caption, numberStyle, captionStyle, constraints.maxWidth, gapPx, density) {
+            val numberWidth = measurer.measure(credits.toString(), numberStyle).size.width
+            val longestWord = caption.split(' ').maxOf { measurer.measure(it, captionStyle).size.width }
+            numberWidth + gapPx + longestWord <= constraints.maxWidth
+        }
+        val number: @Composable () -> Unit = {
+            Text(text = credits.toString(), style = numberStyle, color = colors.lime)
+        }
+        val captionText: @Composable (Modifier) -> Unit = { captionModifier ->
+            Text(text = caption, style = captionStyle, color = colors.textSecondary, modifier = captionModifier)
+        }
+        if (sideBySide) {
+            Row(horizontalArrangement = Arrangement.spacedBy(BalanceGap), verticalAlignment = Alignment.CenterVertically) {
+                number()
+                captionText(Modifier.weight(1f))
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                number()
+                captionText(Modifier)
+            }
+        }
     }
 }
 

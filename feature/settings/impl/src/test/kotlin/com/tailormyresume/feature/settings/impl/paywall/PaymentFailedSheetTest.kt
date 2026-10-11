@@ -36,7 +36,7 @@ class PaymentFailedSheetTest {
 
         rule.assertTexts(
             "!",
-            "Payment didn't go through",
+            "Payment didn't\ngo through",
             "You weren't charged. Try again, or pick another payment method.",
         )
         rule.onNodeWithText("Try again").performClick()
@@ -54,7 +54,7 @@ class PaymentFailedSheetTest {
         }
 
         rule.assertTexts(
-            "Payment didn't go through",
+            "Payment didn't\ngo through",
             "We haven't confirmed your payment yet. Your credits will appear once it is confirmed.",
         )
         assertThat(rule.onAllNodesWithText("charged", substring = true).fetchSemanticsNodes()).isEmpty()

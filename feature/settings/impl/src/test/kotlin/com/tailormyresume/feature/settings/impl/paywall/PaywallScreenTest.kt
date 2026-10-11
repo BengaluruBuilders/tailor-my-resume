@@ -1,13 +1,16 @@
 package com.tailormyresume.feature.settings.impl.paywall
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.domain.offline.MockPackCatalogue
+import com.tailormyresume.core.screenshot.TmrTestDevice
 import com.tailormyresume.core.screenshot.TmrTestDevices
+import com.tailormyresume.feature.settings.impl.NARROW_QUALIFIERS
 import com.tailormyresume.feature.settings.impl.assertTexts
 import com.tailormyresume.feature.settings.impl.setTmrContent
 import org.junit.Rule
@@ -57,7 +60,7 @@ class PaywallScreenTest {
             "₹30 per resume",
             "₹25 per resume",
             "Best value",
-            "Buy 15 credits · ₹449",
+            "Buy 15 credits ·\u00A0₹449",
             "One-time payment · Restore purchases",
         )
     }
@@ -102,4 +105,21 @@ class PaywallScreenTest {
 
         assertThat(taps).containsExactly("buy")
     }
+
+    private fun assertHeadlineClearsArt(fontScale: Float) {
+        val device = TmrTestDevice("narrow-337-font-$fontScale", NARROW_QUALIFIERS, fontScale)
+        rule.setTmrContent(device) { PaywallScreen(paywallState(), actions) }
+
+        val headline = rule.onNodeWithText("Keep tailoring for every job").fetchSemanticsNode().boundsInRoot
+        val art = rule.onNodeWithTag(PAYWALL_ART_TAG).fetchSemanticsNode().boundsInRoot
+        assertThat(headline.overlaps(art)).isFalse()
+    }
+
+    @Test
+    @Config(qualifiers = NARROW_QUALIFIERS)
+    fun headlineClearsArtAt337dpFont100() = assertHeadlineClearsArt(1.0f)
+
+    @Test
+    @Config(qualifiers = NARROW_QUALIFIERS)
+    fun headlineClearsArtAt337dpFont115() = assertHeadlineClearsArt(1.15f)
 }

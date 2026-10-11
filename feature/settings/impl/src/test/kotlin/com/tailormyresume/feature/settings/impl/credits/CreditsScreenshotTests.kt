@@ -92,4 +92,18 @@ class CreditsScreenshotTests {
 
         rule.assertTexts("1", "credit left. It never expires.")
     }
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+    fun twoDigitBalanceSitsBesideItsCaption() {
+        rule.setTmrContent(TmrTestDevices.prototype) {
+            CreditsScreen(CreditsUiState.Content(credits = 30, history = emptyList()), onBuyMore = {})
+        }
+
+        val number = rule.onNodeWithText("30").fetchSemanticsNode().boundsInRoot
+        val caption = rule.onNodeWithText("credits left. They never expire.").fetchSemanticsNode().boundsInRoot
+        assertThat(caption.left).isAtLeast(number.right)
+        assertThat(caption.top).isLessThan(number.bottom)
+        rule.capture("credits_twoDigit", TmrTestDevices.prototype)
+    }
 }
