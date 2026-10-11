@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.CreditsRepository
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,11 +17,12 @@ import javax.inject.Inject
 @HiltViewModel
 internal class CreditsViewModel @Inject constructor(
     private val creditsRepository: CreditsRepository,
+    creditBalance: AccountCreditBalance,
     applicationRepository: ApplicationRepository,
 ) : ViewModel() {
 
     val uiState: StateFlow<CreditsUiState> = combine(
-        creditsRepository.observeBalance(),
+        creditBalance.observeCredits(),
         creditsRepository.observeLedger(),
         applicationRepository.observeApplications(),
     ) { credits, entries, applications ->
@@ -33,7 +35,6 @@ internal class CreditsViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = CreditsUiState.Loading,
     )
-
     init {
         viewModelScope.launch { creditsRepository.refresh() }
     }

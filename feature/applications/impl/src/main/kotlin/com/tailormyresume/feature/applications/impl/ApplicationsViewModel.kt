@@ -3,8 +3,8 @@ package com.tailormyresume.feature.applications.impl
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
-import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,13 +17,13 @@ import javax.inject.Inject
 @HiltViewModel
 internal class ApplicationsViewModel @Inject constructor(
     applicationRepository: ApplicationRepository,
-    creditsRepository: CreditsRepository,
+    creditBalance: AccountCreditBalance,
     profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     val state: StateFlow<ApplicationsUiState> = combine(
         applicationRepository.observeApplications(),
-        creditsRepository.observeBalance(),
+        creditBalance.observeCredits(),
         profileRepository.observeProfile(),
         ::stateFor,
     ).stateIn(
@@ -34,10 +34,10 @@ internal class ApplicationsViewModel @Inject constructor(
 
     private fun stateFor(
         applications: List<JobApplication>,
-        credits: Int,
+        credits: Int?,
         profile: CandidateProfile?,
     ): ApplicationsUiState {
-        val header = ApplicationsHeader(credits = credits.coerceAtLeast(0), initials = initialsOf(profile?.fullName.orEmpty()))
+        val header = ApplicationsHeader(credits = credits?.coerceAtLeast(0), initials = initialsOf(profile?.fullName.orEmpty()))
         if (applications.isEmpty()) return ApplicationsUiState.Empty(header)
         val rows = applications.sortedByDescending { it.updatedAt }.map(::rowFor)
         return ApplicationsUiState.Populated(

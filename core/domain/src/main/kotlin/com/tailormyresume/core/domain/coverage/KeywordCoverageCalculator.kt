@@ -5,8 +5,8 @@ import com.tailormyresume.core.domain.keywordsStatedIn
 import com.tailormyresume.core.domain.offline.SkillLexicon
 import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.BulletDecision
+import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobRequirement
-import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
 import com.tailormyresume.core.model.TailoredResume
@@ -19,25 +19,37 @@ object KeywordCoverageCalculator {
         matches: List<RequirementMatch>,
         quickAnswer: QuickAnswer?,
         tailoredResume: TailoredResume?,
+        profile: CandidateProfile,
     ): ApplicationKeywordCoverage {
         val requirements = matches.map { it.requirement }
         val keywordSet = requirements.flatMap(::keywordsOf).toSet()
-        val metKeywords = matches
-            .filter { it.status == MatchStatus.MET || it.status == MatchStatus.PARTIAL }
-            .flatMap { keywordsOf(it.requirement) }
-            .toSet()
+        val metKeywords = evidencedKeywords(matches, profile)
         val answerKeywords = answerKeywords(requirements, quickAnswer)
         return ApplicationKeywordCoverage(
             now = percent(metKeywords.size, keywordSet.size),
             upTo = percent((metKeywords + answerKeywords).size, keywordSet.size),
             final = tailoredResume?.let { resume ->
-                val text = resume.bullets.joinToString("\n") {
-                    if (it.decision == BulletDecision.ACCEPTED) it.proposedText else it.originalText
-                }
+                val text = finalText(resume, profile)
                 percent(requirements.flatMap { stated(it, text) }.toSet().size, keywordSet.size)
             },
         )
     }
+
+    private fun finalText(resume: TailoredResume, profile: CandidateProfile): String = buildList {
+        addAll(
+            resume.bullets.map {
+                if (it.decision == BulletDecision.ACCEPTED && it.violations.isEmpty()) it.proposedText else it.originalText
+            },
+        )
+        add(
+            when (resume.summary?.decision) {
+                BulletDecision.ACCEPTED -> resume.summary?.text.orEmpty()
+                BulletDecision.PENDING -> ""
+                else -> profile.summary
+            },
+        )
+        addAll(resume.skills?.takeIf { it.decision == BulletDecision.ACCEPTED }?.skills ?: profile.skills)
+    }.joinToString("\n")
 
     private fun keywordOf(keyword: String): String = SkillLexicon.displayName(keyword).lowercase()
 

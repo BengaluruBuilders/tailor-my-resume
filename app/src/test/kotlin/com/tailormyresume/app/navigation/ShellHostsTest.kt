@@ -19,6 +19,7 @@ import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.designsystem.component.chrome.TmrSheetHostState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.navigation.RegisterChromeAction
+import com.tailormyresume.core.navigation.RegisterChromeBack
 import com.tailormyresume.feature.applications.api.navigation.DefaultApplicationsNavKey
 import com.tailormyresume.feature.tailor.api.navigation.EditResumeNavKey
 import org.junit.Rule
@@ -46,6 +47,8 @@ class ShellHostsTest {
     private fun provider(
         onSave: () -> Unit = {},
         registerSave: Boolean = false,
+        onBack: () -> Unit = {},
+        registerBack: Boolean = false,
         showHosts: Boolean = false,
     ): (Navigator) -> (NavKey) -> NavEntry<NavKey> = { _ ->
         { key ->
@@ -61,6 +64,7 @@ class ShellHostsTest {
                     }
                 }
                 if (registerSave && key is EditResumeNavKey) RegisterChromeAction(onSave)
+                if (registerBack && key is EditResumeNavKey) RegisterChromeBack(onBack)
                 Column { Text(checkNotNull(key::class.simpleName)) }
             }
         }
@@ -92,6 +96,22 @@ class ShellHostsTest {
         rule.mainClock.advanceTimeByFrame()
 
         assertThat(saved).isEqualTo(1)
+        assertThat(shell.stack).containsExactly(DefaultApplicationsNavKey, EditResumeNavKey("app-1")).inOrder()
+    }
+
+    @Test
+    fun aRegisteredBackActionHandlesTopBarAndSystemBack() {
+        var saved = 0
+        rule.mainClock.autoAdvance = false
+        shell.show(DefaultApplicationsNavKey, provider(onBack = { saved += 1 }, registerBack = true))
+        shell.go(EditResumeNavKey("app-1"))
+        rule.mainClock.advanceTimeBy(1_000)
+
+        shell.clickBack()
+        rule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+        rule.mainClock.advanceTimeByFrame()
+
+        assertThat(saved).isEqualTo(2)
         assertThat(shell.stack).containsExactly(DefaultApplicationsNavKey, EditResumeNavKey("app-1")).inOrder()
     }
 

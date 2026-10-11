@@ -4,10 +4,11 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
-import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.core.testing.util.TestClock
 import com.tailormyresume.feature.applications.impl.prototypeApplication
@@ -39,7 +40,7 @@ class ApplicationDetailSaveSingleFlightTest {
         backing.sendApplications(listOf(prototypeApplication("kb")))
         val viewModel = ApplicationDetailViewModel(
             applicationRepository = applicationRepository,
-            creditsRepository = TestCreditsRepository(),
+            creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(1)),
             setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, TestClock()),
             exportedPdfIntents = FakeExportedPdfIntents(),
             applicationId = "kb",

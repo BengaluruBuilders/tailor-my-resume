@@ -41,9 +41,8 @@ class SignInNarrowScreenshotTest {
     fun cancelledToast() {
         reduceMotion()
         composeRule.mainClock.autoAdvance = false
-        composeRule.showSignIn(fontScale = NARROW_DEVICE.fontScale) {
-            SignInRoute(SignInViewModel(ScriptedSignInGateway { SignInResult.Cancelled }))
-        }
+        val viewModel = SignInViewModel(ScriptedSignInGateway { SignInResult.Cancelled })
+        composeRule.showSignIn(fontScale = NARROW_DEVICE.fontScale) { SignInRoute(viewModel) }
         composeRule.onNodeWithText("Continue with Google").performClick()
         composeRule.mainClock.advanceTimeBy(400)
         composeRule.captureSignIn("signin_cancelled_toast", NARROW_DEVICE)

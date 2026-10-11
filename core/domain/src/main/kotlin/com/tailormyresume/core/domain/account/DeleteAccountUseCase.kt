@@ -17,6 +17,8 @@ import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.factCounts
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -42,11 +44,17 @@ class DeleteAccountUseCase @Inject constructor(
 
     suspend fun finishRemoval(): PendingWipeOutcome = finishPendingWipe()
 
+    fun observePreview(): Flow<AccountDeletionCounts> = combine(
+        applicationRepository.observeApplications(),
+        profileRepository.observeProfile(),
+        creditBalance.observeCredits(),
+    ) { applications, profile, credits -> countsOf(applications, profile, credits) }
+
     suspend fun preview(): AccountDeletionCounts = previewWith(creditBalance.cachedCredits())
 
     suspend fun refreshedPreview(): AccountDeletionCounts = previewWith(creditBalance.unusedCredits())
 
-    private suspend fun previewWith(credits: Int): AccountDeletionCounts {
+    private suspend fun previewWith(credits: Int?): AccountDeletionCounts {
         val applications = applicationRepository.observeApplications().first()
         val profile = profileRepository.observeProfile().first()
         return countsOf(applications, profile, credits)
@@ -58,9 +66,12 @@ class DeleteAccountUseCase @Inject constructor(
         val applications = applicationRepository.observeApplications().first()
         val profile = profileRepository.observeProfile().first()
         val exports = exportHistoryRepository.observeExports().first()
-        val counts = countsOf(applications, profile, creditBalance.unusedCredits())
         val tracksPendingWipe = serverAccountDeleter.deletesRemoteData
-        if (tracksPendingWipe && serverAlreadyClosedThisAccount()) return settlePendingWipe(counts, dataIntactIfOpen = false)
+        if (tracksPendingWipe && serverAlreadyClosedThisAccount()) {
+            val counts = countsOf(applications, profile, creditBalance.cachedCredits())
+            return settlePendingWipe(counts, dataIntactIfOpen = false)
+        }
+        val counts = countsOf(applications, profile, creditBalance.unusedCredits())
         val earlierAttempt = tracksPendingWipe && hasEarlierRequestedAttempt()
         if (tracksPendingWipe && !earlierAttempt && !markRequested()) return AccountDeletionResult.Failed(dataIntact = true)
         val deleteFailure = serverAccountDeleter.delete().exceptionOrNull()
@@ -164,10 +175,10 @@ class DeleteAccountUseCase @Inject constructor(
         latency.await(MockOperation.DELETE_ACCOUNT_STEP)
     }
 
-    private suspend fun countsOf(
+    private fun countsOf(
         applications: List<JobApplication>,
         profile: CandidateProfile?,
-        credits: Int,
+        credits: Int?,
     ) = AccountDeletionCounts(
         profileFacts = profile?.factCounts()?.total ?: 0,
         applications = applications.size,

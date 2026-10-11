@@ -10,6 +10,7 @@ import com.tailormyresume.core.model.EvidenceBullet
 import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.model.ProfileLimits
+import com.tailormyresume.core.model.continues
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -167,7 +168,19 @@ internal class EditRoleViewModel @AssistedInject constructor(
         val entries = if (original == null) {
             profile.entries.withExperienceInserted(edited)
         } else {
-            profile.entries.map { if (it.id == edited.id) edited else it }
+            val group = profile.entries.continuationGroupOf(original.id)
+            profile.entries.map { entry ->
+                when {
+                    entry.id == edited.id -> edited
+                    entry.id in group -> entry.copy(
+                        title = edited.title,
+                        organization = edited.organization,
+                        startDate = edited.startDate,
+                        endDate = edited.endDate,
+                    )
+                    else -> entry
+                }
+            }
         }
         finished = true
         profileRepository.saveProfile(profile.copy(entries = entries))
@@ -178,7 +191,8 @@ internal class EditRoleViewModel @AssistedInject constructor(
         val id = entryId ?: return
         val profile = profileRepository.observeProfile().first() ?: return
         finished = true
-        profileRepository.saveProfile(profile.copy(entries = profile.entries.filterNot { it.id == id }))
+        val group = profile.entries.continuationGroupOf(id)
+        profileRepository.saveProfile(profile.copy(entries = profile.entries.filterNot { it.id in group }))
         channel.send(EditRoleEvent.Deleted)
     }
 
@@ -256,4 +270,14 @@ private fun ProfileEntry.toDraft(): EditRoleDraft {
 private fun List<ProfileEntry>.withExperienceInserted(entry: ProfileEntry): List<ProfileEntry> {
     val position = indexOfFirst { it.category == EntryCategory.EXPERIENCE }
     return if (position < 0) this + entry else toMutableList().apply { add(position, entry) }
+}
+
+private fun List<ProfileEntry>.continuationGroupOf(entryId: String): Set<String> {
+    val index = indexOfFirst { it.id == entryId }
+    if (index < 0) return emptySet()
+    var first = index
+    while (first > 0 && this[first].continues(this[first - 1])) first--
+    var last = index
+    while (last < lastIndex && this[last + 1].continues(this[last])) last++
+    return subList(first, last + 1).mapTo(mutableSetOf()) { it.id }
 }

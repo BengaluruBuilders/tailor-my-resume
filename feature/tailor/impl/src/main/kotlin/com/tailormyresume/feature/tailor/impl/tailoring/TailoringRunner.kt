@@ -55,7 +55,7 @@ internal class TailoringRunner @Inject constructor(
                 applicationRepository.upsertApplication(
                     application.copy(
                         tailoredResume = tailored.copy(runId = runId),
-                        keywordCoverage = KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, tailored),
+                        keywordCoverage = KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, tailored, profile),
                         changesAcceptedAt = null,
                         updatedAt = clock.now(),
                     ),

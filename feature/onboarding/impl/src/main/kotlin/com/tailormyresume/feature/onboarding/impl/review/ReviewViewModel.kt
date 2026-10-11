@@ -50,17 +50,17 @@ internal class ReviewViewModel @Inject constructor(
         }
     }
 
-    fun onContinue() {
+    fun onContinue(displayedProfile: CandidateProfile?) {
         if (!continuing.compareAndSet(false, true)) return
         viewModelScope.launch {
             try {
-                eventChannel.trySend(
-                    when (markReviewed()) {
-                        is MarkReviewedResult.Reviewed -> ReviewEvent.Continue
-                        is MarkReviewedResult.RequiredInfoMissing -> ReviewEvent.MissingEndDate
-                        MarkReviewedResult.NothingToReview -> ReviewEvent.NothingToReview
-                    },
-                )
+                val event = when (markReviewed(displayedProfile)) {
+                    is MarkReviewedResult.Reviewed -> ReviewEvent.Continue
+                    is MarkReviewedResult.RequiredInfoMissing -> ReviewEvent.MissingEndDate
+                    MarkReviewedResult.NothingToReview -> ReviewEvent.NothingToReview
+                    MarkReviewedResult.ProfileChanged -> null
+                }
+                event?.let(eventChannel::trySend)
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (failure: Exception) {

@@ -2,8 +2,10 @@ package com.tailormyresume.feature.settings.impl.paywall
 
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.ApplicationPack
+import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.PurchaseFailureReason
 import com.tailormyresume.core.domain.PurchaseOutcome
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.offline.MockPackCatalogue
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.testing.util.MainDispatcherRule
@@ -13,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -30,7 +31,7 @@ class PaywallViewModelTest {
     private fun viewModel(
         gateway: CountingPaymentGateway = CountingPaymentGateway(),
         credits: com.tailormyresume.core.data.repository.CreditsRepository = RecordingCreditsRepository(),
-    ) = PaywallViewModel(gateway, credits, clock)
+    ) = PaywallViewModel(gateway, credits, AccountCreditBalance(gateway), clock)
 
     private fun TestScope.keepSubscribed(flow: Flow<*>) {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { flow.collect {} }
@@ -110,7 +111,7 @@ class PaywallViewModelTest {
         viewModel.onBuy()
 
         assertThat(events).containsExactly(PaywallEvent.Added(15))
-        assertThat(credits.calls).containsExactly("refresh", "record", "refresh").inOrder()
+        assertThat(credits.calls).containsExactly("record")
         val entry = credits.recorded.single()
         assertThat(entry.kind).isEqualTo(CreditLedgerKind.PURCHASE)
         assertThat(entry.amount).isEqualTo(15)
@@ -131,7 +132,7 @@ class PaywallViewModelTest {
 
         assertThat(events).containsExactly(PaywallEvent.PaymentFailed)
         assertThat(viewModel.uiState.value.busy).isFalse()
-        assertThat(credits.calls).containsExactly("refresh")
+        assertThat(credits.calls).isEmpty()
 
         gateway.scripted.withOutcome(fifteen, PurchaseOutcome.Success)
         viewModel.onBuy()
@@ -168,7 +169,7 @@ class PaywallViewModelTest {
         assertThat(gateway.purchaseCalls).isEqualTo(1)
         assertThat(events).isEmpty()
         assertThat(viewModel.uiState.value).isEqualTo(before)
-        assertThat(credits.calls).containsExactly("refresh")
+        assertThat(credits.calls).isEmpty()
     }
 
     @Test
@@ -184,7 +185,7 @@ class PaywallViewModelTest {
 
         assertThat(events).containsExactly(PaywallEvent.Pending)
         assertThat(credits.recorded).isEmpty()
-        assertThat(credits.calls).containsExactly("refresh")
+        assertThat(credits.calls).isEmpty()
         assertThat(viewModel.uiState.value.credits).isEqualTo(0)
         assertThat(viewModel.uiState.value.busy).isFalse()
     }
@@ -203,27 +204,30 @@ class PaywallViewModelTest {
     }
 
     @Test
-    fun restoreThatAddsCreditsToastsAddedAndRefreshes() = runTest {
-        val credits = RemoteStyleCreditsRepository(initialBalance = 1)
-        val viewModel = viewModel(CountingPaymentGateway(onRestore = { credits.serverBalance = 4 }), credits)
+    fun restoreCountsEntitlementIncreaseWithoutReadingLedgerBalance() = runTest {
+        val credits = RemoteStyleCreditsRepository(initialBalance = 99)
+        val gateway = CountingPaymentGateway(
+            initialEntitlement = PurchaseEntitlement(1, 0, emptyList()),
+            restoredEntitlement = PurchaseEntitlement(1, 3, emptyList()),
+        )
+        val viewModel = viewModel(gateway, credits)
         keepSubscribed(viewModel.uiState)
         val events = collectEvents(viewModel)
 
         viewModel.onRestore()
 
         assertThat(events).containsExactly(PaywallEvent.Added(3))
-        assertThat(credits.refreshCalls).isEqualTo(3)
+        assertThat(credits.refreshCalls).isEqualTo(0)
         assertThat(viewModel.uiState.value.credits).isEqualTo(4)
     }
 
     @Test
-    fun restoreWithBalanceNotYetLoadedDoesNotClaimTheServerBalanceWasRestored() = runTest {
-        val credits = RemoteStyleCreditsRepository(initialBalance = 0, serverBalance = 3, failingRefreshes = setOf(1))
-        val viewModel = viewModel(credits = credits)
+    fun loadingExistingEntitlementDoesNotClaimRestoredCredits() = runTest {
+        val gateway = CountingPaymentGateway(initialEntitlement = PurchaseEntitlement(0, 3, emptyList()))
+        val viewModel = viewModel(gateway)
         keepSubscribed(viewModel.uiState)
         val events = collectEvents(viewModel)
-        advanceUntilIdle()
-        assertThat(viewModel.uiState.value.credits).isEqualTo(0)
+        gateway.restoredEntitlement = PurchaseEntitlement(0, 3, emptyList())
 
         viewModel.onRestore()
 
@@ -232,32 +236,16 @@ class PaywallViewModelTest {
     }
 
     @Test
-    fun restoreWhoseBalanceCannotBeReadBeforehandReportsFailure() = runTest {
-        val credits = RemoteStyleCreditsRepository(initialBalance = 0, serverBalance = 3, failingRefreshes = setOf(1, 2))
-        val gateway = CountingPaymentGateway()
-        val viewModel = viewModel(gateway, credits)
+    fun unavailableBeforeRestoreDoesNotClaimUnknownBalanceWasRestored() = runTest {
+        val gateway = CountingPaymentGateway(entitlementFailure = IOException("wallet unavailable"))
+        val viewModel = viewModel(gateway)
         keepSubscribed(viewModel.uiState)
         val events = collectEvents(viewModel)
-        advanceUntilIdle()
 
         viewModel.onRestore()
 
         assertThat(events).containsExactly(PaywallEvent.RestoreFailed)
         assertThat(gateway.restoreCalls).isEqualTo(0)
-    }
-
-    @Test
-    fun restoreWhoseRefreshFailsReportsFailureNotNoneFound() = runTest {
-        val credits = RemoteStyleCreditsRepository(initialBalance = 1, failingRefreshes = setOf(3))
-        val viewModel = viewModel(CountingPaymentGateway(onRestore = { credits.serverBalance = 4 }), credits)
-        keepSubscribed(viewModel.uiState)
-        val events = collectEvents(viewModel)
-        advanceUntilIdle()
-
-        viewModel.onRestore()
-
-        assertThat(events).containsExactly(PaywallEvent.RestoreFailed)
-        assertThat(viewModel.uiState.value.busy).isFalse()
     }
 
     @Test
@@ -301,22 +289,16 @@ class PaywallViewModelTest {
     }
 
     @Test
-    fun balanceChangesOnlyAfterRepositoryRefresh() = runTest {
-        val credits = RemoteStyleCreditsRepository(initialBalance = 1)
+    fun purchaseBalanceComesFromGatewayEvenWhenHistoryRefreshIsBlocked() = runTest {
+        val credits = RemoteStyleCreditsRepository(initialBalance = 99, refreshGate = CompletableDeferred())
         val viewModel = viewModel(credits = credits)
         keepSubscribed(viewModel.uiState)
         val events = collectEvents(viewModel)
-        val gate = CompletableDeferred<Unit>()
-        credits.refreshGate = gate
-        credits.serverBalance = 16
 
         viewModel.onBuy()
 
         assertThat(credits.recordCalls).isEqualTo(1)
-        assertThat(viewModel.uiState.value.credits).isEqualTo(1)
-        assertThat(events).isEmpty()
-        gate.complete(Unit)
-        assertThat(viewModel.uiState.value.credits).isEqualTo(16)
+        assertThat(viewModel.uiState.value.credits).isEqualTo(15)
         assertThat(events).containsExactly(PaywallEvent.Added(15))
     }
 }

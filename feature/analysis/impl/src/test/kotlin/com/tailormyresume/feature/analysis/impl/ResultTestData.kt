@@ -1,12 +1,17 @@
 package com.tailormyresume.feature.analysis.impl
 
 import com.tailormyresume.core.model.ApplicationStatus
+import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.EntryCategory
+import com.tailormyresume.core.model.EvidenceBullet
+import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.JobRequirement
 import com.tailormyresume.core.model.KeywordCoverage
 import com.tailormyresume.core.model.MatchStatus
+import com.tailormyresume.core.model.ProfileEntry
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.QuickQuestion
 import com.tailormyresume.core.model.RequirementMatch
@@ -44,6 +49,24 @@ internal object ResultTestData {
         RequirementMatch(powerBi, MatchStatus.PARTIAL, listOf("e2"), "Power BI at your internship, no Tableau"),
         RequirementMatch(stakeholders, MatchStatus.GAP, emptyList(), null),
         RequirementMatch(python, MatchStatus.GAP, emptyList(), "Not in your resume"),
+    )
+
+    val profile = CandidateProfile(
+        fullName = "Candidate",
+        email = "",
+        phone = "",
+        headline = "",
+        skills = emptyList(),
+        entries = listOf(
+            ProfileEntry(
+                "e1", EntryCategory.EXPERIENCE, "Analyst", "Company", "2020", "2021",
+                listOf(EvidenceBullet("e1-b1", "Used SQL and Excel")), FactSource.IMPORTED, true,
+            ),
+            ProfileEntry(
+                "e2", EntryCategory.EXPERIENCE, "Analyst", "Company", "2021", "2022",
+                listOf(EvidenceBullet("e2-b1", "Built Power BI dashboards")), FactSource.IMPORTED, true,
+            ),
+        ),
     )
 
     val question = QuickQuestion(

@@ -75,6 +75,6 @@
         <item quantity="other">%1$d degrees</item>
     </plurals>
 
-    <string name="feature_onboarding_impl_file_size_kb">%1$d KB</string>
-    <string name="feature_onboarding_impl_file_size_mb">%1$s MB</string>
+    <string name="feature_onboarding_impl_file_size_kb">%1$d KB</string>
+    <string name="feature_onboarding_impl_file_size_mb">%1$s MB</string>
 </resources>

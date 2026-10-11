@@ -201,7 +201,10 @@ internal fun TmrShell(
                             leading = chrome.leading,
                             holdLeadingSpace = holdLeadingSpace,
                             onLeading = {
-                                if (chrome.leading == TmrTopBarLeading.Close && key is ExportedNavKey) {
+                                val registered = chromeActions.backHandler
+                                if (registered != null) {
+                                    registered()
+                                } else if (chrome.leading == TmrTopBarLeading.Close && key is ExportedNavKey) {
                                     navigator.root(DefaultApplicationsNavKey)
                                 } else {
                                     navigator.goBack()
@@ -268,12 +271,13 @@ private fun TmrNavDisplay(
     modifier: Modifier = Modifier,
 ) {
     val currentOnSettled by rememberUpdatedState(onSettled)
+    val chromeActions = LocalChromeActions.current
     val tabbedProvider = remember(entryProvider) { withTabMetadata(entryProvider) { currentOnSettled(it) } }
     val transitions = rememberTmrNavTransitions()
     Box(modifier = modifier) {
         NavDisplay(
             entries = navigationState.toEntries(tabbedProvider),
-            onBack = { navigator.goBack() },
+            onBack = { chromeActions.backHandler?.invoke() ?: navigator.goBack() },
             transitionSpec = {
                 tabDirection(initialState, targetState)?.let { transitions.tab(this, it, pop = false) }
                     ?: transitions.forward(this, hierarchical = !targetState.isTopLevel())

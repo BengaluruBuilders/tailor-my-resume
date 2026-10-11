@@ -55,7 +55,12 @@ class EditResumeScreenshots {
         device: TmrTestDevice,
     ) {
         rule.captureResultScreen(screenName, device) {
-            EditResumeScreen(state = state, onBulletChange = { _, _ -> })
+            EditResumeScreen(
+                state = state,
+                onBulletChange = { _, _ -> },
+                onSummaryChange = {},
+                onSkillsChange = {},
+            )
         }
     }
 
@@ -106,6 +111,8 @@ class EditResumeScreenshots {
                         changedId = bulletId
                         changedText = text
                     },
+                    onSummaryChange = {},
+                    onSkillsChange = {},
                 )
             }
         }

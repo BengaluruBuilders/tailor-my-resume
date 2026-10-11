@@ -321,7 +321,7 @@ class JobViewModelTest {
         assertThat(saved.job).isEqualTo(RESULT.job)
         assertThat(saved.gapAnalysis).isEqualTo(RESULT.gap)
         assertThat(saved.location).isEqualTo(RESULT.job.location.orEmpty())
-        assertThat(saved.keywordCoverage).isEqualTo(KeywordCoverageCalculator.compute(RESULT.gap.matches, null, null))
+        assertThat(saved.keywordCoverage).isEqualTo(KeywordCoverageCalculator.compute(RESULT.gap.matches, null, null, profile = PrototypeFixtures.returning().profile))
         assertThat(saved.createdAt).isEqualTo(clock.instant)
         assertThat(saved.updatedAt).isEqualTo(clock.instant)
         assertThat(events.filterIsInstance<JobEvent.Analyzed>()).containsExactly(JobEvent.Analyzed(saved.id))

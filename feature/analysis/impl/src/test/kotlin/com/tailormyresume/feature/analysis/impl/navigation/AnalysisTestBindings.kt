@@ -7,12 +7,15 @@ import com.tailormyresume.core.domain.ImportedJob
 import com.tailormyresume.core.domain.JobAnalysisResult
 import com.tailormyresume.core.domain.JobAnalysisSource
 import com.tailormyresume.core.domain.JobImporter
+import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestContentReportRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -31,6 +34,10 @@ object AnalysisTestBindings {
 
     @Provides
     fun contentReportRepository(): ContentReportRepository = TestContentReportRepository()
+
+    @Provides
+    @Singleton
+    fun paymentGateway(): PaymentGateway = TestPaymentGateway().withFreeCredits(0)
 
     @Provides
     fun remoteLedgerSource(): RemoteLedgerSource = NoRemoteLedger()

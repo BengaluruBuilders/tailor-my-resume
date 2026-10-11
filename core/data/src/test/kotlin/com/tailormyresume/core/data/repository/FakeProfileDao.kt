@@ -19,6 +19,10 @@ class FakeProfileDao : ProfileDao() {
             savedProfile?.let { PopulatedProfile(it, savedEntries) }
         }
 
+    override suspend fun readProfile(): ProfileEntity? = profile.value
+
+    override suspend fun readEntries(): List<ProfileEntryEntity> = entries.value.sortedBy { it.position }
+
     override suspend fun upsertProfile(profile: ProfileEntity) {
         this.profile.value = profile
     }

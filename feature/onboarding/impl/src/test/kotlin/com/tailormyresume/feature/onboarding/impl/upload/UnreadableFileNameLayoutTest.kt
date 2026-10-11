@@ -4,7 +4,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.designsystem.component.content.TmrFitTextLayoutKey
+import com.tailormyresume.core.designsystem.component.TmrWholeWordTextLayoutKey
 import com.tailormyresume.feature.onboarding.impl.signin.NARROW_DEVICE
 import com.tailormyresume.feature.onboarding.impl.signin.NARROW_QUALIFIERS
 import org.junit.Rule
@@ -26,7 +26,7 @@ class UnreadableFileNameLayoutTest {
         }
 
         val layout = checkNotNull(
-            composeRule.onNodeWithText("PriyaDeshmukhResume2026.pdf").fetchSemanticsNode().config[TmrFitTextLayoutKey].invoke(),
+            composeRule.onNodeWithText("PriyaDeshmukhResume2026.pdf").fetchSemanticsNode().config[TmrWholeWordTextLayoutKey].invoke(),
         )
         val lines = (0 until layout.lineCount).map { line ->
             layout.layoutInput.text.text.substring(layout.getLineStart(line), layout.getLineEnd(line, visibleEnd = false))

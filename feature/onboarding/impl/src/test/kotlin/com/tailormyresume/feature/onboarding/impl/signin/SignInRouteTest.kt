@@ -26,7 +26,8 @@ class SignInRouteTest {
 
     private fun showRoute(gateway: ScriptedSignInGateway) {
         reduceMotion()
-        composeRule.showSignIn { SignInRoute(SignInViewModel(gateway)) }
+        val viewModel = SignInViewModel(gateway)
+        composeRule.showSignIn { SignInRoute(viewModel) }
     }
 
     @Test

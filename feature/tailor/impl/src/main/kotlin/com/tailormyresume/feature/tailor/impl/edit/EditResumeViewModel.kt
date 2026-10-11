@@ -5,13 +5,17 @@ import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.ResumeSettingsRepository
+import com.tailormyresume.core.data.repository.TailoringReviewStateRepository
+import com.tailormyresume.core.domain.UpdateBulletDecisionUseCase
+import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.ResumeSettings
 import com.tailormyresume.core.model.TailoredBullet
 import com.tailormyresume.core.model.TailoredResume
-import com.tailormyresume.feature.tailor.impl.HandEditBulletUseCase
+import com.tailormyresume.core.model.TailoredSkills
+import com.tailormyresume.core.model.TailoredText
 import com.tailormyresume.feature.tailor.impl.document.ResumeDocumentAssembler
 import com.tailormyresume.feature.tailor.impl.document.ResumeEntry
 import com.tailormyresume.feature.tailor.impl.export.ResumePdfRenderer
@@ -20,6 +24,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -41,12 +46,13 @@ internal class EditResumeViewModel @AssistedInject constructor(
     private val profileRepository: ProfileRepository,
     private val settingsRepository: ResumeSettingsRepository,
     private val assembler: ResumeDocumentAssembler,
-    private val handEditBullet: HandEditBulletUseCase,
+    private val reviewState: TailoringReviewStateRepository,
+    private val clock: kotlin.time.Clock,
     private val renderer: ResumePdfRenderer,
     @Assisted val applicationId: String,
 ) : ViewModel() {
 
-    private val drafts = MutableStateFlow<Map<String, String>>(emptyMap())
+    private val drafts = MutableStateFlow(EditResumeDrafts())
 
     private val saveMutex = Mutex()
 
@@ -71,24 +77,68 @@ internal class EditResumeViewModel @AssistedInject constructor(
     val events: Flow<EditResumeEvent> = eventChannel.receiveAsFlow()
 
     fun onBulletChange(bulletId: String, text: String) {
-        drafts.value = drafts.value + (bulletId to text)
+        drafts.value = drafts.value.copy(bullets = drafts.value.bullets + (bulletId to text))
+    }
+
+    fun onSummaryChange(text: String) {
+        drafts.value = drafts.value.copy(summary = text)
+    }
+
+    fun onSkillsChange(text: String) {
+        drafts.value = drafts.value.copy(skills = text)
     }
 
     fun onSave() {
         viewModelScope.launch {
-            saveMutex.withLock {
-                val current = drafts.value
-                val application = applicationRepository.observeApplication(applicationId).first()
-                val stored = application?.tailoredResume?.bullets.orEmpty()
-                for ((bulletId, text) in current) {
-                    val edited = text.trim()
-                    if (edited.isEmpty()) continue
-                    val bullet = stored.firstOrNull { it.id == bulletId } ?: continue
-                    if (edited == bullet.effectiveText()) continue
-                    handEditBullet(applicationId, bulletId, edited)
+            try {
+                saveMutex.withLock {
+                    val current = drafts.value
+                    val application = applicationRepository.observeApplication(applicationId).first()
+                    val profile = profileRepository.observeProfile().first()
+                    val resume = application?.tailoredResume
+                    if (application == null || profile == null || resume == null) return@withLock
+                    val stored = resume.bullets
+                    val editedBulletIds = mutableListOf<String>()
+                    val bullets = stored.map { bullet ->
+                        val text = current.bullets[bullet.id] ?: return@map bullet
+                        val edited = text.trim()
+                        if (edited.isEmpty() || edited == bullet.effectiveText()) return@map bullet
+                        editedBulletIds += bullet.id
+                        bullet.copy(
+                            proposedText = edited,
+                            decision = BulletDecision.ACCEPTED,
+                            violations = emptyList(),
+                            editTypes = emptyList(),
+                            keywordsUsed = emptyList(),
+                        )
+                    }
+                    val edited = applyDrafts(resume.copy(bullets = bullets), profile, current)
+                    if (edited != resume) {
+                        val keywordCoverage = application.gapAnalysis?.let { gap ->
+                            KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, edited, profile)
+                        } ?: application.keywordCoverage
+                        applicationRepository.upsertApplication(
+                            application.copy(
+                                tailoredResume = edited,
+                                keywordCoverage = keywordCoverage,
+                                updatedAt = clock.now(),
+                            ),
+                        )
+                        editedBulletIds.forEach { reviewState.markEdited(applicationId, it) }
+                        if (current.summary != null && edited.summary != resume.summary) {
+                            reviewState.markEdited(applicationId, UpdateBulletDecisionUseCase.SUMMARY_CHANGE_ID)
+                        }
+                        if (current.skills != null && edited.skills != resume.skills) {
+                            reviewState.markEdited(applicationId, UpdateBulletDecisionUseCase.SKILLS_CHANGE_ID)
+                        }
+                    }
+                    drafts.value = EditResumeDrafts()
+                    eventChannel.send(EditResumeEvent.Saved)
                 }
-                drafts.value = emptyMap()
-                eventChannel.send(EditResumeEvent.Saved)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                eventChannel.send(EditResumeEvent.SaveFailed)
             }
         }
     }
@@ -97,12 +147,12 @@ internal class EditResumeViewModel @AssistedInject constructor(
         application: JobApplication?,
         profile: CandidateProfile?,
         settings: ResumeSettings,
-        currentDrafts: Map<String, String>,
+        currentDrafts: EditResumeDrafts,
     ): EditResumeUiState {
         val resume = application?.tailoredResume
         if (application == null || profile == null || resume == null) return EditResumeUiState.NotFound
-        if (currentDrafts.isNotEmpty()) delay(FIT_DEBOUNCE_MS)
-        val edited = applyDrafts(resume.withPendingAccepted(), currentDrafts)
+        if (currentDrafts.isNotEmpty) delay(FIT_DEBOUNCE_MS)
+        val edited = applyDrafts(resume.withPendingAccepted(), profile, currentDrafts)
         val document = assembler.assemble(profile, edited)
         val used = mutableSetOf<String>()
         val roles = document.sections.flatMap { section ->
@@ -128,10 +178,14 @@ internal class EditResumeViewModel @AssistedInject constructor(
         )
     }
 
-    private fun applyDrafts(resume: TailoredResume, currentDrafts: Map<String, String>): TailoredResume =
+    private fun applyDrafts(
+        resume: TailoredResume,
+        profile: CandidateProfile,
+        currentDrafts: EditResumeDrafts,
+    ): TailoredResume =
         resume.copy(
             bullets = resume.bullets.map { bullet ->
-                val draft = currentDrafts[bullet.id]?.trim()
+                val draft = currentDrafts.bullets[bullet.id]?.trim()
                 if (draft.isNullOrEmpty()) {
                     bullet
                 } else {
@@ -142,6 +196,21 @@ internal class EditResumeViewModel @AssistedInject constructor(
                     )
                 }
             },
+            summary = currentDrafts.summary?.let { text ->
+                TailoredText(
+                    text = text.trim(),
+                    original = resume.summary?.original ?: profile.summary.trim(),
+                    sourceIds = resume.summary?.sourceIds.orEmpty(),
+                    decision = BulletDecision.ACCEPTED,
+                )
+            } ?: resume.summary,
+            skills = currentDrafts.skills?.let { text ->
+                TailoredSkills(
+                    skills = text.split(',').map(String::trim).filter(String::isNotEmpty),
+                    original = resume.skills?.original ?: profile.skills,
+                    decision = BulletDecision.ACCEPTED,
+                )
+            } ?: resume.skills,
         )
 
     private fun TailoredResume.match(text: String, used: MutableSet<String>): TailoredBullet? =
@@ -165,6 +234,14 @@ internal class EditResumeViewModel @AssistedInject constructor(
     interface Factory {
         fun create(applicationId: String): EditResumeViewModel
     }
+}
+
+private data class EditResumeDrafts(
+    val bullets: Map<String, String> = emptyMap(),
+    val summary: String? = null,
+    val skills: String? = null,
+) {
+    val isNotEmpty: Boolean get() = bullets.isNotEmpty() || summary != null || skills != null
 }
 
 private const val ANSWER_SOURCE_PREFIX = "ans-"

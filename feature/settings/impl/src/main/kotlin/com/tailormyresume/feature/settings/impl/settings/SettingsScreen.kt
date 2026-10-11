@@ -76,7 +76,8 @@ internal fun SettingsScreen(
             AccountIdentity(email = content.email)
             SettingsValueRow(
                 label = stringResource(R.string.feature_settings_impl_credits_row),
-                value = pluralStringResource(R.plurals.feature_settings_impl_credits_left, content.credits, content.credits),
+                value = content.credits?.let { pluralStringResource(R.plurals.feature_settings_impl_credits_left, it, it) }
+                    ?: stringResource(R.string.feature_settings_impl_credits_unavailable),
                 onClick = actions.onCredits,
                 showChevron = true,
                 showDivider = false,

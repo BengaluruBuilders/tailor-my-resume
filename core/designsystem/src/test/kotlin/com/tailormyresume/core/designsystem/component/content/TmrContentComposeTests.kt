@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tailormyresume.core.designsystem.component.TmrPreviewTheme
+import com.tailormyresume.core.designsystem.component.TmrWholeWordTextLayoutKey
 import com.tailormyresume.core.designsystem.component.breaksInsideWord
 import com.tailormyresume.core.designsystem.theme.LocalTmrMotion
 import com.tailormyresume.core.designsystem.theme.TmrMotionDefaults
@@ -122,7 +123,7 @@ private fun assertWrapsAtWordBoundaries(node: SemanticsNode) {
 }
 
 private fun textLayouts(node: SemanticsNode): List<TextLayoutResult> {
-    val fitted = node.config.getOrNull(TmrFitTextLayoutKey)?.invoke()
+    val fitted = node.config.getOrNull(TmrWholeWordTextLayoutKey)?.invoke()
     if (fitted != null) return listOf(fitted)
     return mutableListOf<TextLayoutResult>().also {
         node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(it)
@@ -629,6 +630,16 @@ class TmrContentFontScaleTest {
             .flatMap { textLayouts(it) }
             .single { it.layoutInput.text.text.replace("\u200B", "") == LONG_FILE_NAME }
         assertTrue("file name did not wrap", nameLayout.lineCount > 1)
+    }
+
+    @Test
+    fun fileNameReadAsTextDoesNotExposeInsertedBreakCharacters() {
+        rule.assertStaysInsideContainer {
+            TmrFileCard(fileName = LONG_FILE_NAME, meta = FILE_META, onShare = {}, onOpen = {})
+        }
+        val name = rule.onNodeWithText(LONG_FILE_NAME, useUnmergedTree = true).fetchSemanticsNode()
+        assertEquals(listOf(LONG_FILE_NAME), name.config[SemanticsProperties.Text].map { it.text })
+        assertTrue(requireNotNull(name.config.getOrNull(TmrWholeWordTextLayoutKey)?.invoke()).layoutInput.text.text.contains('\u200B'))
     }
 
     @Test

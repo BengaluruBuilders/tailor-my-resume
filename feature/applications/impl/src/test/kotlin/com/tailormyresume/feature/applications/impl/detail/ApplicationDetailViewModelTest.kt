@@ -3,12 +3,16 @@ package com.tailormyresume.feature.applications.impl.detail
 import android.content.Intent
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.KeywordCoverage
 import com.tailormyresume.core.model.QuickQuestion
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
@@ -16,6 +20,7 @@ import com.tailormyresume.core.testing.util.TestClock
 import com.tailormyresume.feature.applications.impl.grant
 import com.tailormyresume.feature.applications.impl.prototypeApplication
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -30,6 +35,8 @@ class ApplicationDetailViewModelTest {
 
     private val applicationRepository = TestApplicationRepository()
     private val creditsRepository = TestCreditsRepository()
+    private val paymentGateway = TestPaymentGateway().withFreeCredits(0)
+    private val creditBalance = AccountCreditBalance(paymentGateway)
     private val intents = FakeExportedPdfIntents()
     private val clock = TestClock()
     private val initialZone: TimeZone = TimeZone.getDefault()
@@ -44,9 +51,9 @@ class ApplicationDetailViewModelTest {
         TimeZone.setDefault(initialZone)
     }
 
-    private fun viewModel(applicationId: String = "kb") = ApplicationDetailViewModel(
+    private fun viewModel(applicationId: String = "kb", balance: AccountCreditBalance = creditBalance) = ApplicationDetailViewModel(
         applicationRepository = applicationRepository,
-        creditsRepository = creditsRepository,
+        creditBalance = balance,
         setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, clock),
         exportedPdfIntents = intents,
         applicationId = applicationId,
@@ -168,6 +175,7 @@ class ApplicationDetailViewModelTest {
     fun retailorWithCreditsOpensQuickQuestionWhenAnalysisHasQuestion() = runTest {
         seed(prototypeApplication("kb").copy(gapAnalysis = questionAnalysis))
         creditsRepository.sendLedger(listOf(grant(2)))
+        paymentGateway.withFreeCredits(2)
         val viewModel = viewModel()
         viewModel.ready()
 
@@ -182,6 +190,7 @@ class ApplicationDetailViewModelTest {
     fun retailorWithCreditsStartsTailoringWhenNoQuestion() = runTest {
         seed(prototypeApplication("kb").copy(gapAnalysis = questionAnalysis.copy(question = null)))
         creditsRepository.sendLedger(listOf(grant(1)))
+        paymentGateway.withFreeCredits(1)
         val viewModel = viewModel()
         viewModel.ready()
 
@@ -206,9 +215,26 @@ class ApplicationDetailViewModelTest {
     }
 
     @Test
+    fun retailorWithUnknownWalletShowsUnavailableWithoutPaywall() = runTest {
+        seed(prototypeApplication("kb"))
+        val gateway = object : PaymentGateway by paymentGateway {
+            override fun observeEntitlement() = flowOf(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
+        }
+        val viewModel = viewModel(balance = AccountCreditBalance(gateway))
+        viewModel.ready()
+
+        viewModel.events.test {
+            viewModel.onRetailor()
+            assertThat(awaitItem()).isEqualTo(ApplicationDetailEvent.BalanceUnavailable)
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun retailorSpendsNoCredit() = runTest {
         seed(prototypeApplication("kb"))
         creditsRepository.sendLedger(listOf(grant(3)))
+        paymentGateway.withFreeCredits(3)
         val viewModel = viewModel()
         viewModel.ready()
 
@@ -219,6 +245,7 @@ class ApplicationDetailViewModelTest {
 
         assertThat(creditsRepository.observeLedger().first()).containsExactly(grant(3))
         assertThat(creditsRepository.observeBalance().first()).isEqualTo(3)
+        assertThat(paymentGateway.entitlement().totalCredits).isEqualTo(3)
     }
 
     @Test

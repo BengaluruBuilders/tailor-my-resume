@@ -49,7 +49,7 @@ internal class TailoredViewModel @AssistedInject constructor(
             contact = document.contactLine,
             blocks = document.toPaperBlocks(previewed),
             coveragePercent = application.gapAnalysis
-                ?.let { KeywordCoverageCalculator.compute(it.matches, application.quickAnswer, previewed).final }
+                ?.let { KeywordCoverageCalculator.compute(it.matches, application.quickAnswer, previewed, profile).final }
                 ?: 0,
             changes = resume.toChangeCards(profile),
             accepted = application.changesAcceptedAt != null,

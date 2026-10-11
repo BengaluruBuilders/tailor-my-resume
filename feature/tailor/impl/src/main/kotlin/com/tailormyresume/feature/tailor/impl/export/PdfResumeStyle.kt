@@ -29,6 +29,7 @@ internal class PdfResumeStyle(pass: FitPass = FitPass.Regular) {
             textSize = size
             this.color = color
             typeface = Typeface.create(Typeface.SANS_SERIF, if (bold) Typeface.BOLD else Typeface.NORMAL)
+            fontFeatureSettings = "'liga' 0, 'clig' 0"
         }
 
     private companion object {

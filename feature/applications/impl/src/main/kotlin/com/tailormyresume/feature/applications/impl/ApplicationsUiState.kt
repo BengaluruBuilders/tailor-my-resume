@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.tailormyresume.core.designsystem.component.content.TmrApplicationStatus
 
 @Immutable
-internal data class ApplicationsHeader(val credits: Int, val initials: String)
+internal data class ApplicationsHeader(val credits: Int?, val initials: String)
 
 @Immutable
 internal data class ApplicationRow(

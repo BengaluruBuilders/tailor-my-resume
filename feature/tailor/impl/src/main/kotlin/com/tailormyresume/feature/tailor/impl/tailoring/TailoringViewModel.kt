@@ -3,6 +3,7 @@ package com.tailormyresume.feature.tailor.impl.tailoring
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
+import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.domain.coverage.ScreenForKeywords
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -31,6 +32,7 @@ private const val STICKER_LIMIT = 3
 internal class TailoringViewModel @AssistedInject constructor(
     private val runner: TailoringRunner,
     applicationRepository: ApplicationRepository,
+    profileRepository: ProfileRepository,
     @Assisted("applicationId") val applicationId: String,
     @Assisted("runId") runId: String,
 ) : ViewModel() {
@@ -70,8 +72,11 @@ internal class TailoringViewModel @AssistedInject constructor(
     val uiState: StateFlow<TailoringUiState> = combine(
         progressState,
         applicationRepository.observeApplication(applicationId),
-    ) { percent, application ->
-        val keywords = application?.gapAnalysis?.let { ScreenForKeywords(it.matches) }
+        profileRepository.observeProfile(),
+    ) { percent, application, profile ->
+        val keywords = profile?.let { candidate ->
+            application?.gapAnalysis?.let { ScreenForKeywords(it.matches, candidate) }
+        }
         TailoringUiState(
             percent = percent,
             rows = tailoringRows(percent, application?.quickAnswer.addsExample()),

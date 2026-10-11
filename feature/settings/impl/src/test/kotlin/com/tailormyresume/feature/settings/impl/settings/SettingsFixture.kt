@@ -1,5 +1,6 @@
 package com.tailormyresume.feature.settings.impl.settings
 
+import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.account.AccountData
@@ -66,10 +67,10 @@ internal class CountingSignInGateway(
 internal class SettingsFixture(
     val exporter: AccountDataExporter = TestAccountDataExporter(),
     gate: CompletableDeferred<Unit>? = null,
+    val payment: PaymentGateway = TestPaymentGateway().withFreeCredits(5),
 ) {
     val session = TestSessionRepository()
     val credits = TestCreditsRepository()
-    val payment = TestPaymentGateway().withFreeCredits(5)
     val settings = TestResumeSettingsRepository()
     val signIn = CountingSignInGateway(TestSignInGateway(session), gate)
 

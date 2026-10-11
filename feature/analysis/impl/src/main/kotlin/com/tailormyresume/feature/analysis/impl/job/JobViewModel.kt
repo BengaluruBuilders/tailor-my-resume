@@ -138,7 +138,7 @@ internal class JobViewModel @Inject constructor(
                     createdAt = now,
                     updatedAt = now,
                     location = result.job.location.orEmpty(),
-                    keywordCoverage = KeywordCoverageCalculator.compute(result.gap.matches, null, null),
+                    keywordCoverage = KeywordCoverageCalculator.compute(result.gap.matches, null, null, profile),
                 )
                 applicationRepository.upsertApplication(application)
                 draftStore.clear()

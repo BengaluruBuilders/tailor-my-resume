@@ -213,6 +213,17 @@ class ProfileViewModelTest {
     }
 
     @Test
+    fun splitRole_countsAsOneExperience() = runTest {
+        val viewModel = viewModel()
+        collectUiState(viewModel)
+        val profile = PrototypeFixtures.returning().profile
+        val role = profile.entries.first { it.category == EntryCategory.EXPERIENCE }
+        profileRepository.sendProfile(profile.copy(entries = profile.entries.flatMap { entry -> if (entry == role) listOf(entry, entry.copy(id = "${entry.id}-2")) else listOf(entry) }))
+
+        assertThat(viewModel.content().experienceCount).isEqualTo(3)
+    }
+
+    @Test
     fun blankLinkedin_showsAddTag() = runTest {
         val viewModel = viewModel()
         collectUiState(viewModel)

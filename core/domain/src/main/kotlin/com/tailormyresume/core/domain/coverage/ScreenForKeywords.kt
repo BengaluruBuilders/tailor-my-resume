@@ -1,7 +1,7 @@
 package com.tailormyresume.core.domain.coverage
 
 import com.tailormyresume.core.domain.offline.SkillLexicon
-import com.tailormyresume.core.model.MatchStatus
+import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.RequirementMatch
 
 data class KeywordScreen(val have: List<String>, val missing: List<String>) {
@@ -9,13 +9,9 @@ data class KeywordScreen(val have: List<String>, val missing: List<String>) {
 }
 
 object ScreenForKeywords {
-    operator fun invoke(matches: List<RequirementMatch>): KeywordScreen {
-        val (haveMatches, missingMatches) = matches.partition {
-            it.status == MatchStatus.MET || it.status == MatchStatus.PARTIAL
-        }
-        val have = distinctDisplayNames(haveMatches)
-        val haveKeys = have.map(String::lowercase).toSet()
-        val missing = distinctDisplayNames(missingMatches).filter { it.lowercase() !in haveKeys }
+    operator fun invoke(matches: List<RequirementMatch>, profile: CandidateProfile): KeywordScreen {
+        val haveKeys = evidencedKeywords(matches, profile)
+        val (have, missing) = distinctDisplayNames(matches).partition { it.lowercase() in haveKeys }
         return KeywordScreen(have = have, missing = missing)
     }
 

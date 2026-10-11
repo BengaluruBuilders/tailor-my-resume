@@ -84,7 +84,7 @@ class SaveImportedProfileUseCaseTest {
                     entry("W-03", EntryCategory.EDUCATION, title = "Kept degree", source = FactSource.USER_ANSWER),
                     entry("W-04", EntryCategory.CERTIFICATION, title = "Old import", source = FactSource.IMPORTED),
                 ),
-            ),
+            ).copy(contactUserStated = true),
         )
         val parsed = profile(
             fullName = "Parsed Name",
@@ -134,7 +134,7 @@ class SaveImportedProfileUseCaseTest {
 
     @Test
     fun userStatedNameKeepsTheWholeExistingContact() = runTest {
-        repository.sendProfile(profile(fullName = "Asha Rao", entries = emptyList()))
+        repository.sendProfile(profile(fullName = "Asha Rao", entries = emptyList()).copy(contactUserStated = true))
         val parsed = profile(
             fullName = "Priya Deshmukh",
             email = "priya@example.com",
@@ -201,7 +201,7 @@ class SaveImportedProfileUseCaseTest {
 
     @Test
     fun userStatedContactKeepsItsBlankLinksHeadlineAndSummary() = runTest {
-        repository.sendProfile(profile(fullName = "Asha Rao", entries = emptyList()))
+        repository.sendProfile(profile(fullName = "Asha Rao", entries = emptyList()).copy(contactUserStated = true))
         val parsed = profile(
             fullName = "Priya Deshmukh",
             linkedinUrl = "https://linkedin.example.com/priya",
@@ -241,6 +241,27 @@ class SaveImportedProfileUseCaseTest {
         val saved = checkNotNull(repository.observeProfile().first())
         assertThat(listOf(saved.fullName, saved.linkedinUrl, saved.portfolioUrl, saved.headline, saved.summary))
             .containsExactly("Priya Deshmukh", "https://linkedin.example.com/priya", "", "", "").inOrder()
+    }
+
+    @Test
+    fun userStatedRoleDoesNotProtectImportedContactOnReimport() = runTest {
+        repository.sendProfile(
+            profile(
+                fullName = "Asha Rao",
+                email = "asha@example.com",
+                entries = listOf(entry("W-01", EntryCategory.EXPERIENCE, source = FactSource.USER_STATED)),
+            ).copy(sourceFileName = "old.pdf", contactUserStated = false),
+        )
+        val parsed = profile(
+            fullName = "Priya Deshmukh",
+            email = "priya@example.com",
+            entries = listOf(entry("x1", EntryCategory.EXPERIENCE)),
+        )
+
+        useCase.invoke(parsed, "new.pdf")
+
+        val saved = checkNotNull(repository.observeProfile().first())
+        assertThat(listOf(saved.fullName, saved.email)).containsExactly("Priya Deshmukh", "priya@example.com").inOrder()
     }
 
     @Test

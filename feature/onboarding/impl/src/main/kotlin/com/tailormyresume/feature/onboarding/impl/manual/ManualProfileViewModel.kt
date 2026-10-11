@@ -42,7 +42,7 @@ private fun isManualRole(entry: ProfileEntry): Boolean =
 
 @HiltViewModel
 internal class ManualProfileViewModel @Inject constructor(
-    sessionRepository: SessionRepository,
+    private val sessionRepository: SessionRepository,
     private val profileRepository: ProfileRepository,
     private val saveManualProfile: SaveManualProfileUseCase,
 ) : ViewModel() {
@@ -55,30 +55,52 @@ internal class ManualProfileViewModel @Inject constructor(
 
     private var savedRoleId: String? = null
 
+    private val dirtyFields = mutableSetOf<ManualField>()
+
     val uiState: StateFlow<ManualProfileUiState> = state.asStateFlow()
 
     val events: Flow<ManualProfileEvent> = eventChannel.receiveAsFlow()
 
     init {
+        refreshFromProfile()
+    }
+
+    fun onRouteActive() {
+        refreshFromProfile()
+    }
+
+    private fun refreshFromProfile() {
         viewModelScope.launch {
             val account = sessionRepository.observeAccount().first()
             val profile = profileRepository.observeProfile().first()
-            val manualRole = profile?.entries.orEmpty().filter(::isManualRole).singleOrNull()
-            savedRoleId = manualRole?.id
+            val entries = profile?.entries.orEmpty()
+            val manualRole = when (val id = savedRoleId) {
+                null -> entries.filter(::isManualRole).singleOrNull()
+                else -> entries.firstOrNull { it.id == id && it.category == EntryCategory.EXPERIENCE }
+            }
+            if (savedRoleId == null) savedRoleId = manualRole?.id
             state.update {
                 it.copy(
-                    jobTitle = it.jobTitle.ifBlank { manualRole?.title.orEmpty() },
-                    company = it.company.ifBlank { manualRole?.organization.orEmpty() },
-                    fullName = it.fullName.ifBlank { profile?.fullName?.takeIf(String::isNotBlank) ?: account?.displayName.orEmpty() },
+                    jobTitle = valueUnlessDirty(ManualField.JobTitle, it.jobTitle, manualRole?.title.orEmpty()),
+                    company = valueUnlessDirty(ManualField.Company, it.company, manualRole?.organization.orEmpty()),
+                    fullName = valueUnlessDirty(
+                        ManualField.FullName,
+                        it.fullName,
+                        profile?.fullName?.takeIf(String::isNotBlank) ?: account?.displayName.orEmpty(),
+                    ),
                     email = account?.email ?: profile?.email.orEmpty(),
-                    phone = it.phone.ifBlank { profile?.phone.orEmpty() },
-                    city = it.city.ifBlank { profile?.city.orEmpty() },
+                    phone = valueUnlessDirty(ManualField.Phone, it.phone, profile?.phone.orEmpty()),
+                    city = valueUnlessDirty(ManualField.City, it.city, profile?.city.orEmpty()),
                 )
             }
         }
     }
 
+    private fun valueUnlessDirty(field: ManualField, current: String, refreshed: String): String =
+        if (field in dirtyFields) current else refreshed
+
     fun onFieldChange(field: ManualField, value: String) {
+        dirtyFields += field
         state.update {
             when (field) {
                 ManualField.FullName -> it.copy(fullName = value)
@@ -101,6 +123,7 @@ internal class ManualProfileViewModel @Inject constructor(
                     savedRoleId,
                 )
                 savedRoleId = saved.entries.firstOrNull { it.id !in idsBefore }?.id ?: savedRoleId.takeIf { id -> saved.entries.any { it.id == id } }
+                dirtyFields.clear()
                 eventChannel.trySend(ManualProfileEvent.Saved)
             } catch (cancellation: CancellationException) {
                 throw cancellation

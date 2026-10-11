@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -27,7 +26,7 @@ internal sealed interface DeleteAccountUiState {
 
     data class Content(
         val applications: Int,
-        val unusedCredits: Int,
+        val unusedCredits: Int?,
         val typed: String,
         val canDelete: Boolean,
         val deleting: Boolean,
@@ -50,7 +49,7 @@ internal class DeleteAccountViewModel @Inject constructor(
     private val eventChannel = Channel<DeleteAccountEvent>(Channel.BUFFERED)
 
     val uiState: StateFlow<DeleteAccountUiState> = combine(
-        flow { emit(deleteAccount.preview()) },
+        deleteAccount.observePreview(),
         typed,
         deleting,
     ) { counts, text, inFlight ->

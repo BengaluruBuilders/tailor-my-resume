@@ -9,9 +9,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
@@ -49,7 +51,7 @@ class ApplicationDetailNavigationTest {
         if (credits > 0) creditsRepository.sendLedger(listOf(grant(credits)))
         val viewModel = ApplicationDetailViewModel(
             applicationRepository = applicationRepository,
-            creditsRepository = creditsRepository,
+            creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(credits)),
             setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, TestClock()),
             exportedPdfIntents = FakeExportedPdfIntents(),
             applicationId = "kb",

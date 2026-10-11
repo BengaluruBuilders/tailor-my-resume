@@ -7,7 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.designsystem.component.content.TmrFitTextLayoutKey
+import com.tailormyresume.core.designsystem.component.TmrWholeWordTextLayoutKey
 import com.tailormyresume.feature.onboarding.impl.signin.NARROW_DEVICE
 import com.tailormyresume.feature.onboarding.impl.signin.NARROW_QUALIFIERS
 import com.tailormyresume.feature.onboarding.impl.upload.showFlowScreen
@@ -27,7 +27,7 @@ class ReviewLayoutTest {
 
     private fun layoutOf(text: String): TextLayoutResult {
         val config = composeRule.onNodeWithText(text, useUnmergedTree = true).fetchSemanticsNode().config
-        config.getOrNull(TmrFitTextLayoutKey)?.invoke()?.let { return it }
+        config.getOrNull(TmrWholeWordTextLayoutKey)?.invoke()?.let { return it }
         val layouts = mutableListOf<TextLayoutResult>()
         checkNotNull(config.getOrNull(SemanticsActions.GetTextLayoutResult)).action?.invoke(layouts)
         return layouts.first()

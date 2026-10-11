@@ -3,9 +3,11 @@ package com.tailormyresume.feature.analysis.impl.result
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
-import com.tailormyresume.core.data.repository.CreditsRepository
+import com.tailormyresume.core.data.repository.ProfileRepository
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.domain.coverage.ScreenForKeywords
+import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.RequirementMatch
@@ -26,7 +28,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = JobResultViewModel.Factory::class)
 internal class JobResultViewModel @AssistedInject constructor(
     private val applicationRepository: ApplicationRepository,
-    private val creditsRepository: CreditsRepository,
+    private val creditBalance: AccountCreditBalance,
+    private val profileRepository: ProfileRepository,
     @Assisted val applicationId: String,
 ) : ViewModel() {
 
@@ -35,16 +38,17 @@ internal class JobResultViewModel @AssistedInject constructor(
 
     val uiState: StateFlow<JobResultUiState> = combine(
         applicationRepository.observeApplication(applicationId),
-        creditsRepository.observeBalance(),
-    ) { application, credits ->
-        toUiState(application, credits)
+        creditBalance.observeCredits(),
+        profileRepository.observeProfile(),
+    ) { application, credits, profile ->
+        toUiState(application, credits, profile)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), JobResultUiState.Loading)
 
     val events: Flow<JobResultEvent> = eventChannel.receiveAsFlow()
 
     fun onTailor() {
         val state = uiState.value
-        if (state !is JobResultUiState.Ready || tailorTapped) return
+        if (state !is JobResultUiState.Ready || state.credits == null || tailorTapped) return
         tailorTapped = true
         val event = when {
             state.credits <= 0 -> JobResultEvent.Paywall(applicationId)
@@ -64,10 +68,11 @@ internal class JobResultViewModel @AssistedInject constructor(
     }
 }
 
-private fun toUiState(application: JobApplication?, credits: Int): JobResultUiState {
+private fun toUiState(application: JobApplication?, credits: Int?, profile: CandidateProfile?): JobResultUiState {
+    if (profile == null) return JobResultUiState.Unavailable
     val gap = application?.gapAnalysis ?: return JobResultUiState.Unavailable
-    val coverage = KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, null)
-    val screen = ScreenForKeywords(gap.matches)
+    val coverage = KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, null, profile)
+    val screen = ScreenForKeywords(gap.matches, profile)
     return JobResultUiState.Ready(
         title = application.job.title,
         company = application.job.company,

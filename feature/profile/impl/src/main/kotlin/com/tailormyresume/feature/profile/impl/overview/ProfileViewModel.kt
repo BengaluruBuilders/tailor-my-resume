@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.domain.profile.ProfileCompleteness
-import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.ProfileEntry
+import com.tailormyresume.core.model.countLogicalEntries
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -55,10 +55,10 @@ internal class ProfileViewModel @Inject constructor(
                 years = yearsOfExperience(profile.entries, clock),
                 city = profile.city,
                 percent = ProfileCompleteness.percent(profile),
-                experienceCount = profile.entryCount(EntryCategory.EXPERIENCE),
-                educationCount = profile.entryCount(EntryCategory.EDUCATION),
+                experienceCount = profile.entries.countLogicalEntries(EntryCategory.EXPERIENCE),
+                educationCount = profile.entries.countLogicalEntries(EntryCategory.EDUCATION),
                 skillsCount = profile.skills.size,
-                achievementsCount = profile.entryCount(EntryCategory.ACHIEVEMENT),
+                achievementsCount = profile.entries.countLogicalEntries(EntryCategory.ACHIEVEMENT),
                 linkedinMissing = profile.linkedinUrl.isBlank(),
                 sourceFileName = profile.sourceFileName?.takeIf { it.isNotBlank() },
             )
@@ -68,9 +68,6 @@ internal class ProfileViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = ProfileUiState.Loading,
     )
-
-    private fun CandidateProfile.entryCount(category: EntryCategory): Int =
-        entries.count { it.category == category }
 }
 
 private fun initialsOf(fullName: String): String =

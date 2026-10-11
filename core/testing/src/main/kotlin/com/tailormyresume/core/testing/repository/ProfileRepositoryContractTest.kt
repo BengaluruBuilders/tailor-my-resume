@@ -69,6 +69,34 @@ abstract class ProfileRepositoryContractTest {
     }
 
     @Test
+    fun conditionalSaveAcceptsOnlyTheCurrentSnapshot() = runTest {
+        val repository = createProfileRepository()
+        val original = canonicalCandidateProfile
+        val reviewed = original.copy(reviewedAt = Instant.fromEpochSeconds(1_700_000_000))
+        repository.saveProfile(original)
+
+        assertThat(repository.saveProfileIfUnchanged(original, reviewed)).isTrue()
+        assertThat(repository.saveProfileIfUnchanged(original, original)).isFalse()
+        assertThat(repository.observeProfile().first()).isEqualTo(reviewed)
+    }
+
+    @Test
+    fun conditionalSaveKeepsChangedContactAndBullets() = runTest {
+        val repository = createProfileRepository()
+        val original = canonicalCandidateProfile
+        val edited = original.copy(
+            email = "edited@example.test",
+            entries = original.entries.map { entry ->
+                entry.copy(bullets = entry.bullets.map { it.copy(text = "Edited evidence") })
+            },
+        )
+        repository.saveProfile(edited)
+
+        assertThat(repository.saveProfileIfUnchanged(original, original.copy(reviewedAt = Instant.fromEpochSeconds(1)))).isFalse()
+        assertThat(repository.observeProfile().first()).isEqualTo(edited)
+    }
+
+    @Test
     fun clearingRemovesTheStoredProfile() = runTest {
         val repository = createProfileRepository()
         repository.saveProfile(canonicalCandidateProfile)

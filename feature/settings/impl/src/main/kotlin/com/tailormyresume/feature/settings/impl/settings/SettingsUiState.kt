@@ -9,7 +9,7 @@ internal sealed interface SettingsUiState {
 
     data class Content(
         val email: String,
-        val credits: Int,
+        val credits: Int?,
         val pageSize: PageSize,
         val fileNameFormat: FileNameFormat,
         val productUpdates: Boolean,

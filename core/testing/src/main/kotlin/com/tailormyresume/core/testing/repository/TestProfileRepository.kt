@@ -15,6 +15,9 @@ class TestProfileRepository : ProfileRepository {
         profileFlow.value = profile
     }
 
+    override suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean =
+        profileFlow.compareAndSet(expected, replacement)
+
     override suspend fun clearProfile() {
         profileFlow.value = null
     }

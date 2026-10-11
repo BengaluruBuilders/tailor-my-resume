@@ -86,8 +86,9 @@ class TailoredViewModelTest {
         assertThat(before.accepted).isFalse()
         assertThat(before.exportEnabled).isFalse()
         val pendingAccepted = TailoredResume(listOf(bullet)).withPendingAccepted()
+        val profile = checkNotNull(profileRepository.observeProfile().first())
         assertThat(before.coveragePercent)
-            .isEqualTo(KeywordCoverageCalculator.compute(gap.matches, null, pendingAccepted).final)
+            .isEqualTo(KeywordCoverageCalculator.compute(gap.matches, null, pendingAccepted, profile).final)
         assertThat(before.blocks.flatMap { it.lines }.map { line -> line.joinToString("") { it.text } })
             .contains("Developed an internal tool")
 

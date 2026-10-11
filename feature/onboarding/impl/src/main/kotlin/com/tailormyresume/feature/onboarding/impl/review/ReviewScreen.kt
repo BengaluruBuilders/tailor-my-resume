@@ -45,9 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.designsystem.component.TmrBottomActionBar
+import com.tailormyresume.core.designsystem.component.TmrWholeWordText
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.designsystem.component.content.TmrCard
-import com.tailormyresume.core.designsystem.component.content.TmrFitText
 import com.tailormyresume.core.designsystem.component.content.TmrSectionLabel
 import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
 import com.tailormyresume.core.designsystem.icon.TmrIcons
@@ -146,7 +146,7 @@ internal fun ReviewRoute(
             onContactClick = { navigator.navigate(EditContactNavKey()) },
             onExperienceClick = { navigator.navigate(ExperienceNavKey()) },
             onSkillsClick = { navigator.navigate(SkillsNavKey()) },
-            onContinueClick = viewModel::onContinue,
+            onContinueClick = { viewModel.onContinue(current.profile) },
             modifier = modifier,
         )
     }
@@ -166,7 +166,7 @@ private fun Header(sourceFileName: String?) {
             color = TmrTheme.colors.text,
             modifier = Modifier.semantics { heading() },
         )
-        TmrFitText(
+        TmrWholeWordText(
             text = if (sourceFileName != null) {
                 stringResource(R.string.feature_onboarding_impl_review_source_file, sourceFileName)
             } else {
@@ -232,7 +232,7 @@ private fun RequiredBanner(gap: ReviewGap, onAddDateClick: (String) -> Unit) {
             color = colors.ink,
             modifier = Modifier.readAs(required),
         )
-        TmrFitText(
+        TmrWholeWordText(
             text = stringResource(R.string.feature_onboarding_impl_review_end_date_missing, gap.title),
             style = TmrTheme.typography.strongLarge.copy(fontSize = 14.sp, lineHeight = 19.sp),
             color = colors.ink,
@@ -360,14 +360,14 @@ private fun ContactCard(contact: ReviewContact, onClick: () -> Unit) {
     EditableCard(stringResource(R.string.feature_onboarding_impl_review_contact), onClick) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             if (contact.name.isNotBlank()) {
-                TmrFitText(
+                TmrWholeWordText(
                     text = contact.name,
                     style = TmrTheme.typography.strongLarge.copy(fontSize = 18.sp),
                     color = TmrTheme.colors.text,
                 )
             }
             listOf(contact.email, contact.phoneAndCity).filter(String::isNotBlank).forEach {
-                TmrFitText(text = it, style = TmrTheme.typography.bodySmall, color = TmrTheme.colors.textSecondary, breakAfter = EMAIL_BREAKS)
+                TmrWholeWordText(text = it, style = TmrTheme.typography.bodySmall, color = TmrTheme.colors.textSecondary, breakAfter = EMAIL_BREAKS)
             }
         }
     }
@@ -388,9 +388,9 @@ private fun RoleRow(role: ReviewRole) {
     val dates = role.dates.label()
     val datesColor = if (role.dates is ReviewDates.EndMissing) colors.amber else colors.textMuted
     val details: @Composable () -> Unit = {
-        TmrFitText(text = role.title, style = TmrTheme.typography.strongLarge, color = colors.text)
+        TmrWholeWordText(text = role.title, style = TmrTheme.typography.strongLarge, color = colors.text)
         if (role.organization.isNotBlank()) {
-            TmrFitText(text = role.organization, style = TmrTheme.typography.caption, color = colors.textMuted)
+            TmrWholeWordText(text = role.organization, style = TmrTheme.typography.caption, color = colors.textMuted)
         }
     }
     val datesText: @Composable () -> Unit = {
@@ -400,11 +400,22 @@ private fun RoleRow(role: ReviewRole) {
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             details()
             datesText()
+            ReviewBullets(role.bullets)
         }
     } else {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) { details() }
             datesText()
+        }
+        ReviewBullets(role.bullets)
+    }
+}
+
+@Composable
+private fun ReviewBullets(bullets: List<String>) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        bullets.forEach { bullet ->
+            TmrWholeWordText(text = "• $bullet", style = TmrTheme.typography.bodySmall, color = TmrTheme.colors.textSecondary)
         }
     }
 }
@@ -424,14 +435,6 @@ private fun SkillsCard(skills: ReviewSkills, onClick: () -> Unit) {
     EditableCard(stringResource(R.string.feature_onboarding_impl_review_skills, skills.count), onClick) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             skills.chips.forEach { SkillChip(it, colors.text, colors.fill, Color.Transparent) }
-            if (skills.more > 0) {
-                SkillChip(
-                    stringResource(R.string.feature_onboarding_impl_review_skills_more, skills.more),
-                    colors.textMuted,
-                    Color.Transparent,
-                    colors.lineHigher,
-                )
-            }
         }
     }
 }
@@ -455,7 +458,7 @@ private fun SkillChip(label: String, content: Color, fill: Color, border: Color)
             }
             .padding(horizontal = 11.dp, vertical = 6.dp),
     ) {
-        TmrFitText(text = label, style = TmrTheme.typography.caption, color = content)
+        TmrWholeWordText(text = label, style = TmrTheme.typography.caption, color = content)
     }
 }
 
@@ -465,10 +468,11 @@ private fun EducationCard(education: List<ReviewEducation>) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             education.forEach {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    TmrFitText(text = it.title, style = TmrTheme.typography.strongLarge, color = TmrTheme.colors.text)
+                    TmrWholeWordText(text = it.title, style = TmrTheme.typography.strongLarge, color = TmrTheme.colors.text)
                     if (it.detail.isNotBlank()) {
-                        TmrFitText(text = it.detail, style = TmrTheme.typography.caption, color = TmrTheme.colors.textMuted)
+                        TmrWholeWordText(text = it.detail, style = TmrTheme.typography.caption, color = TmrTheme.colors.textMuted)
                     }
+                    ReviewBullets(it.bullets)
                 }
             }
         }

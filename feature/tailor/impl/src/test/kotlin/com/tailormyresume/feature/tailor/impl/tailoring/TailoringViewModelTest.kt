@@ -107,6 +107,7 @@ class TailoringViewModelTest {
         val viewModel = TailoringViewModel(
             runner = runner(tailorMillis = 10_000, failing = false),
             applicationRepository = applicationRepository,
+            profileRepository = profileRepository,
             applicationId = "app-1",
             runId = "run-1",
         )
@@ -158,6 +159,7 @@ class TailoringViewModelTest {
         val viewModel = TailoringViewModel(
             runner = runner(tailorMillis = 0, failing = false),
             applicationRepository = applicationRepository,
+            profileRepository = profileRepository,
             applicationId = "app-1",
             runId = "run-1",
         )
@@ -182,6 +184,7 @@ class TailoringViewModelTest {
         val viewModel = TailoringViewModel(
             runner = runner(tailorMillis = 0, failing = true),
             applicationRepository = applicationRepository,
+            profileRepository = profileRepository,
             applicationId = "app-1",
             runId = "run-1",
         )

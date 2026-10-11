@@ -4,12 +4,17 @@ import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.PendingWipeState
+import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.PurchaseEntitlement
+import com.tailormyresume.core.domain.account.AccountWipeFinisher
 import com.tailormyresume.core.navigation.PendingToast
+import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.feature.settings.impl.R
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -220,6 +225,32 @@ class DeleteAccountViewModelTest {
         viewModel.onSheetOpened()
 
         viewModel.events.test { expectNoEvents() }
+    }
+
+    @Test
+    fun serverClosedRecoveryFinishesWithoutAKnownWallet() = runTest {
+        val unknown = PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false)
+        val gateway = object : PaymentGateway by TestPaymentGateway() {
+            override fun observeEntitlement() = flowOf(unknown)
+            override suspend fun entitlement(): PurchaseEntitlement = error("closed account")
+        }
+        val deleter = RecordingServerAccountDeleter(deletesRemoteData = true)
+        lateinit var fixture: DeleteFixture
+        fixture = DeleteFixture(
+            payment = gateway,
+            deleter = deleter,
+            finisher = AccountWipeFinisher { fixture.applicationRepository.sendApplications(emptyList()) },
+        ).seed().signedInWithServerClosedMarker("uid-a")
+        val viewModel = fixture.viewModel()
+        keepSubscribed(viewModel.uiState)
+
+        viewModel.onTextChanged("DELETE")
+        viewModel.onDelete()
+
+        assertThat(fixture.remainingApplications()).isEqualTo(0)
+        assertThat(fixture.pendingWipe.current).isEqualTo(PendingWipeState.NONE)
+        assertThat(deleter.deleteCalls).isEqualTo(0)
+        assertThat(PendingToast.consume()).isEqualTo(R.string.feature_settings_impl_toast_account_deleted)
     }
 
     @Test

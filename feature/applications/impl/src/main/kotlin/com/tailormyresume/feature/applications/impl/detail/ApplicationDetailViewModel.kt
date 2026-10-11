@@ -4,8 +4,8 @@ import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
-import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.feature.applications.impl.keywordPercent
@@ -35,7 +35,7 @@ import kotlin.time.Instant as KotlinInstant
 @HiltViewModel(assistedFactory = ApplicationDetailViewModel.Factory::class)
 internal class ApplicationDetailViewModel @AssistedInject constructor(
     private val applicationRepository: ApplicationRepository,
-    private val creditsRepository: CreditsRepository,
+    private val creditBalance: AccountCreditBalance,
     private val setApplicationStatus: SetApplicationStatusUseCase,
     private val exportedPdfIntents: ExportedPdfIntents,
     @Assisted val applicationId: String,
@@ -87,8 +87,10 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
 
     fun onRetailor() {
         viewModelScope.launch {
+            val credits = creditBalance.cachedCredits()
             val event = when {
-                creditsRepository.observeBalance().first() <= 0 -> ApplicationDetailEvent.OpenPaywall(applicationId)
+                credits == null -> ApplicationDetailEvent.BalanceUnavailable
+                credits <= 0 -> ApplicationDetailEvent.OpenPaywall(applicationId)
                 hasQuestion() -> ApplicationDetailEvent.OpenQuickQuestion(applicationId)
                 else -> ApplicationDetailEvent.StartTailoring(applicationId)
             }

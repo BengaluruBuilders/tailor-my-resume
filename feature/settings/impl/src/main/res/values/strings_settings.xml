@@ -47,4 +47,6 @@
     <string name="feature_settings_impl_delete_confirm_label">Type DELETE to confirm</string>
     <string name="feature_settings_impl_delete_confirm_placeholder" translatable="false">DELETE</string>
     <string name="feature_settings_impl_keep_account">Keep my account</string>
+    <string name="feature_settings_impl_credits_unavailable">Balance unavailable</string>
+    <string name="feature_settings_impl_delete_credits_unknown">any unused credits</string>
 </resources>
