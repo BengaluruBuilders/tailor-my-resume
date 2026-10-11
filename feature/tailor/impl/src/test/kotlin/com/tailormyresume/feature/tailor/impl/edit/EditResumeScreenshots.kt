@@ -113,4 +113,24 @@ class EditResumeScreenshots {
         assertEquals("b3", changedId)
         assertEquals("Wrote SQL pipelines over 25M+ rows.", changedText)
     }
+
+    @Test
+    fun editingSummaryAndSkillsReportsTheNewText() {
+        var summary: String? = null
+        var skills: String? = null
+        rule.setContent {
+            TmrTheme {
+                EditResumeScreen(
+                    state = ready(),
+                    onBulletChange = { _, _ -> },
+                    onSummaryChange = { summary = it },
+                    onSkillsChange = { skills = it },
+                )
+            }
+        }
+        rule.onNodeWithText(SUMMARY).performTextReplacement("My own summary.")
+        rule.onNodeWithText(SKILLS).performTextReplacement("Go, SQL")
+        assertEquals("My own summary.", summary)
+        assertEquals("Go, SQL", skills)
+    }
 }

@@ -16,6 +16,7 @@ import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.core.testing.util.TestClock
 import com.tailormyresume.feature.tailor.impl.EXPORT_ACCEPTED_AT
 import com.tailormyresume.feature.tailor.impl.HandEditBulletUseCase
+import com.tailormyresume.feature.tailor.impl.HandEditSummaryAndSkillsUseCase
 import com.tailormyresume.feature.tailor.impl.acceptedApplication
 import com.tailormyresume.feature.tailor.impl.acceptedBullet
 import com.tailormyresume.feature.tailor.impl.document.ResumeDocumentAssembler
@@ -68,6 +69,7 @@ class EditResumeViewModelTest {
         settingsRepository = settingsRepository,
         assembler = ResumeDocumentAssembler(TestResumeHeadings),
         handEditBullet = HandEditBulletUseCase(applicationRepository, reviewStateRepository, clock),
+        handEditSummaryAndSkills = HandEditSummaryAndSkillsUseCase(applicationRepository, clock),
         renderer = renderer,
         applicationId = "app-1",
     )
@@ -204,6 +206,55 @@ class EditResumeViewModelTest {
         backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
 
         assertThat(viewModel.ready().summary).isEqualTo("My own words.")
+    }
+
+    @Test
+    fun saveStoresSummaryAndSkillsEditsAsTheUsersAcceptedText() = runTest {
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+        seed()
+
+        viewModel.onSummaryChange("My own summary.")
+        viewModel.onSkillsChange("Go, SQL")
+        viewModel.onSave()
+
+        val resume = applicationRepository.observeApplication("app-1").first()?.tailoredResume
+        assertThat(resume?.summary?.text).isEqualTo("My own summary.")
+        assertThat(resume?.summary?.decision).isEqualTo(BulletDecision.ACCEPTED)
+        assertThat(resume?.skills?.skills).containsExactly("Go", "SQL").inOrder()
+        assertThat(resume?.skills?.decision).isEqualTo(BulletDecision.ACCEPTED)
+        assertThat(viewModel.ready().summary).isEqualTo("My own summary.")
+        assertThat(viewModel.ready().skills).isEqualTo("Go, SQL")
+    }
+
+    @Test
+    fun unchangedSummaryAndSkillsAreNotStored() = runTest {
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+        seed()
+
+        viewModel.onSummaryChange("Tailored summary")
+        viewModel.onSkillsChange("Kotlin, SQL")
+        viewModel.onSave()
+
+        val resume = applicationRepository.observeApplication("app-1").first()?.tailoredResume
+        assertThat(resume?.summary).isEqualTo(summary)
+        assertThat(resume?.skills).isNull()
+    }
+
+    @Test
+    fun summaryEditShownWithoutATailoredSummaryComesFromTheProfileSummary() = runTest {
+        applicationRepository.sendApplications(listOf(acceptedApplication(listOf(b1, b2))))
+        profileRepository.sendProfile(testProfile(listOf(entryFor("exp-1", b1, b2))).copy(summary = "Profile words."))
+        val viewModel = viewModel()
+        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
+
+        viewModel.onSummaryChange("Edited profile words.")
+        viewModel.onSave()
+
+        val stored = applicationRepository.observeApplication("app-1").first()?.tailoredResume?.summary
+        assertThat(stored?.original).isEqualTo("Profile words.")
+        assertThat(stored?.text).isEqualTo("Edited profile words.")
     }
 
     @Test
