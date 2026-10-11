@@ -11,14 +11,19 @@ import com.tailormyresume.feature.onboarding.api.navigation.ReviewProfileNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadErrorNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
+import com.tailormyresume.feature.onboarding.impl.manual.ManualProfileRoute
+import com.tailormyresume.feature.onboarding.impl.paste.PasteResumeRoute
+import com.tailormyresume.feature.onboarding.impl.reading.ReadingRoute
 import com.tailormyresume.feature.onboarding.impl.signin.SignInRoute
+import com.tailormyresume.feature.onboarding.impl.upload.UnreadableRoute
+import com.tailormyresume.feature.onboarding.impl.upload.UploadRoute
 
 fun EntryProviderScope<NavKey>.onboardingEntry(navigator: Navigator) {
     entry<SignInNavKey> { SignInRoute(hiltViewModel()) }
-    entry<UploadNavKey> { key -> NavKeyPlaceholder(key) }
-    entry<UploadErrorNavKey> { key -> NavKeyPlaceholder(key) }
-    entry<PasteResumeNavKey> { key -> NavKeyPlaceholder(key) }
-    entry<ManualProfileNavKey> { key -> NavKeyPlaceholder(key) }
-    entry<ReadingNavKey> { key -> NavKeyPlaceholder(key) }
+    entry<UploadNavKey> { UploadRoute(hiltViewModel(), navigator) }
+    entry<UploadErrorNavKey> { UnreadableRoute(hiltViewModel(), navigator) }
+    entry<PasteResumeNavKey> { PasteResumeRoute(hiltViewModel(), navigator) }
+    entry<ManualProfileNavKey> { ManualProfileRoute(hiltViewModel(), navigator) }
+    entry<ReadingNavKey> { ReadingRoute(hiltViewModel(), navigator) }
     entry<ReviewProfileNavKey> { key -> NavKeyPlaceholder(key) }
 }
