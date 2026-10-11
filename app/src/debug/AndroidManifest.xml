@@ -7,11 +7,12 @@
             android:name=".debug.DebugScenarioActivity"
             android:configChanges="uiMode|fontScale|density|screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true"
-            android:label="@string/debug_scenario_activity_label">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:label="@string/debug_scenario_activity_label" />
+
+        <activity android:name=".MainActivity">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/debug_shortcuts" />
         </activity>
 
     </application>

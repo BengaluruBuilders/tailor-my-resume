@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="debug_scenario_activity_label">TailorMyResume dev</string>
-    <string name="debug_scenario_title">TailorMyResume dev</string>
+    <string name="debug_scenario_activity_label">Dev console</string>
+    <string name="debug_scenario_title">Dev console</string>
     <string name="debug_scenario_intro">Debug build only. Load data or open one screen in one state.</string>
     <string name="debug_data_heading">App data</string>
     <string name="debug_data_load">Load sample data</string>
