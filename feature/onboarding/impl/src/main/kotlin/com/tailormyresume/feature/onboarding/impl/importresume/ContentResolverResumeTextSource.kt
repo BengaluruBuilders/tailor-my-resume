@@ -36,6 +36,7 @@ class ContentResolverResumeTextSource @Inject constructor(
         }
         val text = when {
             isZipContainer(bytes) -> textFromZip(bytes)
+                ?: return@withContext ResumeRead.Unreadable(measured.displayName)
             isPdfContainer(bytes) -> return@withContext readPdfResumeText(context, bytes, measured.displayName)
             else -> textFromPlainBytes(bytes)
         } ?: return@withContext ResumeRead.NoTextLayer(measured.displayName)
@@ -69,22 +70,9 @@ class ContentResolverResumeTextSource @Inject constructor(
 
     private fun readBytes(uriText: String): ByteArray? = runCatching {
         context.contentResolver.openInputStream(uriText.toUri())?.use { stream ->
-            stream.toByteArrayLimited(RESUME_READ_LIMIT_BYTES + 1L)
+            stream.readLimitedBytes(RESUME_READ_LIMIT_BYTES + 1L)
         }
     }.getOrNull()
-
-    private fun InputStream.toByteArrayLimited(limit: Long): ByteArray {
-        val buffer = ByteArrayOutputStream()
-        val chunk = ByteArray(DEFAULT_CHUNK_BYTES)
-        var total = 0L
-        while (total < limit) {
-            val read = read(chunk)
-            if (read <= 0) break
-            buffer.write(chunk, 0, read)
-            total += read
-        }
-        return buffer.toByteArray()
-    }
 
     private fun Cursor.longAtOrZero(index: Int): Long = if (isNull(index)) 0L else getLong(index)
 
@@ -105,6 +93,19 @@ private const val MIN_TEXT_WORDS = 5
 
 private data class MeasuredFile(val displayName: String, val byteSize: Long)
 
+private fun InputStream.readLimitedBytes(limit: Long): ByteArray {
+    val buffer = ByteArrayOutputStream()
+    val chunk = ByteArray(DEFAULT_CHUNK_BYTES)
+    var total = 0L
+    while (total < limit) {
+        val read = read(chunk, 0, minOf(chunk.size.toLong(), limit - total).toInt())
+        if (read <= 0) break
+        buffer.write(chunk, 0, read)
+        total += read
+    }
+    return buffer.toByteArray()
+}
+
 private fun isPdfContainer(bytes: ByteArray): Boolean =
     bytes.size >= PDF_HEADER.length &&
         String(bytes, 0, PDF_HEADER.length, Charsets.ISO_8859_1) == PDF_HEADER
@@ -119,9 +120,13 @@ private fun textFromZip(bytes: ByteArray): String? {
         ZipInputStream(bytes.inputStream()).use { zip ->
             var entry = zip.nextEntry
             var document = ""
+            var expanded = 0L
             while (entry != null) {
+                val content = zip.readLimitedBytes(RESUME_READ_LIMIT_BYTES - expanded + 1L)
+                expanded += content.size
+                if (expanded > RESUME_READ_LIMIT_BYTES) return null
                 if (entry.name == ZIP_ENTRY_MARKER) {
-                    document = zip.readBytes().toString(Charsets.UTF_8)
+                    document = content.toString(Charsets.UTF_8)
                     break
                 }
                 entry = zip.nextEntry
