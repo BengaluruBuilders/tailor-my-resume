@@ -75,11 +75,12 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
             return false
         }
         return synchronized(lock) {
-            if (started == generation && owner == remote.owner()) {
+            val stored = started == generation && owner == remote.owner()
+            if (stored) {
                 held.value = Held(owner, snapshot)
                 refreshCancelled = false
             }
-            held.value?.owner == owner
+            stored
         }
     }
 

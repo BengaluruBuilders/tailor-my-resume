@@ -242,4 +242,60 @@ class OfflineFirstCreditsRepositoryRemoteTest {
 
         assertThat(repository.observeBalance().first()).isEqualTo(4)
     }
+
+    @Test
+    fun refreshConfirmedIsFalseWhenTheFetchFails() = runTest {
+        remote.snapshot = CreditSnapshot(1, emptyList())
+        val repository = repository()
+        repository.refresh()
+        remote.failure = java.io.IOException("offline")
+
+        assertThat(repository.refreshConfirmed()).isFalse()
+    }
+
+    @Test
+    fun refreshConfirmedIsFalseWhenANewerRefreshSupersedesItsFetch() = runTest {
+        val seedGate = CompletableDeferred(Unit)
+        val staleGate = CompletableDeferred<Unit>()
+        val newerGate = CompletableDeferred<Unit>()
+        val answers = ArrayDeque(
+            listOf(seedGate to CreditSnapshot(1, emptyList()), staleGate to CreditSnapshot(6, emptyList()), newerGate to CreditSnapshot(6, emptyList())),
+        )
+        val gated = repository(object : RemoteLedgerSource {
+            override val ownsLedger = true
+            override fun owner() = "uid-1"
+            override suspend fun fetch(): CreditSnapshot {
+                val (gate, snapshot) = answers.removeFirst()
+                gate.await()
+                return snapshot
+            }
+        })
+        gated.refresh()
+        var confirmed: Boolean? = null
+        val superseded = launch(UnconfinedTestDispatcher(testScheduler)) { confirmed = gated.refreshConfirmed() }
+        val newer = launch(UnconfinedTestDispatcher(testScheduler)) { gated.refresh() }
+
+        staleGate.complete(Unit)
+        superseded.join()
+
+        assertThat(confirmed).isFalse()
+        assertThat(gated.observeBalance().first()).isEqualTo(1)
+        newerGate.complete(Unit)
+        newer.join()
+        assertThat(gated.observeBalance().first()).isEqualTo(6)
+    }
+
+    @Test
+    fun refreshConfirmedIsTrueAndStoresTheBalanceWhenTheFetchSucceeds() = runTest {
+        remote.snapshot = CreditSnapshot(7, emptyList())
+        val repository = repository()
+
+        assertThat(repository.refreshConfirmed()).isTrue()
+        assertThat(repository.observeBalance().first()).isEqualTo(7)
+    }
+
+    @Test
+    fun refreshConfirmedIsTrueWithoutFetchingInDemo() = runTest {
+        assertThat(repository(NoRemoteLedger()).refreshConfirmed()).isTrue()
+    }
 }
