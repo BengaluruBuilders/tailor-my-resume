@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.component.hero.TmrHeroCard
 import com.tailormyresume.core.designsystem.component.hero.TmrHeroColor
@@ -39,6 +42,9 @@ import com.tailormyresume.feature.onboarding.impl.R
 import com.tailormyresume.feature.onboarding.impl.importresume.resumeMimeTypes
 
 private const val STACK_ACTIONS_FONT_SCALE = 1.1f
+private val CONTENT_SIDE_PADDING = 14.dp
+private val ACTION_GAP = 10.dp
+private val ACTION_LABEL_PADDING = 24.dp
 private val HERO_MIN_HEIGHT = 290.dp
 private val HERO_EXTRA_PER_FONT_STEP = 140.dp
 
@@ -49,14 +55,42 @@ internal fun UploadScreen(
     onManualClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val stackActions = LocalDensity.current.fontScale > STACK_ACTIONS_FONT_SCALE
-    Column(modifier.fillMaxSize().background(TmrTheme.colors.background)) {
+    BoxWithConstraints(modifier.fillMaxSize().background(TmrTheme.colors.background)) {
+        val stackActions = LocalDensity.current.fontScale > STACK_ACTIONS_FONT_SCALE || !actionLabelsFitOneLine(maxWidth)
+        UploadContent(stackActions, onUploadClick, onPasteClick, onManualClick)
+    }
+}
+
+@Composable
+private fun actionLabelsFitOneLine(screenWidth: Dp): Boolean {
+    val measurer = rememberTextMeasurer()
+    val style = TmrTheme.typography.mono14
+    val labels = listOf(
+        stringResource(R.string.feature_onboarding_impl_upload_paste),
+        stringResource(R.string.feature_onboarding_impl_upload_manual),
+    )
+    val density = LocalDensity.current
+    val labelWidth = (screenWidth - CONTENT_SIDE_PADDING * 2 - ACTION_GAP) / 2 - ACTION_LABEL_PADDING * 2
+    return labels.all { label ->
+        measurer.measure(label, style, softWrap = false, maxLines = 1).size.width <= with(density) { labelWidth.roundToPx() }
+    }
+}
+
+@Composable
+private fun UploadContent(
+    stackActions: Boolean,
+    onUploadClick: () -> Unit,
+    onPasteClick: () -> Unit,
+    onManualClick: () -> Unit,
+) {
+    Column(Modifier.fillMaxSize()) {
         val heroMinHeight = HERO_MIN_HEIGHT + HERO_EXTRA_PER_FONT_STEP * (LocalDensity.current.fontScale - 1f).coerceAtLeast(0f)
         Column(
             Modifier
                 .weight(1f)
+                .then(if (stackActions) Modifier.navigationBarsPadding() else Modifier)
                 .verticalScroll(rememberScrollState())
-                .padding(start = 14.dp, end = 14.dp, top = 14.dp),
+                .padding(start = CONTENT_SIDE_PADDING, end = CONTENT_SIDE_PADDING, top = 14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             TmrHeroCard(
@@ -99,29 +133,29 @@ internal fun UploadScreen(
                 onClick = onUploadClick,
             )
             if (stackActions) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(ACTION_GAP)) {
                     PasteAction(onPasteClick, Modifier.fillMaxWidth())
                     ManualAction(onManualClick, Modifier.fillMaxWidth())
                 }
-                UploadFooter()
+                UploadFooter(insetPadding = false)
             } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(ACTION_GAP)) {
                     PasteAction(onPasteClick, Modifier.weight(1f))
                     ManualAction(onManualClick, Modifier.weight(1f))
                 }
             }
         }
-        if (!stackActions) UploadFooter()
+        if (!stackActions) UploadFooter(insetPadding = true)
     }
 }
 
 @Composable
-private fun UploadFooter() {
+private fun UploadFooter(insetPadding: Boolean) {
     Text(
         text = stringResource(R.string.feature_onboarding_impl_upload_footer),
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
+            .then(if (insetPadding) Modifier.navigationBarsPadding() else Modifier)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         style = TmrTheme.typography.caption,
         color = TmrTheme.colors.textMuted,

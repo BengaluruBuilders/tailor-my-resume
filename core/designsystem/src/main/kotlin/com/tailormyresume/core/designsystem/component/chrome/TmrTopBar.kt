@@ -47,6 +47,7 @@ fun TmrTopBar(
     title: String? = null,
     action: String? = null,
     onAction: () -> Unit = {},
+    holdLeadingSpace: Boolean = false,
 ) {
     val colors = TmrTheme.colors
     val typography = TmrTheme.typography
@@ -82,7 +83,9 @@ fun TmrTopBar(
             contentAlignment = Alignment.Center,
         ) {
             if (leadingIcon == null || leadingLabel == null) {
-                Spacer(modifier = Modifier.size(spacing.topBarButton))
+                Box(modifier = if (holdLeadingSpace) Modifier.minimumInteractiveComponentSize() else Modifier) {
+                    Spacer(modifier = Modifier.size(spacing.topBarButton))
+                }
             } else {
                 Box(
                     modifier =
