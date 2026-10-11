@@ -200,8 +200,10 @@ class OfflineGapMatcherTest {
             - Strong SQL
             - Experience presenting to senior leaders
             """.trimIndent(),
+            profileOf(listOf("SQL")),
         )
 
+        assertThat(gap.matches.last().status).isEqualTo(MatchStatus.GAP)
         assertThat(gap.question?.text).isEqualTo("Do you have experience with presenting to senior leaders?")
         assertThat(gap.question?.why).isEqualTo("It's a must-have for this role, and your resume doesn't mention it.")
         assertThat(gap.matches.map { it.reason }).doesNotContain(null)

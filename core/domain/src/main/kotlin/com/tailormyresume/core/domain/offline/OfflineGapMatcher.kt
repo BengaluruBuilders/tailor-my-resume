@@ -9,8 +9,8 @@ import com.tailormyresume.core.model.KeywordCoverage
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.QuickQuestion
 import com.tailormyresume.core.model.RequirementMatch
-import com.tailormyresume.core.model.RequirementType
 import com.tailormyresume.core.model.RequirementPriority
+import com.tailormyresume.core.model.RequirementType
 import javax.inject.Inject
 
 internal class OfflineGapMatcher @Inject constructor() : GapMatcher {
@@ -55,8 +55,9 @@ internal class OfflineGapMatcher @Inject constructor() : GapMatcher {
     )
 
     private fun whyFor(status: MatchStatus): String = when (status) {
-        MatchStatus.PARTIAL -> "It's a must-have for this role. Your resume has related evidence, " +
-            "but it does not fully confirm this requirement."
+        MatchStatus.PARTIAL ->
+            "It's a must-have for this role. Your resume has related evidence, " +
+                "but it does not fully confirm this requirement."
         MatchStatus.GAP -> "It's a must-have for this role, and your resume doesn't mention it."
         MatchStatus.MET -> error("A met requirement does not need a question.")
     }
