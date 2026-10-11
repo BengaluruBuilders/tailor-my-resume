@@ -7,7 +7,7 @@
     </plurals>
     <string name="feature_settings_impl_credits_buy_more">Buy more</string>
     <string name="feature_settings_impl_credits_history">History</string>
-    <string name="feature_settings_impl_credits_receipts">Receipts go to your Google email</string>
+    <string name="feature_settings_impl_credits_receipts">Receipts go to the email of your Google Play account</string>
     <string name="feature_settings_impl_credits_free_first_resume">Free first resume</string>
     <string name="feature_settings_impl_credits_welcome">Welcome</string>
     <plurals name="feature_settings_impl_credits_bought">
