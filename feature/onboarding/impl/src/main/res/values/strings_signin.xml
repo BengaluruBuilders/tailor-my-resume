@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_onboarding_impl_signin_story_label">How it works · %1$d of %2$d</string>
-    <string name="feature_onboarding_impl_signin_hint_idle">Tap · hold</string>
+    <string name="feature_onboarding_impl_signin_hint_idle">Tap to change story · Hold to pause</string>
     <string name="feature_onboarding_impl_signin_hint_paused">Paused</string>
     <string name="feature_onboarding_impl_signin_story1_headline">Tired of rewriting your resume?</string>
-    <string name="feature_onboarding_impl_signin_story1_subline">Every job asks for something different. You shouldn’t have to start over every time.</string>
+    <string name="feature_onboarding_impl_signin_story1_subline">Have your resume or work details and the full job description ready.</string>
     <string name="feature_onboarding_impl_signin_story2_headline">Built around the job. Backed by your experience.</string>
     <string name="feature_onboarding_impl_signin_story2_subline">AI matches your real skills and achievements to each job description.</string>
     <string name="feature_onboarding_impl_signin_story3_headline">Apply smarter, not harder.</string>

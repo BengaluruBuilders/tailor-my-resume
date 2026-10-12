@@ -7,12 +7,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -24,8 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.component.hero.TmrPaige
 import com.tailormyresume.core.designsystem.component.hero.TmrPaigePose
@@ -60,25 +63,41 @@ internal val SignInStories = listOf(
     ) { it.lime },
 )
 
-private const val ONE_PAGE_STICKER_MAX_FONT_SCALE = 1.3f
+private const val DECORATION_MAX_FONT_SCALE = 1.3f
+private const val DECORATION_MIN_ART_WIDTH_FRACTION = 0.65f
+private val FULL_ART_HEIGHT = 220.dp
+private val DECORATION_MIN_WIDTH = 320.dp
 
 @Composable
-internal fun SignInStoryArt(index: Int, modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        when (index) {
-            0 -> UploadArt()
-            1 -> JobPostArt()
-            else -> TailoredArt()
+internal fun SignInStoryArt(index: Int, artHeight: Dp, modifier: Modifier = Modifier) {
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+        val artScale = (artHeight / FULL_ART_HEIGHT).coerceAtMost(1f)
+        val showDecorations = maxWidth >= DECORATION_MIN_WIDTH &&
+            LocalDensity.current.fontScale <= DECORATION_MAX_FONT_SCALE &&
+            artHeight >= maxWidth * DECORATION_MIN_ART_WIDTH_FRACTION
+        Box(
+            Modifier.fillMaxWidth().requiredHeight(maxOf(artHeight, FULL_ART_HEIGHT)).graphicsLayer {
+                scaleX = artScale
+                scaleY = artScale
+            },
+            contentAlignment = Alignment.Center,
+        ) {
+            when (index) {
+                0 -> UploadArt(showDecorations)
+                1 -> JobPostArt(showDecorations)
+                else -> TailoredArt(showDecorations)
+            }
+            TmrPaige(
+                pose = SignInStories[index].pose,
+                modifier = if (index == 0) Modifier.offset(y = 32.dp) else Modifier,
+            )
         }
-        TmrPaige(
-            pose = SignInStories[index].pose,
-            modifier = if (index == 0) Modifier.offset(y = 32.dp) else Modifier,
-        )
     }
 }
 
 @Composable
-private fun BoxScope.UploadArt() {
+private fun BoxScope.UploadArt(showDecorations: Boolean) {
+    if (!showDecorations) return
     TmrSticker(
         stringResource(R.string.feature_onboarding_impl_signin_art_pdf),
         Modifier.align(Alignment.TopStart).offset(y = 30.dp),
@@ -93,7 +112,8 @@ private fun BoxScope.UploadArt() {
 }
 
 @Composable
-private fun BoxScope.JobPostArt() {
+private fun BoxScope.JobPostArt(showDecorations: Boolean) {
+    if (!showDecorations) return
     val colors = TmrTheme.colors
     val outline = BorderStroke(2.5.dp, colors.ink)
     Column(
@@ -148,7 +168,8 @@ private fun HighlightBar(fraction: Float) {
 }
 
 @Composable
-private fun BoxScope.TailoredArt() {
+private fun BoxScope.TailoredArt(showDecorations: Boolean) {
+    if (!showDecorations) return
     val colors = TmrTheme.colors
     TmrSticker(
         stringResource(R.string.feature_onboarding_impl_signin_sticker_for_job),
@@ -163,11 +184,9 @@ private fun BoxScope.TailoredArt() {
         Modifier.align(Alignment.BottomEnd).offset(x = (-30).dp, y = (-40).dp).size(18.dp).rotate(45f)
             .background(colors.cheek).border(BorderStroke(2.5.dp, colors.ink)),
     )
-    if (LocalDensity.current.fontScale <= ONE_PAGE_STICKER_MAX_FONT_SCALE) {
-        TmrSticker(
-            stringResource(R.string.feature_onboarding_impl_signin_art_one_page),
-            Modifier.align(Alignment.BottomStart).offset(x = 8.dp, y = (-34).dp),
-            rotationDegrees = -8f,
-        )
-    }
+    TmrSticker(
+        stringResource(R.string.feature_onboarding_impl_signin_art_one_page),
+        Modifier.align(Alignment.BottomStart).offset(x = 8.dp, y = (-34).dp),
+        rotationDegrees = -8f,
+    )
 }
