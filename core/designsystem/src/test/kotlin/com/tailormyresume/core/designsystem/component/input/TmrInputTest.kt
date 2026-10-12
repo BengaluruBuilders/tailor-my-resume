@@ -145,7 +145,7 @@ class TmrInputTest {
             }
         }
         assertEquals(TmrDarkColors.ink, labelColor("Continue"))
-        assertEquals(TmrDarkColors.textDisabled, labelColor("Later"))
+        assertEquals(TmrDarkColors.textMuted, labelColor("Later"))
         rule.onNodeWithText("Continue").assertHeightIsAtLeast(56.dp)
     }
 

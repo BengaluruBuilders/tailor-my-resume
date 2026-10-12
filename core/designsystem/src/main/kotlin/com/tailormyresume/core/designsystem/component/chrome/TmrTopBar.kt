@@ -45,6 +45,7 @@ fun TmrTopBar(
     onLeading: () -> Unit,
     modifier: Modifier = Modifier,
     title: String? = null,
+    step: Int? = null,
     action: String? = null,
     onAction: () -> Unit = {},
     actionEnabled: Boolean = true,
@@ -123,9 +124,11 @@ fun TmrTopBar(
             Modifier
                 .weight(1f)
                 .padding(horizontal = spacing.sm),
-            contentAlignment = Alignment.Center,
+            contentAlignment = if (step != null) Alignment.CenterStart else Alignment.Center,
         ) {
-            if (title != null) {
+            if (step != null) {
+                TmrStepBar(current = step)
+            } else if (title != null) {
                 TmrCapsText(
                     text = title,
                     style = typography.label,

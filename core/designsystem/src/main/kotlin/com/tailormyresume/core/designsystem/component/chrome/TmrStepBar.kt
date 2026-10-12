@@ -3,14 +3,15 @@ package com.tailormyresume.core.designsystem.component.chrome
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -19,14 +20,14 @@ import com.tailormyresume.core.designsystem.R
 import com.tailormyresume.core.designsystem.theme.TmrColors
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 
-class TmrStepPillStyle(val container: Color, val content: Color)
+private val TRACK_HEIGHT = 4.dp
 
-fun tmrStepPillStyle(step: Int, current: Int, colors: TmrColors): TmrStepPillStyle =
-    when {
-        step < current -> TmrStepPillStyle(colors.surfaceHigh, colors.lime)
-        step == current -> TmrStepPillStyle(colors.lime, colors.ink)
-        else -> TmrStepPillStyle(colors.surfaceHigh, colors.textMuted)
-    }
+private val TRACK_GAP = 6.dp
+
+private const val STEP_COUNT = 3
+
+fun tmrStepTrackColor(step: Int, current: Int, colors: TmrColors): Color =
+    if (step <= current) colors.lime else colors.surfaceHigh
 
 @Composable
 fun TmrStepBar(current: Int, modifier: Modifier = Modifier) {
@@ -36,42 +37,30 @@ fun TmrStepBar(current: Int, modifier: Modifier = Modifier) {
             stringResource(R.string.core_designsystem_chrome_step_job),
             stringResource(R.string.core_designsystem_chrome_step_tailor),
         )
-    val enlarged = LocalDensity.current.fontScale > 1f
-    val labels = names.mapIndexed { index, name ->
-        if (index + 1 < current) {
-            stringResource(R.string.core_designsystem_chrome_step_done_label, name)
-        } else {
-            stringResource(R.string.core_designsystem_chrome_step_pending_label, index + 1, name)
-        }
-    }
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    val name = names[(current - 1).coerceIn(names.indices)]
+    val description = stringResource(R.string.core_designsystem_chrome_step_description, current, name)
+    Column(
+        modifier = modifier.semantics(mergeDescendants = true) { contentDescription = description },
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        names.forEachIndexed { index, name ->
-            val step = index + 1
-            val style = tmrStepPillStyle(step, current, TmrTheme.colors)
-            val description = stringResource(R.string.core_designsystem_chrome_step_description, step, name)
-            val semantics =
-                if (step == current) {
-                    Modifier.semantics(mergeDescendants = true) { contentDescription = description }
-                } else {
-                    Modifier
-                }
-            Box(
-                modifier =
-                Modifier
-                    .then(if (enlarged) Modifier.weight(1f) else Modifier)
-                    .background(style.container, CircleShape)
-                    .padding(horizontal = 11.dp, vertical = 7.dp)
-                    .then(semantics),
-                contentAlignment = Alignment.Center,
-            ) {
-                TmrCapsText(
-                    text = labels[index],
-                    style = TmrTheme.typography.label,
-                    color = style.content,
-                    fitTexts = if (enlarged) labels else emptyList(),
+        Text(
+            text = stringResource(R.string.core_designsystem_chrome_step_label, current, name),
+            style = TmrTheme.typography.strongSmall,
+            color = TmrTheme.colors.textSecondary,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(TRACK_GAP),
+        ) {
+            repeat(STEP_COUNT) { index ->
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(TRACK_HEIGHT)
+                        .background(
+                            tmrStepTrackColor(index + 1, current, TmrTheme.colors),
+                            RoundedCornerShape(TRACK_HEIGHT / 2),
+                        ),
                 )
             }
         }

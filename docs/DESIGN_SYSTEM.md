@@ -54,7 +54,7 @@ differ on purpose.
 | `background` | `#000000` | Every screen except Sign in |
 | `surface` | `#111111` | Cards, option rows |
 | `surfaceRaised` | `#161616` | Raised cards |
-| `surfaceHigh` | `#1C1C1C` | Top-bar buttons, step pills, done steps |
+| `surfaceHigh` | `#1C1C1C` | Top-bar buttons, secondary buttons, the unreached step track |
 | `sheet` | `#141414` | Bottom sheet |
 | `sheetOption` | `#1A1A1A` | Unselected option in a sheet |
 | `uploadCard` | `#0D0D0D` | Upload card fill |
@@ -66,7 +66,7 @@ differ on purpose.
 | `tabDivider` | `#1A1A1A` | Tab bar top line |
 | `text` | `#FFFFFF` | Primary text |
 | `textSecondary` | `#C8C8C8` | Body copy |
-| `textMuted` | `#A6A6A6` | Labels, later steps |
+| `textMuted` | `#A6A6A6` | Labels, the character count below the minimum, disabled button labels |
 | `textDisabled` | `#7D7D7D` | Placeholder, disabled, pending rows |
 | `ink` | `#0A0A0A` | Text on light fills |
 | `lime` | `#A3F43F` | Primary, selected, Interview |

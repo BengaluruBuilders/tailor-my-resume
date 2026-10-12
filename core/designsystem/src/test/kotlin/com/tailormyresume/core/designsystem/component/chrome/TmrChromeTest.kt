@@ -67,30 +67,13 @@ class TmrStepBarTest {
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun pillStylesMatchPrototypeSteps() {
-        val firstCurrent = tmrStepPillStyle(step = 1, current = 1, colors = TmrDarkColors)
-        assertEquals(TmrDarkColors.lime, firstCurrent.container)
-        assertEquals(TmrDarkColors.ink, firstCurrent.content)
-
-        val firstDone = tmrStepPillStyle(step = 1, current = 2, colors = TmrDarkColors)
-        assertEquals(TmrDarkColors.surfaceHigh, firstDone.container)
-        assertEquals(TmrDarkColors.lime, firstDone.content)
-
-        val secondCurrent = tmrStepPillStyle(step = 2, current = 2, colors = TmrDarkColors)
-        assertEquals(TmrDarkColors.lime, secondCurrent.container)
-        assertEquals(TmrDarkColors.ink, secondCurrent.content)
-
-        val thirdCurrent = tmrStepPillStyle(step = 3, current = 3, colors = TmrDarkColors)
-        assertEquals(TmrDarkColors.lime, thirdCurrent.container)
-        assertEquals(TmrDarkColors.ink, thirdCurrent.content)
-
-        val secondLater = tmrStepPillStyle(step = 2, current = 1, colors = TmrDarkColors)
-        assertEquals(TmrDarkColors.surfaceHigh, secondLater.container)
-        assertEquals(TmrDarkColors.textMuted, secondLater.content)
-
-        val thirdLater = tmrStepPillStyle(step = 3, current = 2, colors = TmrDarkColors)
-        assertEquals(TmrDarkColors.surfaceHigh, thirdLater.container)
-        assertEquals(TmrDarkColors.textMuted, thirdLater.content)
+    fun trackColoursMatchTheRedesignSteps() {
+        assertEquals(TmrDarkColors.lime, tmrStepTrackColor(step = 1, current = 1, colors = TmrDarkColors))
+        assertEquals(TmrDarkColors.surfaceHigh, tmrStepTrackColor(step = 2, current = 1, colors = TmrDarkColors))
+        assertEquals(TmrDarkColors.lime, tmrStepTrackColor(step = 1, current = 2, colors = TmrDarkColors))
+        assertEquals(TmrDarkColors.lime, tmrStepTrackColor(step = 2, current = 2, colors = TmrDarkColors))
+        assertEquals(TmrDarkColors.surfaceHigh, tmrStepTrackColor(step = 3, current = 2, colors = TmrDarkColors))
+        assertEquals(TmrDarkColors.lime, tmrStepTrackColor(step = 3, current = 3, colors = TmrDarkColors))
     }
 
     @Test
@@ -102,9 +85,7 @@ class TmrStepBarTest {
                 }
             }
         }
-        composeRule.onNodeWithText("✓ Profile").assertIsDisplayed()
-        composeRule.onNodeWithText("2 Job").assertIsDisplayed()
-        composeRule.onNodeWithText("3 Tailor").assertIsDisplayed()
+        composeRule.onNodeWithText("Step 2 of 3 · Job").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Step 2 of 3, Job").assertIsDisplayed()
     }
 }

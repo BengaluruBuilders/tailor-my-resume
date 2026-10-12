@@ -15,12 +15,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTouchHeightIsEqualTo
 import androidx.compose.ui.test.getBoundsInRoot
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -53,7 +51,6 @@ private const val A11Y_LONG_TIMEOUT_MS = 10_000
 private const val A11Y_FONT_SCALE = 2f
 private const val A11Y_STRESS_FONT_SCALE = 3f
 private const val A11Y_PARENT_TAG = "parent"
-private const val A11Y_STEP_COUNT = 3
 private val A11Y_TOAST_TOP = 96.dp + 8.dp
 private val A11Y_PARENT_WIDTH = 337.dp
 
@@ -106,20 +103,10 @@ class TmrChromeLargeTextA11yTest {
             TmrStepBar(current = 2, modifier = Modifier.fillMaxWidth())
         }
         val parent = composeRule.onNodeWithTag(A11Y_PARENT_TAG).getBoundsInRoot()
-        val pills =
-            composeRule.onAllNodes(
-                hasText("✓ Profile") or hasText("2 Job") or hasText("3 Tailor"),
-                useUnmergedTree = true,
-            )
-        pills.assertCountEquals(A11Y_STEP_COUNT)
-        val top = pills[0].getBoundsInRoot().top
-        for (index in 0 until A11Y_STEP_COUNT) {
-            val bounds = pills[index].getBoundsInRoot()
-            assertEquals(top.value, bounds.top.value, 0.5f)
-            assertTrue(bounds.left >= parent.left)
-            assertTrue(bounds.right <= parent.right)
-            assertTrue(bounds.right <= A11Y_PARENT_WIDTH)
-        }
+        val label = composeRule.onNodeWithText("Step 2 of 3 · Job", useUnmergedTree = true).getBoundsInRoot()
+        assertTrue(label.left >= parent.left)
+        assertTrue(label.right <= parent.right)
+        assertTrue(label.right <= A11Y_PARENT_WIDTH)
     }
 
     @Test

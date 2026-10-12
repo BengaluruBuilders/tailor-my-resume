@@ -40,6 +40,7 @@ If a task changes UI, read the frames for that flow before you write code.
 | Need | File |
 |---|---|
 | **Current design and MVP flow (wins first)** | `design/prototype-2026-10-10/README.md`, then `Prototype.dc.html` |
+| Add job, the step bar and the Paige buttons (overrides the prototype) | `design/job-step-2026-10-12/README.md` |
 | Logo, app icon, brand colours and wordmark | `design/logo/2026-10-11/kit/guidelines.md` |
 | Previous look (Avvio) | `design/avvio-canvas/README.md`, then `flow<N>-*.md` outlines |
 | Older restyle | `design/jade-restyle/INDEX.md`, then the frames it lists; rules in `docs/REDESIGN.md` section 0 |

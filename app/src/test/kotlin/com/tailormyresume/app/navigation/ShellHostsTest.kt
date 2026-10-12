@@ -129,7 +129,7 @@ class ShellHostsTest {
             }
         }, fontScale = 2f)
         rule.mainClock.advanceTimeBy(1_000)
-        val steps = rule.onNodeWithText("3 Tailor", useUnmergedTree = true).getBoundsInRoot()
+        val steps = rule.onNodeWithText("Step 2 of 3 · Job", useUnmergedTree = true).getBoundsInRoot()
         val toast = rule.onNodeWithTag(TOAST_TAG).getBoundsInRoot()
         assertThat(toast.top.value).isGreaterThan(steps.bottom.value)
     }

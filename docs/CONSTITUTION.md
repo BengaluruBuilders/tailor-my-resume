@@ -145,6 +145,12 @@ the release APK still requests no network permission.
 |---|---|---|
 | The screenshot acceptance source includes `design/activation-2026-10-12/README.md` for its listed states | The owner approved focused first-use changes after the activation review. The exported prototype stays unchanged and remains the source for all other states. Product integrity rules I.1 to I.5 are unchanged. | `verifyRoborazziDebug` (unchanged) |
 
+### Ledger amendment — 2026-10-12, job step redesign
+
+| Item | Why | Gate |
+|---|---|---|
+| The screenshot acceptance source includes `design/job-step-2026-10-12/README.md` for the add-job screen, the setup step bar, and the two Paige buttons | The owner approved the Claude Design "Job Step Redesign" on 2026-10-12. It keeps the prototype tokens and changes the step indicator, the hero height, the requirement placement and the button hierarchy. The exported prototype remains the source for all other states. Product integrity rules I.1 to I.5 are unchanged. | `verifyRoborazziDebug` (unchanged) |
+
 ### Ledger amendment — 2026-10-08, network access for the TailorMyResume backend (I.5)
 
 Adopted under Article VII in the PR that adds the `demo` and `prod` flavours.

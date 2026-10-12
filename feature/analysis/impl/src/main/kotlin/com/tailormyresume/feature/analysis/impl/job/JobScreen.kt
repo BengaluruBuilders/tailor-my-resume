@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +38,8 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -95,7 +98,9 @@ internal fun JobScreen(
                 placeholder = stringResource(R.string.feature_analysis_impl_job_placeholder),
                 readOnly = state is JobUiState.Analyzing,
                 modifier = Modifier.fillMaxWidth(),
+                trailing = { JobCharCount(state.text) },
             )
+            JobHint()
             if (state !is JobUiState.Analyzing && state.text.isBlank()) {
                 JobPasteActions(fontScale = fontScale, onPaste = onPaste, onUseLink = onUseLink)
             }
@@ -113,15 +118,6 @@ private fun JobBottom(state: JobUiState, onAnalyze: () -> Unit) {
     ) {
         when (state) {
             JobUiState.Empty -> {
-                Text(
-                    text = pluralStringResource(R.plurals.feature_analysis_impl_job_hint, MIN_JOB_CHARS, MIN_JOB_CHARS),
-                    style = TmrTheme.typography.caption,
-                    color = TmrTheme.colors.textMuted,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                )
                 TmrPrimaryButton(
                     label = stringResource(R.string.feature_analysis_impl_job_analyze),
                     onClick = onAnalyze,
@@ -132,15 +128,6 @@ private fun JobBottom(state: JobUiState, onAnalyze: () -> Unit) {
 
             is JobUiState.HasText -> Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 JobStatusRow(state)
-                if (!isPlausibleJobPost(state.text)) {
-                    Text(
-                        text = pluralStringResource(R.plurals.feature_analysis_impl_job_hint, MIN_JOB_CHARS, MIN_JOB_CHARS),
-                        style = TmrTheme.typography.caption,
-                        color = TmrTheme.colors.textMuted,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
                 if (state.notAJobPost) JobNotAPostCard()
                 TmrPrimaryButton(
                     label = stringResource(R.string.feature_analysis_impl_job_analyze),
@@ -164,7 +151,7 @@ private fun JobHero(showArt: Boolean) {
         headline = stringResource(R.string.feature_analysis_impl_job_hero_headline),
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 230.dp),
+            .heightIn(min = 196.dp),
     ) {
         if (!showArt) return@TmrHeroCard
         TmrPaige(
@@ -172,13 +159,13 @@ private fun JobHero(showArt: Boolean) {
             Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 30.dp)
-                .offset(y = 40.dp),
+                .offset(y = 58.dp),
         )
         JobMagnifier(
             Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 166.dp)
-                .offset(y = 40.dp),
+                .offset(y = 58.dp),
         )
     }
 }
@@ -230,35 +217,43 @@ private fun JobHeader(showClear: Boolean, onClear: () -> Unit, fontScale: Float)
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun JobStatusRow(state: JobUiState.HasText) {
-    val detected = state.detected
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        itemVerticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (detected != null) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                JobDetectedMark()
-                Text(
-                    text = detected,
-                    style = TmrTheme.typography.body,
-                    color = TmrTheme.colors.text,
-                    modifier = Modifier.padding(start = 8.dp),
-                )
-            }
-        }
+    val detected = state.detected ?: return
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        JobDetectedMark()
         Text(
-            text = stringResource(
-                R.string.feature_analysis_impl_job_char_count,
-                NumberFormat.getIntegerInstance().format(state.charCount),
-            ),
-            style = TmrTheme.typography.caption,
-            color = TmrTheme.colors.textMuted,
+            text = detected,
+            style = TmrTheme.typography.body,
+            color = TmrTheme.colors.text,
+            modifier = Modifier.padding(start = 8.dp),
         )
     }
+}
+
+@Composable
+private fun JobHint() {
+    Text(
+        text = pluralStringResource(R.plurals.feature_analysis_impl_job_hint, MIN_JOB_CHARS, MIN_JOB_CHARS),
+        style = TmrTheme.typography.caption,
+        color = TmrTheme.colors.textMuted,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun JobCharCount(text: String) {
+    val count = text.trim().length
+    val format = remember { NumberFormat.getIntegerInstance() }
+    val shown = format.format(count)
+    val minimum = format.format(MIN_JOB_CHARS)
+    val spoken = stringResource(R.string.feature_analysis_impl_job_char_count_description, shown, minimum)
+    Text(
+        text = stringResource(R.string.feature_analysis_impl_job_char_count, shown, minimum),
+        style = TmrTheme.typography.strongSmall,
+        color = if (count >= MIN_JOB_CHARS) TmrTheme.colors.lime else TmrTheme.colors.textMuted,
+        modifier = Modifier.semantics { contentDescription = spoken },
+    )
 }
 
 @Composable
@@ -314,7 +309,7 @@ private fun JobPasteActions(fontScale: Float, onPaste: () -> Unit, onUseLink: ()
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            TmrPrimaryButton(
+            TmrSecondaryButton(
                 label = stringResource(R.string.feature_analysis_impl_job_paste),
                 onClick = onPaste,
                 modifier = Modifier.fillMaxWidth(),
@@ -327,10 +322,10 @@ private fun JobPasteActions(fontScale: Float, onPaste: () -> Unit, onUseLink: ()
         }
     } else {
         Row(modifier = Modifier.fillMaxWidth()) {
-            TmrPrimaryButton(
+            TmrSecondaryButton(
                 label = stringResource(R.string.feature_analysis_impl_job_paste),
                 onClick = onPaste,
-                modifier = Modifier.weight(1.5f),
+                modifier = Modifier.weight(1.4f),
             )
             TmrSecondaryButton(
                 label = stringResource(R.string.feature_analysis_impl_job_use_link),
