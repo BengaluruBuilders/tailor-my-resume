@@ -16,6 +16,7 @@ import com.tailormyresume.feature.analysis.api.navigation.navigateToQuickQuestio
 import com.tailormyresume.feature.applications.impl.R
 import com.tailormyresume.feature.applications.impl.toTmrStatus
 import com.tailormyresume.feature.settings.api.navigation.navigateToPaywall
+import com.tailormyresume.feature.tailor.api.navigation.navigateToTailored
 import com.tailormyresume.feature.tailor.api.navigation.navigateToTailoring
 
 @Composable
@@ -43,6 +44,7 @@ internal fun ApplicationDetailRoute(viewModel: ApplicationDetailViewModel, navig
                 )
                 is ApplicationDetailEvent.OpenQuickQuestion -> navigator.navigateToQuickQuestion(event.applicationId)
                 is ApplicationDetailEvent.StartTailoring -> navigator.navigateToTailoring(event.applicationId)
+                is ApplicationDetailEvent.ReviewTailoredResume -> navigator.navigateToTailored(event.applicationId)
                 is ApplicationDetailEvent.OpenPaywall -> navigator.navigateToPaywall(event.applicationId)
             }
         }
@@ -60,6 +62,7 @@ internal fun ApplicationDetailRoute(viewModel: ApplicationDetailViewModel, navig
             onShare = viewModel::onShare,
             onOpen = viewModel::onOpen,
             onRetailor = viewModel::onRetailor,
+            onReviewTailoredResume = viewModel::onReviewTailoredResume,
             onViewJobAnalysis = { navigator.navigateToJobResult(viewModel.applicationId) },
             onSoon = viewModel::onSoon,
         )

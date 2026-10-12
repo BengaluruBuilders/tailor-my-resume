@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
+import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.domain.coverage.ScreenForKeywords
@@ -30,6 +31,7 @@ internal class JobResultViewModel @AssistedInject constructor(
     private val applicationRepository: ApplicationRepository,
     private val creditBalance: AccountCreditBalance,
     private val profileRepository: ProfileRepository,
+    private val tailorResume: TailorResumeUseCase,
     @Assisted val applicationId: String,
 ) : ViewModel() {
 
@@ -41,21 +43,32 @@ internal class JobResultViewModel @AssistedInject constructor(
         creditBalance.observeCredits(),
         profileRepository.observeProfile(),
     ) { application, credits, profile ->
-        toUiState(application, credits, profile)
+        toUiState(application, credits, profile, tailorResume.hasUnfinishedRequest(applicationId))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), JobResultUiState.Loading)
 
     val events: Flow<JobResultEvent> = eventChannel.receiveAsFlow()
 
     fun onTailor() {
         val state = uiState.value
-        if (state !is JobResultUiState.Ready || state.credits == null || tailorTapped) return
+        if (state !is JobResultUiState.Ready || tailorTapped) return
         tailorTapped = true
-        val event = when {
-            state.credits <= 0 -> JobResultEvent.Paywall(applicationId)
-            state.asksQuestion -> JobResultEvent.QuickQuestion(applicationId)
-            else -> JobResultEvent.Tailor(applicationId)
+        viewModelScope.launch {
+            val hasUnfinishedRequest = tailorResume.hasUnfinishedRequest(applicationId)
+            val event = if (hasUnfinishedRequest) {
+                JobResultEvent.Tailor(applicationId)
+            } else {
+                val credits = state.credits ?: run {
+                    tailorTapped = false
+                    return@launch
+                }
+                when {
+                    credits <= 0 -> JobResultEvent.Paywall(applicationId)
+                    state.asksQuestion -> JobResultEvent.QuickQuestion(applicationId)
+                    else -> JobResultEvent.Tailor(applicationId)
+                }
+            }
+            eventChannel.send(event)
         }
-        viewModelScope.launch { eventChannel.send(event) }
     }
 
     fun onShown() {
@@ -68,7 +81,12 @@ internal class JobResultViewModel @AssistedInject constructor(
     }
 }
 
-private fun toUiState(application: JobApplication?, credits: Int?, profile: CandidateProfile?): JobResultUiState {
+private fun toUiState(
+    application: JobApplication?,
+    credits: Int?,
+    profile: CandidateProfile?,
+    hasUnfinishedRequest: Boolean,
+): JobResultUiState {
     if (profile == null) return JobResultUiState.Unavailable
     val gap = application?.gapAnalysis ?: return JobResultUiState.Unavailable
     val coverage = KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, null, profile)
@@ -95,6 +113,7 @@ private fun toUiState(application: JobApplication?, credits: Int?, profile: Cand
             },
         credits = credits,
         asksQuestion = gap.question != null && application.quickAnswer == null,
+        hasUnfinishedRequest = hasUnfinishedRequest,
     )
 }
 

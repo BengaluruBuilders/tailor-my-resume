@@ -38,6 +38,7 @@ internal sealed interface JobResultUiState {
         val mustHaves: List<MustHaveRow>,
         val credits: Int?,
         val asksQuestion: Boolean,
+        val hasUnfinishedRequest: Boolean = false,
     ) : JobResultUiState {
         val keywordCount: Int get() = have.size + missing.size
 

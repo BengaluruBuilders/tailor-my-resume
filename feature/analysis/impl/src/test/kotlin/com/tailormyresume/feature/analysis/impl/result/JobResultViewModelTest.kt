@@ -3,13 +3,20 @@ package com.tailormyresume.feature.analysis.impl.result
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.CreditsRepository
+import com.tailormyresume.core.domain.FabricationGuard
 import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.PurchaseEntitlement
+import com.tailormyresume.core.domain.ResumeTailor
+import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
 import com.tailormyresume.core.domain.coverage.ScreenForKeywords
+import com.tailormyresume.core.domain.offline.OfflineResumeTailor
+import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
+import com.tailormyresume.core.model.EvidenceBullet
+import com.tailormyresume.core.model.GuardrailViolation
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.QuickAnswer
@@ -193,6 +200,18 @@ class JobResultViewModelTest {
     }
 
     @Test
+    fun unfinishedRequestTailorsWithoutCreditsOrAQuestion() = runTest {
+        seed(ResultTestData.application(), credits = 0)
+        val viewModel = viewModel(hasUnfinishedRequest = true)
+
+        viewModel.events.test {
+            viewModel.onTailor()
+
+            assertThat(awaitItem()).isEqualTo(JobResultEvent.Tailor(ResultTestData.APP_ID))
+        }
+    }
+
+    @Test
     fun unknownBalanceDoesNotPromptAPurchase() = runTest {
         seed()
         val gateway = object : PaymentGateway by paymentGateway {
@@ -207,6 +226,26 @@ class JobResultViewModelTest {
         viewModel.events.test {
             viewModel.onTailor()
             expectNoEvents()
+        }
+    }
+
+    @Test
+    fun unfinishedRequestTailorsWhenTheBalanceIsUnknown() = runTest {
+        seed()
+        val gateway = object : PaymentGateway by paymentGateway {
+            override fun observeEntitlement() = flowOf(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
+        }
+        val unknownCredits = object : CreditsRepository by creditsRepository {
+            override fun observeKnownBalance() = flowOf<Int?>(null)
+        }
+        val viewModel = viewModel(gateway, AccountCreditBalance(gateway, unknownCredits), hasUnfinishedRequest = true)
+
+        assertThat(readyState(viewModel).hasUnfinishedRequest).isTrue()
+
+        viewModel.events.test {
+            viewModel.onTailor()
+
+            assertThat(awaitItem()).isEqualTo(JobResultEvent.Tailor(ResultTestData.APP_ID))
         }
     }
 
@@ -279,14 +318,35 @@ class JobResultViewModelTest {
         )
     }
 
-    private fun TestScope.viewModel(gateway: PaymentGateway = paymentGateway, balance: AccountCreditBalance = AccountCreditBalance(gateway, creditsRepository)) =
-        JobResultViewModel(applicationRepository, balance, TestProfileRepository().apply { sendProfile(ResultTestData.profile) }, ResultTestData.APP_ID).also {
-            backgroundScope.launch(UnconfinedTestDispatcher()) { it.uiState.collect() }
-        }
+    private fun TestScope.viewModel(
+        gateway: PaymentGateway = paymentGateway,
+        balance: AccountCreditBalance = AccountCreditBalance(gateway, creditsRepository),
+        hasUnfinishedRequest: Boolean = false,
+    ) = JobResultViewModel(
+        applicationRepository,
+        balance,
+        TestProfileRepository().apply { sendProfile(ResultTestData.profile) },
+        TailorResumeUseCase(RecoveryTailor(hasUnfinishedRequest), AllowAllFabricationGuard),
+        ResultTestData.APP_ID,
+    ).also {
+        backgroundScope.launch(UnconfinedTestDispatcher()) { it.uiState.collect() }
+    }
 
     private fun readyState(viewModel: JobResultViewModel): JobResultUiState.Ready {
         val state = viewModel.uiState.value
         assertThat(state).isInstanceOf(JobResultUiState.Ready::class.java)
         return state as JobResultUiState.Ready
     }
+}
+
+private class RecoveryTailor(private val hasUnfinishedRequest: Boolean) : ResumeTailor by OfflineResumeTailor() {
+    override suspend fun hasUnfinishedRequest(applicationId: String) = hasUnfinishedRequest
+}
+
+private object AllowAllFabricationGuard : FabricationGuard {
+    override fun check(
+        proposedText: String,
+        sources: List<EvidenceBullet>,
+        profile: CandidateProfile,
+    ): List<GuardrailViolation> = emptyList()
 }

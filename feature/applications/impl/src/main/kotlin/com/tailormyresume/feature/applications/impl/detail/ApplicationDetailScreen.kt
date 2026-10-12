@@ -47,6 +47,7 @@ internal fun ApplicationDetailScreen(
     onViewJobAnalysis: () -> Unit,
     onSoon: () -> Unit,
     modifier: Modifier = Modifier,
+    onReviewTailoredResume: () -> Unit = {},
 ) {
     Box(modifier = modifier.fillMaxSize().background(TmrTheme.colors.background)) {
         Column(
@@ -108,6 +109,13 @@ internal fun ApplicationDetailScreen(
                     .background(TmrTheme.colors.surfaceRaised, TmrTheme.shapes.card)
                     .padding(horizontal = 16.dp),
             ) {
+                if (state.canReviewTailoredResume) {
+                    TmrListRow(
+                        label = stringResource(R.string.feature_applications_impl_review_tailored_resume),
+                        onClick = onReviewTailoredResume,
+                        minHeight = 56.dp,
+                    )
+                }
                 TmrListRow(
                     label = stringResource(R.string.feature_applications_impl_retailor),
                     meta = stringResource(R.string.feature_applications_impl_retailor_cost),

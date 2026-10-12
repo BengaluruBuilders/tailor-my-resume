@@ -26,6 +26,9 @@ class PendingTailoringIds @Inject constructor(
         store.remove(keyOf(runId))
     }
 
+    suspend fun hasUnfinishedRequest(applicationId: String): Boolean =
+        store.read(unfinishedKeyOf(applicationId)) != null
+
     private fun keyOf(runId: String) = "tailoring.request.$runId"
 
     private fun unfinishedKeyOf(applicationId: String) = "tailoring.request.unfinished.$applicationId"

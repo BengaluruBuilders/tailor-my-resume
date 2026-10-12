@@ -33,6 +33,8 @@ class RemoteResumeTailor @Inject constructor(
 ) : ResumeTailor {
     override suspend fun resultStored(applicationId: String, runId: String) = pending.settle(runId, applicationId)
 
+    override suspend fun hasUnfinishedRequest(applicationId: String) = pending.hasUnfinishedRequest(applicationId)
+
     override suspend fun tailor(
         profile: CandidateProfile,
         job: JobDescription,

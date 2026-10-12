@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.TailorResumeUseCase
+import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
@@ -42,6 +44,7 @@ class ApplicationDetailSaveSingleFlightTest {
             applicationRepository = applicationRepository,
             creditBalance = testAccountCreditBalance(TestPaymentGateway().withFreeCredits(1)),
             setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, TestClock()),
+            tailorResume = TailorResumeUseCase(OfflineResumeTailor(), AllowAllFabricationGuard),
             exportedPdfIntents = FakeExportedPdfIntents(),
             applicationId = "kb",
         )

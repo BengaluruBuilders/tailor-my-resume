@@ -21,6 +21,7 @@ internal sealed interface ApplicationDetailUiState {
         val appliedOn: String?,
         val file: ApplicationFile?,
         val statusSheet: ApplicationStatus?,
+        val canReviewTailoredResume: Boolean = false,
     ) : ApplicationDetailUiState
 }
 
@@ -40,6 +41,8 @@ internal sealed interface ApplicationDetailEvent {
     data class OpenQuickQuestion(val applicationId: String) : ApplicationDetailEvent
 
     data class StartTailoring(val applicationId: String) : ApplicationDetailEvent
+
+    data class ReviewTailoredResume(val applicationId: String) : ApplicationDetailEvent
 
     data class OpenPaywall(val applicationId: String) : ApplicationDetailEvent
 }

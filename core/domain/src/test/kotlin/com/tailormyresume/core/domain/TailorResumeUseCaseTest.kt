@@ -53,6 +53,15 @@ class TailorResumeUseCaseTest {
         decision = BulletDecision.PENDING,
     )
 
+    @Test
+    fun unfinishedRequestStateComesFromTheTailor() = runTest {
+        val tailor = object : ResumeTailor by OfflineResumeTailor() {
+            override suspend fun hasUnfinishedRequest(applicationId: String) = applicationId == "app-1"
+        }
+
+        assertThat(TailorResumeUseCase(tailor, OfflineFabricationGuard()).hasUnfinishedRequest("app-1")).isTrue()
+    }
+
     private suspend fun useCaseReturning(vararg bullets: TailoredBullet): TailorResumeUseCase {
         val tailor = object : ResumeTailor {
             override suspend fun tailor(profile: CandidateProfile, job: JobDescription, gap: GapAnalysis, applicationId: String, answer: QuickAnswer?, runId: String) =

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.designsystem.component.content.TmrApplicationStatus
 import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.ApplicationKeywordCoverage
+import com.tailormyresume.core.model.TailoredResume
 import com.tailormyresume.core.testing.data.PrototypeFixtures
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
@@ -34,7 +35,7 @@ class ApplicationsViewModelTest {
 
     private suspend fun populated(): ApplicationsUiState.Populated {
         profileRepository.sendProfile(scenario.profile)
-        applicationRepository.sendApplications(scenario.applications)
+        applicationRepository.sendApplications(scenario.applications.map { it.copy(tailoredResume = TailoredResume(emptyList())) })
         creditsRepository.sendLedger(scenario.ledger)
         return viewModel().settled() as ApplicationsUiState.Populated
     }
@@ -71,6 +72,20 @@ class ApplicationsViewModelTest {
         assertThat(first.keywordPercent).isEqualTo(92)
         assertThat(first.initial).isEqualTo("N")
         assertThat(first.status).isEqualTo(TmrApplicationStatus.Applied)
+    }
+
+    @Test
+    fun summaryCountsOnlyTailoredApplicationsWhileRowsKeepDrafts() = runTest {
+        val tailored = prototypeApplication("nw").copy(tailoredResume = TailoredResume(emptyList()))
+        val draft = prototypeApplication("kb").copy(tailoredResume = null)
+        applicationRepository.sendApplications(listOf(tailored, draft))
+        profileRepository.sendProfile(scenario.profile)
+
+        val state = viewModel().settled() as ApplicationsUiState.Populated
+
+        assertThat(state.total).isEqualTo(1)
+        assertThat(state.statusCounts).containsExactly(TmrApplicationStatus.Applied, 1)
+        assertThat(state.rows.map { it.id }).containsExactly("nw", "kb").inOrder()
     }
 
     @Test

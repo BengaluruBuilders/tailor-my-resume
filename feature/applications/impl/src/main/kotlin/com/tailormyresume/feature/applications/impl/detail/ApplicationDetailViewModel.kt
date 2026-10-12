@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
@@ -37,6 +38,7 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
     private val applicationRepository: ApplicationRepository,
     private val creditBalance: AccountCreditBalance,
     private val setApplicationStatus: SetApplicationStatusUseCase,
+    private val tailorResume: TailorResumeUseCase,
     private val exportedPdfIntents: ExportedPdfIntents,
     @Assisted val applicationId: String,
 ) : ViewModel() {
@@ -89,6 +91,7 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val credits = creditBalance.cachedCredits()
             val event = when {
+                tailorResume.hasUnfinishedRequest(applicationId) -> ApplicationDetailEvent.StartTailoring(applicationId)
                 credits == null -> ApplicationDetailEvent.BalanceUnavailable
                 credits <= 0 -> ApplicationDetailEvent.OpenPaywall(applicationId)
                 hasQuestion() -> ApplicationDetailEvent.OpenQuickQuestion(applicationId)
@@ -96,6 +99,10 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
             }
             eventChannel.send(event)
         }
+    }
+
+    fun onReviewTailoredResume() {
+        eventChannel.trySend(ApplicationDetailEvent.ReviewTailoredResume(applicationId))
     }
 
     fun onSoon() {
@@ -130,6 +137,7 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
             appliedOn = appliedOnOf(application),
             file = application.exportFileName?.let { ApplicationFile(it, application.keywordCoverage.keywordPercent()) },
             statusSheet = sheet,
+            canReviewTailoredResume = application.tailoredResume != null,
         )
     }
 

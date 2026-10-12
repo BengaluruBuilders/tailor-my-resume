@@ -20,6 +20,7 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -35,6 +36,7 @@ import com.tailormyresume.feature.profile.impl.experience.ExperienceRow
 import com.tailormyresume.feature.profile.impl.experience.ExperienceScreen
 import com.tailormyresume.feature.profile.impl.experience.ExperienceUiState
 import com.tailormyresume.feature.profile.impl.overview.ProfileScreen
+import com.tailormyresume.feature.profile.impl.overview.ProfileTarget
 import com.tailormyresume.feature.profile.impl.overview.ProfileUiState
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertFalse
@@ -103,7 +105,10 @@ internal fun ComposeContentTestRule.textLayouts(): List<Pair<SemanticsNode, Text
             layouts.firstOrNull()?.let { node to it }
         }
 
-private fun profileContent(): @Composable () -> Unit = {
+private fun profileContent(
+    sourceFileName: String? = "Priya_Deshmukh_Resume.pdf",
+    onOpen: (ProfileTarget) -> Unit = {},
+): @Composable () -> Unit = {
     ProfileScreen(
         state = ProfileUiState.Content(
             initials = "PD",
@@ -117,9 +122,9 @@ private fun profileContent(): @Composable () -> Unit = {
             skillsCount = 18,
             achievementsCount = 6,
             linkedinMissing = true,
-            sourceFileName = "Priya_Deshmukh_Resume.pdf",
+            sourceFileName = sourceFileName,
         ),
-        onOpen = {},
+        onOpen = onOpen,
     )
 }
 
@@ -241,6 +246,19 @@ class ProfileScreenshotTest {
     @Config(qualifiers = NARROW_QUALIFIERS)
     fun profileFont200At337dp() {
         profileState(NARROW_DEVICE)
+    }
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+    fun profileDetailsCanReplaceTheResume() {
+        val opened = mutableListOf<ProfileTarget>()
+
+        rule.setTmrContent(TmrTestDevices.prototype, profileContent(sourceFileName = null) { opened += it })
+
+        rule.onNodeWithText("Built from your details").performClick()
+        rule.onNodeWithText("Replace").assertExists()
+        assertTrue(opened == listOf(ProfileTarget.REPLACE))
+        rule.capture("profile_profile_details", TmrTestDevices.prototype)
     }
 
     private fun profileState(device: TmrTestDevice) {
