@@ -44,6 +44,19 @@ class JobLinkViewModelTest {
     }
 
     @Test
+    fun reopeningLinkModeRestoresTheUrlWithoutImporting() = runTest(dispatcher) {
+        val importer = FakeJobImporter()
+        val draftStore = store()
+        viewModel(importer, draftStore).onLinkChange(URL)
+
+        val reopened = viewModel(importer, draftStore)
+
+        assertThat(reopened.uiState.value.link).isEqualTo(URL)
+        assertThat(reopened.uiState.value.importing).isFalse()
+        assertThat(importer.urls).isEmpty()
+    }
+
+    @Test
     fun httpsImportReturnsTextAndHostThenPops() = runTest(dispatcher) {
         listOf(URL, "  $URL  ", "\t$URL\n").forEach { typed ->
             val importer = FakeJobImporter()

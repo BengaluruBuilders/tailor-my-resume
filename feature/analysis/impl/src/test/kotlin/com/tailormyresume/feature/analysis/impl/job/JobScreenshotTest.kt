@@ -118,6 +118,7 @@ class JobScreenshotTest {
                                 state = JobLinkUiState(link = LINK),
                                 onLinkChange = {},
                                 onImport = {},
+                                onPasteText = {},
                             )
                         }
                     }

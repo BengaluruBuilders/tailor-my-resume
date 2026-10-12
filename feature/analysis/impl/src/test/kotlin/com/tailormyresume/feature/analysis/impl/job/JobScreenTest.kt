@@ -13,7 +13,10 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.TextLayoutResult
@@ -27,6 +30,8 @@ import com.tailormyresume.core.designsystem.component.chrome.TmrToastHost
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastState
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.screenshot.TmrTestDevices
+import com.tailormyresume.feature.analysis.impl.joblink.JobLinkScreen
+import com.tailormyresume.feature.analysis.impl.joblink.JobLinkUiState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.junit.After
@@ -44,7 +49,7 @@ private const val FONT_SCALE_200 = 2.0f
 private const val SCREEN_READER_PERSIST_MS = 60_000L
 private const val MAX_FRAMES = 120
 private const val TOAST_SETTLE_MS = 1_000L
-private const val MINIMUM_HINT = "At least 200 characters. Include the responsibilities and requirements."
+private const val MINIMUM_HINT = "200 characters minimum"
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -73,21 +78,27 @@ class JobScreenTest {
     fun emptyScreenShowsHeroPasteAndLinkButtonsAndDisabledAnalyze() {
         setScreen(JobUiState.Empty)
         rule.onNodeWithText("Paige reads it for you", ignoreCase = true).assertIsDisplayed()
-        rule.onNodeWithText("Paste the job you want").assertIsDisplayed()
+        rule.onNodeWithText("Paste the job\nyou want").assertIsDisplayed()
         rule.onNodeWithText("Paste from clipboard").assertIsDisplayed()
         rule.onNodeWithText("Use a link").assertIsDisplayed()
         rule
             .onNodeWithText(MINIMUM_HINT)
             .assertIsDisplayed()
+        rule.onNodeWithContentDescription(MINIMUM_HINT).assertIsDisplayed()
         val config = rule.onNodeWithText("Analyze job").fetchSemanticsNode().config
         assertThat(config.getOrNull(SemanticsProperties.Disabled)).isNotEqualTo(false)
         assertThat(config.getOrNull(SemanticsProperties.StateDescription)).isEqualTo(NOT_AVAILABLE)
     }
 
     @Test
-    fun pasteAndLinkButtonsInvokeCallbacks() {
+    fun inputModeSelectionDoesNotPasteAndClipboardHasItsOwnAction() {
         val calls = Calls()
         setScreen(JobUiState.Empty, calls)
+        rule.onNodeWithText("Paste text").assertIsSelected().performClick()
+        rule.onNodeWithText("Use a link").assertIsNotSelected()
+        val item = rule.onNodeWithText("Use a link").fetchSemanticsNode().config[SemanticsProperties.CollectionItemInfo]
+        assertThat(item.columnIndex).isEqualTo(1)
+        rule.runOnIdle { assertThat(calls.pastes).isEqualTo(0) }
         rule.onNodeWithText("Paste from clipboard").performClick()
         rule.onNodeWithText("Use a link").performClick()
         rule.runOnIdle {
@@ -97,12 +108,39 @@ class JobScreenTest {
     }
 
     @Test
+    fun linkModeShowsUrlAndImportAndReturnsToTextWithoutImporting() {
+        var imports = 0
+        var returns = 0
+        rule.setContent {
+            TmrTheme {
+                JobLinkScreen(
+                    state = JobLinkUiState(link = "https://careers.example/job"),
+                    onLinkChange = {},
+                    onImport = { imports += 1 },
+                    onPasteText = { returns += 1 },
+                )
+            }
+        }
+        rule.onNodeWithText("Use a link").assertIsSelected().performClick()
+        rule.onNodeWithText("Paste text").assertIsNotSelected().performClick()
+        rule.onNodeWithText("Job link").assertIsDisplayed()
+        rule.onNodeWithText("https://careers.example/job").assertIsDisplayed()
+        rule.onNodeWithText("Analyze job").assertDoesNotExist()
+        rule.runOnIdle {
+            assertThat(imports).isEqualTo(0)
+            assertThat(returns).isEqualTo(1)
+        }
+        rule.onNodeWithText("Import job").performClick()
+        rule.runOnIdle { assertThat(imports).isEqualTo(1) }
+    }
+
+    @Test
     fun hasTextShowsHeaderClearCountAndDetected() {
         val calls = Calls()
         setScreen(JobUiState.HasText(text = jobText(1234), detected = DETECTED), calls)
         rule.onNodeWithText("Job description").assertIsDisplayed()
         rule.onNodeWithText("Clear").assertIsDisplayed()
-        rule.onNodeWithText("1,234 / 200").assertIsDisplayed()
+        rule.onNodeWithText("1,234 / 200 characters").assertIsDisplayed()
         rule.onNodeWithText(DETECTED).assertIsDisplayed()
         val analyze = rule.onNodeWithText("Analyze job").fetchSemanticsNode().config
         assertThat(analyze.getOrNull(SemanticsProperties.StateDescription)).isNull()
@@ -117,7 +155,7 @@ class JobScreenTest {
     @Test
     fun notAJobPostShowsAmberCard() {
         setScreen(JobUiState.HasText(text = jobText(40), notAJobPost = true))
-        rule.onNodeWithText(MINIMUM_HINT).assertIsDisplayed()
+        rule.onNodeWithText("40 / 200 characters").assertIsDisplayed()
         rule.onNodeWithText("This doesn't look like a job post").assertIsDisplayed()
         rule
             .onNodeWithText("Paste the full listing, including responsibilities and requirements.")
@@ -133,9 +171,13 @@ class JobScreenTest {
             }
         }
 
-        rule.onNodeWithText("199 / 200").assertIsDisplayed()
+        rule.onNodeWithText("199 / 200 characters").assertIsDisplayed()
+        assertThat(rule.onNodeWithText("Analyze job").fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription))
+            .isEqualTo(NOT_AVAILABLE)
         rule.runOnIdle { state.value = JobUiState.HasText(text = "  " + jobText(200) + "  ") }
-        rule.onNodeWithText("200 / 200").assertIsDisplayed()
+        rule.onNodeWithText("200 / 200 characters").assertIsDisplayed()
+        assertThat(rule.onNodeWithText("Analyze job").fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription))
+            .isNull()
     }
 
     @Test
@@ -249,7 +291,7 @@ class JobScreenTest {
                 }
             }
         }
-        assertLabelsFit("Paste from clipboard", "Use a link", "Analyze job")
+        assertLabelsFit("Paste text", "Paste from clipboard", "Use a link", MINIMUM_HINT, "Analyze job")
         rule.runOnIdle { state.value = JobUiState.HasText(text = jobText(1234), detected = DETECTED) }
         assertLabelsFit("Analyze job", "Clear")
     }

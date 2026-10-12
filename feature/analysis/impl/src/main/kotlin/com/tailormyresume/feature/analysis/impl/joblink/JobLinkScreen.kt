@@ -14,24 +14,25 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.tailormyresume.core.designsystem.component.input.TmrInputModeSelector
 import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
 import com.tailormyresume.core.designsystem.component.input.TmrTextField
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.feature.analysis.impl.R
+import com.tailormyresume.feature.analysis.impl.job.JobInputHero
+import com.tailormyresume.feature.analysis.impl.job.jobInputModes
 
 @Composable
 internal fun JobLinkScreen(
     state: JobLinkUiState,
     onLinkChange: (String) -> Unit,
     onImport: () -> Unit,
+    onPasteText: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val fontScale = LocalDensity.current.fontScale
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -43,27 +44,15 @@ internal fun JobLinkScreen(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(start = 14.dp, end = 14.dp, top = 20.dp),
+                .padding(start = 14.dp, end = 14.dp, top = 14.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            val titleStyle = TmrTheme.typography.headline
-            Text(
-                text = stringResource(R.string.feature_analysis_impl_joblink_title),
-                style = titleStyle.copy(
-                    fontSize = (titleStyle.fontSize.value * minOf(fontScale, 1.4f) / fontScale).sp,
-                ),
-                color = TmrTheme.colors.text,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-            )
-            Text(
-                text = stringResource(R.string.feature_analysis_impl_joblink_body),
-                style = TmrTheme.typography.body,
-                color = TmrTheme.colors.textSecondary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+            JobInputHero(showArt = true)
+            TmrInputModeSelector(
+                options = jobInputModes(),
+                selectedIndex = 1,
+                onSelect = { if (it == 0) onPasteText() },
+                enabled = !state.importing,
             )
             TmrTextField(
                 value = state.link,
