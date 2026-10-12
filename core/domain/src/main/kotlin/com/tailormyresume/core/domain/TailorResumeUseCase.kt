@@ -23,6 +23,8 @@ class TailorResumeUseCase @Inject constructor(
 ) {
     suspend fun resultStored(applicationId: String, runId: String) = tailor.resultStored(applicationId, runId)
 
+    suspend fun hasUnfinishedRequest(applicationId: String) = tailor.hasUnfinishedRequest(applicationId)
+
     private class Evidence(
         val profileBullets: Map<String, EvidenceBullet>,
         val answerFact: EvidenceBullet?,

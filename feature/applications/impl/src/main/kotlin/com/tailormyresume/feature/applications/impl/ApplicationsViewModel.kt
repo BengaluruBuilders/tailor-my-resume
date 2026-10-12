@@ -40,10 +40,11 @@ internal class ApplicationsViewModel @Inject constructor(
         val header = ApplicationsHeader(credits = credits?.coerceAtLeast(0), initials = initialsOf(profile?.fullName.orEmpty()))
         if (applications.isEmpty()) return ApplicationsUiState.Empty(header)
         val rows = applications.sortedByDescending { it.updatedAt }.map(::rowFor)
+        val tailoredApplications = applications.filter { it.tailoredResume != null }
         return ApplicationsUiState.Populated(
             header = header,
-            total = rows.size,
-            statusCounts = rows.groupingBy { it.status }.eachCount(),
+            total = tailoredApplications.size,
+            statusCounts = tailoredApplications.groupingBy { it.status.toTmrStatus() }.eachCount(),
             rows = rows,
         )
     }

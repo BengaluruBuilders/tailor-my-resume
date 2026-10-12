@@ -265,6 +265,7 @@ private fun MarkerGlyph(glyph: String) {
 @Composable
 private fun JobResultBottom(state: JobResultUiState.Ready, onTailor: () -> Unit) {
     val note = when {
+        state.hasUnfinishedRequest -> stringResource(R.string.feature_analysis_impl_result_note_existing_request)
         state.credits == null -> stringResource(R.string.feature_analysis_impl_result_note_unknown_credits)
         state.credits > 0 -> stringResource(R.string.feature_analysis_impl_result_note_credits, state.credits)
         else -> stringResource(R.string.feature_analysis_impl_result_note_no_credits)
@@ -281,9 +282,15 @@ private fun JobResultBottom(state: JobResultUiState.Ready, onTailor: () -> Unit)
         },
     ) {
         TmrPrimaryButton(
-            label = stringResource(R.string.feature_analysis_impl_result_tailor),
+            label = stringResource(
+                if (state.hasUnfinishedRequest) {
+                    R.string.feature_analysis_impl_result_resume_tailoring
+                } else {
+                    R.string.feature_analysis_impl_result_tailor
+                },
+            ),
             onClick = onTailor,
-            enabled = state.credits != null,
+            enabled = state.credits != null || state.hasUnfinishedRequest,
             modifier = Modifier.weight(1f),
         )
     }

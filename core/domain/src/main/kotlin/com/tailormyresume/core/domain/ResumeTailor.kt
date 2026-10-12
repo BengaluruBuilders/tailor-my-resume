@@ -17,4 +17,6 @@ interface ResumeTailor {
     ): TailoredResume
 
     suspend fun resultStored(applicationId: String, runId: String) = Unit
+
+    suspend fun hasUnfinishedRequest(applicationId: String) = false
 }

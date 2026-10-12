@@ -137,6 +137,18 @@ class RemoteResumeTailorRunIdTest {
     }
 
     @Test
+    fun reportsAnUnfinishedRequestUntilTheResultIsStored() = runTest {
+        succeed()
+        val tailor = tailorOverStore()
+
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
+
+        assertThat(tailor.hasUnfinishedRequest("app-1")).isTrue()
+        tailor.resultStored("app-1", "run-1")
+        assertThat(tailor.hasUnfinishedRequest("app-1")).isFalse()
+    }
+
+    @Test
     fun pendingIdsStayUnderThePrefixSignOutWipes() = runTest {
         succeed()
 

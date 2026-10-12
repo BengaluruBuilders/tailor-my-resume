@@ -332,6 +332,27 @@ class ApplicationsScreenshots {
     }
 
     @Test
+    fun applicationDetailUnexportedTailoredResume() {
+        shootDetail(
+            "application_detail_unexported_tailored_resume",
+            detail(status = ApplicationStatus.SAVED, appliedOn = null, file = null).copy(canReviewTailoredResume = true),
+            TmrTestDevices.prototype,
+        )
+        rule.onNodeWithText("Review tailored resume").assertExists()
+    }
+
+    @Test
+    fun applicationDetailExportedTailoredResume() {
+        shootDetail(
+            "application_detail_exported_tailored_resume",
+            detail().copy(canReviewTailoredResume = true),
+            TmrTestDevices.prototype,
+        )
+        rule.onNodeWithText("Open").assertExists()
+        rule.onNodeWithText("Review tailored resume").assertExists()
+    }
+
+    @Test
     @Config(qualifiers = NARROW_QUALIFIERS)
     fun applicationDetailNoFile_font2_337dp() {
         shootDetail(

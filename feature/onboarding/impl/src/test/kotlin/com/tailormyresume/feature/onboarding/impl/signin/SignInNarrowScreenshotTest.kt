@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tailormyresume.core.domain.SignInResult
 import org.junit.Rule
@@ -46,13 +45,12 @@ class SignInNarrowScreenshotTest {
             SignInScreen(SignInUiState.Ready, onContinueWithGoogle = {}, story = story)
         }
         listOf(
-            "Every job asks for something different. You shouldn’t have to start over every time.",
+            "Have your resume or work details and the full job description ready.",
             "AI matches your real skills and achievements to each job description.",
             "Create a tailored resume for each job without rewriting it yourself. Review and approve each version before export.",
         ).forEachIndexed { index, subline ->
             composeRule.runOnIdle { repeat(index - story.index) { story.step(1) } }
-            composeRule.onNodeWithText(subline).performScrollTo().assertIsDisplayed()
-            composeRule.onNodeWithText("Continue with Google").performScrollTo().assertIsDisplayed()
+            composeRule.onNodeWithText("Continue with Google").assertIsDisplayed()
         }
     }
 

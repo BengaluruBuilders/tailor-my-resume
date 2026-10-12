@@ -16,9 +16,12 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -138,6 +141,25 @@ class JobResultScreenshotTest {
         assertTrue(reasonsY < coverageY)
     }
 
+    @Test
+    fun unfinishedRequestWithUnknownCreditsEnablesResumeTailoring() {
+        var taps = 0
+        val state = CREDITS_STATE.copy(credits = null, hasUnfinishedRequest = true)
+
+        setContent(state, TmrTestDevices.prototype) { taps += 1 }
+
+        rule.onNodeWithText("Resume tailoring").assertIsEnabled().performClick()
+        rule.onNodeWithText("Continue the existing request").assertExists()
+        assertTrue(taps == 1)
+    }
+
+    @Test
+    fun freshRequestWithUnknownCreditsKeepsTailoringDisabled() {
+        setContent(CREDITS_STATE.copy(credits = null), TmrTestDevices.prototype)
+
+        rule.onNodeWithText("Tailor my resume").assertIsNotEnabled()
+    }
+
     private fun captureStates(device: TmrTestDevice) {
         var screen by mutableStateOf(SCREENS.first().second)
         rule.setContent { ResultContent(screen, device) }
@@ -156,33 +178,49 @@ class JobResultScreenshotTest {
         }
     }
 
-    private fun setContent(state: JobResultUiState.Ready, device: TmrTestDevice) {
-        rule.setContent { ResultContent(state, device) }
+    private fun setContent(
+        state: JobResultUiState.Ready,
+        device: TmrTestDevice,
+        onTailor: () -> Unit = {},
+    ) {
+        rule.setContent { ResultContent(state, device, onTailor) }
         rule.waitForIdle()
         assertResultContent(state)
     }
 
     @Composable
-    private fun ResultContent(state: JobResultUiState.Ready, device: TmrTestDevice) {
+    private fun ResultContent(
+        state: JobResultUiState.Ready,
+        device: TmrTestDevice,
+        onTailor: () -> Unit = {},
+    ) {
         TmrTheme {
             Box(modifier = Modifier.fillMaxSize().background(TmrTheme.colors.background)) {
                 val density = LocalDensity.current
                 CompositionLocalProvider(
                     LocalDensity provides Density(density.density, device.fontScale),
                 ) {
-                    JobResultScreen(state = state, onTailor = {})
+                    JobResultScreen(state = state, onTailor = onTailor)
                 }
             }
         }
     }
 
     private fun assertResultContent(state: JobResultUiState.Ready) {
-        rule.onNodeWithText("Tailor my resume", useUnmergedTree = true).assertIsDisplayed()
+        val label = if (state.hasUnfinishedRequest) "Resume tailoring" else "Tailor my resume"
+        rule.onNodeWithText(label, useUnmergedTree = true).assertIsDisplayed()
         rule.onNodeWithText("Keywords matched", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("What they screen for · 8", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Must-haves", useUnmergedTree = true).assertExists()
         rule.onNodeWithText("Not clear in your resume. We'll ask you next.", useUnmergedTree = true).assertExists()
-        if ((state.credits ?: 0) > 0) {
+        if (state.hasUnfinishedRequest) {
+            rule.onNodeWithText("Continue the existing request", useUnmergedTree = true).assertExists()
+        } else if (state.credits == null) {
+            rule.onNodeWithText(
+                "A successful tailoring uses 1 credit · balance unavailable",
+                useUnmergedTree = true,
+            ).assertExists()
+        } else if (state.credits > 0) {
             rule.onNodeWithText("A successful tailoring uses 1 credit · you have ${state.credits}", useUnmergedTree = true).assertExists()
         } else {
             rule.onNodeWithText("A successful tailoring uses 1 credit · no credits left", useUnmergedTree = true).assertExists()

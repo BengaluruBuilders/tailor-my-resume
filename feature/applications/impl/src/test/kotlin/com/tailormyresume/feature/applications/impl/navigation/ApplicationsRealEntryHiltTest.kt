@@ -28,6 +28,8 @@ import com.tailormyresume.core.designsystem.component.chrome.TmrToastHost
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastState
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.ResumeTailor
+import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.navigation.NavigationState
@@ -67,6 +69,9 @@ class ApplicationsEntryHostActivity : ComponentActivity()
 @Module
 @InstallIn(SingletonComponent::class)
 internal abstract class ApplicationsHiltTestBindings {
+    @Binds
+    abstract fun bindResumeTailor(impl: OfflineResumeTailor): ResumeTailor
+
     @Binds
     abstract fun bindContentReports(impl: StoredContentReportRepository): ContentReportRepository
 

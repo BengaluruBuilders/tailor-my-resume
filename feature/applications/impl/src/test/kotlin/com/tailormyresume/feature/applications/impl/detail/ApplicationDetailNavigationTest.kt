@@ -9,7 +9,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.account.AccountCreditBalance
+import com.tailormyresume.core.domain.offline.OfflineResumeTailor
+import com.tailormyresume.core.model.TailoredResume
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
@@ -23,6 +26,7 @@ import com.tailormyresume.feature.applications.api.navigation.ApplicationDetailN
 import com.tailormyresume.feature.applications.impl.grant
 import com.tailormyresume.feature.applications.impl.prototypeApplication
 import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
+import com.tailormyresume.feature.tailor.api.navigation.TailoredNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoringNavKey
 import org.junit.Rule
 import org.junit.Test
@@ -46,13 +50,30 @@ class ApplicationDetailNavigationTest {
     private val navigator = Navigator(NavigationState(NavBackStack<NavKey>(detailKey)))
     private val stack: List<NavKey> get() = navigator.state.stack.toList()
 
-    private fun show(credits: Int) {
-        applicationRepository.sendApplications(listOf(prototypeApplication("kb")))
+    private fun show(
+        credits: Int,
+        hasTailoredResume: Boolean = false,
+        hasExportFile: Boolean = true,
+    ) {
+        val application = prototypeApplication("kb")
+        applicationRepository.sendApplications(
+            listOf(
+                if (hasTailoredResume) {
+                    application.copy(
+                        tailoredResume = TailoredResume(emptyList()),
+                        exportFileName = if (hasExportFile) application.exportFileName else null,
+                    )
+                } else {
+                    application
+                },
+            ),
+        )
         if (credits > 0) creditsRepository.sendLedger(listOf(grant(credits)))
         val viewModel = ApplicationDetailViewModel(
             applicationRepository = applicationRepository,
             creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(0), creditsRepository),
             setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, TestClock()),
+            tailorResume = TailorResumeUseCase(OfflineResumeTailor(), AllowAllFabricationGuard),
             exportedPdfIntents = FakeExportedPdfIntents(),
             applicationId = "kb",
         )
@@ -94,5 +115,24 @@ class ApplicationDetailNavigationTest {
         composeRule.waitForIdle()
 
         assertThat(stack.last()).isEqualTo(PaywallNavKey(returnToApplicationId = "kb"))
+    }
+
+    @Test
+    fun reviewUnexportedTailoredResumePushesTheTailoredScreen() {
+        show(credits = 0, hasTailoredResume = true, hasExportFile = false)
+
+        composeRule.onNodeWithText("Review tailored resume").performClick()
+
+        assertThat(stack.last()).isEqualTo(TailoredNavKey("kb"))
+    }
+
+    @Test
+    fun reviewExportedTailoredResumeKeepsTheFileCardAndPushesTheTailoredScreen() {
+        show(credits = 0, hasTailoredResume = true)
+
+        composeRule.onNodeWithText("Open").assertExists()
+        composeRule.onNodeWithText("Review tailored resume").performClick()
+
+        assertThat(stack.last()).isEqualTo(TailoredNavKey("kb"))
     }
 }

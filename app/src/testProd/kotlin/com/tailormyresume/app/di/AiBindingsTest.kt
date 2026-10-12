@@ -90,4 +90,14 @@ class AiBindingsTest {
 
         assertThat(store.read("tailoring.request.unfinished.app-1")).isNull()
     }
+
+    @Test
+    fun guardedTailorHidesPendingRequestsDuringAPreview() = runBlocking {
+        backend.reply(202, tailoringBody("SUCCEEDED", tailoringResult("Cleaned and checked weekly sales data in Excel.")))
+        tailor.tailor(candidate, job, gap, "app-1", null, "run-1")
+
+        assertThat(tailor.hasUnfinishedRequest("app-1")).isTrue()
+        previewMode.active = true
+        assertThat(tailor.hasUnfinishedRequest("app-1")).isFalse()
+    }
 }

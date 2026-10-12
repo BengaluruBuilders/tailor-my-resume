@@ -197,34 +197,34 @@ internal fun ProfileScreen(
                     )
                 }
             }
-            content.sourceFileName?.let { fileName ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(role = Role.Button) { onOpen(ProfileTarget.REPLACE) }
-                        .heightIn(min = 48.dp)
-                        .padding(vertical = spacing.sm),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(spacing.sm),
-                ) {
-                    Icon(
-                        imageVector = TmrIcons.File,
-                        contentDescription = null,
-                        tint = colors.textSecondary,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.feature_profile_impl_built_from, fileName),
-                        style = typography.caption,
-                        color = colors.textSecondary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        text = stringResource(R.string.feature_profile_impl_replace),
-                        style = typography.caption,
-                        color = colors.lime,
-                    )
-                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(role = Role.Button) { onOpen(ProfileTarget.REPLACE) }
+                    .heightIn(min = 48.dp)
+                    .padding(vertical = spacing.sm),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(spacing.sm),
+            ) {
+                Icon(
+                    imageVector = TmrIcons.File,
+                    contentDescription = null,
+                    tint = colors.textSecondary,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    text = content.sourceFileName?.let { fileName ->
+                        stringResource(R.string.feature_profile_impl_built_from, fileName)
+                    } ?: stringResource(R.string.feature_profile_impl_built_from_details),
+                    style = typography.caption,
+                    color = colors.textSecondary,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = stringResource(R.string.feature_profile_impl_replace),
+                    style = typography.caption,
+                    color = colors.lime,
+                )
             }
         }
     }

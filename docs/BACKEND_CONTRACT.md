@@ -503,11 +503,11 @@ Quick-question answer, and the truth rule (PLAN section 2.3). An answer is a fac
    `USER_ANSWER`. When `detail` is not empty, the server also adds one bullet, `ans-<requirementId>-b1`,
    with the text of `detail`. The text of the fact is `detail`, or the requirement text when there is no detail.
    `NOT_YET` and `SKIPPED` add nothing; a `detail` sent with them is ignored.
-2. A bullet of an experience entry E may cite an `ans-` id only when `detail` names the organisation or the
-   title of E (case-insensitive). The `ans-` source sits next to at least one source bullet of E, and the bullet
-   stays under E. Otherwise the answer can support only the summary and the skills. An answer creates no entry
-   and no employer claim (revamp D6). The device FabricationGuard (D7) accepts an `ans-` id as a source in the same way.
-   The server drops or reverts a bullet that breaks this rule.
+2. When `detail` names the organisation or title of an experience entry E (case-insensitive), a bullet under
+   E may cite an `ans-` id as its only source. E may have no existing bullets. Any cited profile bullet must
+   also belong to E. Otherwise the answer can support only the summary and the skills. An answer creates no
+   entry and no employer claim (revamp D6). The device FabricationGuard (D7) accepts an `ans-` id as a source
+   in the same way. The server drops or reverts a bullet that breaks this rule.
 3. Only the server makes `USER_ANSWER` facts. A request that sends this source, or an id that starts
    with `ans-`, gets `400 INVALID_INPUT`.
 4. The app shows a change that cites an `ans-` id with the source "Your answer". If the answer supports
@@ -767,7 +767,7 @@ Backs the server part of `AccountDataExporter`. The app adds it to the archive a
       "day": "2026-10-10", "resetsAt": "..."
     },
     "credits": [{ "id": "...", "kind": "PURCHASE", "amount": 5, "applicationId": null, "productId": "...", "createdAt": "..." }],
-    "unlocks": [{ "applicationId": "...", "creditKind": "...", "createdAt": "..." }],
+    "unlocks": [{ "applicationId": "...", "creditKind": "...", "unlockedAt": "..." }],
     "purchases": [],
     "contentReports": [
       { "id": "...", "applicationId": "...", "itemKind": "...", "itemId": "...", "generationId": "...", "itemText": "...", "reportedAt": "..." }

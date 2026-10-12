@@ -6,13 +6,17 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.PurchaseEntitlement
+import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
+import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.account.AccountCreditBalance
+import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.KeywordCoverage
 import com.tailormyresume.core.model.QuickQuestion
+import com.tailormyresume.core.model.TailoredResume
 import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
@@ -52,10 +56,15 @@ class ApplicationDetailViewModelTest {
         TimeZone.setDefault(initialZone)
     }
 
-    private fun viewModel(applicationId: String = "kb", balance: AccountCreditBalance = creditBalance) = ApplicationDetailViewModel(
+    private fun viewModel(
+        applicationId: String = "kb",
+        balance: AccountCreditBalance = creditBalance,
+        hasUnfinishedRequest: Boolean = false,
+    ) = ApplicationDetailViewModel(
         applicationRepository = applicationRepository,
         creditBalance = balance,
         setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, clock),
+        tailorResume = TailorResumeUseCase(RecoveryTailor(hasUnfinishedRequest), AllowAllFabricationGuard),
         exportedPdfIntents = intents,
         applicationId = applicationId,
     )
@@ -110,6 +119,33 @@ class ApplicationDetailViewModelTest {
         seed(prototypeApplication("kb").copy(exportFileName = null))
 
         assertThat(viewModel().ready().file).isNull()
+    }
+
+    @Test
+    fun savedTailoredResumeWithoutAnExportCanBeReviewed() = runTest {
+        seed(prototypeApplication("kb").copy(tailoredResume = TailoredResume(emptyList()), exportFileName = null))
+        val viewModel = viewModel()
+
+        assertThat(viewModel.ready().canReviewTailoredResume).isTrue()
+        viewModel.events.test {
+            viewModel.onReviewTailoredResume()
+
+            assertThat(awaitItem()).isEqualTo(ApplicationDetailEvent.ReviewTailoredResume("kb"))
+        }
+    }
+
+    @Test
+    fun exportedTailoredResumeKeepsTheFileCardAndCanBeReviewed() = runTest {
+        seed(prototypeApplication("kb").copy(tailoredResume = TailoredResume(emptyList())))
+        val viewModel = viewModel()
+
+        assertThat(viewModel.ready().file).isNotNull()
+        assertThat(viewModel.ready().canReviewTailoredResume).isTrue()
+        viewModel.events.test {
+            viewModel.onReviewTailoredResume()
+
+            assertThat(awaitItem()).isEqualTo(ApplicationDetailEvent.ReviewTailoredResume("kb"))
+        }
     }
 
     @Test
@@ -216,6 +252,19 @@ class ApplicationDetailViewModelTest {
     }
 
     @Test
+    fun retailorWithAnUnfinishedRequestStartsTailoringWithoutCreditsOrAQuestion() = runTest {
+        seed(prototypeApplication("kb").copy(gapAnalysis = questionAnalysis))
+        val viewModel = viewModel(hasUnfinishedRequest = true)
+        viewModel.ready()
+
+        viewModel.events.test {
+            viewModel.onRetailor()
+
+            assertThat(awaitItem()).isEqualTo(ApplicationDetailEvent.StartTailoring("kb"))
+        }
+    }
+
+    @Test
     fun retailorWithUnknownWalletShowsUnavailableWithoutPaywall() = runTest {
         seed(prototypeApplication("kb"))
         val gateway = object : PaymentGateway by paymentGateway {
@@ -231,6 +280,28 @@ class ApplicationDetailViewModelTest {
             viewModel.onRetailor()
             assertThat(awaitItem()).isEqualTo(ApplicationDetailEvent.BalanceUnavailable)
             expectNoEvents()
+        }
+    }
+
+    @Test
+    fun retailorWithAnUnfinishedRequestStartsTailoringWhenTheWalletIsUnknown() = runTest {
+        seed(prototypeApplication("kb").copy(gapAnalysis = questionAnalysis))
+        val gateway = object : PaymentGateway by paymentGateway {
+            override fun observeEntitlement() = flowOf(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
+        }
+        val unknownCredits = object : CreditsRepository by creditsRepository {
+            override fun observeKnownBalance() = flowOf<Int?>(null)
+        }
+        val viewModel = viewModel(
+            balance = AccountCreditBalance(gateway, unknownCredits),
+            hasUnfinishedRequest = true,
+        )
+        viewModel.ready()
+
+        viewModel.events.test {
+            viewModel.onRetailor()
+
+            assertThat(awaitItem()).isEqualTo(ApplicationDetailEvent.StartTailoring("kb"))
         }
     }
 
@@ -335,4 +406,8 @@ class ApplicationDetailViewModelTest {
         assertThat(names.filter { it.contains("delete", ignoreCase = true) }).isEmpty()
         assertThat(names).contains("onRetailor")
     }
+}
+
+private class RecoveryTailor(private val hasUnfinishedRequest: Boolean) : ResumeTailor by OfflineResumeTailor() {
+    override suspend fun hasUnfinishedRequest(applicationId: String) = hasUnfinishedRequest
 }

@@ -18,6 +18,9 @@ class GuardedResumeTailor @Inject constructor(
         if (!previewMode.active) remote.resultStored(applicationId, runId)
     }
 
+    override suspend fun hasUnfinishedRequest(applicationId: String): Boolean =
+        !previewMode.active && remote.hasUnfinishedRequest(applicationId)
+
     override suspend fun tailor(
         profile: CandidateProfile,
         job: JobDescription,

@@ -43,6 +43,11 @@ fun Navigator.navigateToTailoring(applicationId: String) {
     navigate(TailoringNavKey(applicationId, UUID.randomUUID().toString()))
 }
 
+fun Navigator.navigateToTailored(applicationId: String) {
+    if ((state.currentKey as? TailoredNavKey)?.applicationId == applicationId) return
+    navigate(TailoredNavKey(applicationId))
+}
+
 fun Navigator.navigateToExported(applicationId: String) {
     navigate(ExportedNavKey(applicationId))
 }

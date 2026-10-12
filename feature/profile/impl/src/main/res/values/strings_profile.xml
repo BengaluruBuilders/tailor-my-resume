@@ -21,6 +21,7 @@
     <string name="feature_profile_impl_row_linkedin">LinkedIn &amp; links</string>
     <string name="feature_profile_impl_linkedin_added">Added</string>
     <string name="feature_profile_impl_built_from">Built from %1$s</string>
+    <string name="feature_profile_impl_built_from_details">Built from your details</string>
     <string name="feature_profile_impl_replace">Replace</string>
     <string name="feature_profile_impl_experience_heading">Experience</string>
     <string name="feature_profile_impl_add_role">+ Add role</string>
