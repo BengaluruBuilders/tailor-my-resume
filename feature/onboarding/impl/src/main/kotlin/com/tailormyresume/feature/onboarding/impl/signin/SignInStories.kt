@@ -16,14 +16,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -64,13 +62,6 @@ internal val SignInStories = listOf(
 
 private const val ONE_PAGE_STICKER_MAX_FONT_SCALE = 1.3f
 
-private val TriangleShape = GenericShape { size, _ ->
-    moveTo(size.width / 2f, 0f)
-    lineTo(size.width, size.height)
-    lineTo(0f, size.height)
-    close()
-}
-
 @Composable
 internal fun SignInStoryArt(index: Int, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -79,17 +70,15 @@ internal fun SignInStoryArt(index: Int, modifier: Modifier = Modifier) {
             1 -> JobPostArt()
             else -> TailoredArt()
         }
-        TmrPaige(SignInStories[index].pose)
+        TmrPaige(
+            pose = SignInStories[index].pose,
+            modifier = if (index == 0) Modifier.offset(y = 32.dp) else Modifier,
+        )
     }
 }
 
 @Composable
 private fun BoxScope.UploadArt() {
-    val ink = TmrTheme.colors.ink
-    Column(Modifier.align(Alignment.BottomCenter), horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(Modifier.size(width = 84.dp, height = 46.dp).clip(TriangleShape).background(ink))
-        Box(Modifier.size(width = 32.dp, height = 44.dp).background(ink))
-    }
     TmrSticker(
         stringResource(R.string.feature_onboarding_impl_signin_art_pdf),
         Modifier.align(Alignment.TopStart).offset(y = 30.dp),

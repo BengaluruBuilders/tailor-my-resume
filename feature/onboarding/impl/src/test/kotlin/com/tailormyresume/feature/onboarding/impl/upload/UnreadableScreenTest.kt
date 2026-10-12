@@ -38,10 +38,9 @@ class UnreadableScreenTest {
             "Resume_scan.pdf",
             "PDF · image only",
             "It looks like a photo or scan, so there's no text for us to read.",
-            "Try one of these",
+            "Try another format",
             "Export your resume as PDF from Word or Google Docs",
             "Upload the DOCX file instead",
-            "Paste the text from your resume",
         ).forEach { composeRule.onNodeWithText(it).assertIsDisplayed() }
         composeRule.onNodeWithText("Choose another file").performClick()
         composeRule.onNodeWithText("Paste as text").performClick()
@@ -71,8 +70,9 @@ class UnreadableScreenTest {
         }
 
         composeRule.onNodeWithText("We couldn't read your resume").assertIsDisplayed()
-        composeRule.onNodeWithText("Try again, paste the text, or fill it in yourself.").assertIsDisplayed()
+        composeRule.onNodeWithText("Choose a file or paste your resume text.").assertIsDisplayed()
         composeRule.onNodeWithText("We couldn't read that file").assertDoesNotExist()
+        composeRule.onNodeWithText("Try another format").assertDoesNotExist()
     }
 
     @Test

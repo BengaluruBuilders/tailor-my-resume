@@ -47,7 +47,7 @@ class ReviewScreenTest {
         val viewModel = ReviewViewModel(repository, MarkProfileReviewedUseCase(repository, TestClock()))
         composeRule.showFlowScreen { ReviewRoute(viewModel, navigator) }
         composeRule.waitUntil(timeoutMillis = 5_000) {
-            composeRule.nodeCount("Your profile") > 0
+            composeRule.nodeCount("Review your profile") > 0
         }
     }
 
@@ -58,8 +58,8 @@ class ReviewScreenTest {
         showRoute(freshReviewProfile())
 
         listOf(
-            "Your profile",
-            "From Priya_Deshmukh_Resume.pdf. Tap anything to edit.",
+            "Review your profile",
+            "From Priya_Deshmukh_Resume.pdf",
             "REQUIRED",
             "End date missing for Data Analyst Intern",
             "Add date",
@@ -84,7 +84,7 @@ class ReviewScreenTest {
     fun fixedStateShowsDoneBannerAndNoRequiredBanner() {
         showRoute(fixedReviewProfile().copy(linkedinUrl = SAMPLE_LINKEDIN))
 
-        composeRule.onNodeWithText("All required info is done").assertIsDisplayed()
+        composeRule.onNodeWithText("No missing end dates").assertIsDisplayed()
         composeRule.onNodeWithText("Profile complete").assertDoesNotExist()
         composeRule.onNodeWithText("Add date").assertDoesNotExist()
         composeRule.onNodeWithText("Add your LinkedIn").assertDoesNotExist()

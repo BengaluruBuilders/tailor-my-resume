@@ -4,12 +4,12 @@
     <string name="feature_onboarding_impl_upload_hero_headline">Start with your resume</string>
     <string name="feature_onboarding_impl_upload_sticker_pdf">PDF</string>
     <string name="feature_onboarding_impl_upload_sticker_docx">DOCX</string>
-    <string name="feature_onboarding_impl_upload_intro">We read it and fill in your profile. You check it and fix anything we got wrong.</string>
+    <string name="feature_onboarding_impl_upload_intro">You can review and edit the imported details.</string>
     <string name="feature_onboarding_impl_upload_card_title">Upload resume</string>
     <string name="feature_onboarding_impl_upload_card_hint">PDF or DOCX · up to 5 MB</string>
     <string name="feature_onboarding_impl_upload_paste">Paste as text</string>
     <string name="feature_onboarding_impl_upload_manual">Fill in myself</string>
-    <string name="feature_onboarding_impl_upload_footer">Your resume is only used to build your applications. Never shared.</string>
+    <string name="feature_onboarding_impl_upload_footer">Your file stays on your device. We use its text to build your profile.</string>
 
     <string name="feature_onboarding_impl_unreadable_title_file">We couldn\'t read that file</string>
     <string name="feature_onboarding_impl_unreadable_title_neutral">We couldn\'t read your resume</string>
@@ -17,37 +17,34 @@
     <string name="feature_onboarding_impl_unreadable_explain_image_only">It looks like a photo or scan, so there\'s no text for us to read.</string>
     <string name="feature_onboarding_impl_unreadable_explain_file">We couldn\'t open this file or find any text in it.</string>
     <string name="feature_onboarding_impl_unreadable_explain_too_large">This file is bigger than 5 MB.</string>
-    <string name="feature_onboarding_impl_unreadable_explain_neutral">Try again, paste the text, or fill it in yourself.</string>
+    <string name="feature_onboarding_impl_unreadable_explain_neutral">Choose a file or paste your resume text.</string>
     <string name="feature_onboarding_impl_unreadable_explain_single_line_paste">Paste each resume section on a new line, then try again.</string>
-    <string name="feature_onboarding_impl_unreadable_tips_title">Try one of these</string>
+    <string name="feature_onboarding_impl_unreadable_tips_title">Try another format</string>
     <string name="feature_onboarding_impl_unreadable_tip_export">Export your resume as PDF from Word or Google Docs</string>
     <string name="feature_onboarding_impl_unreadable_tip_docx">Upload the DOCX file instead</string>
-    <string name="feature_onboarding_impl_unreadable_tip_paste">Paste the text from your resume</string>
     <string name="feature_onboarding_impl_unreadable_choose_another">Choose another file</string>
     <string name="feature_onboarding_impl_unreadable_paste">Paste as text</string>
 
     <string name="feature_onboarding_impl_paste_title">Paste your resume</string>
-    <string name="feature_onboarding_impl_paste_intro">Copy everything from your resume file and paste it here.</string>
+    <string name="feature_onboarding_impl_paste_intro">Include all sections, with each on a new line.</string>
     <string name="feature_onboarding_impl_paste_label">Resume text</string>
-    <string name="feature_onboarding_impl_paste_placeholder">Paste your resume text here…</string>
-    <string name="feature_onboarding_impl_paste_read">Read text</string>
+    <string name="feature_onboarding_impl_paste_read">Build my profile</string>
 
-    <string name="feature_onboarding_impl_manual_title">Tell us about you</string>
-    <string name="feature_onboarding_impl_manual_intro">Start with the basics. You can add roles and skills next.</string>
+    <string name="feature_onboarding_impl_manual_title">Build your profile</string>
+    <string name="feature_onboarding_impl_manual_intro">Start with your name.</string>
     <string name="feature_onboarding_impl_manual_full_name">Full name</string>
     <string name="feature_onboarding_impl_manual_email">Email</string>
-    <string name="feature_onboarding_impl_manual_phone">Phone</string>
+    <string name="feature_onboarding_impl_manual_phone">Phone (optional)</string>
     <string name="feature_onboarding_impl_manual_phone_hint">+91</string>
-    <string name="feature_onboarding_impl_manual_city">City</string>
+    <string name="feature_onboarding_impl_manual_city">City (optional)</string>
     <string name="feature_onboarding_impl_manual_city_hint">e.g. Pune</string>
-    <string name="feature_onboarding_impl_manual_job_title">Current or last job title</string>
+    <string name="feature_onboarding_impl_manual_job_title">Current or last job title (optional)</string>
     <string name="feature_onboarding_impl_manual_job_title_hint">e.g. Business Analyst</string>
-    <string name="feature_onboarding_impl_manual_company">Company</string>
+    <string name="feature_onboarding_impl_manual_company">Company (optional)</string>
     <string name="feature_onboarding_impl_manual_company_hint">e.g. Infosys</string>
-    <string name="feature_onboarding_impl_manual_continue">Continue</string>
+    <string name="feature_onboarding_impl_manual_continue">Review profile</string>
 
     <string name="feature_onboarding_impl_reading_title">Reading your resume</string>
-    <string name="feature_onboarding_impl_reading_takes">Reading your details…</string>
     <string name="feature_onboarding_impl_reading_file_meta">%1$s · %2$s</string>
     <string name="feature_onboarding_impl_reading_pasted_name">Pasted text</string>
     <plurals name="feature_onboarding_impl_reading_pasted_meta">

@@ -30,12 +30,12 @@ class UploadScreenTest {
             "Start with your resume",
             "PDF",
             "DOCX",
-            "We read it and fill in your profile. You check it and fix anything we got wrong.",
+            "You can review and edit the imported details.",
             "Upload resume",
             "PDF or DOCX · up to 5\u00A0MB",
             "Paste as text",
             "Fill in myself",
-            "Your resume is only used to build your applications. Never shared.",
+            "Your file stays on your device. We use its text to build your profile.",
         ).forEach { composeRule.onNodeWithText(it, ignoreCase = true).assertIsDisplayed() }
     }
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -68,8 +69,10 @@ internal object SignInTags {
 }
 
 private const val HINT_ALPHA = 0.6f
+private const val SUBORDINATE_TEXT_ALPHA = 0.8f
 private const val ART_HEIGHT_FRACTION = 0.4f
 private val ART_MIN_HEIGHT = 300.dp
+private val STORY_MESSAGE_MIN_HEIGHT = 180.dp
 private val GOOGLE_OUTLINE = Color(0xFF747775)
 private val GOOGLE_TEXT = Color(0xFF1F1F1F)
 
@@ -116,39 +119,30 @@ internal fun SignInScreen(
             val screenHeight = maxHeight
             Column(
                 Modifier
-                    .heightIn(min = screenHeight)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 26.dp),
             ) {
-                StoryPanel(story, (screenHeight * ART_HEIGHT_FRACTION).coerceAtLeast(ART_MIN_HEIGHT))
-                Spacer(Modifier.weight(1f))
-                Spacer(Modifier.height(18.dp))
-                Text(
-                    stringResource(R.string.feature_onboarding_impl_signin_prepare),
-                    Modifier.fillMaxWidth(),
-                    TmrTheme.colors.ink,
-                    style = TmrTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
+                StoryPanel(
+                    story,
+                    (screenHeight * ART_HEIGHT_FRACTION).coerceAtLeast(ART_MIN_HEIGHT),
+                    screenHeight,
+                    uiState,
+                    onContinueWithGoogle,
                 )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    stringResource(R.string.feature_onboarding_impl_signin_sign_in_caption),
-                    Modifier.fillMaxWidth(),
-                    TmrTheme.colors.ink.copy(alpha = HINT_ALPHA),
-                    style = TmrTheme.typography.label,
-                    textAlign = TextAlign.Center,
-                )
-                Spacer(Modifier.height(8.dp))
-                GoogleButton(uiState, onContinueWithGoogle)
-                Spacer(Modifier.height(10.dp))
-                Footer(Modifier.padding(bottom = 34.dp))
             }
         }
     }
 }
 
 @Composable
-private fun StoryPanel(story: SignInStoryState, artHeight: Dp, modifier: Modifier = Modifier) {
+private fun StoryPanel(
+    story: SignInStoryState,
+    artHeight: Dp,
+    minHeight: Dp,
+    uiState: SignInUiState,
+    onContinueWithGoogle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val spec = SignInStories[story.index]
     val ink = TmrTheme.colors.ink
     val typography = TmrTheme.typography
@@ -164,6 +158,8 @@ private fun StoryPanel(story: SignInStoryState, artHeight: Dp, modifier: Modifie
     Column(
         modifier
             .testTag(SignInTags.STORY)
+            .heightIn(min = minHeight)
+            .height(IntrinsicSize.Min)
             .semantics(mergeDescendants = true) {
                 contentDescription = "$headline. $subline. $label"
                 if (story.paused) stateDescription = paused
@@ -181,28 +177,41 @@ private fun StoryPanel(story: SignInStoryState, artHeight: Dp, modifier: Modifie
     ) {
         Column(
             Modifier
+                .weight(1f)
                 .testTag(SignInTags.STORY_TOUCH)
                 .signInStoryGestures(story)
                 .padding(top = 12.dp),
         ) {
             TmrStoryBars(SIGN_IN_STORY_COUNT, story.index, if (TmrTheme.motion.reduced) 1f else story.fraction)
-            Row(
+            Text(
+                hint.uppercase(),
                 Modifier.fillMaxWidth().padding(top = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ink.copy(alpha = HINT_ALPHA),
+                style = typography.label,
+                textAlign = TextAlign.End,
+            )
+            Box(
+                Modifier.fillMaxWidth().weight(1f).heightIn(min = artHeight),
+                contentAlignment = Alignment.Center,
             ) {
-                Text(label.uppercase(), Modifier.weight(2f), ink, style = typography.label)
-                Text(
-                    hint.uppercase(),
-                    Modifier.weight(1f),
-                    ink.copy(alpha = HINT_ALPHA),
-                    style = typography.label,
-                    textAlign = TextAlign.End,
-                )
+                SignInStoryArt(story.index, Modifier.height(artHeight))
             }
-            SignInStoryArt(story.index, Modifier.height(artHeight))
         }
-        Text(headline, color = ink, style = typography.display)
-        Text(subline, Modifier.padding(top = 12.dp), ink, style = typography.bodyLarge)
+        Column(Modifier.fillMaxWidth()) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = STORY_MESSAGE_MIN_HEIGHT),
+                verticalArrangement = Arrangement.Bottom,
+            ) {
+                Text(headline, color = ink, style = typography.display)
+                Text(subline, Modifier.padding(top = 12.dp), ink, style = typography.bodyLarge)
+            }
+            Spacer(Modifier.height(24.dp))
+            GoogleButton(uiState, onContinueWithGoogle)
+            Spacer(Modifier.height(16.dp))
+            Footer(Modifier.padding(bottom = 34.dp))
+        }
     }
 }
 
@@ -264,5 +273,13 @@ private fun Footer(modifier: Modifier = Modifier) {
             }
         }
     }
-    Text(annotated, modifier.fillMaxWidth(), ink, style = TmrTheme.typography.caption, textAlign = TextAlign.Center)
+    Text(
+        annotated,
+        modifier
+            .semantics(mergeDescendants = true) {}
+            .fillMaxWidth(),
+        ink.copy(alpha = SUBORDINATE_TEXT_ALPHA),
+        style = TmrTheme.typography.caption,
+        textAlign = TextAlign.Center,
+    )
 }

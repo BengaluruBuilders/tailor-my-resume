@@ -50,7 +50,7 @@ class ReviewRouteNavigationTest {
         val viewModel = ReviewViewModel(repository, MarkProfileReviewedUseCase(repository, TestClock()))
         composeRule.showFlowScreen { ReviewRoute(viewModel, navigator) }
         if (profile != null) {
-            composeRule.waitUntil(timeoutMillis = 5_000) { composeRule.onAllNodesWithText("Your profile").fetchSemanticsNodes().isNotEmpty() }
+            composeRule.waitUntil(timeoutMillis = 5_000) { composeRule.onAllNodesWithText("Review your profile").fetchSemanticsNodes().isNotEmpty() }
         }
     }
 
@@ -114,7 +114,7 @@ class ReviewRouteNavigationTest {
         )
         show(manual)
 
-        composeRule.onNodeWithText("Add a work example").performClick()
+        composeRule.onNodeWithText("Add a work example (optional)").performClick()
 
         assertThat(navigator.state.currentKey).isEqualTo(EditRoleNavKey(entryId = "manual-role"))
         navigator.goBack()

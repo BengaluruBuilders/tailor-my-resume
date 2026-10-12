@@ -51,7 +51,7 @@ class ReviewLayoutTest {
 
         assertLinesEndAtWordBoundaries("End date missing for Data Analyst Intern")
         assertLinesEndAtWordBoundaries("Add date")
-        assertLinesEndAtWordBoundaries("From Priya_Deshmukh_Resume_Final_2026.pdf. Tap anything to edit.")
+        assertLinesEndAtWordBoundaries("From Priya_Deshmukh_Resume_Final_2026.pdf")
         assertLinesEndAtWordBoundaries("Looks right, continue")
     }
 

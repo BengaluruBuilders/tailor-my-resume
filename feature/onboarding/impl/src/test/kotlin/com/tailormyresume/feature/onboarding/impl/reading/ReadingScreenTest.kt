@@ -58,7 +58,6 @@ class ReadingScreenTest {
             "Priya_Deshmukh_Resume.pdf",
             "PDF · 112 KB",
             "100%",
-            "Reading your details…",
             "Contact details",
             "Work experience",
             "Education",
