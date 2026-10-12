@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.theme.TmrColors
@@ -145,6 +146,7 @@ internal fun TmrButtonLabeled(
     leadingIcon: ImageVector?,
     trailingIcon: ImageVector?,
     size: TmrButtonSize = TmrButtonSize.Large,
+    labelStyle: TextStyle? = null,
 ) {
     TmrButtonBase(
         kind = kind,
@@ -162,7 +164,7 @@ internal fun TmrButtonLabeled(
         var wrapped by remember { mutableStateOf(false) }
         Text(
             text = label,
-            style = if (size == TmrButtonSize.Compact) TmrTheme.typography.labelL else TmrTheme.typography.button,
+            style = labelStyle ?: if (size == TmrButtonSize.Compact) TmrTheme.typography.labelL else TmrTheme.typography.button,
             textAlign = if (wrapped) TextAlign.Center else TextAlign.Unspecified,
             onTextLayout = { wrapped = it.lineCount > 1 },
         )
@@ -280,8 +282,9 @@ fun TmrOutlineButton(
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     size: TmrButtonSize = TmrButtonSize.Large,
+    labelStyle: TextStyle? = null,
 ) {
-    TmrButtonLabeled(TmrButtonKind.Outline, label, onClick, modifier, enabled, leadingIcon, trailingIcon, size)
+    TmrButtonLabeled(TmrButtonKind.Outline, label, onClick, modifier, enabled, leadingIcon, trailingIcon, size, labelStyle)
 }
 
 @Composable

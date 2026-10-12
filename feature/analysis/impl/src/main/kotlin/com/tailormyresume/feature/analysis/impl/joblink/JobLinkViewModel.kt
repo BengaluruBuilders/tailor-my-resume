@@ -21,7 +21,7 @@ internal class JobLinkViewModel @Inject constructor(
     private val draftStore: JobDraftStore,
 ) : ViewModel() {
 
-    private val state = MutableStateFlow(JobLinkUiState())
+    private val state = MutableStateFlow(JobLinkUiState(link = draftStore.link.value))
     private val eventChannel = Channel<JobLinkEvent>(Channel.BUFFERED)
 
     val uiState: StateFlow<JobLinkUiState> = state
@@ -30,6 +30,7 @@ internal class JobLinkViewModel @Inject constructor(
 
     fun onLinkChange(link: String) {
         state.update { it.copy(link = link) }
+        draftStore.setLink(link)
     }
 
     fun onImport() {
@@ -47,6 +48,7 @@ internal class JobLinkViewModel @Inject constructor(
             try {
                 val job = importer.import(url)
                 draftStore.set(text = job.jobText, importedFrom = job.sourceHost)
+                draftStore.clearLink()
             } catch (e: CancellationException) {
                 cancelled = true
                 throw e

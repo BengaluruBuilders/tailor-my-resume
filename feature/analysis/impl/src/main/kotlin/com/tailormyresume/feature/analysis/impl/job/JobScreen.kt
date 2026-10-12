@@ -5,6 +5,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -28,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -36,7 +38,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -44,20 +45,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tailormyresume.core.designsystem.component.TmrOutlineButton
 import com.tailormyresume.core.designsystem.component.hero.TmrHeroCard
 import com.tailormyresume.core.designsystem.component.hero.TmrHeroColor
 import com.tailormyresume.core.designsystem.component.hero.TmrPaige
 import com.tailormyresume.core.designsystem.component.hero.TmrPaigePose
+import com.tailormyresume.core.designsystem.component.input.TmrInputModeOption
+import com.tailormyresume.core.designsystem.component.input.TmrInputModeSelector
 import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
 import com.tailormyresume.core.designsystem.component.input.TmrSecondaryButton
 import com.tailormyresume.core.designsystem.component.input.TmrTextArea
+import com.tailormyresume.core.designsystem.icon.TmrIcons
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.feature.analysis.impl.R
 import java.text.NumberFormat
 
 private const val STACKED_BUTTON_FONT_SCALE = 1.3f
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun JobScreen(
     state: JobUiState,
@@ -78,33 +82,46 @@ internal fun JobScreen(
             .navigationBarsPadding()
             .imePadding(),
     ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 14.dp)
-                .padding(top = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            if (state is JobUiState.Empty) {
-                JobHero(showArt = pinBottom)
+        BoxWithConstraints(Modifier.weight(1f)) {
+            val fieldHeight = if (pinBottom) {
+                (maxHeight - if (state is JobUiState.Empty) 280.dp else 140.dp).coerceAtLeast(240.dp)
             } else {
-                JobHeader(showClear = state is JobUiState.HasText, onClear = onClear, fontScale = fontScale)
+                240.dp
             }
-            TmrTextArea(
-                value = state.text,
-                onValueChange = onTextChange,
-                label = stringResource(R.string.feature_analysis_impl_job_field_label),
-                placeholder = stringResource(R.string.feature_analysis_impl_job_placeholder),
-                readOnly = state is JobUiState.Analyzing,
-                modifier = Modifier.fillMaxWidth(),
-                trailing = { JobCharCount(state.text) },
-            )
-            JobHint()
-            if (state !is JobUiState.Analyzing && state.text.isBlank()) {
-                JobPasteActions(fontScale = fontScale, onPaste = onPaste, onUseLink = onUseLink)
+            Column(
+                modifier = Modifier
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 14.dp)
+                    .padding(top = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                if (state is JobUiState.Empty) {
+                    JobInputHero(showArt = pinBottom)
+                } else {
+                    JobHeader(showClear = state is JobUiState.HasText, onClear = onClear, fontScale = fontScale)
+                }
+                TmrInputModeSelector(
+                    options = jobInputModes(),
+                    selectedIndex = 0,
+                    onSelect = { if (it == 1) onUseLink() },
+                    enabled = state !is JobUiState.Analyzing,
+                )
+                TmrTextArea(
+                    value = state.text,
+                    onValueChange = onTextChange,
+                    label = stringResource(R.string.feature_analysis_impl_job_field_label),
+                    placeholder = stringResource(R.string.feature_analysis_impl_job_placeholder),
+                    readOnly = state is JobUiState.Analyzing,
+                    modifier = Modifier.fillMaxWidth(),
+                    minHeight = fieldHeight,
+                    footer = {
+                        if (state !is JobUiState.Analyzing) {
+                            JobTextAreaFooter(onPaste = onPaste, text = state.text)
+                        }
+                    },
+                )
+                if (!pinBottom) JobBottom(state, onAnalyze)
             }
-            if (!pinBottom) JobBottom(state, onAnalyze)
         }
         if (pinBottom) JobBottom(state, onAnalyze)
     }
@@ -132,7 +149,7 @@ private fun JobBottom(state: JobUiState, onAnalyze: () -> Unit) {
                 TmrPrimaryButton(
                     label = stringResource(R.string.feature_analysis_impl_job_analyze),
                     onClick = onAnalyze,
-                    enabled = state.text.isNotBlank(),
+                    enabled = state.text.trim().length >= MIN_JOB_CHARS && !state.notAJobPost,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -144,22 +161,23 @@ private fun JobBottom(state: JobUiState, onAnalyze: () -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun JobHero(showArt: Boolean) {
+internal fun JobInputHero(showArt: Boolean) {
     TmrHeroCard(
         color = TmrHeroColor.Amber,
         label = stringResource(R.string.feature_analysis_impl_job_hero_label),
         headline = stringResource(R.string.feature_analysis_impl_job_hero_headline),
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 196.dp),
+            .heightIn(min = 136.dp),
     ) {
         if (!showArt) return@TmrHeroCard
         TmrPaige(
             TmrPaigePose.Job,
             Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 30.dp)
-                .offset(y = 58.dp),
+                .padding(end = 12.dp)
+                .offset(y = 54.dp)
+                .scale(0.7f),
         )
         JobMagnifier(
             Modifier
@@ -232,29 +250,51 @@ private fun JobStatusRow(state: JobUiState.HasText) {
 }
 
 @Composable
-private fun JobHint() {
-    Text(
-        text = pluralStringResource(R.plurals.feature_analysis_impl_job_hint, MIN_JOB_CHARS, MIN_JOB_CHARS),
-        style = TmrTheme.typography.caption,
-        color = TmrTheme.colors.textMuted,
-        modifier = Modifier.fillMaxWidth(),
-    )
-}
-
-@Composable
 private fun JobCharCount(text: String) {
     val count = text.trim().length
     val format = remember { NumberFormat.getIntegerInstance() }
     val shown = format.format(count)
     val minimum = format.format(MIN_JOB_CHARS)
-    val spoken = stringResource(R.string.feature_analysis_impl_job_char_count_description, shown, minimum)
+    val spoken = if (count == 0) {
+        stringResource(R.string.feature_analysis_impl_job_char_count_empty, minimum)
+    } else {
+        stringResource(R.string.feature_analysis_impl_job_char_count_description, shown, minimum)
+    }
     Text(
-        text = stringResource(R.string.feature_analysis_impl_job_char_count, shown, minimum),
+        text = if (count == 0) {
+            stringResource(R.string.feature_analysis_impl_job_char_count_empty, minimum)
+        } else {
+            stringResource(R.string.feature_analysis_impl_job_char_count, shown, minimum)
+        },
         style = TmrTheme.typography.strongSmall,
         color = if (count >= MIN_JOB_CHARS) TmrTheme.colors.lime else TmrTheme.colors.textMuted,
         modifier = Modifier.semantics { contentDescription = spoken },
     )
 }
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun JobTextAreaFooter(onPaste: () -> Unit, text: String) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        TmrOutlineButton(
+            label = stringResource(R.string.feature_analysis_impl_job_paste_clipboard),
+            leadingIcon = TmrIcons.Clipboard,
+            onClick = onPaste,
+            labelStyle = TmrTheme.typography.strongSmall,
+        )
+        JobCharCount(text)
+    }
+}
+
+@Composable
+internal fun jobInputModes(): List<TmrInputModeOption> = listOf(
+    TmrInputModeOption(stringResource(R.string.feature_analysis_impl_job_paste), TmrIcons.Description),
+    TmrInputModeOption(stringResource(R.string.feature_analysis_impl_job_use_link), TmrIcons.Link),
+)
 
 @Composable
 private fun JobDetectedMark() {
@@ -299,42 +339,6 @@ private fun JobNotAPostCard() {
             style = TmrTheme.typography.body,
             color = TmrTheme.colors.ink,
         )
-    }
-}
-
-@Composable
-private fun JobPasteActions(fontScale: Float, onPaste: () -> Unit, onUseLink: () -> Unit) {
-    if (fontScale > STACKED_BUTTON_FONT_SCALE) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            TmrSecondaryButton(
-                label = stringResource(R.string.feature_analysis_impl_job_paste),
-                onClick = onPaste,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            TmrSecondaryButton(
-                label = stringResource(R.string.feature_analysis_impl_job_use_link),
-                onClick = onUseLink,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    } else {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            TmrSecondaryButton(
-                label = stringResource(R.string.feature_analysis_impl_job_paste),
-                onClick = onPaste,
-                modifier = Modifier.weight(1.4f),
-            )
-            TmrSecondaryButton(
-                label = stringResource(R.string.feature_analysis_impl_job_use_link),
-                onClick = onUseLink,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp),
-            )
-        }
     }
 }
 

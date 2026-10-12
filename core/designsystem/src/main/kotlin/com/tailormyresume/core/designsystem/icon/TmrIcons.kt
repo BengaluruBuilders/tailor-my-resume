@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.ContentPaste
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.DocumentScanner
@@ -66,6 +67,7 @@ object TmrIcons {
     val Check = Icons.Rounded.Check
     val CheckCircle = Icons.Rounded.CheckCircle
     val Clock = Icons.Rounded.Schedule
+    val Clipboard = Icons.Rounded.ContentPaste
     val Close = Icons.Rounded.Close
     val Delete = Icons.Rounded.Delete
     val Description = Icons.Rounded.Description

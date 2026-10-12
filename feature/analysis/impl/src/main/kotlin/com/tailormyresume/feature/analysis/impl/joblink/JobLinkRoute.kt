@@ -24,6 +24,7 @@ internal fun JobLinkRoute(
         state = state,
         onLinkChange = viewModel::onLinkChange,
         onImport = viewModel::onImport,
+        onPasteText = navigator::goBack,
         modifier = modifier,
     )
 }

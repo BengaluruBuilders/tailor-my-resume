@@ -100,9 +100,21 @@ fun TmrTextArea(
     readOnly: Boolean = false,
     amber: Boolean = false,
     trailing: @Composable (() -> Unit)? = null,
+    footer: @Composable (() -> Unit)? = null,
+    minHeight: Dp = 120.dp,
 ) {
     TmrLabeledField(label = label, modifier = modifier, trailing = trailing) {
-        TmrFieldBox(value, onValueChange, label, placeholder, readOnly, amber, singleLine = false, minHeight = 120.dp)
+        TmrFieldBox(
+            value,
+            onValueChange,
+            label,
+            placeholder,
+            readOnly,
+            amber,
+            singleLine = false,
+            minHeight = minHeight,
+            footer = footer,
+        )
     }
 }
 
@@ -118,6 +130,7 @@ private fun TmrFieldBox(
     minHeight: Dp,
     enabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    footer: @Composable (() -> Unit)? = null,
 ) {
     val colors = TmrTheme.colors
     val shape = TmrTheme.shapes.field
@@ -139,11 +152,28 @@ private fun TmrFieldBox(
                 if (!enabled) disabled()
             },
         decorationBox = { inner ->
-            Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
-                if (value.isEmpty()) {
-                    Text(text = placeholder, style = TmrTheme.typography.bodyLarge, color = colors.textDisabled)
+            if (footer == null) {
+                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
+                    if (value.isEmpty()) {
+                        Text(text = placeholder, style = TmrTheme.typography.bodyLarge, color = colors.textDisabled)
+                    }
+                    inner()
                 }
-                inner()
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = minHeight - 32.dp)
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (value.isEmpty()) {
+                            Text(text = placeholder, style = TmrTheme.typography.bodyLarge, color = colors.textDisabled)
+                        }
+                        inner()
+                    }
+                    footer()
+                }
             }
         },
     )

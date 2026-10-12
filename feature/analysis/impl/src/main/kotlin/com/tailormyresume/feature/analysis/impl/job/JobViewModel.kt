@@ -172,10 +172,7 @@ internal class JobViewModel @Inject constructor(
     private fun applyDraft(draft: JobDraft?) {
         when {
             draft == null -> Unit
-            draft.notAJobPost -> {
-                text.value = ""
-                notAJobPost.value = true
-            }
+            draft.notAJobPost -> if (text.value.isBlank()) notAJobPost.value = true
             draft.text != null -> {
                 text.value = draft.text.take(MAX_JOB_CHARS)
                 notAJobPost.value = false

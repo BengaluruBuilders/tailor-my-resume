@@ -475,6 +475,28 @@ class JobViewModelTest {
     }
 
     @Test
+    fun failedLinkImportPreservesTypedJobTextAndItsValidation() = runTest(dispatcher) {
+        val draftStore = JobDraftStore(TestSessionRepository(), backgroundScope)
+        val viewModel = viewModel(draftStore = draftStore)
+        viewModel.onTextChange(POST_250)
+
+        JobLinkViewModel(
+            importer = object : JobImporter {
+                override suspend fun import(url: String): ImportedJob = throw AiException(AiFailure.JobImportFailed)
+            },
+            draftStore = draftStore,
+        ).apply {
+            onLinkChange("https://careers.example/a")
+            onImport()
+        }
+        advanceTimeBy(1_000)
+
+        val state = viewModel.uiState.value as JobUiState.HasText
+        assertThat(state.text).isEqualTo(POST_250)
+        assertThat(state.notAJobPost).isFalse()
+    }
+
+    @Test
     fun everyFailedLinkImportLandsOnBlankNotAJobPostState() = runTest(dispatcher) {
         val importFailures: List<Pair<String, Throwable?>> = listOf(
             "https://careers.example/a" to AiException(AiFailure.JobImportFailed),

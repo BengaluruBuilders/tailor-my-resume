@@ -24,8 +24,10 @@ internal class JobDraftStore @Inject constructor(
     @ApplicationScope scope: CoroutineScope,
 ) {
     private val current = MutableStateFlow<JobDraft?>(null)
+    private val currentLink = MutableStateFlow("")
 
     val draft: StateFlow<JobDraft?> = current
+    val link: StateFlow<String> = currentLink
 
     init {
         scope.launch {
@@ -41,9 +43,18 @@ internal class JobDraftStore @Inject constructor(
         current.value = JobDraft(notAJobPost = true)
     }
 
+    fun setLink(link: String) {
+        currentLink.value = link
+    }
+
+    fun clearLink() {
+        currentLink.value = ""
+    }
+
     fun consume(): JobDraft? = current.getAndUpdate { null }
 
     fun clear() {
         current.value = null
+        currentLink.value = ""
     }
 }

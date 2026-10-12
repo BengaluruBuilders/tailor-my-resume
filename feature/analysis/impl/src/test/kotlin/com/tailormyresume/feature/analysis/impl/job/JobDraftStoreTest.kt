@@ -21,6 +21,7 @@ class JobDraftStoreTest {
         assertThat(store.consume()).isEqualTo(JobDraft(text = "Role at Northwind", importedFrom = "careers.northwind.example"))
         assertThat(store.consume()).isNull()
         assertThat(store.draft.value).isNull()
+        assertThat(store.link.value).isEmpty()
     }
 
     @Test
@@ -35,9 +36,11 @@ class JobDraftStoreTest {
     fun clearDropsTheDraft() = runTest(UnconfinedTestDispatcher()) {
         val store = JobDraftStore(session, backgroundScope)
         store.set(text = "Role", importedFrom = "host")
+        store.setLink("https://careers.example/job")
         store.clear()
 
         assertThat(store.draft.value).isNull()
+        assertThat(store.link.value).isEmpty()
     }
 
     @Test
@@ -45,8 +48,11 @@ class JobDraftStoreTest {
         val store = JobDraftStore(session, backgroundScope)
         store.set(text = "Role", importedFrom = "host")
 
+        store.setLink("https://careers.example/job")
+
         session.saveAccount(SignInAccount(id = "account-2", displayName = "Asha", email = "asha@example.com"))
 
         assertThat(store.draft.value).isNull()
+        assertThat(store.link.value).isEmpty()
     }
 }
