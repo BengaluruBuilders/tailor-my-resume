@@ -16,10 +16,10 @@ order, and all other states.
 | 1 | Monospace is kept for the headline only. Buttons, step text, and helper text use the proportional sans (Space Grotesk), so labels no longer wrap or space out. |
 | 2 | The step chips become "Step N of 3 · Name" with a three-segment progress bar, beside the back button in the top bar. |
 | 3 | The hero has a 136 dp minimum height. The smaller illustration stays clear of the two-line headline. |
-| 4 | The minimum requirement and live character count sit inside the field, beside or below the clipboard action as space permits. |
+| 4 | The minimum requirement and live character count sit at the right edge inside the field. |
 | 5 | One lime button per screen. "Analyze job" is the primary action in text mode. "Import job" is the primary action in link mode. |
 | 6 | The disabled button label uses `textMuted`, not `textDisabled`, so it reads at a usable contrast. |
-| 7 | The text and link choices form one input-mode selector. Paste from clipboard stays inside the text field. The empty count says "200 characters minimum". A non-empty count says "N / 200 characters". |
+| 7 | The text and link choices form one input-mode selector. The empty count says "200 characters minimum". A non-empty count says "N / 200 characters". |
 
 Changes 1, 2 and 6 live in `core:designsystem` and therefore apply to every screen that uses the
 step bar or the `TmrPrimaryButton` and `TmrSecondaryButton` pair.
@@ -28,13 +28,13 @@ step bar or the `TmrPrimaryButton` and `TmrSecondaryButton` pair.
 
 | State | Required behaviour |
 |---|---|
-| Add job, empty | Short hero, text input selected, a clipboard action inside the field, "200 characters minimum", and a disabled but readable "Analyze job". |
+| Add job, empty | Short hero, text input selected, right-aligned "200 characters minimum", and a disabled but readable "Analyze job". |
 | Add job, with text | The count follows the trimmed length and turns lime at 200. "Analyze job" becomes lime and enabled. |
 | Add job, link mode | Show a URL field and "Import job". Switching modes keeps the text and URL drafts. A failed link import preserves existing text and its validation state. |
 | Keyboard open | Keep the primary action above the keyboard. Allow the form to scroll. |
 | Setup steps 1 to 3 | The step label and the progress bar sit on the top-bar row. The spoken description stays "Step N of 3, Name". |
 
-The 200-character minimum, the trimming rule, paste, link import, and the login-page fallback are
+The 200-character minimum, the trimming rule, system text paste, link import, and the login-page fallback are
 unchanged. No copy claims a match, a fit, or an ATS score.
 
 ## Evidence

@@ -106,7 +106,6 @@ class JobScreenshotTest {
                                 JobScreen(
                                     state = current.state,
                                     onTextChange = {},
-                                    onPaste = {},
                                     onUseLink = {},
                                     onClear = {},
                                     onAnalyze = {},

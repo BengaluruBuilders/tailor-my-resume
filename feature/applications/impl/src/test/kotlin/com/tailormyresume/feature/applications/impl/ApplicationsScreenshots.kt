@@ -17,6 +17,7 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
@@ -32,6 +33,7 @@ import com.tailormyresume.feature.applications.impl.detail.ApplicationDetailUiSt
 import com.tailormyresume.feature.applications.impl.detail.ApplicationFile
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -305,6 +307,16 @@ class ApplicationsScreenshots {
     fun applicationDetail_font2_337dp() {
         shootDetail("application_detail", detail(), NARROW_DEVICE)
         assertDetailTexts()
+        val label = rule.onNodeWithText("Status").fetchSemanticsNode().boundsInRoot
+        val chip = rule.onNodeWithText("Interview").fetchSemanticsNode().boundsInRoot
+        val change = rule.onNodeWithText("Change").fetchSemanticsNode().boundsInRoot
+        val date = rule.onNodeWithText("on 6 Oct").fetchSemanticsNode().boundsInRoot
+        val screen = rule.onRoot().fetchSemanticsNode().boundsInRoot
+        assertTrue(label.bottom <= chip.top)
+        assertTrue(chip.right <= change.left)
+        assertTrue(kotlin.math.abs(chip.center.y - change.center.y) <= 1f)
+        assertTrue(change.right <= screen.right)
+        assertTrue(date.top >= change.bottom)
     }
 
     @Test
@@ -329,6 +341,29 @@ class ApplicationsScreenshots {
         )
         rule.onNodeWithText("Business Analyst").assertExists()
         rule.onNodeWithText("Not applied yet").assertExists()
+        rule.onNodeWithText("Share").assertDoesNotExist()
+    }
+
+    @Test
+    fun applicationDetailInterviewNoFile() {
+        shootDetail(
+            "application_detail_interview_no_file",
+            detail(appliedOn = null, file = null).copy(title = "Data Analyst Intern", company = "Paisa Ledger", place = ""),
+            TmrTestDevices.prototype,
+        )
+        rule.onNodeWithText("Interview").assertExists()
+        rule.onNodeWithText("Share").assertDoesNotExist()
+    }
+
+    @Test
+    @Config(qualifiers = NARROW_QUALIFIERS)
+    fun applicationDetailInterviewNoFile_font2_337dp() {
+        shootDetail(
+            "application_detail_interview_no_file",
+            detail(appliedOn = null, file = null).copy(title = "Data Analyst Intern", company = "Paisa Ledger", place = ""),
+            NARROW_DEVICE,
+        )
+        rule.onNodeWithText("Interview").assertExists()
         rule.onNodeWithText("Share").assertDoesNotExist()
     }
 

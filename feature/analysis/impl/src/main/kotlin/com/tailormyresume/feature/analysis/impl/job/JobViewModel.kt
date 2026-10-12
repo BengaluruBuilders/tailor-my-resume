@@ -100,10 +100,6 @@ internal class JobViewModel @Inject constructor(
         setText(text)
     }
 
-    fun onPaste(clipboardText: String) {
-        setText(clipboardText)
-    }
-
     fun onClear() {
         text.value = ""
         notAJobPost.value = false

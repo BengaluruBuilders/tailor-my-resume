@@ -16,7 +16,8 @@ class JobCopyTest {
 
     @Test
     fun stringsFileExistsWithTheDrawnCopy() {
-        assertThat(strings).contains("Paste from clipboard")
+        assertThat(strings).contains("%1\$s characters minimum")
+        assertThat(strings).doesNotContain("Paste from clipboard")
         assertThat(strings).contains("This doesn\\'t look like a job post")
         assertThat(strings).contains("Import from a link")
     }
