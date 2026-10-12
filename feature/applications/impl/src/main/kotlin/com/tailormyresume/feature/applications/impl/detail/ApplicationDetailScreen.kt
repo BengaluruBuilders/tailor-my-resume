@@ -4,8 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -144,49 +143,37 @@ internal fun ApplicationDetailScreen(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun StatusCard(
     state: ApplicationDetailUiState.Ready,
     onChangeStatus: () -> Unit,
 ) {
     TmrCard {
-        FlowRow(
+        TmrSectionLabel(text = stringResource(R.string.feature_applications_impl_status_label))
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            itemVerticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(
-                modifier = Modifier.weight(1f, fill = false),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                TmrSectionLabel(text = stringResource(R.string.feature_applications_impl_status_label))
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TmrStatusChip(status = state.status.toTmrStatus())
-                    val dateLine = when {
-                        state.appliedOn != null ->
-                            stringResource(R.string.feature_applications_impl_applied_on, state.appliedOn)
-                        state.status == ApplicationStatus.SAVED ->
-                            stringResource(R.string.feature_applications_impl_not_applied)
-                        else -> null
-                    }
-                    if (dateLine != null) {
-                        Text(
-                            text = dateLine,
-                            style = TmrTheme.typography.bodySmall,
-                            color = TmrTheme.colors.textMuted,
-                        )
-                    }
-                }
-            }
+            TmrStatusChip(status = state.status.toTmrStatus())
             TmrCompactButton(
                 label = stringResource(R.string.feature_applications_impl_change),
                 onClick = onChangeStatus,
                 size = TmrButtonSize.Compact,
+            )
+        }
+        val dateLine = when {
+            state.appliedOn != null ->
+                stringResource(R.string.feature_applications_impl_applied_on, state.appliedOn)
+            state.status == ApplicationStatus.SAVED ->
+                stringResource(R.string.feature_applications_impl_not_applied)
+            else -> null
+        }
+        if (dateLine != null) {
+            Text(
+                text = dateLine,
+                style = TmrTheme.typography.bodySmall,
+                color = TmrTheme.colors.textMuted,
             )
         }
     }
