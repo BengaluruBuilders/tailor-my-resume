@@ -148,7 +148,7 @@ class JobViewModelTest {
     }
 
     @Test
-    fun pasteFillsTextAndClearsError() = runTest(dispatcher) {
+    fun enteringTextClearsError() = runTest(dispatcher) {
         val viewModel = viewModel()
 
         viewModel.onTextChange(POST_120)
@@ -156,7 +156,7 @@ class JobViewModelTest {
         advanceTimeBy(1_000)
         assertThat((viewModel.uiState.value as JobUiState.HasText).notAJobPost).isTrue()
 
-        viewModel.onPaste(POST_250)
+        viewModel.onTextChange(POST_250)
 
         val state = viewModel.uiState.value as JobUiState.HasText
         assertThat(state.text).isEqualTo(POST_250)
@@ -256,10 +256,6 @@ class JobViewModelTest {
         val viewModel = viewModel()
 
         viewModel.onTextChange(postOf(MAX_JOB_CHARS + 500))
-
-        assertThat(viewModel.uiState.value.text.length).isEqualTo(MAX_JOB_CHARS)
-
-        viewModel.onPaste(postOf(MAX_JOB_CHARS + 500))
 
         assertThat(viewModel.uiState.value.text.length).isEqualTo(MAX_JOB_CHARS)
     }

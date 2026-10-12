@@ -45,7 +45,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tailormyresume.core.designsystem.component.TmrOutlineButton
 import com.tailormyresume.core.designsystem.component.hero.TmrHeroCard
 import com.tailormyresume.core.designsystem.component.hero.TmrHeroColor
 import com.tailormyresume.core.designsystem.component.hero.TmrPaige
@@ -66,7 +65,6 @@ private const val STACKED_BUTTON_FONT_SCALE = 1.3f
 internal fun JobScreen(
     state: JobUiState,
     onTextChange: (String) -> Unit,
-    onPaste: () -> Unit,
     onUseLink: () -> Unit,
     onClear: () -> Unit,
     onAnalyze: () -> Unit,
@@ -116,7 +114,7 @@ internal fun JobScreen(
                     minHeight = fieldHeight,
                     footer = {
                         if (state !is JobUiState.Analyzing) {
-                            JobTextAreaFooter(onPaste = onPaste, text = state.text)
+                            JobCharCount(state.text)
                         }
                     },
                 )
@@ -268,26 +266,9 @@ private fun JobCharCount(text: String) {
         },
         style = TmrTheme.typography.strongSmall,
         color = if (count >= MIN_JOB_CHARS) TmrTheme.colors.lime else TmrTheme.colors.textMuted,
-        modifier = Modifier.semantics { contentDescription = spoken },
+        textAlign = TextAlign.End,
+        modifier = Modifier.fillMaxWidth().semantics { contentDescription = spoken },
     )
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun JobTextAreaFooter(onPaste: () -> Unit, text: String) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-    ) {
-        TmrOutlineButton(
-            label = stringResource(R.string.feature_analysis_impl_job_paste_clipboard),
-            leadingIcon = TmrIcons.Clipboard,
-            onClick = onPaste,
-            labelStyle = TmrTheme.typography.strongSmall,
-        )
-        JobCharCount(text)
-    }
 }
 
 @Composable

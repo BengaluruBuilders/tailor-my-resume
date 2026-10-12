@@ -3,7 +3,6 @@
     <string name="feature_analysis_impl_job_hero_label">Paige reads it for you</string>
     <string name="feature_analysis_impl_job_hero_headline">Paste the job\nyou want</string>
     <string name="feature_analysis_impl_job_paste">Paste text</string>
-    <string name="feature_analysis_impl_job_paste_clipboard">Paste from clipboard</string>
     <string name="feature_analysis_impl_job_use_link">Use a link</string>
     <string name="feature_analysis_impl_job_analyze">Analyze job</string>
     <string name="feature_analysis_impl_job_analyzing">Reading the job… %1$d%%</string>

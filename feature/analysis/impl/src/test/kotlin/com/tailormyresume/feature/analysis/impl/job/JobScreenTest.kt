@@ -63,7 +63,6 @@ class JobScreenTest {
 
     private class Calls {
         var textChanges = 0
-        var pastes = 0
         var links = 0
         var clears = 0
         var analyzes = 0
@@ -75,34 +74,33 @@ class JobScreenTest {
     }
 
     @Test
-    fun emptyScreenShowsHeroPasteAndLinkButtonsAndDisabledAnalyze() {
+    fun emptyScreenShowsHeroModesMinimumAndDisabledAnalyze() {
         setScreen(JobUiState.Empty)
         rule.onNodeWithText("Paige reads it for you", ignoreCase = true).assertIsDisplayed()
         rule.onNodeWithText("Paste the job\nyou want").assertIsDisplayed()
-        rule.onNodeWithText("Paste from clipboard").assertIsDisplayed()
+        rule.onNodeWithText("Paste text").assertIsDisplayed()
+        rule.onNodeWithText("Paste from clipboard").assertDoesNotExist()
         rule.onNodeWithText("Use a link").assertIsDisplayed()
         rule
             .onNodeWithText(MINIMUM_HINT)
             .assertIsDisplayed()
         rule.onNodeWithContentDescription(MINIMUM_HINT).assertIsDisplayed()
+        assertCountRightAligned(MINIMUM_HINT)
         val config = rule.onNodeWithText("Analyze job").fetchSemanticsNode().config
         assertThat(config.getOrNull(SemanticsProperties.Disabled)).isNotEqualTo(false)
         assertThat(config.getOrNull(SemanticsProperties.StateDescription)).isEqualTo(NOT_AVAILABLE)
     }
 
     @Test
-    fun inputModeSelectionDoesNotPasteAndClipboardHasItsOwnAction() {
+    fun inputModeSelectionOpensLink() {
         val calls = Calls()
         setScreen(JobUiState.Empty, calls)
         rule.onNodeWithText("Paste text").assertIsSelected().performClick()
         rule.onNodeWithText("Use a link").assertIsNotSelected()
         val item = rule.onNodeWithText("Use a link").fetchSemanticsNode().config[SemanticsProperties.CollectionItemInfo]
         assertThat(item.columnIndex).isEqualTo(1)
-        rule.runOnIdle { assertThat(calls.pastes).isEqualTo(0) }
-        rule.onNodeWithText("Paste from clipboard").performClick()
         rule.onNodeWithText("Use a link").performClick()
         rule.runOnIdle {
-            assertThat(calls.pastes).isEqualTo(1)
             assertThat(calls.links).isEqualTo(1)
         }
     }
@@ -141,6 +139,7 @@ class JobScreenTest {
         rule.onNodeWithText("Job description").assertIsDisplayed()
         rule.onNodeWithText("Clear").assertIsDisplayed()
         rule.onNodeWithText("1,234 / 200 characters").assertIsDisplayed()
+        assertCountRightAligned("1,234 / 200 characters")
         rule.onNodeWithText(DETECTED).assertIsDisplayed()
         val analyze = rule.onNodeWithText("Analyze job").fetchSemanticsNode().config
         assertThat(analyze.getOrNull(SemanticsProperties.StateDescription)).isNull()
@@ -167,7 +166,7 @@ class JobScreenTest {
         val state = mutableStateOf<JobUiState>(JobUiState.HasText(text = "  " + jobText(199) + "  "))
         rule.setContent {
             TmrTheme {
-                JobScreen(state = state.value, onTextChange = {}, onPaste = {}, onUseLink = {}, onClear = {}, onAnalyze = {})
+                JobScreen(state = state.value, onTextChange = {}, onUseLink = {}, onClear = {}, onAnalyze = {})
             }
         }
 
@@ -181,18 +180,16 @@ class JobScreenTest {
     }
 
     @Test
-    fun blankNotAJobPostShowsPasteActionsAndDisabledAnalyze() {
+    fun blankNotAJobPostShowsModesAndDisabledAnalyze() {
         val calls = Calls()
         setScreen(JobUiState.HasText(text = "", notAJobPost = true), calls)
         rule.onNodeWithText("This doesn't look like a job post").assertIsDisplayed()
-        rule.onNodeWithText("Paste from clipboard").assertIsDisplayed()
+        rule.onNodeWithText("Paste from clipboard").assertDoesNotExist()
         rule.onNodeWithText("Use a link").assertIsDisplayed()
         val config = rule.onNodeWithText("Analyze job").fetchSemanticsNode().config
         assertThat(config.getOrNull(SemanticsProperties.StateDescription)).isEqualTo(NOT_AVAILABLE)
-        rule.onNodeWithText("Paste from clipboard").performClick()
         rule.onNodeWithText("Use a link").performClick()
         rule.runOnIdle {
-            assertThat(calls.pastes).isEqualTo(1)
             assertThat(calls.links).isEqualTo(1)
         }
     }
@@ -200,7 +197,7 @@ class JobScreenTest {
     @Test
     fun whitespaceOnlyTextDisablesAnalyze() {
         setScreen(JobUiState.HasText(text = "   \n ", notAJobPost = true))
-        rule.onNodeWithText("Paste from clipboard").assertIsDisplayed()
+        rule.onNodeWithText("Paste from clipboard").assertDoesNotExist()
         val config = rule.onNodeWithText("Analyze job").fetchSemanticsNode().config
         assertThat(config.getOrNull(SemanticsProperties.StateDescription)).isEqualTo(NOT_AVAILABLE)
     }
@@ -282,7 +279,6 @@ class JobScreenTest {
                         JobScreen(
                             state = state.value,
                             onTextChange = { calls.textChanges += 1 },
-                            onPaste = { calls.pastes += 1 },
                             onUseLink = { calls.links += 1 },
                             onClear = { calls.clears += 1 },
                             onAnalyze = { calls.analyzes += 1 },
@@ -291,9 +287,11 @@ class JobScreenTest {
                 }
             }
         }
-        assertLabelsFit("Paste text", "Paste from clipboard", "Use a link", MINIMUM_HINT, "Analyze job")
+        assertLabelsFit("Paste text", "Use a link", MINIMUM_HINT, "Analyze job")
+        assertCountRightAligned(MINIMUM_HINT)
         rule.runOnIdle { state.value = JobUiState.HasText(text = jobText(1234), detected = DETECTED) }
         assertLabelsFit("Analyze job", "Clear")
+        assertCountRightAligned("1,234 / 200 characters")
     }
 
     private fun setScreen(state: JobUiState, calls: Calls = Calls()) {
@@ -303,7 +301,6 @@ class JobScreenTest {
                     JobScreen(
                         state = state,
                         onTextChange = { calls.textChanges += 1 },
-                        onPaste = { calls.pastes += 1 },
                         onUseLink = { calls.links += 1 },
                         onClear = { calls.clears += 1 },
                         onAnalyze = { calls.analyzes += 1 },
@@ -364,6 +361,14 @@ class JobScreenTest {
                 assertThat(text.substring(0, lineEnd)).endsWith(" ")
             }
         }
+    }
+
+    private fun assertCountRightAligned(label: String) {
+        val node = rule.onNodeWithText(label, useUnmergedTree = true).fetchSemanticsNode()
+        val layouts = mutableListOf<TextLayoutResult>()
+        node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts)
+        val layout = layouts.single()
+        assertThat(layout.getLineRight(0)).isWithin(1f).of(layout.size.width.toFloat())
     }
 
     private fun jobText(length: Int): String = "a".repeat(length)
