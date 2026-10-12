@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentDescription
@@ -27,10 +29,18 @@ import com.tailormyresume.core.designsystem.theme.TmrTheme
 fun TmrLabeledField(
     label: String,
     modifier: Modifier = Modifier,
+    trailing: @Composable (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(text = label, style = TmrTheme.typography.caption, color = TmrTheme.colors.textSecondary)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = label, style = TmrTheme.typography.caption, color = TmrTheme.colors.textSecondary)
+            trailing?.invoke()
+        }
         content()
     }
 }
@@ -89,8 +99,9 @@ fun TmrTextArea(
     placeholder: String = "",
     readOnly: Boolean = false,
     amber: Boolean = false,
+    trailing: @Composable (() -> Unit)? = null,
 ) {
-    TmrLabeledField(label = label, modifier = modifier) {
+    TmrLabeledField(label = label, modifier = modifier, trailing = trailing) {
         TmrFieldBox(value, onValueChange, label, placeholder, readOnly, amber, singleLine = false, minHeight = 120.dp)
     }
 }

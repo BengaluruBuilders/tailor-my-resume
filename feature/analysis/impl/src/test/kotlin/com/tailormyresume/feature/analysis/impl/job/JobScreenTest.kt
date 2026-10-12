@@ -44,7 +44,7 @@ private const val FONT_SCALE_200 = 2.0f
 private const val SCREEN_READER_PERSIST_MS = 60_000L
 private const val MAX_FRAMES = 120
 private const val TOAST_SETTLE_MS = 1_000L
-private const val MINIMUM_HINT = "Use at least 200 characters from the job post. Spaces at the start and end do not count. Include responsibilities and requirements."
+private const val MINIMUM_HINT = "At least 200 characters. Include the responsibilities and requirements."
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -102,7 +102,7 @@ class JobScreenTest {
         setScreen(JobUiState.HasText(text = jobText(1234), detected = DETECTED), calls)
         rule.onNodeWithText("Job description").assertIsDisplayed()
         rule.onNodeWithText("Clear").assertIsDisplayed()
-        rule.onNodeWithText("1,234 characters").assertIsDisplayed()
+        rule.onNodeWithText("1,234 / 200").assertIsDisplayed()
         rule.onNodeWithText(DETECTED).assertIsDisplayed()
         val analyze = rule.onNodeWithText("Analyze job").fetchSemanticsNode().config
         assertThat(analyze.getOrNull(SemanticsProperties.StateDescription)).isNull()
@@ -125,7 +125,7 @@ class JobScreenTest {
     }
 
     @Test
-    fun minimumHintUsesTheTrimmedBoundary() {
+    fun characterCountUsesTheTrimmedBoundary() {
         val state = mutableStateOf<JobUiState>(JobUiState.HasText(text = "  " + jobText(199) + "  "))
         rule.setContent {
             TmrTheme {
@@ -133,9 +133,9 @@ class JobScreenTest {
             }
         }
 
-        rule.onNodeWithText(MINIMUM_HINT).assertIsDisplayed()
+        rule.onNodeWithText("199 / 200").assertIsDisplayed()
         rule.runOnIdle { state.value = JobUiState.HasText(text = "  " + jobText(200) + "  ") }
-        rule.onNodeWithText(MINIMUM_HINT).assertDoesNotExist()
+        rule.onNodeWithText("200 / 200").assertIsDisplayed()
     }
 
     @Test

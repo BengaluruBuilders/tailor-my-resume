@@ -126,9 +126,7 @@ class TmrChromeWholeWordsA11yTest {
         setLargeTextContent {
             TmrStepBar(current = 2, modifier = Modifier.fillMaxWidth())
         }
-        for (label in listOf("✓ Profile", "2 Job", "3 Tailor")) {
-            composeRule.assertNoSplitWords(label)
-        }
+        composeRule.assertNoSplitWords("Step 2 of 3 · Job")
     }
 
     @Test

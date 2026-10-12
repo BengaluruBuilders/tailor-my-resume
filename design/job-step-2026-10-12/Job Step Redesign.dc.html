@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9E8E4;font-family:Manrope,sans-serif;color:#141414}a{color:#141414}a:hover{color:#555}textarea::placeholder,input::placeholder{color:#9B9B9B}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;gap:48px;justify-content:center;align-items:flex-start;padding:48px 24px">
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+    <div style="font:700 12px/1 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#6B6A66">Before</div>
+    <img src="original.png" alt="Original screen" style="width:412px;height:855px;object-fit:cover;border-radius:28px;display:block"></img>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+    <div style="font:700 12px/1 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#6B6A66">After</div>
+    <div style="width:412px;height:855px;background:#000;border-radius:28px;overflow:hidden;display:flex;flex-direction:column;color:#F2F2F0">
+      <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:600 16px/1 Manrope,sans-serif">
+        <span>12:54</span>
+        <span style="display:flex;gap:6px;align-items:center"><span style="width:22px;height:11px;border-radius:3px;background:#fff;display:block"></span></span>
+      </div>
+
+      <div style="flex:1;display:flex;flex-direction:column;padding:8px 30px 0">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button aria-label="Back" style="width:44px;height:44px;flex:none;border-radius:50%;border:none;background:#1C1C1C;color:#F2F2F0;font:600 20px/1 Manrope,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
+          <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+            <div style="font:600 13px/1 Manrope,sans-serif;color:#B5B5B2">Step 2 of 3 · Job</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+              <div style="height:4px;border-radius:2px;background:#A3F43C"></div>
+              <div style="height:4px;border-radius:2px;background:#A3F43C"></div>
+              <div style="height:4px;border-radius:2px;background:#333"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;height:196px;flex:none;position:relative;background:#F6A83E;border-radius:28px;overflow:hidden;color:#111">
+          <div style="padding:22px 22px 0;display:flex;flex-direction:column;gap:10px">
+            <div style="font:700 12px/1.2 'Space Mono',monospace;letter-spacing:.06em;text-transform:uppercase">Paige reads it for you</div>
+            <div style="font:400 26px/1.2 'Space Mono',monospace;letter-spacing:-.01em;max-width:310px">Paste the job you want</div>
+          </div>
+          <img src="mascot.png" alt="" style="position:absolute;right:9px;bottom:0;width:190px;display:block"></img>
+        </div>
+
+        <div style="margin-top:22px;display:flex;justify-content:space-between;align-items:baseline">
+          <label style="font:600 15px/1 Manrope,sans-serif">{{ fieldLabel }}</label>
+          <sc-if value="{{ textMode }}" hint-placeholder-val="{{ true }}">
+            <span style="font:600 13px/1 Manrope,sans-serif;color:{{ countColor }};font-variant-numeric:tabular-nums">{{ count }} / 200</span>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ textMode }}" hint-placeholder-val="{{ true }}">
+          <textarea value="{{ text }}" onChange="{{ onText }}" placeholder="Paste the full job description here" style="margin-top:10px;height:132px;flex:none;box-sizing:border-box;width:100%;resize:none;background:#252425;border:1.5px solid #4A4A4A;border-radius:20px;padding:14px 16px;color:#F2F2F0;font:400 16px/1.5 Manrope,sans-serif;outline:none" style-focus="border-color:#A3F43C"></textarea>
+          <div style="margin-top:8px;font:500 14px/1.45 Manrope,sans-serif;color:#B5B5B2;text-wrap:pretty">At least 200 characters. Include the responsibilities and requirements.</div>
+        </sc-if>
+        <sc-if value="{{ linkMode }}" hint-placeholder-val="{{ false }}">
+          <input value="{{ url }}" onChange="{{ onUrl }}" type="url" placeholder="https://company.com/jobs/…" style="margin-top:10px;height:56px;box-sizing:border-box;width:100%;background:#252425;border:1.5px solid #4A4A4A;border-radius:18px;padding:0 16px;color:#F2F2F0;font:400 16px/1 Manrope,sans-serif;outline:none" style-focus="border-color:#A3F43C"></input>
+          <div style="margin-top:8px;font:500 14px/1.45 Manrope,sans-serif;color:#B5B5B2">Paige will fetch the job post from this page.</div>
+        </sc-if>
+
+        <div style="margin-top:14px;display:grid;grid-template-columns:{{ altCols }};gap:10px">
+          <sc-if value="{{ textMode }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ pasteClip }}" style="height:48px;border-radius:24px;border:1.5px solid #3A3A3A;background:#1C1C1C;color:#F2F2F0;font:600 15px/1 Manrope,sans-serif;cursor:pointer;white-space:nowrap" style-hover="background:#262626">Paste from clipboard</button>
+          </sc-if>
+          <button onClick="{{ toggleMode }}" style="height:48px;border-radius:24px;border:1.5px solid #3A3A3A;background:#1C1C1C;color:#F2F2F0;font:600 15px/1 Manrope,sans-serif;cursor:pointer;white-space:nowrap" style-hover="background:#262626">{{ toggleLabel }}</button>
+        </div>
+
+        <div style="flex:1"></div>
+
+        <button disabled="{{ disabled }}" style="height:56px;flex:none;border-radius:28px;border:none;background:{{ ctaBg }};color:{{ ctaFg }};font:700 17px/1 Manrope,sans-serif;cursor:{{ ctaCursor }}">Analyze job</button>
+        <div style="height:18px;flex:none"></div>
+      </div>
+
+      <div style="height:52px;flex:none;display:flex;align-items:center;justify-content:space-around;padding:0 70px">
+        <span style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-right:13px solid #fff;display:block"></span>
+        <span style="width:16px;height:16px;border-radius:50%;background:#fff;display:block"></span>
+        <span style="width:14px;height:14px;border-radius:2px;background:#fff;display:block"></span>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:340px;display:flex;flex-direction:column;gap:14px;padding-top:28px">
+    <div style="font:700 12px/1 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#6B6A66">Changes</div>
+    <ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px;font:500 15px/1.5 Manrope,sans-serif;text-wrap:pretty">
+      <li>Monospace kept for the headline only. Buttons, steps and helper text use a proportional sans, so labels no longer wrap or space out.</li>
+      <li>Step chips replaced with “Step 2 of 3” and a progress bar beside the back button.</li>
+      <li>Hero card is shorter, giving the input more room. Illustration unchanged.</li>
+      <li>Requirement moved directly under the field, shortened, with a live character count.</li>
+      <li>One lime button per screen: “Analyze job” is the primary action. Paste and link are equal secondary options.</li>
+      <li>Disabled button text raised to readable contrast. Try typing or tap “Paste from clipboard”.</li>
+    </ol>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SAMPLE = "Senior Product Designer, Growth. You will own end-to-end design for onboarding and activation, partner with product and engineering, run research and usability tests, and ship weekly. Requirements: 5+ years of product design, a strong portfolio of shipped mobile work, fluency in Figma and prototyping, and clear written communication.";
+class Component extends DCLogic {
+  state = { text: "", url: "", mode: "text" };
+  renderVals() {
+    const { text, url, mode } = this.state;
+    const count = text.trim().length;
+    const textMode = mode === "text";
+    const ok = textMode ? count >= 200 : /^https?:\/\/\S+\.\S+/.test(url.trim());
+    return {
+      text, url, count, textMode, linkMode: !textMode,
+      fieldLabel: textMode ? "Job post" : "Job link",
+      countColor: count >= 200 ? "#A3F43C" : "#B5B5B2",
+      toggleLabel: textMode ? "Use a link" : "Paste text instead",
+      altCols: textMode ? "1.4fr 1fr" : "1fr",
+      disabled: !ok,
+      ctaBg: ok ? "#A3F43C" : "#262626",
+      ctaFg: ok ? "#111" : "#8E8E8C",
+      ctaCursor: ok ? "pointer" : "not-allowed",
+      onText: e => this.setState({ text: e.target.value }),
+      onUrl: e => this.setState({ url: e.target.value }),
+      pasteClip: async () => {
+        let t = "";
+        try { t = await navigator.clipboard.readText(); } catch (e) {}
+        this.setState({ text: t && t.trim().length ? t : SAMPLE });
+      },
+      toggleMode: () => this.setState(s => ({ mode: s.mode === "text" ? "link" : "text" })),
+    };
+  }
+}
+</script>
+</body>
+</html>

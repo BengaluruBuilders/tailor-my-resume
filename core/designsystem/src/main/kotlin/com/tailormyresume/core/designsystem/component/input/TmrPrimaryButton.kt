@@ -51,8 +51,8 @@ fun TmrPrimaryButton(
     ) {
         Text(
             text = label,
-            style = TmrTheme.typography.mono15,
-            color = if (enabled) colors.ink else colors.textDisabled,
+            style = TmrTheme.typography.strongLarge,
+            color = if (enabled) colors.ink else colors.textMuted,
             textAlign = TextAlign.Center,
         )
     }

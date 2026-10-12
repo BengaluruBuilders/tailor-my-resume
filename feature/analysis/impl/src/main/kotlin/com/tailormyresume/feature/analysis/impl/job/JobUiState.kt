@@ -11,9 +11,7 @@ internal sealed interface JobUiState {
         override val text: String,
         val detected: String? = null,
         val notAJobPost: Boolean = false,
-    ) : JobUiState {
-        val charCount: Int get() = text.length
-    }
+    ) : JobUiState
 
     data class Analyzing(
         override val text: String,

@@ -5,8 +5,8 @@
     <string name="feature_analysis_impl_job_paste">Paste from clipboard</string>
     <string name="feature_analysis_impl_job_use_link">Use a link</string>
     <plurals name="feature_analysis_impl_job_hint">
-        <item quantity="one">Use at least %1$d character from the job post. Spaces at the start and end do not count. Include responsibilities and requirements.</item>
-        <item quantity="other">Use at least %1$d characters from the job post. Spaces at the start and end do not count. Include responsibilities and requirements.</item>
+        <item quantity="one">At least %1$d character. Include the responsibilities and requirements.</item>
+        <item quantity="other">At least %1$d characters. Include the responsibilities and requirements.</item>
     </plurals>
     <string name="feature_analysis_impl_job_analyze">Analyze job</string>
     <string name="feature_analysis_impl_job_analyzing">Reading the job… %1$d%%</string>
@@ -14,7 +14,8 @@
     <string name="feature_analysis_impl_job_clear">Clear</string>
     <string name="feature_analysis_impl_job_field_label">Job post</string>
     <string name="feature_analysis_impl_job_placeholder">Paste the full job description here…</string>
-    <string name="feature_analysis_impl_job_char_count">%1$s characters</string>
+    <string name="feature_analysis_impl_job_char_count">%1$s / %2$s</string>
+    <string name="feature_analysis_impl_job_char_count_description">%1$s of %2$s characters</string>
     <string name="feature_analysis_impl_job_not_a_post_title">This doesn\'t look like a job post</string>
     <string name="feature_analysis_impl_job_not_a_post_body">Paste the full listing, including responsibilities and requirements.</string>
     <string name="feature_analysis_impl_job_imported">Imported from %1$s</string>

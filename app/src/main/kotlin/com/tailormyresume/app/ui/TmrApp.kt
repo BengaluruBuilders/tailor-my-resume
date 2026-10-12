@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
@@ -42,7 +41,6 @@ import com.tailormyresume.core.designsystem.component.chrome.LocalTmrSheetHost
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.designsystem.component.chrome.TmrSheetHost
 import com.tailormyresume.core.designsystem.component.chrome.TmrSheetHostState
-import com.tailormyresume.core.designsystem.component.chrome.TmrStepBar
 import com.tailormyresume.core.designsystem.component.chrome.TmrTab
 import com.tailormyresume.core.designsystem.component.chrome.TmrTabBar
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastHost
@@ -224,6 +222,7 @@ internal fun TmrShell(
                                 }
                             },
                             title = chrome.title?.let { stringResource(it) },
+                            step = chrome.step,
                             action = chrome.action?.let { stringResource(it.label) },
                             actionEnabled = chromeActions.enabled,
                             onAction = {
@@ -236,12 +235,6 @@ internal fun TmrShell(
                                 }
                             },
                         )
-                        chrome.step?.let { step ->
-                            TmrStepBar(
-                                current = step,
-                                modifier = Modifier.padding(horizontal = TmrTheme.spacing.gutter, vertical = 6.dp),
-                            )
-                        }
                     }
                 }
                 Box(

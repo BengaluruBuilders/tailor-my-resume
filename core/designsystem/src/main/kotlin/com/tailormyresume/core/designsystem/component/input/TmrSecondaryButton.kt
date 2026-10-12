@@ -34,7 +34,7 @@ fun TmrSecondaryButton(
     ) {
         Text(
             text = label,
-            style = TmrTheme.typography.mono14,
+            style = TmrTheme.typography.strongLarge,
             color = if (enabled) colors.text else colors.textDisabled,
             textAlign = TextAlign.Center,
         )
