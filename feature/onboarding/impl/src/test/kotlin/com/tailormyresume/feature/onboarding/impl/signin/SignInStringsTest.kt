@@ -12,6 +12,7 @@ class SignInStringsTest {
     @Test
     fun noMatchScoreCopy() {
         assertThat(strings).contains("story1_subline")
+        assertThat(strings).contains("Have your resume or work details and the full job description ready.")
         assertThat(forbidden.find(strings)).isNull()
     }
 

@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Dp
@@ -56,33 +57,34 @@ class SignInScreenTest {
             stepTo(story, index)
             composeRule.onNodeWithText(headline).assertIsDisplayed()
             composeRule.onNodeWithText("How it works · ${index + 1} of 3", ignoreCase = true).assertDoesNotExist()
-            composeRule.onNodeWithText("Tap · hold", ignoreCase = true).assertIsDisplayed()
+            composeRule.onNodeWithText("Tap to change story · Hold to pause", ignoreCase = true).assertIsDisplayed()
             composeRule.onNodeWithText("Sign in to get started.").assertDoesNotExist()
-            composeRule.onNodeWithText("After sign-in, you’ll need your resume or work details and the full job description.").assertDoesNotExist()
+            if (index == 0) {
+                composeRule.onNodeWithText(
+                    "Have your resume or work details and the full job description ready.",
+                ).assertIsDisplayed()
+            } else {
+                composeRule.onNodeWithText(
+                    "Have your resume or work details and the full job description ready.",
+                ).assertDoesNotExist()
+            }
             composeRule.onNodeWithText("Continue with Google").assertIsDisplayed()
         }
     }
 
     @Test
-    fun storyMessageStaysGroupedWithTheSignInAction() {
+    fun signInActionStaysVisibleAndStableAcrossStories() {
         val story = SignInStoryState()
         show(story)
-        val sublines = listOf(
-            "Every job asks for something different. You shouldn’t have to start over every time.",
-            "AI matches your real skills and achievements to each job description.",
-            "Create a tailored resume for each job without rewriting it yourself. Review and approve each version before export.",
-        )
         val googlePositions = mutableListOf<Dp>()
 
-        sublines.forEachIndexed { index, subline ->
+        headlines.indices.forEach { index ->
             stepTo(story, index)
-            val body = composeRule.onNodeWithText(subline).getUnclippedBoundsInRoot()
-            val google = composeRule.onNodeWithText("Continue with Google").getUnclippedBoundsInRoot()
-            val footer = composeRule.onNodeWithText("Privacy Policy", substring = true).getUnclippedBoundsInRoot()
+            val google = composeRule.onNodeWithTag(SignInTags.GOOGLE_ACTION).getUnclippedBoundsInRoot()
             val screen = composeRule.onRoot().getUnclippedBoundsInRoot()
 
-            assertThat((google.top - body.bottom).value).isAtMost(48.dp.value)
-            assertThat((screen.bottom - footer.bottom).value).isWithin(1f).of(34f)
+            assertThat(google.top.value).isAtLeast(screen.top.value)
+            assertThat(google.bottom.value).isAtMost(screen.bottom.value)
             googlePositions.add(google.top)
         }
 
@@ -124,8 +126,21 @@ class SignInScreenTest {
         composeRule.onNodeWithText("Paused", ignoreCase = true).assertIsDisplayed()
         composeRule.onNodeWithTag(SignInTags.STORY_TOUCH, useUnmergedTree = true).performTouchInput { up() }
 
-        composeRule.onNodeWithText("Tap · hold", ignoreCase = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Tap to change story · Hold to pause", ignoreCase = true).assertIsDisplayed()
         assertThat(story.index).isEqualTo(0)
+    }
+
+    @Test
+    fun verticalSwipeScrollsStoryWithoutChangingIt() {
+        val story = SignInStoryState()
+        composeRule.showSignIn(fontScale = 2f) {
+            SignInScreen(SignInUiState.Ready, onContinueWithGoogle = {}, story = story)
+        }
+        composeRule.onNodeWithTag(SignInTags.STORY_TOUCH, useUnmergedTree = true).performTouchInput { swipeUp() }
+        composeRule.waitForIdle()
+
+        assertThat(story.index).isEqualTo(0)
+        composeRule.onNodeWithText("Continue with Google").assertIsDisplayed()
     }
 
     @Test
@@ -239,7 +254,7 @@ class SignInScreenTest {
         val config = composeRule.onNodeWithTag(SignInTags.STORY).fetchSemanticsNode().config
         val description = config[SemanticsProperties.ContentDescription].joinToString(" ")
         assertThat(description).contains("Tired of rewriting your resume?")
-        assertThat(description).contains("Every job asks for something different. You shouldn’t have to start over every time")
+        assertThat(description).contains("Have your resume or work details and the full job description ready")
         assertThat(description).contains("1 of 3")
         val labels = config[SemanticsActions.CustomActions].map { it.label }
         assertThat(labels).containsExactly("Next story", "Previous story")
