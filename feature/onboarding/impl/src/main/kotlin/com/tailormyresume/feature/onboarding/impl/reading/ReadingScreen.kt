@@ -5,8 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.designsystem.component.content.TmrProgressRow
@@ -151,16 +148,6 @@ internal fun ReadingScreen(
             }
             val progress = readingProgressRows(state)
             TmrProgressRows(rows = progress.rows, percent = progress.percent)
-            Text(
-                text = stringResource(R.string.feature_onboarding_impl_reading_takes),
-                style = TmrTheme.typography.caption,
-                color = TmrTheme.colors.textMuted,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 30.dp, vertical = 12.dp),
-            )
         }
     }
 }

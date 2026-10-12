@@ -92,7 +92,9 @@ internal fun UnreadableScreen(
                     color = TmrTheme.colors.ink,
                 )
             }
-            TipsCard()
+            if (failure.kind == UploadFailureKind.ImageOnly || failure.kind == UploadFailureKind.FileProblem) {
+                TipsCard()
+            }
         }
         TmrBottomActionBar(stacked = true) {
             TmrSecondaryButton(
@@ -125,7 +127,6 @@ private fun TipsCard() {
         )
         TipRow(R.string.feature_onboarding_impl_unreadable_tip_export)
         TipRow(R.string.feature_onboarding_impl_unreadable_tip_docx)
-        TipRow(R.string.feature_onboarding_impl_unreadable_tip_paste)
     }
 }
 

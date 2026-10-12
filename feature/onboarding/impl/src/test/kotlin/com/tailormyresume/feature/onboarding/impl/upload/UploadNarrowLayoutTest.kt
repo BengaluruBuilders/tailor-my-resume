@@ -116,7 +116,7 @@ class UploadNarrowLayoutTest {
     fun footerSitsInsideTheScreenAtRest() {
         showAt(1f)
 
-        val footer = composeRule.onNodeWithText("Never shared.", substring = true).getUnclippedBoundsInRoot()
+        val footer = composeRule.onNodeWithText("Your file stays on your device. We use its text to build your profile.").getUnclippedBoundsInRoot()
         val root = composeRule.onRoot().getUnclippedBoundsInRoot()
 
         assertThat(footer.bottom.value).isAtMost(root.bottom.value)

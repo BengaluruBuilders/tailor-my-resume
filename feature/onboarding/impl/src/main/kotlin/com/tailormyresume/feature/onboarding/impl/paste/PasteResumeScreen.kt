@@ -61,7 +61,6 @@ internal fun PasteResumeScreen(
                 value = state.text,
                 onValueChange = onTextChange,
                 label = stringResource(R.string.feature_onboarding_impl_paste_label),
-                placeholder = stringResource(R.string.feature_onboarding_impl_paste_placeholder),
             )
         }
         TmrBottomActionBar {

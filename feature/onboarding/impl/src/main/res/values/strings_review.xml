@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_onboarding_impl_review_title">Your profile</string>
-    <string name="feature_onboarding_impl_review_source_file">From %1$s. Tap anything to edit.</string>
-    <string name="feature_onboarding_impl_review_source_none">Tap anything to edit.</string>
+    <string name="feature_onboarding_impl_review_title">Review your profile</string>
+    <string name="feature_onboarding_impl_review_source_file">From %1$s</string>
+    <string name="feature_onboarding_impl_review_source_none">Check each section before you continue.</string>
     <string name="feature_onboarding_impl_review_required">Required</string>
     <string name="feature_onboarding_impl_review_end_date_missing">End date missing for %1$s</string>
     <string name="feature_onboarding_impl_review_add_date">Add date</string>
-    <string name="feature_onboarding_impl_review_all_done">All required info is done</string>
+    <string name="feature_onboarding_impl_review_all_done">No missing end dates</string>
     <string name="feature_onboarding_impl_review_contact">Contact</string>
     <string name="feature_onboarding_impl_review_experience">Experience · %1$d</string>
     <string name="feature_onboarding_impl_review_skills">Skills · %1$d</string>
     <string name="feature_onboarding_impl_review_education">Education</string>
     <string name="feature_onboarding_impl_review_edit">Edit</string>
-    <string name="feature_onboarding_impl_review_example_title">Add a work example</string>
-    <string name="feature_onboarding_impl_review_example_body">If you have one, add a true example of work you did. It helps tailor your resume.</string>
+    <string name="feature_onboarding_impl_review_example_title">Add a work example (optional)</string>
+    <string name="feature_onboarding_impl_review_example_body">Describe what you did and the result.</string>
     <string name="feature_onboarding_impl_review_skills_more">+%1$d</string>
     <string name="feature_onboarding_impl_review_dates_range">%1$s – %2$s</string>
     <string name="feature_onboarding_impl_review_dates_current">%1$s – Now</string>

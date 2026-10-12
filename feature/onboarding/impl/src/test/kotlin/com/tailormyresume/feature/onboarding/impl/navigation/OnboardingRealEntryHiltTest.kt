@@ -115,7 +115,7 @@ class OnboardingRealEntryHiltTest {
         show(navigator, PasteResumeNavKey())
 
         composeRule.onNode(hasSetTextAction()).performTextInput("Priya Deshmukh. Business analyst at Northwind Traders since 2021.")
-        composeRule.onNodeWithText("Read text").performClick()
+        composeRule.onNodeWithText("Build my profile").performClick()
         composeRule.waitForIdle()
 
         assertThat(navigator.state.stack.toList()).containsExactly(UploadNavKey(), ReadingNavKey()).inOrder()
@@ -131,7 +131,7 @@ class OnboardingRealEntryHiltTest {
     }
 
     private fun waitForReview() {
-        waitUntilIdling { composeRule.onAllNodesWithText("Your profile").fetchSemanticsNodes().isNotEmpty() }
+        waitUntilIdling { composeRule.onAllNodesWithText("Review your profile").fetchSemanticsNodes().isNotEmpty() }
     }
 
     private fun waitUntilIdling(condition: () -> Boolean) {

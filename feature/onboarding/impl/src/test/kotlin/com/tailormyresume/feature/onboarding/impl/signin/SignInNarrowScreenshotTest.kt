@@ -40,18 +40,20 @@ class SignInNarrowScreenshotTest {
     fun story2() = captureStory(1)
 
     @Test
-    fun story2KeepsSignInAvailableAtNarrowFont200() {
+    fun everyStoryKeepsSignInAvailableAtNarrowFont200() {
         val story = SignInStoryState()
         composeRule.showSignIn(fontScale = NARROW_DEVICE.fontScale) {
             SignInScreen(SignInUiState.Ready, onContinueWithGoogle = {}, story = story)
         }
-        composeRule.runOnIdle { story.step(1) }
-
-        composeRule.onNodeWithText(
-            "We compare your profile with the job description to show relevant skills and gaps.",
-        ).performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("Sign in to get started.").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("Continue with Google").performScrollTo().assertIsDisplayed()
+        listOf(
+            "Every job asks for something different. You shouldn’t have to start over every time.",
+            "AI matches your real skills and achievements to each job description.",
+            "Create a tailored resume for each job without rewriting it yourself. Review and approve each version before export.",
+        ).forEachIndexed { index, subline ->
+            composeRule.runOnIdle { repeat(index - story.index) { story.step(1) } }
+            composeRule.onNodeWithText(subline).performScrollTo().assertIsDisplayed()
+            composeRule.onNodeWithText("Continue with Google").performScrollTo().assertIsDisplayed()
+        }
     }
 
     @Test
