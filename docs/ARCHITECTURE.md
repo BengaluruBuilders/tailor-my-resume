@@ -56,19 +56,19 @@ The current look follows `docs/AVVIO_REDESIGN.md`. `docs/DESIGN_SYSTEM.md` holds
 
 Dependency rules: features depend on `core:*` and on other features' `api` only. `core:domain` depends on
 `core:data` and `core:model`. `core:model` depends on nothing Android. `core:network` depends on `core:model` only,
-and only `:app` (as `prodImplementation`) and remote bindings of the `prod` flavour depend on it.
+and only `:app` and its remote bindings depend on it.
 
-### Flavours
+### Build types
 
-`:app` has one flavour dimension, `backend`, with two flavours. `demo` binds the on-device implementations of
-`docs/MOCK_BACKEND.md`, keeps the developer menu and sample data, and has no `INTERNET` permission and no
-network classes. `prod` binds the remote implementations through the files in `app/src/prod/kotlin/.../di`
-and declares `INTERNET`. Room stays the local source of truth in both. In `prod` these are remote:
+`:app` has no product flavours. Every build type binds the remote implementations through the files in
+`app/src/main/kotlin/.../di` and declares `INTERNET`. `debug` and `staging` use the staging backend, `release`
+the prod backend. `debug` keeps the developer menu and sample data. Room stays the local source of truth.
+These are remote:
 sign-in and account deletion, resume parsing, job analysis, tailoring, prep questions, the cover letter,
 payment and the wallet, content reports (saved locally, then posted), and the data export (local files plus
-`server.json`). Profile, applications, and review state are local in both flavours.
+`server.json`). Profile, applications, and review state are local.
 
-Prod sign-in (`app/src/prod/.../auth`) uses Firebase Auth and Credential Manager without the google-services
+Sign-in (`app/src/main/kotlin/.../auth`) uses Firebase Auth and Credential Manager without the google-services
 plugin. It reads four Gradle properties (in `gradle.properties` or `~/.gradle/gradle.properties`, never in git):
 `tailormyresumeWebClientId`, `tailormyresumeFirebaseApiKey`, `tailormyresumeFirebaseAppId`, and `tailormyresumeFirebaseProjectId`. Each
 defaults to empty. If one is empty, sign-in shows the sign-in-failed state and the app still starts.

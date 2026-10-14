@@ -9,7 +9,7 @@ class NoLoggingSourceTest {
 
     @Test
     fun networkAndProdSourcesNeverLog() {
-        val roots = listOf(File("src/main"), File("../../app/src/prod"))
+        val roots = listOf(File("src/main"), File("../../app/src/main"))
         val offenders = roots.flatMap { root ->
             assertThat(root.exists()).isTrue()
             root.walkTopDown().filter { it.extension == "kt" }.flatMap { file ->

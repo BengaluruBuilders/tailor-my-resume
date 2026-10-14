@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">TMR Staging</string>
     <string name="debug_scenario_activity_label">Dev console</string>
     <string name="debug_scenario_title">Dev console</string>
     <string name="debug_scenario_intro">Debug build only. Load data or open one screen in one state.</string>

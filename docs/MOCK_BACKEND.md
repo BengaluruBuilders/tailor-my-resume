@@ -1,10 +1,11 @@
 # Mock backend
 
-The mock backend is a set of interfaces with on-device implementations. The `demo` flavour binds them and
-has no network code. The `prod` flavour binds remote implementations through one Hilt binding each
-(`app/src/prod/kotlin/.../di`, Constitution I.5 as amended, `docs/BACKEND_CONTRACT.md`). No UI code changes.
+The mock backend is a set of interfaces with on-device implementations. The app binds remote
+implementations through one Hilt binding each, and the on-device ones stay as fakes in `core.domain.offline`
+for screenshot tests and the Dev console
+(`app/src/main/kotlin/.../di`, Constitution I.5 as amended, `docs/BACKEND_CONTRACT.md`). No UI code changes.
 
-Remote in `prod`: `SignInGateway`, `ResumeTextParser`, `AnalyzeJobUseCase`, `ResumeTailor`,
+Remote in the app: `SignInGateway`, `ResumeTextParser`, `AnalyzeJobUseCase`, `ResumeTailor`,
 `PrepQuestionSource`, `CoverLetterSource`, `PaymentGateway`, `UsageAllowance`, `ContentReportRepository`,
 `AccountDataExporter`, and account deletion. `RemoteContentReportRepository` saves the report locally, then
 posts it; a post that fails with a retryable error stays in `PendingReportQueue` and is sent on the next
@@ -165,7 +166,7 @@ data class KeptJobDescription(val text: String, val company: String, val role: S
 
 `ConsentRecord.CURRENT_NOTICE_VERSION` is the version string to store. `SignInAccount` also has a typealias in `com.tailormyresume.core.domain`, so the old import still works.
 
-`signOut()` removes the account and the kept job description. The consent and the onboarding flag stay in the demo flavour, so a person who signs in again goes straight to Applications. The prod flavour clears the consent on sign-out through `SignOutCleaner` and keeps the flag, so the next sign-in shows S4 before Applications. `clear()` removes the account, the consent, the onboarding flag, and the kept job description. Delete account and "Reset app data" use `clear()`. Neither method touches the profile, the applications, the credits, or the export history.
+`signOut()` removes the account and the kept job description. The consent and the onboarding flag stay on the device, so a person who signs in again goes straight to Applications. The prod flavour clears the consent on sign-out through `SignOutCleaner` and keeps the flag, so the next sign-in shows S4 before Applications. `clear()` removes the account, the consent, the onboarding flag, and the kept job description. Delete account and "Reset app data" use `clear()`. Neither method touches the profile, the applications, the credits, or the export history.
 
 - Mock: `StoredSessionRepository` (internal, `@Singleton`).
 - Binding: `DataModule.bindsSessionRepository`.

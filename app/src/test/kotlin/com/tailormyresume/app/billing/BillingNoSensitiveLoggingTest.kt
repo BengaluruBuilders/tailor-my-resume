@@ -11,7 +11,7 @@ class BillingNoSensitiveLoggingTest {
 
     @Test
     fun billingSourcesLogNothingSensitive() {
-        val roots = listOf(File("src/prod/kotlin/com/tailormyresume/app/billing"), File("src/prod/kotlin/com/tailormyresume/app/credits"))
+        val roots = listOf(File("src/main/kotlin/com/tailormyresume/app/billing"), File("src/main/kotlin/com/tailormyresume/app/credits"))
         val offenders = roots.flatMap { root ->
             assertThat(root.exists()).isTrue()
             root.walkTopDown().filter { it.extension == "kt" }.flatMap { file ->

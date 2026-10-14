@@ -11,14 +11,10 @@ python3 tools/ci/test-build-workflow.py
   spotlessCheck \
   :core:model:test \
   testDebugUnitTest \
-  :app:testDemoDebugUnitTest \
-  :app:testProdDebugUnitTest \
   :core:domain:koverVerify \
   :core:data:koverVerify \
   verifyRoborazziDebug \
   lintRelease \
-  :app:lintDemoRelease \
-  :app:lintProdRelease \
   dependencyGuard \
   assembleDebug \
   assembleRelease \
