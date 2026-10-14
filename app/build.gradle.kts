@@ -65,7 +65,7 @@ fun com.android.build.api.dsl.BuildType.backendConfig(apiBaseUrl: String, otherV
 
 fun com.android.build.api.dsl.BuildType.stagingBuildConfig() {
     val values = stagingBackendProperties.map { providers.gradleProperty(it).getOrElse("") }
-    backendConfig(values.first(), values.drop(1))
+    backendConfig(values.first().ifBlank { "https://staging.invalid" }, values.drop(1))
 }
 
 android {
