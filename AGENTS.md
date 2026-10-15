@@ -86,27 +86,32 @@ If the design changes, export the frames again and replace the folder in one PR.
 | Run every CI gate on your machine | `tools/ci/verify-local.sh` |
 | Run the constitution policy check only | `tools/ci/check-constitution.sh` |
 | Fix formatting | `./gradlew spotlessApply` |
-| Run unit tests | `./gradlew testDebugUnitTest :app:testDemoDebugUnitTest :app:testProdDebugUnitTest` |
+| Run unit tests | `./gradlew testDebugUnitTest` |
 | Record screenshot baselines for one module | `./gradlew :feature:<name>:impl:recordRoborazziDebug` |
 | Verify screenshot baselines | `./gradlew verifyRoborazziDebug` |
 | Run one test class | `./gradlew :core:domain:testDebugUnitTest --tests "com.tailormyresume.core.domain.TailorResumeUseCaseTest"` |
-| Run lint | `./gradlew lintRelease :app:lintDemoRelease :app:lintProdRelease` |
+| Run lint | `./gradlew lintRelease` |
 | Check the release classpath | `./gradlew dependencyGuard` |
 | Update the release classpath baseline | `./gradlew dependencyGuardBaseline` |
-| Build the offline debug APK | `./gradlew assembleDemoDebug` |
-| Build the backend debug APK | `./gradlew assembleProdDebug` |
+| Build the debug APK (staging server) | `./gradlew assembleDebug` |
+| Build the staging release APK | `./gradlew assembleStaging` |
+| Build the signed prod bundle | `./gradlew bundleRelease` |
 | Install the pre-push hook | `tools/setup.sh` |
 | Stop Gradle daemons when you finish | `./gradlew --stop` |
 
-## Flavours
+## Build types
 
-`:app` has the flavour dimension `backend`. `demo` is offline and has no `INTERNET` permission. `prod` talks to
-the TailorMyResume backend (Constitution I.5). The debug build below belongs to `demo`.
+`:app` has no product flavours. `debug` and `staging` talk to the staging backend and the staging Firebase
+project (app id `com.tailormyresume.app.staging`, label "TMR Staging"). `staging` is minified like `release`.
+`release` talks to the prod backend (`https://apps-backend.fly.dev`) and the prod Firebase project.
+The staging values come from the Gradle properties `tailormyresumeStagingApiBaseUrl`,
+`tailormyresumeStagingWebClientId`, `tailormyresumeStagingFirebaseApiKey`, `tailormyresumeStagingFirebaseAppId`
+and `tailormyresumeStagingFirebaseProjectId`. Debug builds compile without them; every `staging` task needs them. See `docs/RELEASE.md`.
 
 ## Debug build
 
 The debug build adds a "Dev console" app shortcut. Long-press the TailorMyResume launcher icon to open it.
-It loads sample data, resets the app, and switches the app offline. It also opens any screen in a forced state.
+It loads sample data and resets the app. It also opens any screen in a forced state.
 
 ## Continuous integration
 

@@ -24,15 +24,27 @@ Release builds are signed with the Play upload key. The key is never in the repo
    - Optional environment variables: `TMR_VERSION_NAME` (default `0.1.0`) and `TMR_VERSION_CODE_OFFSET` (digits only, default `0`).
 
 The prod bundle fails if any of the four Firebase and web-client values is blank, because sign-in would be dead.
+Gradle property names (the CI secrets above map to them): `tailormyresumeWebClientId`, `tailormyresumeFirebaseApiKey`,
+`tailormyresumeFirebaseAppId`, `tailormyresumeFirebaseProjectId`. The prod API URL is fixed to `https://apps-backend.fly.dev`.
+
+## Staging
+
+`debug` and `staging` use the staging backend and the staging Firebase project, app id `com.tailormyresume.app.staging`
+(register that Android app in the staging Firebase project). They read five Gradle properties (environment is not read):
+`tailormyresumeStagingApiBaseUrl`, `tailormyresumeStagingWebClientId`, `tailormyresumeStagingFirebaseApiKey`,
+`tailormyresumeStagingFirebaseAppId`, `tailormyresumeStagingFirebaseProjectId`. A blank value compiles for `debug`, but
+every `staging` task (`assembleStaging`, `installStaging`, `bundleStaging`) fails until all five are set. `staging` is
+minified like `release` and is always signed with the debug key, so `debug` and `staging` installs replace each other.
+It is never published (Constitution V.7).
 
 ## Build a bundle
 
-Run the "Release bundle" workflow from the Actions tab on `main` and approve the `release` environment gate. It uploads `prod-release-aab` (kept 3 days).
+Run the "Release bundle" workflow from the Actions tab on `main` and approve the `release` environment gate. It uploads `release-aab` (kept 3 days).
 
-Locally, set the four variables below (environment or `~/.gradle/gradle.properties`) and run `./gradlew :app:bundleProdRelease`:
+Locally, set the four variables below (environment or `~/.gradle/gradle.properties`) and run `./gradlew :app:bundleRelease` (prod) or `./gradlew :app:bundleStaging` (staging, needs the five staging properties):
 `TMR_UPLOAD_KEYSTORE_FILE`, `TMR_UPLOAD_STORE_PASSWORD`, `TMR_UPLOAD_KEY_ALIAS`, `TMR_UPLOAD_KEY_PASSWORD`.
 
-Without them `assembleRelease` still works and produces an unsigned APK. Any `bundle*Release` task fails with a message naming the missing values.
+Without them `assembleRelease` still works and produces an unsigned APK. `bundleRelease` fails with a message naming the missing values.
 
 ## Versions
 

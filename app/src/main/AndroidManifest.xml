@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name=".TailorMyResumeApplication"
         android:allowBackup="false"
@@ -21,6 +24,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="firebase_data_collection_default_enabled"
+            android:value="false" />
+
+        <provider
+            android:name="com.tailormyresume.app.auth.ForegroundActivityRegistrar"
+            android:authorities="${applicationId}.foreground-activity"
+            android:exported="false" />
 
     </application>
 

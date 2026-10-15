@@ -38,11 +38,11 @@ env_clean() {
 
 expect_failure "bundle without signing values fails" "Release bundles must be signed with the upload key" \
   env_clean "$gradle_cmd" :app:verifyUploadSigning -q
-dry_run_plan="$("$gradle_cmd" :app:bundleProdRelease --dry-run 2>&1)"
+dry_run_plan="$("$gradle_cmd" :app:bundleRelease --dry-run 2>&1)"
 if grep -q ":app:verifyUploadSigning" <<<"$dry_run_plan"; then
-  echo "ok   bundleProdRelease runs the signing check"
+  echo "ok   bundleRelease runs the signing check"
 else
-  echo "FAIL bundleProdRelease runs the signing check"
+  echo "FAIL bundleRelease runs the signing check"
   failures=$((failures + 1))
 fi
 expect_failure "version code zero rejected" "TMR_VERSION_CODE must be an integer" \

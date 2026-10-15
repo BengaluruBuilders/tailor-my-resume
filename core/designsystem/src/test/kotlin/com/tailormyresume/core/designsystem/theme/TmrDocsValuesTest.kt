@@ -38,7 +38,7 @@ class TmrDocsValuesTest {
                 "## Design source",
                 "## Motion",
                 "## Commands",
-                "## Flavours",
+                "## Build types",
                 "## Debug build",
                 "## Continuous integration",
             ),

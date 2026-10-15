@@ -1,10 +1,11 @@
 # Mock backend
 
-The mock backend is a set of interfaces with on-device implementations. The `demo` flavour binds them and
-has no network code. The `prod` flavour binds remote implementations through one Hilt binding each
-(`app/src/prod/kotlin/.../di`, Constitution I.5 as amended, `docs/BACKEND_CONTRACT.md`). No UI code changes.
+The mock backend is a set of interfaces with on-device implementations. The app binds remote
+implementations through one Hilt binding each, and the on-device ones stay as fakes in `core.domain.offline`
+for screenshot tests and the Dev console
+(`app/src/main/kotlin/.../di`, Constitution I.5 as amended, `docs/BACKEND_CONTRACT.md`). No UI code changes.
 
-Remote in `prod`: `SignInGateway`, `ResumeTextParser`, `AnalyzeJobUseCase`, `ResumeTailor`,
+Remote in the app: `SignInGateway`, `ResumeTextParser`, `AnalyzeJobUseCase`, `ResumeTailor`,
 `PrepQuestionSource`, `CoverLetterSource`, `PaymentGateway`, `UsageAllowance`, `ContentReportRepository`,
 `AccountDataExporter`, and account deletion. `RemoteContentReportRepository` saves the report locally, then
 posts it; a post that fails with a retryable error stays in `PendingReportQueue` and is sent on the next
@@ -165,7 +166,7 @@ data class KeptJobDescription(val text: String, val company: String, val role: S
 
 `ConsentRecord.CURRENT_NOTICE_VERSION` is the version string to store. `SignInAccount` also has a typealias in `com.tailormyresume.core.domain`, so the old import still works.
 
-`signOut()` removes the account and the kept job description. The consent and the onboarding flag stay in the demo flavour, so a person who signs in again goes straight to Applications. The prod flavour clears the consent on sign-out through `SignOutCleaner` and keeps the flag, so the next sign-in shows S4 before Applications. `clear()` removes the account, the consent, the onboarding flag, and the kept job description. Delete account and "Reset app data" use `clear()`. Neither method touches the profile, the applications, the credits, or the export history.
+`signOut()` removes the account and the kept job description. Every build type also runs `SignOutCleaner` on sign-out: it clears the consent and keeps the onboarding flag, so the next sign-in shows S4 before Applications. `clear()` removes the account, the consent, the onboarding flag, and the kept job description. Delete account and "Reset app data" use `clear()`. Neither method touches the profile, the applications, the credits, or the export history.
 
 - Mock: `StoredSessionRepository` (internal, `@Singleton`).
 - Binding: `DataModule.bindsSessionRepository`.
@@ -464,7 +465,7 @@ class ObserveStartDestinationUseCase {
 }
 ```
 
-`Applications` when an account is signed in, onboarding is complete, and a consent record exists. `Welcome` otherwise. `AppViewModel` maps the flow to the app root, so sign out switches to the first-run root. A returning person who signs in switches to the main root at once when the consent record is still stored (the demo flavour). When the consent record is gone (prod sign-out, or `ConsentRevoker` after `CONSENT_REQUIRED`), the root stays on the first-run flow, `NextOnboardingStepUseCase` returns `Consent`, and the main root returns after S4 records the consent.
+`Applications` when an account is signed in, onboarding is complete, and a consent record exists. `Welcome` otherwise. `AppViewModel` maps the flow to the app root, so sign out switches to the first-run root. When the consent record is gone (after sign-out, or `ConsentRevoker` after `CONSENT_REQUIRED`), the root stays on the first-run flow, `NextOnboardingStepUseCase` returns `Consent`, and the main root returns after S4 records the consent.
 
 ### `DeleteAccountUseCase`
 
@@ -549,7 +550,7 @@ interface SampleDataController {
 The dataset is one file: `core/domain/src/main/kotlin/com/tailormyresume/core/domain/sample/SampleDataSet.kt`.
 The controller is in `core:domain`, not `core:data`, because it uses `AnalyzeJobUseCase`, `TailorResumeUseCase`, and `PaymentGateway`. `core:data` cannot see them.
 
-- Mock: `OfflineSampleDataController`. It always uses the offline payment gateway and the offline analysis and tailoring sources. In `prod` it never opens a Play purchase and never calls the backend.
+- Mock: `OfflineSampleDataController`. It always uses the offline payment gateway and the offline analysis and tailoring sources. In every build type it never opens a Play purchase and never calls the backend.
 - Binding: `DomainModule.provideSampleDataController` (`@Singleton`).
 - `keepSampleJobDescription()` also signs in the sample candidate when the app has no account, consent, or profile. This lets the Gap analysis preview open with the Error and Daily limit scenarios.
 - Test fake: `TestSampleDataController` (counts calls). Contract: `SampleDataControllerContractTest`.

@@ -34,6 +34,48 @@ val uploadKeyPassword = releaseSetting("TMR_UPLOAD_KEY_PASSWORD")
 val hasUploadSigning =
     listOf(uploadKeystoreFile, uploadStorePassword, uploadKeyAlias, uploadKeyPassword).all { it != null }
 
+val prodBackendProperties =
+    listOf(
+        "tailormyresumeWebClientId",
+        "tailormyresumeFirebaseApiKey",
+        "tailormyresumeFirebaseAppId",
+        "tailormyresumeFirebaseProjectId",
+    )
+
+val stagingBackendProperties =
+    listOf(
+        "tailormyresumeStagingApiBaseUrl",
+        "tailormyresumeStagingWebClientId",
+        "tailormyresumeStagingFirebaseApiKey",
+        "tailormyresumeStagingFirebaseAppId",
+        "tailormyresumeStagingFirebaseProjectId",
+    )
+
+fun com.android.build.api.dsl.BuildType.backendConfig(apiBaseUrl: String, otherValues: List<String>) {
+    val names =
+        listOf(
+            "TAILORMYRESUME_WEB_CLIENT_ID",
+            "TAILORMYRESUME_FIREBASE_API_KEY",
+            "TAILORMYRESUME_FIREBASE_APP_ID",
+            "TAILORMYRESUME_FIREBASE_PROJECT_ID",
+        )
+    buildConfigField("String", "TAILORMYRESUME_API_BASE_URL", "\"$apiBaseUrl\"")
+    names.zip(otherValues).forEach { (name, value) -> buildConfigField("String", name, "\"$value\"") }
+}
+
+fun com.android.build.api.dsl.ApplicationBuildType.stagingBuildConfig() {
+    val values = stagingBackendProperties.map { providers.gradleProperty(it).getOrElse("") }
+    applicationIdSuffix = ".staging"
+    resValue("string", "app_name", "TMR Staging")
+    backendConfig(values.first().ifBlank { "https://staging.invalid" }, values.drop(1))
+}
+
+fun com.android.build.api.dsl.ApplicationBuildType.shrinkWithR8(defaultRules: File) {
+    isMinifyEnabled = true
+    isShrinkResources = true
+    proguardFiles(defaultRules, "proguard-rules.pro")
+}
+
 android {
     namespace = "com.tailormyresume.app"
 
@@ -45,40 +87,10 @@ android {
 
     buildFeatures {
         buildConfig = true
+        resValues = true
     }
 
     testOptions.unitTests.isIncludeAndroidResources = true
-
-    flavorDimensions += "backend"
-    productFlavors {
-        create("demo") {
-            dimension = "backend"
-        }
-        create("prod") {
-            dimension = "backend"
-            buildConfigField("String", "TAILORMYRESUME_API_BASE_URL", "\"https://apps-backend.fly.dev\"")
-            buildConfigField(
-                "String",
-                "TAILORMYRESUME_WEB_CLIENT_ID",
-                "\"${providers.gradleProperty("tailormyresumeWebClientId").getOrElse("")}\"",
-            )
-            buildConfigField(
-                "String",
-                "TAILORMYRESUME_FIREBASE_API_KEY",
-                "\"${providers.gradleProperty("tailormyresumeFirebaseApiKey").getOrElse("")}\"",
-            )
-            buildConfigField(
-                "String",
-                "TAILORMYRESUME_FIREBASE_APP_ID",
-                "\"${providers.gradleProperty("tailormyresumeFirebaseAppId").getOrElse("")}\"",
-            )
-            buildConfigField(
-                "String",
-                "TAILORMYRESUME_FIREBASE_PROJECT_ID",
-                "\"${providers.gradleProperty("tailormyresumeFirebaseProjectId").getOrElse("")}\"",
-            )
-        }
-    }
 
     signingConfigs {
         if (hasUploadSigning) {
@@ -92,11 +104,22 @@ android {
     }
 
     buildTypes {
+        debug {
+            stagingBuildConfig()
+        }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            shrinkWithR8(getDefaultProguardFile("proguard-android-optimize.txt"))
             if (hasUploadSigning) signingConfig = signingConfigs.getByName("upload")
+            backendConfig(
+                "https://apps-backend.fly.dev",
+                prodBackendProperties.map { providers.gradleProperty(it).getOrElse("") },
+            )
+        }
+        create("staging") {
+            shrinkWithR8(getDefaultProguardFile("proguard-android-optimize.txt"))
+            matchingFallbacks += "release"
+            signingConfig = signingConfigs.getByName("debug")
+            stagingBuildConfig()
         }
     }
 
@@ -117,28 +140,24 @@ val verifyUploadSigning by tasks.registering {
     }
 }
 
-val prodBackendProperties =
-    listOf(
-        "tailormyresumeWebClientId",
-        "tailormyresumeFirebaseApiKey",
-        "tailormyresumeFirebaseAppId",
-        "tailormyresumeFirebaseProjectId",
-    )
-
-val verifyProdBackendConfig by tasks.registering {
-    val blank = prodBackendProperties.filter { providers.gradleProperty(it).orNull.isNullOrBlank() }
-    doLast {
-        check(blank.isEmpty()) {
-            "The prod release bundle needs these Gradle properties, missing or blank: ${blank.joinToString()}. " +
-                "See docs/RELEASE.md."
+fun verifyBackendConfig(taskName: String, buildLabel: String, properties: List<String>) =
+    tasks.register(taskName) {
+        val blank = properties.filter { providers.gradleProperty(it).orNull.isNullOrBlank() }
+        doLast {
+            check(blank.isEmpty()) {
+                "The $buildLabel build needs these Gradle properties, missing or blank: ${blank.joinToString()}. " +
+                    "See docs/RELEASE.md."
+            }
         }
     }
-}
+
+val verifyProdBackendConfig = verifyBackendConfig("verifyProdBackendConfig", "release", prodBackendProperties)
+val verifyStagingBackendConfig = verifyBackendConfig("verifyStagingBackendConfig", "staging", stagingBackendProperties)
 
 tasks.configureEach {
-    if (name.startsWith("bundle") && name.endsWith("Release")) {
-        dependsOn(verifyUploadSigning)
-        if (name.contains("Prod")) dependsOn(verifyProdBackendConfig)
+    when (name) {
+        "bundleRelease" -> dependsOn(verifyUploadSigning, verifyProdBackendConfig)
+        "preStagingBuild" -> dependsOn(verifyStagingBackendConfig)
     }
 }
 
@@ -164,14 +183,14 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.navigation)
 
-    "prodImplementation"(projects.core.network)
-    "prodImplementation"(libs.room.runtime)
-    "prodImplementation"(platform(libs.firebase.bom))
-    "prodImplementation"(libs.firebase.auth)
-    "prodImplementation"(libs.androidx.credentials)
-    "prodImplementation"(libs.androidx.credentials.playServicesAuth)
-    "prodImplementation"(libs.google.googleid)
-    "prodImplementation"(libs.play.billing) {
+    implementation(projects.core.network)
+    implementation(libs.room.runtime)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.playServicesAuth)
+    implementation(libs.google.googleid)
+    implementation(libs.play.billing) {
         exclude(group = "com.google.android.gms", module = "play-services-location")
     }
 
@@ -186,8 +205,7 @@ dependencies {
     testImplementation(libs.roborazzi.compose)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
-    "testProdImplementation"(libs.okhttp.mockwebserver)
-    "testProdImplementation"(libs.robolectric)
+    testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.robolectric)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test)
@@ -195,11 +213,6 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
 }
 
-tasks.register("recordRoborazziDebug") { dependsOn("recordRoborazziDemoDebug") }
-
-tasks.register("verifyRoborazziDebug") { dependsOn("verifyRoborazziDemoDebug") }
-
 dependencyGuard {
-    configuration("demoReleaseRuntimeClasspath")
-    configuration("prodReleaseRuntimeClasspath")
+    configuration("releaseRuntimeClasspath")
 }

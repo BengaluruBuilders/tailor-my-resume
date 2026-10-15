@@ -53,18 +53,14 @@ def main():
     failures += expect(":core:model:test" in job_run(jobs["unit-core"]), "core model tests run")
     failures += expect("python3 tools/ci/test-build-workflow.py" in job_run(jobs["static"]), "static checks test workflow")
 
-    expected_matrix = {"fail-fast": False, "matrix": {"flavor": ["Demo", "Prod"]}}
-    for name, task in (("unit-app", ":app:test${{ matrix.flavor }}DebugUnitTest"), ("assemble", "assemble${{ matrix.flavor }}Debug")):
+    for name, task in (("unit-app", ":app:testDebugUnitTest"), ("assemble", "assembleDebug")):
         job = jobs[name]
-        failures += expect(job["strategy"] == expected_matrix, f"{name} has both flavors")
-        failures += expect(task in job_run(job), f"{name} uses flavor task")
-        failures += expect(
-            artifact_names(job) == [f"reports-{name}-${{{{ matrix.flavor }}}}"],
-            f"{name} names artifacts by flavor",
-        )
+        failures += expect("strategy" not in job, f"{name} has no flavor matrix")
+        failures += expect(task in job_run(job), f"{name} uses flavorless task")
+        failures += expect(artifact_names(job) == [f"reports-{name}"], f"{name} names its artifact")
 
     assemble_run = job_run(jobs["assemble"])
-    failures += expect("assemble${{ matrix.flavor }}Release" in assemble_run, "assemble builds release APKs")
+    failures += expect("assembleRelease" in assemble_run, "assemble builds release APKs")
     failures += expect(":app:dependencyGuard" not in assemble_run, "assemble does not repeat dependency guard")
 
     release_config = jobs["release-config"]
