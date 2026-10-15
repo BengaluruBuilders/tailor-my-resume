@@ -34,6 +34,30 @@ forbid_ungrounded_comments() {
   fi
 }
 
+forbid_debug_signing_outside_staging() {
+  local matches
+  matches="$(awk '
+    /create\("staging"\)[[:space:]]*\{/ { staging = 1; depth = 0 }
+    {
+      line = $0
+      allowed = staging && line ~ /signingConfigs\.getByName\("debug"\)/
+      if (line ~ /signingConfigs\.(named|getByName)\(/ && line !~ /signingConfigs\.(named|getByName)\("upload"\)/ && !allowed) {
+        print FILENAME ":" FNR ":" line
+      }
+      if (staging) {
+        depth += gsub(/\{/, "{", line) - gsub(/\}/, "}", line)
+        if (depth <= 0) staging = 0
+      }
+    }
+  ' app/build.gradle.kts)"
+  if [[ -n "$matches" ]]; then
+    echo "::error title=Constitution V.7::Only the staging build type may use the debug key. Every other signing config must name the upload key directly."
+    echo "$matches"
+    echo
+    failures=$((failures + 1))
+  fi
+}
+
 base_ref() {
   if [[ -n "${BASE_REF:-}" ]]; then
     echo "$BASE_REF"
@@ -95,8 +119,7 @@ forbid I.5 "Analytics, crash, and ad SDKs are forbidden." \
 forbid I.5 "Network libraries belong in core:network or in :app." \
   'libs\.(okhttp|retrofit|firebase|play\.billing|androidx\.credentials|google\.googleid)' \
   'feature/*/build.gradle.kts' 'core/*/build.gradle.kts' ':!core/network/build.gradle.kts'
-forbid V.7 "Release must never be signed with the debug key." \
-  'signingConfigs\.(named|getByName)\("debug"\)' app/build.gradle.kts
+forbid_debug_signing_outside_staging
 forbid IV.3 "Thread.sleep makes tests slow and flaky. Use runTest and virtual time." \
   'Thread\.sleep' '*.kt'
 forbid III.3 "Production code must not reference a test double or a fake." \

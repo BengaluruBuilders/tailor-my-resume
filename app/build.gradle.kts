@@ -63,9 +63,17 @@ fun com.android.build.api.dsl.BuildType.backendConfig(apiBaseUrl: String, otherV
     names.zip(otherValues).forEach { (name, value) -> buildConfigField("String", name, "\"$value\"") }
 }
 
-fun com.android.build.api.dsl.BuildType.stagingBuildConfig() {
+fun com.android.build.api.dsl.ApplicationBuildType.stagingBuildConfig() {
     val values = stagingBackendProperties.map { providers.gradleProperty(it).getOrElse("") }
+    applicationIdSuffix = ".staging"
+    resValue("string", "app_name", "TMR Staging")
     backendConfig(values.first().ifBlank { "https://staging.invalid" }, values.drop(1))
+}
+
+fun com.android.build.api.dsl.ApplicationBuildType.shrinkWithR8(defaultRules: File) {
+    isMinifyEnabled = true
+    isShrinkResources = true
+    proguardFiles(defaultRules, "proguard-rules.pro")
 }
 
 android {
@@ -79,6 +87,7 @@ android {
 
     buildFeatures {
         buildConfig = true
+        resValues = true
     }
 
     testOptions.unitTests.isIncludeAndroidResources = true
@@ -96,13 +105,10 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".staging"
             stagingBuildConfig()
         }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            shrinkWithR8(getDefaultProguardFile("proguard-android-optimize.txt"))
             if (hasUploadSigning) signingConfig = signingConfigs.getByName("upload")
             backendConfig(
                 "https://apps-backend.fly.dev",
@@ -110,10 +116,9 @@ android {
             )
         }
         create("staging") {
-            initWith(getByName("release"))
+            shrinkWithR8(getDefaultProguardFile("proguard-android-optimize.txt"))
             matchingFallbacks += "release"
-            applicationIdSuffix = ".staging"
-            signingConfig = signingConfigs.getByName(if (hasUploadSigning) "upload" else "debug")
+            signingConfig = signingConfigs.getByName("debug")
             stagingBuildConfig()
         }
     }
@@ -152,7 +157,7 @@ val verifyStagingBackendConfig = verifyBackendConfig("verifyStagingBackendConfig
 tasks.configureEach {
     when (name) {
         "bundleRelease" -> dependsOn(verifyUploadSigning, verifyProdBackendConfig)
-        "bundleStaging", "assembleStaging" -> dependsOn(verifyStagingBackendConfig)
+        "preStagingBuild" -> dependsOn(verifyStagingBackendConfig)
     }
 }
 

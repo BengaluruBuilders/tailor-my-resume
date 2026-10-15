@@ -106,8 +106,7 @@ project (app id `com.tailormyresume.app.staging`, label "TMR Staging"). `staging
 `release` talks to the prod backend (`https://apps-backend.fly.dev`) and the prod Firebase project.
 The staging values come from the Gradle properties `tailormyresumeStagingApiBaseUrl`,
 `tailormyresumeStagingWebClientId`, `tailormyresumeStagingFirebaseApiKey`, `tailormyresumeStagingFirebaseAppId`
-and `tailormyresumeStagingFirebaseProjectId`. Debug builds compile without them; `assembleStaging` and
-`bundleStaging` need them. See `docs/RELEASE.md`.
+and `tailormyresumeStagingFirebaseProjectId`. Debug builds compile without them; every `staging` task needs them. See `docs/RELEASE.md`.
 
 ## Debug build
 

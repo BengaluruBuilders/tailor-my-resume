@@ -33,8 +33,9 @@ Gradle property names (the CI secrets above map to them): `tailormyresumeWebClie
 (register that Android app in the staging Firebase project). They read five Gradle properties (environment is not read):
 `tailormyresumeStagingApiBaseUrl`, `tailormyresumeStagingWebClientId`, `tailormyresumeStagingFirebaseApiKey`,
 `tailormyresumeStagingFirebaseAppId`, `tailormyresumeStagingFirebaseProjectId`. A blank value compiles for `debug`, but
-`assembleStaging` and `bundleStaging` fail until all five are set. `staging` is minified like `release`; it is signed with the
-upload key when present, otherwise with the debug key.
+every `staging` task (`assembleStaging`, `installStaging`, `bundleStaging`) fails until all five are set. `staging` is
+minified like `release` and is always signed with the debug key, so `debug` and `staging` installs replace each other.
+It is never published (Constitution V.7).
 
 ## Build a bundle
 

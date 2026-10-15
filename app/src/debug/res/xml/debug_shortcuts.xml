@@ -10,7 +10,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetClass="com.tailormyresume.app.debug.DebugScenarioActivity"
-            android:targetPackage="com.tailormyresume.app" />
+            android:targetPackage="com.tailormyresume.app.staging" />
     </shortcut>
 
 </shortcuts>

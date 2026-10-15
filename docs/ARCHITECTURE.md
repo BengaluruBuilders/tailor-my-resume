@@ -42,7 +42,7 @@ The current look follows `docs/AVVIO_REDESIGN.md`. `docs/DESIGN_SYSTEM.md` holds
 | `:core:database` | library + room + hilt | Room DB, entities, DAOs, type converters. It holds the profile and the applications |
 | `:core:data` | library + hilt | Repository interfaces and offline-first implementations. `SessionRepository` and `ExportHistoryRepository` store their state in `MockStateStore` (DataStore). `ConnectivityMonitor` reports the network state |
 | `:core:domain` | library + hilt | JD analysis, gap match, tailoring, fabrication guard, resume text parser, cover letter, prep questions, fact validation, use cases. Gateways: `SignInGateway`, `PaymentGateway`, `AccountDataExporter`, `SampleDataController` |
-| `:core:network` | library + hilt | The one HTTP stack (I.5): OkHttp, Retrofit, kotlinx.serialization. `TailorMyResumeApi` (one function per route of `docs/BACKEND_CONTRACT.md`), the DTOs and their pure mappers to `core:model`, the `X-App-Id` and bearer interceptors with one 401 retry, the sealed `ApiError`, `apiResult`, and `IdTokenProvider`. Only `prod` bindings use it: `:app` adds it as `prodImplementation`, and no other module declares a network library |
+| `:core:network` | library + hilt | The one HTTP stack (I.5): OkHttp, Retrofit, kotlinx.serialization. `TailorMyResumeApi` (one function per route of `docs/BACKEND_CONTRACT.md`), the DTOs and their pure mappers to `core:model`, the `X-App-Id` and bearer interceptors with one 401 retry, the sealed `ApiError`, `apiResult`, and `IdTokenProvider`. `:app` adds it as `implementation`, and no other module declares a network library |
 | `:core:testing` | library | Test repositories and gateways, contract tests, `MainDispatcherRule`, test data |
 | `:core:screenshot` | library | Roborazzi screenshot helpers and test devices |
 | `:feature:onboarding:{api,impl}` | feature | Welcome, Paste JD, Sign in, Consent, Import resume, Confirm your facts (Flow 1, S1 to S6) |
@@ -69,9 +69,11 @@ payment and the wallet, content reports (saved locally, then posted), and the da
 `server.json`). Profile, applications, and review state are local.
 
 Sign-in (`app/src/main/kotlin/.../auth`) uses Firebase Auth and Credential Manager without the google-services
-plugin. It reads four Gradle properties (in `gradle.properties` or `~/.gradle/gradle.properties`, never in git):
-`tailormyresumeWebClientId`, `tailormyresumeFirebaseApiKey`, `tailormyresumeFirebaseAppId`, and `tailormyresumeFirebaseProjectId`. Each
-defaults to empty. If one is empty, sign-in shows the sign-in-failed state and the app still starts.
+plugin. It reads Gradle properties (in `gradle.properties` or `~/.gradle/gradle.properties`, never in git).
+`release` reads `tailormyresumeWebClientId`, `tailormyresumeFirebaseApiKey`, `tailormyresumeFirebaseAppId`, and
+`tailormyresumeFirebaseProjectId`. `debug` and `staging` read `tailormyresumeStagingApiBaseUrl`,
+`tailormyresumeStagingWebClientId`, `tailormyresumeStagingFirebaseApiKey`, `tailormyresumeStagingFirebaseAppId`, and
+`tailormyresumeStagingFirebaseProjectId`. Each defaults to empty. If one is empty, sign-in shows the sign-in-failed state and the app still starts.
 
 ## 3. Shared models (`:core:model`, package `com.tailormyresume.core.model`)
 
