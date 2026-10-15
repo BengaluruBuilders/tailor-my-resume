@@ -62,4 +62,30 @@ expect_failure "blank prod backend property rejected" "tailormyresumeFirebasePro
 expect_success "complete prod backend properties accepted" \
   env_clean "$gradle_cmd" :app:verifyProdBackendConfig "${blank_props[@]}" -PtailormyresumeFirebaseProjectId=x -q
 
+staging_props=(
+  -PtailormyresumeStagingApiBaseUrl=https://staging.example.invalid
+  -PtailormyresumeStagingWebClientId=staging-client
+  -PtailormyresumeStagingFirebaseApiKey=staging-key
+  -PtailormyresumeStagingFirebaseAppId=staging-app
+  -PtailormyresumeStagingFirebaseProjectId=staging-project
+)
+expect_success "complete staging backend properties accepted" \
+  env_clean "$gradle_cmd" :app:verifyStagingBackendConfig "${staging_props[@]}" -q
+for property in ApiBaseUrl WebClientId FirebaseApiKey FirebaseAppId FirebaseProjectId; do
+  expect_failure "blank staging $property rejected" "tailormyresumeStaging$property" \
+    env_clean "$gradle_cmd" :app:verifyStagingBackendConfig "${staging_props[@]}" \
+    "-PtailormyresumeStaging$property=" -q
+done
+expect_failure "prod config cannot replace staging config" "tailormyresumeStagingFirebaseProjectId" \
+  env_clean "$gradle_cmd" :app:verifyStagingBackendConfig "${blank_props[@]}" \
+  -PtailormyresumeFirebaseProjectId=prod-project "${staging_props[@]}" \
+  -PtailormyresumeStagingFirebaseProjectId= -q
+if staging_plan="$("$gradle_cmd" :app:installStaging --dry-run "${staging_props[@]}" 2>&1)" &&
+  grep -q ":app:verifyStagingBackendConfig" <<<"$staging_plan"; then
+  echo "ok   installStaging runs the staging configuration check"
+else
+  echo "FAIL installStaging runs the staging configuration check"
+  failures=$((failures + 1))
+fi
+
 exit "$failures"

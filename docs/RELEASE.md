@@ -37,14 +37,57 @@ every `staging` task (`assembleStaging`, `installStaging`, `bundleStaging`) fail
 minified like `release` and is always signed with the debug key, so `debug` and `staging` installs replace each other.
 It is never published (Constitution V.7).
 
+## Firebase projects and local configuration
+
+There are two environments and three Android build types:
+
+| Environment | Build types | Firebase project ID | Android package |
+|---|---|---|---|
+| Staging | `debug`, `staging` | `tailormy-resume-staging` | `com.tailormyresume.app.staging` |
+| Production | `release` | `tailormyresume-app` | `com.tailormyresume.app` |
+
+Register each package in its own Firebase project. Enable only the Google sign-in provider under
+Authentication, Sign-in method. Use `TMR Staging` as the staging public name and `TailorMyResume`
+as the production public name. Keep Analytics disabled.
+
+Run `./gradlew :app:signingReport` to get this machine's staging SHA-1 and SHA-256 certificates.
+Add both to the staging Android app. Each developer machine can have a different debug key.
+For production, register the upload certificate for local release installs and the Play app-signing
+certificate for Play installs. The Play certificate is in Play Console, App integrity.
+
+Download `google-services.json` from each Android app after enabling Google sign-in. The app uses
+`FirebaseOptions` directly; do not add the Google services Gradle plugin. Copy these values into
+`~/.gradle/gradle.properties`, outside the repository:
+
+| JSON value for the matching Android client | Staging property | Production property |
+|---|---|---|
+| `project_info.project_id` | `tailormyresumeStagingFirebaseProjectId` | `tailormyresumeFirebaseProjectId` |
+| `client_info.mobilesdk_app_id` | `tailormyresumeStagingFirebaseAppId` | `tailormyresumeFirebaseAppId` |
+| `api_key[].current_key` | `tailormyresumeStagingFirebaseApiKey` | `tailormyresumeFirebaseApiKey` |
+| `oauth_client[].client_id` where `client_type` is `3` | `tailormyresumeStagingWebClientId` | `tailormyresumeWebClientId` |
+
+The web client ID is required by Credential Manager; do not use the Android client ID (`client_type: 1`).
+See [Firebase Google sign-in setup](https://firebase.google.com/docs/auth/android/google-signin).
+Also set `tailormyresumeStagingApiBaseUrl` to the staging backend's HTTPS URL. Keep it unset until
+that deployment is available. Never point staging at production to make a build pass.
+
+The staging backend must verify tokens for `tailormy-resume-staging`; the production backend must
+verify tokens for `tailormyresume-app`. Firebase Admin credentials stay on the backend. They never
+belong in the Android configuration or repository.
+
+Check the local values with `./gradlew :app:verifyStagingBackendConfig :app:verifyProdBackendConfig`.
+These tasks check for missing values. Verify Google sign-in on a device against each backend before
+release; a successful build does not prove that the backend accepts the Firebase token.
+
 ## Build a bundle
 
 Run the "Release bundle" workflow from the Actions tab on `main` and approve the `release` environment gate. It uploads `release-aab` (kept 3 days).
 
-Locally, set the four variables below (environment or `~/.gradle/gradle.properties`) and run `./gradlew :app:bundleRelease` (prod) or `./gradlew :app:bundleStaging` (staging, needs the five staging properties):
+Locally, set the four variables below (environment or `~/.gradle/gradle.properties`) and run `./gradlew :app:bundleRelease` (prod):
 `TMR_UPLOAD_KEYSTORE_FILE`, `TMR_UPLOAD_STORE_PASSWORD`, `TMR_UPLOAD_KEY_ALIAS`, `TMR_UPLOAD_KEY_PASSWORD`.
 
 Without them `assembleRelease` still works and produces an unsigned APK. `bundleRelease` fails with a message naming the missing values.
+`./gradlew :app:assembleStaging` needs the five staging properties and uses the debug key; it does not need an upload key.
 
 ## Versions
 
