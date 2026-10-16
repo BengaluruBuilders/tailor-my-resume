@@ -21,10 +21,12 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.domain.profile.RequiredGap
 import com.tailormyresume.core.screenshot.TmrTestDevice
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.core.screenshot.captureForDevice
@@ -107,6 +109,9 @@ internal fun ComposeContentTestRule.textLayouts(): List<Pair<SemanticsNode, Text
 
 private fun profileContent(
     sourceFileName: String? = "Priya_Deshmukh_Resume.pdf",
+    reviewed: Boolean = true,
+    requiredGaps: List<RequiredGap> = emptyList(),
+    onFixGap: (String) -> Unit = {},
     onOpen: (ProfileTarget) -> Unit = {},
 ): @Composable () -> Unit = {
     ProfileScreen(
@@ -116,15 +121,16 @@ private fun profileContent(
             headline = "Finance analyst",
             years = 4,
             city = "Pune",
-            percent = 96,
+            reviewed = reviewed,
+            requiredGaps = requiredGaps,
             experienceCount = 3,
             educationCount = 1,
             skillsCount = 18,
             achievementsCount = 6,
-            linkedinMissing = true,
             sourceFileName = sourceFileName,
         ),
         onOpen = onOpen,
+        onFixGap = onFixGap,
     )
 }
 
@@ -261,6 +267,58 @@ class ProfileScreenshotTest {
         rule.capture("profile_profile_details", TmrTestDevices.prototype)
     }
 
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+    fun requiredCorrections() {
+        requiredCorrectionsState(TmrTestDevices.prototype)
+    }
+
+    @Test
+    @Config(qualifiers = NARROW_QUALIFIERS)
+    fun requiredCorrectionsFont200At337dp() {
+        requiredCorrectionsState(NARROW_DEVICE)
+    }
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+    fun unreviewedProfileOffersExplicitReview() {
+        unreviewedState(TmrTestDevices.prototype)
+    }
+
+    @Test
+    @Config(qualifiers = NARROW_QUALIFIERS)
+    fun unreviewedProfileFont200At337dp() {
+        unreviewedState(NARROW_DEVICE)
+    }
+
+    private fun unreviewedState(device: TmrTestDevice) {
+        val opened = mutableListOf<ProfileTarget>()
+        rule.setTmrContent(device, profileContent(reviewed = false) { opened += it })
+        rule.assertTexts("Confirm your facts before tailoring", "Review profile")
+        rule.assertNoText("Ready to tailor")
+        rule.assertNoTruncatedText()
+        rule.capture("profile_review_needed", device)
+        rule.onNodeWithText("Review profile").performClick()
+        assertTrue(opened == listOf(ProfileTarget.REVIEW))
+    }
+
+    private fun requiredCorrectionsState(device: TmrTestDevice) {
+        val corrected = mutableListOf<String>()
+        rule.setTmrContent(
+            device,
+            profileContent(
+                requiredGaps = listOf(RequiredGap("exp-tata", "Data Analyst Intern")),
+                onFixGap = { corrected += it },
+            ),
+        )
+        rule.assertTexts("Required corrections", "Add an end date for Data Analyst Intern", "Optional")
+        rule.assertNoText("Ready to tailor")
+        rule.assertNoTruncatedText()
+        rule.onNodeWithText("Add an end date for Data Analyst Intern").performClick()
+        assertTrue(corrected == listOf("exp-tata"))
+        rule.capture("profile_required_corrections", device)
+    }
+
     private fun profileState(device: TmrTestDevice) {
         rule.setTmrContent(device, profileContent())
         rule.assertTexts(
@@ -268,7 +326,7 @@ class ProfileScreenshotTest {
             "Settings",
             "Priya Deshmukh",
             "Finance analyst · 4 yrs · Pune",
-            "96% complete",
+            "Ready to tailor",
             "Contact",
             "Summary",
             "Experience",
@@ -276,12 +334,19 @@ class ProfileScreenshotTest {
             "Skills",
             "Achievements",
             "LinkedIn & links",
-            "Add",
+            "Optional",
             "Built from",
             "Replace",
         )
+        rule.assertNoText("96% complete")
+        rule.assertNoText("Add")
         rule.assertNoTruncatedText()
         rule.capture("profile_profile", device)
+        if (device == NARROW_DEVICE) {
+            rule.onNodeWithText("Optional").performScrollTo()
+            rule.assertNoTruncatedText()
+            rule.capture("profile_optional_links", device)
+        }
     }
 }
 

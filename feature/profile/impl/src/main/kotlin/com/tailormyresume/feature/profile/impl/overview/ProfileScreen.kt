@@ -1,16 +1,13 @@
 package com.tailormyresume.feature.profile.impl.overview
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,13 +29,14 @@ import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.core.designsystem.component.content.TmrCard
 import com.tailormyresume.core.designsystem.component.content.TmrInitialDisc
 import com.tailormyresume.core.designsystem.component.content.TmrListRow
-import com.tailormyresume.core.designsystem.component.content.TmrTag
 import com.tailormyresume.core.designsystem.component.input.TmrTextButton
 import com.tailormyresume.core.designsystem.icon.TmrIcons
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.navigation.Navigator
+import com.tailormyresume.feature.onboarding.api.navigation.ReviewProfileNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
+import com.tailormyresume.feature.profile.api.navigation.EditRoleNavKey
 import com.tailormyresume.feature.profile.api.navigation.ExperienceNavKey
 import com.tailormyresume.feature.profile.api.navigation.ListEditNavKey
 import com.tailormyresume.feature.profile.api.navigation.ProfileListSection
@@ -46,7 +44,7 @@ import com.tailormyresume.feature.profile.api.navigation.SkillsNavKey
 import com.tailormyresume.feature.profile.impl.R
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
 
-internal enum class ProfileTarget { SETTINGS, CONTACT, SUMMARY, EXPERIENCE, EDUCATION, SKILLS, ACHIEVEMENTS, LINKEDIN, REPLACE }
+internal enum class ProfileTarget { SETTINGS, CONTACT, SUMMARY, EXPERIENCE, EDUCATION, SKILLS, ACHIEVEMENTS, LINKEDIN, REPLACE, REVIEW }
 
 internal fun ProfileTarget.navKey(): NavKey = when (this) {
     ProfileTarget.SETTINGS -> SettingsNavKey()
@@ -57,6 +55,7 @@ internal fun ProfileTarget.navKey(): NavKey = when (this) {
     ProfileTarget.EXPERIENCE -> ExperienceNavKey()
     ProfileTarget.SKILLS -> SkillsNavKey()
     ProfileTarget.REPLACE -> UploadNavKey()
+    ProfileTarget.REVIEW -> ReviewProfileNavKey()
 }
 
 internal fun Navigator.open(target: ProfileTarget) = navigate(target.navKey())
@@ -67,6 +66,7 @@ internal fun ProfileScreen(
     state: ProfileUiState,
     onOpen: (ProfileTarget) -> Unit,
     modifier: Modifier = Modifier,
+    onFixGap: (String) -> Unit = {},
 ) {
     val colors = TmrTheme.colors
     val typography = TmrTheme.typography
@@ -125,31 +125,7 @@ internal fun ProfileScreen(
                         }
                     }
                 }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(spacing.md),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .height(4.dp)
-                            .background(colors.fill, TmrTheme.shapes.pill),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(content.percent / 100f)
-                                .height(4.dp)
-                                .background(colors.lime, TmrTheme.shapes.pill),
-                        )
-                    }
-                    Text(
-                        text = stringResource(R.string.feature_profile_impl_percent_complete, content.percent),
-                        style = typography.caption,
-                        color = colors.text,
-                    )
-                }
+                ProfileReadiness(content, onOpen, onFixGap)
             }
             TmrCard {
                 Column(
@@ -186,12 +162,7 @@ internal fun ProfileScreen(
                     )
                     TmrListRow(
                         label = stringResource(R.string.feature_profile_impl_row_linkedin),
-                        tag = if (content.linkedinMissing) TmrTag.Add else null,
-                        meta = if (content.linkedinMissing) {
-                            null
-                        } else {
-                            stringResource(R.string.feature_profile_impl_linkedin_added)
-                        },
+                        meta = stringResource(R.string.feature_profile_impl_optional),
                         onClick = { onOpen(ProfileTarget.LINKEDIN) },
                         showDivider = false,
                     )
@@ -231,11 +202,51 @@ internal fun ProfileScreen(
 }
 
 @Composable
+private fun ProfileReadiness(
+    content: ProfileUiState.Content,
+    onOpen: (ProfileTarget) -> Unit,
+    onFixGap: (String) -> Unit,
+) {
+    val colors = TmrTheme.colors
+    Column(verticalArrangement = Arrangement.spacedBy(TmrTheme.spacing.xs)) {
+        Text(
+            text = stringResource(
+                when {
+                    content.requiredGaps.isNotEmpty() -> R.string.feature_profile_impl_required_fixes
+                    content.readyToTailor -> R.string.feature_profile_impl_ready_to_tailor
+                    else -> R.string.feature_profile_impl_review_needed
+                },
+            ),
+            style = TmrTheme.typography.strongLarge,
+            color = if (content.readyToTailor) colors.lime else colors.amber,
+        )
+        content.requiredGaps.forEach { gap ->
+            TmrListRow(
+                label = stringResource(R.string.feature_profile_impl_required_end_date, gap.title),
+                onClick = { onFixGap(gap.entryId) },
+                showDivider = false,
+            )
+        }
+        if (!content.reviewed && content.requiredGaps.isEmpty()) {
+            TmrTextButton(
+                label = stringResource(R.string.feature_profile_impl_review_profile),
+                onClick = { onOpen(ProfileTarget.REVIEW) },
+            )
+        }
+    }
+}
+
+@Composable
 internal fun ProfileRoute(
     navigator: Navigator,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    ProfileScreen(state = state, onOpen = navigator::open, modifier = modifier)
+    ProfileScreen(
+        state = state,
+        onOpen = navigator::open,
+        modifier = modifier,
+        onFixGap = { navigator.navigate(EditRoleNavKey(entryId = it)) },
+    )
 }
