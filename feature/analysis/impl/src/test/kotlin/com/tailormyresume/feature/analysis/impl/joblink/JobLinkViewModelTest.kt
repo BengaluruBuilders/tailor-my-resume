@@ -72,6 +72,8 @@ class JobLinkViewModelTest {
             assertThat(events).containsExactly(JobLinkEvent.Close)
             assertThat(viewModel.uiState.value.importing).isFalse()
             assertThat(importer.urls).containsExactly(URL)
+            assertThat(store.link.value).isEqualTo(typed)
+            assertThat(viewModel(importer, store).uiState.value.link).isEqualTo(typed)
         }
     }
 
