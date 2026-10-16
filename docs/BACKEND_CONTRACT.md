@@ -1,6 +1,6 @@
-# TailorMyResume backend contract, v2
+# TailorMyResume backend contract, v2 + guest-trial-v1
 
-Status: v2 proposed 2026-10-10 for the simplified MVP (v1 was proposed 2026-10-07). Owner: the TailorMyResume app.
+Status: v2 proposed 2026-10-10; guest-trial-v1 frozen for slice 01 on 2026-10-17 (section 8). Owner: the TailorMyResume app.
 The backend is `BengaluruBuilders/apps-backend`. The app decides the shapes in this file. The backend may change an
 internal detail. A change to a request, a response, a status, or an error code needs a change to this file first.
 
@@ -192,7 +192,7 @@ the prompt version with no new column.
 | Field | Rule |
 |---|---|
 | `credits` | `freeCredits` plus `purchasedCredits`. The number of tailorings the user can still start, before the credits that a running job reserves |
-| `freeCredits` | Credits from the welcome grant. A tailoring uses a free credit first |
+| `freeCredits` | Earned promotional and historical welcome credits. A tailoring uses a free credit first |
 | `purchasedCredits` | Credits from packs. They never expire |
 | `analysesLeftToday` | Analyses left on the current TailorMyResume day. The cap is 20 |
 | `day`, `resetsAt` | The current TailorMyResume day, and the instant it ends |
@@ -561,8 +561,9 @@ Backs `UsageAllowance` and the credit part of `PaymentGateway`.
 
 #### `GET /v1/tailormyresume/wallet`
 
-The first call creates the wallet with 1 free credit and one `WELCOME` ledger row in one transaction. A
-second call writes no second row. The app reads it right after sign-in.
+Reads never grant credits or insert a ledger event. An absent wallet reads as zero. Historical balances
+stay intact. The app reads after sign-in and uses explicit protected initialization for a new eligible
+guest trial (section 8); no GET, export, unlock, purchase, or tailoring path can create WELCOME credits.
 
 Response `200`: `{"wallet": Wallet}`. The `Wallet` shape is in section 3.
 
@@ -593,8 +594,8 @@ The credit ledger. It has no request body.
 | Field | Rule |
 |---|---|
 | `balance` | `wallet.freeCredits + wallet.purchasedCredits` from the wallet counters, which stay authoritative (apps-backend #89). It equals `wallet.credits`. History of wallets made before the ledger may differ from it by the deploy window |
-| `entries` | Newest first. At most 100 |
-| `kind` | `WELCOME`: the first free credit, amount `+1`. `PURCHASE`: a pack, amount `+5`, `+15`, or `+40`, with `productId`. `TAILORING`: a successful tailoring, amount `-1`, with `applicationId`. `REFUND`: credits given back, positive amount. `MIGRATION`: the balance that a wallet had before the ledger existed, one row for each wallet that had credits, positive amount |
+| `entries` | Newest first. At most 100. Every row exposes its original stable server `id`, including legacy rows and `GUEST_TRIAL`; never synthesize IDs from amount/time |
+| `kind` | `WELCOME`: a historical welcome event, original amount unchanged. `GUEST_TRIAL`: a protected trial grant, amount from the original server policy (`+2` in this campaign). `PURCHASE`: a pack, amount `+5`, `+15`, or `+40`, with `productId`. `TAILORING`: a successful tailoring, amount `-1`, with `applicationId`. `REFUND`: credits given back, positive amount. `MIGRATION`: the balance that a wallet had before the ledger existed, one row for each wallet that had credits, positive amount |
 | `amount` | Signed integer, never `0` |
 | `applicationId`, `productId` | String or `null`. Only the kinds above set them |
 
@@ -889,3 +890,303 @@ These are not backend issues. They go to this repository.
 | `POST /me/data-export` has no email provider | Blocked by apps-backend #99. The on-device interim stays until a provider exists |
 | The compatibility fields of section 1 | Remove them in a follow-up after app issue #287 is deployed |
 | Profile and application sync | After the MVP, as a separate contract |
+
+## 8. Guest trial slice contract — `guest-trial-v1` (2026-10-17)
+
+This section supersedes conflicting welcome-grant, provider, and GET behavior above. It is the
+implementation contract for slice 01 only. The approved earn-credit plans replace the old one-credit
+acquisition offer with an eligible two-credit guest trial. Google signup/link rewards and referrals
+are later slices. Do not advertise or implement them as available here. Amounts, eligibility, and
+availability come from server policy. A missing policy never means two free credits.
+
+### 8.1 Authority, scope, and access
+
+Every route below uses the existing app header, Firebase Bearer auth, app/environment database,
+and live-account guard. `ANONYMOUS` means verified Firebase `sign_in_provider=anonymous`;
+`GOOGLE` means verified `google.com`; other/missing provider claims mean `OTHER`. The backend
+verifies audience/project and provider claims; a client flag, email, UID shape, or body cannot select
+account mode. Preserve generic core behavior for apps that do not opt into this TMR policy.
+
+| Route family | Anonymous | Google | Other/missing verified provider |
+|---|---|---|---|
+| Core `/v1/me`, deletion, TMR wallet/credits/export | Own data; zero balance is valid | Own data/history | Own reads and deletion; no new promotional entitlement |
+| `GET /v1/tailormyresume/credits/policy` | Own current eligibility | Own current eligibility; guest offer ineligible | Mode `OTHER`; guest offer ineligible |
+| `POST /v1/tailormyresume/credits/grant-challenges` | Guest-trial action | `403 GUEST_REQUIRED` | `403 GUEST_REQUIRED` |
+| `POST /v1/tailormyresume/credits/initialize` | Evaluate trial or recover committed result | Recover own committed trial, otherwise `200 NOT_ELIGIBLE / ACCOUNT_MODE_INELIGIBLE` | Same recovery/ineligible rule |
+| TMR parse/analyses/job-imports/tailorings and own tailoring recovery/reports | Available under existing quota/cost/balance rules | Same | `403 PROVIDER_NOT_SUPPORTED` for new AI/import work; own job recovery/report access remains |
+| Generic `/v1/ai/extract` and `/v1/ai/chat` for TMR app id | `403 FORBIDDEN` before provider/reservation | Same | Same |
+| Legacy unlock | No-op; no free grant/debit | Same | Same |
+| Packs and purchase history | Read existing shapes | Read existing shapes | Read existing shapes |
+| Legacy new purchase submission | `403 GOOGLE_REQUIRED`; no new welcome credit | Existing validation/settlement retained | `403 GOOGLE_REQUIRED` |
+| Signup/link/referral mutation and public inviter lookup | No route added in slice 01 (`404 NOT_FOUND`) | Same | Same |
+
+Blocking generic AI prevents bypassing TMR's typed request validation, allowances, credit flow, and
+fabrication checks. Keep core quotas and app micro-USD cost caps in addition to credit admission;
+a trial grant makes no AI call. This slice does not increase either existing AI limit. No Google
+base-grant fallback may bypass the protected trial. Legacy purchase settlement/history is retained;
+new payment retirement is a later slice.
+
+`GET /wallet`, `GET /credits`, and `GET /me/export` never grant, top up, consume capacity, or insert
+a ledger event. An absent wallet reads as a zero wallet; persistence of a zero wallet belongs to an
+explicit mutation. `GET /v1/me` may still create the core user row, with no economic side effect.
+The implicit `WELCOME` path must be removed from every wallet, export, unlock, purchase, and tailoring
+call site before anonymous acquisition is enabled. A new grant is only an explicit protected POST.
+
+### 8.2 Server policy snapshot
+
+`GET /v1/tailormyresume/credits/policy` has no body. `200` returns `{policy: Policy}`. It is authenticated,
+non-granting, and carries `Cache-Control: no-store`. It evaluates the caller's own known entitlement,
+mode, and current configured campaign; it does not collect Android ID or call Play Integrity.
+
+| Policy field | Type/rule |
+|---|---|
+| `version` | String `^[a-z0-9][a-z0-9._-]{0,63}$`, or `null` if no usable policy exists |
+| `effectiveAt`, `expiresAt` | UTC ISO-8601 timestamps, or `null` with no usable policy; `expiresAt > effectiveAt` |
+| `accountMode` | `ANONYMOUS`, `GOOGLE`, `OTHER` from verified server identity |
+| `guestTrial.status` | `AVAILABLE`, `ALREADY_GRANTED`, `NOT_ELIGIBLE`, `UNAVAILABLE` |
+| `guestTrial.reason` | `ELIGIBLE`, `ALREADY_GRANTED`, `LEGACY_ACCOUNT`, `ACCOUNT_MODE_INELIGIBLE`, `ADMISSIONS_DISABLED`, `POLICY_UNAVAILABLE`, `CAMPAIGN_EXHAUSTED` |
+| `guestTrial.amount` | Positive integer from usable policy (2 in this campaign), or `null` without one; display an amount as an offer only when status is `AVAILABLE` |
+| `guestTrial.operation` | `GUEST_TRIAL` |
+| `guestTrial.integrity`, `guestTrial.continuity`, `guestTrial.bindingVersion` | `PLAY_INTEGRITY_STANDARD`, `ANDROID_ID`, integer `1` |
+| `signupBonus`, `referrals` | Each exactly `{status:"UNAVAILABLE"}` in this slice |
+
+Precedence: recorded committed trial → `ALREADY_GRANTED` (even with policy absent/paused); unsupported
+mode → `NOT_ELIGIBLE/ACCOUNT_MODE_INELIGIBLE`; historical classification → `NOT_ELIGIBLE/LEGACY_ACCOUNT`;
+missing/invalid/not-yet-effective/expired policy or missing platform/key/database configuration →
+`UNAVAILABLE/POLICY_UNAVAILABLE`; disabled admission → `UNAVAILABLE/ADMISSIONS_DISABLED`; exhausted
+capacity → `UNAVAILABLE/CAMPAIGN_EXHAUSTED`; otherwise `AVAILABLE/ELIGIBLE`. A committed grant does
+not imply the original policy is still usable: nullable metadata stays null in that case.
+Policy availability is a snapshot, never a reservation or evidence that a device is unused.
+
+New admission defaults off. Activation requires a complete validated per-app/environment policy,
+installed database revision, finite capacity, trusted ingress setup, continuity key ring, and real
+integrity verifier/package/certificate/version configuration. Immutable entitlement identity is
+independent of policy revision, policy expiry, and HMAC key version. A revision changes admission
+rules for uncommitted requests; it does not create a second lifetime entitlement.
+
+Android refreshes policy at entry/retry/resume and before a new challenge after expiry. It never
+hardcodes eligibility, two-credit availability, reset timing, or a Google reward promise. On an
+unavailable policy/503 it shows a neutral temporary-unavailable state, refreshes the wallet, and
+keeps existing profile/application/balance access. No zero fallback may overwrite a previously
+loaded wallet on a failed request. Scope responses/pending operations to UID, environment, and
+session generation so sign-out/account changes cannot apply stale data.
+
+### 8.3 Strict request and challenge shapes
+
+Both POSTs reject unknown keys, missing/nonconforming fields, invalid JSON, and wrong content type
+as `400 INVALID_INPUT`. Strings are not trimmed or case-normalized. Body limits apply to UTF-8
+bytes: challenge 2,048; initialize 16,384. Larger bodies are `413 PAYLOAD_TOO_LARGE`.
+
+Shared rules: `requestId` and `challengeId` are canonical lowercase UUID v4 strings;
+`policyVersion` follows `Policy.version` without null; digest/hash/challenge values are exactly 43
+base64url characters (`[A-Za-z0-9_-]`), no padding. `requestId` is generated once per business attempt
+and persisted for retry across process restart. The caller never sends UID, amount, environment,
+provider mode, eligibility time, or a client-side integrity verdict.
+
+`POST /v1/tailormyresume/credits/grant-challenges`:
+
+```json
+{"operation":"GUEST_TRIAL","requestId":"11111111-1111-4111-8111-111111111111","policyVersion":"guest-local-v1","payloadDigest":"<43-character canonical business digest>"}
+```
+
+`201` returns exactly the required fields below (responses may gain fields):
+
+```json
+{"challengeId":"22222222-2222-4222-8222-222222222222","challenge":"<43-character server random challenge>","expiresAt":"2026-10-17T00:05:00Z","bindingVersion":1,"requestHash":"<43-character server-computed binding hash>"}
+```
+
+The server generates 32 cryptographically random challenge bytes. TTL is at most five minutes and
+never beyond policy expiry. Each issuance creates a fresh handle (not an idempotent grant); rate
+limit issuance. Bind the stored challenge to app/environment/live actor/action/requestId/payloadDigest/
+policyVersion. Hash the bearer challenge secret at rest. The server returns its computed `requestHash`
+so Android never guesses a deployment namespace. Android passes that exact string to Play Integrity's
+Standard request. The server persists its expected `requestHash` at issuance against immutable authoritative binding
+fields, plus the hash of the challenge secret. At initialization it compares the decoded token hash
+to that persisted expected hash and rechecks actor/app/environment/action/key/payload/policy/expiry.
+It does not need to reconstruct a discarded secret; initialize echoes only `challengeId`, not `challenge`.
+
+`POST /v1/tailormyresume/credits/initialize`:
+
+```json
+{"requestId":"11111111-1111-4111-8111-111111111111","policyVersion":"guest-local-v1","continuity":{"type":"ANDROID_ID","value":"0123456789abcdef"},"challengeId":"22222222-2222-4222-8222-222222222222","integrityToken":"synthetic-token-not-valid-in-any-environment"}
+```
+
+`continuity` is a strict object with exactly `type:"ANDROID_ID"` and `value` matching
+`^[0-9a-f]{16}$`, excluding `0000000000000000` and known unusable `9774d56d682e549c`. The client reads
+its app-scoped Android ID only for an explicit admission attempt under the disclosed policy; missing
+signal is not an empty/shared identity and cannot yield a new trial. `integrityToken` is an opaque
+nonempty string of at most 12,000 characters. No request allows arbitrary evidence JSON or amount.
+
+The Standard Integrity cloud project number comes from non-secret build configuration: release
+`tailormyresumePlayIntegrityCloudProjectNumber`; debug/staging
+`tailormyresumeStagingPlayIntegrityCloudProjectNumber`. Each is a positive decimal integer that fits
+a signed 64-bit value, bound to its matching backend verifier project. Do not commit actual values.
+A missing/invalid/mismatched client value closes admission with temporary integrity-unavailable
+recovery; it cannot select production as a staging fallback. Android computes only the business
+payloadDigest, and passes the exact server-returned requestHash to Standard Integrity.
+
+### 8.4 Canonical digest and integrity binding version 1
+
+The stable business payload is the compact UTF-8 JSON array (no whitespace, no final newline):
+
+```json
+["TMR_GUEST_TRIAL_PAYLOAD_V1","ANDROID_ID","0123456789abcdef"]
+```
+
+`payloadDigest = base64urlNoPadding(SHA256(bytes))`. Only the validated lower-case hex signal is
+variable. No sorting, locale transforms, Unicode normalization, JSON object ordering, or platform
+default charset may affect these bytes. Request IDs/actors/action are separately namespaced; the
+stable digest excludes policyVersion, challenge, and token so fresh evidence and a new policy can
+retry the same uncommitted business payload. Changing the signal with the same operation key is a
+conflict. Never log this digest or raw signal.
+
+The binding bytes are the same compact UTF-8 serialization of this ordered array:
+
+```text
+["TMR_PROMOTION_BINDING_V1",appId,environmentNamespace,authenticatedUid,"GUEST_TRIAL",requestId,payloadDigest,policyVersion,challengeId,challenge]
+```
+
+`requestHash = base64urlNoPadding(SHA256(bindingBytes))`. All array members are strings.
+App id/environment/UID come from trusted server routing/auth/config, never request fields.
+The decoded Standard Integrity token must match this hash, expected package, approved certificate
+set/version policy, and freshness (within five minutes, never older than the issued challenge;
+allow at most 30 seconds server-configured clock skew). Require `MEETS_DEVICE_INTEGRITY`; an enabled
+Play-distributed policy also requires `PLAY_RECOGNIZED` and `LICENSED`. Do not require the strongest
+optional verdict, and do not bypass baseline verification for sideload, debug, emulator, absent
+license, unavailable service, or a client that says it is trusted. Missing real configuration is a
+closed admission, not a fake success. Deterministic test/local verifier injection cannot activate a
+real environment or be selected by an HTTP parameter. Integrity binds the reported Android ID;
+it does not certify the ID's truth or prove a unique human.
+
+Golden byte strings and positive/negative vectors are in
+`docs/testing/earn-credits/2026-10-17/01-guest-trial/fixtures/hash-vectors.json`.
+`generate-fixtures.py --check` reproduces them with Python's UTF-8/SHA-256/base64url implementation.
+
+### 8.5 Outcomes, status, and recovery
+
+Initialize always returns `200` for a business outcome:
+
+```json
+{"wallet":{"credits":2,"freeCredits":2,"purchasedCredits":0,"analysesLeftToday":20,"freeTailoringsLeftToday":0,"day":"2026-10-17","resetsAt":"2026-10-17T18:30:00Z","unlockedApplicationIds":[]},"grants":[{"id":"33333333-3333-4333-8333-333333333333","kind":"GUEST_TRIAL","amount":2,"createdAt":"2026-10-17T00:00:00Z","policyVersion":"guest-local-v1"}],"trial":{"status":"GRANTED","reason":"ELIGIBLE"},"replayed":false}
+```
+
+| Field/outcome | Rule |
+|---|---|
+| `wallet` | Existing full Wallet shape; authoritative current counters, not a replay cache snapshot |
+| `grants` | Array of 0 or 1 own trial receipt; UUID id, `kind:GUEST_TRIAL`, positive integer amount, UTC createdAt, original nonnull policyVersion |
+| `GRANTED / ELIGIBLE` | One new grant and ledger event atomically committed; `replayed:false` |
+| `ALREADY_GRANTED / ALREADY_GRANTED` | Return original grant with current wallet; no top-up, second ledger event, evidence decode, or capacity charge. `replayed:true` for a committed same-key operation; false for another key finding the same lifetime grant |
+| `NOT_ELIGIBLE / SIGN_IN_REQUIRED` | Allocated continuity signal; empty grants, own wallet only, no other UID/grant/wallet information. Sign-in is another account path and promises no new base grant |
+| `NOT_ELIGIBLE / LEGACY_ACCOUNT` | Historical account; empty grants; balance/history intact |
+| `NOT_ELIGIBLE / ACCOUNT_MODE_INELIGIBLE` | Non-anonymous provider; empty grants; balance/history intact |
+
+No refusal writes a reward grant or consumes campaign capacity. Persist bounded non-grant decisions
+and attempts for abuse control, but do not permanently cache a temporary refusal as a successful
+operation. A fresh challenge may retry the same uncommitted key/payload under current policy.
+
+| Status/code | Meaning and client recovery |
+|---|---|
+| Existing `400 INVALID_INPUT`, `401 UNAUTHENTICATED/INVALID_TOKEN`, `403 CROSS_APP_TOKEN`, `404 NOT_FOUND`, `409 ACCOUNT_DELETED` | Existing semantics. Same-app other-owner resource is never disclosed. No retry can recreate a deleting account |
+| `403 GUEST_REQUIRED` | Challenge requested with non-anonymous identity; refresh policy/account state |
+| `403 PROVIDER_NOT_SUPPORTED`, `403 GOOGLE_REQUIRED` | Access matrix above; no provider/credit side effects |
+| `409 IDEMPOTENCY_CONFLICT` | Same live actor/action/requestId with different stable payload. Preserve committed original; do not retry with changed payload/key to evade entitlement |
+| `409 POLICY_CHANGED` | New/uncommitted request's policy version does not match current usable policy; fetch policy and obtain fresh challenge with same stable key/payload |
+| `409 INTEGRITY_CHALLENGE_INVALID` | Expired, consumed, wrong-owner/action/app/environment/key/payload/policy challenge; obtain fresh challenge for same business attempt |
+| `403 INTEGRITY_REJECTED` | Decoded baseline verdict/hash/package/certificate/time invalid; no automatic tight retry or accusation of fraud |
+| `503 INTEGRITY_UNAVAILABLE` | Verification service timeout/unavailable; fresh evidence and same business key may retry later |
+| `503 PROMOTION_UNAVAILABLE` | Missing/invalid/disabled/expired policy/config, unavailable revision/key, or exhausted campaign; preserve wallet, refresh policy later |
+| `429 RATE_LIMITED` | Bounded velocity/load shedding; respect `Retry-After` seconds |
+| `413 PAYLOAD_TOO_LARGE`, existing `500 INTERNAL_ERROR` | Existing envelopes and no partially committed award |
+
+All errors retain `{error:{code,message}}`, never raw provider output, UID, thresholds, token, or signal.
+429 and 503 carry positive integer `Retry-After` seconds; a missing known recovery time uses 60.
+Responses carry `Cache-Control:no-store`. When policy is usable, version mismatch is `POLICY_CHANGED`;
+without a usable policy it is `PROMOTION_UNAVAILABLE`. Neither blocks committed recovery.
+
+Processing order: validate auth/app/live-user and strict body/size; derive stable digest; check
+committed actor/action/key and payload conflict; return committed grant/current wallet before
+current policy, expired evidence, admissions, capacity, or provider calls. Then check existing stable
+lifetime grant (even under a new key); classify provider/legacy account; validate current policy
+and challenge; verify evidence outside SQL locks; evaluate counters; transactionally recheck live
+actor, policy, challenge, grant/signal uniqueness and capacity, then consume challenge + insert grant
++ increment freeCredits + ledger + operation receipt together. Same-key concurrent requests return
+one grant. One full last award wins; no partial two-credit award. All transactions use a documented
+common lock order and the existing live-user guard. A provider/sink/commit failure cannot leave
+capacity, wallet, ledger, and grant disagreeing. Expired replay-cache rows cannot remove durable
+lifetime grant uniqueness. No replay issues new credits after the original credits were spent.
+
+### 8.6 Shared policy, abuse, and lifecycle foundation
+
+Reusable policy/grant/capacity primitives are opt-in per app/environment, with a transaction-aware
+app wallet sink. Core reward services have no TMR imports, Google/Android rules, or global wallet.
+Use separate stable grant sources, durable atomic capacity, unique grant→ledger links, controlled
+clock/randomness ports, and injected integrity provider. Never call a remote verifier in a SQL
+transaction or apply a wallet write through a separate transaction/callback.
+
+Limited Android-ID continuity uses purpose-separated HMACs containing trusted app/environment and
+key version. Keep active and retiring digests queryable/locked together so key rotation does not
+regrant. Allocation records expire at most 180 days after allocation while the account is live;
+erase them on account deletion. An expired record cannot support an indefinite one-trial-per-device
+promise. A missing signal or key ring fails new admission; it is not proof of a new device. Device
+Recall remains disabled/optional and grants never depend on an unverified beta capability.
+
+Independent durable counters cover actor, accepted continuity signal, short-window network, and
+campaign load; no combined device/IP/model fingerprint. Count failed attempts in a bounded
+independent transaction when award rollback would otherwise erase them. Network counters are
+short-lived load shedding, never identity/duplicate proof; shared NAT or a matching model alone is
+not fraud denial. Trust IP only from the configured ingress; reject spoofed proxy headers, normalize
+IPv4-mapped IPv6 and /64 IPv6 windows, and omit unavailable addresses from the network dimension
+rather than creating one permanent shared unknown identity.
+
+Deterministic **local-test policy only**: lifetime capacity 100 credit units, trial amount 2;
+actor 5 attempts/60 seconds; continuity signal 3/60 seconds; network 100/60 seconds; decisions 7 days;
+challenge TTL 5 minutes; replay operation TTL 30 days; network counters purge within 1 hour.
+Counter periods/expiry/key version are explicit server policy. Production thresholds/capacity are
+unset and admission stays off. No monthly user/referral cap is invented. Retention windows are
+maximums; account erasure removes attributable rows earlier. Campaign aggregate consumption has
+no UID/signal edge and never decreases on account deletion or record expiry.
+
+No raw Android ID/IP, attestation token, canonical bytes/digest, challenge secrets, provider outputs,
+resume/JD, device name/model, installed-app list, location, contact, serial, IMEI, or advertising ID
+is logged or stored as grant evidence. Store only minimized HMAC/key version, coarse decision reason,
+policy revision and grant references within stated limits. HMACs remain personal/pseudonymous data.
+Export own grant receipts/eligibility dates and existing full ledger, with no other-user data or
+internal abuse hashes/secrets. Add an own `promotions:{grants:[GrantReceipt]}` object inside the
+existing export object; no grant is created by export. Erase owned grant/operation/challenge/
+decision/continuity/counter rows and wallet/ledger through `DELETE /v1/me`; recovery/partial-failure
+and concurrent-grant guards apply. Preserve only nonidentifying consumed campaign totals and the
+existing bounded deletion tombstone. Do not claim deletion-resistant abuse prevention or silently
+retain an identity HMAC after deletion. Firebase automatic anonymous deletion cannot independently
+remove identity while an active server wallet still needs lifecycle reconciliation.
+
+Production disclosure/Terms/Data Safety review of this limited signal/purpose/retention and genuine
+Firebase anonymous-provider, package/certificate and Play Integrity verification remain activation
+checks. Local fake results are application-logic evidence only. No real admission is enabled by this
+contract, by staging Firebase setup alone, or by missing external credentials.
+
+### 8.7 Migration, balance, and slice acceptance
+
+Existing WELCOME/PURCHASE/TAILORING/REFUND/MIGRATION rows, free/purchased balances, reservations,
+purchase validation/settlement, and original ledger IDs/times remain unchanged. Do not backfill
+credits again or infer a top-up from a historical numeric balance. Mark pre-rollout server identities/
+wallets and trusted pre-cutoff Firebase identities as legacy before admissions activate. Unknown
+creation/classification data is unavailable for new admission, never an eligible-new default.
+No historical account receives the new trial automatically.
+
+Add `GUEST_TRIAL` and unique nullable grant references additively; Google/referral ledger kinds are
+reserved for their later slices. Credit history retains stable server IDs and renders a distinct
+Guest trial label; an old lenient decoder may see UNKNOWN, so activation requires a compatible client.
+Wallet's `freeCredits` now covers earned promotional credits plus historical free credits; spending
+still takes a free credit before a purchased one. Successful tailoring consumes exactly one once;
+failure/interruption releases its reservation without debit. Retry existing request/job before a
+current zero-credit gate; current balance must not prevent recovery of a completed result.
+
+The acceptance map/fixtures in `docs/testing/earn-credits/2026-10-17/01-guest-trial/` are normative
+examples for both implementations. Required proof: fresh anonymous sign-in → protected eligible
++2 → authoritative wallet → two successful debits to zero; duplicate/lost-reply/restart/race gives
+one grant; failure/interruption/repeated completed job never bills twice; third new successful work
+cannot overdraw; reads/legacy routes cannot grant; wrong scope/provider/evidence fails; stale policy,
+provider outage and campaign exhaustion preserve balance; key/policy changes cannot reset entitlement;
+legacy wallets/history survive; account/environment switching rejects stale replies; export/deletion
+cover every new row and non-TMR apps remain unchanged. No broad suite is required for this
+contract-only commit; implementations run their repository gates and focused transaction tests.

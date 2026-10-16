@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tailormyresume:guest-trial-v1:requests",
+  "$defs": {
+    "requestId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "policyVersion": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$"
+    },
+    "continuity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "ANDROID_ID"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{16}$",
+          "not": {
+            "enum": [
+              "0000000000000000",
+              "9774d56d682e549c"
+            ]
+          }
+        }
+      }
+    },
+    "challengeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "requestId",
+        "policyVersion",
+        "payloadDigest"
+      ],
+      "properties": {
+        "operation": {
+          "const": "GUEST_TRIAL"
+        },
+        "requestId": {
+          "$ref": "#/$defs/requestId"
+        },
+        "policyVersion": {
+          "$ref": "#/$defs/policyVersion"
+        },
+        "payloadDigest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "initializeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "policyVersion",
+        "continuity",
+        "challengeId",
+        "integrityToken"
+      ],
+      "properties": {
+        "requestId": {
+          "$ref": "#/$defs/requestId"
+        },
+        "policyVersion": {
+          "$ref": "#/$defs/policyVersion"
+        },
+        "continuity": {
+          "$ref": "#/$defs/continuity"
+        },
+        "challengeId": {
+          "$ref": "#/$defs/requestId"
+        },
+        "integrityToken": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 12000
+        }
+      }
+    }
+  }
+}

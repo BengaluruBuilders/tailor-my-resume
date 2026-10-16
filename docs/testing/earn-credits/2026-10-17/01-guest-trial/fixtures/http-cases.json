@@ -1,0 +1,833 @@
+{
+  "revision": "guest-trial-v1",
+  "prefix": "/v1/tailormyresume",
+  "syntheticOnly": true,
+  "cases": [
+    {
+      "name": "policy-eligible",
+      "method": "GET",
+      "path": "/credits/policy",
+      "status": 200,
+      "response": {
+        "policy": {
+          "version": "guest-local-v1",
+          "effectiveAt": "2026-10-17T00:00:00Z",
+          "expiresAt": "2026-10-18T00:00:00Z",
+          "accountMode": "ANONYMOUS",
+          "guestTrial": {
+            "status": "AVAILABLE",
+            "reason": "ELIGIBLE",
+            "amount": 2,
+            "operation": "GUEST_TRIAL",
+            "integrity": "PLAY_INTEGRITY_STANDARD",
+            "continuity": "ANDROID_ID",
+            "bindingVersion": 1
+          },
+          "signupBonus": {
+            "status": "UNAVAILABLE"
+          },
+          "referrals": {
+            "status": "UNAVAILABLE"
+          }
+        }
+      }
+    },
+    {
+      "name": "policy-missing",
+      "method": "GET",
+      "path": "/credits/policy",
+      "status": 200,
+      "response": {
+        "policy": {
+          "version": null,
+          "effectiveAt": null,
+          "expiresAt": null,
+          "accountMode": "ANONYMOUS",
+          "guestTrial": {
+            "status": "UNAVAILABLE",
+            "reason": "POLICY_UNAVAILABLE",
+            "amount": null,
+            "operation": "GUEST_TRIAL",
+            "integrity": "PLAY_INTEGRITY_STANDARD",
+            "continuity": "ANDROID_ID",
+            "bindingVersion": 1
+          },
+          "signupBonus": {
+            "status": "UNAVAILABLE"
+          },
+          "referrals": {
+            "status": "UNAVAILABLE"
+          }
+        }
+      }
+    },
+    {
+      "name": "policy-paused",
+      "method": "GET",
+      "path": "/credits/policy",
+      "status": 200,
+      "response": {
+        "policy": {
+          "version": "guest-local-v1",
+          "effectiveAt": "2026-10-17T00:00:00Z",
+          "expiresAt": "2026-10-18T00:00:00Z",
+          "accountMode": "ANONYMOUS",
+          "guestTrial": {
+            "status": "UNAVAILABLE",
+            "reason": "ADMISSIONS_DISABLED",
+            "amount": 2,
+            "operation": "GUEST_TRIAL",
+            "integrity": "PLAY_INTEGRITY_STANDARD",
+            "continuity": "ANDROID_ID",
+            "bindingVersion": 1
+          },
+          "signupBonus": {
+            "status": "UNAVAILABLE"
+          },
+          "referrals": {
+            "status": "UNAVAILABLE"
+          }
+        }
+      }
+    },
+    {
+      "name": "policy-google",
+      "method": "GET",
+      "path": "/credits/policy",
+      "status": 200,
+      "response": {
+        "policy": {
+          "version": "guest-local-v1",
+          "effectiveAt": "2026-10-17T00:00:00Z",
+          "expiresAt": "2026-10-18T00:00:00Z",
+          "accountMode": "GOOGLE",
+          "guestTrial": {
+            "status": "NOT_ELIGIBLE",
+            "reason": "ACCOUNT_MODE_INELIGIBLE",
+            "amount": 2,
+            "operation": "GUEST_TRIAL",
+            "integrity": "PLAY_INTEGRITY_STANDARD",
+            "continuity": "ANDROID_ID",
+            "bindingVersion": 1
+          },
+          "signupBonus": {
+            "status": "UNAVAILABLE"
+          },
+          "referrals": {
+            "status": "UNAVAILABLE"
+          }
+        }
+      }
+    },
+    {
+      "name": "challenge-created",
+      "method": "POST",
+      "path": "/credits/grant-challenges",
+      "status": 201,
+      "request": {
+        "operation": "GUEST_TRIAL",
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "payloadDigest": "7neZ2sms_OeVJ-VxobUIdk2OZYS-3x8Fdch1KYJnu4k"
+      },
+      "response": {
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "expiresAt": "2026-10-17T00:05:00Z",
+        "bindingVersion": 1,
+        "requestHash": "nrHgWZfUo-R3ouNur9XjOKmtKapV6l6RbGsjuUeBSSY"
+      }
+    },
+    {
+      "name": "initialize-granted",
+      "method": "POST",
+      "path": "/credits/initialize",
+      "status": 200,
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      },
+      "response": {
+        "wallet": {
+          "credits": 2,
+          "freeCredits": 2,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        },
+        "grants": [
+          {
+            "id": "33333333-3333-4333-8333-333333333333",
+            "kind": "GUEST_TRIAL",
+            "amount": 2,
+            "createdAt": "2026-10-17T00:00:00Z",
+            "policyVersion": "guest-local-v1"
+          }
+        ],
+        "trial": {
+          "status": "GRANTED",
+          "reason": "ELIGIBLE"
+        },
+        "replayed": false
+      }
+    },
+    {
+      "name": "initialize-replay-after-two-spends-paused-policy-expired-token",
+      "method": "POST",
+      "path": "/credits/initialize",
+      "status": 200,
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      },
+      "response": {
+        "wallet": {
+          "credits": 0,
+          "freeCredits": 0,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        },
+        "grants": [
+          {
+            "id": "33333333-3333-4333-8333-333333333333",
+            "kind": "GUEST_TRIAL",
+            "amount": 2,
+            "createdAt": "2026-10-17T00:00:00Z",
+            "policyVersion": "guest-local-v1"
+          }
+        ],
+        "trial": {
+          "status": "ALREADY_GRANTED",
+          "reason": "ALREADY_GRANTED"
+        },
+        "replayed": true
+      }
+    },
+    {
+      "name": "initialize-another-key-existing-trial",
+      "method": "POST",
+      "path": "/credits/initialize",
+      "status": 200,
+      "request": {
+        "requestId": "44444444-4444-4444-8444-444444444444",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      },
+      "response": {
+        "wallet": {
+          "credits": 0,
+          "freeCredits": 0,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        },
+        "grants": [
+          {
+            "id": "33333333-3333-4333-8333-333333333333",
+            "kind": "GUEST_TRIAL",
+            "amount": 2,
+            "createdAt": "2026-10-17T00:00:00Z",
+            "policyVersion": "guest-local-v1"
+          }
+        ],
+        "trial": {
+          "status": "ALREADY_GRANTED",
+          "reason": "ALREADY_GRANTED"
+        },
+        "replayed": false
+      }
+    },
+    {
+      "name": "initialize-allocated-signal-other-owner",
+      "method": "POST",
+      "path": "/credits/initialize",
+      "status": 200,
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      },
+      "response": {
+        "wallet": {
+          "credits": 0,
+          "freeCredits": 0,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        },
+        "grants": [],
+        "trial": {
+          "status": "NOT_ELIGIBLE",
+          "reason": "SIGN_IN_REQUIRED"
+        },
+        "replayed": false
+      }
+    },
+    {
+      "name": "initialize-historical-account",
+      "method": "POST",
+      "path": "/credits/initialize",
+      "status": 200,
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      },
+      "response": {
+        "wallet": {
+          "credits": 6,
+          "freeCredits": 1,
+          "purchasedCredits": 5,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        },
+        "grants": [],
+        "trial": {
+          "status": "NOT_ELIGIBLE",
+          "reason": "LEGACY_ACCOUNT"
+        },
+        "replayed": false
+      }
+    },
+    {
+      "name": "wallet-absent-no-grant",
+      "method": "GET",
+      "path": "/wallet",
+      "status": 200,
+      "response": {
+        "wallet": {
+          "credits": 0,
+          "freeCredits": 0,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        }
+      }
+    },
+    {
+      "name": "wallet-after-grant",
+      "method": "GET",
+      "path": "/wallet",
+      "status": 200,
+      "response": {
+        "wallet": {
+          "credits": 2,
+          "freeCredits": 2,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        }
+      }
+    },
+    {
+      "name": "wallet-after-successful-tailoring",
+      "method": "GET",
+      "path": "/wallet",
+      "status": 200,
+      "response": {
+        "wallet": {
+          "credits": 1,
+          "freeCredits": 1,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        }
+      }
+    },
+    {
+      "name": "wallet-after-failed-tailoring",
+      "method": "GET",
+      "path": "/wallet",
+      "status": 200,
+      "response": {
+        "wallet": {
+          "credits": 2,
+          "freeCredits": 2,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        }
+      }
+    },
+    {
+      "name": "trial-ledger",
+      "method": "GET",
+      "path": "/credits",
+      "status": 200,
+      "response": {
+        "credits": {
+          "balance": 2,
+          "entries": [
+            {
+              "id": "55555555-5555-4555-8555-555555555555",
+              "kind": "GUEST_TRIAL",
+              "amount": 2,
+              "applicationId": null,
+              "productId": null,
+              "createdAt": "2026-10-17T00:00:00Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "legacy-ledger-preserved",
+      "method": "GET",
+      "path": "/credits",
+      "status": 200,
+      "response": {
+        "credits": {
+          "balance": 6,
+          "entries": [
+            {
+              "id": "66666666-6666-4666-8666-666666666666",
+              "kind": "PURCHASE",
+              "amount": 5,
+              "applicationId": null,
+              "productId": "application_pack_5",
+              "createdAt": "2026-10-15T00:00:00Z"
+            },
+            {
+              "id": "77777777-7777-4777-8777-777777777777",
+              "kind": "WELCOME",
+              "amount": 1,
+              "applicationId": null,
+              "productId": null,
+              "createdAt": "2026-10-14T00:00:00Z"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "errors": [
+    {
+      "status": 400,
+      "code": "INVALID_INPUT",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "INVALID_INPUT",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 401,
+      "code": "UNAUTHENTICATED",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "UNAUTHENTICATED",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 401,
+      "code": "INVALID_TOKEN",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "INVALID_TOKEN",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "code": "CROSS_APP_TOKEN",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "CROSS_APP_TOKEN",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "code": "GUEST_REQUIRED",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "GUEST_REQUIRED",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "code": "PROVIDER_NOT_SUPPORTED",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "PROVIDER_NOT_SUPPORTED",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "code": "GOOGLE_REQUIRED",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "GOOGLE_REQUIRED",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "code": "FORBIDDEN",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "FORBIDDEN",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 404,
+      "code": "NOT_FOUND",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "NOT_FOUND",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "code": "ACCOUNT_DELETED",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "ACCOUNT_DELETED",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "code": "IDEMPOTENCY_CONFLICT",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "IDEMPOTENCY_CONFLICT",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "code": "POLICY_CHANGED",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "POLICY_CHANGED",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "code": "INTEGRITY_CHALLENGE_INVALID",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "INTEGRITY_CHALLENGE_INVALID",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "code": "INTEGRITY_REJECTED",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "INTEGRITY_REJECTED",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 503,
+      "code": "INTEGRITY_UNAVAILABLE",
+      "headers": {
+        "Cache-Control": "no-store",
+        "Retry-After": "60"
+      },
+      "response": {
+        "error": {
+          "code": "INTEGRITY_UNAVAILABLE",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 503,
+      "code": "PROMOTION_UNAVAILABLE",
+      "headers": {
+        "Cache-Control": "no-store",
+        "Retry-After": "60"
+      },
+      "response": {
+        "error": {
+          "code": "PROMOTION_UNAVAILABLE",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 429,
+      "code": "RATE_LIMITED",
+      "headers": {
+        "Cache-Control": "no-store",
+        "Retry-After": "60"
+      },
+      "response": {
+        "error": {
+          "code": "RATE_LIMITED",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 413,
+      "code": "PAYLOAD_TOO_LARGE",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "PAYLOAD_TOO_LARGE",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    },
+    {
+      "status": 500,
+      "code": "INTERNAL_ERROR",
+      "headers": {
+        "Cache-Control": "no-store"
+      },
+      "response": {
+        "error": {
+          "code": "INTERNAL_ERROR",
+          "message": "Synthetic safe recovery message."
+        }
+      }
+    }
+  ],
+  "invalidRequests": [
+    {
+      "name": "client-amount",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment",
+        "amount": 2
+      },
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "name": "uppercase-signal",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789ABCDEF"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      },
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "name": "empty-signal",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": ""
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      },
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "name": "all-zero-signal",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0000000000000000"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      },
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "name": "known-unusable-signal",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "9774d56d682e549c"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      },
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "name": "client-provider",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment",
+        "accountMode": "ANONYMOUS"
+      },
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "name": "client-environment",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment",
+        "environment": "production"
+      },
+      "status": 400,
+      "code": "INVALID_INPUT"
+    },
+    {
+      "name": "missing-proof",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "guest-local-v1",
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222"
+      },
+      "status": 400,
+      "code": "INVALID_INPUT"
+    }
+  ]
+}
