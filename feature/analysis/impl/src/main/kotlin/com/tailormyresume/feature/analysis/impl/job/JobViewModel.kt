@@ -91,6 +91,7 @@ internal class JobViewModel @Inject constructor(
     val events: Flow<JobEvent> = eventChannel.receiveAsFlow()
 
     init {
+        draftStore.clearLink()
         viewModelScope.launch {
             draftStore.draft.filterNotNull().collect { applyDraft(draftStore.consume()) }
         }
@@ -101,6 +102,7 @@ internal class JobViewModel @Inject constructor(
     }
 
     fun onClear() {
+        draftStore.clear()
         text.value = ""
         notAJobPost.value = false
     }
@@ -138,8 +140,6 @@ internal class JobViewModel @Inject constructor(
                     keywordCoverage = KeywordCoverageCalculator.compute(result.gap.matches, null, null, profile),
                 )
                 applicationRepository.upsertApplication(application)
-                draftStore.clear()
-                text.value = ""
                 notAJobPost.value = false
                 percent.value = null
                 eventChannel.send(JobEvent.Analyzed(application.id))

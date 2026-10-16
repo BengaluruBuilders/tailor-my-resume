@@ -48,7 +48,6 @@ internal class JobLinkViewModel @Inject constructor(
             try {
                 val job = importer.import(url)
                 draftStore.set(text = job.jobText, importedFrom = job.sourceHost)
-                draftStore.clearLink()
             } catch (e: CancellationException) {
                 cancelled = true
                 throw e
