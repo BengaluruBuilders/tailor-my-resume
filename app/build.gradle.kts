@@ -83,6 +83,7 @@ android {
         applicationId = "com.tailormyresume.app"
         versionCode = releaseVersionCode
         versionName = releaseVersionName
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
@@ -121,6 +122,11 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             stagingBuildConfig()
         }
+    }
+
+    sourceSets {
+        getByName("debug").res.srcDir("src/localStaging/res")
+        getByName("staging").res.srcDir("src/localStaging/res")
     }
 
     packaging {
@@ -211,6 +217,9 @@ dependencies {
     testImplementation(libs.androidx.compose.ui.test)
     testImplementation(libs.androidx.compose.ui.testManifest)
     testImplementation(libs.androidx.test.ext.junit)
+
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }
 
 dependencyGuard {
