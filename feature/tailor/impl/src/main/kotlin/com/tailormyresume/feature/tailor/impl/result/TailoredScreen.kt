@@ -147,7 +147,7 @@ private fun TailoredFooter(
         } else if (state.accepted) {
             AcceptedRow()
         } else {
-            TmrSecondaryButton(
+            TmrPrimaryButton(
                 label = stringResource(R.string.feature_tailor_impl_result_accept),
                 onClick = onAcceptChanges,
                 modifier = Modifier.fillMaxWidth(),
