@@ -324,21 +324,6 @@ class ApplicationDetailViewModelTest {
     }
 
     @Test
-    fun soonRowsOnlyEmitComingSoon() = runTest {
-        seed(prototypeApplication("kb"))
-        val viewModel = viewModel()
-        viewModel.ready()
-
-        viewModel.events.test {
-            viewModel.onSoon()
-
-            assertThat(awaitItem()).isEqualTo(ApplicationDetailEvent.ComingSoon)
-            expectNoEvents()
-        }
-        assertThat(stored()).isEqualTo(prototypeApplication("kb"))
-    }
-
-    @Test
     fun tapsWhileAFileRequestRunsAreIgnored() = runTest {
         seed(prototypeApplication("kb"))
         intents.share = Intent("share")

@@ -22,7 +22,6 @@ internal fun ExportedRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val toast = LocalTmrToast.current
-    val comingSoon = stringResource(R.string.feature_tailor_impl_exported_coming_soon)
     val fileMissing = stringResource(R.string.feature_tailor_impl_exported_file_missing)
     val openFailed = stringResource(R.string.feature_tailor_impl_exported_open_failed)
     val undo = stringResource(R.string.feature_tailor_impl_exported_undo)
@@ -38,7 +37,6 @@ internal fun ExportedRoute(
                     toast.show(openFailed)
                 }
                 ExportedEvent.FileMissing -> toast.show(fileMissing)
-                ExportedEvent.ComingSoon -> toast.show(comingSoon)
                 is ExportedEvent.MarkedApplied -> toast.show(
                     message = context.getString(R.string.feature_tailor_impl_exported_applied_toast, event.on),
                     action = TmrToastAction(undo, viewModel::onUndoApplied),
@@ -75,7 +73,6 @@ internal fun ExportedRoute(
             onPickStatus = viewModel::onPickStatus,
             onDismissStatusSheet = viewModel::onDismissStatusSheet,
             onSaveStatus = viewModel::onSaveStatus,
-            onSoon = viewModel::onSoon,
             onGoToApplications = onGoToApplications,
         )
     }

@@ -47,7 +47,6 @@ class ApplicationDetailDateLineTest {
                     onOpen = {},
                     onRetailor = {},
                     onViewJobAnalysis = {},
-                    onSoon = {},
                 )
             }
         }

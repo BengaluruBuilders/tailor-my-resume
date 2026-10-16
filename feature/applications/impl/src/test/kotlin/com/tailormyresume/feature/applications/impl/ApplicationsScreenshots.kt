@@ -13,12 +13,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHasNoClickAction
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
 import androidx.test.core.app.ApplicationProvider
@@ -196,7 +201,6 @@ class ApplicationsScreenshots {
         onOpen: () -> Unit = {},
         onRetailor: () -> Unit = {},
         onViewJobAnalysis: () -> Unit = {},
-        onSoon: () -> Unit = {},
     ) {
         rule.captureApplicationsScreen(screenName, device) {
             ApplicationDetailScreen(
@@ -209,7 +213,6 @@ class ApplicationsScreenshots {
                 onOpen = onOpen,
                 onRetailor = onRetailor,
                 onViewJobAnalysis = onViewJobAnalysis,
-                onSoon = onSoon,
             )
         }
     }
@@ -246,8 +249,51 @@ class ApplicationsScreenshots {
         rule.onNodeWithText("Re-tailor with profile changes").assertExists()
         rule.onNodeWithText("1 credit").assertExists()
         rule.onNodeWithText("View job analysis").assertExists()
-        rule.onNodeWithText("Get prep questions").assertExists()
-        rule.onNodeWithText("Write a cover letter").assertExists()
+        rule.onNodeWithText("Coming soon: prep questions and cover letters.").assertHasNoClickAction()
+    }
+
+    @Test
+    fun roadmapHierarchyPrototype() = verifyRoadmapHierarchy(TmrTestDevices.prototype)
+
+    @Test
+    fun roadmapHierarchyPrototypeFont200() = verifyRoadmapHierarchy(TmrTestDevices.prototypeLargeFont)
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.SMALL_PHONE_QUALIFIERS)
+    fun roadmapHierarchySmallPhone() = verifyRoadmapHierarchy(TmrTestDevices.smallPhone)
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.SMALL_PHONE_QUALIFIERS)
+    fun roadmapHierarchySmallPhoneFont200() = verifyRoadmapHierarchy(
+        TmrTestDevices.smallPhone.copy(name = "small-phone-font-200", fontScale = 2f),
+    )
+
+    private fun verifyRoadmapHierarchy(device: TmrTestDevice) {
+        shootDetail("application_detail_hierarchy", detail().copy(canReviewTailoredResume = true), device)
+        val actions = listOf("Change", "Share", "Open", "Review tailored resume", "Re-tailor with profile changes", "View job analysis")
+        actions.forEach { label ->
+            rule.onNodeWithText(label).performScrollTo().assertIsDisplayed().assertHasClickAction()
+        }
+
+        val note = rule.onNodeWithText("Coming soon: prep questions and cover letters.")
+        note.performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+        val noteBounds = note.fetchSemanticsNode().boundsInRoot
+        val screenBounds = rule.onRoot().fetchSemanticsNode().boundsInRoot
+        assertTrue(
+            "Roadmap stays inside the viewport",
+            noteBounds.left >= screenBounds.left && noteBounds.right <= screenBounds.right &&
+                noteBounds.top >= screenBounds.top && noteBounds.bottom <= screenBounds.bottom,
+        )
+        val layouts = mutableListOf<TextLayoutResult>()
+        note.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        val layout = layouts.single()
+        assertTrue(
+            "Roadmap text must wrap without clipping: width=${layout.didOverflowWidth}, height=${layout.didOverflowHeight}",
+            !layout.hasVisualOverflow,
+        )
+        val lastAction = rule.onNodeWithText("View job analysis").fetchSemanticsNode().boundsInRoot
+        assertTrue("Roadmap follows available actions", note.fetchSemanticsNode().boundsInRoot.top >= lastAction.bottom)
+        runBlocking { rule.captureForDevice("src/test/screenshots", "application_detail_roadmap", device) }
     }
 
     @Test
@@ -455,14 +501,14 @@ class ApplicationsScreenshots {
         var opens = 0
         var retailored = 0
         var analyses = 0
-        var soon = 0
+        var reviewed = 0
         val picked = mutableListOf<ApplicationStatus>()
         var sheet by mutableStateOf<ApplicationStatus?>(null)
 
         rule.setContent {
             TmrTheme {
                 ApplicationDetailScreen(
-                    state = detail(statusSheet = sheet),
+                    state = detail(statusSheet = sheet).copy(canReviewTailoredResume = true),
                     onChangeStatus = { changed += 1 },
                     onPickStatus = { picked.add(it) },
                     onDismissStatusSheet = { dismissed += 1 },
@@ -471,7 +517,7 @@ class ApplicationsScreenshots {
                     onOpen = { opens += 1 },
                     onRetailor = { retailored += 1 },
                     onViewJobAnalysis = { analyses += 1 },
-                    onSoon = { soon += 1 },
+                    onReviewTailoredResume = { reviewed += 1 },
                 )
             }
         }
@@ -482,8 +528,8 @@ class ApplicationsScreenshots {
         rule.onNodeWithText("Change").performClick()
         rule.onNodeWithText("Re-tailor with profile changes").performClick()
         rule.onNodeWithText("View job analysis").performClick()
-        rule.onNodeWithText("Get prep questions").performClick()
-        rule.onNodeWithText("Write a cover letter").performClick()
+        rule.onNodeWithText("Review tailored resume").performClick()
+        rule.onNodeWithText("Coming soon: prep questions and cover letters.").assertHasNoClickAction()
         sheet = ApplicationStatus.INTERVIEW
         rule.waitForIdle()
         rule.onNodeWithText("Offer").performClick()
@@ -496,7 +542,7 @@ class ApplicationsScreenshots {
         assertEquals(1, saved)
         assertEquals(1, retailored)
         assertEquals(1, analyses)
-        assertEquals(2, soon)
+        assertEquals(1, reviewed)
         assertEquals(0, dismissed)
         assertEquals(listOf(ApplicationStatus.OFFER), picked)
     }

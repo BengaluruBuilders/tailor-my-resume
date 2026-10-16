@@ -4,10 +4,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.text.TextLayoutResult
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastAction
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastHost
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastState
@@ -15,10 +22,13 @@ import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.screenshot.TmrTestDevice
 import com.tailormyresume.core.screenshot.TmrTestDevices
+import com.tailormyresume.core.screenshot.captureForDevice
 import com.tailormyresume.feature.tailor.impl.NARROW_DEVICE
 import com.tailormyresume.feature.tailor.impl.NARROW_QUALIFIERS
 import com.tailormyresume.feature.tailor.impl.captureResultScreen
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,7 +79,6 @@ class ExportedScreenshots {
                 onPickStatus = {},
                 onDismissStatusSheet = {},
                 onSaveStatus = {},
-                onSoon = {},
                 onGoToApplications = {},
             )
             extra()
@@ -86,9 +95,52 @@ class ExportedScreenshots {
         rule.onNodeWithText("Saved to Applications: Associate Analyst, Northwind GCC").assertExists()
         rule.onNodeWithText("Did you apply?").assertExists()
         rule.onNodeWithText("✓ Mark as Applied").assertExists()
-        rule.onNodeWithText("Get prep questions").assertExists()
-        rule.onNodeWithText("Write a cover letter").assertExists()
+        rule.onNodeWithText("Coming soon: prep questions and cover letters.").assertHasNoClickAction()
         rule.onNodeWithText("Go to Applications").assertExists()
+    }
+
+    @Test
+    fun roadmapHierarchyPrototype() = verifyRoadmapHierarchy(TmrTestDevices.prototype)
+
+    @Test
+    fun roadmapHierarchyPrototypeFont200() = verifyRoadmapHierarchy(TmrTestDevices.prototypeLargeFont)
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.SMALL_PHONE_QUALIFIERS)
+    fun roadmapHierarchySmallPhone() = verifyRoadmapHierarchy(TmrTestDevices.smallPhone)
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.SMALL_PHONE_QUALIFIERS)
+    fun roadmapHierarchySmallPhoneFont200() = verifyRoadmapHierarchy(
+        TmrTestDevices.smallPhone.copy(name = "small-phone-font-200", fontScale = 2f),
+    )
+
+    private fun verifyRoadmapHierarchy(device: TmrTestDevice) {
+        shoot("export_exported_hierarchy", ready(), device)
+        val actions = listOf("Share", "Open", "✓ Mark as Applied")
+        actions.forEach { label ->
+            rule.onNodeWithText(label).performScrollTo().assertIsDisplayed().assertHasClickAction()
+        }
+        rule.onNodeWithText("Go to Applications").assertIsDisplayed().assertHasClickAction()
+        val note = rule.onNodeWithText("Coming soon: prep questions and cover letters.")
+        note.performScrollTo().assertIsDisplayed().assertHasNoClickAction()
+        val noteBounds = note.fetchSemanticsNode().boundsInRoot
+        val screenBounds = rule.onRoot().fetchSemanticsNode().boundsInRoot
+        assertTrue(
+            "Roadmap stays inside the viewport",
+            noteBounds.left >= screenBounds.left && noteBounds.right <= screenBounds.right &&
+                noteBounds.top >= screenBounds.top && noteBounds.bottom <= screenBounds.bottom,
+        )
+        val layouts = mutableListOf<TextLayoutResult>()
+        note.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        val layout = layouts.single()
+        assertTrue(
+            "Roadmap text must wrap without clipping: width=${layout.didOverflowWidth}, height=${layout.didOverflowHeight}",
+            !layout.hasVisualOverflow,
+        )
+        val lastAction = rule.onNodeWithText("✓ Mark as Applied").fetchSemanticsNode().boundsInRoot
+        assertTrue("Roadmap follows available actions", note.fetchSemanticsNode().boundsInRoot.top >= lastAction.bottom)
+        runBlocking { rule.captureForDevice("src/test/screenshots", "export_exported_roadmap", device) }
     }
 
     @Test
@@ -193,8 +245,6 @@ class ExportedScreenshots {
         var changed = 0
         var saved = 0
         var dismissed = 0
-        var prep = 0
-        var coverLetter = 0
         var wentToApplications = 0
         val picked = mutableListOf<ApplicationStatus>()
         var sheet by mutableStateOf<ApplicationStatus?>(null)
@@ -211,7 +261,6 @@ class ExportedScreenshots {
                     onPickStatus = { picked.add(it) },
                     onDismissStatusSheet = { dismissed += 1 },
                     onSaveStatus = { saved += 1 },
-                    onSoon = { prep += 1 },
                     onGoToApplications = { wentToApplications += 1 },
                 )
             }
@@ -221,8 +270,7 @@ class ExportedScreenshots {
         rule.onNodeWithText("Share").performClick()
         rule.onNodeWithText("Open").performClick()
         rule.onNodeWithText("✓ Mark as Applied").performClick()
-        rule.onNodeWithText("Get prep questions").performClick()
-        rule.onNodeWithText("Write a cover letter").performClick()
+        rule.onNodeWithText("Coming soon: prep questions and cover letters.").assertHasNoClickAction()
         rule.onNodeWithText("Go to Applications").performClick()
         status = ApplicationStatus.APPLIED
         rule.waitForIdle()
@@ -242,8 +290,6 @@ class ExportedScreenshots {
         assertEquals(1, saved)
         assertEquals(listOf(ApplicationStatus.OFFER), picked)
         assertEquals(0, dismissed)
-        assertEquals(2, prep)
-        assertEquals(0, coverLetter)
         assertEquals(1, wentToApplications)
     }
 }

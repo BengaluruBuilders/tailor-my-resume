@@ -22,10 +22,10 @@ import com.tailormyresume.core.designsystem.component.TmrButtonSize
 import com.tailormyresume.core.designsystem.component.TmrWholeWordText
 import com.tailormyresume.core.designsystem.component.chrome.TmrStatusSheet
 import com.tailormyresume.core.designsystem.component.content.TmrCard
+import com.tailormyresume.core.designsystem.component.content.TmrComingSoonNote
 import com.tailormyresume.core.designsystem.component.content.TmrFileCard
 import com.tailormyresume.core.designsystem.component.content.TmrListRow
 import com.tailormyresume.core.designsystem.component.content.TmrSectionLabel
-import com.tailormyresume.core.designsystem.component.content.TmrSoonRow
 import com.tailormyresume.core.designsystem.component.content.TmrStatusChip
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.model.ApplicationStatus
@@ -45,7 +45,6 @@ internal fun ApplicationDetailScreen(
     onOpen: () -> Unit,
     onRetailor: () -> Unit,
     onViewJobAnalysis: () -> Unit,
-    onSoon: () -> Unit,
     modifier: Modifier = Modifier,
     onReviewTailoredResume: () -> Unit = {},
 ) {
@@ -126,18 +125,11 @@ internal fun ApplicationDetailScreen(
                 TmrListRow(
                     label = stringResource(R.string.feature_applications_impl_view_job),
                     onClick = onViewJobAnalysis,
+                    showDivider = false,
                     minHeight = 56.dp,
                 )
-                TmrSoonRow(
-                    label = stringResource(R.string.feature_applications_impl_prep_questions),
-                    onClick = onSoon,
-                )
-                TmrSoonRow(
-                    label = stringResource(R.string.feature_applications_impl_cover_letter),
-                    onClick = onSoon,
-                    showDivider = false,
-                )
             }
+            TmrComingSoonNote(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
         }
         val statusSheet = state.statusSheet
         if (statusSheet != null) {

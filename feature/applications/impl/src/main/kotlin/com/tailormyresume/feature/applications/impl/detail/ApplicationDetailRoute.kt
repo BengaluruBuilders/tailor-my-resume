@@ -25,7 +25,6 @@ internal fun ApplicationDetailRoute(viewModel: ApplicationDetailViewModel, navig
     val context = LocalContext.current
     val toast = LocalTmrToast.current
     val balanceUnavailable = stringResource(R.string.feature_applications_impl_credits_unknown)
-    val comingSoon = stringResource(R.string.feature_applications_impl_coming_soon)
     val fileMissing = stringResource(R.string.feature_applications_impl_file_missing)
     val openFailed = stringResource(R.string.feature_applications_impl_open_failed)
     LaunchedEffect(viewModel) {
@@ -35,7 +34,6 @@ internal fun ApplicationDetailRoute(viewModel: ApplicationDetailViewModel, navig
                 is ApplicationDetailEvent.OpenFile -> context.startOrToast(event.intent) { toast.show(openFailed) }
                 ApplicationDetailEvent.FileMissing -> toast.show(fileMissing)
                 ApplicationDetailEvent.BalanceUnavailable -> toast.show(balanceUnavailable)
-                ApplicationDetailEvent.ComingSoon -> toast.show(comingSoon)
                 is ApplicationDetailEvent.StatusSet -> toast.show(
                     context.getString(
                         R.string.feature_applications_impl_status_set,
@@ -64,7 +62,6 @@ internal fun ApplicationDetailRoute(viewModel: ApplicationDetailViewModel, navig
             onRetailor = viewModel::onRetailor,
             onReviewTailoredResume = viewModel::onReviewTailoredResume,
             onViewJobAnalysis = { navigator.navigateToJobResult(viewModel.applicationId) },
-            onSoon = viewModel::onSoon,
         )
     }
 }

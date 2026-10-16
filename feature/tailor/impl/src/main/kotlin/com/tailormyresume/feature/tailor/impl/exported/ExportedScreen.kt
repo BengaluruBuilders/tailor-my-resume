@@ -29,8 +29,8 @@ import com.tailormyresume.core.designsystem.component.TmrButtonSize
 import com.tailormyresume.core.designsystem.component.chrome.TmrStatusSheet
 import com.tailormyresume.core.designsystem.component.content.TmrApplicationStatus
 import com.tailormyresume.core.designsystem.component.content.TmrCard
+import com.tailormyresume.core.designsystem.component.content.TmrComingSoonNote
 import com.tailormyresume.core.designsystem.component.content.TmrFileCard
-import com.tailormyresume.core.designsystem.component.content.TmrSoonRow
 import com.tailormyresume.core.designsystem.component.content.TmrStatusChip
 import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
 import com.tailormyresume.core.designsystem.component.input.TmrSecondaryButton
@@ -50,7 +50,6 @@ internal fun ExportedScreen(
     onPickStatus: (ApplicationStatus) -> Unit,
     onDismissStatusSheet: () -> Unit,
     onSaveStatus: () -> Unit,
-    onSoon: () -> Unit,
     onGoToApplications: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -88,7 +87,7 @@ internal fun ExportedScreen(
                     color = TmrTheme.colors.textMuted,
                 )
                 StatusCard(state, onMarkApplied, onChangeStatus)
-                SoonCard(onSoon)
+                TmrComingSoonNote(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
             }
             Box(
                 modifier = Modifier
@@ -222,26 +221,6 @@ private fun StatusCard(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun SoonCard(onSoon: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(TmrTheme.colors.surfaceRaised, TmrTheme.shapes.card)
-            .padding(horizontal = 16.dp),
-    ) {
-        TmrSoonRow(
-            label = stringResource(R.string.feature_tailor_impl_exported_prep_questions),
-            onClick = onSoon,
-        )
-        TmrSoonRow(
-            label = stringResource(R.string.feature_tailor_impl_exported_cover_letter),
-            onClick = onSoon,
-            showDivider = false,
-        )
     }
 }
 

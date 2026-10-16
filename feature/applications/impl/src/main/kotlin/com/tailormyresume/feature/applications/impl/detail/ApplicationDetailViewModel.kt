@@ -105,10 +105,6 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
         eventChannel.trySend(ApplicationDetailEvent.ReviewTailoredResume(applicationId))
     }
 
-    fun onSoon() {
-        eventChannel.trySend(ApplicationDetailEvent.ComingSoon)
-    }
-
     private suspend fun hasQuestion(): Boolean =
         applicationRepository.observeApplication(applicationId).first()?.gapAnalysis?.question != null
 

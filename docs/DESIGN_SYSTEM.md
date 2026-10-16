@@ -333,7 +333,13 @@ Always pass `label`. The default label is the enum name and is not user copy.
 Board: Chips, pills and the report action; Requirement rows.
 
 ## Content
+
+`TmrComingSoonNote` shows the shared prep-question and cover-letter roadmap as muted body text.
+Place it after available actions, outside their action card. It has no tap action, button role,
+chevron, badge, or toast. It wraps at the system text size. See issue #393.
+
 ```kotlin
+fun TmrComingSoonNote(modifier: Modifier = Modifier)
 fun TmrCoverageBlock(met: Int, partial: Int?, gap: Int, caption: String, metLegend: String, partialLegend: String?, gapLegend: String, modifier, summary: String? = null)
 fun TmrCoverageBar(met: Int, partial: Int, gap: Int, modifier)
 fun TmrEvidenceMark(text: String, modifier, style: TextStyle? = null, tint: Color? = null)
