@@ -1,0 +1,8 @@
+*.log
+avd/
+*.apk
+before*.png
+emulator-session.sh
+gradle-ci.sh
+validate-and-run.sh
+pr-body.md
