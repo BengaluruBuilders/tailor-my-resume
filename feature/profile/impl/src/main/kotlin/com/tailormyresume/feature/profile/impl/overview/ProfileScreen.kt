@@ -33,7 +33,6 @@ import com.tailormyresume.core.designsystem.component.input.TmrTextButton
 import com.tailormyresume.core.designsystem.icon.TmrIcons
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.navigation.Navigator
-import com.tailormyresume.feature.onboarding.api.navigation.ReviewProfileNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditRoleNavKey
@@ -44,7 +43,7 @@ import com.tailormyresume.feature.profile.api.navigation.SkillsNavKey
 import com.tailormyresume.feature.profile.impl.R
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
 
-internal enum class ProfileTarget { SETTINGS, CONTACT, SUMMARY, EXPERIENCE, EDUCATION, SKILLS, ACHIEVEMENTS, LINKEDIN, REPLACE, REVIEW }
+internal enum class ProfileTarget { SETTINGS, CONTACT, SUMMARY, EXPERIENCE, EDUCATION, SKILLS, ACHIEVEMENTS, LINKEDIN, REPLACE }
 
 internal fun ProfileTarget.navKey(): NavKey = when (this) {
     ProfileTarget.SETTINGS -> SettingsNavKey()
@@ -55,7 +54,6 @@ internal fun ProfileTarget.navKey(): NavKey = when (this) {
     ProfileTarget.EXPERIENCE -> ExperienceNavKey()
     ProfileTarget.SKILLS -> SkillsNavKey()
     ProfileTarget.REPLACE -> UploadNavKey()
-    ProfileTarget.REVIEW -> ReviewProfileNavKey()
 }
 
 internal fun Navigator.open(target: ProfileTarget) = navigate(target.navKey())
@@ -125,7 +123,7 @@ internal fun ProfileScreen(
                         }
                     }
                 }
-                ProfileReadiness(content, onOpen, onFixGap)
+                ProfileReadiness(content, onFixGap)
             }
             TmrCard {
                 Column(
@@ -204,17 +202,16 @@ internal fun ProfileScreen(
 @Composable
 private fun ProfileReadiness(
     content: ProfileUiState.Content,
-    onOpen: (ProfileTarget) -> Unit,
     onFixGap: (String) -> Unit,
 ) {
     val colors = TmrTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(TmrTheme.spacing.xs)) {
         Text(
             text = stringResource(
-                when {
-                    content.requiredGaps.isNotEmpty() -> R.string.feature_profile_impl_required_fixes
-                    content.readyToTailor -> R.string.feature_profile_impl_ready_to_tailor
-                    else -> R.string.feature_profile_impl_review_needed
+                if (content.readyToTailor) {
+                    R.string.feature_profile_impl_ready_to_tailor
+                } else {
+                    R.string.feature_profile_impl_required_fixes
                 },
             ),
             style = TmrTheme.typography.strongLarge,
@@ -225,12 +222,6 @@ private fun ProfileReadiness(
                 label = stringResource(R.string.feature_profile_impl_required_end_date, gap.title),
                 onClick = { onFixGap(gap.entryId) },
                 showDivider = false,
-            )
-        }
-        if (!content.reviewed && content.requiredGaps.isEmpty()) {
-            TmrTextButton(
-                label = stringResource(R.string.feature_profile_impl_review_profile),
-                onClick = { onOpen(ProfileTarget.REVIEW) },
             )
         }
     }

@@ -9,8 +9,6 @@
     <string name="feature_profile_impl_ready_to_tailor">Ready to tailor</string>
     <string name="feature_profile_impl_required_fixes">Required corrections</string>
     <string name="feature_profile_impl_required_end_date">Add an end date for %1$s</string>
-    <string name="feature_profile_impl_review_needed">Confirm your facts before tailoring</string>
-    <string name="feature_profile_impl_review_profile">Review profile</string>
     <string name="feature_profile_impl_optional">Optional</string>
     <string name="feature_profile_impl_subtitle_separator" translatable="false">" · "</string>
     <plurals name="feature_profile_impl_years">

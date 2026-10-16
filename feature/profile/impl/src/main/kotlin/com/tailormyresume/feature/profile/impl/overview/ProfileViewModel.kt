@@ -29,7 +29,6 @@ internal sealed interface ProfileUiState {
         val headline: String,
         val years: Int?,
         val city: String,
-        val reviewed: Boolean,
         val requiredGaps: List<RequiredGap>,
         val experienceCount: Int,
         val educationCount: Int,
@@ -37,7 +36,7 @@ internal sealed interface ProfileUiState {
         val achievementsCount: Int,
         val sourceFileName: String?,
     ) : ProfileUiState {
-        val readyToTailor: Boolean get() = reviewed && requiredGaps.isEmpty()
+        val readyToTailor: Boolean get() = requiredGaps.isEmpty()
     }
 }
 
@@ -57,7 +56,6 @@ internal class ProfileViewModel @Inject constructor(
                 headline = profile.headline,
                 years = yearsOfExperience(profile.entries, clock),
                 city = profile.city,
-                reviewed = profile.reviewedAt != null,
                 requiredGaps = RequiredGaps.of(profile),
                 experienceCount = profile.entries.countLogicalEntries(EntryCategory.EXPERIENCE),
                 educationCount = profile.entries.countLogicalEntries(EntryCategory.EDUCATION),

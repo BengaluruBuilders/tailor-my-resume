@@ -29,7 +29,6 @@ import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.core.testing.data.PrototypeFixtures
-import com.tailormyresume.feature.onboarding.api.navigation.ReviewProfileNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditRoleNavKey
 import com.tailormyresume.feature.profile.api.navigation.ExperienceNavKey
@@ -143,19 +142,6 @@ class ProfileRealEntryWiringTest {
 
         assertThat(state.stack.last()).isEqualTo(EditContactNavKey())
         assertThat(savedProfile()).isEqualTo(before)
-    }
-
-    @Test
-    fun unreviewedProfile_opensExistingReviewWithoutConfirmingFacts() {
-        val profile = PrototypeFixtures.returning().profile.copy(reviewedAt = null)
-        runBlocking { repository.saveProfile(profile) }
-        show(ProfileNavKey())
-
-        composeRule.onNodeWithText("Review profile").performClick()
-        composeRule.waitForIdle()
-
-        assertThat(state.stack.last()).isEqualTo(ReviewProfileNavKey())
-        assertThat(savedProfile()).isEqualTo(profile)
     }
 
     @Test

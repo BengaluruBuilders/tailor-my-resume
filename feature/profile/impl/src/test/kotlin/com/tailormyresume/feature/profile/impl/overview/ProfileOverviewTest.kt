@@ -14,7 +14,6 @@ import com.tailormyresume.core.testing.data.PrototypeFixtures
 import com.tailormyresume.core.testing.repository.TestProfileRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.core.testing.util.TestClock
-import com.tailormyresume.feature.onboarding.api.navigation.ReviewProfileNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
 import com.tailormyresume.feature.profile.api.navigation.EditContactNavKey
 import com.tailormyresume.feature.profile.api.navigation.ExperienceNavKey
@@ -273,10 +272,10 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun requiredCorrections_areListedEvenForAReviewedProfile() = runTest {
+    fun requiredCorrections_areListed() = runTest {
         val viewModel = viewModel()
         collectUiState(viewModel)
-        val fresh = PrototypeFixtures.fresh().profile.copy(reviewedAt = clock.now())
+        val fresh = PrototypeFixtures.fresh().profile
         profileRepository.sendProfile(fresh)
 
         assertThat(viewModel.content().readyToTailor).isFalse()
@@ -290,14 +289,13 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun fixingDates_doesNotReplaceExplicitReview() = runTest {
+    fun confirmedProfileWithoutReviewTimestamp_isReadyToTailor() = runTest {
         val viewModel = viewModel()
         collectUiState(viewModel)
         profileRepository.sendProfile(PrototypeFixtures.returning().profile.copy(reviewedAt = null))
 
         assertThat(viewModel.content().requiredGaps).isEmpty()
-        assertThat(viewModel.content().reviewed).isFalse()
-        assertThat(viewModel.content().readyToTailor).isFalse()
+        assertThat(viewModel.content().readyToTailor).isTrue()
     }
 
     @Test
@@ -359,11 +357,6 @@ class ProfileDestinationsTest {
     @Test
     fun skillsTarget_mapsToSkillsNavKey() {
         assertThat(ProfileTarget.SKILLS.navKey()).isEqualTo(SkillsNavKey())
-    }
-
-    @Test
-    fun reviewTarget_mapsToExistingReview() {
-        assertThat(ProfileTarget.REVIEW.navKey()).isEqualTo(ReviewProfileNavKey())
     }
 
     @Test

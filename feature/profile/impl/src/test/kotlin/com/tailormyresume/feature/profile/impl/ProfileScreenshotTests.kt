@@ -109,7 +109,6 @@ internal fun ComposeContentTestRule.textLayouts(): List<Pair<SemanticsNode, Text
 
 private fun profileContent(
     sourceFileName: String? = "Priya_Deshmukh_Resume.pdf",
-    reviewed: Boolean = true,
     requiredGaps: List<RequiredGap> = emptyList(),
     onFixGap: (String) -> Unit = {},
     onOpen: (ProfileTarget) -> Unit = {},
@@ -121,7 +120,6 @@ private fun profileContent(
             headline = "Finance analyst",
             years = 4,
             city = "Pune",
-            reviewed = reviewed,
             requiredGaps = requiredGaps,
             experienceCount = 3,
             educationCount = 1,
@@ -277,29 +275,6 @@ class ProfileScreenshotTest {
     @Config(qualifiers = NARROW_QUALIFIERS)
     fun requiredCorrectionsFont200At337dp() {
         requiredCorrectionsState(NARROW_DEVICE)
-    }
-
-    @Test
-    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
-    fun unreviewedProfileOffersExplicitReview() {
-        unreviewedState(TmrTestDevices.prototype)
-    }
-
-    @Test
-    @Config(qualifiers = NARROW_QUALIFIERS)
-    fun unreviewedProfileFont200At337dp() {
-        unreviewedState(NARROW_DEVICE)
-    }
-
-    private fun unreviewedState(device: TmrTestDevice) {
-        val opened = mutableListOf<ProfileTarget>()
-        rule.setTmrContent(device, profileContent(reviewed = false) { opened += it })
-        rule.assertTexts("Confirm your facts before tailoring", "Review profile")
-        rule.assertNoText("Ready to tailor")
-        rule.assertNoTruncatedText()
-        rule.capture("profile_review_needed", device)
-        rule.onNodeWithText("Review profile").performClick()
-        assertTrue(opened == listOf(ProfileTarget.REVIEW))
     }
 
     private fun requiredCorrectionsState(device: TmrTestDevice) {
