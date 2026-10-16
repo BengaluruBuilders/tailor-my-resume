@@ -25,9 +25,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import kotlin.math.abs
 
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
 class SignInScreenTest {
 
@@ -144,6 +146,35 @@ class SignInScreenTest {
     }
 
     @Test
+    @Config(qualifiers = TmrTestDevices.SMALL_PHONE_QUALIFIERS)
+    fun readingScrolledExplanationPausesAutoAdvanceUntilTheNextStory() {
+        composeRule.mainClock.autoAdvance = false
+        lateinit var story: SignInStoryState
+        composeRule.showSignIn(fontScale = 2f) {
+            story = rememberSignInStoryState(false)
+            SignInScreen(SignInUiState.Ready, onContinueWithGoogle = {}, story = story)
+        }
+        composeRule.onNodeWithTag(SignInTags.STORY).performTouchInput { swipeUp() }
+        composeRule.mainClock.advanceTimeBy(1_000)
+        assertThat(story.reading).isTrue()
+
+        composeRule.mainClock.advanceTimeBy(12_000)
+
+        assertThat(story.index).isEqualTo(0)
+        composeRule.onNodeWithText("Have your resume or work details and the full job description ready.").assertIsDisplayed()
+        val config = composeRule.onNodeWithTag(SignInTags.STORY).fetchSemanticsNode().config
+        composeRule.runOnUiThread {
+            config[SemanticsActions.CustomActions].first { it.label == "Next story" }.action()
+        }
+        composeRule.mainClock.advanceTimeBy(32)
+        assertThat(story.reading).isFalse()
+        assertThat(story.index).isEqualTo(1)
+        composeRule.mainClock.advanceTimeBy(5_300)
+        assertThat(story.index).isEqualTo(2)
+        composeRule.onNodeWithText("Apply smarter, not harder.", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    @Test
     fun reducedMotionAutoAdvancesAndTapsStep() {
         reduceMotion()
         composeRule.mainClock.autoAdvance = false
@@ -239,7 +270,7 @@ class SignInScreenTest {
     fun noEllipsisAtFont200() {
         composeRule.showSignIn(fontScale = 2f) { SignInScreen(SignInUiState.Ready, onContinueWithGoogle = {}) }
 
-        val node = composeRule.onNodeWithText("Tired of rewriting your resume?").fetchSemanticsNode()
+        val node = composeRule.onNodeWithText("Tired of rewriting your resume?", useUnmergedTree = true).fetchSemanticsNode()
         val layouts = mutableListOf<TextLayoutResult>()
         node.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts)
         assertThat(layouts).isNotEmpty()

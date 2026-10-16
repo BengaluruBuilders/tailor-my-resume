@@ -54,7 +54,7 @@ internal fun TailoredTabs(
                     .fillMaxHeight()
                     .defaultMinSize(minHeight = 44.dp)
                     .clip(TmrTheme.shapes.pill)
-                    .background(if (isSelected) colors.lime else Color.Transparent)
+                    .background(if (isSelected) colors.surfaceHigh else Color.Transparent)
                     .selectable(
                         selected = isSelected,
                         role = Role.Tab,
@@ -66,7 +66,7 @@ internal fun TailoredTabs(
                 Text(
                     text = label,
                     style = TmrTheme.typography.mono14,
-                    color = if (isSelected) colors.ink else colors.textSecondary,
+                    color = if (isSelected) colors.lime else colors.textSecondary,
                     textAlign = TextAlign.Center,
                 )
             }

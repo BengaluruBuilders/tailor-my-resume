@@ -20,20 +20,28 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.then
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastHost
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastState
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.screenshot.TmrTestDevices
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 @RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
 class SignInResponsiveLayoutTest {
 
     @get:Rule
@@ -64,6 +72,7 @@ class SignInResponsiveLayoutTest {
 
         listOf(
             DpSize(320.dp, 480.dp),
+            DpSize(320.dp, 568.dp),
             DpSize(320.dp, 640.dp),
             DpSize(374.dp, 640.dp),
             DpSize(374.dp, 834.dp),
@@ -73,12 +82,12 @@ class SignInResponsiveLayoutTest {
                 val story = SignInStoryState()
                 composeRule.runOnIdle { scenario.value = Scenario(size, fontScale, story) }
                 composeRule.waitForIdle()
-                assertStories(story)
+                assertStories(story, size, fontScale)
             }
         }
     }
 
-    private fun assertStories(story: SignInStoryState) {
+    private fun assertStories(story: SignInStoryState, size: DpSize, fontScale: Float) {
         SignInStories.indices.forEach { index ->
             composeRule.runOnIdle { repeat(index - story.index) { story.step(1) } }
             val scrollRange = composeRule.onNodeWithTag(SignInTags.STORY)
@@ -92,9 +101,24 @@ class SignInResponsiveLayoutTest {
             assertThat(footer.bottom).isAtMost(root.bottom)
 
             val headline = composeRule.onNodeWithText(headlines[index], useUnmergedTree = true)
+            if (fontScale == 2f) headline.assertIsDisplayed()
+            if (fontScale == 2f && size.height <= 568.dp) {
+                assertWithMessage("$size font $fontScale story $index scroll range").that(scrollRange.maxValue()).isGreaterThan(0f)
+            }
+            if (scrollRange.maxValue() > 0f) {
+                composeRule.onNodeWithTag(SignInTags.STORY).performTouchInput { swipeUp() }
+                composeRule.waitForIdle()
+                assertThat(scrollRange.value()).isGreaterThan(0f)
+                assertThat(story.index).isEqualTo(index)
+                assertThat(story.reading).isTrue()
+            }
             headline.performScrollTo().assertIsDisplayed()
             composeRule.onNodeWithText(sublines[index], useUnmergedTree = true)
                 .performScrollTo().assertIsDisplayed()
+            val explanation = composeRule.onNodeWithText(sublines[index], useUnmergedTree = true)
+                .fetchSemanticsNode().boundsInRoot
+            assertThat(explanation.bottom).isAtMost(google.top)
+            assertThat(google.bottom).isAtMost(footer.top)
         }
     }
 

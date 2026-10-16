@@ -3,6 +3,7 @@ package com.tailormyresume.feature.tailor.impl.result
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -189,6 +190,15 @@ class TailoredScreenshotTest {
         shoot("result_changes_before_accept", ready(), TailoredTab.Changes, TmrTestDevices.prototype)
         rule.onNodeWithText("Business Analyst · Infosys").assertExists()
         rule.onNodeWithText("Accept changes").assertExists()
+        rule.onNodeWithText("Changes · 3").assertIsSelected()
+        assertTrue(rule.onAllUndo().isNotEmpty())
+    }
+
+    @Test
+    fun changesBeforeAccept_font2_374dp() {
+        shoot("result_changes_before_accept", ready(), TailoredTab.Changes, TmrTestDevices.prototypeLargeFont)
+        rule.onNodeWithText("Accept changes").assertIsEnabled()
+        rule.onNodeWithText("Changes · 3").assertIsSelected()
         assertTrue(rule.onAllUndo().isNotEmpty())
     }
 
@@ -246,7 +256,22 @@ class TailoredScreenshotTest {
             TmrTestDevices.prototype,
         )
         rule.onNodeWithText("Changes accepted").assertExists()
+        rule.onNodeWithText("Accept changes").assertDoesNotExist()
         rule.onNodeWithText("Export PDF").assertIsEnabled()
+    }
+
+    @Test
+    fun accepted_font2_374dp() {
+        shoot(
+            "result_accepted",
+            ready(accepted = true, exportEnabled = true),
+            TailoredTab.Changes,
+            TmrTestDevices.prototypeLargeFont,
+        )
+        rule.onNodeWithText("Changes accepted").assertExists()
+        rule.onNodeWithText("Accept changes").assertDoesNotExist()
+        rule.onNodeWithText("Export PDF").assertIsEnabled()
+        rule.onNodeWithText("Edit").assertIsEnabled()
     }
 
     @Test

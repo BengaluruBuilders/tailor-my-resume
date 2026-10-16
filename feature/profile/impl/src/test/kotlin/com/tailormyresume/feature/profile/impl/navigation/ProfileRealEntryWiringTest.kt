@@ -119,6 +119,32 @@ class ProfileRealEntryWiringTest {
     }
 
     @Test
+    fun requiredCorrection_opensAffectedRoleWithoutChangingFacts() {
+        val profile = PrototypeFixtures.fresh().profile
+        runBlocking { repository.saveProfile(profile) }
+        val gap = profile.entries.single { it.category == EntryCategory.EXPERIENCE && it.endDate.isBlank() }
+        show(ProfileNavKey())
+
+        composeRule.onNodeWithText("Add an end date for ${gap.title}").performClick()
+        composeRule.waitForIdle()
+
+        assertThat(state.stack.last()).isEqualTo(EditRoleNavKey(entryId = gap.id))
+        assertThat(savedProfile()).isEqualTo(profile)
+    }
+
+    @Test
+    fun optionalLinks_openExistingContactEditorWithoutChangingFacts() {
+        val before = savedProfile()
+        show(ProfileNavKey())
+
+        composeRule.onNodeWithText("LinkedIn & links").performClick()
+        composeRule.waitForIdle()
+
+        assertThat(state.stack.last()).isEqualTo(EditContactNavKey())
+        assertThat(savedProfile()).isEqualTo(before)
+    }
+
+    @Test
     fun settingsGearTap_opensSettings() {
         show(ProfileNavKey())
 
