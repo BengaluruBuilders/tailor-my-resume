@@ -29,6 +29,8 @@ internal class SignInStoryState(private val durationMs: Int = 5000) {
     var paused by mutableStateOf(false)
         private set
 
+    var reading by mutableStateOf(false)
+
     fun tick(dtMs: Long) {
         fraction += dtMs.toFloat() / durationMs
         while (fraction >= 1f) {
@@ -60,7 +62,7 @@ internal class SignInStoryState(private val durationMs: Int = 5000) {
 internal fun rememberSignInStoryState(signingIn: Boolean): SignInStoryState {
     val idle = TmrTheme.motion.idle
     val state = remember(idle.storyDurationMs) { SignInStoryState(idle.storyDurationMs) }
-    val running = idle.storyAutoAdvance && !state.paused && !signingIn
+    val running = idle.storyAutoAdvance && !state.paused && !state.reading && !signingIn
     LaunchedEffect(running) {
         if (!running) return@LaunchedEffect
         var last = withInfiniteAnimationFrameNanos { it }
