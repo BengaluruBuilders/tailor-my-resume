@@ -460,23 +460,6 @@ class ExportedViewModelTest {
     }
 
     @Test
-    fun soonRowsOnlyEmitComingSoonToast() = runTest {
-        seed()
-        val viewModel = viewModel()
-        backgroundScope.launch(UnconfinedTestDispatcher()) { viewModel.state.collect() }
-        val before = storedApplication()
-
-        viewModel.events.test {
-            viewModel.onSoon()
-
-            assertThat(awaitItem()).isEqualTo(ExportedEvent.ComingSoon)
-            cancelAndIgnoreRemainingEvents()
-        }
-
-        assertThat(storedApplication()).isEqualTo(before)
-    }
-
-    @Test
     fun deepLinkWithoutAcceptShowsNothingExported() = runTest {
         seed(acceptedApplication(listOf(b1), accepted = false))
         val viewModel = viewModel()

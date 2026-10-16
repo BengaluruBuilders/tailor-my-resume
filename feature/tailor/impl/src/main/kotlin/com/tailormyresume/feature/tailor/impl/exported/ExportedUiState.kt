@@ -33,8 +33,6 @@ internal sealed interface ExportedEvent {
 
     data object FileMissing : ExportedEvent
 
-    data object ComingSoon : ExportedEvent
-
     data class MarkedApplied(val on: String) : ExportedEvent
 
     data class StatusSet(val status: ApplicationStatus) : ExportedEvent

@@ -25,10 +25,7 @@
     <string name="feature_tailor_impl_exported_mark_applied">✓ Mark as Applied</string>
     <string name="feature_tailor_impl_exported_marked_on">Marked on %1$s</string>
     <string name="feature_tailor_impl_exported_change">Change</string>
-    <string name="feature_tailor_impl_exported_prep_questions">Get prep questions</string>
-    <string name="feature_tailor_impl_exported_cover_letter">Write a cover letter</string>
     <string name="feature_tailor_impl_exported_go_to_applications">Go to Applications</string>
-    <string name="feature_tailor_impl_exported_coming_soon">Coming soon</string>
     <string name="feature_tailor_impl_exported_applied_toast">Applied, marked on %1$s</string>
     <string name="feature_tailor_impl_exported_undo">Undo</string>
     <string name="feature_tailor_impl_exported_status_set">Status set to %1$s</string>

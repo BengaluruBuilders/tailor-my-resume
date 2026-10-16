@@ -145,10 +145,6 @@ internal class ExportedViewModel @AssistedInject constructor(
         }
     }
 
-    fun onSoon() {
-        eventChannel.trySend(ExportedEvent.ComingSoon)
-    }
-
     private fun resolveIntent(build: suspend (String) -> Intent?, event: (Intent) -> ExportedEvent) {
         viewModelScope.launch {
             if (state.value !is ExportedUiState.Ready) return@launch

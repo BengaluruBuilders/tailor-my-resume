@@ -1,6 +1,7 @@
 package com.tailormyresume.feature.tailor.impl.exported
 
 import android.content.Intent
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -123,13 +124,10 @@ class ExportedRouteTest {
     }
 
     @Test
-    fun soonRowShowsComingSoonAndOpensNothing() {
+    fun comingSoonNoteHasNoAction() {
         show(viewModel(accepted = true))
 
-        composeRule.onNodeWithText("Get prep questions").performClick()
-        composeRule.waitForIdle()
-
-        composeRule.onNodeWithText("Coming soon").assertExists()
+        composeRule.onNodeWithText("Coming soon: prep questions and cover letters.").assertHasNoClickAction()
         assertThat(state.stack.toList()).containsExactly(ExportedNavKey("app-1"))
     }
 

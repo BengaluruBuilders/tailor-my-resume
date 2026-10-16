@@ -22,6 +22,7 @@
     <string name="core_designsystem_content_tag_rewritten">Rewritten</string>
     <string name="core_designsystem_content_tag_added">Added</string>
     <string name="core_designsystem_content_tag_reordered">Reordered</string>
+    <string name="core_designsystem_content_coming_soon_note">Coming soon: prep questions and cover letters.</string>
     <string name="core_designsystem_content_soon_state">Coming soon</string>
 
     <string name="core_designsystem_content_keyword_have_state">In your resume</string>
