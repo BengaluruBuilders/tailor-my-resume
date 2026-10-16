@@ -255,6 +255,10 @@ Rules, all in `core:navigation` `Navigator` and the app `ScreenChrome` table:
 - **Root.** `root(key)` clears the stack to one key. A tab tap, Go to Applications, Close on Exported, the
   Applications avatar and sign-out or delete-account completion (`navigateToSignIn()`) all use it. Back from the
   rooted key does not return to the previous flow.
+- **Job draft.** The Add job entry keeps the exact text in its ViewModel while analysis results sit above it.
+  Back restores that text and its input mode. The link draft stays in `JobDraftStore` across input-mode changes,
+  import and analysis. Clear resets both drafts. A new Add job ViewModel starts with empty text and resets the
+  link draft. These drafts live in memory; they are not saved across process death.
 - **Close.** Close on Exported is root Applications. Close on Paywall is back.
 - **Tab bar.** `TmrTabBar` (Applications, +, Profile) shows only on the Applications and Profile screens. The centre +
   pushes Add job (`Navigator.newApp()`). Settings opens from the Profile gear and is not a tab.

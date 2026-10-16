@@ -336,7 +336,46 @@ class JobViewModelTest {
         assertThat(saved.updatedAt).isEqualTo(clock.instant)
         assertThat(events.filterIsInstance<JobEvent.Analyzed>()).containsExactly(JobEvent.Analyzed(saved.id))
         assertThat(draftStore.draft.value).isNull()
+        assertThat(viewModel.uiState.value.text).isEqualTo(POST_250)
+    }
+
+    @Test
+    fun editedDraftIsUsedForReanalysis() = runTest(dispatcher) {
+        val source = FakeJobAnalysisSource()
+        val viewModel = viewModel(source = source)
+        collectEvents(viewModel)
+        val original = "  $POST_250\n"
+        viewModel.onTextChange(original)
+        viewModel.onAnalyze()
+        advanceTimeBy(1_000)
+
+        assertThat(viewModel.uiState.value.text).isEqualTo(original)
+        val edited = "$original SQL reporting"
+        viewModel.onTextChange(edited)
+        viewModel.onAnalyze()
+        advanceTimeBy(1_000)
+
+        assertThat(source.calls).containsExactly(original, edited).inOrder()
+        assertThat(viewModel.uiState.value.text).isEqualTo(edited)
+    }
+
+    @Test
+    fun clearResetsTextAndLinkAndNewJobStartsEmpty() = runTest(dispatcher) {
+        val draftStore = JobDraftStore(TestSessionRepository(), backgroundScope)
+        val viewModel = viewModel(draftStore = draftStore)
+        viewModel.onTextChange(POST_250)
+        draftStore.setLink("https://jobs.example/old")
+        viewModel.onClear()
+
         assertThat(viewModel.uiState.value).isEqualTo(JobUiState.Empty)
+        assertThat(draftStore.link.value).isEmpty()
+        viewModel.onTextChange(POST_250)
+        draftStore.setLink("https://jobs.example/old")
+
+        val newJob = viewModel(draftStore = draftStore)
+
+        assertThat(newJob.uiState.value).isEqualTo(JobUiState.Empty)
+        assertThat(draftStore.link.value).isEmpty()
     }
 
     @Test
