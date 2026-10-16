@@ -4,7 +4,6 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.domain.profile.ProfileCompleteness
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.ProfileEntry
@@ -190,7 +189,7 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun returningProfile_mapsHeaderPercentAndCounts() = runTest {
+    fun returningProfile_mapsHeaderReadinessAndCounts() = runTest {
         val viewModel = viewModel()
         collectUiState(viewModel)
         val profile = PrototypeFixtures.returning().profile
@@ -203,12 +202,12 @@ class ProfileViewModelTest {
         assertThat(content.city).isEqualTo("Pune")
         assertThat(content.years).isEqualTo(yearsOfExperience(profile.entries, clock))
         assertThat(content.years).isNotNull()
-        assertThat(content.percent).isEqualTo(ProfileCompleteness.percent(profile))
+        assertThat(content.readyToTailor).isTrue()
+        assertThat(content.requiredGaps).isEmpty()
         assertThat(content.experienceCount).isEqualTo(3)
         assertThat(content.educationCount).isEqualTo(1)
         assertThat(content.skillsCount).isEqualTo(18)
         assertThat(content.achievementsCount).isEqualTo(6)
-        assertThat(content.linkedinMissing).isTrue()
         assertThat(content.sourceFileName).isNull()
     }
 
@@ -224,16 +223,16 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun blankLinkedin_showsAddTag() = runTest {
+    fun optionalLinks_doNotChangeReadiness() = runTest {
         val viewModel = viewModel()
         collectUiState(viewModel)
         val profile = PrototypeFixtures.returning().profile
         profileRepository.sendProfile(profile)
-        assertThat(viewModel.content().linkedinMissing).isTrue()
+        assertThat(viewModel.content().readyToTailor).isTrue()
 
-        profileRepository.sendProfile(profile.copy(linkedinUrl = "https://linkedin.com/in/priya"))
+        profileRepository.sendProfile(profile.copy(linkedinUrl = "https://linkedin.com/in/priya", portfolioUrl = "https://priya.example.com"))
 
-        assertThat(viewModel.content().linkedinMissing).isFalse()
+        assertThat(viewModel.content().readyToTailor).isTrue()
     }
 
     @Test
@@ -268,31 +267,35 @@ class ProfileViewModelTest {
         assertThat(content.educationCount).isEqualTo(1)
         assertThat(content.skillsCount).isEqualTo(18)
         assertThat(content.achievementsCount).isEqualTo(6)
-        assertThat(content.percent).isEqualTo(ProfileCompleteness.percent(profile))
+        assertThat(content.readyToTailor).isTrue()
+        assertThat(content.requiredGaps).isEmpty()
     }
 
     @Test
-    fun percentDropsForMissingEndDate() = runTest {
+    fun requiredCorrections_areListed() = runTest {
         val viewModel = viewModel()
         collectUiState(viewModel)
         val fresh = PrototypeFixtures.fresh().profile
         profileRepository.sendProfile(fresh)
-        val withoutEndDate = viewModel.content().percent
 
-        profileRepository.sendProfile(
-            fresh.copy(
-                entries = fresh.entries.map {
-                    if (it.category == EntryCategory.EXPERIENCE && it.endDate.isBlank()) {
-                        it.copy(endDate = "May 2022")
-                    } else {
-                        it
-                    }
-                },
-            ),
-        )
-        val withEndDate = viewModel.content().percent
+        assertThat(viewModel.content().readyToTailor).isFalse()
+        assertThat(viewModel.content().requiredGaps.map { it.entryId }).containsExactly("exp-tata")
+        assertThat(viewModel.content().requiredGaps.single().title).isEqualTo("Data Analyst Intern")
 
-        assertThat(withEndDate - withoutEndDate).isEqualTo(6)
+        profileRepository.sendProfile(PrototypeFixtures.returning().profile)
+
+        assertThat(viewModel.content().requiredGaps).isEmpty()
+        assertThat(viewModel.content().readyToTailor).isTrue()
+    }
+
+    @Test
+    fun confirmedProfileWithoutReviewTimestamp_isReadyToTailor() = runTest {
+        val viewModel = viewModel()
+        collectUiState(viewModel)
+        profileRepository.sendProfile(PrototypeFixtures.returning().profile.copy(reviewedAt = null))
+
+        assertThat(viewModel.content().requiredGaps).isEmpty()
+        assertThat(viewModel.content().readyToTailor).isTrue()
     }
 
     @Test
