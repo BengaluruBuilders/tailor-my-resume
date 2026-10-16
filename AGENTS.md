@@ -3,6 +3,10 @@
 TailorMyResume is an Android app. It turns a candidate's confirmed background and a job description into a
 tailored application. It never invents facts about the candidate.
 
+When `../AGENTS.md` exists, read it once at the start of a task for shared workspace context.
+The backend checkout is `../backend`. Read its `AGENTS.md` before working there. Keep both
+sides of the API contract in view; each repository's rules apply within its own directory.
+
 ## Read these first
 
 0. `design/prototype-2026-10-10/README.md` and `docs/PRD.md` section 6.1.2 — the simplified MVP

@@ -37,6 +37,54 @@ every `staging` task (`assembleStaging`, `installStaging`, `bundleStaging`) fail
 minified like `release` and is always signed with the debug key, so `debug` and `staging` installs replace each other.
 It is never published (Constitution V.7).
 
+### Ubuntu server on the same Wi-Fi
+
+The local staging endpoint is `https://abhishek-dubey-ms-7b16.local:8443/`.
+Set `tailormyresumeStagingApiBaseUrl` to this URL in `~/.gradle/gradle.properties` and
+build `:app:assembleStaging`. The other four staging Firebase properties are still required.
+`https://192.168.88.15:8443/` is an alternative when a phone cannot resolve `.local`;
+that IP can change with DHCP. Prefer the hostname or reserve the IP on the router.
+
+The `debug` and `staging` source sets share `app/src/localStaging/res`. Their manifests
+select a network security configuration that trusts the Ubuntu Caddy public CA only for
+the server's exact hostname and LAN IP. Cleartext traffic stays disabled. Google/Firebase
+and other hosts use the Android system trust store. The production source set does not
+include the CA or this configuration; its API URL stays fixed.
+
+Caddy runs on the Ubuntu workstation, accepts IPv4 HTTPS on port 8443, and proxies to
+the staging Node service on loopback port 8080. No router port forwarding is required.
+Keep the server awake and every test phone on the same LAN without guest-network client
+isolation. The phones still need internet access for Firebase sign-in and AI requests.
+
+The certificate in `res/raw/staging_ca.pem` is public. The CA private key must stay on
+the Ubuntu server. If that CA is replaced, copy only its new public certificate here,
+rebuild the APK and update the phones. Do not install a system-wide CA on the phone.
+
+For a physical phone, enable Developer options and Wireless debugging (Android 11+).
+Pair with `adb pair <phone-ip>:<pairing-port>`, entering the temporary code at its prompt,
+then use `adb connect <phone-ip>:<connection-port>`. The two ports differ and may change.
+Install with `adb -s <device> install -r app/build/outputs/apk/staging/app-staging.apk`.
+This preserves staging app data and uses the existing debug signing key.
+
+The opt-in on-device connection test checks verified TLS, disabled cleartext, `/health`
+and rejection of an unauthenticated account request. Build `assembleDebugAndroidTest`,
+install both the debug APK and test APK, then run:
+
+```bash
+adb -s <device> shell am instrument -w \
+  -e class com.tailormyresume.app.network.StagingConnectionTest \
+  -e stagingConnectionCheck true \
+  com.tailormyresume.app.staging.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+This test runs only when explicitly enabled because it needs the physical LAN staging
+server. Install the staging APK again after the test to use the minified staging build.
+
+Verified on 2026-10-16 on a Pixel 7 Pro running Android 17: `.local` resolution, the on-device
+TLS/authentication connection check, and installation/startup of the minified staging APK.
+The temporary test APK was removed. App and network unit tests passed (504 tests), and the
+release APK was checked to exclude both the local CA and the LAN endpoint.
+
 ## Firebase projects and local configuration
 
 There are two environments and three Android build types:
