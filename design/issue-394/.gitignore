@@ -1,0 +1,4 @@
+evidence/*.log
+evidence/*.sh
+evidence/*.pid
+evidence/avd/

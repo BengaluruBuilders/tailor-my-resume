@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -72,6 +74,9 @@ private const val HINT_ALPHA = 0.6f
 private const val SUBORDINATE_TEXT_ALPHA = 0.8f
 private const val ART_HEIGHT_FRACTION = 0.45f
 private const val ART_WIDTH_FRACTION = 0.8f
+private const val COMPACT_FONT_SCALE = 1.3f
+private val COMPACT_STORY_HEIGHT = 400.dp
+private val COMPACT_ART_HEIGHT = 96.dp
 private val GOOGLE_OUTLINE = Color(0xFF747775)
 private val GOOGLE_TEXT = Color(0xFF1F1F1F)
 
@@ -132,8 +137,6 @@ private fun StoryPanel(
     modifier: Modifier = Modifier,
 ) {
     val spec = SignInStories[story.index]
-    val ink = TmrTheme.colors.ink
-    val typography = TmrTheme.typography
     val headline = stringResource(spec.headline)
     val subline = stringResource(spec.subline)
     val label = stringResource(R.string.feature_onboarding_impl_signin_story_label, story.index + 1, SIGN_IN_STORY_COUNT)
@@ -144,8 +147,13 @@ private fun StoryPanel(
     val previous = stringResource(R.string.feature_onboarding_impl_signin_action_previous)
     val paused = stringResource(R.string.feature_onboarding_impl_signin_hint_paused)
     val scrollState = remember(story.index) { ScrollState(initial = 0) }
+    val reading by remember(scrollState) {
+        derivedStateOf { scrollState.value > 0 || scrollState.isScrollInProgress }
+    }
+    LaunchedEffect(reading) { story.reading = reading }
     BoxWithConstraints(modifier) {
-        val artHeight = minOf(maxHeight * ART_HEIGHT_FRACTION, maxWidth * ART_WIDTH_FRACTION)
+        val compact = maxHeight < COMPACT_STORY_HEIGHT || LocalDensity.current.fontScale > COMPACT_FONT_SCALE
+        val artHeight = if (compact) COMPACT_ART_HEIGHT else minOf(maxHeight * ART_HEIGHT_FRACTION, maxWidth * ART_WIDTH_FRACTION)
         Column(
             Modifier
                 .fillMaxSize()
@@ -173,26 +181,38 @@ private fun StoryPanel(
                     .padding(top = 12.dp),
             ) {
                 TmrStoryBars(SIGN_IN_STORY_COUNT, story.index, if (TmrTheme.motion.reduced) 1f else story.fraction)
-                Text(
-                    hint,
-                    Modifier.fillMaxWidth().padding(top = 12.dp),
-                    ink.copy(alpha = HINT_ALPHA),
-                    style = typography.label,
-                    textAlign = TextAlign.End,
-                )
+                if (compact) StoryExplanation(headline, subline, Modifier.padding(top = TmrTheme.spacing.sectionGap))
+                if (!compact) StoryHint(hint)
                 Box(
                     Modifier.fillMaxWidth().height(artHeight),
                     contentAlignment = Alignment.Center,
                 ) {
                     SignInStoryArt(story.index, artHeight, Modifier.fillMaxSize())
                 }
-            }
-            Column(Modifier.testTag(SignInTags.STORY_CONTENT)) {
-                Text(headline, color = ink, style = typography.display)
-                Text(subline, Modifier.padding(top = 12.dp), ink, style = typography.bodyLarge)
+                if (compact) StoryHint(hint)
+                if (!compact) StoryExplanation(headline, subline)
             }
         }
     }
+}
+
+@Composable
+private fun StoryExplanation(headline: String, subline: String, modifier: Modifier = Modifier) {
+    Column(modifier.testTag(SignInTags.STORY_CONTENT)) {
+        Text(headline, color = TmrTheme.colors.ink, style = TmrTheme.typography.display)
+        Text(subline, Modifier.padding(top = 12.dp), TmrTheme.colors.ink, style = TmrTheme.typography.bodyLarge)
+    }
+}
+
+@Composable
+private fun StoryHint(hint: String) {
+    Text(
+        hint,
+        Modifier.fillMaxWidth().padding(top = 12.dp),
+        TmrTheme.colors.ink.copy(alpha = HINT_ALPHA),
+        style = TmrTheme.typography.label,
+        textAlign = TextAlign.End,
+    )
 }
 
 @Composable
