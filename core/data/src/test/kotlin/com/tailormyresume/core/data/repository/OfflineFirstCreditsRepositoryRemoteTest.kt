@@ -57,7 +57,10 @@ class OfflineFirstCreditsRepositoryRemoteTest {
     }
 
     @After
-    fun closeDatabase() = database.close()
+    fun closeDatabase() {
+        runBlocking { ownedScopes.forEach { it.coroutineContext[Job]?.cancelAndJoin() } }
+        database.close()
+    }
 
     private fun repository(source: RemoteLedgerSource = remote) =
         OfflineFirstCreditsRepository(database.creditLedgerDao(), UnconfinedTestDispatcher(), CoroutineScope(UnconfinedTestDispatcher()).also(ownedScopes::add), source)
@@ -349,7 +352,7 @@ class OfflineFirstCreditsRepositoryRemoteTest {
         val ledger = database.creditLedgerDao()
         ledger.insert(com.tailormyresume.core.database.model.CreditLedgerEntity(kind = CreditLedgerKind.FREE_GRANT, amount = 2, applicationId = null, productId = null, createdAt = Instant.fromEpochMilliseconds(0)))
         val reward = entry(CreditLedgerKind.REFERRAL_REWARD, 13, 3).copy(id = "reward-a")
-        val second = reward.copy(id = "reward-b")
+        val second = reward.copy(id = "reward-b", kind = CreditLedgerKind.SPEND, amount = -1, applicationId = "app-a")
         remote.snapshot = CreditSnapshot(7, listOf(reward, second))
         val first = repository()
         first.refresh()
@@ -358,7 +361,7 @@ class OfflineFirstCreditsRepositoryRemoteTest {
         val restored = repository()
         assertThat(restored.observeLedger().first().map { it.id }).containsExactly("reward-a", "reward-b")
         assertThat(restored.observeKnownBalance().first()).isNull()
-        first.removeForApplication("any")
+        first.removeForApplication("app-a")
         assertThat(ledger.ownedEntries("uid-1", "")).hasSize(2)
         remote.owner = "uid-2"
         assertThat(repository().observeLedger().first()).isEmpty()

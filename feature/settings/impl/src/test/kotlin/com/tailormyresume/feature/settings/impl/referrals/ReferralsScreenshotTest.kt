@@ -3,6 +3,8 @@ package com.tailormyresume.feature.settings.impl.referrals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.ReferralMessage
@@ -44,5 +46,6 @@ class ReferralsScreenshotTest {
         rule.setTmrContent(NARROW_DEVICE) { ReferralsScreen(ReferralUiState.Content(message = ReferralMessage.ReadOnly), actions) }
         rule.assertNoTruncatedText()
         rule.capture("referrals_read_only", NARROW_DEVICE)
+        rule.onNodeWithText("Refresh referral status").performScrollTo().assertIsDisplayed()
     }
 }

@@ -177,6 +177,7 @@ class RemoteReferralGateway @Inject constructor(
             current.phase in setOf("READ_ONLY", "ATTACHED", "SENT") -> refresh(owner)
             normalized == null -> mutable.value = content().copy(busy = false, message = ReferralMessage.Invalid)
             current.code != null && current.code != normalized && !replace -> mutable.value = content().copy(busy = false, message = ReferralMessage.ReplaceRequired)
+            current.requestId != null && !replace -> mutable.value = content().copy(busy = false, message = ReferralMessage.Conflict)
             else -> {
                 write(owner, current.copy(code = normalized, requestId = null, revision = null, payloadDigest = null, challengeId = null, phase = "CANDIDATE", retryAt = null))
                 refresh(owner, ReferralMessage.Saved)
@@ -309,7 +310,7 @@ class RemoteReferralGateway @Inject constructor(
         }
         val message = when (error) {
             ApiError.ReferralAlreadyAttached -> {
-                write(owner, journal.copy(code = null, requestId = null, revision = null, payloadDigest = null, challengeId = null, retryAt = null, phase = "READ_ONLY"))
+                write(owner, ReferralJournal(journal.owner, journal.environment, owner.provider, owner.ticket.generation, phase = "READ_ONLY"))
                 refresh(owner)
                 return
             }
