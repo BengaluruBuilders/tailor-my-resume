@@ -26,11 +26,14 @@ class RemoteSignInGateway @Inject constructor(
     private val cleaner: SignOutCleaner,
     private val wiper: LocalDataWiper = LocalDataWiper.None,
     private val pendingWipe: PendingAccountWipe = PendingAccountWipe.None,
+    private val upgrades: com.tailormyresume.core.domain.GoogleAccountGateway? = null,
+    private val fence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : SignInGateway {
 
     override suspend fun currentAccount(): SignInAccount? = sessionRepository.observeAccount().first()
 
     override suspend fun signIn(): SignInResult {
+        upgrades?.let { return it.signIn() }
         if (!config.isComplete || firebase.hasAnonymousSession()) return AuthFailure.NotConfigured.toSignInResult()
         val googleToken = when (val outcome = credentials.idToken()) {
             is AuthOutcome.Success -> outcome.value
@@ -62,11 +65,13 @@ class RemoteSignInGateway @Inject constructor(
 
     override suspend fun signOut() {
         withContext(NonCancellable) {
+            fence.invalidate()
             firebase.signOut()
             credentials.clearState()
             sessionRepository.observeAccount().first()?.let { sessionRepository.saveLastAccountId(it.id) }
             sessionRepository.signOut()
             cleaner.clear()
+            fence.release()
         }
     }
 

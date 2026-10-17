@@ -1,0 +1,92 @@
+{
+  "frontendSha": "01cfb637e26ca075df78892a352b8b7c62e8531d",
+  "backendSha": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "contractRevision": "google-activation-v1-rate-limit-1",
+  "contractSha256": "2143cac25a92c6b0b9a26c5b65932f638f20373c76f1c7048785b44ba244391a",
+  "apkSha256": "b174910dedae7fdb590113a2bdce87cc4bc106564c2b6908a55f5c63ddcb5bff",
+  "variant": "staging",
+  "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+  "environment": "staging Firebase/local-fixture candidate HTTPS20002; policies absent/admissions closed",
+  "verdict": "implementation checks and attainable closed-admission device smoke PASS; external acceptance BLOCKED; draft only/not ready for merge",
+  "files": {
+    "01-preserved-app-after-upgrade.png": {
+      "bytes": 111922,
+      "sha256": "dcd9162db72dac075ad6f755659044a1af98bfc69080727e01b4704305547ee1"
+    },
+    "02-settings-google-entry.png": {
+      "bytes": 142128,
+      "sha256": "e7144cc89509979f1d38f0237bd1e42acef4dad469c1e2211ef53bd8e65f497c"
+    },
+    "03-google-offer-admissions-closed.png": {
+      "bytes": 103365,
+      "sha256": "33543ff5ecba77ac8b1a07a41cc57d69fb5664ccf97d450a44ca3a72be6826ad"
+    },
+    "04-google-unavailable-retry.gesture-telemetry.json": {
+      "bytes": 310,
+      "sha256": "89974c91ec12a04030913f6b975b68f7daf89537bc4fdc530837ec7f87597c13"
+    },
+    "04-google-unavailable-retry.mp4": {
+      "bytes": 1810598,
+      "sha256": "f4dc445c2ee74ec7187612580f61bf7589fc3b2c7e5535b2493b4d299791d288"
+    },
+    "05-google-entry-observed-result.png": {
+      "bytes": 41008,
+      "sha256": "1cfaafb096212631a753faaf0e199c3d9f3713214daf2cecccbc4ce7a2f6fdaf"
+    },
+    "06-rechecked-offer-no-reward.png": {
+      "bytes": 103365,
+      "sha256": "33543ff5ecba77ac8b1a07a41cc57d69fb5664ccf97d450a44ca3a72be6826ad"
+    },
+    "07-offer-after-explicit-recheck.png": {
+      "bytes": 103365,
+      "sha256": "33543ff5ecba77ac8b1a07a41cc57d69fb5664ccf97d450a44ca3a72be6826ad"
+    },
+    "08-synthetic-profile-preserved.png": {
+      "bytes": 90144,
+      "sha256": "33599df4b3c5f7b701f4bd3ebe55788adb347e95080ddff1c438182296a6e156"
+    },
+    "09-restart-zero-wallet-preserved.png": {
+      "bytes": 109366,
+      "sha256": "f5fec0a0d56b86382c79d624490582ab9ea0333ac5541e0cdb140bdbb37fded7"
+    },
+    "10-synthetic-profile-after-restart.png": {
+      "bytes": 90144,
+      "sha256": "33599df4b3c5f7b701f4bd3ebe55788adb347e95080ddff1c438182296a6e156"
+    },
+    "artifact.json": {
+      "bytes": 2256,
+      "sha256": "cd922d93c2360a108f0fa1def10b3f6156254e0b867071bff47c1cd8a8398c6d"
+    },
+    "candidate-observations.json": {
+      "bytes": 2144,
+      "sha256": "c8eca4cf029992057accfaf840794a9699b3eeb004e0716bf3d9c882f1244300"
+    },
+    "captions.md": {
+      "bytes": 3418,
+      "sha256": "974b25b661a534c0aa182c7f7a9c2ffc35b65ac555802b95250497530351ce4f"
+    },
+    "frontend-independent-focused-summary.json": {
+      "bytes": 1695,
+      "sha256": "cf234b44801cbce7f17a36eb665491d2112a0b0baa00c2ada9327213d5f67de9"
+    },
+    "frontend-independent-focused.log": {
+      "bytes": 35528,
+      "sha256": "b5736437926365bdee9bc54e77eeee43f7c300181e357c27ce373f55d6fab385"
+    },
+    "frontend-required-final.log.gz": {
+      "bytes": 13648,
+      "sha256": "9ffbcc830b15279319c94ad34ad8ce0a8ea4f86985e33873d37096946b21c665"
+    },
+    "frontend-required-summary.json": {
+      "bytes": 3277,
+      "sha256": "fb0071a2e11c55ce8fabfb74ae9b9d4a33b940bc9683c2747aa38cc9ce7b2e39"
+    },
+    "relay-summary.json": {
+      "bytes": 1579,
+      "sha256": "190d207bf5591c028b708d13c0f68b8308fdf954842dfad3dfec6ba356b57827"
+    }
+  },
+  "reportSha256": "2b50901fde8e4bfe65f9f996f967a47f3a40265b8f6a9995190bc00ea5200df8",
+  "sourceLogSha256": "a18cf53b8d69625089df91106e653d9c311cc0ab7db7a1591a42f5c567545aa2",
+  "publication": "not published; immutable local handoff to publisher"
+}

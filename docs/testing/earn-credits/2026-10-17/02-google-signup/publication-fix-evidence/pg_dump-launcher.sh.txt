@@ -1,0 +1,3 @@
+#!/bin/sh
+export LD_LIBRARY_PATH=/tmp/tmr-pr117-postgres/root/usr/lib/x86_64-linux-gnu
+exec /tmp/tmr-pr117-postgres/root/usr/lib/postgresql/18/bin/pg_dump "$@"

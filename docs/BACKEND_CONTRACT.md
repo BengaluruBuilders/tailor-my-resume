@@ -1190,3 +1190,444 @@ provider outage and campaign exhaustion preserve balance; key/policy changes can
 legacy wallets/history survive; account/environment switching rejects stale replies; export/deletion
 cover every new row and non-TMR apps remain unchanged. No broad suite is required for this
 contract-only commit; implementations run their repository gates and focused transaction tests.
+
+## 9. Google activation and conflict recovery — google-activation-v1
+
+Status: frozen for slice02 implementer agreement, 2026-10-17; independent rate-limit clarification
+`google-activation-v1-rate-limit-1`. Both implementers must record
+agreement before application implementation. This extends v2 + guest-trial-v1. Section 8 and its
+canonical fixtures stay byte-for-byte unchanged. Production admissions remain off. Issues: backend #121; Android #403.
+
+### 9.1 Trusted identity and immutable eligibility
+
+All endpoints retain Firebase signature/audience verification, app/environment routing and the
+live-user guard. Add validated provider subject and `auth_time` to trusted identity context;
+Google requires verified `firebase.sign_in_provider="google.com"`, exactly one nonempty Google
+subject in verified `firebase.identities["google.com"]`, and same-project Admin `getUser(uid)`
+with exactly one matching `google.com` provider UID for new observations/preparation/admission.
+Committed receipt recovery requires valid Google token/provider shape and live server account,
+but deliberately makes no fresh Admin/Integrity call (9.5). Disabled/deleted users and missing/malformed/
+contradictory evidence cannot activate. Email, client flags, claimed UID and unsigned JWT claims
+are never identity keys. Bound Admin lookup to 10 seconds, outside SQL locks; recheck local live
+state before commit. Token refresh does not prove a new signup or recent authentication.
+
+Persist activation independently of grants/replay caches: own UID, Firebase incarnation/creation,
+source (`GUEST_LINK`, `DIRECT_GOOGLE`, `EXISTING_GOOGLE`, `AMBIGUOUS`), source-event time, first
+server-verified Google time, eligibility/reason, immutable referral deadline when configured,
+original policy snapshot and a separately expiring purpose-scoped provider-subject HMAC alias. App/environment
+and purpose `google-signup` separate subject keys. Active/retiring versions remain queryable and
+locked together; losing a key closes admission rather than silently resetting uniqueness. No
+raw subject survives request processing. Policy/key/login/request changes never reset a live
+account's classification or entitlement. `users.created_at`, wallet creation, token `auth_time`
+and first backend contact are not first Google activation.
+
+A known guest prepares under anonymous auth before Firebase `linkWithCredential`. Admin confirms
+that this UID has no Google provider, preventing stale anonymous tokens preparing an already
+Google identity. Durable pre-link provenance is distinct from the short-lived bearer intent;
+same-UID crash recovery must not depend on retention of that secret. Verify unchanged Firebase
+incarnation and trusted Google subject before recovery. An old anonymous creation alone does not
+make a genuinely observed guest-to-Google link an old Google account. Existing legacy/ambiguous
+Google classification cannot be overwritten by another intent/key/policy. A retained subject claim for another UID denies a fresh signup as
+EXISTING_ACCOUNT without disclosing that UID; it is never permission to read/merge the other wallet.
+
+Direct-new is an app-account rule, not Google/Gmail account age. Sufficient positive evidence is
+trusted Firebase app-account creation at/after the configured cutoff and first server Google
+observation within the configured new-account admission interval; current verified token/Admin
+matching Google subject; and no contradictory durable prior activation/prelink/legacy history or
+still-retained subject grant. A brief never-observed anonymous phase within this bounded interval
+is allowed; Firebase cannot prove never-anonymous provenance and this contract does not demand it.
+Old/out-of-window or contradictory/unprovable history is conservatively EXISTING/AMBIGUOUS. Missing
+trusted metadata is temporary IDENTITY_UNAVAILABLE, not eligible-new. Existing durable eligibility
+survives that initial interval for later evidence/admission retries, using the original anchor.
+No legacy bonus is authorized; new key/token/policy cannot reset old Google classification.
+
+Preparation uses one current unused attempt per live UID/incarnation. A new prepare may supersede
+it only after fresh anonymous auth + authoritative same-incarnation Google-absent lookup + no
+recorded Google observation/activation. Cancellation/expiry alone cannot renew an anchor. The
+same-key create replay recovers its original intent, never renews it; renewing needs a new key
+and supersedes the previous secret. An unused canceled prompt weeks earlier does not permanently
+anchor a future link. If prepare discovers Google, reconcile/freeze the prior attempt rather
+than issue a new intent; return ACCOUNT_LINK_CONFLICT after recording observation. Recheck under
+the user lock so concurrent renewal cannot replace an already observed transition. Bound lookup
+freshness to the configured interval; never accept a stale snapshot over newer durable state.
+
+For GUEST_LINK, eligibilityAnchorAt is the qualifying attempt's server prepare time, a conservative
+lower bound on the link, **not a provider link timestamp**. For DIRECT_GOOGLE it is authoritative
+Firebase creation. firstGoogleObservedAt is separately the first server verification of Google.
+Freeze anchor/provenance/window/deadline on that observation; delayed completion or token refresh
+cannot extend it. A long prepare-to-link interval can shorten referral time. Referral expiry alone
+does not cancel a provable pending signup bonus. Missing live cutoff/window/classification policy
+still records first observation and provenance through the non-granting observation POST; later
+configuration cannot rewrite an observed returning/ambiguous account as new. A pending provable
+transition retains its original facts while the account lives, even if grants are paused.
+
+Unobserved pre-link evidence has finite recovery expiry (fixture 30 days). Missing/expired bearer
+with valid durable evidence can recover same UID; if durable evidence also expired/erased, return
+explicit conservative AMBIGUOUS_HISTORY/RECOVERY_EXPIRED without inventing a direct-new path.
+Minimal live-account entitlement/classification/observed-pending facts survive alias/cache expiry
+until erasure. Subject HMAC aliases expire from first claim, not last login (fixture 180 days),
+and do not renew silently. Same-account regrant remains impossible after alias expiry; cross-UID
+suppression then cannot be promised. Post-deletion alias retention is **zero**; deletion/recreation
+may qualify again and consumed campaign capacity remains consumed. No permanent per-human or
+per-Google prevention claim. Key rotation preserves original alias expiry; missing retained key
+closes new admission. Fixture-only secret TTL 5 minutes, operation/prelink cache 30 days, alias
+180 days, referral window 24 hours; production values remain explicitly unset.
+No device-level signup cap is invented: a reused trial signal may deny base while leaving an
+otherwise eligible signup bonus. Referrals remain unimplemented; only activation/deadline
+foundations belong here. Own reads, spending and work survive promotional refusal/unavailability.
+
+### 9.2 Coherent policy and offer preconditions
+
+GET `/credits/policy` stays non-granting. Top-level `version/effectiveAt/expiresAt` and `guestTrial`
+retain section 8 meanings. Extend `signupBonus` additively with these fields; `referrals` stays
+exactly `{status:"UNAVAILABLE"}`. No Android amount/security/clock defaults are allowed.
+
+| Field | Rule |
+|---|---|
+| `status` | AVAILABLE, ALREADY_GRANTED, NOT_ELIGIBLE, UNAVAILABLE |
+| `reason` | ELIGIBLE, ALREADY_GRANTED, EXISTING_ACCOUNT, AMBIGUOUS_HISTORY, RECOVERY_EXPIRED, ACCOUNT_MODE_INELIGIBLE, IDENTITY_UNAVAILABLE, POLICY_UNAVAILABLE, ADMISSIONS_DISABLED, CAMPAIGN_EXHAUSTED |
+| `amount` | Positive configured integer or null; offer only when AVAILABLE |
+| `version`, `effectiveAt`, `expiresAt` | Current signup revision/bounds, or null |
+| `grantPolicyVersion` | Original own committed signup receipt revision, or null; used for base-only retry |
+| `operation`, `bindingVersion`, `integrity` | GOOGLE_ACTIVATION, 1, PLAY_INTEGRITY_STANDARD |
+| `referralWindowSeconds` | Positive configured integer or null; no attachment permission yet |
+| `baseTrial` | `{status,reason,amount,version,grantPolicyVersion}` with section 8 statuses/reasons and nullable policy metadata; can be AVAILABLE for provably new direct Google signup; never for guest link |
+
+Precedence: committed own signup receipt; durable ineligibility; unsupported mode; missing trusted
+identity/policy/config; disabled signup admission; exhausted signup capacity; eligible. Anonymous
+AVAILABLE is conditional on a new credential linking the same UID, never a conflict bonus promise.
+Policy reads collect no Android ID, reserve nothing and do not guarantee device eligibility.
+
+Preserve existing guest internal scope compact JSON `[appId,environment]` and entitlement
+`guest-trial` exactly. Signup policy/capacity uses additive scope `[appId,environment,"google-signup"]`
+and entitlement `google-signup`; never overwrite the one existing active trial campaign. Resolver
+may share generic primitives but cannot silently change guest policy schema/storage/revision rules.
+Lock applicable promotion scopes in lexical order after live-user locks; alias/allocation locks
+follow scopes in lexical order. Policy publishers acquire only their scope lock and no user lock.
+
+Both grants resolve one coherent current policy snapshot and transactionally recheck its revision
+pair. The validated acquisition-classification configuration (cutoff/new-account interval/window and
+finite evidence/alias retention) is a shared prerequisite, independent of either grant campaign.
+Its immutable classification snapshot is recorded at observation; missing classification config
+closes both new grants while preserving first observed facts. Signup revision owns signup amount/
+capacity/admission; optional base names trial amount/capacity/admission. A paused or absent signup
+campaign is not missing classification config. Sources/outcomes remain separate. Used signal, legacy base refusal, absent/paused/
+exhausted base policy cannot silently refuse eligible +5. There is no +2 fallback for unavailable
+base. The same independence applies to each source's bounded attempt admission (9.5).
+Symmetrically, available protected base may grant when signup campaign is absent/paused/
+exhausted: return base GRANTED and signup UNAVAILABLE, preserving eligible pending signup.
+If a requested revision for an uncommitted available subaction differs from its usable current
+revision (including null when now available), return 409 POLICY_CHANGED before **any new award**.
+Unavailable campaign has null revision if absent, or its acknowledged version if present/paused;
+never guess amount. A committed subaction binds its original receipt revision and bypasses its
+current policy, leaving only new work subject to current rules. Return 200 when at least one new
+requested award commits, or for durable business refusal/complete requested receipt recovery. Use 429
+RATE_LIMITED under 9.5 when no new award commits and a requested new source is rate-blocked. Use 503
+PROMOTION_UNAVAILABLE when no requested new award can proceed solely because required campaigns
+are temporarily unavailable, or shared classification/security prerequisites are missing. Refresh/reconfirm revised offers and obtain fresh evidence with the same
+stable business key. A committed replay returns original receipts/current wallet before current
+policy, pause, expiry, capacity or provider calls. Never combine an offered signup amount with an
+unacknowledged new base amount. Missing base config yields a separate unavailable sub-outcome.
+
+### 9.3 Strict endpoints and schemas
+
+Paths below are relative to `/v1/tailormyresume`. All bodies are strict JSON: no unknown fields,
+trimming/coercion, client UID/amount/environment/eligibility time/email/provider subject/arbitrary
+verdict. UUID v4, version, continuity and token rules follow 8.3. Proof is exactly 32 random bytes,
+43 base64url characters, generated/persisted privately by Android **before** create. Server stores
+only a purpose-separated proof hash; a lost create reply retries without plaintext recovery.
+Never put proof in a URL/query/log. Cache-Control:no-store applies to every response.
+
+| Endpoint | Auth | UTF-8 limit | Strict body | Success |
+|---|---|---|---|---|
+| POST `/account/upgrade-intents` | Anonymous + Admin confirms unlinked | 2048 | `{requestId,proof}` | 201 new / 200 same key+proof: `{intentId,createdAt,expiresAt,state:"PREPARED"}` |
+| POST `/account/upgrade-intents/status` | Source anonymous/same-UID Google, or already bound destination Google | 2048 | `{intentId,proof}` | 200 `{intent:{id,state,createdAt,expiresAt},completion}` |
+| POST `/account/activation-challenges` | Google | 2048 | `{operation:"GOOGLE_ACTIVATION",requestId,policyVersion,trialPolicyVersion,payloadDigest}` | 201 section 8 challenge response |
+| POST `/account/activate` | Google | 16384 | Activation union below | 200 outcome below |
+| POST `/account/activation-observations` | Google | 2048 | `{requestId}` | 200 `{wallet,activation,grants,referralEligibility}`; records first observation/classification, never awards |
+| GET `/account/activation` | Google | no body/query | None | 200 `{wallet,activation,grants,referralEligibility}`; no new fact/grant |
+| POST `/account/upgrade-intents/complete` | Fresh destination Google | 2048 | `{requestId,intentId,proof,disposition:"PRESERVE_LOCAL_WORK"}` | 200 completion below |
+
+`intentId` is canonical UUID v4; `state` PREPARED, LINKED, COMPLETED, EXPIRED. LINKED requires
+server verification, never a client assertion. `completion` is null, `{kind:"SAME_UID_ACTIVATION"}`
+or `{kind:"EXISTING_ACCOUNT",disposition:"PRESERVE_LOCAL_WORK"}`. PREPARED means no verified Google
+transition/completion; LINKED means own same-UID Google was observed but grant finalization is pending;
+COMPLETED is committed same-UID activation or conflict completion. EXPIRED applies only to an
+unobserved/uncompleted expired bearer; it does not erase a valid durable same-UID recovery fact.
+Status can read a retained proof hash after bearer expiry but cannot authorize new cross-UID use.
+The create replay always returns its original create snapshot; status supplies current state.
+Source status discloses no
+counterparty UID. Status never binds an unbound destination or creates activation/grants. Random,
+wrong-proof, other-owner/scope intent always returns 404 NOT_FOUND without private state.
+
+Activate requires all keys, including explicit null:
+
+```json
+{"requestId":"11111111-1111-4111-8111-111111111111","policyVersion":"signup-local-v1","trialPolicyVersion":null,"path":"GUEST_LINK","upgradeIntent":{"intentId":"44444444-4444-4444-8444-444444444444","proof":"<43-character private proof>"},"continuity":null,"challengeId":"22222222-2222-4222-8222-222222222222","integrityToken":"synthetic-token-not-valid-in-any-environment"}
+```
+
+GUEST_LINK: upgradeIntent exactly `{intentId,proof}` or null for independently proven durable
+same-UID recovery; continuity/trialPolicyVersion null. Never refill an absent/spent/denied guest
+base. DIRECT_GOOGLE: upgradeIntent null; continuity valid 8.3 object or null; trialPolicyVersion
+current version, original own base receipt revision for recovery, or null. policyVersion is also
+nullable: current signup version, original own signup receipt revision, or null if signup campaign
+is absent. GUEST_LINK with no usable signup admission cannot award and uses normal 503 recovery;
+DIRECT_GOOGLE may still admit a separately protected base. Null trial revision with continuity
+explicitly acknowledges an unavailable base policy; it cannot waive a now-usable trial revision: return POLICY_CHANGED if a usable revision
+now exists. Nonnull trial revision requires continuity. Valid continuity with null
+trial revision means unavailable base, never a guessed award. Null continuity means
+NOT_ATTEMPTED/EVIDENCE_NOT_PROVIDED. Separate signup identity and Integrity rules always apply.
+The same key may not change the business path/intent/signal to evade a refusal.
+
+Challenge's nullable policyVersion and trialPolicyVersion must match activate exactly. Issuance checks Google mode
+and policy revisions but need not know the digest's private preimage. Activate recomputes digest
+and checks stored actor/action/key/digest/revision pair/expiry. Reuse 8.3–8.4 TTL/randomness/hashed
+challenge, returned requestHash and strict package/certificate/licensing/device/freshness checks.
+One activation challenge authorizes its direct base sub-attempt; reuse the stable guest-trial
+entitlement/allocation/counters, never a second Google base source. No HTTP fake-verifier selector.
+
+### 9.4 Canonical action bytes
+
+Compact UTF-8 JSON arrays, no whitespace/newline; SHA256 → unpadded base64url. All business array
+members are strings; empty string represents null:
+
+```text
+["TMR_GOOGLE_ACTIVATION_PAYLOAD_V1",path,intentIdOrEmpty,requestedActions,"ANDROID_ID"OrEmpty,androidIdOrEmpty]
+```
+
+requestedActions is exactly SIGNUP_AND_BASE when continuity is nonnull, otherwise SIGNUP_ONLY.
+It is derived and included in canonical bytes; do not accept a separate client flag. A signup-only
+challenge can never authorize adding base. The direct-base action recovers any committed signup
+receipt rather than reissuing it. Proof/revisions/challenge/token/display data are excluded. Proof is separately verified in constant
+time. Changed path/intent/requested set/signal with actor/action/requestId is IDEMPOTENCY_CONFLICT. Fresh evidence
+and revisions may retry an uncommitted stable payload. Persist only a purpose-separated operation
+fingerprint, never raw bytes/digest/signal. For durable missing-secret recovery, persist the
+original intent ID separately on Android; a null upgradeIntent uses the canonical empty ID and
+cannot silently change a previously prepared business key. A new recovery key cannot duplicate
+the durable UID/subject entitlement.
+
+Integrity binding is exactly 8.4's ordered outer array with action GOOGLE_ACTIVATION. Its revision
+slot is the compact JSON **string** `[signupPolicyVersion,trialPolicyVersion]` (inner JSON null
+for an absent campaign/no base request). All outer members remain strings. Store both parsed revision preconditions
+with the challenge. Android uses returned requestHash; no deployment namespace guess.
+
+Proof hash is SHA256/base64url of compact UTF-8
+`["TMR_UPGRADE_PROOF_V1",appId,environmentNamespace,proof]`. Intent create stable bytes are
+`["TMR_UPGRADE_INTENT_V1",proofHash]`. Conflict completion bytes are
+`["TMR_EXISTING_ACCOUNT_HANDOFF_V1",intentId,"PRESERVE_LOCAL_WORK"]`; actor/action/key and
+server-resolved guest/proof are bound separately. Another destination cannot replay completion.
+Positive/negative canonical vectors are in this slice's fixtures.
+
+### 9.5 Outcomes, atomicity and replay
+
+Activate returns 200 for business classifications:
+
+```text
+{wallet,activation,grants,signupBonus,baseTrial,referralEligibility,replayed}
+activation = null | {source,eligibility,reason,eligibilityAnchorAt,firstGoogleObservedAt,referralDeadline}
+signupBonus = {status,reason}; baseTrial = {status,reason}
+referralEligibility = {status,deadline}
+```
+
+Activation eligibility: ELIGIBLE, EXISTING, AMBIGUOUS; reason ELIGIBLE, EXISTING_ACCOUNT,
+AMBIGUOUS_HISTORY, RECOVERY_EXPIRED. UTC dates; deadline nullable. Grants are 0–2 own 8.5 receipts, kind GUEST_TRIAL
+or GOOGLE_SIGNUP with original amount/time/revision. POST grants contains receipts of its evaluated entitlements
+(guest link: signup only; direct: signup and any own admitted/evaluated base). GET includes all own
+trial/signup receipts. Current wallet, never cached pre-spend
+wallet. GET returns durable fact/receipts or null and never classifies/grants as a side effect.
+The observation POST is idempotent by UID/incarnation and requestId, verifies trusted provider
+metadata outside SQL locks, records earliest observation even with missing grant policy and returns
+no credits. If policy cannot classify, retain immutable observed facts/provenance and an unavailable
+eligibility/deadline, not an eligible-new default. Later config may resolve preserved provable
+prelink/new evidence once; it cannot reset dates or convert recorded existing/ambiguous history.
+Android calls it after Firebase sign-in/link and on recovery before requesting a new grant offer.
+It requires no Integrity or grant policy, since it never awards. On identity lookup outage return
+503 IDENTITY_UNAVAILABLE without guessed facts. Add UNAVAILABLE eligibility/reason POLICY_UNAVAILABLE
+to the activation shape when only immutable observation is known. RequestId conflicts cannot
+change provenance; repeated calls preserve firstGoogleObservedAt.
+
+| Outcome | status / reason |
+|---|---|
+| New signup/base | GRANTED / ELIGIBLE |
+| Existing own receipt | ALREADY_GRANTED / ALREADY_GRANTED |
+| Returning/prelaunch signup | NOT_ELIGIBLE / EXISTING_ACCOUNT |
+| Unprovable history / expired durable recovery | NOT_ELIGIBLE / AMBIGUOUS_HISTORY, RECOVERY_EXPIRED |
+| Base signal allocated elsewhere | NOT_ELIGIBLE / SIGN_IN_REQUIRED; no old owner data |
+| Unusable signup or base campaign | UNAVAILABLE / POLICY_UNAVAILABLE, ADMISSIONS_DISABLED, CAMPAIGN_EXHAUSTED |
+| Independently rate-limited new signup or direct base | UNAVAILABLE / RATE_LIMITED (activate outcome only; policy GET unchanged) |
+| No base / linked guest | NOT_ATTEMPTED / EVIDENCE_NOT_PROVIDED, GUEST_LINK |
+| Historical direct base refusal | NOT_ELIGIBLE / LEGACY_ACCOUNT |
+
+Referral status ELIGIBLE, EXPIRED, NOT_ELIGIBLE, UNAVAILABLE with durable deadline or null is a
+foundation only; no referral code/attribution/reward endpoint appears here. Later policy cannot
+reset the deadline. Pending referral text is never sent to activation or allowed to undo signup.
+
+Atomically commit activation, new signup and admitted direct base, challenge consumption,
+receipts, free-credit increments, unique grant-linked ledger rows, operation and capacity. Base
+refusal leaves eligible +5 intact; SQL/provider failure leaves no partial new economic writes. The separate no-grant observation
+fact remains durable when later admission fails; no failed economic transaction erases it. Each last
+capacity unit admits one full configured award; no partial amounts. Durable ineligible fact
+prevents later key/policy/auth reclassification. Do not cache temporary unavailability as success;
+retry retains original qualifying event/deadline even if bonus admission occurs later.
+
+For uncommitted requested sources, evaluate independent bounded attempt admission: signup uses
+its actor/network/campaign counters, with no device cap; direct base reuses existing trial
+actor/continuity/network/campaign counters and scope. A source's limit blocks only that source:
+base rate limiting cannot abort eligible signup, and signup rate limiting cannot abort eligible
+base. Count refused attempts in bounded independent transactions as 8.6 requires; no new key,
+policy, challenge or alternate path resets those counters or changes recorded continuity.
+Never treat network load shedding as duplicate-person proof. Common ingress/whole-action and
+challenge-issuance limits remain whole-operation 429; shared auth/live-user/classification,
+identity, challenge/binding, revision and Integrity prerequisites remain mandatory for both.
+A partial source result cannot mask a common security failure, provider outage or SQL failure.
+
+When at least one new award commits and another requested source is rate-limited, return 200
+with that source UNAVAILABLE/RATE_LIMITED and a positive integer Retry-After header in seconds
+(60 if unknown; the maximum advised wait if multiple source limits apply). The JSON outcome
+shape is unchanged. Persist the partial operation's immutable sub-outcome/receipt snapshot;
+same-key replay returns it with current wallet, bypassing fresh counters/provider calls, and
+still carries a positive Retry-After if its snapshot contains RATE_LIMITED (60 if unknown).
+Android retains the retry deadline and waits before an explicit new-key/fresh-challenge attempt
+for only the missing grant; policy refresh is not evidence that a counter reset.
+
+If no new award commits and at least one otherwise eligible requested new source is rate-blocked,
+return whole-operation 429 RATE_LIMITED with positive Retry-After, including when its counterpart
+is unavailable, ineligible or already granted. Do not consume the challenge, allocate a signal,
+charge capacity, create a grant/ledger/wallet increment or commit a successful operation snapshot.
+Retain independent bounded attempts and already durable observation/classification/continuity
+facts. Retry the same stable key/payload with fresh evidence after the delay. Recovering a
+counterpart receipt alone cannot freeze unresolved rate-blocked new work as a 200 partial success.
+Complete requested receipt recovery and durable all-ineligible classifications remain 200;
+campaign-only temporary unavailability remains 503 under 9.2. Previously committed receipts,
+balances and eligibility anchor/deadline remain intact in every case.
+
+Order: auth/app/live + strict body → stable fingerprint/committed recovery → existing lifetime
+receipt/fact → current revision snapshot → bounded Admin/Integrity outside SQL locks → common
+live-user/promotion/subject/allocation/capacity locks → recheck revisions/live state/uniqueness →
+commit. Committed same-key returns replayed:true; another key finding durable receipts false.
+A committed operation returns its immutable base/signup sub-outcome snapshot and original receipt
+references; it never reruns a previously UNAVAILABLE subaction under the same key. Explicit new
+key + fresh challenge may retry only missing subgrants under the same immutable eligible
+DIRECT_GOOGLE fact. If signup originally omitted base continuity, its first later explicit base
+attempt may establish it once; after that, changing signal cannot evade allocation refusal.
+Each revision-pair member is the original own receipt revision for a committed source, current
+acknowledged revision for available new work, or null/versioned unavailable campaign as above.
+Thus [original signup revision,current base revision] enables base retry while signup is paused;
+[current signup revision,original base revision] enables signup retry while base is paused.
+Recover existing receipt first and apply current policy/evidence/capacity only to uncommitted
+work; SQL rollback affects only new writes, never historical grants. Neither direction resets
+anchor/deadline, refills GUEST_LINK, changes recorded continuity, or reopens durable account-level
+legacy/ineligible classification. Already complete requested actions recover before provider calls.
+Temporary UNAVAILABLE is an attempt outcome, not permanent loss of the independent entitlement.
+Replay precedes current policy/evidence/provider calls but still requires valid auth/live account,
+strict body and matching stable fingerprint. Operation-cache expiry cannot erase entitlement. Exact non-grant per-attempt snapshots are
+recoverable only within the finite operation cache. After expiry, reconcile durable original
+receipts/current wallet and immutable classification; do not claim byte-identical expired refusal
+replay or retain arbitrary failed operations forever. Durable receipt recovery uses ALREADY_GRANTED
+for granted sources and current read-only eligibility for uncommitted sources, without new award.
+Receipt recovery never restores spent credits or recreates a deleted account.
+
+### 9.6 Credential conflict and local preservation
+
+Credential-already-in-use is a distinct Firebase result. Show explicit choice before switching:
+keep guest intact, or continue to the existing Google account preserving selected local work.
+Explain guest promotional credits stay with guest and this switch earns no new signup bonus.
+Prepare intent and durable private local snapshot before changing Firebase identity. Persist no
+Google credential/token. No resume/JD upload or server content merge is implied.
+
+Completion requires Google subject verification and auth_time within configured fresh-auth bound
+(fixture 5 minutes), and no earlier than intent creation minus at most 30-second skew. Reauthenticate;
+token refresh alone does not satisfy this. Resolve source only from capability, destination only
+from token. Lock both accounts in **sorted UID order**, then intent/promotion state consistently.
+Same UID is a link, not conflict. Both must be live; Admin must still confirm source unlinked to
+Google, so a completed same-UID link cannot become cross-UID handoff. Bind first completion to
+this destination/key/payload. Consume capability for new actions; same-destination matching replay
+returns committed completion/current destination wallet before secret expiry/fresh-auth/provider
+calls, while still validating hash, auth/live accounts and destination binding. Another destination
+gets non-enumerating 404. No body UID, email/device match or guest UID possession is authority.
+
+```text
+{wallet,completion:{kind:"EXISTING_ACCOUNT",disposition:"PRESERVE_LOCAL_WORK",
+ creditsTransferred:0,purchasesTransferred:false,runningJobsTransferred:false},replayed}
+```
+
+No guest free/purchased credit, grant, purchase, ledger, unlock, server report or server job moves.
+No destination work overwrite, auto deletion or guest abandonment. Existing destination receives
+no new bonus/invitee status from completion; retain any prior immutable destination fact/grant.
+An unclassified destination becomes EXISTING_GOOGLE, preventing later direct-signup bypass.
+Deletion of either required account revokes incomplete/completed attributable capabilities.
+Denied completion preserves the snapshot and both accounts.
+
+Local snapshot includes profile/contact/summary/skills and source/confirmation facts; entries/
+bullets/order; applications with JD/requirements/notes/status/dates/gap analysis/quick answers/
+coverage/completed tailored text/accepted and undone edits/acceptance time; kept JD/onboarding;
+and readable local export files. Same-UID link preserves every local ID/file/pending job pointer.
+Cross-UID import occurs only after server completion, only for selected content and bound destination.
+Explicitly choose profile if destination has one; never overwrite silently. Allocate fresh local
+application IDs/remap references on collision. Keep completed local work/acceptance; detach source
+remote request/job/ledger/billing/report pointers and capabilities. Never poll/resend guest jobs
+under destination auth. Keep unfinished job input as local work; a new charged action as destination
+needs an explicit start. Retain exports privately or regenerate from completed content without
+exposing unrelated-account files. No entire-state-store blind copy, wallet copy or server ID rewrite. Cross-UID detachment includes
+generationId in gap analysis, tailored bullets/preparation/report state and PendingTailoringIds;
+content, decisions and acceptance remain intact. Before either identity transition, durably save
+unsaved JobDraftStore/ResumeImportDraft/current paste/manual-profile/editor inputs, or prevent
+entry until that save barrier succeeds. Fence late source writers while snapshotting/importing.
+
+Persist selection/snapshot/phase before cleanup. Recovery journal + atomic Room import + idempotent
+file staging + unique handoff ID must survive death before/after switch, completion, import and
+cleanup without data loss/duplication. The snapshot is visible only to verified source/bound
+destination, never later account C. Cancel old requests, clear account-scoped wallet/ledger/remote
+job state, enforce UID+environment+session-generation guards, and do not run blanket
+wipeKeepingOnboardingInput/export deletion until durable recovery is safe. Pending deletion/wipe
+wins. Bounded local retention must be explicit/disclosed before activation; no silent timed data
+loss while UI still promises recovery.
+
+### 9.7 Stable errors, lifecycle and implementation gates
+
+Existing 8.5 errors retain semantics/envelope; 429/503 include positive Retry-After (60 if unknown).
+No raw provider output/hash/subject/proof/counterparty UID in response/logs. New operations check
+Admin incarnation; committed replay deliberately trusts authenticated live server account and
+performs no Admin lookup. Normal account erasure revokes all state. Privileged out-of-band Firebase
+same-UID reuse without server lifecycle reconciliation cannot be detected from token claims alone
+and is outside this recovery guarantee; it must not be presented as proven safe by fixture replay.
+
+| HTTP / code | Meaning/recovery |
+|---|---|
+| 403 GUEST_REQUIRED / GOOGLE_REQUIRED | Required trusted provider; no mutation |
+| 403 GOOGLE_IDENTITY_REJECTED | Missing/contradictory Google provider/subject evidence |
+| 403 RECENT_GOOGLE_AUTH_REQUIRED | Reauthenticate for uncommitted conflict completion |
+| 409 ACCOUNT_LINK_CONFLICT | Incompatible same/different UID transition or consumed action |
+| 409 UPGRADE_INTENT_EXPIRED | Valid owned proof expired for uncommitted cross-UID completion |
+| 409 UPGRADE_INTENT_REQUIRED | No acceptable durable pre-link provenance for claimed guest path |
+| 503 IDENTITY_UNAVAILABLE | Trusted metadata unavailable/indeterminate; retry original key |
+| 409 POLICY_CHANGED / IDEMPOTENCY_CONFLICT / INTEGRITY_CHALLENGE_INVALID | Refresh offer / retain payload / fresh challenge per 8.5 |
+| 403 INTEGRITY_REJECTED / 503 INTEGRITY_UNAVAILABLE / PROMOTION_UNAVAILABLE | No new award; retain wallet/work |
+| 404 NOT_FOUND | Unknown/wrong-proof/other-owner/scope; no enumeration |
+| 409 ACCOUNT_DELETED | Either required account deleting/deleted; never revive |
+
+Do not embed provider HMAC, raw subject or deleted UID into an opaque surviving campaign/grant
+source. Per-account lifetime entitlement belongs to the deletable own grant/fact; finite cross-UID
+suppression belongs to the separately expiring alias. Export may include understandable purpose/
+evidence category/expiry, never alias values or risk thresholds.
+
+Add GOOGLE_SIGNUP ledger kind and linkage additively. Preserve historical WELCOME/PURCHASE/
+TAILORING/REFUND/MIGRATION, balances/reservations/timestamps/settlement; no welcome backfill rerun,
+numeric balance classification, destructive reset or automatic legacy grant. Resumable inventory/
+classification of pre-rollout Google accounts precedes activation; unknown history stays closed.
+Android explicitly renders GOOGLE_SIGNUP history before enabling offers.
+
+DELETE /v1/me erases activation/subject/intent/proof/operation/decision rows with partial-failure,
+retry and in-flight-finalization coverage. Handoff records link both parties: either deletion
+removes/revokes the edge, never deletes the other account. Preserve only nonidentifying consumed
+capacity as 8.6. Existing export.promotions gains `activation` (fact object or null) including own
+source/eligibility/reason/eligibilityAnchorAt/firstGoogleObservedAt/referralDeadline; omit counterparty UID, subject/device hashes,
+proof and internal decisions. Read/export never awards or creates an activation fact.
+
+Only deterministic test config enables fixture admission. Production cutoff, finite capacities,
+amounts, ingress, verifier/project/package/certs, freshness/window/retention/key rotation and
+migration revision need explicit validated values. Missing required config closes new grants.
+No live settings change here. Backend owner must propose a narrow constitution rule-3 exception
+for capability-resolved source locks under token-derived destination auth, same app/environment,
+sorted locks, no arbitrary source reads or content/economic transfer. This contract describes
+the proposal; it does not silently amend governing backend documents.

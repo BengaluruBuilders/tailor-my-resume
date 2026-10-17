@@ -53,7 +53,9 @@ internal class ExportedViewModel @AssistedInject constructor(
     private val savedStateHandle: SavedStateHandle,
     @param:Dispatcher(TmrDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     @Assisted val applicationId: String,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
 
     private val outcome = MutableStateFlow<ExportOutcome?>(null)
 
@@ -79,11 +81,12 @@ internal class ExportedViewModel @AssistedInject constructor(
     private var lastChange: StatusChange? = null
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             outcome.value = try {
                 if (savedStateHandle.get<Boolean>(EXPORTED_KEY) == true) {
                     restoredExport() ?: ExportOutcome.Failed
                 } else {
+                    workFence.check(workTicket)
                     exportResume(applicationId).also(::rememberExported)
                 }
             } catch (_: IOException) {
@@ -107,7 +110,8 @@ internal class ExportedViewModel @AssistedInject constructor(
     fun onOpen() = resolveIntent(exportedPdfIntents::viewIntent, ExportedEvent::Open)
 
     fun onMarkApplied() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
+            workFence.check(workTicket)
             val previous = setApplicationStatus(applicationId, ApplicationStatus.APPLIED)
             lastChange = previous
             val appliedOn = applicationRepository.observeApplication(applicationId).first()?.appliedOn
@@ -116,7 +120,7 @@ internal class ExportedViewModel @AssistedInject constructor(
     }
 
     fun onUndoApplied() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val previous = lastChange ?: return@launch
             setApplicationStatus.restore(applicationId, previous)
             lastChange = null
@@ -137,8 +141,9 @@ internal class ExportedViewModel @AssistedInject constructor(
     }
 
     fun onSaveStatus() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val pick = statusSheet.value ?: return@launch
+            workFence.check(workTicket)
             setApplicationStatus(applicationId, pick)
             statusSheet.value = null
             eventChannel.send(ExportedEvent.StatusSet(pick))
@@ -146,9 +151,11 @@ internal class ExportedViewModel @AssistedInject constructor(
     }
 
     private fun resolveIntent(build: suspend (String) -> Intent?, event: (Intent) -> ExportedEvent) {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             if (state.value !is ExportedUiState.Ready) return@launch
+            workFence.check(workTicket)
             val intent = build(applicationId)
+            workFence.check(workTicket)
             eventChannel.send(intent?.let(event) ?: ExportedEvent.FileMissing)
         }
     }
@@ -185,7 +192,7 @@ internal class ExportedViewModel @AssistedInject constructor(
         var fundedByFree = false
         for (entry in sortedBy { it.createdAt }) {
             when (entry.kind) {
-                CreditLedgerKind.FREE_GRANT, CreditLedgerKind.GUEST_TRIAL -> freeBalance += entry.amount
+                CreditLedgerKind.FREE_GRANT, CreditLedgerKind.GUEST_TRIAL, CreditLedgerKind.GOOGLE_SIGNUP -> freeBalance += entry.amount
                 CreditLedgerKind.PURCHASE -> Unit
                 CreditLedgerKind.REFUND -> Unit
                 CreditLedgerKind.MIGRATION -> Unit

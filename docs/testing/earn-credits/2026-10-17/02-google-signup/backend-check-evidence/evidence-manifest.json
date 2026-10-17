@@ -1,0 +1,35 @@
+{
+  "candidate_backend_sha": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "contract_sha256": "2143cac25a92c6b0b9a26c5b65932f638f20373c76f1c7048785b44ba244391a",
+  "source_evidence_sha256": {
+    "required-check-repair1.log": "a0ef92ffd9bdaa50bca87c084598916e60e1cf3c82a4072d208398089d586fd6",
+    "required-check-repair1-memory.csv": "d903f593ab1e614c62ce12c6c8092e7cb7b782806addf4b9ae847cf37decda72",
+    "required-check-repair1-result.json": "47c1ba718bcb4dda0d17acee3ce795472eb987ed5283fd212d3b07541562a288",
+    "precheck-repair1-manifest.json": "2ccac6580487115efd2553d75eb60b5165100a0757d391717595f42ac19006bb",
+    "focused-finaldev.log": "ffd21788cf06fd2071a8d5ee605f1b451d62d962ccd82851bc2948d5e145a95a",
+    "shared-repair1.log": "f94f72ba647906fecf1fb4f75106bebc001716e300958a72967b501088ce8cbe"
+  },
+  "published_assets": [
+    {
+      "file": "backend-check-summary.json",
+      "bytes": 2306,
+      "sha256": "f2de8354b0698f612d58d891c4a4637c0675afa2183cad59d2a4d38c1978559c"
+    },
+    {
+      "file": "backend-required-check-memory.csv",
+      "bytes": 1408,
+      "sha256": "d903f593ab1e614c62ce12c6c8092e7cb7b782806addf4b9ae847cf37decda72"
+    },
+    {
+      "file": "backend-required-check-repair1.log.gz",
+      "bytes": 23596,
+      "sha256": "20bb462e53d60f0ab011ca35466255834a14752a4455cc1570ccc6da947253be"
+    },
+    {
+      "file": "backend-shared-repair1.log",
+      "bytes": 581,
+      "sha256": "f94f72ba647906fecf1fb4f75106bebc001716e300958a72967b501088ce8cbe"
+    }
+  ],
+  "publication": "pending independent validation; local preparation only"
+}

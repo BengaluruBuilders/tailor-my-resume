@@ -12,6 +12,7 @@ data class CreditPolicyDto(
     val expiresAt: String?,
     val accountMode: String,
     val guestTrial: GuestTrialPolicyDto,
+    val signupBonus: SignupBonusPolicyDto = SignupBonusPolicyDto("UNAVAILABLE"),
 )
 
 @Serializable

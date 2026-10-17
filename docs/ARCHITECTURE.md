@@ -353,3 +353,17 @@ headlines (`TmrHeadline`). `TmrFontFamilies` in `core:designsystem` defines both
 - Add NiA production tooling only in the order that the adoption ledger in `docs/CONSTITUTION.md` gives.
   Spotless with ktlint has no license header step.
 - Verify before you push: `tools/ci/verify-local.sh` must pass.
+
+
+### Recent Google authentication recovery
+
+A server recent-auth rejection retains the existing upgrade journal and a private recovery marker
+containing the expected Firebase UID, Google subject digest and original claim/reconcile action.
+Opening the app exposes recovery without automatically requesting credentials. Explicit retry uses
+Credential Manager and Android FirebaseUser.reauthenticate(AuthCredential), verifies the same UID
+and Google provider subject, reloads the user and force-refreshes the ID token before resuming.
+Cancellation, another Google selection, provider failure and process death retain the original
+checkpoint, selection, operation keys, receipt revisions and rate deadline. A changed uncommitted
+offer still requires confirmation; committed request recovery precedes provider/policy lookups.
+Account deletion erases recovery and freezes late writes. Reauthentication never extends a server
+capability's expiry or authorizes an account switch.

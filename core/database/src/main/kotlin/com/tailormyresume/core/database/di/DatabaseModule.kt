@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.tailormyresume.core.database.MIGRATION_1_2
 import com.tailormyresume.core.database.MIGRATION_2_3
 import com.tailormyresume.core.database.MIGRATION_3_4
+import com.tailormyresume.core.database.MIGRATION_4_5
 import com.tailormyresume.core.database.TmrDatabase
 import dagger.Module
 import dagger.Provides
@@ -24,5 +25,5 @@ internal object DatabaseModule {
         context,
         TmrDatabase::class.java,
         "hh-database",
-    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
+    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
 }

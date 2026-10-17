@@ -30,6 +30,7 @@ class RemoteCreditsLedgerSource @Inject constructor(
     private fun toEntry(dto: CreditEntryDto): CreditLedgerEntry? {
         val kind = when (dto.kind) {
             LedgerKind.WELCOME -> CreditLedgerKind.FREE_GRANT
+            LedgerKind.GOOGLE_SIGNUP -> CreditLedgerKind.GOOGLE_SIGNUP
             LedgerKind.GUEST_TRIAL -> CreditLedgerKind.GUEST_TRIAL
             LedgerKind.PURCHASE -> CreditLedgerKind.PURCHASE
             LedgerKind.TAILORING -> CreditLedgerKind.SPEND

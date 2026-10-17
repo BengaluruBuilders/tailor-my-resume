@@ -1,5 +1,6 @@
 package com.tailormyresume.core.data.repository
 
+import com.tailormyresume.core.data.account.LocalWorkFence
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.model.TailoringReviewState
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,7 @@ import javax.inject.Singleton
 @Singleton
 internal class StoredTailoringReviewStateRepository @Inject constructor(
     private val store: MockStateStore,
+    private val workFence: LocalWorkFence = LocalWorkFence(),
 ) : TailoringReviewStateRepository {
 
     private val mutex = Mutex()
@@ -25,7 +27,7 @@ internal class StoredTailoringReviewStateRepository @Inject constructor(
             )
         }.distinctUntilChanged()
 
-    override suspend fun recordRegeneration(applicationId: String, section: String) {
+    override suspend fun recordRegeneration(applicationId: String, section: String) = workFence.mutate {
         mutex.withLock {
             val key = regenerationsKey(applicationId)
             val current = decodeRegenerations(store.read(key))
@@ -33,14 +35,14 @@ internal class StoredTailoringReviewStateRepository @Inject constructor(
         }
     }
 
-    override suspend fun markEdited(applicationId: String, bulletId: String) {
+    override suspend fun markEdited(applicationId: String, bulletId: String) = workFence.mutate {
         mutex.withLock {
             val key = editedKey(applicationId)
             store.write(key, encodeIds(decodeIds(store.read(key)) + bulletId))
         }
     }
 
-    override suspend fun clearEdited(applicationId: String, bulletIds: Collection<String>) {
+    override suspend fun clearEdited(applicationId: String, bulletIds: Collection<String>) = workFence.mutate {
         mutex.withLock {
             val key = editedKey(applicationId)
             val left = decodeIds(store.read(key)) - bulletIds.toSet()

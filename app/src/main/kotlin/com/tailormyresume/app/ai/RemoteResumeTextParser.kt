@@ -18,11 +18,14 @@ import javax.inject.Inject
 class RemoteResumeTextParser @Inject constructor(
     private val api: TailorMyResumeApi,
     private val ids: FactIdAllocator,
+    private val ownership: com.tailormyresume.app.auth.AccountOperationGuard? = null,
 ) : ResumeTextParser {
     override suspend fun parse(rawText: String): CandidateProfile = parse(rawText, keptEntries = 0)
 
     override suspend fun parse(rawText: String, keptEntries: Int): CandidateProfile {
+        val ticket = ownership?.capture()
         val response = remoteAi { api.parseResume(ResumeParseRequest(rawText)) }
+        ticket?.let { ownership.check(it) }
         val parsed = response.profile
         return CandidateProfile(
             fullName = parsed.fullName.orEmpty(),

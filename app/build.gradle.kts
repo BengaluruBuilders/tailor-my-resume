@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.tailormyresume.android.application)
     alias(libs.plugins.tailormyresume.android.application.compose)
     alias(libs.plugins.tailormyresume.hilt)

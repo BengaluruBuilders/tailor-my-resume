@@ -28,6 +28,7 @@ internal class CreditsViewModel @Inject constructor(
     applicationRepository: ApplicationRepository,
     uids: FirebaseUidProvider = FirebaseUidProvider { null },
     private val trials: GuestTrialGateway? = null,
+    private val google: com.tailormyresume.core.domain.GoogleAccountGateway? = null,
 ) : ViewModel() {
 
     private val trial = MutableStateFlow<CreditsTrialState>(CreditsTrialState.Idle)
@@ -50,6 +51,10 @@ internal class CreditsViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = CreditsUiState.Loading,
     )
+    fun onGoogleAccount() {
+        viewModelScope.launch { google?.open() }
+    }
+
     fun onCheckTrial() {
         if (trialJob?.isActive == true) return
         trial.value = CreditsTrialState.Loading

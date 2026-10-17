@@ -8,6 +8,7 @@ import com.tailormyresume.core.database.json.EvidenceBulletDto
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.FactSource
 
+@kotlinx.serialization.Serializable
 @Entity(
     tableName = "profile_entries",
     foreignKeys = [

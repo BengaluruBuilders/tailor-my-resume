@@ -30,13 +30,15 @@ class AppViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val rootState: StateFlow<AppRootState> = sessionRepository.observeAccount()
-        .map { account -> account?.id }
+        .map { account -> account?.let { it.id to it.mode } }
         .distinctUntilChanged()
-        .flatMapLatest { accountId ->
+        .flatMapLatest { identity ->
+            val accountId = identity?.first
             flow {
                 val handled = lastHandled
                 if (handled != null && handled.first == accountId) {
                     emit(AppRootState.Ready(handled.second, accountId))
+                    if (accountId != null) refreshWallet()
                 } else {
                     val start = observeStartDestination().first()
                     lastHandled = accountId to start

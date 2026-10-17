@@ -41,7 +41,9 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
     private val tailorResume: TailorResumeUseCase,
     private val exportedPdfIntents: ExportedPdfIntents,
     @Assisted val applicationId: String,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
 
     private val statusSheet = MutableStateFlow<ApplicationStatus?>(null)
 
@@ -80,7 +82,8 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
 
     fun onSaveStatus() {
         val pick = statusSheet.getAndUpdate { null } ?: return
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
+            workFence.check(workTicket)
             setApplicationStatus(applicationId, pick)
             statusSheet.value = null
             eventChannel.send(ApplicationDetailEvent.StatusSet(pick))
@@ -88,7 +91,7 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
     }
 
     fun onRetailor() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val credits = creditBalance.cachedCredits()
             val event = when {
                 tailorResume.hasUnfinishedRequest(applicationId) -> ApplicationDetailEvent.StartTailoring(applicationId)
@@ -113,7 +116,7 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
         event: (Intent) -> ApplicationDetailEvent,
     ) {
         if (!fileRequestRunning.compareAndSet(false, true)) return
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 val intent = build(applicationId)
                 eventChannel.send(intent?.let(event) ?: ApplicationDetailEvent.FileMissing)

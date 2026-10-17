@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.tailormyresume.core.database.DatabaseModuleTest" tests="1" skipped="0" failures="1" errors="0" timestamp="2026-10-17T07:47:25.777Z" hostname="abhishek-dubey-MS-7B16" time="0.095">
+  <properties/>
+  <testcase name="registersBothMigrationsWithoutDestructiveFallback" classname="com.tailormyresume.core.database.DatabaseModuleTest" time="0.092">
+    <failure message="com.google.common.truth.Platform$ComparisonFailureWithFacts: expected: 4&#10;but was : 5" type="com.google.common.truth.Platform$ComparisonFailureWithFacts">expected: 4
+but was : 5
+	at com.tailormyresume.core.database.DatabaseModuleTest.registersBothMigrationsWithoutDestructiveFallback(DatabaseModuleTest.kt:42)
+</failure>
+  </testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

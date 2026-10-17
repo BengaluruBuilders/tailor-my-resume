@@ -55,7 +55,9 @@ internal class TailorViewModel @AssistedInject constructor(
     private val handEditBullet: HandEditBulletUseCase,
     @Assisted val applicationId: String,
     @Assisted scenario: DebugScenario,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
 
     private val decisionMutex = Mutex()
 
@@ -87,15 +89,15 @@ internal class TailorViewModel @AssistedInject constructor(
     val events: Flow<TailorEvent> = eventChannel.receiveAsFlow()
 
     fun onUndoChange(changeId: String) {
-        viewModelScope.launch { updateBulletDecision(applicationId, changeId, BulletDecision.REJECTED) }
+        viewModelScope.launch(workFence.context(workTicket)) { updateBulletDecision(applicationId, changeId, BulletDecision.REJECTED) }
     }
 
     fun onAcceptChanges() {
-        viewModelScope.launch { acceptChanges(applicationId) }
+        viewModelScope.launch(workFence.context(workTicket)) { acceptChanges(applicationId) }
     }
 
     fun onExportTapped() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val application = applicationRepository.observeApplication(applicationId).first()
             val allowed = application != null && ExportReadiness.check(application) == ExportCheck.ALLOWED
             eventChannel.send(
@@ -109,7 +111,7 @@ internal class TailorViewModel @AssistedInject constructor(
     }
 
     fun onEditByHand(bulletId: String, text: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             decisionMutex.withLock { handEditBullet(applicationId, bulletId, text) }
         }
     }
@@ -125,7 +127,7 @@ internal class TailorViewModel @AssistedInject constructor(
     private fun report(kind: ReportedItemKind, itemId: String) {
         val success = uiState.value as? TailorUiState.Success ?: return
         val itemText = success.reportedText(kind, itemId) ?: return
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             contentReportRepository.report(
                 ContentReport(
                     applicationId = applicationId,

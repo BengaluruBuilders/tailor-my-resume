@@ -1,0 +1,145 @@
+{
+  "sha": "01cfb637e26ca075df78892a352b8b7c62e8531d",
+  "sourceManifestSha256": "8c1d78b34e8dbe3b486fe86ab07e185ceb56c5d25e36643837d8630cc2b1b8bc",
+  "trackedInputs": 2222,
+  "sourceMismatches": [],
+  "terminalExit": 0,
+  "modules": {
+    "app": {
+      "tests": 492,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core/testing": {
+      "tests": 95,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core/model": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core/domain": {
+      "tests": 783,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core/common": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core/navigation": {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core/designsystem": {
+      "tests": 233,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core/data": {
+      "tests": 185,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core/database": {
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core/network": {
+      "tests": 67,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "feature/onboarding/impl": {
+      "tests": 201,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "feature/applications/impl": {
+      "tests": 64,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "feature/settings/impl": {
+      "tests": 125,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "feature/analysis/impl": {
+      "tests": 112,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "feature/profile/impl": {
+      "tests": 169,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "feature/tailor/impl": {
+      "tests": 250,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "total": {
+    "tests": 2844,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "failingReports": [],
+  "minimumSampledAvailableMiB": 28597,
+  "maximumSampledSwapUsedMiB": 0,
+  "maximumSampledMemoryPsiAvg10": 0.0,
+  "realGitleaksSkipLines": [
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found",
+    "SKIP real gitleaks not found"
+  ]
+}

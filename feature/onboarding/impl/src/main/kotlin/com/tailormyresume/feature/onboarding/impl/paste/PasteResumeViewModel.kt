@@ -21,7 +21,9 @@ internal enum class PasteResumeEvent { OpenReading }
 @HiltViewModel
 internal class PasteResumeViewModel @Inject constructor(
     private val draft: ResumeImportDraft,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
 
     private val state = MutableStateFlow(PasteResumeUiState())
 
@@ -32,6 +34,7 @@ internal class PasteResumeViewModel @Inject constructor(
     val events: Flow<PasteResumeEvent> = eventChannel.receiveAsFlow()
 
     fun onTextChange(text: String) {
+        workFence.editing(this, true)
         val capped = text.take(MAX_RESUME_CHARS)
         state.update { PasteResumeUiState(capped, capped.trim().length >= MIN_PASTED_RESUME_CHARS) }
     }
@@ -40,6 +43,11 @@ internal class PasteResumeViewModel @Inject constructor(
         val current = state.value
         if (!current.canRead) return
         draft.setText(current.text)
+        workFence.editing(this, false)
         eventChannel.trySend(PasteResumeEvent.OpenReading)
+    }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
     }
 }

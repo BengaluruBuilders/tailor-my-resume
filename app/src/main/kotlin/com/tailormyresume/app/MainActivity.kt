@@ -18,6 +18,9 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @javax.inject.Inject
+    lateinit var google: com.tailormyresume.core.domain.GoogleAccountGateway
+
     private val appViewModel: AppViewModel by viewModels()
     private val backTargetViewModel: BackTargetViewModel by viewModels()
 
@@ -29,7 +32,7 @@ class MainActivity : ComponentActivity() {
             TmrTheme {
                 val rootState by appViewModel.rootState.collectAsStateWithLifecycle()
                 val hasHome by backTargetViewModel.hasHome.collectAsStateWithLifecycle()
-                TmrApp(rootState = rootState, hasHome = { hasHome })
+                TmrApp(rootState = rootState, hasHome = { hasHome }, google = google)
             }
         }
     }

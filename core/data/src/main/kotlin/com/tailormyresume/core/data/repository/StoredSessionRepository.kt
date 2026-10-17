@@ -1,5 +1,6 @@
 package com.tailormyresume.core.data.repository
 
+import com.tailormyresume.core.data.account.LocalWorkFence
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.mock.observeValue
 import com.tailormyresume.core.data.mock.writeValue
@@ -17,6 +18,7 @@ import javax.inject.Singleton
 @Singleton
 internal class StoredSessionRepository @Inject constructor(
     private val store: MockStateStore,
+    private val workFence: LocalWorkFence = LocalWorkFence(),
 ) : SessionRepository {
 
     override fun observeAccount(): Flow<SignInAccount?> =
@@ -38,15 +40,15 @@ internal class StoredSessionRepository @Inject constructor(
         store.write(LAST_ACCOUNT_KEY, id)
     }
 
-    override suspend fun markOnboardingComplete() {
+    override suspend fun markOnboardingComplete() = workFence.mutate {
         store.write(ONBOARDING_KEY, COMPLETE)
     }
 
-    override suspend fun keepJobDescription(job: KeptJobDescription) {
+    override suspend fun keepJobDescription(job: KeptJobDescription) = workFence.mutate {
         store.writeValue(KEPT_JOB_KEY, KeptJobDto.serializer(), KeptJobDto(job.text, job.company, job.role, job.companyIsPrefill, job.roleIsPrefill))
     }
 
-    override suspend fun clearKeptJobDescription() {
+    override suspend fun clearKeptJobDescription() = workFence.mutate {
         store.remove(KEPT_JOB_KEY)
     }
 

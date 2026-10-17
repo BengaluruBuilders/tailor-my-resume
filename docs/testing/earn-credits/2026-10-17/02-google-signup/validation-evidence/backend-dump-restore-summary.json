@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "kind": "fixture/database integration; real pg_dump/empty restore, candidate deletion service with explicit noop external ports",
+  "backendSha": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "archiveSha256": "d4465f4401783f4f46b0cad673fc4d9e861ad30ff2803a5013e3d03fd56efa2c",
+  "archiveBytes": 62226,
+  "migrationCount": 15,
+  "newTableRowsBefore": {
+    "tailormyresume_google_activations": 2,
+    "tailormyresume_upgrade_intents": 1,
+    "tailormyresume_google_aliases": 2,
+    "tailormyresume_activation_operations": 2
+  },
+  "newTableRowsAfterReconciliation": {
+    "tailormyresume_google_activations": 1,
+    "tailormyresume_upgrade_intents": 0,
+    "tailormyresume_google_aliases": 1,
+    "tailormyresume_activation_operations": 1
+  },
+  "checks": [
+    "all four new tables nonempty and byte-equivalent JSON rows after empty restore",
+    "restored deleted user rows/aliases/proofs/operations removed including destination-bound intent",
+    "control account unchanged",
+    "capacity consumed unchanged",
+    "repeated deletion exactly once external ports",
+    "live-user tombstone guard rejects resurrection"
+  ],
+  "externalAcceptance": "NOT tested; no cloud Firebase/storage action; no live candidate database touched"
+}

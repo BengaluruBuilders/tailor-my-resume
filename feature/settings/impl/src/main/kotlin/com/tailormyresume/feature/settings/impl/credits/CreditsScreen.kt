@@ -44,7 +44,7 @@ private val RowMinHeight = 68.dp
 private val BalanceGap = 16.dp
 
 @Composable
-internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifier: Modifier = Modifier, onCheckTrial: () -> Unit = {}, onClaimTrial: () -> Unit = {}) {
+internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifier: Modifier = Modifier, onCheckTrial: () -> Unit = {}, onClaimTrial: () -> Unit = {}, onGoogle: (() -> Unit)? = null) {
     val content = state as? CreditsUiState.Content ?: return
     val spacing = TmrTheme.spacing
     LazyColumn(
@@ -65,6 +65,11 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
         if (!content.canPurchase) {
             item(key = "guest-trial") {
                 GuestTrialCard(content.trial, onCheckTrial, onClaimTrial)
+            }
+        }
+        if (onGoogle != null) {
+            item(key = "google-account") {
+                TmrSecondaryButton(stringResource(R.string.feature_settings_impl_google_account), onGoogle, Modifier.fillMaxWidth().padding(vertical = spacing.md))
             }
         }
         item(key = "history-label") {
@@ -182,6 +187,7 @@ private fun HistoryRow(row: CreditsHistoryRow, first: Boolean, last: Boolean) {
 
 @Composable
 private fun HistoryTitle.text(): String = when (this) {
+    HistoryTitle.GoogleSignup -> stringResource(R.string.feature_settings_impl_credits_google_signup)
     HistoryTitle.GuestTrial -> stringResource(R.string.feature_settings_impl_credits_guest_trial)
     HistoryTitle.FreeFirstResume -> stringResource(R.string.feature_settings_impl_credits_free_first_resume)
     is HistoryTitle.BoughtCredits -> pluralStringResource(R.plurals.feature_settings_impl_credits_bought, credits, credits)

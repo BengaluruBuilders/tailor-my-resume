@@ -1,0 +1,199 @@
+{
+  "revision": "google-activation-v1",
+  "syntheticOnly": true,
+  "valid": {
+    "prepare": {
+      "requestId": "11111111-1111-4111-8111-111111111111",
+      "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8"
+    },
+    "status": {
+      "intentId": "44444444-4444-4444-8444-444444444444",
+      "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8"
+    },
+    "observation": {
+      "requestId": "11111111-1111-4111-8111-111111111111"
+    },
+    "guestLink": {
+      "requestId": "11111111-1111-4111-8111-111111111111",
+      "policyVersion": "signup-local-v1",
+      "trialPolicyVersion": null,
+      "path": "GUEST_LINK",
+      "upgradeIntent": {
+        "intentId": "44444444-4444-4444-8444-444444444444",
+        "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8"
+      },
+      "continuity": null,
+      "challengeId": "22222222-2222-4222-8222-222222222222",
+      "integrityToken": "synthetic-integrity-not-valid-in-any-environment"
+    },
+    "sameUidRecovery": {
+      "requestId": "11111111-1111-4111-8111-111111111111",
+      "policyVersion": "signup-local-v1",
+      "trialPolicyVersion": null,
+      "path": "GUEST_LINK",
+      "upgradeIntent": null,
+      "continuity": null,
+      "challengeId": "22222222-2222-4222-8222-222222222222",
+      "integrityToken": "synthetic-integrity-not-valid-in-any-environment"
+    },
+    "directGoogle": {
+      "requestId": "11111111-1111-4111-8111-111111111111",
+      "policyVersion": "signup-local-v1",
+      "trialPolicyVersion": "guest-local-v1",
+      "path": "DIRECT_GOOGLE",
+      "upgradeIntent": null,
+      "continuity": {
+        "type": "ANDROID_ID",
+        "value": "0123456789abcdef"
+      },
+      "challengeId": "22222222-2222-4222-8222-222222222222",
+      "integrityToken": "synthetic-integrity-not-valid-in-any-environment"
+    },
+    "directBaseSignupAbsent": {
+      "requestId": "11111111-1111-4111-8111-111111111111",
+      "policyVersion": null,
+      "trialPolicyVersion": "guest-local-v1",
+      "path": "DIRECT_GOOGLE",
+      "upgradeIntent": null,
+      "continuity": {
+        "type": "ANDROID_ID",
+        "value": "0123456789abcdef"
+      },
+      "challengeId": "22222222-2222-4222-8222-222222222222",
+      "integrityToken": "synthetic-integrity-not-valid-in-any-environment"
+    },
+    "directNoBase": {
+      "requestId": "11111111-1111-4111-8111-111111111111",
+      "policyVersion": "signup-local-v1",
+      "trialPolicyVersion": null,
+      "path": "DIRECT_GOOGLE",
+      "upgradeIntent": null,
+      "continuity": null,
+      "challengeId": "22222222-2222-4222-8222-222222222222",
+      "integrityToken": "synthetic-integrity-not-valid-in-any-environment"
+    },
+    "challenge": {
+      "operation": "GOOGLE_ACTIVATION",
+      "requestId": "11111111-1111-4111-8111-111111111111",
+      "policyVersion": "signup-local-v1",
+      "trialPolicyVersion": "guest-local-v1",
+      "payloadDigest": "RU3Wn6-pVXneW4fdmkjIS5_YemQgqwNZpwobbQFrPDE"
+    },
+    "complete": {
+      "requestId": "11111111-1111-4111-8111-111111111111",
+      "intentId": "44444444-4444-4444-8444-444444444444",
+      "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8",
+      "disposition": "PRESERVE_LOCAL_WORK"
+    }
+  },
+  "invalid": [
+    {
+      "name": "unknown-client-uid",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "signup-local-v1",
+        "trialPolicyVersion": null,
+        "path": "GUEST_LINK",
+        "upgradeIntent": {
+          "intentId": "44444444-4444-4444-8444-444444444444",
+          "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8"
+        },
+        "continuity": null,
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-integrity-not-valid-in-any-environment",
+        "userId": "forged"
+      }
+    },
+    {
+      "name": "amount-is-server-owned",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "signup-local-v1",
+        "trialPolicyVersion": null,
+        "path": "GUEST_LINK",
+        "upgradeIntent": {
+          "intentId": "44444444-4444-4444-8444-444444444444",
+          "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8"
+        },
+        "continuity": null,
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-integrity-not-valid-in-any-environment",
+        "amount": 500
+      }
+    },
+    {
+      "name": "google-link-cannot-refill-base",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "signup-local-v1",
+        "trialPolicyVersion": null,
+        "path": "GUEST_LINK",
+        "upgradeIntent": {
+          "intentId": "44444444-4444-4444-8444-444444444444",
+          "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8"
+        },
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-integrity-not-valid-in-any-environment"
+      }
+    },
+    {
+      "name": "direct-cannot-claim-intent",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "signup-local-v1",
+        "trialPolicyVersion": "guest-local-v1",
+        "path": "DIRECT_GOOGLE",
+        "upgradeIntent": {
+          "intentId": "44444444-4444-4444-8444-444444444444",
+          "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8"
+        },
+        "continuity": {
+          "type": "ANDROID_ID",
+          "value": "0123456789abcdef"
+        },
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-integrity-not-valid-in-any-environment"
+      }
+    },
+    {
+      "name": "trial-revision-without-signal",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "signup-local-v1",
+        "trialPolicyVersion": "guest-local-v1",
+        "path": "DIRECT_GOOGLE",
+        "upgradeIntent": null,
+        "continuity": null,
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-integrity-not-valid-in-any-environment"
+      }
+    },
+    {
+      "name": "uppercase-request-id",
+      "request": {
+        "requestId": "AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA",
+        "policyVersion": "signup-local-v1",
+        "trialPolicyVersion": null,
+        "path": "GUEST_LINK",
+        "upgradeIntent": {
+          "intentId": "44444444-4444-4444-8444-444444444444",
+          "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8"
+        },
+        "continuity": null,
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-integrity-not-valid-in-any-environment"
+      }
+    },
+    {
+      "name": "proof-not-32-bytes",
+      "request": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "proof": "short"
+      }
+    }
+  ]
+}

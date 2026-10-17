@@ -16,6 +16,7 @@ import javax.inject.Inject
 internal class OfflineFirstProfileRepository @Inject constructor(
     private val profileDao: ProfileDao,
     @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ProfileRepository {
 
     override fun observeProfile(): Flow<CandidateProfile?> =
@@ -23,7 +24,7 @@ internal class OfflineFirstProfileRepository @Inject constructor(
             .map { populated -> populated?.asExternalModel() }
             .flowOn(ioDispatcher)
 
-    override suspend fun saveProfile(profile: CandidateProfile) {
+    override suspend fun saveProfile(profile: CandidateProfile) = workFence.mutate {
         requireUniqueIds(profile)
         profileDao.replaceProfile(
             profile = profile.asEntity(),
@@ -31,9 +32,9 @@ internal class OfflineFirstProfileRepository @Inject constructor(
         )
     }
 
-    override suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean {
+    override suspend fun saveProfileIfUnchanged(expected: CandidateProfile, replacement: CandidateProfile): Boolean = workFence.mutate {
         requireUniqueIds(replacement)
-        return profileDao.replaceProfileIfUnchanged(
+        profileDao.replaceProfileIfUnchanged(
             expected.asEntity(),
             expected.asEntryEntities(),
             replacement.asEntity(),

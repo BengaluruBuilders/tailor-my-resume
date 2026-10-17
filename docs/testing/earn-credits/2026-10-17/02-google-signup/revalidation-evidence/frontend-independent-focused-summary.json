@@ -1,0 +1,68 @@
+{
+  "frontendSha": "01cfb637e26ca075df78892a352b8b7c62e8531d",
+  "backendSha": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "independentReexecution": true,
+  "terminalExit": 0,
+  "classes": {
+    "com.tailormyresume.app.credits.GooglePromotionClientTest": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.tailormyresume.app.auth.PrivateUpgradeStoreTest": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.tailormyresume.app.auth.RemoteServerPrivateErasureTest": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.tailormyresume.app.auth.GoogleAccountCoordinatorTest": {
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.tailormyresume.app.billing.BillingNoSensitiveLoggingTest": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.tailormyresume.core.database.DatabaseModuleTest": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.tailormyresume.feature.settings.impl.navigation.SettingsCreditsWiringTest": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.tailormyresume.feature.settings.impl.navigation.SettingsRealEntryWiringTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "com.tailormyresume.feature.settings.impl.navigation.PaywallRouteWiringTest": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "total": {
+    "tests": 44,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

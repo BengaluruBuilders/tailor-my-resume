@@ -6,7 +6,7 @@ internal object LedgerKindSerializer :
     LenientEnumSerializer<LedgerKind>(LedgerKind.entries.toTypedArray(), LedgerKind.UNKNOWN, "LedgerKind")
 
 @Serializable(with = LedgerKindSerializer::class)
-enum class LedgerKind { WELCOME, GUEST_TRIAL, PURCHASE, TAILORING, REFUND, MIGRATION, UNKNOWN }
+enum class LedgerKind { WELCOME, GUEST_TRIAL, GOOGLE_SIGNUP, PURCHASE, TAILORING, REFUND, MIGRATION, UNKNOWN }
 
 @Serializable
 data class CreditEntryDto(

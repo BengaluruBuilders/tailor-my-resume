@@ -31,6 +31,7 @@ internal data class UploadFailure(
 internal class ResumeImportDraft @Inject constructor(
     sessionRepository: SessionRepository,
     @ApplicationScope scope: CoroutineScope,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) {
     private val pending = MutableStateFlow<ResumeSource?>(null)
     private val failed = MutableStateFlow<UploadFailure?>(null)
@@ -50,7 +51,10 @@ internal class ResumeImportDraft @Inject constructor(
 
     fun setText(text: String) = begin(ResumeSource.PastedText(text))
 
-    fun consumeSource(): ResumeSource? = pending.getAndUpdate { null }
+    fun consumeSource(): ResumeSource? {
+        workFence.editing(this, false)
+        return pending.getAndUpdate { null }
+    }
 
     fun fail(failure: UploadFailure) {
         pending.value = null
@@ -58,11 +62,13 @@ internal class ResumeImportDraft @Inject constructor(
     }
 
     fun clear() {
+        workFence.editing(this, false)
         pending.value = null
         setFailure(null)
     }
 
     private fun begin(source: ResumeSource) {
+        workFence.editing(this, true)
         setFailure(null)
         pending.value = source
     }

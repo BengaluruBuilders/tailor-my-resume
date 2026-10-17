@@ -1,0 +1,253 @@
+package com.tailormyresume.core.data.account
+
+import android.content.Context
+import android.util.AtomicFile
+import androidx.room.withTransaction
+import com.tailormyresume.core.common.network.Dispatcher
+import com.tailormyresume.core.common.network.TmrDispatchers
+import com.tailormyresume.core.data.mock.MockStateStore
+import com.tailormyresume.core.database.TmrDatabase
+import com.tailormyresume.core.database.model.JobApplicationEntity
+import com.tailormyresume.core.database.model.LocalAccountOwnerEntity
+import com.tailormyresume.core.database.model.LocalHandoffEntity
+import com.tailormyresume.core.database.model.ProfileEntity
+import com.tailormyresume.core.database.model.ProfileEntryEntity
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.io.File
+import java.net.URLEncoder
+import java.security.MessageDigest
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Serializable
+data class WorkSnapshot(
+    val owner: String,
+    val environment: String,
+    val profile: ProfileEntity?,
+    val entries: List<ProfileEntryEntity>,
+    val applications: List<JobApplicationEntity>,
+    val local: Map<String, String>,
+)
+
+@Singleton
+class LocalWorkCheckpoint @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val database: TmrDatabase,
+    private val store: MockStateStore,
+    @Dispatcher(TmrDispatchers.IO) private val io: CoroutineDispatcher,
+) {
+    private val ownershipMutex = Mutex()
+    private val json = Json { encodeDefaults = true }
+    private val erased = java.util.concurrent.ConcurrentHashMap.newKeySet<Pair<String, String>>()
+
+    private fun requireLive(owner: String, environment: String) {
+        check((environment to owner) !in erased) { "Account work was erased" }
+    }
+
+    suspend fun capture(owner: String, environment: String): WorkSnapshot = withContext(io) {
+        ownershipMutex.withLock {
+            requireLive(owner, environment)
+            val snapshot = database.withTransaction {
+                requireLive(owner, environment)
+                val held = database.localHandoffDao().owner()
+                check(held == null || (held.owner == owner && held.environment == environment))
+                database.localHandoffDao().setOwner(LocalAccountOwnerEntity(owner = owner, environment = environment))
+                val apps = database.jobApplicationDao().readAll()
+                val keys = LOCAL_KEYS + apps.flatMap { app ->
+                    listOf("tailor.edited.${app.id}", "tailor.regenerations.${app.id}", "reports.content.${app.id}", "prep.plan.${app.id}")
+                }
+                val local = keys.mapNotNull { key -> store.read(key)?.let { key to it } }.toMap()
+                WorkSnapshot(owner, environment, database.profileDao().readProfile(), database.profileDao().readEntries(), apps, local)
+            }
+            val target = folder(owner, environment)
+            val files = File(target, "exports").also {
+                it.deleteRecursively()
+                it.mkdirs()
+            }
+            File(context.filesDir, "exports").takeIf { it.exists() }?.copyRecursively(files, overwrite = true)
+            requireLive(owner, environment)
+            atomicWrite(File(target, "snapshot.json"), json.encodeToString(WorkSnapshot.serializer(), snapshot))
+            if ((environment to owner) in erased) {
+                target.deleteRecursively()
+                error("Account work was erased")
+            }
+            snapshot
+        }
+    }
+
+    suspend fun read(owner: String, environment: String): WorkSnapshot? = withContext(io) {
+        if ((environment to owner) in erased) return@withContext null
+        val file = File(folder(owner, environment), "snapshot.json")
+        if (!file.exists()) {
+            null
+        } else {
+            json.decodeFromString(WorkSnapshot.serializer(), AtomicFile(file).openRead().use { it.reader().readText() })
+                .also { check(it.owner == owner && it.environment == environment) }
+        }
+    }
+
+    suspend fun restore(owner: String, environment: String) = withContext(io) {
+        ownershipMutex.withLock {
+            requireLive(owner, environment)
+            val snapshot = read(owner, environment)
+            database.withTransaction {
+                requireLive(owner, environment)
+                val held = database.localHandoffDao().owner()
+                if (held?.owner != owner || held.environment != environment) {
+                    database.profileDao().deleteProfile()
+                    database.jobApplicationDao().deleteAll()
+                    database.creditLedgerDao().clear()
+                    if (snapshot != null) {
+                        snapshot.profile?.let { database.profileDao().replaceProfile(it, snapshot.entries) }
+                        snapshot.applications.forEach { database.jobApplicationDao().upsertApplication(it) }
+                    }
+                    database.localHandoffDao().setOwner(LocalAccountOwnerEntity(owner = owner, environment = environment))
+                }
+            }
+            clearLocalKeys()
+            snapshot?.local?.forEach { (key, value) -> store.write(key, value) }
+            File(context.filesDir, "exports").deleteRecursively()
+            File(folder(owner, environment), "exports").takeIf { it.exists() }
+                ?.copyRecursively(File(context.filesDir, "exports"), overwrite = true)
+        }
+    }
+
+    suspend fun importSelected(
+        handoff: String,
+        source: String,
+        destination: String,
+        environment: String,
+        useProfile: Boolean,
+        applicationIds: Set<String>,
+    ) = withContext(io) {
+        ownershipMutex.withLock {
+            requireLive(source, environment)
+            requireLive(destination, environment)
+            val snapshot = checkNotNull(read(source, environment))
+            val selected = snapshot.applications.filter { it.id in applicationIds }
+            val serializer = MapSerializer(String.serializer(), String.serializer())
+            val mapping = database.withTransaction {
+                requireLive(source, environment)
+                requireLive(destination, environment)
+                val held = checkNotNull(database.localHandoffDao().owner())
+                check(held.owner == destination && held.environment == environment)
+                val previous = database.localHandoffDao().find(handoff)
+                if (previous != null) {
+                    check(previous.destination == destination && previous.source == source)
+                    json.decodeFromString(serializer, previous.mapping)
+                } else {
+                    val allocated = mutableMapOf<String, String>()
+                    selected.forEach { app ->
+                        val candidate = importedId(handoff, app.id)
+                        var id = candidate
+                        var suffix = 0
+                        while (database.jobApplicationDao().getApplication(id) != null || id in allocated.values) {
+                            suffix++
+                            id = "$candidate-$suffix"
+                        }
+                        allocated[app.id] = id
+                    }
+                    if (useProfile) snapshot.profile?.let { database.profileDao().replaceProfile(it, snapshot.entries) }
+                    selected.forEach { app -> database.jobApplicationDao().upsertApplication(detached(app, allocated.getValue(app.id))) }
+                    database.localHandoffDao().insert(LocalHandoffEntity(handoff, destination, source, json.encodeToString(serializer, allocated)))
+                    allocated
+                }
+            }
+            requireLive(source, environment)
+            requireLive(destination, environment)
+            stageFiles(snapshot, mapping)
+            mapping.forEach { (old, new) ->
+                listOf("tailor.edited.", "tailor.regenerations.").forEach { prefix ->
+                    snapshot.local[prefix + old]?.let { store.write(prefix + new, it) }
+                }
+            }
+            mergeExportHistory(snapshot, mapping)
+            if (store.read("session.keptJobDescription") == null) {
+                snapshot.local["session.keptJobDescription"]?.let { store.write("session.keptJobDescription", it) }
+            }
+            if (useProfile) snapshot.local["session.onboardingComplete"]?.let { store.write("session.onboardingComplete", it) }
+            requireLive(source, environment)
+            requireLive(destination, environment)
+        }
+    }
+
+    suspend fun erase(owner: String, environment: String) = withContext(io) {
+        ownershipMutex.withLock {
+            erased.add(environment to owner)
+            folder(owner, environment).deleteRecursively()
+            database.localHandoffDao().erase(owner)
+        }
+    }
+
+    private fun stageFiles(snapshot: WorkSnapshot, mapping: Map<String, String>) {
+        val root = File(folder(snapshot.owner, snapshot.environment), "exports")
+        mapping.forEach { (old, new) ->
+            val original = File(root, segment(old))
+            if (original.exists()) original.copyRecursively(File(context.filesDir, "exports/${segment(new)}"), overwrite = true)
+        }
+    }
+
+    private suspend fun mergeExportHistory(snapshot: WorkSnapshot, mapping: Map<String, String>) {
+        val old = snapshot.local["exports.history"] ?: return
+        val imported = json.parseToJsonElement(old).jsonArray.mapNotNull { element ->
+            val record = element.jsonObject
+            val id = mapping[record["applicationId"]?.jsonPrimitive?.content] ?: return@mapNotNull null
+            kotlinx.serialization.json.JsonObject(
+                record + mapOf(
+                    "applicationId" to kotlinx.serialization.json.JsonPrimitive(id),
+                    "creditKind" to kotlinx.serialization.json.JsonNull,
+                ),
+            )
+        }
+        val current = store.read("exports.history")?.let { json.parseToJsonElement(it).jsonArray }.orEmpty()
+        store.write("exports.history", kotlinx.serialization.json.JsonArray((current + imported).distinct()).toString())
+    }
+
+    private suspend fun clearLocalKeys() {
+        LOCAL_KEYS.forEach { store.remove(it) }
+        listOf("tailor.", "reports.content.", "prep.plan.", "tailoring.request.").forEach { store.removeWithPrefix(it) }
+    }
+
+    private fun folder(owner: String, environment: String): File =
+        File(context.filesDir, "account-work/${digest(environment + "\u0000" + owner)}").also { it.mkdirs() }
+
+    private fun segment(id: String): String = URLEncoder.encode(id, Charsets.UTF_8.name()).replace(".", "%2E").ifEmpty { "%" }
+
+    private fun importedId(handoff: String, id: String): String = "local-${digest(handoff + "\u0000" + id).take(48)}"
+
+    private fun digest(value: String): String = MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
+        .joinToString("") { "%02x".format(it) }
+
+    private fun atomicWrite(file: File, value: String) {
+        val atomic = AtomicFile(file)
+        val stream = atomic.startWrite()
+        try {
+            stream.write(value.toByteArray(Charsets.UTF_8))
+            atomic.finishWrite(stream)
+        } catch (failure: Exception) {
+            atomic.failWrite(stream)
+            throw failure
+        }
+    }
+
+    private fun detached(app: JobApplicationEntity, id: String): JobApplicationEntity = app.copy(
+        id = id,
+        gapAnalysis = app.gapAnalysis?.copy(generationId = null),
+        tailoredResume = app.tailoredResume?.let { resume -> resume.copy(runId = null, bullets = resume.bullets.map { it.copy(generationId = null) }) },
+    )
+
+    private companion object {
+        val LOCAL_KEYS = listOf("session.keptJobDescription", "session.onboardingComplete", "resume.settings", "exports.history")
+    }
+}

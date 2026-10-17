@@ -30,7 +30,9 @@ private fun CandidateProfile?.toUiState(): ReviewUiState =
 internal class ReviewViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val markReviewed: MarkProfileReviewedUseCase,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
 
     private val eventChannel = Channel<ReviewEvent>(Channel.BUFFERED)
 
@@ -43,7 +45,7 @@ internal class ReviewViewModel @Inject constructor(
     val events: Flow<ReviewEvent> = eventChannel.receiveAsFlow()
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             if (profileRepository.observeProfile().first().hasNothingToReview()) {
                 eventChannel.trySend(ReviewEvent.NothingToReview)
             }
@@ -52,7 +54,7 @@ internal class ReviewViewModel @Inject constructor(
 
     fun onContinue(displayedProfile: CandidateProfile?) {
         if (!continuing.compareAndSet(false, true)) return
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 val event = when (markReviewed(displayedProfile)) {
                     is MarkReviewedResult.Reviewed -> ReviewEvent.Continue

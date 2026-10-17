@@ -43,9 +43,11 @@ internal class ReadingViewModel @Inject constructor(
     private val saveImported: SaveImportedProfileUseCase,
     private val profileRepository: ProfileRepository,
     @Dispatcher(TmrDispatchers.IO) private val io: CoroutineDispatcher,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
 
-    private val scope = CoroutineScope(SupervisorJob() + io)
+    private val workTicket = workFence.ticket()
+    private val scope = CoroutineScope(SupervisorJob() + io + workFence.context(workTicket))
 
     private val eventChannel = Channel<ReadingEvent>(Channel.BUFFERED)
 
@@ -68,6 +70,7 @@ internal class ReadingViewModel @Inject constructor(
 
     init {
         val source = draft.consumeSource()
+        workFence.editing(this, source != null)
         if (source == null) {
             eventChannel.trySend(ReadingEvent.NothingToRead)
         } else {
@@ -77,6 +80,7 @@ internal class ReadingViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        workFence.editing(this, false)
         scope.cancel()
         super.onCleared()
     }
@@ -107,7 +111,9 @@ internal class ReadingViewModel @Inject constructor(
             return
         }
         try {
+            workFence.check(workTicket)
             saveImported(parsed, file?.displayName)
+            workFence.editing(this, false)
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (failure: Exception) {

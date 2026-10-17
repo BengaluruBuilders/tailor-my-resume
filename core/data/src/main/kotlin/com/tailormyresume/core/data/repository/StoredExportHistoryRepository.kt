@@ -1,5 +1,6 @@
 package com.tailormyresume.core.data.repository
 
+import com.tailormyresume.core.data.account.LocalWorkFence
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.mock.observeValue
 import com.tailormyresume.core.data.mock.readValue
@@ -20,6 +21,7 @@ import kotlin.time.Instant
 @Singleton
 internal class StoredExportHistoryRepository @Inject constructor(
     private val store: MockStateStore,
+    private val workFence: LocalWorkFence = LocalWorkFence(),
 ) : ExportHistoryRepository {
 
     private val mutex = Mutex()
@@ -31,7 +33,7 @@ internal class StoredExportHistoryRepository @Inject constructor(
     override fun observeExports(applicationId: String): Flow<List<ExportRecord>> =
         observeExports().map { records -> records.filter { it.applicationId == applicationId } }
 
-    override suspend fun record(export: ExportRecord) = update { current -> current + export.toDto() }
+    override suspend fun record(export: ExportRecord) = workFence.mutate { update { current -> current + export.toDto() } }
 
     override suspend fun clearFor(applicationId: String) =
         update { current -> current.filterNot { it.applicationId == applicationId } }

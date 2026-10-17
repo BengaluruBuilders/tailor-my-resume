@@ -47,6 +47,7 @@ internal class SettingsActions(
     val onHelp: () -> Unit,
     val onDeleteAccount: () -> Unit,
     val onSignOut: () -> Unit,
+    val onGoogle: (() -> Unit)? = null,
 )
 
 @Composable
@@ -74,6 +75,15 @@ internal fun SettingsScreen(
         TmrSectionLabel(stringResource(R.string.feature_settings_impl_section_account))
         SettingsGroup {
             AccountIdentity(email = content.email, guest = content.guest)
+            if (content.guest) {
+                actions.onGoogle?.let { action ->
+                    com.tailormyresume.core.designsystem.component.input.TmrSecondaryButton(
+                        stringResource(R.string.feature_settings_impl_google_account),
+                        action,
+                        Modifier.fillMaxWidth(),
+                    )
+                }
+            }
             SettingsValueRow(
                 label = stringResource(R.string.feature_settings_impl_credits_row),
                 value = content.credits?.let { pluralStringResource(R.plurals.feature_settings_impl_credits_left, it, it) }

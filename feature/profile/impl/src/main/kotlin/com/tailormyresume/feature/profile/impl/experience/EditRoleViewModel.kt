@@ -62,7 +62,9 @@ internal enum class EditRoleEvent { Saved, Deleted }
 internal class EditRoleViewModel @AssistedInject constructor(
     private val profileRepository: ProfileRepository,
     @Assisted private val entryId: String?,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
 
     private val draft = MutableStateFlow<EditRoleDraft?>(null)
 
@@ -95,7 +97,7 @@ internal class EditRoleViewModel @AssistedInject constructor(
     )
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val profile = profileRepository.observeProfile().filterNotNull().first()
             if (draft.value != null) return@launch
             val entry = entryId?.let { id ->
@@ -141,7 +143,7 @@ internal class EditRoleViewModel @AssistedInject constructor(
     private fun singleFlight(action: suspend () -> Unit) {
         if (finished || busy) return
         busy = true
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 action()
             } finally {
@@ -183,7 +185,9 @@ internal class EditRoleViewModel @AssistedInject constructor(
             }
         }
         finished = true
+        workFence.check(workTicket)
         profileRepository.saveProfile(profile.copy(entries = entries))
+        workFence.editing(this, false)
         channel.send(EditRoleEvent.Saved)
     }
 
@@ -192,11 +196,13 @@ internal class EditRoleViewModel @AssistedInject constructor(
         val profile = profileRepository.observeProfile().first() ?: return
         finished = true
         val group = profile.entries.continuationGroupOf(id)
+        workFence.check(workTicket)
         profileRepository.saveProfile(profile.copy(entries = profile.entries.filterNot { it.id in group }))
         channel.send(EditRoleEvent.Deleted)
     }
 
     private fun edit(transform: (EditRoleDraft) -> EditRoleDraft) {
+        workFence.editing(this, true)
         draft.update { roleDraft -> roleDraft?.let(transform) }
     }
 
@@ -210,6 +216,10 @@ internal class EditRoleViewModel @AssistedInject constructor(
     @AssistedFactory
     interface Factory {
         fun create(entryId: String?): EditRoleViewModel
+    }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
     }
 }
 

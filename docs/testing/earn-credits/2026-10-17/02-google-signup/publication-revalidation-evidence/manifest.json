@@ -1,0 +1,29 @@
+{
+  "finding": "GS02-PUB-001",
+  "status": "RESOLVED",
+  "frontendPublishedHead": "4a297db54a88eaa2771c03b6776cd7df8e0dc43e",
+  "backendPublishedHead": "4e954057173fd6a25576708450c864fd31d17c19",
+  "testedFrontend": "01cfb637e26ca075df78892a352b8b7c62e8531d",
+  "testedBackend": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "verdict": "attainable post-publication checks PASS with disclosed frontend run cancellation; external acceptance BLOCKED; draft/not ready for merge",
+  "files": {
+    "backend-ci-test-lines.txt": {
+      "bytes": 482,
+      "sha256": "0706cc44b8292dacb0f3230efe88e32f58be88e1353b969ab32a3766086d2002"
+    },
+    "backend-secret-ci.json": {
+      "bytes": 384,
+      "sha256": "380a0ed8581c5242bf66b715464178df2196bdf54203abe12e9b6e9498c1f8f4"
+    },
+    "backend-validation-ci.json": {
+      "bytes": 1339,
+      "sha256": "e86cb498bc5ed1e2b3b61b481c448561081c64d749401ba24b2093b2970c3401"
+    },
+    "repair-integrity-summary.json": {
+      "bytes": 1034,
+      "sha256": "724441c5b7d845339e70ac9435cf8610e54af80714e98d784b8b29a25f4be7af"
+    }
+  },
+  "reportSha256": "2036d85cfadb24cc1a28358fdb7b4f1b3c6003e7e1b77b16c1b8bab253a2c364",
+  "publication": "local independent follow-up; no commit/push by validator"
+}

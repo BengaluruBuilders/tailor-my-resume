@@ -27,5 +27,5 @@ internal fun CreditsRoute(
         lifecycle.addObserver(observer)
         onDispose { lifecycle.removeObserver(observer) }
     }
-    CreditsScreen(state = state, onBuyMore = onBuyMore, modifier = modifier, onCheckTrial = viewModel::onCheckTrial, onClaimTrial = viewModel::onClaimTrial)
+    CreditsScreen(state = state, onBuyMore = onBuyMore, modifier = modifier, onCheckTrial = viewModel::onCheckTrial, onClaimTrial = viewModel::onClaimTrial, onGoogle = viewModel::onGoogleAccount)
 }

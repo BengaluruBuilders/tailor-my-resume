@@ -9,6 +9,7 @@ import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GetTokenResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.tailormyresume.core.common.network.Dispatcher
@@ -42,13 +43,75 @@ class FirebaseAuthClient @Inject constructor(
 
     private val auth: FirebaseAuth? by lazy { if (config.isComplete) createAuth() else null }
 
+    override suspend fun currentUser(): FirebaseUser? = withContext(io) {
+        auth?.currentUser?.let { user ->
+            FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), if (user.isAnonymous) AccountMode.ANONYMOUS else AccountMode.GOOGLE, user.providerData.firstOrNull { it.providerId == "google.com" }?.uid)
+        }
+    }
+
+    override suspend fun linkGoogle(googleIdToken: String): AuthOutcome<FirebaseUser> = withContext(io) {
+        val user = auth?.currentUser?.takeIf { it.isAnonymous }
+            ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+        try {
+            val linked = user.linkWithCredential(GoogleAuthProvider.getCredential(googleIdToken, null)).await().user
+                ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+            check(linked.uid == user.uid)
+            refreshGoogle()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (conflict: FirebaseAuthUserCollisionException) {
+            AuthOutcome.Failure(AuthFailure.CredentialConflict)
+        } catch (failure: Exception) {
+            AuthOutcome.Failure(failure.toAuthFailure())
+        }
+    }
+
+    override suspend fun refreshGoogle(): AuthOutcome<FirebaseUser> = withContext(io) {
+        val user = auth?.currentUser ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+        try {
+            user.reload().await()
+            check(!user.isAnonymous && user.providerData.any { it.providerId == "google.com" })
+            user.getIdToken(true).await()
+            AuthOutcome.Success(FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), googleSubject = user.providerData.firstOrNull { it.providerId == "google.com" }?.uid))
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            AuthOutcome.Failure(failure.toAuthFailure())
+        }
+    }
+
+    override suspend fun reauthenticateGoogle(googleIdToken: String, expectedUid: String, expectedGoogleDigest: String): AuthOutcome<FirebaseUser> = withContext(io) {
+        val firebaseAuth = auth ?: return@withContext AuthOutcome.Failure(AuthFailure.NotConfigured)
+        val user = firebaseAuth.currentUser ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+        try {
+            fun verifyCurrent() {
+                val current = checkNotNull(firebaseAuth.currentUser)
+                check(current.uid == expectedUid && !current.isAnonymous)
+                check(current.providerData.single { it.providerId == "google.com" }.uid.let(GoogleCredentialIdentity::digestSubject) == expectedGoogleDigest)
+            }
+            verifyCurrent()
+            check(GoogleCredentialIdentity.digest(googleIdToken) == expectedGoogleDigest)
+            user.reauthenticate(GoogleAuthProvider.getCredential(googleIdToken, null)).await()
+            verifyCurrent()
+            user.reload().await()
+            verifyCurrent()
+            user.getIdToken(true).await()
+            verifyCurrent()
+            AuthOutcome.Success(checkNotNull(currentUser()))
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            AuthOutcome.Failure(failure.toAuthFailure())
+        }
+    }
+
     override suspend fun signIn(googleIdToken: String): AuthOutcome<FirebaseUser> = withContext(io) {
         val firebaseAuth = auth ?: return@withContext AuthOutcome.Failure(AuthFailure.NotConfigured)
         try {
             val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
             val user = firebaseAuth.signInWithCredential(credential).await().user
                 ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
-            AuthOutcome.Success(FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty()))
+            AuthOutcome.Success(FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), googleSubject = user.providerData.firstOrNull { it.providerId == "google.com" }?.uid))
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (failure: Exception) {

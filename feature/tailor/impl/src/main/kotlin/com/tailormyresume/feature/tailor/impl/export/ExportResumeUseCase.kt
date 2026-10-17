@@ -1,5 +1,6 @@
 package com.tailormyresume.feature.tailor.impl.export
 
+import com.tailormyresume.core.data.account.LocalWorkFence
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
@@ -38,8 +39,13 @@ internal class ExportResumeUseCase @Inject constructor(
     private val assembler: ResumeDocumentAssembler,
     private val renderer: ResumePdfRenderer,
     private val clock: Clock,
+    private val workFence: LocalWorkFence = LocalWorkFence(),
 ) {
-    suspend operator fun invoke(applicationId: String): ExportOutcome {
+    suspend operator fun invoke(applicationId: String): ExportOutcome = workFence.protect {
+        export(applicationId)
+    }
+
+    private suspend fun export(applicationId: String): ExportOutcome {
         val application = applicationRepository.observeApplication(applicationId).first() ?: return ExportOutcome.Refused
         if (ExportReadiness.check(application) != ExportCheck.ALLOWED) return ExportOutcome.Refused
         val resume = application.tailoredResume ?: return ExportOutcome.Refused

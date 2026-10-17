@@ -50,7 +50,9 @@ internal enum class EditContactEvent { Saved }
 internal class EditContactViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val sessionRepository: SessionRepository,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
 
     private val draft = MutableStateFlow<EditContactDraft?>(null)
 
@@ -85,7 +87,7 @@ internal class EditContactViewModel @Inject constructor(
     )
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val profile = profileRepository.observeProfile().filterNotNull().first()
             draft.compareAndSet(null, profile.toDraft())
         }
@@ -106,7 +108,7 @@ internal class EditContactViewModel @Inject constructor(
     fun save() {
         if (finished || busy) return
         busy = true
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 write()
             } finally {
@@ -122,6 +124,7 @@ internal class EditContactViewModel @Inject constructor(
         val email = if (sessionRepository.observeAccount().first()?.mode == AccountMode.ANONYMOUS) contactDraft.email.trim() else profile.email
         if (email.isNotBlank() && !ContactFieldValidator.isValidEmail(email)) return
         finished = true
+        workFence.check(workTicket)
         profileRepository.saveProfile(
             profile.copy(
                 fullName = contactDraft.fullName.trim(),
@@ -133,11 +136,17 @@ internal class EditContactViewModel @Inject constructor(
                 contactUserStated = true,
             ),
         )
+        workFence.editing(this, false)
         channel.send(EditContactEvent.Saved)
     }
 
     private fun edit(transform: (EditContactDraft) -> EditContactDraft) {
+        workFence.editing(this, true)
         draft.update { contactDraft -> contactDraft?.let(transform) }
+    }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
     }
 }
 

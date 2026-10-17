@@ -80,6 +80,7 @@ internal fun SettingsRoute(
                 }
             },
             onSignOut = viewModel::onSignOut,
+            onGoogle = viewModel::onGoogleAccount,
         )
     }
     SettingsScreen(state = state, versionName = versionName, actions = actions, modifier = modifier)
