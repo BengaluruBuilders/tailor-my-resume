@@ -100,6 +100,12 @@ class CacheDirAccountDataExporter(private val context: Context) : AccountDataExp
 @InstallIn(SingletonComponent::class)
 object SettingsAppGatewayFakes {
     @Provides
+    fun guests(): com.tailormyresume.core.domain.GuestTrialGateway = com.tailormyresume.core.testing.gateway.TestGuestTrialGateway()
+
+    @Provides
+    fun firebaseUids(): com.tailormyresume.core.domain.FirebaseUidProvider = com.tailormyresume.core.domain.FirebaseUidProvider { "test-user" }
+
+    @Provides
     @Singleton
     fun recordingSignInGateway(): RecordingSignInGateway = RecordingSignInGateway()
 

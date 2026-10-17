@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.domain.ApplicationPack
+import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.PurchaseFailureReason
 import com.tailormyresume.core.domain.PurchaseResult
@@ -32,6 +33,7 @@ internal class PaywallViewModel @Inject constructor(
     private val creditsRepository: CreditsRepository,
     private val creditBalance: AccountCreditBalance,
     private val clock: Clock,
+    uids: FirebaseUidProvider = FirebaseUidProvider { null },
 ) : ViewModel() {
 
     private val packs = MutableStateFlow<List<ApplicationPack>>(emptyList())
@@ -52,6 +54,7 @@ internal class PaywallViewModel @Inject constructor(
             packs = packs,
             selectedPackId = selectedPack(packs, chosen)?.id,
             busy = busy,
+            canPurchase = !uids.isAnonymous(),
         )
     }.stateIn(
         scope = viewModelScope,

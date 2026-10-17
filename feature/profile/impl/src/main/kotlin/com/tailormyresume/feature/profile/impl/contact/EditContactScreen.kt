@@ -40,6 +40,7 @@ internal data class EditContactActions(
     val onCityChange: (String) -> Unit = {},
     val onLinkedinChange: (String) -> Unit = {},
     val onPortfolioChange: (String) -> Unit = {},
+    val onEmailChange: (String) -> Unit = {},
 )
 
 @Composable
@@ -92,7 +93,11 @@ private fun EditContactForm(
             onValueChange = actions.onCityChange,
             modifier = Modifier.fillMaxWidth(),
         )
-        ReadOnlyEmail(email = state.email, fromGoogle = state.emailFromGoogle)
+        if (state.emailEditable) {
+            TmrTextField(label = stringResource(R.string.feature_profile_impl_contact_email_guest), value = draft.email, onValueChange = actions.onEmailChange, modifier = Modifier.fillMaxWidth())
+        } else {
+            ReadOnlyEmail(email = state.email, fromGoogle = state.emailFromGoogle)
+        }
         TmrTextField(
             label = stringResource(R.string.feature_profile_impl_contact_linkedin),
             value = draft.linkedin,
@@ -170,6 +175,7 @@ internal fun EditContactRoute(
             onCityChange = viewModel::onCityChange,
             onLinkedinChange = viewModel::onLinkedinChange,
             onPortfolioChange = viewModel::onPortfolioChange,
+            onEmailChange = viewModel::onEmailChange,
         ),
         modifier = modifier,
     )

@@ -7,6 +7,7 @@ import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.account.ExportAccountDataUseCase
+import com.tailormyresume.core.model.AccountMode
 import com.tailormyresume.core.model.FileNameFormat
 import com.tailormyresume.core.model.PageSize
 import com.tailormyresume.core.navigation.PendingToast
@@ -46,6 +47,7 @@ internal class SettingsViewModel @Inject constructor(
             pageSize = settings.pageSize,
             fileNameFormat = settings.fileNameFormat,
             productUpdates = settings.productUpdates,
+            guest = account?.mode == AccountMode.ANONYMOUS,
         )
     }.stateIn(
         scope = viewModelScope,

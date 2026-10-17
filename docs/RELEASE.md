@@ -94,9 +94,17 @@ There are two environments and three Android build types:
 | Staging | `debug`, `staging` | `tailormy-resume-staging` | `com.tailormyresume.app.staging` |
 | Production | `release` | `tailormyresume-app` | `com.tailormyresume.app` |
 
-Register each package in its own Firebase project. Enable only the Google sign-in provider under
-Authentication, Sign-in method. Use `TMR Staging` as the staging public name and `TailorMyResume`
-as the production public name. Keep Analytics disabled.
+Register each package in its own Firebase project. Under Authentication, Sign-in method, enable
+Google for both projects and Anonymous for the staging project used to validate guest entry. Keep
+production Google-only; guest-provider activation there is not part of staging validation. Use
+`TMR Staging` as the staging public name and `TailorMyResume` as the production public name. Keep
+Analytics disabled.
+
+Enabling the staging Anonymous provider permits Firebase guest authentication only. Guest-trial
+admission still requires the separately configured matching Play Integrity verifier and the
+backend's active reward policy and admission controls described in [BACKEND_CONTRACT.md, section 8](BACKEND_CONTRACT.md#8-guest-trial-slice-contract-guest-trial-v1-2026-10-17).
+Do not weaken integrity evidence or enable a production reward policy as part of staging setup.
+Provider enablement alone does not prove signup or a real credit grant.
 
 Run `./gradlew :app:signingReport` to get this machine's staging SHA-1 and SHA-256 certificates.
 Add both to the staging Android app. Each developer machine can have a different debug key.
@@ -143,3 +151,20 @@ Without them `assembleRelease` still works and produces an unsigned APK. `bundle
 - `TMR_VERSION_CODE`: integer from 1 to 2100000000. Default `1`. The workflow sets it to `github.run_number + TMR_VERSION_CODE_OFFSET`, so it grows with each new run. Re-running a job reuses its run number, and renaming the workflow file resets the run number. Raise `TMR_VERSION_CODE_OFFSET` above your last uploaded code if either happens. Play rejects a repeated code.
 
 Invalid values fail the build. `tools/ci/test-release-config.sh` checks this.
+
+
+### Guest trial integrity configuration
+
+Guest trial admission uses Standard Play Integrity with a non-secret cloud project number. Set
+`tailormyresumeStagingPlayIntegrityCloudProjectNumber` for debug/staging and
+`tailormyresumePlayIntegrityCloudProjectNumber` for release in user Gradle properties. Use the project
+that matches the backend verifier for that environment. Values must be positive decimal integers
+that fit a signed 64-bit value. Missing or invalid values disable trial verification only; the app
+retains existing account/work/balance access and shows temporary-unavailable recovery. Staging never
+falls back to the release value. Do not commit actual values or service credentials.
+
+The existing Firebase Auth dependency includes Integrity 1.3.0, whose Standard API the adapter uses.
+No new runtime SDK is added. Sideload/debug/emulator installs receive no trust bypass. Real admission
+needs matching Firebase anonymous-provider configuration, backend policy/admissions, finite capacity,
+package/certificate/version checks, Google verifier access and the production disclosure review in
+contract section 8. Test fixtures are application-logic evidence only.

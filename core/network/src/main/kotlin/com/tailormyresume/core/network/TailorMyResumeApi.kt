@@ -4,8 +4,13 @@ import com.tailormyresume.core.network.dto.AnalysisRequest
 import com.tailormyresume.core.network.dto.AnalysisResponse
 import com.tailormyresume.core.network.dto.ContentReportRequest
 import com.tailormyresume.core.network.dto.ContentReportResponse
+import com.tailormyresume.core.network.dto.CreditPolicyResponse
 import com.tailormyresume.core.network.dto.CreditsResponse
 import com.tailormyresume.core.network.dto.DeletionResponse
+import com.tailormyresume.core.network.dto.GrantChallengeRequest
+import com.tailormyresume.core.network.dto.GrantChallengeResponse
+import com.tailormyresume.core.network.dto.GuestInitializeRequest
+import com.tailormyresume.core.network.dto.GuestInitializeResponse
 import com.tailormyresume.core.network.dto.JobImportRequest
 import com.tailormyresume.core.network.dto.JobImportResponse
 import com.tailormyresume.core.network.dto.MeResponse
@@ -26,6 +31,15 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface TailorMyResumeApi {
+    @GET("v1/tailormyresume/credits/policy")
+    suspend fun creditPolicy(): CreditPolicyResponse
+
+    @POST("v1/tailormyresume/credits/grant-challenges")
+    suspend fun grantChallenge(@Body body: GrantChallengeRequest): GrantChallengeResponse
+
+    @POST("v1/tailormyresume/credits/initialize")
+    suspend fun initializeGuest(@Body body: GuestInitializeRequest): GuestInitializeResponse
+
     @GET("v1/me")
     suspend fun me(): MeResponse
 

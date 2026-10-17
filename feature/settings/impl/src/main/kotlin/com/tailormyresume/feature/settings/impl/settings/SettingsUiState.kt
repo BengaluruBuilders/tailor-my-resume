@@ -13,6 +13,7 @@ internal sealed interface SettingsUiState {
         val pageSize: PageSize,
         val fileNameFormat: FileNameFormat,
         val productUpdates: Boolean,
+        val guest: Boolean = false,
     ) : SettingsUiState
 }
 

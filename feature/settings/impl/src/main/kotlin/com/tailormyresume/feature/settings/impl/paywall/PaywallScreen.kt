@@ -48,6 +48,7 @@ internal class PaywallActions(
     val onSelectPack: (String) -> Unit,
     val onBuy: () -> Unit,
     val onRestore: () -> Unit,
+    val onCredits: () -> Unit = {},
 )
 
 private const val ART_MAX_FONT_SCALE = 1.15f
@@ -59,6 +60,10 @@ private val BadgeSize = 54.dp
 @Composable
 internal fun PaywallScreen(state: PaywallUiState, actions: PaywallActions, modifier: Modifier = Modifier) {
     val spacing = TmrTheme.spacing
+    if (!state.canPurchase) {
+        GuestCreditRecovery(actions.onCredits, modifier)
+        return
+    }
     val enlarged = LocalDensity.current.fontScale > ART_MAX_FONT_SCALE
     Column(modifier = modifier.fillMaxSize()) {
         Column(
@@ -235,5 +240,17 @@ private fun PaywallBottomBar(state: PaywallUiState, actions: PaywallActions, mod
                 textAlign = TextAlign.Center,
             )
         }
+    }
+}
+
+@Composable
+private fun GuestCreditRecovery(onCredits: () -> Unit, modifier: Modifier) {
+    Column(
+        modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(TmrTheme.spacing.gutter),
+        verticalArrangement = Arrangement.spacedBy(TmrTheme.spacing.md),
+    ) {
+        Text(stringResource(R.string.feature_settings_impl_guest_credit_title), style = TmrTheme.typography.headline, color = TmrTheme.colors.text)
+        Text(stringResource(R.string.feature_settings_impl_guest_credit_recovery), style = TmrTheme.typography.body, color = TmrTheme.colors.textSecondary)
+        TmrPrimaryButton(label = stringResource(R.string.feature_settings_impl_guest_credit_view), onClick = onCredits, modifier = Modifier.fillMaxWidth())
     }
 }

@@ -50,6 +50,34 @@ class EditContactViewModelTest {
     }
 
     @Test
+    fun guestCanCorrectImportedEmailWithoutChangingAuthentication() = runTest {
+        session.sendAccount(SignInAccount("guest", "", "", com.tailormyresume.core.model.AccountMode.ANONYMOUS))
+        profileRepository.sendProfile(PrototypeFixtures.returning().profile)
+        val subject = viewModel()
+        collectUiState(subject)
+        assertThat(subject.editing().emailEditable).isTrue()
+        subject.onEmailChange("not an email")
+        assertThat(subject.editing().canSave).isFalse()
+        subject.onEmailChange("candidate@example.com")
+        subject.saveAndAwait()
+        assertThat(savedProfile().email).isEqualTo("candidate@example.com")
+        assertThat(session.observeAccount().first()?.email).isEmpty()
+    }
+
+    @Test
+    fun googleAccountEmailCannotBeReplacedThroughTheGuestEditorHandler() = runTest {
+        val profile = PrototypeFixtures.returning().profile
+        session.sendAccount(SignInAccount("google", "Name", profile.email))
+        profileRepository.sendProfile(profile)
+        val subject = viewModel()
+        collectUiState(subject)
+        assertThat(subject.editing().emailEditable).isFalse()
+        subject.onEmailChange("candidate@example.com")
+        subject.saveAndAwait()
+        assertThat(savedProfile().email).isEqualTo(profile.email)
+    }
+
+    @Test
     fun initialState_beforeProfileIsLoaded_isLoading() {
         assertThat(viewModel().uiState.value).isEqualTo(EditContactUiState.Loading)
     }
@@ -64,7 +92,7 @@ class EditContactViewModelTest {
         val editing = viewModel.editing()
 
         assertThat(editing.draft).isEqualTo(
-            EditContactDraft(profile.fullName, profile.phone, profile.city, profile.linkedinUrl, profile.portfolioUrl),
+            EditContactDraft(profile.fullName, profile.phone, profile.city, profile.linkedinUrl, profile.portfolioUrl, profile.email),
         )
         assertThat(editing.email).isEqualTo(profile.email)
         assertThat(editing.canSave).isTrue()

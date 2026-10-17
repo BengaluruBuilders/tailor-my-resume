@@ -14,6 +14,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.tailormyresume.core.common.network.Dispatcher
 import com.tailormyresume.core.common.network.TmrDispatchers
 import com.tailormyresume.core.domain.FirebaseUidProvider
+import com.tailormyresume.core.model.AccountMode
 import com.tailormyresume.core.network.IdTokenProvider
 import com.tailormyresume.core.network.SessionExpiredException
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -55,6 +56,25 @@ class FirebaseAuthClient @Inject constructor(
         }
     }
 
+    override fun isAnonymous(): Boolean = auth?.currentUser?.isAnonymous == true
+
+    override suspend fun hasAnonymousSession(): Boolean = withContext(io) { isAnonymous() }
+
+    override suspend fun resumeGuest(): AuthOutcome<FirebaseUser> = withContext(io) {
+        val firebaseAuth = auth ?: return@withContext AuthOutcome.Failure(AuthFailure.NotConfigured)
+        try {
+            val current = firebaseAuth.currentUser
+            if (current != null && !current.isAnonymous) return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+            val user = current ?: firebaseAuth.signInAnonymously().await().user
+                ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+            AuthOutcome.Success(FirebaseUser(user.uid, "", "", AccountMode.ANONYMOUS))
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            AuthOutcome.Failure(failure.toAuthFailure())
+        }
+    }
+
     override fun signOut() {
         auth?.signOut()
     }
@@ -86,8 +106,8 @@ internal fun Exception.toAuthFailure(): AuthFailure = when (this) {
 }
 
 private suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { continuation ->
-    addOnSuccessListener { continuation.resume(it) }
-    addOnFailureListener { continuation.resumeWithException(it) }
+    addOnSuccessListener { if (continuation.isActive) continuation.resume(it) }
+    addOnFailureListener { if (continuation.isActive) continuation.resumeWithException(it) }
 }
 
 private const val TOKEN_TIMEOUT_SECONDS = 10L

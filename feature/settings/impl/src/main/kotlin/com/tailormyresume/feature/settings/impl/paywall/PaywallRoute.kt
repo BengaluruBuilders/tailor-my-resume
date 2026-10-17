@@ -13,6 +13,7 @@ import com.tailormyresume.core.designsystem.component.chrome.LocalTmrSheetHost
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.feature.analysis.api.navigation.QuickQuestionNavKey
+import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
 import com.tailormyresume.feature.settings.impl.R
 
 @Composable
@@ -63,8 +64,8 @@ internal fun PaywallRoute(
             }
         }
     }
-    val actions = remember(viewModel) {
-        PaywallActions(onSelectPack = viewModel::onSelectPack, onBuy = viewModel::onBuy, onRestore = viewModel::onRestore)
+    val actions = remember(viewModel, navigator) {
+        PaywallActions(onSelectPack = viewModel::onSelectPack, onBuy = viewModel::onBuy, onRestore = viewModel::onRestore, onCredits = { navigator.replace(CreditsNavKey()) })
     }
     PaywallScreen(state = state, actions = actions, modifier = modifier)
 }

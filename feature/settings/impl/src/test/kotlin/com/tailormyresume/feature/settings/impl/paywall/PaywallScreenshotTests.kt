@@ -45,6 +45,16 @@ class PaywallScreenshotTests {
 
     @Test
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+    fun guestCreditRecoveryUsesExistingWalletAccess() {
+        rule.setTmrContent(TmrTestDevices.prototype) {
+            PaywallScreen(paywallState().copy(canPurchase = false), noActions)
+        }
+        rule.assertTexts("Guest credits", "View credits")
+        rule.capture("guest_credit_recovery", TmrTestDevices.prototype)
+    }
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
     fun outOfCreditsPrototype() = check(
         "credits_paywall_outOfCredits",
         TmrTestDevices.prototype,

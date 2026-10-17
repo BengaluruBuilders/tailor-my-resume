@@ -1,0 +1,76 @@
+{
+  "candidate": {
+    "frontendCode": "13aa4fef53057036c52fa25aa475e7a1ab303d83",
+    "frontendPublishedHead": "037d3ee88765d9f22d2199396d79996e155ee97a",
+    "backendCodeAndPublishedHead": "69797ec759f3493b6d4f5d6912a82b1429e30fdb",
+    "contractSha256": "b76d2202bf1e76f25dfec6191e2b3e2d04cb9dbb419deccfa33979444071a2a6",
+    "apkSha256": "cd0082b09855dba860b73ad6e44bd9e0b39977ffd5cbd7ddc7dae5c9b918e4fa",
+    "variant": "staging",
+    "firebaseProject": "tailormy-resume-staging",
+    "endpoint": "https://abhishek-dubey-MS-7B16.local:20002/",
+    "policy": "no published policy; admissions closed",
+    "device": "TmrGuestValidator; emulator-5582; Android16/API36 Google APIs x86_64; existing task-only fresh SDK userdata"
+  },
+  "files": {
+    "07-guest-candidate-replay.mp4": {
+      "bytes": 1310460,
+      "sha256": "740922d76023d23f5fec1fe3be3e6ddc59656f71b9a8be268a8c4c30c86777eb"
+    },
+    "08-guest-candidate-state.png": {
+      "bytes": 154742,
+      "sha256": "4aec77f6b9020c27cb593e0422ea1eda22b68b8eebc679babad46129c8a0d879"
+    },
+    "09-guest-continued.png": {
+      "bytes": 134814,
+      "sha256": "eddba643be138dac332d603c86dc07eaf8d1ce0768ac3fcb98c611d8397e4444"
+    },
+    "11-guest-process-resume.png": {
+      "bytes": 110761,
+      "sha256": "db75bdcf2c6d8fa4145c3dc44198c449164c21b0117e57764092fe50b069df01"
+    },
+    "12-authoritative-zero-credits.png": {
+      "bytes": 61704,
+      "sha256": "0e5ba25e42b27b9e242a4a3a156372d877b7e063d927f4bc1d08c75161049631"
+    },
+    "13-guest-trial-recheck.png": {
+      "bytes": 81118,
+      "sha256": "389c7bd9c2dc4cfab26ac59288f8d806f37913090a8658cf9b44820f5e464ee2"
+    },
+    "backend-pr.json": {
+      "bytes": 778,
+      "sha256": "cb4b80ac71f542348c268f7cd7c00217427016b87a1e4c3b810d9f88d9e529e2"
+    },
+    "candidate-after.json": {
+      "bytes": 243,
+      "sha256": "f2d8fad5184e2b60c96d0dfb295b904bb1e2d7f2561335efded57fbbb3697623"
+    },
+    "candidate-before.json": {
+      "bytes": 182,
+      "sha256": "7ff7dc94af27a6aa9558452a5cc378da3b7a0628ee546da38b65718b859f98a6"
+    },
+    "candidate-final.json": {
+      "bytes": 182,
+      "sha256": "19ac22e3d7a5de55fd40842efe5f17499b466250fb36343ab64cd377431d5cef"
+    },
+    "connect-relay.py.txt": {
+      "bytes": 2803,
+      "sha256": "be4b48124946b3b76c908d5f5fd7afe64325beb53bfad7b4aa45f001fea65dc5"
+    },
+    "frontend-pr.json": {
+      "bytes": 3507,
+      "sha256": "41255b2f9943a772add600db7729dbb93d96b05f5a4deba931537d9b092ae576"
+    },
+    "relay-preflight.log": {
+      "bytes": 75,
+      "sha256": "2906be492d33c75b7ef7d9a08628038bfec002579b46148487ce9dccad0a49b2"
+    },
+    "relay-summary.json": {
+      "bytes": 1227,
+      "sha256": "7b5ca7dfc607fff37a2efeca791eed0b84789877e0887b35e68b80e6f49312fc"
+    },
+    "runtime-observations.json": {
+      "bytes": 3531,
+      "sha256": "b8621d82be9db1d247818b33e17687ee49c835e6efa1f406275eda5a1a7ec841"
+    }
+  }
+}

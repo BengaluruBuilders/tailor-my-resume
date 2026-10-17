@@ -9,6 +9,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 internal sealed interface HistoryTitle {
+    data object GuestTrial : HistoryTitle
+
     data object FreeFirstResume : HistoryTitle
 
     data class BoughtCredits(val credits: Int) : HistoryTitle
@@ -56,7 +58,7 @@ internal fun toHistoryRows(
         occurrences[identity] = occurrence
         val (title, detail) = entry.describe(applicationsById)
         CreditsHistoryRow(
-            key = "$identity#$occurrence",
+            key = entry.id ?: "$identity#$occurrence",
             title = title,
             detail = detail,
             date = dateFormat.format(Instant.ofEpochMilli(millis)),
@@ -68,6 +70,7 @@ internal fun toHistoryRows(
 private fun CreditLedgerEntry.describe(
     applicationsById: Map<String, JobApplication>,
 ): Pair<HistoryTitle, HistoryDetail> = when (kind) {
+    CreditLedgerKind.GUEST_TRIAL -> HistoryTitle.GuestTrial to HistoryDetail.None
     CreditLedgerKind.FREE_GRANT -> HistoryTitle.FreeFirstResume to HistoryDetail.Welcome
     CreditLedgerKind.PURCHASE -> HistoryTitle.BoughtCredits(amount) to HistoryDetail.None
     CreditLedgerKind.SPEND -> applicationId?.let(applicationsById::get)?.let { application ->

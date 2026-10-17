@@ -3,6 +3,15 @@ package com.tailormyresume.core.network
 import kotlinx.serialization.Serializable
 
 sealed interface ApiError {
+    data object GuestRequired : ApiError
+    data object GoogleRequired : ApiError
+    data object ProviderNotSupported : ApiError
+    data object IdempotencyConflict : ApiError
+    data object PolicyChanged : ApiError
+    data object IntegrityChallengeInvalid : ApiError
+    data object IntegrityRejected : ApiError
+    data class IntegrityUnavailable(val retryAfterSeconds: Int?) : ApiError
+    data class PromotionUnavailable(val retryAfterSeconds: Int?) : ApiError
     data object InvalidInput : ApiError
     data object AppIdInvalid : ApiError
     data object AppNotFound : ApiError
@@ -42,6 +51,15 @@ internal data class ErrorEnvelope(val error: ErrorBody? = null)
 internal data class ErrorBody(val code: String? = null, val message: String? = null)
 
 internal fun apiErrorOf(httpStatus: Int, code: String?, retryAfterSeconds: Int?): ApiError = when (code) {
+    "GUEST_REQUIRED" -> ApiError.GuestRequired
+    "GOOGLE_REQUIRED" -> ApiError.GoogleRequired
+    "PROVIDER_NOT_SUPPORTED" -> ApiError.ProviderNotSupported
+    "IDEMPOTENCY_CONFLICT" -> ApiError.IdempotencyConflict
+    "POLICY_CHANGED" -> ApiError.PolicyChanged
+    "INTEGRITY_CHALLENGE_INVALID" -> ApiError.IntegrityChallengeInvalid
+    "INTEGRITY_REJECTED" -> ApiError.IntegrityRejected
+    "INTEGRITY_UNAVAILABLE" -> ApiError.IntegrityUnavailable(retryAfterSeconds)
+    "PROMOTION_UNAVAILABLE" -> ApiError.PromotionUnavailable(retryAfterSeconds)
     "INVALID_INPUT" -> ApiError.InvalidInput
     "APP_ID_INVALID" -> ApiError.AppIdInvalid
     "APP_NOT_FOUND" -> ApiError.AppNotFound

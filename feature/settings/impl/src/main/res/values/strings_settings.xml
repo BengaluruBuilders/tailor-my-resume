@@ -49,4 +49,6 @@
     <string name="feature_settings_impl_keep_account">Keep my account</string>
     <string name="feature_settings_impl_credits_unavailable">Balance unavailable</string>
     <string name="feature_settings_impl_delete_credits_unknown">any unused credits</string>
+    <string name="feature_settings_impl_guest_account">Guest account</string>
+    <string name="feature_settings_impl_guest_session">Saved on this device. Keep this session to access your work and balance.</string>
 </resources>

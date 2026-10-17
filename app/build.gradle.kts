@@ -63,11 +63,15 @@ fun com.android.build.api.dsl.BuildType.backendConfig(apiBaseUrl: String, otherV
     names.zip(otherValues).forEach { (name, value) -> buildConfigField("String", name, "\"$value\"") }
 }
 
+fun integrityProjectNumber(property: String): String = providers.gradleProperty(property).orNull
+    ?.takeIf { raw -> Regex("[0-9]+").matches(raw) && (raw.toLongOrNull() ?: 0) > 0 }.orEmpty()
+
 fun com.android.build.api.dsl.ApplicationBuildType.stagingBuildConfig() {
     val values = stagingBackendProperties.map { providers.gradleProperty(it).getOrElse("") }
     applicationIdSuffix = ".staging"
     resValue("string", "app_name", "TMR Staging")
     backendConfig(values.first().ifBlank { "https://staging.invalid" }, values.drop(1))
+    buildConfigField("String", "TAILORMYRESUME_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER", "\"${integrityProjectNumber("tailormyresumeStagingPlayIntegrityCloudProjectNumber")}\"")
 }
 
 fun com.android.build.api.dsl.ApplicationBuildType.shrinkWithR8(defaultRules: File) {
@@ -110,6 +114,7 @@ android {
         }
         release {
             shrinkWithR8(getDefaultProguardFile("proguard-android-optimize.txt"))
+            buildConfigField("String", "TAILORMYRESUME_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER", "\"${integrityProjectNumber("tailormyresumePlayIntegrityCloudProjectNumber")}\"")
             if (hasUploadSigning) signingConfig = signingConfigs.getByName("upload")
             backendConfig(
                 "https://apps-backend.fly.dev",

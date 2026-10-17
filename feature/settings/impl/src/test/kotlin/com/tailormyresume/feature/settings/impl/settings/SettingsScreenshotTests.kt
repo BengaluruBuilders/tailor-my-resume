@@ -49,6 +49,16 @@ class SettingsScreenshotTest {
 
     @Test
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+    fun guestIdentityDoesNotClaimGoogleOrOfferDestructiveSignOut() {
+        rule.setTmrContent(TmrTestDevices.prototype) {
+            SettingsScreen(settingsContent().copy(guest = true, email = ""), versionName = "1.0.0", actions = noActions)
+        }
+        rule.assertTexts("Guest account", "Saved on this device. Keep this session to access your work and balance.")
+        rule.capture("guest_settings", TmrTestDevices.prototype)
+    }
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
     fun settingsDefault() {
         rule.setTmrContent(TmrTestDevices.prototype) {
             SettingsScreen(settingsContent(), versionName = "1.0.0", actions = noActions)

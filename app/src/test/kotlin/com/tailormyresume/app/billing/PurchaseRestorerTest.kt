@@ -15,6 +15,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
@@ -72,11 +73,17 @@ class PurchaseRestorerTest {
 
     @Test
     fun anUpdateWithNoPurchaseInFlightIsSettled() = runBlocking {
-        purchaseSucceeds()
+        val unsolicitedPurchase = billing.owned.single()
+        billing.owned = emptyList()
+        session.saveAccount(SignInAccount("uid-1", "Priya", "p@example.com"))
+        reply(200, """{"wallet":${walletJson(purchased = 0)}}""")
         restorer().start()
-        billing.unsolicitedPurchases.subscriptionCount.first { it > 0 }
+        assertThat(nextRequest().path).isEqualTo("/v1/tailormyresume/wallet")
+        withTimeout(5_000) { billing.unsolicitedPurchases.subscriptionCount.first { it > 0 } }
+        purchaseSucceeds()
 
-        billing.unsolicitedPurchases.emit(billing.owned.single())
+        billing.owned = listOf(unsolicitedPurchase)
+        billing.unsolicitedPurchases.emit(unsolicitedPurchase)
 
         assertThat(nextRequest().path).isEqualTo("/v1/tailormyresume/purchases")
     }

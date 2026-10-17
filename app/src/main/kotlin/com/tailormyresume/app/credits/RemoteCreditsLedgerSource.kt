@@ -30,12 +30,13 @@ class RemoteCreditsLedgerSource @Inject constructor(
     private fun toEntry(dto: CreditEntryDto): CreditLedgerEntry? {
         val kind = when (dto.kind) {
             LedgerKind.WELCOME -> CreditLedgerKind.FREE_GRANT
+            LedgerKind.GUEST_TRIAL -> CreditLedgerKind.GUEST_TRIAL
             LedgerKind.PURCHASE -> CreditLedgerKind.PURCHASE
             LedgerKind.TAILORING -> CreditLedgerKind.SPEND
             LedgerKind.REFUND -> CreditLedgerKind.REFUND
             LedgerKind.MIGRATION -> CreditLedgerKind.MIGRATION
             LedgerKind.UNKNOWN -> return null
         }
-        return CreditLedgerEntry(kind, dto.amount, dto.applicationId, dto.productId, Instant.parse(dto.createdAt))
+        return CreditLedgerEntry(kind, dto.amount, dto.applicationId, dto.productId, Instant.parse(dto.createdAt), id = dto.id)
     }
 }
