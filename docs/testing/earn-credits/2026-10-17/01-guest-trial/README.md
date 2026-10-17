@@ -24,3 +24,5 @@ The [guarded staging authentication setup](staging-auth-setup.md) enabled only `
 ## Implementation handoffs
 
 [Frontend handoff](frontend-handoff.md), [backend handoff](backend-handoff.md), and [contract handoff](contract-handoff.md) describe implementation scope and required checks. They are not independent validation.
+
+The follow-up [staging documentation resolution](staging-docs-resolution.md) reconciles the release setup instructions with the staging-only anonymous-auth prerequisite. It does not claim signup or reward validation.

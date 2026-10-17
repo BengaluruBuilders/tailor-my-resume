@@ -94,9 +94,17 @@ There are two environments and three Android build types:
 | Staging | `debug`, `staging` | `tailormy-resume-staging` | `com.tailormyresume.app.staging` |
 | Production | `release` | `tailormyresume-app` | `com.tailormyresume.app` |
 
-Register each package in its own Firebase project. Enable only the Google sign-in provider under
-Authentication, Sign-in method. Use `TMR Staging` as the staging public name and `TailorMyResume`
-as the production public name. Keep Analytics disabled.
+Register each package in its own Firebase project. Under Authentication, Sign-in method, enable
+Google for both projects and Anonymous for the staging project used to validate guest entry. Keep
+production Google-only; guest-provider activation there is not part of staging validation. Use
+`TMR Staging` as the staging public name and `TailorMyResume` as the production public name. Keep
+Analytics disabled.
+
+Enabling the staging Anonymous provider permits Firebase guest authentication only. Guest-trial
+admission still requires the separately configured matching Play Integrity verifier and the
+backend's active reward policy and admission controls described in [BACKEND_CONTRACT.md, section 8](BACKEND_CONTRACT.md#8-guest-trial-slice-contract-guest-trial-v1-2026-10-17).
+Do not weaken integrity evidence or enable a production reward policy as part of staging setup.
+Provider enablement alone does not prove signup or a real credit grant.
 
 Run `./gradlew :app:signingReport` to get this machine's staging SHA-1 and SHA-256 certificates.
 Add both to the staging Android app. Each developer machine can have a different debug key.
