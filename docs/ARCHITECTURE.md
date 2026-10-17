@@ -270,8 +270,8 @@ Rules, all in `core:navigation` `Navigator` and the app `ScreenChrome` table:
 
 ### NavKeys
 
-Each key is registered with one `entry<...>` in the `impl` module of its feature. The 27 keys below are one per
-prototype screen. W4 replaces each placeholder entry with the real screen.
+Each key is registered with one `entry<...>` in the `impl` module of its feature. The 28 keys below cover
+the prototype screens and the optional Invite friends screen added by manual-referrals-v1.
 
 | Key | Module | Screen |
 |---|---|---|
@@ -301,6 +301,7 @@ prototype screen. W4 replaces each placeholder entry with the real screen.
 | `ListEditNavKey(section)` | `feature/profile/api` | Summary, Education or Achievements (`ProfileListSection`) |
 | `SettingsNavKey` | `feature/settings/api` | Settings |
 | `CreditsNavKey` | `feature/settings/api` | Credits |
+| `ReferralsNavKey` | `feature/settings/api` | Invite friends and optional manual code entry |
 | `PaywallNavKey(returnToApplicationId?)` | `feature/settings/api` | Paywall; after a purchase it replaces itself with Quick question when the id is set, else goes back |
 
 Every key carries an optional `DebugScenario` from `core:model`, defaulting to `DebugScenario.DEFAULT`. That is the
