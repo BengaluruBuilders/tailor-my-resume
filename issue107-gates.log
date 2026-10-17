@@ -1,0 +1,835 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Isolated Projects is an incubating feature.
+Calculating task graph as no cached configuration is available for tasks: :feature:tailor:impl:testDebugUnitTest :feature:tailor:impl:verifyRoborazziDebug spotlessCheck :feature:tailor:impl:lintRelease
+Type-safe project accessors is an incubating feature.
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+> Task :core:model:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:common:preBuild UP-TO-DATE
+> Task :core:common:preDebugBuild UP-TO-DATE
+> Task :core:model:processResources NO-SOURCE
+> Task :core:common:generateDebugResources UP-TO-DATE
+> Task :core:common:processDebugNavigationResources UP-TO-DATE
+> Task :core:common:javaPreCompileDebug UP-TO-DATE
+> Task :core:data:preBuild UP-TO-DATE
+> Task :core:data:preDebugBuild UP-TO-DATE
+> Task :core:common:packageDebugResources UP-TO-DATE
+> Task :core:data:generateDebugResources UP-TO-DATE
+> Task :core:common:parseDebugLocalResources UP-TO-DATE
+> Task :core:data:packageDebugResources UP-TO-DATE
+> Task :core:model:compileKotlin UP-TO-DATE
+> Task :core:data:processDebugNavigationResources UP-TO-DATE
+> Task :core:model:compileJava NO-SOURCE
+> Task :core:model:classes UP-TO-DATE
+> Task :core:common:generateDebugRFile UP-TO-DATE
+> Task :core:data:parseDebugLocalResources UP-TO-DATE
+> Task :core:model:jar UP-TO-DATE
+> Task :core:data:generateDebugRFile UP-TO-DATE
+> Task :core:database:preBuild UP-TO-DATE
+> Task :core:database:preDebugBuild UP-TO-DATE
+> Task :core:database:preReleaseBuild UP-TO-DATE
+> Task :core:database:generateDebugResources UP-TO-DATE
+> Task :core:database:processDebugNavigationResources UP-TO-DATE
+> Task :core:database:packageDebugResources UP-TO-DATE
+> Task :core:database:javaPreCompileDebug UP-TO-DATE
+> Task :core:database:parseDebugLocalResources UP-TO-DATE
+> Task :core:database:generateDebugRFile UP-TO-DATE
+> Task :core:database:generateReleaseResources FROM-CACHE
+> Task :core:common:kspDebugKotlin UP-TO-DATE
+> Task :core:database:kspDebugKotlin UP-TO-DATE
+> Task :core:database:packageReleaseResources FROM-CACHE
+> Task :core:database:processReleaseNavigationResources FROM-CACHE
+> Task :core:database:parseReleaseLocalResources FROM-CACHE
+> Task :core:database:generateReleaseRFile FROM-CACHE
+> Task :core:common:compileDebugKotlin UP-TO-DATE
+> Task :core:database:compileDebugKotlin UP-TO-DATE
+> Task :core:database:kspReleaseKotlin FROM-CACHE
+> Task :core:common:processDebugJavaRes UP-TO-DATE
+> Task :core:common:compileDebugJavaWithJavac UP-TO-DATE
+> Task :core:database:compileDebugJavaWithJavac UP-TO-DATE
+> Task :core:database:javaPreCompileRelease FROM-CACHE
+> Task :core:database:transformDebugClassesWithAsm UP-TO-DATE
+> Task :core:common:transformDebugClassesWithAsm UP-TO-DATE
+> Task :core:common:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:common:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:database:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:data:javaPreCompileDebug UP-TO-DATE
+> Task :core:database:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:database:processDebugJavaRes UP-TO-DATE
+> Task :core:designsystem:preBuild UP-TO-DATE
+> Task :core:designsystem:preDebugBuild UP-TO-DATE
+> Task :core:designsystem:generateDebugResources UP-TO-DATE
+> Task :core:designsystem:packageDebugResources UP-TO-DATE
+> Task :core:designsystem:processDebugNavigationResources UP-TO-DATE
+> Task :core:designsystem:parseDebugLocalResources UP-TO-DATE
+> Task :core:designsystem:generateDebugRFile UP-TO-DATE
+> Task :core:data:kspDebugKotlin UP-TO-DATE
+> Task :core:data:compileDebugKotlin UP-TO-DATE
+> Task :core:data:compileDebugJavaWithJavac UP-TO-DATE
+> Task :core:data:transformDebugClassesWithAsm UP-TO-DATE
+> Task :core:data:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:data:processDebugJavaRes UP-TO-DATE
+> Task :core:designsystem:javaPreCompileDebug UP-TO-DATE
+> Task :core:domain:preBuild UP-TO-DATE
+> Task :core:domain:preDebugBuild UP-TO-DATE
+> Task :core:designsystem:compileDebugKotlin UP-TO-DATE
+> Task :core:designsystem:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:designsystem:processDebugJavaRes UP-TO-DATE
+> Task :core:designsystem:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:domain:generateDebugResources UP-TO-DATE
+> Task :core:data:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:domain:processDebugNavigationResources UP-TO-DATE
+> Task :core:domain:javaPreCompileDebug UP-TO-DATE
+> Task :core:domain:packageDebugResources UP-TO-DATE
+> Task :core:navigation:preBuild UP-TO-DATE
+> Task :core:navigation:preDebugBuild UP-TO-DATE
+> Task :core:navigation:generateDebugResources UP-TO-DATE
+> Task :core:domain:parseDebugLocalResources UP-TO-DATE
+> Task :core:domain:generateDebugRFile UP-TO-DATE
+> Task :core:navigation:packageDebugResources UP-TO-DATE
+> Task :core:navigation:processDebugNavigationResources UP-TO-DATE
+> Task :core:navigation:parseDebugLocalResources UP-TO-DATE
+> Task :core:navigation:generateDebugRFile UP-TO-DATE
+> Task :core:domain:kspDebugKotlin UP-TO-DATE
+> Task :core:domain:compileDebugKotlin UP-TO-DATE
+> Task :core:domain:compileDebugJavaWithJavac UP-TO-DATE
+> Task :core:navigation:compileDebugKotlin UP-TO-DATE
+> Task :core:domain:processDebugJavaRes UP-TO-DATE
+> Task :core:navigation:javaPreCompileDebug UP-TO-DATE
+> Task :core:navigation:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:navigation:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:navigation:processDebugJavaRes UP-TO-DATE
+> Task :core:screenshot:preBuild UP-TO-DATE
+> Task :core:screenshot:preDebugBuild UP-TO-DATE
+> Task :core:screenshot:generateDebugResources UP-TO-DATE
+> Task :core:screenshot:packageDebugResources UP-TO-DATE
+> Task :core:screenshot:processDebugNavigationResources UP-TO-DATE
+> Task :core:screenshot:parseDebugLocalResources UP-TO-DATE
+> Task :core:domain:transformDebugClassesWithAsm UP-TO-DATE
+> Task :core:screenshot:generateDebugRFile UP-TO-DATE
+> Task :core:domain:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:screenshot:javaPreCompileDebug UP-TO-DATE
+> Task :core:domain:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:testing:preBuild UP-TO-DATE
+> Task :core:testing:preDebugBuild UP-TO-DATE
+> Task :core:testing:generateDebugResources UP-TO-DATE
+> Task :core:testing:packageDebugResources UP-TO-DATE
+> Task :core:testing:processDebugNavigationResources UP-TO-DATE
+> Task :core:testing:parseDebugLocalResources UP-TO-DATE
+> Task :core:testing:generateDebugRFile UP-TO-DATE
+> Task :core:testing:compileDebugKotlin UP-TO-DATE
+> Task :core:testing:javaPreCompileDebug UP-TO-DATE
+> Task :core:testing:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:testing:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:testing:processDebugJavaRes UP-TO-DATE
+> Task :core:designsystem:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:ui:preBuild UP-TO-DATE
+> Task :core:ui:preDebugBuild UP-TO-DATE
+> Task :core:ui:generateDebugResources UP-TO-DATE
+> Task :core:ui:packageDebugResources UP-TO-DATE
+> Task :core:ui:processDebugNavigationResources UP-TO-DATE
+> Task :core:ui:parseDebugLocalResources UP-TO-DATE
+> Task :core:ui:generateDebugRFile UP-TO-DATE
+> Task :core:screenshot:compileDebugKotlin UP-TO-DATE
+> Task :core:screenshot:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:screenshot:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:screenshot:processDebugJavaRes UP-TO-DATE
+> Task :core:ui:javaPreCompileDebug UP-TO-DATE
+> Task :core:ui:compileDebugKotlin UP-TO-DATE
+> Task :core:ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:ui:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:ui:processDebugJavaRes UP-TO-DATE
+> Task :feature:applications:api:preBuild UP-TO-DATE
+> Task :feature:applications:api:preDebugBuild UP-TO-DATE
+> Task :core:navigation:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:applications:api:generateDebugResources UP-TO-DATE
+> Task :feature:applications:api:processDebugNavigationResources UP-TO-DATE
+> Task :feature:applications:api:javaPreCompileDebug UP-TO-DATE
+> Task :feature:profile:api:preBuild UP-TO-DATE
+> Task :feature:profile:api:preDebugBuild UP-TO-DATE
+> Task :feature:profile:api:generateDebugResources UP-TO-DATE
+> Task :feature:applications:api:packageDebugResources UP-TO-DATE
+> Task :feature:applications:api:parseDebugLocalResources UP-TO-DATE
+> Task :feature:profile:api:packageDebugResources UP-TO-DATE
+> Task :feature:applications:api:generateDebugRFile UP-TO-DATE
+> Task :feature:profile:api:processDebugNavigationResources UP-TO-DATE
+> Task :feature:profile:api:parseDebugLocalResources UP-TO-DATE
+> Task :feature:profile:api:generateDebugRFile UP-TO-DATE
+> Task :feature:applications:api:compileDebugKotlin UP-TO-DATE
+> Task :feature:applications:api:compileDebugJavaWithJavac NO-SOURCE
+> Task :feature:applications:api:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :feature:profile:api:compileDebugKotlin UP-TO-DATE
+> Task :feature:applications:api:processDebugJavaRes UP-TO-DATE
+> Task :feature:profile:api:javaPreCompileDebug UP-TO-DATE
+> Task :feature:profile:api:compileDebugJavaWithJavac NO-SOURCE
+> Task :feature:profile:api:processDebugJavaRes UP-TO-DATE
+> Task :feature:profile:api:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :feature:tailor:api:preBuild UP-TO-DATE
+> Task :feature:tailor:api:preDebugBuild UP-TO-DATE
+> Task :feature:tailor:impl:preBuild UP-TO-DATE
+> Task :feature:tailor:api:generateDebugResources UP-TO-DATE
+> Task :feature:tailor:api:processDebugNavigationResources UP-TO-DATE
+> Task :feature:tailor:api:javaPreCompileDebug UP-TO-DATE
+> Task :feature:tailor:impl:preDebugBuild UP-TO-DATE
+> Task :core:ui:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:tailor:api:packageDebugResources UP-TO-DATE
+> Task :feature:applications:api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:tailor:api:parseDebugLocalResources UP-TO-DATE
+> Task :feature:profile:api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:tailor:impl:generateDebugResources UP-TO-DATE
+> Task :feature:tailor:api:generateDebugRFile UP-TO-DATE
+> Task :feature:tailor:impl:packageDebugResources UP-TO-DATE
+> Task :feature:tailor:impl:processDebugNavigationResources UP-TO-DATE
+> Task :feature:tailor:impl:parseDebugLocalResources UP-TO-DATE
+> Task :feature:tailor:impl:generateDebugRFile UP-TO-DATE
+> Task :feature:tailor:impl:javaPreCompileDebug UP-TO-DATE
+> Task :core:common:generateDebugAssets UP-TO-DATE
+> Task :feature:tailor:api:compileDebugKotlin UP-TO-DATE
+> Task :core:common:mergeDebugAssets UP-TO-DATE
+> Task :feature:tailor:api:compileDebugJavaWithJavac NO-SOURCE
+> Task :feature:tailor:api:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :feature:tailor:api:processDebugJavaRes UP-TO-DATE
+> Task :core:data:generateDebugAssets UP-TO-DATE
+> Task :feature:tailor:api:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:data:mergeDebugAssets UP-TO-DATE
+> Task :core:database:generateDebugAssets UP-TO-DATE
+> Task :core:database:mergeDebugAssets UP-TO-DATE
+> Task :core:designsystem:generateDebugAssets UP-TO-DATE
+> Task :core:designsystem:mergeDebugAssets UP-TO-DATE
+> Task :core:domain:generateDebugAssets UP-TO-DATE
+> Task :core:domain:mergeDebugAssets UP-TO-DATE
+> Task :core:navigation:generateDebugAssets UP-TO-DATE
+> Task :core:navigation:mergeDebugAssets UP-TO-DATE
+> Task :core:screenshot:generateDebugAssets UP-TO-DATE
+> Task :core:screenshot:mergeDebugAssets UP-TO-DATE
+> Task :core:testing:generateDebugAssets UP-TO-DATE
+> Task :core:testing:mergeDebugAssets UP-TO-DATE
+> Task :core:ui:generateDebugAssets UP-TO-DATE
+> Task :core:ui:mergeDebugAssets UP-TO-DATE
+> Task :feature:applications:api:generateDebugAssets UP-TO-DATE
+> Task :feature:applications:api:mergeDebugAssets UP-TO-DATE
+> Task :feature:profile:api:generateDebugAssets UP-TO-DATE
+> Task :feature:profile:api:mergeDebugAssets UP-TO-DATE
+> Task :feature:tailor:api:generateDebugAssets UP-TO-DATE
+> Task :feature:tailor:api:mergeDebugAssets UP-TO-DATE
+> Task :feature:tailor:impl:generateDebugUnitTestAssets UP-TO-DATE
+> Task :feature:tailor:impl:generateDebugAssets UP-TO-DATE
+> Task :feature:tailor:impl:mergeDebugAssets UP-TO-DATE
+> Task :feature:tailor:impl:preDebugUnitTestBuild UP-TO-DATE
+> Task :feature:tailor:impl:kspDebugKotlin UP-TO-DATE
+> Task :feature:tailor:impl:compileDebugKotlin UP-TO-DATE
+> Task :feature:tailor:impl:compileDebugJavaWithJavac UP-TO-DATE
+> Task :feature:tailor:impl:transformDebugClassesWithAsm UP-TO-DATE
+> Task :feature:tailor:impl:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :core:common:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:common:compileDebugLibraryResources UP-TO-DATE
+> Task :core:data:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:data:compileDebugLibraryResources UP-TO-DATE
+> Task :core:database:mapDebugSourceSetPaths UP-TO-DATE
+> Task :feature:tailor:impl:mergeDebugUnitTestAssets UP-TO-DATE
+> Task :core:database:compileDebugLibraryResources UP-TO-DATE
+> Task :core:domain:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:designsystem:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:designsystem:compileDebugLibraryResources UP-TO-DATE
+> Task :core:domain:compileDebugLibraryResources UP-TO-DATE
+> Task :core:navigation:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:screenshot:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:navigation:compileDebugLibraryResources UP-TO-DATE
+> Task :core:screenshot:compileDebugLibraryResources UP-TO-DATE
+> Task :core:ui:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:testing:mapDebugSourceSetPaths UP-TO-DATE
+> Task :core:ui:compileDebugLibraryResources UP-TO-DATE
+> Task :core:testing:compileDebugLibraryResources UP-TO-DATE
+> Task :feature:profile:api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :feature:applications:api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :feature:profile:api:compileDebugLibraryResources UP-TO-DATE
+> Task :feature:applications:api:compileDebugLibraryResources UP-TO-DATE
+> Task :feature:tailor:api:mapDebugSourceSetPaths UP-TO-DATE
+> Task :feature:tailor:api:compileDebugLibraryResources UP-TO-DATE
+> Task :core:common:writeDebugAarMetadata UP-TO-DATE
+> Task :core:database:writeDebugAarMetadata UP-TO-DATE
+> Task :core:data:writeDebugAarMetadata UP-TO-DATE
+> Task :core:domain:writeDebugAarMetadata UP-TO-DATE
+> Task :core:designsystem:writeDebugAarMetadata UP-TO-DATE
+> Task :core:navigation:writeDebugAarMetadata UP-TO-DATE
+> Task :core:screenshot:writeDebugAarMetadata UP-TO-DATE
+> Task :core:ui:writeDebugAarMetadata UP-TO-DATE
+> Task :core:testing:writeDebugAarMetadata UP-TO-DATE
+> Task :feature:profile:api:writeDebugAarMetadata UP-TO-DATE
+> Task :feature:applications:api:writeDebugAarMetadata UP-TO-DATE
+> Task :feature:tailor:impl:writeDebugAarMetadata UP-TO-DATE
+> Task :feature:tailor:api:writeDebugAarMetadata UP-TO-DATE
+> Task :feature:tailor:impl:mapDebugSourceSetPaths UP-TO-DATE
+> Task :feature:tailor:impl:compileDebugLibraryResources UP-TO-DATE
+> Task :feature:tailor:impl:mapDebugUnitTestSourceSetPaths UP-TO-DATE
+> Task :feature:tailor:impl:generateDebugUnitTestResources UP-TO-DATE
+> Task :feature:tailor:impl:checkDebugUnitTestAarMetadata UP-TO-DATE
+> Task :core:common:extractDeepLinksDebug UP-TO-DATE
+> Task :core:common:processDebugManifest UP-TO-DATE
+> Task :core:data:extractDeepLinksDebug UP-TO-DATE
+> Task :core:data:processDebugManifest UP-TO-DATE
+> Task :core:database:extractDeepLinksDebug UP-TO-DATE
+> Task :core:database:processDebugManifest UP-TO-DATE
+> Task :core:designsystem:extractDeepLinksDebug UP-TO-DATE
+> Task :core:designsystem:processDebugManifest UP-TO-DATE
+> Task :core:domain:extractDeepLinksDebug UP-TO-DATE
+> Task :core:domain:processDebugManifest UP-TO-DATE
+> Task :core:navigation:extractDeepLinksDebug UP-TO-DATE
+> Task :core:navigation:processDebugManifest UP-TO-DATE
+> Task :core:screenshot:extractDeepLinksDebug UP-TO-DATE
+> Task :core:screenshot:processDebugManifest UP-TO-DATE
+> Task :core:testing:extractDeepLinksDebug UP-TO-DATE
+> Task :feature:tailor:impl:mergeDebugUnitTestResources UP-TO-DATE
+> Task :core:ui:extractDeepLinksDebug UP-TO-DATE
+> Task :core:testing:processDebugManifest UP-TO-DATE
+> Task :feature:applications:api:extractDeepLinksDebug UP-TO-DATE
+> Task :core:ui:processDebugManifest UP-TO-DATE
+> Task :feature:profile:api:extractDeepLinksDebug UP-TO-DATE
+> Task :feature:applications:api:processDebugManifest UP-TO-DATE
+> Task :feature:tailor:api:extractDeepLinksDebug UP-TO-DATE
+> Task :feature:profile:api:processDebugManifest UP-TO-DATE
+> Task :feature:tailor:impl:extractDeepLinksDebug UP-TO-DATE
+> Task :feature:tailor:api:processDebugManifest UP-TO-DATE
+> Task :feature:tailor:impl:processDebugManifest UP-TO-DATE
+> Task :feature:tailor:impl:processDebugJavaRes UP-TO-DATE
+> Task :core:screenshot:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:testing:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:tailor:impl:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:tailor:impl:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :spotlessKotlin FROM-CACHE
+> Task :spotlessKotlinCheck UP-TO-DATE
+> Task :spotlessKts FROM-CACHE
+> Task :spotlessKtsCheck UP-TO-DATE
+> Task :spotlessCheck UP-TO-DATE
+> Task :app:spotlessKotlin FROM-CACHE
+> Task :app:spotlessKotlinCheck UP-TO-DATE
+> Task :app:spotlessKts FROM-CACHE
+> Task :app:spotlessKtsCheck UP-TO-DATE
+> Task :app:spotlessXml FROM-CACHE
+> Task :app:spotlessXmlCheck UP-TO-DATE
+> Task :app:spotlessCheck UP-TO-DATE
+> Task :core:common:spotlessKotlin FROM-CACHE
+> Task :core:common:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:tailor:impl:mergeDebugUnitTestManifest UP-TO-DATE
+> Task :core:common:spotlessKts FROM-CACHE
+> Task :feature:tailor:impl:processDebugUnitTestManifest UP-TO-DATE
+> Task :core:common:spotlessKtsCheck UP-TO-DATE
+> Task :core:common:spotlessXml FROM-CACHE
+> Task :core:common:spotlessXmlCheck UP-TO-DATE
+> Task :core:common:spotlessCheck UP-TO-DATE
+> Task :core:data:spotlessKotlin FROM-CACHE
+> Task :core:data:spotlessKotlinCheck UP-TO-DATE
+> Task :core:data:spotlessKts FROM-CACHE
+> Task :core:data:spotlessKtsCheck UP-TO-DATE
+> Task :core:data:spotlessXml FROM-CACHE
+> Task :core:data:spotlessXmlCheck UP-TO-DATE
+> Task :core:data:spotlessCheck UP-TO-DATE
+> Task :core:database:spotlessKotlin FROM-CACHE
+> Task :core:database:spotlessKotlinCheck UP-TO-DATE
+> Task :core:database:spotlessKts FROM-CACHE
+> Task :core:database:spotlessKtsCheck UP-TO-DATE
+> Task :core:database:spotlessXml FROM-CACHE
+> Task :core:database:spotlessXmlCheck UP-TO-DATE
+> Task :core:database:spotlessCheck UP-TO-DATE
+> Task :core:designsystem:spotlessKotlin FROM-CACHE
+> Task :core:designsystem:spotlessKotlinCheck UP-TO-DATE
+> Task :core:designsystem:spotlessKts FROM-CACHE
+> Task :core:designsystem:spotlessKtsCheck UP-TO-DATE
+> Task :core:designsystem:spotlessXml FROM-CACHE
+> Task :core:designsystem:spotlessXmlCheck UP-TO-DATE
+> Task :core:designsystem:spotlessCheck UP-TO-DATE
+> Task :core:domain:spotlessKotlin FROM-CACHE
+> Task :core:domain:spotlessKotlinCheck UP-TO-DATE
+> Task :core:domain:spotlessKts FROM-CACHE
+> Task :core:domain:spotlessKtsCheck UP-TO-DATE
+> Task :core:domain:spotlessXml FROM-CACHE
+> Task :core:domain:spotlessXmlCheck UP-TO-DATE
+> Task :core:domain:spotlessCheck UP-TO-DATE
+> Task :core:model:spotlessKotlin FROM-CACHE
+> Task :core:model:spotlessKotlinCheck UP-TO-DATE
+> Task :core:model:spotlessKts FROM-CACHE
+> Task :core:model:spotlessKtsCheck UP-TO-DATE
+> Task :core:model:spotlessCheck UP-TO-DATE
+> Task :core:navigation:spotlessKotlin FROM-CACHE
+> Task :core:navigation:spotlessKotlinCheck UP-TO-DATE
+> Task :core:navigation:spotlessKts FROM-CACHE
+> Task :core:navigation:spotlessKtsCheck UP-TO-DATE
+> Task :core:navigation:spotlessXml FROM-CACHE
+> Task :core:navigation:spotlessXmlCheck UP-TO-DATE
+> Task :core:navigation:spotlessCheck UP-TO-DATE
+> Task :core:network:spotlessKotlin FROM-CACHE
+> Task :core:network:spotlessKotlinCheck UP-TO-DATE
+> Task :core:network:spotlessKts FROM-CACHE
+> Task :core:network:spotlessKtsCheck UP-TO-DATE
+> Task :core:network:spotlessXml FROM-CACHE
+> Task :core:network:spotlessXmlCheck UP-TO-DATE
+> Task :core:network:spotlessCheck UP-TO-DATE
+> Task :core:screenshot:spotlessKotlin FROM-CACHE
+> Task :core:screenshot:spotlessKotlinCheck UP-TO-DATE
+> Task :core:screenshot:spotlessKts FROM-CACHE
+> Task :core:screenshot:spotlessKtsCheck UP-TO-DATE
+> Task :core:screenshot:spotlessXml FROM-CACHE
+> Task :core:screenshot:spotlessXmlCheck UP-TO-DATE
+> Task :core:screenshot:spotlessCheck UP-TO-DATE
+> Task :core:testing:spotlessKotlin FROM-CACHE
+> Task :core:testing:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:tailor:impl:processDebugUnitTestResources UP-TO-DATE
+> Task :core:testing:spotlessKts FROM-CACHE
+> Task :feature:tailor:impl:packageDebugUnitTestForUnitTest UP-TO-DATE
+> Task :feature:tailor:impl:generateDebugUnitTestConfig UP-TO-DATE
+> Task :core:testing:spotlessKtsCheck UP-TO-DATE
+> Task :core:testing:spotlessXml FROM-CACHE
+> Task :core:testing:spotlessXmlCheck UP-TO-DATE
+> Task :core:testing:spotlessCheck UP-TO-DATE
+> Task :core:ui:spotlessKotlin FROM-CACHE
+> Task :core:ui:spotlessKotlinCheck UP-TO-DATE
+> Task :core:ui:spotlessKts FROM-CACHE
+> Task :core:ui:spotlessKtsCheck UP-TO-DATE
+> Task :core:ui:spotlessXml FROM-CACHE
+> Task :core:ui:spotlessXmlCheck UP-TO-DATE
+> Task :core:ui:spotlessCheck UP-TO-DATE
+> Task :feature:analysis:api:spotlessKotlin FROM-CACHE
+> Task :feature:analysis:api:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:analysis:api:spotlessKts FROM-CACHE
+> Task :feature:analysis:api:spotlessKtsCheck UP-TO-DATE
+> Task :feature:analysis:api:spotlessXml FROM-CACHE
+> Task :feature:analysis:api:spotlessXmlCheck UP-TO-DATE
+> Task :feature:analysis:api:spotlessCheck UP-TO-DATE
+> Task :feature:analysis:impl:spotlessKotlin FROM-CACHE
+> Task :feature:analysis:impl:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:tailor:impl:kspDebugUnitTestKotlin UP-TO-DATE
+> Task :feature:analysis:impl:spotlessKts FROM-CACHE
+> Task :feature:analysis:impl:spotlessKtsCheck UP-TO-DATE
+> Task :feature:analysis:impl:spotlessXml FROM-CACHE
+> Task :feature:analysis:impl:spotlessXmlCheck UP-TO-DATE
+> Task :feature:analysis:impl:spotlessCheck UP-TO-DATE
+> Task :feature:applications:api:spotlessKotlin FROM-CACHE
+> Task :feature:applications:api:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:applications:api:spotlessKts FROM-CACHE
+> Task :feature:applications:api:spotlessKtsCheck UP-TO-DATE
+> Task :feature:applications:api:spotlessXml FROM-CACHE
+> Task :feature:applications:api:spotlessXmlCheck UP-TO-DATE
+> Task :feature:applications:api:spotlessCheck UP-TO-DATE
+> Task :feature:applications:impl:spotlessKotlin FROM-CACHE
+> Task :feature:applications:impl:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:applications:impl:spotlessKts FROM-CACHE
+> Task :feature:applications:impl:spotlessKtsCheck UP-TO-DATE
+> Task :feature:tailor:impl:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :feature:tailor:impl:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :feature:applications:impl:spotlessXml FROM-CACHE
+> Task :feature:applications:impl:spotlessXmlCheck UP-TO-DATE
+> Task :feature:applications:impl:spotlessCheck UP-TO-DATE
+> Task :feature:tailor:impl:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :feature:tailor:impl:hiltCollectClassesDebugUnitTest UP-TO-DATE
+> Task :feature:onboarding:api:spotlessKotlin FROM-CACHE
+> Task :feature:onboarding:api:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:onboarding:api:spotlessKts FROM-CACHE
+> Task :feature:onboarding:api:spotlessKtsCheck UP-TO-DATE
+> Task :feature:onboarding:api:spotlessXml FROM-CACHE
+> Task :feature:onboarding:api:spotlessXmlCheck UP-TO-DATE
+> Task :feature:onboarding:api:spotlessCheck UP-TO-DATE
+> Task :feature:onboarding:impl:spotlessKotlin FROM-CACHE
+> Task :feature:onboarding:impl:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:onboarding:impl:spotlessKts FROM-CACHE
+> Task :feature:onboarding:impl:spotlessKtsCheck UP-TO-DATE
+> Task :feature:onboarding:impl:spotlessXml FROM-CACHE
+> Task :feature:onboarding:impl:spotlessXmlCheck UP-TO-DATE
+> Task :feature:onboarding:impl:spotlessCheck UP-TO-DATE
+> Task :feature:profile:api:spotlessKotlin FROM-CACHE
+> Task :feature:profile:api:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:profile:api:spotlessKts FROM-CACHE
+> Task :feature:profile:api:spotlessKtsCheck UP-TO-DATE
+> Task :feature:profile:api:spotlessXml FROM-CACHE
+> Task :feature:profile:api:spotlessXmlCheck UP-TO-DATE
+> Task :feature:profile:api:spotlessCheck UP-TO-DATE
+> Task :feature:profile:impl:spotlessKotlin FROM-CACHE
+> Task :feature:profile:impl:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:profile:impl:spotlessKts FROM-CACHE
+> Task :feature:profile:impl:spotlessKtsCheck UP-TO-DATE
+> Task :feature:profile:impl:spotlessXml FROM-CACHE
+> Task :feature:profile:impl:spotlessXmlCheck UP-TO-DATE
+> Task :feature:profile:impl:spotlessCheck UP-TO-DATE
+> Task :feature:settings:api:spotlessKotlin FROM-CACHE
+> Task :feature:settings:api:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:settings:api:spotlessKts FROM-CACHE
+> Task :feature:settings:api:spotlessKtsCheck UP-TO-DATE
+> Task :feature:settings:api:spotlessXml FROM-CACHE
+> Task :feature:settings:api:spotlessXmlCheck UP-TO-DATE
+> Task :feature:settings:api:spotlessCheck UP-TO-DATE
+> Task :feature:settings:impl:spotlessKotlin FROM-CACHE
+> Task :feature:settings:impl:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:settings:impl:spotlessKts FROM-CACHE
+> Task :feature:settings:impl:spotlessKtsCheck UP-TO-DATE
+> Task :feature:settings:impl:spotlessXml FROM-CACHE
+> Task :feature:settings:impl:spotlessXmlCheck UP-TO-DATE
+> Task :feature:settings:impl:spotlessCheck UP-TO-DATE
+> Task :feature:tailor:api:spotlessKotlin FROM-CACHE
+> Task :feature:tailor:api:spotlessKotlinCheck UP-TO-DATE
+> Task :feature:tailor:api:spotlessKts FROM-CACHE
+> Task :feature:tailor:api:spotlessKtsCheck UP-TO-DATE
+> Task :feature:tailor:api:spotlessXml FROM-CACHE
+> Task :feature:tailor:api:spotlessXmlCheck UP-TO-DATE
+> Task :feature:tailor:api:spotlessCheck UP-TO-DATE
+> Task :feature:tailor:impl:hiltAggregateDepsDebugUnitTest UP-TO-DATE
+> Task :feature:tailor:impl:hiltJavaCompileDebugUnitTest NO-SOURCE
+> Task :feature:tailor:impl:transformDebugUnitTestClassesWithAsm UP-TO-DATE
+> Task :feature:tailor:impl:spotlessKotlin
+> Task :feature:tailor:impl:spotlessKotlinCheck
+> Task :feature:tailor:impl:spotlessKts UP-TO-DATE
+> Task :feature:tailor:impl:spotlessKtsCheck UP-TO-DATE
+> Task :feature:tailor:impl:spotlessXml
+> Task :feature:tailor:impl:spotlessXmlCheck
+> Task :feature:tailor:impl:spotlessCheck
+> Task :core:common:preReleaseBuild UP-TO-DATE
+> Task :core:common:generateReleaseResources FROM-CACHE
+> Task :core:common:packageReleaseResources FROM-CACHE
+> Task :core:common:processReleaseNavigationResources FROM-CACHE
+> Task :core:common:parseReleaseLocalResources FROM-CACHE
+> Task :core:common:generateReleaseRFile FROM-CACHE
+> Task :core:common:kspReleaseKotlin FROM-CACHE
+> Task :core:common:compileReleaseKotlin
+> Task :core:common:javaPreCompileRelease FROM-CACHE
+> Task :core:common:compileReleaseJavaWithJavac FROM-CACHE
+> Task :core:common:extractProguardFiles
+> Task :core:common:processReleaseManifest FROM-CACHE
+> Task :core:common:generateReleaseLintModel
+> Task :core:common:lintAnalyzeRelease FROM-CACHE
+> Task :core:common:prepareLintJarForPublish
+> Task :core:common:transformReleaseClassesWithAsm FROM-CACHE
+> Task :core:common:bundleLibRuntimeToJarRelease
+> Task :core:common:processReleaseJavaRes
+> Task :core:common:createFullJarRelease
+> Task :core:common:bundleLibCompileToJarRelease
+> Task :core:data:preReleaseBuild UP-TO-DATE
+> Task :core:data:generateReleaseResources FROM-CACHE
+> Task :core:data:packageReleaseResources FROM-CACHE
+> Task :core:data:processReleaseNavigationResources FROM-CACHE
+> Task :core:data:parseReleaseLocalResources FROM-CACHE
+> Task :core:data:generateReleaseRFile FROM-CACHE
+> Task :core:data:javaPreCompileRelease FROM-CACHE
+> Task :core:data:extractProguardFiles
+> Task :core:data:processReleaseManifest FROM-CACHE
+> Task :core:database:extractProguardFiles
+> Task :core:database:processReleaseManifest FROM-CACHE
+> Task :core:database:prepareLintJarForPublish
+> Task :core:common:checkReleaseAarMetadata
+> Task :core:common:extractDeepLinksForAarRelease FROM-CACHE
+> Task :core:common:extractReleaseAnnotations FROM-CACHE
+> Task :core:common:generateReleaseAssets UP-TO-DATE
+> Task :core:common:mergeReleaseAssets
+> Task :core:common:mergeReleaseGeneratedProguardFiles
+> Task :core:common:mergeReleaseConsumerProguardFiles
+> Task :core:common:prepareReleaseArtProfile
+> Task :core:common:mergeReleaseJavaResource
+> Task :core:common:syncReleaseLibJars FROM-CACHE
+> Task :core:common:writeReleaseAarMetadata
+> Task :core:common:bundleReleaseLocalLintAar
+> Task :core:database:checkReleaseAarMetadata
+> Task :core:database:extractDeepLinksForAarRelease FROM-CACHE
+> Task :core:database:extractReleaseAnnotations FROM-CACHE
+> Task :core:database:generateReleaseAssets UP-TO-DATE
+> Task :core:database:mergeReleaseAssets
+> Task :core:database:prepareReleaseArtProfile
+> Task :core:database:writeReleaseAarMetadata
+> Task :core:common:writeReleaseLintModelMetadata
+> Task :core:database:writeReleaseLintModelMetadata
+> Task :core:data:prepareLintJarForPublish
+> Task :core:designsystem:preReleaseBuild UP-TO-DATE
+> Task :core:designsystem:generateReleaseResources FROM-CACHE
+> Task :core:designsystem:packageReleaseResources FROM-CACHE
+> Task :core:designsystem:processReleaseNavigationResources FROM-CACHE
+> Task :core:designsystem:parseReleaseLocalResources FROM-CACHE
+> Task :core:designsystem:generateReleaseRFile FROM-CACHE
+> Task :core:database:compileReleaseKotlin
+> Task :core:database:compileReleaseJavaWithJavac FROM-CACHE
+> Task :core:database:copyRoomSchemas NO-SOURCE
+> Task :core:database:transformReleaseClassesWithAsm FROM-CACHE
+> Task :core:database:bundleLibCompileToJarRelease
+> Task :core:data:kspReleaseKotlin FROM-CACHE
+> Task :core:data:compileReleaseKotlin
+> Task :core:data:compileReleaseJavaWithJavac FROM-CACHE
+> Task :core:database:bundleLibRuntimeToJarRelease
+> Task :core:database:processReleaseJavaRes
+> Task :core:database:createFullJarRelease
+> Task :core:database:generateReleaseLintModel
+> Task :core:data:generateReleaseLintModel
+> Task :core:database:mergeReleaseGeneratedProguardFiles
+> Task :core:database:mergeReleaseConsumerProguardFiles
+> Task :core:database:mergeReleaseJavaResource
+> Task :core:database:syncReleaseLibJars FROM-CACHE
+> Task :core:database:bundleReleaseLocalLintAar
+> Task :core:database:lintAnalyzeRelease FROM-CACHE
+> Task :core:data:lintAnalyzeRelease FROM-CACHE
+> Task :core:designsystem:javaPreCompileRelease FROM-CACHE
+> Task :core:designsystem:extractProguardFiles
+> Task :core:designsystem:processReleaseManifest FROM-CACHE
+> Task :core:designsystem:prepareLintJarForPublish
+> Task :core:data:transformReleaseClassesWithAsm FROM-CACHE
+> Task :core:data:bundleLibRuntimeToJarRelease
+> Task :core:data:processReleaseJavaRes
+> Task :core:data:createFullJarRelease
+> Task :core:data:bundleLibCompileToJarRelease
+> Task :core:domain:preReleaseBuild UP-TO-DATE
+> Task :core:domain:generateReleaseResources FROM-CACHE
+> Task :core:domain:packageReleaseResources FROM-CACHE
+> Task :core:domain:processReleaseNavigationResources FROM-CACHE
+> Task :core:domain:parseReleaseLocalResources FROM-CACHE
+> Task :core:domain:generateReleaseRFile FROM-CACHE
+> Task :core:domain:kspReleaseKotlin FROM-CACHE
+> Task :core:designsystem:compileReleaseKotlin
+> Task :core:designsystem:compileReleaseJavaWithJavac NO-SOURCE
+> Task :core:designsystem:generateReleaseLintModel
+> Task :core:designsystem:lintAnalyzeRelease FROM-CACHE
+> Task :core:domain:javaPreCompileRelease FROM-CACHE
+> Task :core:domain:extractProguardFiles
+> Task :core:domain:processReleaseManifest FROM-CACHE
+> Task :core:data:checkReleaseAarMetadata
+> Task :core:data:extractDeepLinksForAarRelease FROM-CACHE
+> Task :core:data:extractReleaseAnnotations FROM-CACHE
+> Task :core:data:generateReleaseAssets UP-TO-DATE
+> Task :core:data:mergeReleaseAssets
+> Task :core:data:mergeReleaseGeneratedProguardFiles
+> Task :core:data:mergeReleaseConsumerProguardFiles
+> Task :core:data:prepareReleaseArtProfile
+> Task :core:data:mergeReleaseJavaResource
+> Task :core:data:syncReleaseLibJars FROM-CACHE
+> Task :core:data:writeReleaseAarMetadata
+> Task :core:data:bundleReleaseLocalLintAar
+> Task :core:data:writeReleaseLintModelMetadata
+> Task :core:domain:prepareLintJarForPublish
+> Task :core:navigation:preReleaseBuild UP-TO-DATE
+> Task :core:navigation:generateReleaseResources FROM-CACHE
+> Task :core:navigation:packageReleaseResources FROM-CACHE
+> Task :core:navigation:processReleaseNavigationResources FROM-CACHE
+> Task :core:navigation:parseReleaseLocalResources FROM-CACHE
+> Task :core:navigation:generateReleaseRFile FROM-CACHE
+> Task :core:navigation:compileReleaseKotlin
+> Task :core:navigation:javaPreCompileRelease FROM-CACHE
+> Task :core:navigation:compileReleaseJavaWithJavac NO-SOURCE
+> Task :core:navigation:extractProguardFiles
+> Task :core:navigation:processReleaseManifest FROM-CACHE
+> Task :core:navigation:generateReleaseLintModel
+> Task :core:navigation:lintAnalyzeRelease FROM-CACHE
+> Task :core:navigation:prepareLintJarForPublish
+> Task :core:designsystem:bundleLibRuntimeToJarRelease
+> Task :core:designsystem:processReleaseJavaRes
+> Task :core:designsystem:createFullJarRelease
+> Task :core:designsystem:bundleLibCompileToJarRelease
+> Task :core:ui:preReleaseBuild UP-TO-DATE
+> Task :core:ui:generateReleaseResources FROM-CACHE
+> Task :core:ui:packageReleaseResources FROM-CACHE
+> Task :core:ui:processReleaseNavigationResources FROM-CACHE
+> Task :core:ui:parseReleaseLocalResources FROM-CACHE
+> Task :core:ui:generateReleaseRFile FROM-CACHE
+> Task :core:domain:compileReleaseKotlin
+> Task :core:domain:compileReleaseJavaWithJavac FROM-CACHE
+> Task :core:domain:generateReleaseLintModel
+> Task :core:domain:lintAnalyzeRelease FROM-CACHE
+> Task :core:ui:javaPreCompileRelease FROM-CACHE
+> Task :core:ui:extractProguardFiles
+> Task :core:ui:processReleaseManifest FROM-CACHE
+> Task :core:designsystem:checkReleaseAarMetadata
+> Task :core:designsystem:extractDeepLinksForAarRelease FROM-CACHE
+> Task :core:designsystem:extractReleaseAnnotations FROM-CACHE
+> Task :core:designsystem:generateReleaseAssets UP-TO-DATE
+> Task :core:designsystem:mergeReleaseAssets
+> Task :core:designsystem:mergeReleaseGeneratedProguardFiles
+> Task :core:designsystem:mergeReleaseConsumerProguardFiles
+> Task :core:designsystem:prepareReleaseArtProfile
+> Task :core:designsystem:mergeReleaseJavaResource
+> Task :core:designsystem:syncReleaseLibJars FROM-CACHE
+> Task :core:designsystem:writeReleaseAarMetadata
+> Task :core:designsystem:bundleReleaseLocalLintAar
+> Task :core:designsystem:writeReleaseLintModelMetadata
+> Task :core:ui:prepareLintJarForPublish
+> Task :core:navigation:bundleLibRuntimeToJarRelease
+> Task :core:navigation:processReleaseJavaRes
+> Task :core:navigation:createFullJarRelease
+> Task :core:navigation:bundleLibCompileToJarRelease
+> Task :feature:applications:api:preReleaseBuild UP-TO-DATE
+> Task :feature:applications:api:generateReleaseResources FROM-CACHE
+> Task :feature:applications:api:packageReleaseResources FROM-CACHE
+> Task :core:ui:compileReleaseKotlin
+> Task :core:ui:compileReleaseJavaWithJavac NO-SOURCE
+> Task :feature:applications:api:processReleaseNavigationResources FROM-CACHE
+> Task :core:ui:lintAnalyzeRelease FROM-CACHE
+> Task :core:ui:generateReleaseLintModel
+> Task :feature:applications:api:parseReleaseLocalResources FROM-CACHE
+> Task :feature:applications:api:javaPreCompileRelease FROM-CACHE
+> Task :feature:applications:api:extractProguardFiles
+> Task :feature:applications:api:generateReleaseRFile FROM-CACHE
+> Task :feature:applications:api:processReleaseManifest FROM-CACHE
+> Task :core:navigation:checkReleaseAarMetadata
+> Task :core:navigation:extractDeepLinksForAarRelease FROM-CACHE
+> Task :core:navigation:extractReleaseAnnotations FROM-CACHE
+> Task :core:navigation:generateReleaseAssets UP-TO-DATE
+> Task :core:navigation:mergeReleaseAssets
+> Task :core:navigation:mergeReleaseGeneratedProguardFiles
+> Task :core:navigation:mergeReleaseConsumerProguardFiles
+> Task :core:navigation:prepareReleaseArtProfile
+> Task :core:navigation:mergeReleaseJavaResource
+> Task :core:navigation:syncReleaseLibJars FROM-CACHE
+> Task :core:navigation:writeReleaseAarMetadata
+> Task :core:navigation:bundleReleaseLocalLintAar
+> Task :core:navigation:writeReleaseLintModelMetadata
+> Task :feature:applications:api:prepareLintJarForPublish
+> Task :feature:profile:api:preReleaseBuild UP-TO-DATE
+> Task :feature:profile:api:generateReleaseResources FROM-CACHE
+> Task :feature:profile:api:packageReleaseResources FROM-CACHE
+> Task :feature:profile:api:processReleaseNavigationResources FROM-CACHE
+> Task :feature:profile:api:parseReleaseLocalResources FROM-CACHE
+> Task :feature:profile:api:generateReleaseRFile FROM-CACHE
+> Task :feature:applications:api:compileReleaseKotlin
+> Task :feature:applications:api:compileReleaseJavaWithJavac NO-SOURCE
+> Task :feature:applications:api:generateReleaseLintModel
+> Task :feature:applications:api:lintAnalyzeRelease FROM-CACHE
+> Task :feature:profile:api:javaPreCompileRelease FROM-CACHE
+> Task :feature:profile:api:extractProguardFiles
+> Task :feature:profile:api:processReleaseManifest FROM-CACHE
+> Task :feature:profile:api:prepareLintJarForPublish
+> Task :feature:tailor:api:preReleaseBuild UP-TO-DATE
+> Task :feature:tailor:api:generateReleaseResources FROM-CACHE
+> Task :feature:tailor:api:packageReleaseResources FROM-CACHE
+> Task :feature:tailor:api:processReleaseNavigationResources FROM-CACHE
+> Task :feature:tailor:api:parseReleaseLocalResources FROM-CACHE
+> Task :feature:tailor:api:generateReleaseRFile FROM-CACHE
+> Task :feature:profile:api:compileReleaseKotlin
+> Task :feature:profile:api:compileReleaseJavaWithJavac NO-SOURCE
+> Task :feature:profile:api:generateReleaseLintModel
+> Task :feature:profile:api:lintAnalyzeRelease FROM-CACHE
+> Task :feature:tailor:api:javaPreCompileRelease FROM-CACHE
+> Task :feature:tailor:api:extractProguardFiles
+> Task :feature:tailor:api:processReleaseManifest FROM-CACHE
+> Task :feature:tailor:api:prepareLintJarForPublish
+> Task :core:domain:transformReleaseClassesWithAsm FROM-CACHE
+> Task :core:domain:bundleLibRuntimeToJarRelease
+> Task :core:domain:processReleaseJavaRes
+> Task :core:domain:createFullJarRelease
+> Task :core:ui:bundleLibRuntimeToJarRelease
+> Task :core:ui:processReleaseJavaRes
+> Task :core:ui:createFullJarRelease
+> Task :feature:applications:api:bundleLibRuntimeToJarRelease
+> Task :feature:applications:api:processReleaseJavaRes
+> Task :feature:applications:api:createFullJarRelease
+> Task :feature:profile:api:bundleLibRuntimeToJarRelease
+> Task :feature:profile:api:processReleaseJavaRes
+> Task :feature:profile:api:createFullJarRelease
+> Task :core:domain:bundleLibCompileToJarRelease
+> Task :core:ui:bundleLibCompileToJarRelease
+> Task :feature:applications:api:bundleLibCompileToJarRelease
+> Task :feature:profile:api:bundleLibCompileToJarRelease
+> Task :feature:tailor:impl:preReleaseBuild UP-TO-DATE
+> Task :feature:tailor:impl:generateReleaseResources FROM-CACHE
+> Task :feature:tailor:api:compileReleaseKotlin
+> Task :feature:tailor:api:compileReleaseJavaWithJavac NO-SOURCE
+> Task :feature:tailor:api:generateReleaseLintModel
+> Task :feature:tailor:api:lintAnalyzeRelease FROM-CACHE
+> Task :feature:tailor:api:bundleLibRuntimeToJarRelease
+> Task :feature:tailor:api:processReleaseJavaRes
+> Task :feature:tailor:api:createFullJarRelease
+> Task :feature:tailor:impl:packageReleaseResources
+> Task :feature:tailor:api:bundleLibCompileToJarRelease
+> Task :feature:tailor:impl:processReleaseNavigationResources FROM-CACHE
+> Task :feature:tailor:impl:javaPreCompileRelease FROM-CACHE
+> Task :feature:tailor:impl:parseReleaseLocalResources FROM-CACHE
+> Task :feature:tailor:impl:extractProguardFiles
+> Task :feature:tailor:impl:generateReleaseRFile FROM-CACHE
+> Task :feature:tailor:impl:processReleaseManifest FROM-CACHE
+> Task :core:ui:checkReleaseAarMetadata
+> Task :core:ui:extractDeepLinksForAarRelease FROM-CACHE
+> Task :core:ui:extractReleaseAnnotations FROM-CACHE
+> Task :core:ui:generateReleaseAssets UP-TO-DATE
+> Task :core:ui:mergeReleaseAssets
+> Task :core:ui:mergeReleaseGeneratedProguardFiles
+> Task :core:ui:mergeReleaseConsumerProguardFiles
+> Task :core:ui:prepareReleaseArtProfile
+> Task :core:ui:mergeReleaseJavaResource
+> Task :core:ui:syncReleaseLibJars FROM-CACHE
+> Task :core:ui:writeReleaseAarMetadata
+> Task :core:ui:bundleReleaseLocalLintAar
+> Task :core:domain:checkReleaseAarMetadata
+> Task :core:domain:extractDeepLinksForAarRelease FROM-CACHE
+> Task :core:domain:extractReleaseAnnotations FROM-CACHE
+> Task :core:domain:generateReleaseAssets UP-TO-DATE
+> Task :core:domain:mergeReleaseAssets
+> Task :core:domain:mergeReleaseGeneratedProguardFiles
+> Task :core:domain:mergeReleaseConsumerProguardFiles
+> Task :core:domain:prepareReleaseArtProfile
+> Task :core:domain:mergeReleaseJavaResource
+> Task :core:domain:syncReleaseLibJars FROM-CACHE
+> Task :core:domain:writeReleaseAarMetadata
+> Task :core:domain:bundleReleaseLocalLintAar
+> Task :feature:applications:api:checkReleaseAarMetadata
+> Task :feature:applications:api:extractDeepLinksForAarRelease FROM-CACHE
+> Task :feature:applications:api:extractReleaseAnnotations FROM-CACHE
+> Task :feature:applications:api:generateReleaseAssets UP-TO-DATE
+> Task :feature:applications:api:mergeReleaseAssets
+> Task :feature:applications:api:mergeReleaseGeneratedProguardFiles
+> Task :feature:applications:api:mergeReleaseConsumerProguardFiles
+> Task :feature:applications:api:prepareReleaseArtProfile
+> Task :feature:applications:api:mergeReleaseJavaResource
+> Task :feature:applications:api:syncReleaseLibJars FROM-CACHE
+> Task :feature:applications:api:writeReleaseAarMetadata
+> Task :feature:applications:api:bundleReleaseLocalLintAar
+> Task :feature:profile:api:checkReleaseAarMetadata
+> Task :feature:profile:api:extractDeepLinksForAarRelease FROM-CACHE
+> Task :feature:profile:api:extractReleaseAnnotations FROM-CACHE
+> Task :feature:profile:api:generateReleaseAssets UP-TO-DATE
+> Task :feature:profile:api:mergeReleaseAssets
+> Task :feature:profile:api:mergeReleaseGeneratedProguardFiles
+> Task :feature:profile:api:mergeReleaseConsumerProguardFiles
+> Task :feature:profile:api:prepareReleaseArtProfile
+> Task :feature:profile:api:mergeReleaseJavaResource
+> Task :feature:profile:api:syncReleaseLibJars FROM-CACHE
+> Task :feature:profile:api:writeReleaseAarMetadata
+> Task :feature:profile:api:bundleReleaseLocalLintAar
+> Task :feature:tailor:api:checkReleaseAarMetadata
+> Task :feature:tailor:api:extractDeepLinksForAarRelease FROM-CACHE
+> Task :feature:tailor:api:extractReleaseAnnotations FROM-CACHE
+> Task :feature:tailor:api:generateReleaseAssets UP-TO-DATE
+> Task :feature:tailor:api:mergeReleaseAssets
+> Task :feature:tailor:api:mergeReleaseGeneratedProguardFiles
+> Task :feature:tailor:api:mergeReleaseConsumerProguardFiles
+> Task :feature:tailor:api:prepareReleaseArtProfile
+> Task :feature:tailor:api:mergeReleaseJavaResource
+> Task :feature:tailor:api:syncReleaseLibJars FROM-CACHE
+> Task :feature:tailor:api:writeReleaseAarMetadata
+> Task :feature:tailor:api:bundleReleaseLocalLintAar
+> Task :core:domain:writeReleaseLintModelMetadata
+> Task :core:ui:writeReleaseLintModelMetadata
+> Task :feature:applications:api:writeReleaseLintModelMetadata
+> Task :feature:profile:api:writeReleaseLintModelMetadata
+> Task :feature:tailor:api:writeReleaseLintModelMetadata
+> Task :feature:tailor:impl:kspReleaseKotlin
+> Task :feature:tailor:impl:compileReleaseKotlin
+> Task :feature:tailor:impl:compileReleaseJavaWithJavac
+> Task :feature:tailor:impl:generateReleaseLintReportModel
+> Task :feature:tailor:impl:testDebugUnitTest
+> Task :feature:tailor:impl:verifyRoborazziDebug
+> Task :feature:tailor:impl:finalizeTestRoborazziDebug
+> Task :feature:tailor:impl:lintAnalyzeRelease
+
+> Task :feature:tailor:impl:lintReportRelease
+Lint found no new issues (and 2 errors filtered by baseline lint-baseline.xml)
+
+1 errors/warnings were listed in the baseline file (/Users/aibuilders/Documents/dev/products/hirehop-lanes/issue-107/feature/tailor/impl/lint-baseline.xml) but not found in the project; perhaps they have been fixed?
+
+> Task :feature:tailor:impl:lintRelease
+
+[Incubating] Problems report is available at: file:///Users/aibuilders/Documents/dev/products/hirehop-lanes/issue-107/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 49s
+700 actionable tasks: 185 executed, 198 from cache, 317 up-to-date
+Configuration cache entry stored.
