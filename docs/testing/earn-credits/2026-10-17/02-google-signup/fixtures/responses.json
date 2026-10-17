@@ -1,0 +1,614 @@
+{
+  "revision": "google-activation-v1",
+  "syntheticOnly": true,
+  "examples": {
+    "prepared": {
+      "intentId": "44444444-4444-4444-8444-444444444444",
+      "createdAt": "2026-10-17T00:00:00Z",
+      "expiresAt": "2026-10-17T00:05:00Z",
+      "state": "PREPARED"
+    },
+    "statusPrepared": {
+      "intent": {
+        "id": "44444444-4444-4444-8444-444444444444",
+        "state": "PREPARED",
+        "createdAt": "2026-10-17T00:00:00Z",
+        "expiresAt": "2026-10-17T00:05:00Z"
+      },
+      "completion": null
+    },
+    "challenge": {
+      "challengeId": "22222222-2222-4222-8222-222222222222",
+      "challenge": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "expiresAt": "2026-10-17T00:05:00Z",
+      "bindingVersion": 1,
+      "requestHash": "Ky-AIm8lLzvg5noG3n_BWCPPXNd6QgsQpVu0LirySQg"
+    },
+    "guestOneToSix": {
+      "wallet": {
+        "credits": 6,
+        "freeCredits": 6,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "GUEST_LINK",
+        "eligibility": "ELIGIBLE",
+        "reason": "ELIGIBLE",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": "2026-10-18T00:00:00Z"
+      },
+      "grants": [
+        {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "kind": "GOOGLE_SIGNUP",
+          "amount": 5,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "signup-local-v1"
+        }
+      ],
+      "signupBonus": {
+        "status": "GRANTED",
+        "reason": "ELIGIBLE"
+      },
+      "baseTrial": {
+        "status": "NOT_ATTEMPTED",
+        "reason": "GUEST_LINK"
+      },
+      "referralEligibility": {
+        "status": "ELIGIBLE",
+        "deadline": "2026-10-18T00:00:00Z"
+      },
+      "replayed": false
+    },
+    "guestTwoToSeven": {
+      "wallet": {
+        "credits": 7,
+        "freeCredits": 7,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "GUEST_LINK",
+        "eligibility": "ELIGIBLE",
+        "reason": "ELIGIBLE",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": "2026-10-18T00:00:00Z"
+      },
+      "grants": [
+        {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "kind": "GOOGLE_SIGNUP",
+          "amount": 5,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "signup-local-v1"
+        }
+      ],
+      "signupBonus": {
+        "status": "GRANTED",
+        "reason": "ELIGIBLE"
+      },
+      "baseTrial": {
+        "status": "NOT_ATTEMPTED",
+        "reason": "GUEST_LINK"
+      },
+      "referralEligibility": {
+        "status": "ELIGIBLE",
+        "deadline": "2026-10-18T00:00:00Z"
+      },
+      "replayed": false
+    },
+    "directUnused": {
+      "wallet": {
+        "credits": 7,
+        "freeCredits": 7,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "DIRECT_GOOGLE",
+        "eligibility": "ELIGIBLE",
+        "reason": "ELIGIBLE",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": "2026-10-18T00:00:00Z"
+      },
+      "grants": [
+        {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "kind": "GUEST_TRIAL",
+          "amount": 2,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "guest-local-v1"
+        },
+        {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "kind": "GOOGLE_SIGNUP",
+          "amount": 5,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "signup-local-v1"
+        }
+      ],
+      "signupBonus": {
+        "status": "GRANTED",
+        "reason": "ELIGIBLE"
+      },
+      "baseTrial": {
+        "status": "GRANTED",
+        "reason": "ELIGIBLE"
+      },
+      "referralEligibility": {
+        "status": "ELIGIBLE",
+        "deadline": "2026-10-18T00:00:00Z"
+      },
+      "replayed": false
+    },
+    "directUsedSignal": {
+      "wallet": {
+        "credits": 5,
+        "freeCredits": 5,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "DIRECT_GOOGLE",
+        "eligibility": "ELIGIBLE",
+        "reason": "ELIGIBLE",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": "2026-10-18T00:00:00Z"
+      },
+      "grants": [
+        {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "kind": "GOOGLE_SIGNUP",
+          "amount": 5,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "signup-local-v1"
+        }
+      ],
+      "signupBonus": {
+        "status": "GRANTED",
+        "reason": "ELIGIBLE"
+      },
+      "baseTrial": {
+        "status": "NOT_ELIGIBLE",
+        "reason": "SIGN_IN_REQUIRED"
+      },
+      "referralEligibility": {
+        "status": "ELIGIBLE",
+        "deadline": "2026-10-18T00:00:00Z"
+      },
+      "replayed": false
+    },
+    "directBaseRetryAfterSignupPause": {
+      "wallet": {
+        "credits": 5,
+        "freeCredits": 5,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "DIRECT_GOOGLE",
+        "eligibility": "ELIGIBLE",
+        "reason": "ELIGIBLE",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": "2026-10-18T00:00:00Z"
+      },
+      "grants": [
+        {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "kind": "GUEST_TRIAL",
+          "amount": 2,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "guest-local-v1"
+        },
+        {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "kind": "GOOGLE_SIGNUP",
+          "amount": 5,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "signup-local-v1"
+        }
+      ],
+      "signupBonus": {
+        "status": "ALREADY_GRANTED",
+        "reason": "ALREADY_GRANTED"
+      },
+      "baseTrial": {
+        "status": "GRANTED",
+        "reason": "ELIGIBLE"
+      },
+      "referralEligibility": {
+        "status": "ELIGIBLE",
+        "deadline": "2026-10-18T00:00:00Z"
+      },
+      "replayed": false
+    },
+    "directBaseSignupAbsent": {
+      "wallet": {
+        "credits": 2,
+        "freeCredits": 2,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "DIRECT_GOOGLE",
+        "eligibility": "ELIGIBLE",
+        "reason": "ELIGIBLE",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": "2026-10-18T00:00:00Z"
+      },
+      "grants": [
+        {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "kind": "GUEST_TRIAL",
+          "amount": 2,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "guest-local-v1"
+        }
+      ],
+      "signupBonus": {
+        "status": "UNAVAILABLE",
+        "reason": "POLICY_UNAVAILABLE"
+      },
+      "baseTrial": {
+        "status": "GRANTED",
+        "reason": "ELIGIBLE"
+      },
+      "referralEligibility": {
+        "status": "ELIGIBLE",
+        "deadline": "2026-10-18T00:00:00Z"
+      },
+      "replayed": false
+    },
+    "signupRetryAfterBaseFirst": {
+      "wallet": {
+        "credits": 7,
+        "freeCredits": 7,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "DIRECT_GOOGLE",
+        "eligibility": "ELIGIBLE",
+        "reason": "ELIGIBLE",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": "2026-10-18T00:00:00Z"
+      },
+      "grants": [
+        {
+          "id": "55555555-5555-4555-8555-555555555555",
+          "kind": "GUEST_TRIAL",
+          "amount": 2,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "guest-local-v1"
+        },
+        {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "kind": "GOOGLE_SIGNUP",
+          "amount": 5,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "signup-local-v1"
+        }
+      ],
+      "signupBonus": {
+        "status": "GRANTED",
+        "reason": "ELIGIBLE"
+      },
+      "baseTrial": {
+        "status": "ALREADY_GRANTED",
+        "reason": "ALREADY_GRANTED"
+      },
+      "referralEligibility": {
+        "status": "ELIGIBLE",
+        "deadline": "2026-10-18T00:00:00Z"
+      },
+      "replayed": false
+    },
+    "signupPolicyNewDirect": {
+      "status": "AVAILABLE",
+      "reason": "ELIGIBLE",
+      "amount": 5,
+      "version": "signup-local-v1",
+      "grantPolicyVersion": null,
+      "effectiveAt": "2026-10-17T00:00:00Z",
+      "expiresAt": "2026-10-19T00:00:00Z",
+      "operation": "GOOGLE_ACTIVATION",
+      "bindingVersion": 1,
+      "integrity": "PLAY_INTEGRITY_STANDARD",
+      "referralWindowSeconds": 86400,
+      "baseTrial": {
+        "status": "AVAILABLE",
+        "reason": "ELIGIBLE",
+        "amount": 2,
+        "version": "guest-local-v1",
+        "grantPolicyVersion": null
+      }
+    },
+    "signupPolicyBaseRetry": {
+      "status": "ALREADY_GRANTED",
+      "reason": "ALREADY_GRANTED",
+      "amount": null,
+      "version": null,
+      "grantPolicyVersion": "signup-local-v1",
+      "effectiveAt": null,
+      "expiresAt": null,
+      "operation": "GOOGLE_ACTIVATION",
+      "bindingVersion": 1,
+      "integrity": "PLAY_INTEGRITY_STANDARD",
+      "referralWindowSeconds": 86400,
+      "baseTrial": {
+        "status": "AVAILABLE",
+        "reason": "ELIGIBLE",
+        "amount": 2,
+        "version": "guest-local-v1",
+        "grantPolicyVersion": null
+      }
+    },
+    "observation": {
+      "wallet": {
+        "credits": 1,
+        "freeCredits": 1,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "GUEST_LINK",
+        "eligibility": "ELIGIBLE",
+        "reason": "ELIGIBLE",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": "2026-10-18T00:00:00Z"
+      },
+      "grants": [],
+      "referralEligibility": {
+        "status": "ELIGIBLE",
+        "deadline": "2026-10-18T00:00:00Z"
+      }
+    },
+    "committedReplayAfterSpendAndPause": {
+      "wallet": {
+        "credits": 4,
+        "freeCredits": 4,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "GUEST_LINK",
+        "eligibility": "ELIGIBLE",
+        "reason": "ELIGIBLE",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": "2026-10-18T00:00:00Z"
+      },
+      "grants": [
+        {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "kind": "GOOGLE_SIGNUP",
+          "amount": 5,
+          "createdAt": "2026-10-17T00:01:00Z",
+          "policyVersion": "signup-local-v1"
+        }
+      ],
+      "signupBonus": {
+        "status": "GRANTED",
+        "reason": "ELIGIBLE"
+      },
+      "baseTrial": {
+        "status": "NOT_ATTEMPTED",
+        "reason": "GUEST_LINK"
+      },
+      "referralEligibility": {
+        "status": "ELIGIBLE",
+        "deadline": "2026-10-18T00:00:00Z"
+      },
+      "replayed": true
+    },
+    "existingGoogle": {
+      "wallet": {
+        "credits": 9,
+        "freeCredits": 9,
+        "purchasedCredits": 0,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "activation": {
+        "source": "EXISTING_GOOGLE",
+        "eligibility": "EXISTING",
+        "reason": "EXISTING_ACCOUNT",
+        "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+        "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+        "referralDeadline": null
+      },
+      "grants": [],
+      "signupBonus": {
+        "status": "NOT_ELIGIBLE",
+        "reason": "EXISTING_ACCOUNT"
+      },
+      "baseTrial": {
+        "status": "NOT_ATTEMPTED",
+        "reason": "EVIDENCE_NOT_PROVIDED"
+      },
+      "referralEligibility": {
+        "status": "NOT_ELIGIBLE",
+        "deadline": null
+      },
+      "replayed": false
+    },
+    "conflict": {
+      "wallet": {
+        "credits": 12,
+        "freeCredits": 9,
+        "purchasedCredits": 3,
+        "analysesLeftToday": 20,
+        "freeTailoringsLeftToday": 0,
+        "day": "2026-10-17",
+        "resetsAt": "2026-10-17T18:30:00Z",
+        "unlockedApplicationIds": []
+      },
+      "completion": {
+        "kind": "EXISTING_ACCOUNT",
+        "disposition": "PRESERVE_LOCAL_WORK",
+        "creditsTransferred": 0,
+        "purchasesTransferred": false,
+        "runningJobsTransferred": false
+      },
+      "replayed": false
+    }
+  },
+  "errors": [
+    {
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "GOOGLE_REQUIRED",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "GUEST_REQUIRED",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "GOOGLE_IDENTITY_REJECTED",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 403,
+      "body": {
+        "error": {
+          "code": "RECENT_GOOGLE_AUTH_REQUIRED",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "body": {
+        "error": {
+          "code": "ACCOUNT_LINK_CONFLICT",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "body": {
+        "error": {
+          "code": "UPGRADE_INTENT_EXPIRED",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "body": {
+        "error": {
+          "code": "UPGRADE_INTENT_REQUIRED",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "body": {
+        "error": {
+          "code": "POLICY_CHANGED",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 409,
+      "body": {
+        "error": {
+          "code": "IDEMPOTENCY_CONFLICT",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 503,
+      "body": {
+        "error": {
+          "code": "IDENTITY_UNAVAILABLE",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 503,
+      "body": {
+        "error": {
+          "code": "PROMOTION_UNAVAILABLE",
+          "message": "Synthetic fixed message."
+        }
+      }
+    },
+    {
+      "status": 404,
+      "body": {
+        "error": {
+          "code": "NOT_FOUND",
+          "message": "Synthetic fixed message."
+        }
+      }
+    }
+  ]
+}

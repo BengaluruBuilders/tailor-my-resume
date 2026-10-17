@@ -1,0 +1,178 @@
+{
+  "revision": "google-activation-v1",
+  "syntheticOnly": true,
+  "proof": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8",
+  "challenge": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+  "vectors": [
+    {
+      "name": "guest-link",
+      "value": [
+        "TMR_GOOGLE_ACTIVATION_PAYLOAD_V1",
+        "GUEST_LINK",
+        "44444444-4444-4444-8444-444444444444",
+        "SIGNUP_ONLY",
+        "",
+        ""
+      ],
+      "utf8": "[\"TMR_GOOGLE_ACTIVATION_PAYLOAD_V1\",\"GUEST_LINK\",\"44444444-4444-4444-8444-444444444444\",\"SIGNUP_ONLY\",\"\",\"\"]",
+      "hex": "5b22544d525f474f4f474c455f41435449564154494f4e5f5041594c4f41445f5631222c2247554553545f4c494e4b222c2234343434343434342d343434342d343434342d383434342d343434343434343434343434222c225349474e55505f4f4e4c59222c22222c22225d",
+      "sha256Base64url": "0-G3Cfz6Oqj9L_rPf0gKg3yRc_HUTSE4nWVufO61AgM"
+    },
+    {
+      "name": "same-uid-no-secret-recovery",
+      "value": [
+        "TMR_GOOGLE_ACTIVATION_PAYLOAD_V1",
+        "GUEST_LINK",
+        "",
+        "SIGNUP_ONLY",
+        "",
+        ""
+      ],
+      "utf8": "[\"TMR_GOOGLE_ACTIVATION_PAYLOAD_V1\",\"GUEST_LINK\",\"\",\"SIGNUP_ONLY\",\"\",\"\"]",
+      "hex": "5b22544d525f474f4f474c455f41435449564154494f4e5f5041594c4f41445f5631222c2247554553545f4c494e4b222c22222c225349474e55505f4f4e4c59222c22222c22225d",
+      "sha256Base64url": "E_4gRFpR2Co_c6-rA5jHhrHeU00nHbrAzj7Qu1PyD6M"
+    },
+    {
+      "name": "direct-base",
+      "value": [
+        "TMR_GOOGLE_ACTIVATION_PAYLOAD_V1",
+        "DIRECT_GOOGLE",
+        "",
+        "SIGNUP_AND_BASE",
+        "ANDROID_ID",
+        "0123456789abcdef"
+      ],
+      "utf8": "[\"TMR_GOOGLE_ACTIVATION_PAYLOAD_V1\",\"DIRECT_GOOGLE\",\"\",\"SIGNUP_AND_BASE\",\"ANDROID_ID\",\"0123456789abcdef\"]",
+      "hex": "5b22544d525f474f4f474c455f41435449564154494f4e5f5041594c4f41445f5631222c224449524543545f474f4f474c45222c22222c225349474e55505f414e445f42415345222c22414e44524f49445f4944222c2230313233343536373839616263646566225d",
+      "sha256Base64url": "RU3Wn6-pVXneW4fdmkjIS5_YemQgqwNZpwobbQFrPDE"
+    },
+    {
+      "name": "direct-no-base",
+      "value": [
+        "TMR_GOOGLE_ACTIVATION_PAYLOAD_V1",
+        "DIRECT_GOOGLE",
+        "",
+        "SIGNUP_ONLY",
+        "",
+        ""
+      ],
+      "utf8": "[\"TMR_GOOGLE_ACTIVATION_PAYLOAD_V1\",\"DIRECT_GOOGLE\",\"\",\"SIGNUP_ONLY\",\"\",\"\"]",
+      "hex": "5b22544d525f474f4f474c455f41435449564154494f4e5f5041594c4f41445f5631222c224449524543545f474f4f474c45222c22222c225349474e55505f4f4e4c59222c22222c22225d",
+      "sha256Base64url": "eEJHBidZKola_AoxQM6fktE2kj7BPapAlpe3PZAd_XQ"
+    },
+    {
+      "name": "intent-proof",
+      "value": [
+        "TMR_UPGRADE_PROOF_V1",
+        "tailormyresume",
+        "fixture",
+        "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8"
+      ],
+      "utf8": "[\"TMR_UPGRADE_PROOF_V1\",\"tailormyresume\",\"fixture\",\"ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8\"]",
+      "hex": "5b22544d525f555047524144455f50524f4f465f5631222c227461696c6f726d79726573756d65222c2266697874757265222c22494345694979516c4a69636f4b536f724c4330754c7a41784d6a4d304e5459334f446b364f7a7739506a38225d",
+      "sha256Base64url": "m1fEQEMKb4lp-wNE4MAM06pkX8gKGCUKTtyCHp8Nyn4"
+    },
+    {
+      "name": "intent-create",
+      "value": [
+        "TMR_UPGRADE_INTENT_V1",
+        "m1fEQEMKb4lp-wNE4MAM06pkX8gKGCUKTtyCHp8Nyn4"
+      ],
+      "utf8": "[\"TMR_UPGRADE_INTENT_V1\",\"m1fEQEMKb4lp-wNE4MAM06pkX8gKGCUKTtyCHp8Nyn4\"]",
+      "hex": "5b22544d525f555047524144455f494e54454e545f5631222c226d31664551454d4b62346c702d774e45344d414d3036706b5838674b4743554b547479434870384e796e34225d",
+      "sha256Base64url": "xp0P7BJruMUB-6kl64dEZhUK04YM7XYhZHjGBOrbQkA"
+    },
+    {
+      "name": "conflict-complete",
+      "value": [
+        "TMR_EXISTING_ACCOUNT_HANDOFF_V1",
+        "44444444-4444-4444-8444-444444444444",
+        "PRESERVE_LOCAL_WORK"
+      ],
+      "utf8": "[\"TMR_EXISTING_ACCOUNT_HANDOFF_V1\",\"44444444-4444-4444-8444-444444444444\",\"PRESERVE_LOCAL_WORK\"]",
+      "hex": "5b22544d525f4558495354494e475f4143434f554e545f48414e444f46465f5631222c2234343434343434342d343434342d343434342d383434342d343434343434343434343434222c2250524553455256455f4c4f43414c5f574f524b225d",
+      "sha256Base64url": "5EaOpkBzAWP-NE-NsbEoY4f9tL2ZUyqKUiLTcgu0eU0"
+    },
+    {
+      "name": "guest-link-binding",
+      "value": [
+        "TMR_PROMOTION_BINDING_V1",
+        "tailormyresume",
+        "fixture",
+        "synthetic-uid-google-01",
+        "GOOGLE_ACTIVATION",
+        "11111111-1111-4111-8111-111111111111",
+        "0-G3Cfz6Oqj9L_rPf0gKg3yRc_HUTSE4nWVufO61AgM",
+        "[\"signup-local-v1\",null]",
+        "22222222-2222-4222-8222-222222222222",
+        "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8"
+      ],
+      "utf8": "[\"TMR_PROMOTION_BINDING_V1\",\"tailormyresume\",\"fixture\",\"synthetic-uid-google-01\",\"GOOGLE_ACTIVATION\",\"11111111-1111-4111-8111-111111111111\",\"0-G3Cfz6Oqj9L_rPf0gKg3yRc_HUTSE4nWVufO61AgM\",\"[\\\"signup-local-v1\\\",null]\",\"22222222-2222-4222-8222-222222222222\",\"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8\"]",
+      "hex": "5b22544d525f50524f4d4f54494f4e5f42494e44494e475f5631222c227461696c6f726d79726573756d65222c2266697874757265222c2273796e7468657469632d7569642d676f6f676c652d3031222c22474f4f474c455f41435449564154494f4e222c2231313131313131312d313131312d343131312d383131312d313131313131313131313131222c22302d473343667a364f716a394c5f72506630674b67337952635f4855545345346e575675664f363141674d222c225b5c227369676e75702d6c6f63616c2d76315c222c6e756c6c5d222c2232323232323232322d323232322d343232322d383232322d323232323232323232323232222c2241414543417751464267634943516f4c4441304f4478415245684d554652595847426b6147787764486838225d",
+      "sha256Base64url": "wChqVMsuolZtu__1u-0R9kRiuYxmfJN5XFTEEBrKDS4"
+    },
+    {
+      "name": "direct-base-binding",
+      "value": [
+        "TMR_PROMOTION_BINDING_V1",
+        "tailormyresume",
+        "fixture",
+        "synthetic-uid-google-01",
+        "GOOGLE_ACTIVATION",
+        "11111111-1111-4111-8111-111111111111",
+        "RU3Wn6-pVXneW4fdmkjIS5_YemQgqwNZpwobbQFrPDE",
+        "[\"signup-local-v1\",\"guest-local-v1\"]",
+        "22222222-2222-4222-8222-222222222222",
+        "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8"
+      ],
+      "utf8": "[\"TMR_PROMOTION_BINDING_V1\",\"tailormyresume\",\"fixture\",\"synthetic-uid-google-01\",\"GOOGLE_ACTIVATION\",\"11111111-1111-4111-8111-111111111111\",\"RU3Wn6-pVXneW4fdmkjIS5_YemQgqwNZpwobbQFrPDE\",\"[\\\"signup-local-v1\\\",\\\"guest-local-v1\\\"]\",\"22222222-2222-4222-8222-222222222222\",\"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8\"]",
+      "hex": "5b22544d525f50524f4d4f54494f4e5f42494e44494e475f5631222c227461696c6f726d79726573756d65222c2266697874757265222c2273796e7468657469632d7569642d676f6f676c652d3031222c22474f4f474c455f41435449564154494f4e222c2231313131313131312d313131312d343131312d383131312d313131313131313131313131222c22525533576e362d7056586e65573466646d6b6a4953355f59656d516771774e5a70776f6262514672504445222c225b5c227369676e75702d6c6f63616c2d76315c222c5c2267756573742d6c6f63616c2d76315c225d222c2232323232323232322d323232322d343232322d383232322d323232323232323232323232222c2241414543417751464267634943516f4c4441304f4478415245684d554652595847426b6147787764486838225d",
+      "sha256Base64url": "Ky-AIm8lLzvg5noG3n_BWCPPXNd6QgsQpVu0LirySQg"
+    },
+    {
+      "name": "direct-base-signup-campaign-absent-binding",
+      "value": [
+        "TMR_PROMOTION_BINDING_V1",
+        "tailormyresume",
+        "fixture",
+        "synthetic-uid-google-01",
+        "GOOGLE_ACTIVATION",
+        "11111111-1111-4111-8111-111111111111",
+        "RU3Wn6-pVXneW4fdmkjIS5_YemQgqwNZpwobbQFrPDE",
+        "[null,\"guest-local-v1\"]",
+        "22222222-2222-4222-8222-222222222222",
+        "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8"
+      ],
+      "utf8": "[\"TMR_PROMOTION_BINDING_V1\",\"tailormyresume\",\"fixture\",\"synthetic-uid-google-01\",\"GOOGLE_ACTIVATION\",\"11111111-1111-4111-8111-111111111111\",\"RU3Wn6-pVXneW4fdmkjIS5_YemQgqwNZpwobbQFrPDE\",\"[null,\\\"guest-local-v1\\\"]\",\"22222222-2222-4222-8222-222222222222\",\"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8\"]",
+      "hex": "5b22544d525f50524f4d4f54494f4e5f42494e44494e475f5631222c227461696c6f726d79726573756d65222c2266697874757265222c2273796e7468657469632d7569642d676f6f676c652d3031222c22474f4f474c455f41435449564154494f4e222c2231313131313131312d313131312d343131312d383131312d313131313131313131313131222c22525533576e362d7056586e65573466646d6b6a4953355f59656d516771774e5a70776f6262514672504445222c225b6e756c6c2c5c2267756573742d6c6f63616c2d76315c225d222c2232323232323232322d323232322d343232322d383232322d323232323232323232323232222c2241414543417751464267634943516f4c4441304f4478415245684d554652595847426b6147787764486838225d",
+      "sha256Base64url": "zpFenBojXMinqIb8LiQKO7jgr79zD9EErb9Z-dwGo-I"
+    }
+  ],
+  "negativeMutations": [
+    {
+      "name": "different-action",
+      "position": 4,
+      "replacement": "GUEST_TRIAL"
+    },
+    {
+      "name": "different-environment",
+      "position": 2,
+      "replacement": "production"
+    },
+    {
+      "name": "different-signup-revision",
+      "position": 7,
+      "replacement": "[\"signup-local-v2\",\"guest-local-v1\"]"
+    },
+    {
+      "name": "different-base-revision",
+      "position": 7,
+      "replacement": "[\"signup-local-v1\",\"guest-local-v2\"]"
+    },
+    {
+      "name": "wrong-revision-encoding",
+      "position": 7,
+      "replacement": "signup-local-v1"
+    }
+  ]
+}

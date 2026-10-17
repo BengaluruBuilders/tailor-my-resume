@@ -1,0 +1,56 @@
+{
+  "revision": "google-activation-v1",
+  "fixtureOnly": true,
+  "liveAdmissionDefault": false,
+  "trial": {
+    "version": "guest-local-v1",
+    "amount": 2,
+    "capacityCreditUnits": 100,
+    "entitlement": "guest-trial",
+    "scope": [
+      "tailormyresume",
+      "fixture"
+    ]
+  },
+  "signup": {
+    "version": "signup-local-v1",
+    "amount": 5,
+    "capacityCreditUnits": 500,
+    "entitlement": "google-signup",
+    "scope": [
+      "tailormyresume",
+      "fixture",
+      "google-signup"
+    ]
+  },
+  "eligibilityCutoff": "2026-10-17T00:00:00Z",
+  "effectiveAt": "2026-10-17T00:00:00Z",
+  "expiresAt": "2026-10-19T00:00:00Z",
+  "secretTtlSeconds": 300,
+  "prelinkRecoverySeconds": 2592000,
+  "operationCacheSeconds": 2592000,
+  "providerAliasSeconds": 15552000,
+  "postDeletionAliasSeconds": 0,
+  "referralWindowSeconds": 86400,
+  "freshGoogleAuthSeconds": 300,
+  "metadataSnapshotMaxAgeSeconds": 30,
+  "directObservationSeconds": 600,
+  "clockSkewSeconds": 30,
+  "actorAttempts": 5,
+  "networkAttempts": 100,
+  "campaignAttempts": 1000,
+  "counterWindowSeconds": 60,
+  "decisionRetentionSeconds": 604800,
+  "networkCounterRetentionSeconds": 3600,
+  "localHandoffPolicy": "Explicit unresolved production retention; fixture journal not auto-erased",
+  "productionUnresolved": [
+    "cutoff",
+    "amount/config publication",
+    "capacities",
+    "freshness bounds",
+    "referral window",
+    "retention/disclosure",
+    "real verifier/package/certificate",
+    "local unresolved-handoff retention"
+  ]
+}
