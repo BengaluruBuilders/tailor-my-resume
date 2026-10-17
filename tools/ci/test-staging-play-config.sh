@@ -85,7 +85,7 @@ gradle.beforeProject { project ->
     }
 }
 GROOVY
-run :app:inspectStagingPlayBuildModel --no-configuration-cache -I "$fixtures/model.gradle" "${props[@]}" -q > "$fixtures/model.out"
+run :app:inspectStagingPlayBuildModel -I "$fixtures/model.gradle" "${props[@]}" -q > "$fixtures/model.out"
 python3 - "$fixtures/model.out" <<'PY'
 import json, sys
 m=json.loads(next(line.removeprefix('BUILD_MODEL=') for line in open(sys.argv[1]) if line.startswith('BUILD_MODEL=')))
@@ -109,7 +109,7 @@ reject 'debug alias rejected' 'existing dedicated staging upload keystore' :app:
   "${signing[@]}" -PTMR_STAGING_UPLOAD_KEY_ALIAS=androiddebugkey -q
 reject 'staging signing cannot supply production signing' 'Release bundles must be signed with the upload key' \
   :app:verifyUploadSigning "${signing[@]}" -q
-run :app:inspectStagingPlayBuildModel --no-configuration-cache -I "$fixtures/model.gradle" "${props[@]}" "${signing[@]}" -q > "$fixtures/signed-model.out"
+run :app:inspectStagingPlayBuildModel -I "$fixtures/model.gradle" "${props[@]}" "${signing[@]}" -q > "$fixtures/signed-model.out"
 python3 - "$fixtures/signed-model.out" <<'PY'
 import json, sys
 m=json.loads(next(line.removeprefix('BUILD_MODEL=') for line in open(sys.argv[1]) if line.startswith('BUILD_MODEL=')))
