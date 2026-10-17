@@ -45,6 +45,7 @@ class ReferralsScreenshotTest {
     fun unavailableLargeTextHasNoRewardPromiseAndKeepsRefreshReachable() {
         rule.setTmrContent(NARROW_DEVICE) { ReferralsScreen(ReferralUiState.Content(message = ReferralMessage.ReadOnly), actions) }
         rule.assertNoTruncatedText()
+        rule.onNodeWithText("Referral code").assertDoesNotExist()
         rule.capture("referrals_read_only", NARROW_DEVICE)
         rule.onNodeWithText("Refresh referral status").performScrollTo().assertIsDisplayed()
     }

@@ -102,7 +102,7 @@ internal fun ReferralsScreen(state: ReferralUiState, actions: ReferralActions, m
         Text(stringResource(R.string.feature_settings_impl_referral_stats, content.creditedCount, content.earnedCredits), style = TmrTheme.typography.caption, color = TmrTheme.colors.textMuted)
         if (content.attached) {
             Text(stringResource(R.string.feature_settings_impl_referral_applied), style = TmrTheme.typography.body, color = TmrTheme.colors.lime)
-        } else {
+        } else if (content.message != ReferralMessage.ReadOnly) {
             content.deadline?.let { deadline ->
                 val formatted = remember(deadline) { java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm", java.util.Locale.ENGLISH).withZone(java.time.ZoneId.systemDefault()).format(java.time.Instant.parse(deadline)) }
                 Text(stringResource(R.string.feature_settings_impl_referral_deadline, formatted), style = TmrTheme.typography.caption, color = TmrTheme.colors.textSecondary)
