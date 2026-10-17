@@ -48,4 +48,12 @@
     <string name="feature_settings_impl_referral_refresh">Refresh referral status</string>
     <string name="feature_settings_impl_referral_history">Referral reward</string>
     <string name="feature_settings_impl_credit_update">Credit update</string>
+    <string name="feature_settings_impl_referral_share">Share referral link</string>
+    <string name="feature_settings_impl_referral_continue">Continue referral</string>
+    <string name="feature_settings_impl_referral_offer_version">Offer %1$s</string>
+    <plurals name="feature_settings_impl_referral_share_offer">
+        <item quantity="one">An eligible referral may earn the inviter %1$d credit. Offer %2$s. Check availability in the app. %3$s</item>
+        <item quantity="other">An eligible referral may earn the inviter %1$d credits. Offer %2$s. Check availability in the app. %3$s</item>
+    </plurals>
+    <string name="feature_settings_impl_referral_share_neutral">Open TailorMyResume to check the current referral offer. Referral link or code: %1$s</string>
 </resources>

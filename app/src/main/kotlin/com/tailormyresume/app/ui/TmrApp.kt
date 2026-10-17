@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -81,6 +82,7 @@ fun TmrApp(
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
     google: com.tailormyresume.core.domain.GoogleAccountGateway? = null,
+    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
 ) {
     val stores = rememberRootViewModelStores()
     LaunchedEffect(rootState) {
@@ -92,12 +94,13 @@ fun TmrApp(
                 AppRootState.Loading -> Unit
                 is AppRootState.Ready -> TmrAccountRoot(
                     ready = rootState,
+                    referrals = referrals,
                     hasHome = hasHome,
                     entryProvider = entryProvider,
                 )
             }
             PendingToastHost()
-            google?.let { GoogleAccountOverlay(it) }
+            google?.let { GoogleAccountOverlay(it, referrals = referrals) }
         }
     }
 }
@@ -117,12 +120,14 @@ internal fun PendingToastHost() {
 internal fun TmrAccountRoot(
     ready: AppRootState.Ready,
     modifier: Modifier = Modifier,
+    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
 ) {
     key(ready.accountId) {
         TmrRoot(
             root = AccountRoot(ready.accountId),
+            referrals = referrals,
             startKey = ready.start.navKey(),
             modifier = modifier,
             hasHome = hasHome,
@@ -142,6 +147,7 @@ internal fun TmrRoot(
     root: AccountRoot,
     startKey: NavKey,
     modifier: Modifier = Modifier,
+    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
     initialKeys: () -> List<NavKey> = PendingNavigation::consume,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
@@ -156,6 +162,12 @@ internal fun TmrRoot(
                         if (key.isTopLevelDestination()) navigator.root(key) else navigator.navigate(key)
                     }
                 }
+            }
+        }
+        val requests by (referrals?.routeRequests ?: remember { kotlinx.coroutines.flow.MutableStateFlow(0L) }).collectAsStateWithLifecycle()
+        LaunchedEffect(requests, root.accountId) {
+            if (requests > 0 && root.accountId != null && navigationState.currentKey != com.tailormyresume.feature.settings.api.navigation.ReferralsNavKey) {
+                navigator.navigate(com.tailormyresume.feature.settings.api.navigation.ReferralsNavKey)
             }
         }
         if (entryProvider == null) {

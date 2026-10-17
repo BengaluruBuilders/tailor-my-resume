@@ -1,0 +1,50 @@
+{
+  "current": {
+    "originalSha256": "316ed0411b581a9575078454b1e89d166242f3cf040a4894fa46426e6c851c6d",
+    "harnessSha256": "7d94f24b382da0053ea2d5caddd2b602555e68ac10da4c858125b434d93209ae",
+    "old": "data-origin=\"https://referrals-staging.example.invalid\"",
+    "new": "data-origin=\"http://127.0.0.1:18766\"",
+    "occurrences": 1,
+    "reversible": true
+  },
+  "paused": {
+    "originalSha256": "316ed0411b581a9575078454b1e89d166242f3cf040a4894fa46426e6c851c6d",
+    "harnessSha256": "7d94f24b382da0053ea2d5caddd2b602555e68ac10da4c858125b434d93209ae",
+    "old": "data-origin=\"https://referrals-staging.example.invalid\"",
+    "new": "data-origin=\"http://127.0.0.1:18766\"",
+    "occurrences": 1,
+    "reversible": true
+  },
+  "expired": {
+    "originalSha256": "316ed0411b581a9575078454b1e89d166242f3cf040a4894fa46426e6c851c6d",
+    "harnessSha256": "7d94f24b382da0053ea2d5caddd2b602555e68ac10da4c858125b434d93209ae",
+    "old": "data-origin=\"https://referrals-staging.example.invalid\"",
+    "new": "data-origin=\"http://127.0.0.1:18766\"",
+    "occurrences": 1,
+    "reversible": true
+  },
+  "future": {
+    "originalSha256": "316ed0411b581a9575078454b1e89d166242f3cf040a4894fa46426e6c851c6d",
+    "harnessSha256": "7d94f24b382da0053ea2d5caddd2b602555e68ac10da4c858125b434d93209ae",
+    "old": "data-origin=\"https://referrals-staging.example.invalid\"",
+    "new": "data-origin=\"http://127.0.0.1:18766\"",
+    "occurrences": 1,
+    "reversible": true
+  },
+  "expiry": {
+    "originalSha256": "316ed0411b581a9575078454b1e89d166242f3cf040a4894fa46426e6c851c6d",
+    "harnessSha256": "7d94f24b382da0053ea2d5caddd2b602555e68ac10da4c858125b434d93209ae",
+    "old": "data-origin=\"https://referrals-staging.example.invalid\"",
+    "new": "data-origin=\"http://127.0.0.1:18766\"",
+    "occurrences": 1,
+    "reversible": true
+  },
+  "neutral": {
+    "originalSha256": "79066cf483853647fabdf8f91f534757338a3997d43347c62e70cfbf9f1af4be",
+    "harnessSha256": "176449d1d5f9bff9cce4c3cce20aac1b20d6ebbfe2b21ca020b0c7b53498776b",
+    "old": "data-origin=\"https://referrals-staging.example.invalid\"",
+    "new": "data-origin=\"http://127.0.0.1:18766\"",
+    "occurrences": 1,
+    "reversible": true
+  }
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "file": "emulator-fixture-cold-candidate.png",
+    "sha256": "faf252d9406c98d1f89fb3e7019fca5279ef8bd1ab54abc67bc7118690064070",
+    "bytes": 166911,
+    "caption": "Synthetic fixture APK, forced cold VIEW to MainActivity: saved LINK code with neutral unavailable offer; no resolver/Play/Google/Integrity/reward proof.",
+    "frontend": "a86e8e3ab7354acab6cb5c78309adb09f91c3796",
+    "backend": "a67d2ad56330c5522235bd4e1ae526b0cf5e3412",
+    "variant": "staging",
+    "apkSha256": "ba3fdd28272a47e822ba183595bce35001e306c0d70c011db2fdade04f6d63e9",
+    "publish": true
+  },
+  {
+    "file": "emulator-warm-first-and-draft.png",
+    "sha256": "656363a0967f7f16558dc7bf8191ddf91f095036f92f560c12f8bc15ba9068d1",
+    "bytes": 183923,
+    "caption": "Synthetic fixture APK/warm forced different-code VIEW: first candidate and synthetic unsaved editor draft retained.",
+    "frontend": "a86e8e3ab7354acab6cb5c78309adb09f91c3796",
+    "backend": "a67d2ad56330c5522235bd4e1ae526b0cf5e3412",
+    "variant": "staging",
+    "apkSha256": "ba3fdd28272a47e822ba183595bce35001e306c0d70c011db2fdade04f6d63e9",
+    "publish": true
+  },
+  {
+    "file": "landing-desktop-current.jpg",
+    "sha256": "e6c8562a2d319bcbdd54769f64dd639ad753540cb200bc15ba865acde1d1b53c",
+    "bytes": 52238,
+    "caption": "Actual IAB Chromium1440x1000: current conditional5-credit copy and fixed store controls; same declared one-attribute loopback accommodation.",
+    "frontend": "a86e8e3ab7354acab6cb5c78309adb09f91c3796",
+    "backend": "a67d2ad56330c5522235bd4e1ae526b0cf5e3412",
+    "variant": "IAB Chromium harness",
+    "apkSha256": null,
+    "publish": true
+  },
+  {
+    "file": "landing-expiry-after.jpg",
+    "sha256": "b1907452d5a14e93c45fd6861e6296c82588809c4486bd16f2b00cd07c3c95a1",
+    "bytes": 51508,
+    "caption": "Actual SAME IAB tab14:27:10Z, no reload/clock/file changes: expired numeric offer becomes neutral; one-attribute origin accommodation.",
+    "frontend": "a86e8e3ab7354acab6cb5c78309adb09f91c3796",
+    "backend": "a67d2ad56330c5522235bd4e1ae526b0cf5e3412",
+    "variant": "IAB Chromium harness",
+    "apkSha256": null,
+    "publish": true
+  },
+  {
+    "file": "landing-mobile-current.jpg",
+    "sha256": "6f0d0eb53484a779cb71cb177dd24f2b64a74de713e018d311e881f2d4274102",
+    "bytes": 36290,
+    "caption": "Actual IAB Chromium390x844: current conditional5-credit copy. Generated JS/assets/offer unchanged; one documented harness-only HTML origin substitution, loopback HTTP.",
+    "frontend": "a86e8e3ab7354acab6cb5c78309adb09f91c3796",
+    "backend": "a67d2ad56330c5522235bd4e1ae526b0cf5e3412",
+    "variant": "IAB Chromium harness",
+    "apkSha256": null,
+    "publish": true
+  }
+]

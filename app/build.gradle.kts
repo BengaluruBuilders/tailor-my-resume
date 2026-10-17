@@ -67,9 +67,25 @@ fun com.android.build.api.dsl.BuildType.backendConfig(apiBaseUrl: String, otherV
 fun integrityProjectNumber(property: String): String = providers.gradleProperty(property).orNull
     ?.takeIf { raw -> Regex("[0-9]+").matches(raw) && (raw.toLongOrNull() ?: 0) > 0 }.orEmpty()
 
+fun referralOrigin(property: String): String {
+    val origin = providers.gradleProperty(property).getOrElse("")
+    if (origin.isEmpty()) return origin
+    require(origin.length <= 253 && Regex("https://[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+").matches(origin)) { "Referral origin must be an exact lowercase HTTPS DNS origin" }
+    val host = origin.removePrefix("https://")
+    require(host.split('.').all { it.length <= 63 } && !host.all { it.isDigit() || it == '.' } && listOf("local", "localhost", "internal", "flycast", "invalid").none { host == it || host.endsWith(".$it") }) { "Referral origin requires an approved public host" }
+    return origin
+}
+
+fun com.android.build.api.dsl.ApplicationBuildType.referralConfig(property: String) {
+    val origin = referralOrigin(property)
+    buildConfigField("String", "TAILORMYRESUME_REFERRAL_ORIGIN", "\"$origin\"")
+    manifestPlaceholders["referralLinkHost"] = origin.removePrefix("https://")
+}
+
 fun com.android.build.api.dsl.ApplicationBuildType.stagingBuildConfig() {
     val values = stagingBackendProperties.map { providers.gradleProperty(it).getOrElse("") }
     applicationIdSuffix = ".staging"
+    referralConfig("tailormyresumeStagingReferralOrigin")
     resValue("string", "app_name", "TMR Staging")
     backendConfig(values.first().ifBlank { "https://staging.invalid" }, values.drop(1))
     buildConfigField("String", "TAILORMYRESUME_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER", "\"${integrityProjectNumber("tailormyresumeStagingPlayIntegrityCloudProjectNumber")}\"")
@@ -114,6 +130,7 @@ android {
             stagingBuildConfig()
         }
         release {
+            referralConfig("tailormyresumeReferralOrigin")
             shrinkWithR8(getDefaultProguardFile("proguard-android-optimize.txt"))
             buildConfigField("String", "TAILORMYRESUME_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER", "\"${integrityProjectNumber("tailormyresumePlayIntegrityCloudProjectNumber")}\"")
             if (hasUploadSigning) signingConfig = signingConfigs.getByName("upload")
@@ -131,6 +148,37 @@ android {
     }
 
     sourceSets {
+        listOf("debug", "staging", "release").forEach { variant ->
+            val property = if (variant == "release") "tailormyresumeReferralOrigin" else "tailormyresumeStagingReferralOrigin"
+            if (referralOrigin(property).isNotEmpty()) {
+                val original = layout.projectDirectory.file("src/$variant/AndroidManifest.xml")
+                val template = layout.projectDirectory.file("src/referralLinks/AndroidManifest.xml")
+                val generated = layout.buildDirectory.file("generated/referralManifest/$variant/AndroidManifest.xml")
+                val generate = tasks.register("generate${variant.replaceFirstChar(Char::uppercaseChar)}ReferralManifest") {
+                    inputs.file(template)
+                    if (original.asFile.exists()) inputs.file(original)
+                    outputs.file(generated)
+                    doLast {
+                        val overlay = template.asFile.readText().substringAfter("<application>").substringBefore("</application>")
+                        val base = if (original.asFile.exists()) original.asFile.readText() else template.asFile.readText().replace(overlay, "")
+                        val activity = "<activity android:name=\".MainActivity\">"
+                        val merged = if (base.contains(activity)) {
+                            base.replace(activity, activity + overlay.substringAfter(activity).substringBefore("</activity>"))
+                        } else if (base.contains("</application>")) {
+                            base.replace("</application>", "$overlay</application>")
+                        } else {
+                            base.replace(Regex("<application\\b([^>]*)/>")) { match ->
+                                "<application${match.groupValues[1]}>$overlay</application>"
+                            }
+                        }
+                        require(merged.contains("android.intent.action.VIEW")) { "Referral manifest must include the link filter" }
+                        generated.get().asFile.apply { parentFile.mkdirs(); writeText(merged) }
+                    }
+                }
+                getByName(variant).manifest.srcFile(generated)
+                tasks.configureEach { if (name == "pre${variant.replaceFirstChar(Char::uppercaseChar)}Build") dependsOn(generate) }
+            }
+        }
         getByName("debug").res.srcDir("src/localStaging/res")
         getByName("staging").res.srcDir("src/localStaging/res")
     }
@@ -202,6 +250,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.playServicesAuth)
     implementation(libs.google.googleid)
+    implementation(libs.install.referrer)
     implementation(libs.play.billing) {
         exclude(group = "com.google.android.gms", module = "play-services-location")
     }

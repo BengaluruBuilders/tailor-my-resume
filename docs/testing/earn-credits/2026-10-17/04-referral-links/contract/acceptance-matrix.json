@@ -1,0 +1,151 @@
+{
+  "contractVersion": "referral-links-v1",
+  "status": "FROZEN_ACCEPTANCE_REQUIREMENTS_NOT_RESULTS",
+  "reuses": "../../03-manual-referrals/contract/acceptance-matrix.json",
+  "cases": [
+    {
+      "id": "04-L01",
+      "area": "API_CONFIG",
+      "expectation": "Missing/disabled link configuration preserves own code, null share URL and manual attachment availability.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L02",
+      "area": "API_CONFIG",
+      "expectation": "Configured exact app/environment origin emits canonical own code share URL on GET and new/replayed code POST; reads remain non-granting.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L03",
+      "area": "API_CONFIG",
+      "expectation": "Unsafe or partially enabled origin/package mapping fails validation; no API-origin fallback, foreign-code suffix lookup or arbitrary redirects.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L04",
+      "area": "SHARE_UI",
+      "expectation": "Share action uses current server policy and validated server URL; unavailable/expired policy uses neutral copy with no cached reward promise; manual copy stays available.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L05",
+      "area": "APP_LINK",
+      "expectation": "Cold start canonical link captures one source LINK candidate without losing normal navigation or drafts.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L06",
+      "area": "APP_LINK",
+      "expectation": "Warm onNewIntent uses identical parser, first candidate retained; repeated/same input cannot duplicate automatic attempts.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L07",
+      "area": "INPUT",
+      "expectation": "Reject foreign host/scheme/userinfo/port/query/fragment/encoded path/backslash/control/overlong URL; full valid foreign code namespace never selects API environment.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L08",
+      "area": "INSTALL",
+      "expectation": "Play-returned exact one-key inner referrer captures LINK with no extra decoding; duplicate/unknown/percent/nested/overlong/malformed input rejected.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L09",
+      "area": "INSTALL",
+      "expectation": "Official referrer adapter unavailable/no data/timeout/disconnect safely closes service and retains manual fallback.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L10",
+      "area": "INSTALL",
+      "expectation": "One-time terminal collection marker and erase/session fence suppress repeated or delayed callback after dismissal/attachment/sign-out; new explicit link remains usable.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L11",
+      "area": "CANDIDATE",
+      "expectation": "Link/referrer/manual races retain first valid captured candidate; explicit replacement/clear requires safe reconciliation of any sent attempt.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L12",
+      "area": "AUTH",
+      "expectation": "Pre-auth and guest candidate survive private process storage and same-UID user-triggered Google activation, then automatically submit LINK under current visible offer.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L13",
+      "area": "AUTH",
+      "expectation": "Existing-account conflict requires explicit eligible destination review/rebind and never auto-inherits guest candidate; unrelated account switch clears it.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L14",
+      "area": "AUTOMATIC",
+      "expectation": "Fresh eligible foreground link triggers one action-bound LINK attempt after current offer is visibly rendered; passive restore/resume/referrer callback never gets fresh Integrity.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L15",
+      "area": "POLICY",
+      "expectation": "Policy change before challenge or commit stops automatic submission and requires explicit current-offer reconfirmation with same stable business identity.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L16",
+      "area": "RETRY",
+      "expectation": "Transient failure retains same actor/code/source/request key; foreground explicit retry uses current offer/fresh evidence after GET-first uncertain recovery; no background loop.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L17",
+      "area": "LINK_TRANSACTION",
+      "expectation": "Actual LINK route with current challenge awards inviter once, invitee unchanged, no tailoring call; concurrent/different-key retry and lost reply preserve original receipt and capacity.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L18",
+      "area": "RECOVERY",
+      "expectation": "Restart/lost response GET ATTACHED clears code-bearing state; already-attached and erased-counterparty paths reuse03 read-only reconciliation, no fresh challenge.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L19",
+      "area": "OWNERSHIP",
+      "expectation": "UID/provider/environment/generation/erase fences reject late capture/network response and prevent cross-account UI/wallet/journal updates.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L20",
+      "area": "MIGRATION",
+      "expectation": "Existing manual journal defaults source MANUAL; no old pending candidate gains automatic LINK permission; no destructive Room or wallet change.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L21",
+      "area": "LANDING",
+      "expectation": "Backend-owned static packager uses coherent matching-scope current snapshot for conditional reward copy and neutral fallback for paused/missing/invalid/future/expired artifact; fixed package, safe code DOM, no private API/PII, documented publication/cache coupling.",
+      "status": "PENDING"
+    },
+    {
+      "id": "04-L22",
+      "area": "PLATFORM",
+      "expectation": "Actual owned HTTPS assetlinks association with matching staging/release package/certificate opens installed app cold/warm on disposable test setup.",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "04-L23",
+      "area": "PLATFORM",
+      "expectation": "Actual supported Google Play install through configured landing/referrer reaches candidate and eligible Google LINK attachment; fake adapter is not PASS evidence.",
+      "status": "BLOCKED_EXTERNAL"
+    },
+    {
+      "id": "04-L24",
+      "area": "REGRESSION",
+      "expectation": "Existing03 MANUAL policy/retry/reward/lifecycle and guest/signup/wallet/history behavior remain unchanged; required repository gates pass.",
+      "status": "PENDING"
+    }
+  ]
+}

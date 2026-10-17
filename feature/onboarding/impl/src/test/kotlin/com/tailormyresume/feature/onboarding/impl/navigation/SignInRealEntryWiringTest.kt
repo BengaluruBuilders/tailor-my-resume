@@ -51,6 +51,9 @@ class SignInEntryHostActivity : ComponentActivity()
 @InstallIn(SingletonComponent::class)
 object ScriptedSignInModule {
     @Provides
+    fun referrals(): com.tailormyresume.core.domain.ReferralGateway = com.tailormyresume.core.testing.gateway.TestReferralGateway()
+
+    @Provides
     fun guests(): com.tailormyresume.core.domain.GuestTrialGateway = com.tailormyresume.core.testing.gateway.TestGuestTrialGateway()
 
     @Provides

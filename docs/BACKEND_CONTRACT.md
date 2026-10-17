@@ -2013,3 +2013,232 @@ capacity/window/retention/namespace/ingress decisions and human-reviewed rule pr
 BLOCKED activation gates. Share origin/domain/associations/Play install proof remains slice04
 BLOCKED. Coding may continue under external-gate-decision.md; no mocked PASS/live fallback,
 deployment, migration against remote data, activation, merge or production policy change here.
+
+## 11. Referral links and install attribution — referral-links-v1
+
+Status: frozen for slice04 implementer agreement, 2026-10-17. Root accepted the independent
+`link-flow-decision.md`; both implementers must agree to the exact freeze hash before source work.
+This additive section preserves sections 8–10 and their fixtures byte-for-byte. Section 10 remains the
+one API/authentication/qualification/atomic award/retry/error/lifecycle contract for both sources.
+No click, install, referrer timestamp or local candidate proves eligibility or earns a reward.
+
+### 11.1 Link capability and compatibility
+
+No endpoint is added. GET `/referrals/me` and POST `/referrals/code` retain section 10.2 status,
+access, strict request and existing response fields. Existing nullable `shareUrl` becomes usable only
+with complete validated app/environment configuration. Null/non-null shareUrl is the existing share
+capability; no new response field is added.
+Code creation/recovery, manual code entry and ordinary work remain independent of link configuration.
+No new policy amount/window, reward/grant type, database attribution table or public `/v1` route.
+
+Backend link configuration is explicitly opt-in and deployment-owned. It contains one approved exact
+HTTPS origin, its independent exact allowlist, fixed `/r/` route, correct environment package,
+actual signing fingerprint inputs and explicit static-publication configuration. Missing/disabled
+configuration
+returns null share URL without failing read/code recovery or inferring a host from API/Firebase data.
+Invalid or partially enabled configuration fails startup validation; never quietly expands trust.
+A configured origin has a lowercase ASCII DNS hostname, no IP/single-label/internal hostname,
+userinfo, port, path, query, fragment, wildcard or trailing dot. No HTTP/custom schemes. Staging and
+production configure separate hosts with their actual package/signing associations; no live host is
+selected in this contract. URL is `origin + "/r/" + ownCanonicalCode`, with no redirect/query/fragment.
+Only a live own code may produce a share URL. Do not expose another inviter's private account data.
+
+Android variant configuration independently pins its trusted link origin/host and package; a server
+URL never expands inbound trust or selects API environment/Firebase project. Empty local config
+disables referral intent filters, URL/referrer capture and link share affordances while preserving
+code/manual behavior. No placeholder host or empty-host filter is enabled. Android only shares
+an HTTPS server URL matching that trusted origin, path and the displayed own code. A malformed,
+foreign or mismatched server URL is unavailable, not rebuilt from untrusted input. Reward availability
+is separate from routing: a configured link may exist while admissions are paused.
+Share text uses the coherent current offer; unavailable/expired offer uses neutral wording, never a
+cached/hardcoded reward guarantee. Links do not freeze the reward revision at issuance or click.
+
+### 11.2 Strict untrusted capture
+
+One URL grammar and fixture set governs the cold `ACTION_VIEW` launch, warm `onNewIntent` parser
+and the separately hosted landing parser; do not create divergent accepted forms.
+An incoming URL is bounded to 512 ASCII characters and must match configured lowercase
+`https://<exact-host>/r/<one-code-segment>` with no explicit port, userinfo, percent escapes,
+backslash, whitespace/control character, query, fragment or trailing slash. Reject extra segments,
+empty code, Unicode/IDN host tricks, alternate schemes, suffix hosts and opaque/custom intents.
+Require ACTION_VIEW for external capture. Ignore intent extras claiming a code, package, UID, API,
+reward, policy or destination. The exact route prefix is case-sensitive; section 10.4 ASCII case
+normalization applies only to the code segment. No URI normalization may hide dot/encoded segments.
+
+Candidate code validation is syntax-only section 10.4, including full configured-looking namespace.
+A foreign code namespace may remain a candidate but cannot select another deployment or be silently
+rewritten. The authenticated current deployment rejects foreign/nonexistent codes authoritatively.
+Rejected capture performs no journal overwrite, challenge, account transition or reward request.
+Existing account/navigation/drafts remain available. A forced explicit intent is not proof of domain
+verification; strict parsing and server qualification always apply.
+
+Play Install Referrer is a narrow injected adapter using the official library/service, closed on
+completion/disconnect/error and queried only for a new installation's bounded collection attempt.
+No ad/analytics/device fingerprint SDK. It reads only the referrer string needed to capture a code;
+click/install timestamps, instant-app flags and installer identity never establish eligibility.
+Treat returned string as untrusted form data, maximum 1024 ASCII characters. Accept exactly one key
+`tmr_referral`, one value and no extra/duplicate/empty keys. Percent decoding is not applied again: Play
+returns the inner string. Reject every percent escape, control/non-ASCII
+text, nested URL, duplicate/unknown parameter, extra equals sign and any whole-string decoding.
+Validate the raw inner value by section 10.4 syntax. Both accepted transports set source LINK.
+
+The static Play link is `https://play.google.com/store/apps/details` with fixed configured `id`
+package and one outer percent-encoded `referrer` whose decoded form is
+`tmr_referral=<canonical-code>`. Never take store origin/package/redirect from input. Sideloaded,
+unsupported, unavailable/no-data Play service preserves manual fallback without guessed attribution.
+
+### 11.3 Candidate ownership and installation lifecycle
+
+Reuse the private journal's first valid candidate, explicit Replace/Clear and section 10.6 ownership
+fences. Persist only canonical code, source and necessary bounded phase/owner state, not raw URL,
+raw referrer, timestamps, Integrity token/challenge secret or continuity value. First valid candidate
+wins across transport races; repeated same code does not change source, reset requestId/revision or
+create another attempt. Another candidate requires explicit replacement after any uncertain request
+has been reconciled. Neither a new link nor install referrer can replace a server attachment.
+
+Before authentication, store a bounded private capture in an installation-local inbox associated
+with the fixed API environment and erase/session epoch, not another account's journal or stable device
+identifier. Wait until Firebase initialization settles, then bind a fresh launch link to the actual
+current actor under the matching epoch/environment; if no actor exists, bind through deliberate
+guest/direct-Google entry. Do not pick an empty UID or first unresolved auth-stream emission. Same-UID
+anonymous-to-Google link preserves its candidate/source;
+Google credential conflict follows section 9 work choice and section 10 explicit eligible destination
+review. Never automatically attach a guest candidate to an existing different Google account.
+Sign-out, erasure or unrelated switch invalidates unbound and actor-owned capture/attempt state and
+late callbacks before any durable write, UI update, navigation or network mutation.
+
+Persist a non-code-bearing collection/dismissal marker to avoid repeated install-referrer reads or
+late callbacks repopulating state after first terminal collection, explicit clear, attachment,
+sign-out or erase. Do not store the original code/referrer in that marker or use it as an identity.
+It survives ordinary process death; the official referrer value may remain available for 90 days.
+A new explicit user link/manual entry is still allowed. Terminal success/no-data/malformed/unsupported
+results are consumed even when an existing
+candidate wins. Capture and consumption commit atomically; a crash cannot replay into another
+owner. A transient failed service connection may retry on a later deliberate foreground entry; it never
+starts a background loop or fresh Integrity.
+Account clear cannot accidentally reopen the installation's old referrer. The inbox and marker stay
+private with backup off; deletion clears personal code state without rearming stale attribution.
+
+Existing slice03 journals lack transport metadata; additive decoding defaults source MANUAL and
+no automatic permission. Preserve stable existing business key/input; never relabel a prepared/sent
+MANUAL attempt LINK. A replaced code/source needs explicit new attempt and key under section 10.
+No candidate TTL is introduced: cleanup follows attachment, explicit dismissal/replacement or
+owner cleanup; server deadline remains authoritative. No Room destructive migration or wallet/grant
+reset is required for link transport metadata.
+
+### 11.4 Automatic LINK attempt and policy confirmation
+
+The approved link journey automatically submits after confirmed eligible user-triggered Google
+signup/link, and for a fresh user-opened link while an eligible Google actor is already foreground.
+A separate Apply tap is not mandatory for that first attempt. For Google continuation, visibly disclose
+the LINK candidate and Clear option inline on the
+existing sign-in surface. If no Firebase actor exists yet, use neutral pre-auth copy; do not call an
+authenticated offer endpoint, create a passive anonymous account or add a public API. After deliberate
+Google completion and activation reconciliation, fetch and visibly render the current authenticated
+offer before protected mutation. A current guest may display its applicable authenticated state. A fresh
+already-Google VIEW routes to the existing
+referral surface and visibly renders current offer before automatic work. This is no new consent
+or mandatory onboarding screen. Manual candidates still require Apply. A VIEW event is untrusted
+and is not cryptographic proof of a gesture; all server security checks remain required. Only live
+Google activation with current `attachmentEligibility:ELIGIBLE`, no existing
+attachment/review/uncertain attempt and unchanged ownership may proceed. Missing activation uses the
+existing non-granting observation path; it cannot invent new classification or grant dependency.
+Signup success and normal work continue if attachment fails; no mandatory onboarding step.
+
+A cold fresh VIEW may wait for Firebase initialization/navigation in the same process. Recreated
+Activity intents are not new VIEW events. Require a resumed foreground surface for evidence; resume
+alone never authorizes it. Finish/reconcile existing Google activation before referral mutation.
+The foreground action authorizes one ephemeral single-use bounded source LINK attempt. Bind canonical
+code/source,
+requestId and current disclosed revision before challenge. Use existing REFERRAL_ATTACH action,
+section 10 canonical bytes and returned requestHash; no client-selected inviter/amount/clock.
+Automatic LINK sends continuity null, which section 10 accepts in both NONE and OPTIONAL modes;
+no passive Android-ID read. An unrelated guest/signup challenge cannot authorize this operation.
+Keep existing strict package/certificate/licensing/device/freshness checks; no live fake/fallback.
+
+Passive session restore, process restart, token refresh, referrer callback, policy/wallet read,
+resume refresh and background work may capture/reconcile/display but cannot obtain new Integrity
+or initiate an uncommitted award. No durable automatic permission survives process death. A newly
+rendered explicit foreground Retry/Continue action may start the next attempt after reconciliation.
+Policy mismatch before/at send requires visible refresh and explicit reconfirmation of new offer,
+even for automatic LINK; retain the same stable business key/input. No silent revised award or
+retry loop. Error/status handling is section 10.6; no new error names or weaker evidence modes.
+
+Lost reply/process recovery first GETs own `/referrals/me`. ATTACHED clears code-bearing state and
+uses the server receipt, regardless of local pending candidate. Unattached uncertain outcome uses
+section 10 committed replay path before new evidence. Already-attached/failed reconciliation keeps
+only section 10.7 read-only marker. Do not create a new key, award, challenge or automatic retry from
+restart. Late responses are fenced by UID/environment/provider/generation/erase epoch. Confirm
+Referral applied only from server receipt; refresh own wallet/history without tailoring or spending.
+
+### 11.5 Static landing and platform acceptance
+
+A separately hosted static page serves `/r/<code>` and the association file. It is not a backend
+API route and reads no private `/v1` endpoint, Firebase token, inviter lookup or reward mutation.
+Render the validated canonical code through text-safe DOM APIs; no raw URL/referrer injection.
+The backend writer owns the one landing/association/public-offer packager and its tests/runbook;
+frontend owns the consuming Android configuration/manifest/parser/adapter/share flow. The landing
+reads only a same-origin static `offer.json`, generated from the same reviewed referral policy
+publication input/revision as the authenticated app offer. Snapshot is strict
+`{appId,environment,version,effectiveAt,expiresAt,availability,rewardAmount}`; availability is AVAILABLE
+or UNAVAILABLE, rewardAmount is a positive integer or null. No actor status/identity/counters,
+thresholds, credentials or private API request. SNAPSHOT mode requires explicit finite publication
+validity/cache bounds; no live TTL/default is chosen here. Disabled/missing/invalid/not-yet-effective/
+expired snapshots use neutral copy: Open TailorMyResume to check the current referral offer.
+Re-evaluate expiry while open. Display the safe code and fixed install/open/manual guidance either
+way. NEUTRAL mode serves no numeric promise and is the safe operational fallback.
+
+Only a matching-scope AVAILABLE snapshot with valid effectiveAt <= now < expiresAt and nonnull
+rewardAmount may render conditional numeric copy: An eligible referral may earn the inviter
+{amount} credits. Check availability in the app. This is a published conditional offer, not real-time
+capacity or personal eligibility. The app always checks/renders the current authenticated offer
+before attachment. No fixed numeric promise, unlimited claim or permanent entitlement in URL.
+
+Package snapshot/header/publication instructions with the static artifact. Use no trackers or
+third-party scripts, safe text rendering, restrictive content security policy and
+`Referrer-Policy: no-referrer`; do not leak the code to unrelated origins. The store link carries
+only the code into its fixed package. The packager clips snapshot expiry to the reviewed server policy
+expiry and configured maximum
+validity. Snapshot cache age may not outlive snapshot expiry; require
+explicit finite maxAgeSeconds/maxValiditySeconds in configured SNAPSHOT publication, and fail
+packaging if maxAgeSeconds exceeds maxValiditySeconds. Serve the neutral artifact and snapshot
+with revalidation/no-store fallback when numeric publication coupling is unavailable.
+
+The runbook must couple policy publication with static replacement/invalidation: publish neutral
+first, invalidate caches, apply the reviewed server policy, then publish its matching valid snapshot.
+Never publish a new numeric offer before that server policy is active. Planned changes respect
+prior snapshot validity/cache bounds; emergency pause publishes neutral immediately while server
+admissions close independently. Static hosting cannot guarantee instantaneous capacity. Missing
+operational coupling leaves quantitative/current public-offer activation BLOCKED and deploys neutral
+only; code for snapshot and neutral paths still ships. Neutral copy alone does not prove the original
+dynamic-landing acceptance. Updating policy/snapshot amounts requires no Android release.
+
+The static artifact uses configured origin and fixed correct package; association statements use
+actual public package/certificate fingerprints only after owner input. No fabricated fingerprint,
+placeholder ownership or private key in served JSON. Production Play App Signing certificate and
+staging certificate differ; do not use upload/debug certificates for the wrong installed binary.
+Serve `/.well-known/assetlinks.json` over owned HTTPS without redirects, correct JSON media type,
+with `delegate_permission/common.handle_all_urls`, `android_app`, exact package and SHA-256 cert.
+Manifest uses HTTPS VIEW/DEFAULT/BROWSABLE with autoVerify for exact variant host and `/r/` prefix;
+strict runtime parser remains required. Unconfigured artifacts cannot claim verification.
+
+Fixture/parser/in-process LINK transaction success proves implementation only. Actual installed
+cold/warm App Links require configured owned host and matching signing association. Actual deferred
+attribution requires supported Google Play installation through that configured landing/store link,
+then genuine candidate/authenticated attachment evidence. Sideload/forced-intent/fake referrer is not
+that proof. Preserve user device/session; destructive install tests use disposable setup. Missing
+host/cert/Play/provider/Integrity prerequisites stay BLOCKED and all related PRs remain draft under
+the external-gate decision; no production activation or acceptance waiver.
+
+Focused fixtures and 24-case acceptance matrix live in
+`docs/testing/earn-credits/2026-10-17/04-referral-links/contract/`; reuse unchanged slice03 security,
+atomicity/lifecycle matrix with targeted LINK route proof. Required implementation gates remain
+Android `tools/ci/verify-local.sh`, backend `npm run check`, scoped parser/ownership/UI/integration
+checks and genuine platform gates when prerequisites exist. Contract-only verification is fixture
+consistency, predecessor hash, whitespace and constitution policy; no runtime acceptance claim.
+
+The frontend writer must propose a narrow Article VII/I.5 clarification for the accepted explicit
+foreground LINK/Google-continuation REFERRAL_ATTACH operations and official install-referrer adapter.
+Keep passive/recovery no-evidence and no extra Android-ID collection; retain existing action binding,
+strict verifier, policy/Dependency Guard/lint gates and human PR review before merge. This section
+does not silently amend governing documents or authorize live collection/hosting/publication.

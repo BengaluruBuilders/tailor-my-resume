@@ -1,0 +1,1006 @@
+
+> check
+> npm run typecheck && npm run lint && npm run format:check && npm run boundaries && npm test
+
+
+> typecheck
+> tsc --noEmit
+
+
+> lint
+> eslint . --max-warnings 0
+
+
+> format:check
+> prettier --check --ignore-unknown .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+> boundaries
+> node scripts/check-import-boundaries.mjs
+
+
+> test
+> node --test --test-concurrency=2
+
+✔ 201 records the consent and creates the missing user row (39.041926ms)
+✔ a withdrawal appends a row and leaves the grant unchanged (9.205533ms)
+✔ 400 INVALID_INPUT for a wrong type writes no row (5.153157ms)
+✔ 400 INVALID_INPUT for a missing field writes no row (4.518992ms)
+✔ 400 INVALID_INPUT for an invalid purpose writes no row (5.073956ms)
+✔ 400 INVALID_INPUT for an invalid policy version writes no row (4.062993ms)
+✔ 400 INVALID_INPUT for an unknown field writes no row (3.417862ms)
+✔ 400 INVALID_INPUT for invalid JSON writes no row (3.701979ms)
+✔ 400 INVALID_INPUT for a non-object body writes no row (3.836774ms)
+✔ 413 PAYLOAD_TOO_LARGE for an oversize body writes no row (3.09561ms)
+✔ 401 for a missing token writes no row (2.721815ms)
+✔ 401 for an invalid token writes no row (3.454738ms)
+✔ 403 for a token from app A sent to app B leaves B untouched (3.500904ms)
+✔ a user's POST writes only that user's row (8.149312ms)
+✔ 201 for a body of exactly 4096 bytes sent with Content-Length (6.414155ms)
+✔ 413 for a body of 4097 bytes sent with Content-Length writes no row (2.26421ms)
+{"event":"request_failed","app_id":"app-a","route":"/v1/me/consents","status":500,"code":"INTERNAL_ERROR"}
+✔ a failed consent insert rolls back the new user row (7.567248ms)
+✔ a withdrawal in an earlier-started transaction is newer than the committed grant (22.02742ms)
+✔ drops the test databases (424.590744ms)
+✔ DELETE removes rows, runs R2 then Postgres then Firebase, and leaves others untouched (88.412166ms)
+✔ a repeated DELETE after completion is idempotent and calls no port (3.514803ms)
+{"event":"deletion_step_failed","app_id":"app-a","step":"files","code":"Error"}
+✔ an R2 failure answers pending, deletes nothing else, and the retry completes (32.461895ms)
+✔ a failed step logs its event, app, step and code and nothing else (30.990043ms)
+{"event":"deletion_step_failed","app_id":"app-a","step":"rows","code":"Error"}
+✔ a Postgres rows failure answers pending, skips Firebase, and the retry completes (37.124063ms)
+{"event":"deletion_step_failed","app_id":"app-a","step":"firebase","code":"Error"}
+✔ a Firebase failure after the Postgres step answers pending and the retry skips done steps (27.892966ms)
+{"event":"deletion_step_failed","app_id":"app-a","step":"firebase","code":"Error"}
+✔ tailorings are deleted for alice and retained for bob after a Firebase failure and retry (65.673684ms)
+{"event":"deletion_step_failed","app_id":"app-a","step":"firebase","code":"Error"}
+✔ ledger rows are deleted for alice, kept for bob, across a Firebase failure and retry (43.587247ms)
+✔ GET and POST consents answer 409 ACCOUNT_DELETED and write nothing after completion (5.856886ms)
+{"event":"deletion_step_failed","app_id":"app-a","step":"files","code":"Error"}
+✔ GET and POST consents answer 409 and write nothing while deletion is pending (28.678829ms)
+✔ a write waiting on the user lock sees the deletion record committed meanwhile (208.863194ms)
+✔ a consent POST racing DELETE never leaves a users or consents row behind (485.803127ms)
+✔ DELETE without a token is 401 and takes no action (0.710084ms)
+✔ DELETE with an app A token on app B is 403 and leaves B untouched (2.449222ms)
+✔ the production Firebase step treats auth/user-not-found as success (0.482399ms)
+✔ the production Firebase step rethrows other failures (0.37114ms)
+✔ drops the test databases (81.416016ms)
+✔ deletes every object under the user's prefix across several pages (2.334821ms)
+✔ another app's bucket is untouched (0.346207ms)
+✔ an empty prefix succeeds and sends no delete (0.316733ms)
+✔ a delete error rejects and a retry deletes the rest (0.572705ms)
+✔ a per-object delete error in the response rejects (0.428691ms)
+✔ an empty or slash-bearing user id never builds a prefix (0.432532ms)
+✔ creates the user row on the first call and returns the stable shape (40.375141ms)
+✔ a second call returns the same createdAt and keeps one row (11.170541ms)
+✔ concurrent first calls create exactly one row (29.769273ms)
+✔ rejects a missing token and leaves data unchanged (7.353532ms)
+✔ rejects an invalid token and leaves data unchanged (5.301502ms)
+✔ rejects a token from app A sent to app B and leaves B's database untouched (2.887061ms)
+✔ one user's call never returns or creates another user's row (5.639607ms)
+✔ drops the test databases (195.345052ms)
+✔ completes a record that is pending at each step and runs only the missing steps (69.20441ms)
+✔ recovers after the Firebase user is already gone, with no token (7.278801ms)
+✔ a step that succeeded but was not saved runs again and succeeds (6.588831ms)
+✔ backs off exponentially up to the cap and reports only persistent failures (28.114505ms)
+✔ never runs more steps at once than the concurrency bound (60.494755ms)
+✔ touches no other user and no other app (43.044784ms)
+✔ one app's scan failure does not stop the next app (35.772199ms)
+✔ purges completed records older than 24 hours and never a pending one (8.39816ms)
+✔ sweeps objects uploaded after completion before purging the tombstone, and keeps it when the sweep fails (16.9286ms)
+✔ a failing purge still lets pending deletions be recovered and is reported with its code (18.392769ms)
+✔ after stop, a run starts no new work (5.513054ms)
+✔ drops the test databases (175.663068ms)
+✔ streams deltas in order, then done, and settles succeeded at the actual cost (77.101871ms)
+✔ sends the server's system prompt, keeps user input out of it, bounds output, and does not retry (15.476304ms)
+✔ answers 400 for a system role, bad body, unknown task, bad last role, or too much history or input, with no provider call or row (10.748415ms)
+✔ answers 413 for a body over the limit (3.188151ms)
+✔ rejects a missing token, an invalid token, and a token from another app (4.112511ms)
+✔ answers 404 for an app with no AI config (1.957324ms)
+✔ answers 409 for a user with a deletion record and does not call the provider (6.276916ms)
+✔ answers 429 QUOTA_EXCEEDED as JSON, not a stream, before calling the provider (45.429891ms)
+✔ answers 429 BUDGET_EXCEEDED as JSON before calling the provider (8.714894ms)
+✔ reserves exactly one call when concurrent requests race for the last quota slot (49.475213ms)
+✔ aborts the provider call and settles unknown once when the client disconnects mid-stream (35.666808ms)
+✔ sends an error event and settles unknown when the provider fails mid-stream (13.228227ms)
+{"event":"request_failed","app_id":"app-a","route":"/v1/ai/chat","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ releases the reservation when the failure is known to precede the provider (41.615536ms)
+✔ makes one attempt and records a retryable error as unknown, and a 4xx rejection as failed at zero (28.543825ms)
+✔ returns near the timeout, releases the stream, and settles unknown when the client stops reading (725.589245ms)
+✔ returns near the timeout, sends AI_TIMEOUT, and settles unknown when the provider ignores abort (216.423737ms)
+✔ settles unknown when a provider 4xx arrives after text was sent (21.564716ms)
+✔ settles a finish that reports no usage as unknown and keeps the reservation (21.220115ms)
+✔ settles unknown and sends AI_TIMEOUT when the provider never answers in time (69.760283ms)
+{"event":"ai_settle_failed"}
+✔ keeps streaming and leaves the row pending when the settlement write fails (26.213194ms)
+✔ a repeated settlement changes nothing once the row is settled (25.676598ms)
+✔ DELETE /v1/me during an in-flight stream leaves the reservation in ai_erased_spend and settles nothing (340.206231ms)
+✔ drops the test databases (201.048983ms)
+✔ returns the validated object and records the usage (60.950894ms)
+✔ sends the server's system prompt, keeps user input out of it, and bounds the output (12.981336ms)
+✔ answers 400 for a bad body, an unknown task, or too long an input, without a provider call or a row (8.857371ms)
+✔ answers 413 for a body over the limit (2.716647ms)
+✔ rejects a missing token, an invalid token, and a token from another app (3.018993ms)
+✔ answers 404 for an app with no AI config (2.632837ms)
+✔ answers 429 QUOTA_EXCEEDED before calling the provider, per user (41.950848ms)
+✔ answers 429 BUDGET_EXCEEDED when the upper bound does not fit the daily cap (8.126334ms)
+{"event":"request_failed","app_id":"app-a","route":"/v1/ai/extract","status":502,"code":"AI_PROVIDER_ERROR"}
+{"event":"request_failed","app_id":"app-a","route":"/v1/ai/extract","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ releases the reservation when the failure is known to precede the provider (46.654921ms)
+{"event":"request_failed","app_id":"app-a","route":"/v1/ai/extract","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ keeps the reservation and the quota after an ambiguous failure, without leaking the provider message (11.286269ms)
+{"event":"request_failed","app_id":"app-a","route":"/v1/ai/extract","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ makes one provider attempt and one unknown row for a retryable error (11.773557ms)
+✔ settles a success that reports no usage as unknown and keeps its reservation (10.753164ms)
+{"event":"request_failed","app_id":"app-a","route":"/v1/ai/extract","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ records a provider rejection as failed at zero cost (12.552925ms)
+{"event":"request_failed","app_id":"app-a","route":"/v1/ai/extract","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ treats output that fails the task schema as a 502 and charges the actual usage once (10.270486ms)
+✔ answers 409 for a user with a deletion record and does not call the provider (3.995315ms)
+✔ DELETE /v1/me removes the user's ai_usage rows and keeps other users' rows (35.855731ms)
+✔ refuses to boot an AI app without its provider key, and ignores the key when no app uses AI (1.488125ms)
+✔ drops the test databases (182.183244ms)
+✔ refuses to boot an AI app without its provider key, and ignores the key when no app uses AI (2.030519ms)
+✔ maps every reasoning effort to the Anthropic effort option and sends no store flag (1.271963ms)
+✔ charges a reply whose thinking tokens are already inside the output count (40.882124ms)
+✔ accepts only Anthropic as an AI provider (0.307375ms)
+✔ computes the cost from per-million-token prices, rounding up (1.858218ms)
+✔ reserves a pending attempt with the reserved upper bound (22.479019ms)
+✔ refuses the call after the user quota is used, with QUOTA_EXCEEDED (22.890668ms)
+✔ concurrent requests at the last quota slot reserve exactly one (53.880152ms)
+✔ refuses a call whose upper bound does not fit, even if the actual cost would (10.075906ms)
+✔ concurrent users of one app never reserve more than the budget (27.576721ms)
+✔ a settled call counts its actual cost, so freed budget can be reserved again (18.840247ms)
+✔ a released attempt frees both its quota and its reservation (27.886611ms)
+✔ an unknown outcome keeps its reservation and quota (18.695185ms)
+✔ a reservation left pending by a crash still counts against both limits (30.387725ms)
+✔ reconciling twice, even concurrently, changes the row once (11.620463ms)
+✔ counts a UTC calendar day: yesterday's usage does not count, midnight resets (28.578676ms)
+✔ refuses a user whose account has a deletion record (6.144077ms)
+{"event":"deletion_step_failed","app_id":"app-a","step":"firebase","code":"Error"}
+✔ deleting the account erases ai_usage rows but keeps their cost in the app budget (70.598039ms)
+✔ settling after the account is deleted changes nothing and recreates no row (19.713134ms)
+✔ rule 13, architecture and plan describe the sweep and the shutdown settlement (1.900263ms)
+✔ no timer or query is created for stale reservations during ten idle minutes (16.786332ms)
+✔ a reserve is the only caller that triggers the sweep (19.910577ms)
+✔ the sweep leaves rows from an earlier UTC day alone (2.723631ms)
+✔ drops the test database (26.883399ms)
+✔ runStructuredCall: a 503 stores the input cost and a third user is admitted after eleven minutes (77.214317ms)
+✔ the chat path: a 503 stores the input cost and a third user is admitted after eleven minutes (60.402144ms)
+✔ drops the test database (142.576017ms)
+✔ sweeps a stale pending row to unknown and counts only its input cost (14.692746ms)
+✔ admits a third user once two unknown rows are older than ten minutes (19.736042ms)
+✔ leaves a pending or unknown row younger than ten minutes unchanged (10.310645ms)
+✔ reconciles once when a sweep races a late settleAiCall (24.723394ms)
+✔ erasure moves the committed cost of swept and unswept rows into ai_erased_spend (8.063826ms)
+✔ config parse fails when the verifier model equals the generation model (2.924847ms)
+✔ uses the model of the requested tier (48.484014ms)
+✔ returns the typed result and the ai_usage row id as generationId, settled succeeded (13.982382ms)
+✔ a provider error settles the row and throws AI_PROVIDER_ERROR (12.022823ms)
+✔ a missing tier throws before any ai_usage row exists (2.338662ms)
+✔ an input over the limit throws INVALID_INPUT before any row exists (1.676ms)
+✔ an aborted signal ends the call and leaves no pending row (23.763554ms)
+✔ a signal aborted before the call reserves nothing (1.904105ms)
+✔ a signal aborted during reservation releases the row without calling the provider (10.391662ms)
+✔ wrapUntrusted removes joined delimiters until none is left (0.221399ms)
+✔ drops the test database (40.119938ms)
+✔ a second module mounts under its own prefix (19.14853ms)
+✔ a module's routes reject a token from another app (1.850955ms)
+✔ the server rejects another app's token on a module without its own guard (0.887833ms)
+✔ accepts the real process environment used by the server (864.399656ms)
+✔ registers tailormyresume as the only app (8.383702ms)
+✔ finds tailormyresume by its exact id and no other id (0.885946ms)
+✔ Firebase storage selects its own bucket without an R2 setting (2.636399ms)
+✔ refuses to boot without the tailormyresume secrets (0.511943ms)
+✔ refuses an empty secret value (0.431973ms)
+✔ keeps app ids to one kebab-case word so secret names stay one to one (1.055034ms)
+✔ requires a Firebase project, a database secret name, and a bucket (0.329376ms)
+✔ rejects a per-token price and names the variable and range (1.545047ms)
+✔ checks the price bounds inclusively (0.879242ms)
+✔ rejects verifier prices below generation prices (0.677258ms)
+✔ rejects an output price below its input price (0.662872ms)
+✔ still rejects zero, empty, NaN, Infinity, negative and out-of-range prices (2.791727ms)
+{"event":"request_failed","app_id":null,"route":"/v1/probe","status":500,"code":"INTERNAL_ERROR"}
+{"event":"request_failed","app_id":null,"route":"/v1/probe","status":500,"code":"INTERNAL_ERROR"}
+{"event":"request_failed","app_id":null,"route":"/v1/probe","status":500,"code":"INTERNAL_ERROR"}
+✔ rejects a request without X-App-Id (19.131279ms)
+✔ rejects a request for an app that is not in the registry (1.877704ms)
+✔ rejects a request without an Authorization header (1.267773ms)
+✔ rejects an Authorization header that is not a Bearer token (1.46787ms)
+✔ accepts a lower-case bearer scheme and still returns the user id (3.068511ms)
+✔ rejects a token that is not valid for the app's Firebase project (2.467869ms)
+✔ rejects a token whose body cannot be read (1.045535ms)
+✔ rejects a token from another app (1.222375ms)
+✔ rejects a forged token that claims another registered project (1.165384ms)
+✔ reports a fault in the issuer's own client as a server error (1.772731ms)
+✔ rejects a token from a project that is not registered (0.993992ms)
+✔ rejects a verifier that returns another project's verified claims (0.896912ms)
+✔ reports a verifier fault as a server error, not a bad token (0.808771ms)
+✔ reports a firebase key outage as a server error (0.849559ms)
+✔ gives a verified request the user id and the database of its own app (1.08339ms)
+✔ gives a second app its own database (1.03073ms)
+✔ never runs the handler of a rejected request (0.722167ms)
+✔ serves GET /health without a token (0.695696ms)
+✔ answers an unknown route with the error contract (0.687386ms)
+✔ backs up each app in order to its own bucket under backups/ (5.63388ms)
+✔ Firebase backup configuration stops before any database or storage access (Firebase only) (0.796479ms)
+✔ Firebase backup configuration stops before any database or storage access (mixed providers) (0.274339ms)
+✔ a failed app does not stop the others, the run still fails, and logs carry only a safe code (1.888459ms)
+✔ a missing or non-direct secret fails before any dump starts (0.536318ms)
+✔ prune removes only backups older than retention and keeps the newest (1.083669ms)
+✔ a successful backup prunes expired objects in that app's bucket only (1.702051ms)
+✔ logs never contain a connection string or password (2.846065ms)
+✔ pg_dump is spawned without a shell and the password stays off argv (9.068783ms)
+✔ a non-zero pg_dump exit fails the stream even after output was produced (1.436442ms)
+✔ sslmode=require is verified against the system roots; other modes pass through (0.462913ms)
+✔ pg_dump is killed when its consumer fails without reading (1.767074ms)
+✔ pg_dump is killed and the stream fails after the timeout (20.727519ms)
+✔ a store that rejects without reading leaves no live pg_dump child (8.249466ms)
+✔ the store never uploads a truncated body (3.928896ms)
+✔ the store uploads a finished body with its length (3.143172ms)
+✔ the store lists every page by following the continuation token (0.390208ms)
+✔ the store throws when DeleteObjects reports errors (0.298016ms)
+✔ a real pg_dump produces a custom-format archive (60.158885ms)
+✔ accepts only a pooled Neon URL over TLS (1.58332ms)
+✔ the pooled URL schema allows only sslmode and channel_binding (0.483028ms)
+✔ refuses a pool that is not pooled (0.68564ms)
+✔ builds a Drizzle database over a pool without connecting (0.676979ms)
+✔ keeps serving when a pooled connection fails (1.334402ms)
+✔ reuses the database of an app and separates it from another app (0.597848ms)
+✔ reports a missing database secret as an internal error (0.410182ms)
+✔ the pooled URL schema accepts hosts with and without a cell label (0.196605ms)
+✔ the pooled URL schema rejects direct, extra-label, other and non-TLS hosts (0.301298ms)
+✔ the pooled URL message states the accepted shape (0.451739ms)
+✔ test/deletion-ports.ts (80.688332ms)
+✔ serves the deletion page without a token (18.968686ms)
+✔ serves the deletion page as HTML (1.623689ms)
+✔ locks the deletion page down with security and cache headers (1.274967ms)
+✔ shows the heading, offers no form or script, and invents no contact address (app name and retention period cannot be checked mechanically) (1.257227ms)
+✔ still rejects an unauthenticated API route (2.088278ms)
+✔ serves GET /health without a token (1.326021ms)
+✔ issues an upload URL under the caller's own prefix (33.076505ms)
+✔ never reuses a key (9.305547ms)
+✔ rejects a content type the app does not allow (2.612792ms)
+✔ rejects a file over the app's maximum size with 413 (6.884402ms)
+✔ rejects an invalid body with 400 (7.255893ms)
+✔ rejects an oversized request body with 413 (0.683474ms)
+✔ rejects a user id that cannot form a safe key (0.651417ms)
+✔ upload-url answers 401 without a token and 403 for another app's token (1.567396ms)
+✔ returns a download URL for the caller's own existing file (6.562011ms)
+✔ answers 404 for a missing own file and issues no URL (6.390968ms)
+✔ denies another user's file in the same app without a HEAD or a URL, whether or not it exists (5.867991ms)
+✔ denies a token from another app (3.027793ms)
+✔ looks a key up only in the bucket of the requesting app (5.237038ms)
+✔ rejects traversal, malformed and unencoded keys (5.141285ms)
+✔ download-url answers 401 without a token and with an invalid one (3.404731ms)
+✔ refuses both routes with 409 once deletion is pending, and issues no URL (10.23354ms)
+✔ a key from upload-url falls under the prefix the files step deletes (2.904801ms)
+✔ the real presigner signs bucket, content type and content length offline (20.148598ms)
+✔ rejects file limits that allow a URL to live over 15 minutes (1.551891ms)
+✔ drops the test databases (201.748032ms)
+✔ Firebase deletion paginates and preserves other users, apps, and backups (1.703099ms)
+✔ Firebase partial deletion rejects and a retry finishes the remaining files (0.665805ms)
+✔ Firebase list failures propagate and invalid identities never list (0.46459ms)
+✔ Firebase existence checks distinguish missing files from permission failures (0.377566ms)
+✔ Firebase ignores unexpected foreign prefixes returned in a listing (0.308562ms)
+✔ real Firebase signing needs no R2 keys and binds upload headers, scope and expiry offline (204.731337ms)
+✔ test-only server accepts dedicated loopback staging fixture and rejects production or unrelated databases (2.045744ms)
+✔ test/guest-trial-local-server.ts (1097.704361ms)
+✔ allows app-to-core and same-app imports (19.336126ms)
+✔ rejects cross-app and core-to-app imports through declarations and reexports (4.891948ms)
+✔ rejects dynamic import bypasses and ignores import-looking text (4.070815ms)
+✔ rejects literal dynamic imports and package aliases to another app (5.147151ms)
+✔ checks CommonJS imports and rejects custom module loaders (5.978132ms)
+✔ registered app ids match the app registry (7.470797ms)
+✔ migrates two apps in order and logs one line each (0.973598ms)
+✔ the first failure stops the run and later apps are not migrated (0.905293ms)
+✔ a missing, pooled, or non-TLS direct URL is rejected before any migration runs (1.004538ms)
+✔ a pg error whose message names the host is logged without the host (0.494761ms)
+✔ the direct URL schema allows only sslmode and channel_binding (0.457885ms)
+✔ logs and errors contain no connection string (0.384271ms)
+✔ re-running the real migrator against a migrated database changes nothing (304.435917ms)
+✔ the direct URL schema accepts hosts with and without a cell label (0.802625ms)
+✔ the direct URL schema rejects pooler, extra labels, other hosts and missing sslmode (0.689481ms)
+✔ the direct URL messages state the accepted shape and do not blame -pooler for a plain mismatch (1.529052ms)
+✔ validation failures carry stable non-secret codes and no URL (1.060761ms)
+✔ a pg 42P07 error reports its SQLSTATE and allow-listed fields (0.958722ms)
+✔ a wrapped pg error is found through cause (0.372328ms)
+✔ a connection string in an error message is never logged (0.856264ms)
+✔ ENOTFOUND reports errno and syscall, also inside an AggregateError (0.343064ms)
+✔ serves GET /health over the Node adapter (29.950374ms)
+✔ runs the app check before routing a /v1 path (9.79961ms)
+Error: body stream exploded
+    at Object.start (file:///tmp/tmr-earn-20261017-backend04/test/node-adapter.test.ts:90:26)
+    at setupReadableStreamDefaultController (node:internal/webstreams/readablestream:2892:23)
+    at setupReadableStreamDefaultControllerFromSource (node:internal/webstreams/readablestream:2939:3)
+    at new ReadableStream (node:internal/webstreams/readablestream:280:7)
+    at Array.<anonymous> (file:///tmp/tmr-earn-20261017-backend04/test/node-adapter.test.ts:88:18)
+    at #dispatch (file:///tmp/tmr-earn-20261017-backend02/node_modules/hono/dist/hono-base.js:276:34)
+    at fetch (file:///tmp/tmr-earn-20261017-backend02/node_modules/hono/dist/hono-base.js:307:24)
+    at Server.<anonymous> (file:///tmp/tmr-earn-20261017-backend02/node_modules/@hono/node-server/dist/index.mjs:1045:10)
+    at Server.emit (node:events:514:28)
+    at parserOnIncoming (node:_http_server:1293:12)
+✔ keeps serving after a response body stream fails (8.307714ms)
+✔ same shared primitives use independent app/environment database, amount and qualifying event (35.051359ms)
+✔ sink failure rolls back grant, continuity allocation, ledger and campaign capacity (21.032589ms)
+✔ policy version is immutable and lifetime entitlement cannot change on publication (10.211958ms)
+✔ account deletion cascades shared fixtures while consumed capacity and other database remain (7.9071ms)
+✔ drops shared app fixtures (170.625779ms)
+✔ test/prompt-golden.ts (140.466437ms)
+✔ passes under the limit and refuses at it with Retry-After (24.603195ms)
+✔ the window resets when the clock passes it (3.837333ms)
+✔ one user's limit spares other users and other apps (3.902286ms)
+✔ the per-app ceiling refuses a user who is still under their own limit (3.056079ms)
+✔ a request refused by the user limit does not spend the app ceiling (2.972199ms)
+✔ failed authentication spends only the caller's IP budget (7.338236ms)
+✔ public route is limited per client IP (2.080106ms)
+✔ Fly-Client-IP is ignored unless trusted (2.939932ms)
+✔ /health is never limited (1.950619ms)
+✔ expired windows are evicted and the key count stays capped (0.300181ms)
+✔ a sweep drops every expired key (0.22154ms)
+✔ two tokens for the same user share one budget (1.872117ms)
+✔ IP churn at the key cap does not reset a user's bucket (38.264165ms)
+✔ IPv6 addresses in one /64 share a bucket; IPv4-mapped counts as IPv4 (1.334053ms)
+✔ defaults are 60 per user and 6000 per app per minute (0.276435ms)
+✔ test/rate-limits.ts (79.498572ms)
+✔ frozen config/examples and hostile schema/semantic inputs validate without expanding origin trust (7.328179ms)
+✔ public snapshot derives only reviewed referral fields and clips expiry; unavailable inputs remain neutral (2.704844ms)
+✔ actual landing script preserves fixed Play encoding, safe text and expiry while open (2.785022ms)
+✔ actual browser script rejects hostile link vectors and falls back for every unsafe public offer (17.146787ms)
+✔ packager writes isolated static assets/association/headers with no private policy data (9.819655ms)
+✔ generic service supports non-Google seven-unit sink in independent database with identical UID/code; fixture prefix/token are isolated (109.112028ms)
+✔ transaction sink failure rolls back partial balance, attribution, grant and capacity; retry grants complete reward (54.019766ms)
+✔ bounded collisions and concurrent issuance retain one owner code (77.154951ms)
+✔ the migration folders are exactly the registered apps (1.974784ms)
+✔ the latest tailormyresume snapshot matches the core schema and the tailormyresume schema (43.659603ms)
+✔ the tailormyresume migrations create only core tables and tailormyresume tables (0.796898ms)
+✔ the migration creates users and consents with a unique user_id and rejects a duplicate (257.60688ms)
+✔ a consent needs an existing user and is deleted with that user (265.868708ms)
+✔ jobs are aborted while the server closes, and databases end last (1.464029ms)
+{"event":"ai_prices","app_id":"tailormyresume","microUsdPerMTok":{"default":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"extraction":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"generation":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"verifier":{"model":"claude-opus-5-5","input":2000000,"output":8000000}}}
+{"event":"ai_prices","app_id":"tailormyresume","microUsdPerMTok":{"default":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"extraction":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"generation":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"verifier":{"model":"claude-opus-5-5","input":2000000,"output":8000000}}}
+{"event":"ai_prices","app_id":"tailormyresume","microUsdPerMTok":{"default":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"extraction":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"generation":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"verifier":{"model":"claude-opus-5-5","input":2000000,"output":8000000}}}
+{"event":"ai_prices","app_id":"tailormyresume","microUsdPerMTok":{"default":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"extraction":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"generation":{"model":"claude-sonnet-5-5","input":1000000,"output":4000000},"verifier":{"model":"claude-opus-5-5","input":2000000,"output":8000000}}}
+✔ builds a Firebase client from a service account secret (3.314635ms)
+✔ refuses a service account secret that is missing (0.883362ms)
+✔ refuses a service account secret that is not JSON (0.235089ms)
+✔ refuses a service account from another Firebase project (0.227895ms)
+✔ refuses to start without the tailormyresume secrets (2.844039ms)
+✔ refuses to start without the tailormyresume Firebase service account (7.781664ms)
+✔ refuses to start when the Firebase service account belongs to another project (1.19402ms)
+✔ refuses to start with a database URL that is not the pooled Neon host (0.986729ms)
+✔ refuses to start without the R2 credentials (0.774409ms)
+✔ the R2 client bounds connect and request time and throws on a request timeout (1.657492ms)
+✔ the real verifier rejects a token from an unregistered project as 401 (9.641557ms)
+✔ the real verifier rejects an unsigned token for the app as 401 (1.918352ms)
+✔ logs the parsed micro-USD prices once at boot and no secret (1.629694ms)
+✔ test/tailormyresume-activation-fixture.ts (1010.96575ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":503,"code":"INTEGRITY_UNAVAILABLE"}
+✔ independent base rate limit preserves the other award and immutable replay (567.752387ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":503,"code":"INTEGRITY_UNAVAILABLE"}
+✔ independent signup rate limit preserves the other award and immutable replay (435.777767ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":503,"code":"INTEGRITY_UNAVAILABLE"}
+✔ whole rate limit retains facts but consumes no challenge or economic success snapshot (487.046245ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":503,"code":"INTEGRITY_UNAVAILABLE"}
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":503,"code":"INTEGRITY_UNAVAILABLE"}
+✔ common Integrity failure cannot be masked by a source limit or recovered counterpart (535.643194ms)
+✔ renewal racing a newer trusted observation cannot replace its frozen anchor (287.408211ms)
+✔ deletion during verified evidence prevents finalization from recreating cleared rows (291.411977ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":503,"code":"INTEGRITY_UNAVAILABLE"}
+✔ fresh evidence after expiry retains business key while altered signal and owner are rejected (360.956169ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activation-observations","status":503,"code":"IDENTITY_UNAVAILABLE"}
+✔ lookup outage records no guessed fact and pending guest observation survives proof cache purge (304.959663ms)
+✔ retained subject observation suppresses another new UID before any campaign grant (263.99715ms)
+✔ frozen activation vectors and strict union preserve canonical action and nullable revisions (4.983371ms)
+✔ known same-UID guest retains 2 and adds five exactly once (302.451774ms)
+✔ known same-UID guest retains 1 and adds five exactly once (326.026614ms)
+✔ link crash recovers without expired local secret and never shifts anchor/deadline (285.452494ms)
+✔ durable proof expiry cannot fall through to direct-new signup (261.351532ms)
+✔ direct new and brief anonymous app accounts receive distinct base and signup grants (380.491625ms)
+✔ used base signal denies base but independently grants signup without prior owner data (345.089099ms)
+✔ base-first partial snapshot replays and later signup ignores paused historical base policy (331.487636ms)
+✔ signup-first partial snapshot survives pause and explicit new key admits missing base once (384.041627ms)
+✔ signup-only may establish first base continuity later without regranting signup (328.366045ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activation-challenges","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ new policy precondition conflicts before awards and shared classification absence closes both (293.532313ms)
+✔ out-of-window and prelaunch identities remain ineligible across keys and policy changes (261.506722ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ concurrent signup keys and capacity contenders commit one full grant per entitlement (433.687674ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":500,"code":"INTERNAL_ERROR"}
+✔ SQL ledger failure rolls back every new economic write while observation remains durable (384.008871ms)
+✔ prepare renewal requires provider absence and cannot overwrite observed linked state (342.367564ms)
+✔ uncommitted incarnation mismatch and forged provider evidence cannot create grants (271.001192ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ subject rotation suppresses another UID, missing retained key closes new grants, expiry does not regrant own (366.239583ms)
+✔ conflict proof binds one fresh destination and lookup-free expired-proof replay transfers nothing (264.781267ms)
+{"event":"deletion_step_failed","app_id":"tailormyresume","step":"files","code":"Error"}
+✔ normal erasure revokes aliases/proofs/operations, preserves other account and consumed capacity (423.851676ms)
+✔ export and activation GET are read-only, own-only and omit aliases/proofs (356.295818ms)
+✔ all account routes reject bad/missing/cross-app tokens and strict unsafe input (226.643797ms)
+✔ test/tailormyresume-ai-harness.ts (1035.702693ms)
+✔ twenty-five posts of one JD make twenty model calls, twenty ai_usage rows and five 429 ALLOWANCE_EXHAUSTED (1045.261628ms)
+✔ the same JD as the first after twenty analyses is 429 ALLOWANCE_EXHAUSTED with no model call (348.43188ms)
+✔ a second request for a JD still in flight is 409 ANALYSIS_IN_PROGRESS with no model call and no extra ai_usage row (23.131483ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/analyses","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ when the in-flight request fails 502, its claim is released and the wallet shows twenty analyses left (27.761384ms)
+✔ twenty distinct JDs each make one model call and the 21st is 429 with no model call (319.205629ms)
+✔ another user analysing the same JD gets 200 with their own call and the first user's claim rows are unchanged (49.475562ms)
+✔ a request that crosses IST midnight is billed to the day it started and leaves the next day's allowance whole (45.993865ms)
+✔ repeating one JD until refused ends in ALLOWANCE_EXHAUSTED and never QUOTA_EXCEEDED or BUDGET_EXCEEDED (717.458091ms)
+✔ the claims rows after three runs of one JD hold only the hash and a run number, never the JD (49.86612ms)
+✔ architecture.md and engineering.md describe a counted repeat and 409 ANALYSIS_IN_PROGRESS (1.89279ms)
+✔ an analysis returns server ids, one match per requirement, and the allowance (82.043687ms)
+✔ user-stated skills reach the prompt marked and a non-subset entry is ignored (68.771389ms)
+✔ a MET backed only by a stated skill is downgraded to PARTIAL (26.164165ms)
+✔ twenty distinct JDs pass, the 21st is 429 ALLOWANCE_EXHAUSTED with no model call (345.029733ms)
+✔ a repeat of the first JD is 200 and spends another analysis (82.67911ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/analyses","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ a provider failure does not use an analysis (37.984447ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/analyses","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ a same-JD request while the first is in flight is 409 and leaves no claim when the first fails (23.261808ms)
+✔ three concurrent different JDs with two left give two 200 and one 429 (320.936525ms)
+✔ an unknown id and a skill that was not sent are removed and the status falls to GAP (20.433484ms)
+✔ an empty requirement is skipped and a repeated evidence id is kept once (19.706289ms)
+✔ more than 40 requirements and 10 keywords are cut (20.529796ms)
+✔ a JD of 19 words is 400 and of 20 words is accepted (18.914909ms)
+✔ the claims table holds the hash and the day, not the JD (18.123458ms)
+✔ a body that is not the documented object is 400 INVALID_INPUT with no model call (6.688844ms)
+✔ a body over the route limit is 413 PAYLOAD_TOO_LARGE (5.326715ms)
+✔ v2 AI succeeds with missing consent history (28.242387ms)
+✔ v2 AI succeeds with withdrawn consent history (23.208729ms)
+✔ v2 AI succeeds with old notice consent history (25.885985ms)
+✔ a deleted user without consent gets ACCOUNT_DELETED with no model call (8.501875ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/analyses","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ a provider error is 502 AI_PROVIDER_ERROR (17.026099ms)
+✔ a user over the core daily quota gets 429 QUOTA_EXCEEDED and no model call (19.036293ms)
+✔ a missing token is 401, another app's token is 403, another app id is 404 (3.657489ms)
+✔ without userStatedSkills the analysis prompt equals the one on main (27.45827ms)
+✔ NOT_A_JOB_POST and JOB_IMPORT_FAILED are 422 with the error body (1.245703ms)
+✔ a referral message is 422 NOT_A_JOB_POST, releases the claim and leaves one settled ai_usage row (152.523972ms)
+✔ job.location is returned, blank and missing are null, and 300 chars are cut to 120 (176.252884ms)
+✔ a GAP reason is the fixed phrase whatever the model said (54.200098ms)
+✔ a MET reason over 120 chars, empty, or with an uncited number is replaced by the fixed phrase; a clean reason and a number found in a bullet, title or date are kept; every match has a non-empty reason of at most 120 chars (44.259547ms)
+✔ a MET reason whose number is only a part of a token in the cited text falls back, and a whole-token number is kept (42.865919ms)
+✔ a proper noun or a number word that is not in the cited text falls back, a cited capitalised organisation is kept, and a PARTIAL fallback says partly (43.942045ms)
+✔ a reason keeps numbers whole, needs a content token, and must sit inside one cited fact (333.005304ms)
+✔ fit wording falls back for every marketing phrase, a plain factual reason is kept (25.693989ms)
+✔ a reason with any word or number outside the cited text falls back; a reason of cited words and function words is kept (191.279614ms)
+✔ a reason for a match backed only by a stated skill is the fixed partial phrase (18.947245ms)
+✔ a reason for a mixed stated-skill and entry citation cannot use the stated-skill note (15.395217ms)
+✔ a hybrid location in the job text is returned with its separator (21.092654ms)
+✔ the analysis prompt keeps the hybrid location, bans fit wording and keeps the reason length rule (19.875516ms)
+✔ a model reason of 200 chars does not fail the call and is replaced by the fixed phrase (18.460376ms)
+✔ the first qualifying must-have experience gap is asked with the three fixed options (21.055567ms)
+✔ question is null when every must-have is MET or the only gaps are skill, tool or education (39.174416ms)
+✔ only the first qualifying requirement is asked and an invalid first wording never falls back (43.261713ms)
+✔ every invalid question wording gives a null question while the length limits are inclusive (161.173283ms)
+✔ a normalised gap or partial status selects the requirement for the question (39.246982ms)
+✔ a question naming the employer of a partial soft-skill gap is dropped while the why is plain (22.847785ms)
+✔ a question of only requirement words and job words is kept (17.365252ms)
+✔ an allowed question with a why holding a word outside the requirement and the job is dropped (16.178636ms)
+✔ natural yes/no wording with other word forms is kept (34.99332ms)
+✔ question wording without a content word, a yes/no start or a single sentence is dropped (50.211488ms)
+✔ a word that is only in the employer of the candidate drops the question and the plain copy is kept (37.723238ms)
+✔ an overlong question of 81 chars or why of 201 chars is 200 with a null question (36.386809ms)
+✔ the analysis prompt asks for one yes/no question with a questionWhy (17.371259ms)
+✔ client entry with source USER_ANSWER or id ans-x, or bullet id ans-x-b1, is 400 on POST /analyses (7.918833ms)
+✔ NOT_YET, SKIPPED and a null answer give no fact (1.281672ms)
+✔ YES and A_FEW with detail give the ans entry and bullet with trimmed text (4.4708ms)
+✔ placeholder detail n/a and blank detail add no bullet (0.310518ms)
+✔ blank detail on a SKILL requirement adds only keywords the requirement text states (0.208548ms)
+✔ n/a detail adds the same and no bullet (0.237044ms)
+✔ detail stating Power BI adds Power BI (1.288446ms)
+✔ a keyword in requirement.keywords but not in requirement.text or detail is never added (D41) (0.165177ms)
+✔ EXPERIENCE requirement with blank detail adds nothing (0.148275ms)
+✔ a short keyword does not match inside a longer word (0.918563ms)
+✔ a short keyword is not confirmed inside a symbol-joined token (2.841455ms)
+✔ a short or symbol keyword is confirmed as a whole token (2.71504ms)
+✔ entriesNamedIn matches the organisation as a whole word (4.400609ms)
+✔ entriesNamedIn matches the title as a whole phrase (0.155957ms)
+✔ the deleted prep-questions and cover-letters routes answer 404 NOT_FOUND with no model call (41.915578ms)
+✔ every fixture file parses with its schema and has the documented size (32.471394ms)
+✔ the generator reproduces the committed fixtures (181.638895ms)
+✔ fixture ids are unique inside each set (9.36212ms)
+✔ a forbidden term appears in the job text and nowhere in the profile (2.823995ms)
+✔ the seeded set has 80 fabricated drafts and 20 clean rewrites (2.367716ms)
+✔ fresher profiles hold one to three bullets (0.84886ms)
+✔ every normal profile carries a summary whose id no entry or bullet uses (3.042111ms)
+✔ a forbidden term is caught on a word boundary and ignored inside another word (2.775314ms)
+✔ a number that is not in the sources is critical and one that is in them is not (0.211552ms)
+✔ an organization is critical only when its sources do not name it (0.90229ms)
+✔ cover-letter forbidden terms apply only to evidence while numbers and organizations apply to every role (0.275317ms)
+✔ a leadership verb is a violation unless its stem is in the sources (0.593798ms)
+✔ a clean rewrite has no unsupported word and an invented word is reported (2.035687ms)
+✔ claim retention counts in-scope bullets cited by at least one final bullet (0.357172ms)
+✔ must-have recall looks only at must-have requirements, text and keywords (0.245146ms)
+✔ precision, recall and F1 follow the multiset match (0.500837ms)
+✔ extraction matches bullets after whitespace normalisation and entries by normalised title and organization (0.741374ms)
+✔ a sensitive value that stays in the profile fails the drop (0.898099ms)
+✔ seeded-fabrication recall and false alarms are counted from rejections (0.219933ms)
+✔ errored fabricated attempts lower recall below the gate and errored clean attempts are excluded from false alarms (0.343414ms)
+✔ a clean report passes every gate (0.131722ms)
+✔ one critical fabrication fails the gates (0.136332ms)
+✔ one verb-strength violation fails the gates (0.102947ms)
+✔ the minor rate must be under 2 percent (0.142966ms)
+✔ claim retention must be over 99 percent (0.120827ms)
+✔ seeded-fabrication recall must be over 95 percent (0.153932ms)
+✔ a run where too many items errored fails, and a metric with no data is skipped (0.152675ms)
+✔ a summary with a number its sources lack is critical (0.151627ms)
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+{"event":"job_import_failed","failure":"invalid_url","host_class":"unknown"}
+✔ rejects http, over-long, userinfo, non-443 port and extra fields with INVALID_INPUT and no DNS or fetch (66.548316ms)
+{"event":"job_import_failed","failure":"refused_host","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"network","host_class":"unknown"}
+✔ refuses every address class (table test over each CIDR plus mapped, NAT64, literal and name cases) with no connection (493.35054ms)
+✔ fixture careers page returns jobText and the final sourceHost (7.713149ms)
+✔ a relative redirect is resolved against the current URL and keeps the host (8.700017ms)
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"public"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"public"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"public"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"literal"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"public"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"public"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"public"}
+{"event":"job_import_failed","failure":"refused_redirect","host_class":"public"}
+✔ redirect to 169.254.169.254, to http and a fourth redirect are refused (69.381739ms)
+✔ the transport connects to the vetted address with the host as servername (pinning) (2.051052ms)
+{"event":"job_import_failed","failure":"too_large","host_class":"public"}
+{"event":"job_import_failed","failure":"too_large","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"network","host_class":"public"}
+{"event":"job_import_failed","failure":"network","host_class":"public"}
+{"event":"job_import_failed","failure":"network","host_class":"public"}
+{"event":"job_import_failed","failure":"network","host_class":"public"}
+{"event":"job_import_failed","failure":"network","host_class":"public"}
+{"event":"job_import_failed","failure":"network","host_class":"public"}
+{"event":"job_import_failed","failure":"timeout","host_class":"public"}
+{"event":"job_import_failed","failure":"timeout","host_class":"public"}
+{"event":"job_import_failed","failure":"timeout","host_class":"unknown"}
+✔ oversize body, slow multi-hop total over 8 s (fake timers via injected signal), non-html and compressed responses are aborted with JOB_IMPORT_FAILED (179.046707ms)
+✔ extraction drops scripts, styles and hidden elements, caps at 20,000 and fails under 200 characters (476.016716ms)
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+{"event":"job_import_failed","failure":"not_html","host_class":"public"}
+✔ the 21st import in a day answers ALLOWANCE_EXHAUSTED with no fetch; failed fetches count (147.432974ms)
+✔ a fifth concurrent import answers RATE_LIMITED without a claim (43.222392ms)
+✔ no log line contains the URL path, query, page text or error message (66.138203ms)
+✔ no token and invalid token answer 401, another app token 403, another app id 404, a deleted user 409 (9.911707ms)
+✔ old claim rows survive and JOB_IMPORT inserts (231.775163ms)
+✔ architecture.md documents the job-imports fetch rule (1.004398ms)
+✔ a claim made before IST midnight is marked on the same day when the fetch ends after midnight (145.714021ms)
+{"event":"job_import_failed","failure":"timeout","host_class":"unknown"}
+✔ a resolver that never answers ends in JOB_IMPORT_FAILED within the deadline (160.762821ms)
+✔ a second concurrent import by the same user answers RATE_LIMITED without a claim; other users are unaffected (41.430454ms)
+✔ the c-ares resolver merges both families, treats ENODATA as empty and cancels on abort (1.849278ms)
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+{"event":"job_import_failed","failure":"refused_host","host_class":"refused"}
+✔ names the c-ares resolver cannot see in /etc/hosts are refused before any resolution (43.462021ms)
+✔ drops the test database (40.872556ms)
+✔ the ledger table has the pinned columns, checks and index (43.534167ms)
+✔ backfill writes one MIGRATION row per non-zero wallet and none for (0,0), and balance equals ledger sum (11.653359ms)
+✔ historical WELCOME balance survives repeated non-granting wallet reads (57.610976ms)
+✔ a first grant writes one PURCHASE row; a repeat token and two concurrent posts write one (72.212927ms)
+✔ GET /credits answers balance and at most 100 entries newest first with id tie-break (27.438574ms)
+✔ user B sees none of A's rows; other-app token 404; missing/invalid token 401; deleted user 409 ACCOUNT_DELETED with no row (74.863853ms)
+✔ credits equals free plus purchased on wallet, purchase and unlock responses (32.347982ms)
+✔ unlock spends nothing and writes no ledger row; GET /credits balance equals the counters and the row sum (34.718911ms)
+✔ a first unlock creates only a zero wallet and no WELCOME ledger event (14.822233ms)
+✔ a second unlock answers 200 and writes no row (22.70419ms)
+✔ a wallet created with zero starting credits writes no WELCOME row (26.306992ms)
+✔ the export lists every ledger row uncapped, oldest first (33.142855ms)
+✔ deleting a user removes the ledger rows of that user only (15.362391ms)
+✔ dropping the ledger table leaves existing wallets, purchases and unlocks intact (new-wallet writes need the code to stop writing the ledger first) (36.68741ms)
+✔ no token on a tailormyresume path is 401 UNAUTHENTICATED (28.897156ms)
+✔ a bad token on a tailormyresume path is 401 INVALID_TOKEN (2.579198ms)
+✔ another app's token with X-App-Id tailormyresume is 403 CROSS_APP_TOKEN (1.537085ms)
+✔ a mounted tailormyresume route accepts tailormyresume and rejects another registered app with 404 NOT_FOUND (5.220416ms)
+✔ an unknown X-App-Id on a tailormyresume path keeps the core 400 (1.186687ms)
+✔ the tailormyresume day turns over at the IST midnight (0.583879ms)
+✔ a valid profile parses and its evidence ids include skill:C++ (2.448943ms)
+✔ a bullet id equal to an entry id is rejected (0.405992ms)
+✔ 201 bullets in total are rejected and 200 are accepted (2.54721ms)
+✔ an unknown profile field is rejected (0.387973ms)
+✔ a GAP match with evidence ids is rejected and a MET match without is rejected (0.894886ms)
+✔ jobSchema and matchSchema accept location and reason and still reject unknown fields (0.926455ms)
+✔ drops the test database (29.592433ms)
+✔ it signs an RS256 assertion, exchanges it once, and reads the purchase from the package path (34.549265ms)
+✔ Play 400 and 404 are rejections; 401, 403, 429, 5xx and a network failure are unavailable (15.745476ms)
+✔ a missing or malformed secret leaves no client and logs a warning that names only the secret (1.303323ms)
+✔ the access token is reused until a minute before expiry, then exchanged again (3.519342ms)
+✔ an unavailable error names only the failure class (6.078006ms)
+✔ a private key that is not a PEM key is rejected at creation and logged as play_secret_invalid (0.834333ms)
+✔ a verified purchase grants 5 credits once (201), consumes it and shows the contract shape (88.855803ms)
+✔ a replayed token is 200 with the stored purchase, no second grant and no Play call (32.181339ms)
+✔ two concurrent posts of one token grant once (37.632303ms)
+✔ a token stored for another account is 403 FORBIDDEN and grants nothing (22.808743ms)
+{"event":"purchase_unbound"}
+✔ a Play purchase bound to another account, or to none, is 403 and stores nothing (15.231437ms)
+✔ pending is 409, cancelled and consumed are 400, a Play 404 is 400, and none stores a row (27.708304ms)
+✔ an unknown product, an empty or oversized token, or extra fields are 400 INVALID_INPUT (4.02437ms)
+✔ GET /packs lists the three packs in order (3.504535ms)
+✔ first purchase of each pack answers 201 and grants 5, 15 or 40 (70.844232ms)
+✔ reposting a granted application_pack_15 token answers 200 and grants nothing more (20.548165ms)
+✔ a pack-5 token without productId in Play's answer is rejected when posted as pack-40 and accepted as pack-5 (22.099497ms)
+✔ application_pack_99 answers 400 INVALID_INPUT with no Play call and no row (2.608042ms)
+✔ a Play answer for another pack answers 400 PURCHASE_INVALID and grants nothing (7.329157ms)
+{"event":"play_unavailable","reason":"5xx"}
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/purchases","status":502,"code":"PLAY_UNAVAILABLE"}
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/purchases","status":502,"code":"PLAY_UNAVAILABLE"}
+✔ Play down is 502 PLAY_UNAVAILABLE, and a server without the Play secret is 502 too (16.854358ms)
+{"event":"play_consume_pending","code":"Error"}
+✔ a failed consume keeps the grant, acknowledges, and the next post consumes without a second grant (29.14754ms)
+{"event":"play_consume_pending","code":"Error"}
+{"event":"play_consume_pending","code":"Error"}
+✔ the hourly sweep consumes rows that are still due and skips rows older than 3 days (33.677845ms)
+{"event":"play_consume_pending","code":"Error"}
+✔ the sweep takes the newest 100 rows first, so old unconsumable rows cannot starve a new one (142.259981ms)
+{"event":"play_consume_pending","code":"Error"}
+✔ a sweep that starts while another is running does nothing (71.62807ms)
+✔ a purchase with no account binding is 403 and logs purchase_unbound without the token (9.884818ms)
+✔ a licence-tester purchase grants credits and is marked test (22.289258ms)
+✔ a missing or invalid token is 401 on POST and GET, and a cross-app token is rejected (6.794306ms)
+✔ the history lists only the caller's purchases, newest first (42.653808ms)
+✔ the export carries the caller's purchases without the token (50.202758ms)
+{"event":"deletion_step_failed","app_id":"tailormyresume","step":"firebase","code":"Error"}
+✔ the purge keeps purchases and DELETE /v1/me erases them, retry included, and only the caller's (55.17684ms)
+✔ drops the test database (34.072523ms)
+✔ configured own/new/replayed code URLs remain independent of paused admissions; disabled links preserve code (560.156643ms)
+✔ actual LINK challenge and concurrent attach commit one full inviter award; changed source cannot reuse evidence (590.644801ms)
+▶ real referral routes reject each substituted binding without economics or challenge consumption
+  ✔ actor (66.945089ms)
+  ✔ request key (65.674941ms)
+  ✔ code (35.853845ms)
+  ✔ source (45.477314ms)
+  ✔ signal (39.535989ms)
+  ✔ revision (53.378756ms)
+  ✔ challenge (57.778946ms)
+  ✔ decoded request hash (68.566402ms)
+  ✔ action discriminator (9.953053ms)
+  ✔ GUEST_TRIAL evidence reuse (112.796826ms)
+  ✔ GOOGLE_ACTIVATION evidence reuse (141.569034ms)
+✔ real referral routes reject each substituted binding without economics or challenge consumption (1458.337441ms)
+✔ simultaneous different inviter codes for one invitee commit exactly one full reward and safe recovery (731.841088ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/referrals/attach","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ advertised five-credit reward refuses four remaining with no partial attribution or evidence consumption (539.730981ms)
+✔ test/tailormyresume-referrals-fixture.ts (980.281965ms)
+{"event":"deletion_step_failed","app_id":"tailormyresume","step":"files","code":"Error"}
+✔ inviter erasure detaches receipt and scrubs code fingerprints; every valid POST conflicts before providers/policy/code (866.204725ms)
+✔ invitee erasure preserves inviter own economics and detached source, then survivor erasure cleans its receipt (524.546198ms)
+✔ partial rows and Firebase failures retry the durable job without duplicate detach or cross-owner loss (512.805607ms)
+✔ reciprocal referrals, concurrent survivor deletion and sorted erasure never deadlock or recreate owners (691.493744ms)
+✔ deletion winning during provider lookup prevents a fresh reward; live guard prevents later owner writes (479.643545ms)
+✔ local PostgreSQL dump/restore preserves detached receipt, consumed capacity and erasure reconciliation (1196.392879ms)
+✔ real TMR routes issue and attach configured non-fixture namespaces with one full inviter reward (772.494898ms)
+✔ foreign app token, namespace, deployment and real foreign-scope code cannot produce any referral economic writes (684.913434ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/referrals/code","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ conflicting retained mapping closes issuance capability and new work while own code/receipt recovery remain original (667.281454ms)
+✔ concurrent first issuance with distinct namespace configurations establishes only one scoped mapping (234.555785ms)
+✔ pre-erasure dump restores intact provenance offline; external later tombstone replays rows failure/retry before route exposure (1721.173397ms)
+ℹ {"event":"pre_erasure_backup_and_external_journal","backupSha256":"df29d298b938cfc9d4e382c4cffe6275f3aab92bc2c03b4c8b5dbe1b18f6f076","journalSha256":"d24d80c8d8b159bfc0e4d1c0679039111553c34039ef4fd4e1084e21432f13ca","authoritativeConsumed":10,"backupDeletionRequests":0,"laterDeletionRequests":1}
+✔ backup before a later award refuses attempted route exposure when later records/checkpoint are unavailable or stale (1060.271875ms)
+ℹ {"event":"pre_award_backup_and_external_checkpoint","backupSha256":"b1292f8b7f2e3d965c6a2fbfa3f11ed3503ca5f1db9488329299d28026cc9542","checkpointSha256":"fca01c6169dc07c0bd0231d16eaf16051c1652ae2a824ac9a43224227b96fbd1","authoritativeConsumed":5,"restoredConsumed":0,"laterEconomicRecordsAvailable":false}
+✔ frozen canonical vectors bind code/source/continuity and reject foreign or malformed scope (4.876653ms)
+✔ manual journey commits full inviter reward twice, owns challenges, preserves wallet and own history (942.410034ms)
+✔ committed replay bypasses outage, pause, window and evidence; stable input conflicts and different inviter cannot replace (609.460813ms)
+✔ existing Google may issue stable codes while paused but cannot retroqualify; passive reads create nothing (658.079413ms)
+✔ strict auth/provider/media/size/query boundaries and actor-only reads (222.992104ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/referrals/code","status":503,"code":"IDENTITY_UNAVAILABLE"}
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/account/activate","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ identity subject, incarnation and stale snapshots fail with no reward; signup refusal does not bar independently eligible referral (694.513645ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/referrals/attach","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ policy stale uncommitted offer reconfirms changed amount; last full capacity and same actor concurrency (862.387437ms)
+✔ unknown, self, expiry, disabled code and wrong evidence never create attachment (512.258813ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/referrals/challenges","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ failed attempts retain independent finite counters with honest reset, key rotation and erasure (926.153105ms)
+✔ committed intact recovery remains original after code disable or configuration removal; missing retained keys close new offers (610.388944ms)
+✔ unknown code fails before unavailable policy and increments failed-attempt counters without capacity (317.924726ms)
+✔ trusted network and campaign counters survive service-instance changes, expire finitely and report the true fixed-window reset (487.408377ms)
+✔ referral reward serializes with signup replay and tailoring settlement without granting or spending twice (441.55643ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/referrals/challenges","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ unavailable activation classification remains recoverable, reads never reclassify, and explicit observation preserves the original anchor (353.166894ms)
+✔ a new report is 201 with an id and the time, and works without consent (39.89798ms)
+✔ a repeat is 200 with the first id and time and never overwrites the text (14.693095ms)
+✔ a repeat after an expired report is purged is 201 with a new id (29.250905ms)
+✔ each invalid field is 400 INVALID_INPUT and stores nothing (15.279559ms)
+✔ a null generation id and a 2,000 character text are accepted (5.199043ms)
+✔ a body over 8 KB is 413 PAYLOAD_TOO_LARGE (1.263513ms)
+✔ a missing token is 401 and another app id is 404, on both routes (1.547141ms)
+✔ invalid and cross-app tokens are rejected on both routes and create no reports or wallets (10.550971ms)
+✔ the export holds only the caller's consents, wallet, unlocks and reports (62.669218ms)
+✔ the export of a fresh user reads zero and leaves the wallet absent (13.391029ms)
+✔ the purge removes a 181-day-old report and keeps a 1-day-old one (16.149372ms)
+{"event":"deletion_step_failed","app_id":"tailormyresume","step":"firebase","code":"Error"}
+✔ DELETE /v1/me erases the reports, keeps others, the retry completes, and a later report is 409 (48.037444ms)
+✔ export and deletion still cover prep and cover-letter reports (33.276184ms)
+✔ routes.ts no longer mounts the deleted routes (1.91521ms)
+✔ drops the test database (119.815674ms)
+✔ a current role stays current, a closed role is not, and the location is kept (86.027968ms)
+✔ a summary from the text is kept, one with an absent word is null, and a null stays null (51.483242ms)
+✔ a linkedin and a portfolio url that appear in the text are kept with their kinds (21.330326ms)
+✔ a link whose url is not in the text is dropped (17.927062ms)
+✔ a non-http link in the text is dropped (18.297714ms)
+✔ a LINKEDIN link on another host is returned as OTHER (14.274391ms)
+✔ current follows the text, not the model (51.949927ms)
+✔ a location with a word that is not in the text is null (13.277187ms)
+✔ a fabricated summary, location and link never reach the profile (13.166976ms)
+✔ sensitive text in the summary is dropped and reported (14.663272ms)
+✔ the current flag is decided per entry from the text (17.055503ms)
+✔ a model endDate of Present makes the entry current and clears the end date (39.942818ms)
+✔ a closed role with an end date is not current and keeps that end date (15.823908ms)
+✔ a url that is only a prefix of the url in the text is dropped (26.152083ms)
+✔ a url delimited by a bracket, a comma, a full stop or the end of the text is kept (56.624876ms)
+✔ a summary whose words are all in the text but recombined is null (12.564588ms)
+✔ a summary matching the text across whitespace and case is kept as the model returned it (12.447951ms)
+✔ a recombined location is null and the exact location is kept (24.635043ms)
+✔ an empty or whitespace-only summary and location are null (22.041388ms)
+✔ an unlabelled date, phone or PAN in the summary is null even when it is in the text (44.592414ms)
+✔ a url followed by a dot and more text is not a whole token (12.263289ms)
+✔ the prototype resume gives Infosys current, Tata not current with its end date and a null end date, and Pune (16.779208ms)
+✔ a model Present on a closed date range is not current and the end date is cleared (18.955696ms)
+✔ a current word in a bullet of an older role does not make it current (17.881106ms)
+✔ a title and organization repeated in the summary do not change current (13.639527ms)
+✔ a summary that is only part of a line and a location outside the header are null (29.938291ms)
+✔ a summary that is a fragment of a negated line is null (42.024321ms)
+✔ a start date in a summary line before a present word does not make a role current (13.880762ms)
+✔ two roles with the same start date are neither current (14.380622ms)
+✔ a certification with the same date as a current job does not change the other entries (12.819302ms)
+✔ an ongoing, currently or today end word makes the role current (40.195577ms)
+✔ a start date contained in another entry's start date makes neither entry current (13.367423ms)
+✔ to date and till date directly after the start date make the role current (34.822906ms)
+✔ an earlier entry dropped by the verbatim filter does not turn off a later current role (19.502071ms)
+✔ a resume parses into refs, verbatim text and a deduplicated droppedSensitive (64.934964ms)
+✔ a resume with no entries is 200 with empty entries (32.450371ms)
+✔ sensitive text in a verbatim bullet or headline is dropped and reported (14.21314ms)
+✔ sensitive labels are case insensitive and single alone is retained (16.072546ms)
+✔ the sync deadline starts before the first database transaction (15.857781ms)
+✔ text of 49 or 30,001 characters is 400, 50 and 30,000 are accepted (28.215986ms)
+✔ a bullet with a word that is not in the text is dropped, the rest stays (13.662366ms)
+✔ an entry whose title or organization has an invented word is dropped and refs are reassigned (14.139387ms)
+✔ an injected resume cannot add an entry that is not in the text (12.074995ms)
+✔ the resume goes only into the user message, inside the data delimiters (14.630168ms)
+✔ a field the schema does not list never reaches the answer (12.518631ms)
+✔ a body that is not the documented object is 400 INVALID_INPUT with no model call (6.07619ms)
+✔ a body over the route limit is 413 PAYLOAD_TOO_LARGE (3.986655ms)
+✔ v2 AI succeeds with missing consent history (15.157266ms)
+✔ v2 AI succeeds with withdrawn consent history (13.421341ms)
+✔ v2 AI succeeds with old notice consent history (15.982938ms)
+✔ a deleted user without consent gets ACCOUNT_DELETED with no model call (31.375222ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/resume/parse","status":502,"code":"AI_PROVIDER_ERROR"}
+✔ a provider error is 502 AI_PROVIDER_ERROR (20.096217ms)
+✔ a user over the core daily quota gets 429 QUOTA_EXCEEDED and no model call (12.751206ms)
+✔ a missing token is 401, another app's token is 403, another app id is 404 (2.184031ms)
+✔ refuses a new tailoring once the shutdown has started (45.139696ms)
+✔ aborts and settles running tailorings before the databases close (99.177553ms)
+✔ authenticated guest trial initializes two credits, spends twice, recovers completed work at zero, and cannot start a third tailoring (280.189545ms)
+✔ a successful tailoring spends exactly one credit, free first, with one TAILORING ledger row (76.283392ms)
+✔ the last credit spent leaves GET /wallet at zero credits and no free tailoring (46.054418ms)
+✔ a failed job and an interrupted job spend nothing and write no ledger row (72.772361ms)
+✔ two concurrent starts with one credit give one 202 and one 402 and the balance never goes negative (48.423042ms)
+✔ a start racing the finish of the reserved job is refused and never yields a free tailoring (555.966608ms)
+✔ a reserved job that finds no credit at finish fails with nothing delivered (78.80064ms)
+✔ a live reserved job blocks a second request id with 402 while a stale or other-boot one is reconciled (94.207591ms)
+✔ a repeated requestId returns 200 with no model call and the total spend stays one credit (42.856629ms)
+✔ re-tailoring a SUCCEEDED application spends again and a zero balance gives 402 (82.479571ms)
+✔ a zero balance gives 402 before any row, model call, ai_usage row or claim (12.493349ms)
+✔ section null or missing is accepted and a non-null section is 400 INVALID_INPUT (78.699439ms)
+✔ unlock answers 200, moves no credit and writes no unlock or ledger row (28.491094ms)
+✔ unlock returns an existing unlock row unchanged and moves no credit (21.842828ms)
+✔ a new wallet shows 20 analyses and no free tailoring left today (7.118514ms)
+✔ a shutdown abort ends the reserved job FAILED with the balance unchanged and no ledger row (22.632252ms)
+✔ credit_reserved is a boolean NOT NULL column defaulting to false (7.048112ms)
+✔ a summary the verifier supports in the first verify call is PASSED with no extra call (133.868876ms)
+✔ a summary the verifier rejects is rewritten by the repair call and reads REPAIRED (77.159911ms)
+✔ a summary the verifier rejects twice is null (73.673045ms)
+✔ a summary naming an employer no cited source holds is null before the verifier (80.947376ms)
+✔ a summary naming an achievement no cited source holds is null before the verifier (52.357246ms)
+✔ a summary naming a tool no cited source holds is null before the verifier (53.411233ms)
+✔ a summary of no words is null before the verifier (96.782249ms)
+✔ a summary of function words only, a recombination of facts or a stated-skill label is null before the verifier (385.732503ms)
+✔ a period inside an organisation name does not tie a clause to another entry (53.618174ms)
+✔ a summary of resume skill names only is PASSED (55.81848ms)
+✔ a summary combining the words of two cited sources is PASSED (45.508742ms)
+✔ a number inside another word of a source never justifies the number in the summary (65.115506ms)
+✔ a number no source holds fails the check while a whole number in a source is verified (90.187761ms)
+✔ a summary with no cited id or an id no fact carries is null (92.787492ms)
+✔ a failing summary and a failing bullet share one repair call of at most four model calls (51.823164ms)
+✔ skills keep the profile spelling and order and are never verified (78.589159ms)
+✔ the first generate prompt holds the summary text and the repair prompt holds no job text (55.826162ms)
+✔ a summary id equal to an entry or bullet id and a summary over 1000 characters are 400 INVALID_INPUT (12.293042ms)
+✔ a stored SUCCEEDED row without summary or skills reads as 200 with an empty summary and skills (6.126616ms)
+✔ a bullet that passes the verifier is PASSED after exactly two model calls (111.579618ms)
+✔ a bullet the verifier rejects is REPAIRED when the repair passes (75.845482ms)
+✔ a bullet that fails the verifier twice is REVERTED to the source text with no edit types (57.612163ms)
+✔ a source bullet the model left out is added back as UNCHANGED (42.663935ms)
+✔ a bullet citing a bullet of another entry fails the check, skips the verifier and is repaired (89.077621ms)
+✔ a bullet that keeps citing another entry is REVERTED to its first source of the entry (39.057221ms)
+✔ a keyword missing from every cited source fails the check (38.180842ms)
+✔ a number missing from every cited source fails the check (39.257598ms)
+✔ the verifier prompt holds the proposed text and sources but no job text (43.738665ms)
+✔ a provider error ends the job FAILED with AI_PROVIDER_ERROR (30.582515ms)
+✔ the core quota used up during the job ends it FAILED with QUOTA_EXCEEDED (74.112002ms)
+✔ a repeated requestId returns the same job with 200 and calls no model (42.495197ms)
+✔ a repeated requestId ignores an otherwise invalid body and an empty scope (72.210692ms)
+✔ 402 NO_CREDIT when the balance is zero (58.221186ms)
+✔ two concurrent tailorings with one credit start one job and answer one 402 (43.132575ms)
+✔ two tailorings of the same application with different requestIds and one credit start one job and answer the other 402 (41.778477ms)
+✔ a second tailoring of the same application while the first job is RUNNING on the only credit is 402 NO_CREDIT (53.828469ms)
+✔ a second tailoring while the found RUNNING job belongs to another boot starts a fresh job and fails the old one as INTERRUPTED (41.102965ms)
+✔ a RUNNING job of another boot or older than five minutes reads as INTERRUPTED (14.685063ms)
+✔ a fifth concurrent job gets 429 RATE_LIMITED with Retry-After 10, and a slot frees when a job ends (117.219225ms)
+✔ another user's job is 404 and a POST without consent succeeds (93.194672ms)
+✔ tailoring rejects a deleted user without consent before a model call (8.086314ms)
+✔ the stored row holds no profile or job text (50.486945ms)
+✔ the purge removes a tailoring finished 25 hours ago and keeps one finished an hour ago (11.222642ms)
+✔ DELETE /v1/me removes the user's tailorings and keeps another user's (99.391549ms)
+✔ without userStatedSkills the generate prompt differs from main only by the skills clause and the repair prompt equals main (51.054482ms)
+✔ a stated skill adds the rule to the generate prompt (41.35279ms)
+✔ answer with unknown requirementId, bad choice or 401-char detail is 400 INVALID_INPUT (49.132568ms)
+✔ answer null or omitted behaves as before (72.037483ms)
+✔ YES and A_FEW with detail add ans-<rid> and ans-<rid>-b1 to the generate payload (104.385606ms)
+✔ NOT_YET and SKIPPED add no answer fact (74.281021ms)
+✔ prototype answer: summary cites ans-<rid>, no Infosys bullet cites it (bullet draft citing ans is REVERTED) (51.471858ms)
+✔ answer naming Infosys: an Infosys bullet may cite ans-<rid>-b1 and passes number and verifier checks (37.02335ms)
+✔ answer naming Infosys: a repaired bullet citing only ans-<rid>-b1 is REVERTED to its first source bullet (58.876165ms)
+✔ answer naming Infosys: a number only in the requirement text fails the number check (43.191382ms)
+✔ client entry with source USER_ANSWER or id ans-x is 400 INVALID_INPUT (10.369312ms)
+✔ client bullet id ans-x-b1 is 400 INVALID_INPUT (7.045109ms)
+✔ result.skills.added holds an answer skill named in the detail and drops a model-added skill that is not (38.873886ms)
+✔ the stored row holds no answer detail text and keeps ans- sourceIds only (73.957163ms)
+✔ test/tailormyresume-trial-fixture.ts (928.821491ms)
+✔ Node UTF-8 digests reproduce frozen Android/Python golden vectors including escaped Unicode UID (1.023676ms)
+✔ continuity HMAC separates app, environment, purpose and retained key versions (0.575079ms)
+✔ requires baseline device, license, recognized package, approved certificate/version, bound hash and fresh issue time (3.674601ms)
+✔ real decode adapter exchanges scoped signed OAuth assertion then decodes only configured package, caches token, bounds timeout (17.230807ms)
+✔ decode service outage rejects safely and never invents a verdict (7.944046ms)
+✔ zero wallet, credit history, and full export reads create no wallet/grant/ledger (68.859809ms)
+✔ trial grants exactly configured two once under duplicate initialization; replay before evidence/config and new key finds lifetime receipt (149.888901ms)
+✔ same-key changed signal is a conflict even after committed grant (92.175117ms)
+✔ signal reuse by another UID returns only its own zero wallet, including concurrent allocation and key rotation (143.219122ms)
+✔ changed policy rejects stale challenge; replay of old grants and publication across stale instances preserves original amount (102.107846ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/credits/initialize","status":503,"code":"INTEGRITY_UNAVAILABLE"}
+✔ outage and rejected verdict create no grant; bounded failed attempt counters survive rollback and retain no token or raw signal (57.091909ms)
+✔ wrong-owner challenge, unknown provider, cross-project auth and generic AI cannot create grants (31.805798ms)
+✔ all new endpoints reject missing/invalid auth, wrong app, invalid JSON shape, and oversized bodies (26.660323ms)
+✔ unknown creation metadata fails closed; old Firebase and pre-cutoff local identities remain legacy (32.958262ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/credits/initialize","status":503,"code":"PROMOTION_UNAVAILABLE"}
+{"event":"deletion_step_failed","app_id":"tailormyresume","step":"firebase","code":"Error"}
+✔ last full campaign award admits one, deletion does not refund capacity, partial deletion recovery and export erase all owned promotion edges (132.77033ms)
+✔ expiration cleanup deletes bounded evidence without deleting durable grants or restoring consumed capacity (7.584639ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/credits/initialize","status":503,"code":"INTEGRITY_UNAVAILABLE"}
+✔ independent actor and normalized network counters throttle temporarily, ignore proxy spoofing, and allow different people on shared Wi-Fi (218.905365ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/credits/initialize","status":500,"code":"INTERNAL_ERROR"}
+✔ transaction failure after wallet increment rolls back wallet, ledger, grant, operation and capacity together (91.130908ms)
+✔ deletion racing evidence verification prevents a late grant and cannot recreate erased data (75.150833ms)
+✔ drops local fixture (25.260828ms)
+✔ userStatedSkills is optional (3.581082ms)
+✔ null is accepted and means none (0.5088ms)
+✔ an entry that is not in skills is ignored and never marked (1.17195ms)
+✔ more than 100 entries is rejected (0.597429ms)
+✔ a payload without the field renders exactly as before (0.33629ms)
+✔ user-stated skills are marked and keep their evidence id (0.422475ms)
+✔ first and repeated wallet reads return zero without manufacturing a grant (59.121031ms)
+✔ an unlock answers 200 every time, spends nothing and returns a FREE unlock (26.919787ms)
+✔ an unlock spends no free or purchased credit (33.160385ms)
+✔ an unlock with no credit answers 200 and writes nothing (19.474553ms)
+✔ an invalid application id is 400 INVALID_INPUT (1.996505ms)
+✔ an unlock with a body is 400 INVALID_INPUT and changes nothing (12.472746ms)
+✔ two concurrent unlocks of one application spend nothing (27.146285ms)
+✔ two concurrent unlocks of different applications with one credit give 200 and 200 (17.883132ms)
+✔ another user's unlocks never show in a wallet (25.023645ms)
+✔ wallet routes with another registered app's token are 404 (0.954322ms)
+✔ packs come from config (3.128785ms)
+✔ a claim counts for the day and the allowance resets at 18:30:00Z (16.886066ms)
+✔ a claim is inflight while pending, repeat only after USED, and exhausted on the 4th distinct key (26.988163ms)
+✔ releaseClaim frees a slot and markUsed keeps it (33.747757ms)
+✔ markUsed after a released claim leaves one USED row (18.383899ms)
+✔ a pending claim older than 10 minutes no longer counts (9.064872ms)
+✔ a used claim older than 10 minutes still counts (21.992568ms)
+✔ three concurrent claims with two left give two claimed and one exhausted (10.553415ms)
+✔ the purge removes old claims except a used free tailoring (14.145114ms)
+{"event":"deletion_step_failed","app_id":"tailormyresume","step":"firebase","code":"Error"}
+✔ DELETE /v1/me erases the wallet tables, keeps others, and the retry completes (55.995319ms)
+✔ a wallet call after deletion is 409 ACCOUNT_DELETED and creates no row (4.118726ms)
+✔ drops the test database (37.216883ms)
+✔ the test database guard accepts only local hosts (2.005585ms)
+✔ test/test-database.ts (658.204569ms)
+ℹ tests 772
+ℹ suites 0
+ℹ pass 772
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 112914.8556

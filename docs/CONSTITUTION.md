@@ -23,7 +23,7 @@ These rules come from the core promise in `docs/PRD.md`: "We never invent anythi
 | I.2 | The candidate decides. Every suggestion starts as `PENDING`. Nothing reaches an export without an explicit accept. | `UpdateBulletDecisionUseCaseTest`, `TailorViewModelTest` |
 | I.3 | UI copy never claims an ATS score, an ATS pass, or a job, interview, or placement guarantee. Say "keyword coverage" and "readable by common ATS parsers" (PRD 6.4, 7). | Policy I.3 on `res/values*/*.xml` |
 | I.4 | No API key, token, or private key goes into the app or the repository. Model credentials live on the backend only. | Policy I.4; gitleaks |
-| I.5 | Candidate data leaves the device only to the TailorMyResume backend (`apps-backend`): the staging deployment in the `debug` and `staging` build types, the prod deployment in the `release` build type. The app has one HTTP stack: OkHttp, Retrofit, and kotlinx.serialization. Firebase Auth, Credential Manager (Google sign-in), Google Play Billing, and direct Google Play Integrity Standard requests only for an explicit protected guest admission (`GUEST_TRIAL`, section 8), Google activation including its explicitly requested protected base subaction (`GOOGLE_ACTIVATION`, section 9), or referral attachment (`REFERRAL_ATTACH`, section 10) under `docs/BACKEND_CONTRACT.md` are allowed. Backups stay off. Analytics, crash, and ad SDKs stay forbidden. | Policy I.5: `INTERNET` only in `app/src/main/AndroidManifest.xml`, no `allowBackup="true"`, no analytics, crash, or ad library, network libraries only in `core:network` or `:app`; Dependency Guard (`dependencyGuard`) locks the release classpath |
+| I.5 | Candidate data leaves the device only to the TailorMyResume backend (`apps-backend`): the staging deployment in the `debug` and `staging` build types, the prod deployment in the `release` build type. The app has one HTTP stack: OkHttp, Retrofit, and kotlinx.serialization. Firebase Auth, Credential Manager (Google sign-in), Google Play Billing, and direct Google Play Integrity Standard requests only for an explicit protected guest admission (`GUEST_TRIAL`, section 8), Google activation including its explicitly requested protected base subaction (`GOOGLE_ACTIVATION`, section 9), or referral attachment (`REFERRAL_ATTACH`, sections 10–11, including bounded foreground LINK/Google-continuation operations), plus the official Google Play Install Referrer service solely for section 11 attribution capture, under `docs/BACKEND_CONTRACT.md` are allowed. Backups stay off. Analytics, crash, and ad SDKs stay forbidden. | Policy I.5: `INTERNET` only in `app/src/main/AndroidManifest.xml`, no `allowBackup="true"`, no analytics, crash, or ad library, network libraries only in `core:network` or `:app`; Dependency Guard (`dependencyGuard`) locks the release classpath |
 
 ## Article II — Architecture
 
@@ -201,3 +201,28 @@ tests cover passive/recovery no-collection, explicit attempts, exact hash, actio
 owner/erasure fences and unavailable admission. Backend tests own finite counters and scope isolation.
 Genuine provider/package/certificate/licensing evidence, live disclosure/Terms/Data Safety, retention,
 erasure and campaign approval remain BLOCKED. This candidate is not ready for merge.
+
+### Proposed Article VII clarification — 2026-10-17, foreground referral links
+
+This unmerged proposal clarifies I.5 for contract section 11. It prepares the accepted implementation
+for review. It does not activate links, reward admission, hosting, merge or release.
+
+| Item | Why | Gate |
+|---|---|---|
+| REFERRAL_ATTACH includes a fresh foreground VIEW or visible user-triggered Google continuation | The accepted link journey automatically attaches a retained LINK candidate after activation reconciliation and visible current authenticated offer. Permission is ephemeral and single-use; the business request is durable. Cold links may wait for initial Firebase resolution in-process. Recreated intents, passive restore, referrer callbacks, resume, status reads and recovery-only work cannot collect fresh Integrity. Changed offers require explicit reconfirmation. | Review; RemoteReferralGatewayTest covers first source, display acknowledgement, LINK digest, policy reconfirmation, passive guards and owner fences. Existing policy/lint/full verification remain required. |
+| Official com.android.installreferrer:installreferrer:2.2 adapter | Read only the bounded referrer string on first foreground execution; close the service in every path, atomically consume terminal results, bound transient retries to three foreground entries, and preserve manual fallback. No timestamps, installer identity, analytics SDK or new Android-ID purpose. | Review; ReferralLinksTest frozen vectors; ReferralInstallationStoreTest durable consumption and cleanup; Dependency Guard and lint. Genuine Play installation/referrer remains external. |
+
+Only the exact server requestHash reaches Integrity. Raw URLs, referrers, Integrity tokens, challenge
+secrets, Android ID and candidate profile content never enter the attribution journal or logs.
+Current referral continuity stays null. The minimal consumed marker contains no code, UID or digest;
+the separate logical inbox in the same atomic envelope holds at most one pending canonical code and
+fixed environment until binding or cleanup. Both stay private with backup disabled. Sign-out,
+unrelated switch, dismissal and deletion clear code-bearing state without rearming old attribution.
+Same-UID guest linking preserves the candidate. Activity pause abandons a fresh VIEW permission;
+temporary credential UI pause does not turn an explicitly initiated Google continuation into a
+passive restore. No automatic permission survives process death.
+
+No general network exception, passive evidence collection, gate suppression or lint baseline change
+is proposed. Owned domains, matching package/certificate associations, Google/Integrity/Play evidence,
+disclosures and publication operations remain BLOCKED until independently satisfied.
+Official reference: [Play Install Referrer Library](https://developer.android.com/google/play/installreferrer/library).

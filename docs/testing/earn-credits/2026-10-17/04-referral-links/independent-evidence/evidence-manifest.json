@@ -1,0 +1,103 @@
+{
+  "frontend": "a86e8e3ab7354acab6cb5c78309adb09f91c3796",
+  "backend": "a67d2ad56330c5522235bd4e1ae526b0cf5e3412",
+  "publicationSelection": true,
+  "files": [
+    {
+      "file": "acceptance-results.json",
+      "sha256": "0cb1e6c00d41fe72b59b57a9912be03f8146f6906452efe2ad6a950a7694129e",
+      "bytes": 8343
+    },
+    {
+      "file": "backend-check.log",
+      "sha256": "d7590ec9d15c6a536b1d14dafc4e3bfdbe056536401b8fd219d165c6a31fb6a0",
+      "bytes": 87320
+    },
+    {
+      "file": "backend-history-scan.log",
+      "sha256": "2d52952def9ff03c56b2651d7afc9bbfb072f955e6a8c8096ece03321fdf0284",
+      "bytes": 111
+    },
+    {
+      "file": "contract-verifier.log",
+      "sha256": "b832930bc1871cef93b33a2955793709eb2836a289cbe536fd7d0f8d2c8846cf",
+      "bytes": 201
+    },
+    {
+      "file": "emulator-fixture-cold-candidate.png",
+      "sha256": "faf252d9406c98d1f89fb3e7019fca5279ef8bd1ab54abc67bc7118690064070",
+      "bytes": 166911
+    },
+    {
+      "file": "emulator-warm-first-and-draft.png",
+      "sha256": "656363a0967f7f16558dc7bf8191ddf91f095036f92f560c12f8bc15ba9068d1",
+      "bytes": 183923
+    },
+    {
+      "file": "frontend-source-scan.log",
+      "sha256": "c07c3f39efab07402b8e5aaa33ab6790365adedaa76a52aed436d5984a9a028d",
+      "bytes": 400
+    },
+    {
+      "file": "frontend-verify.log",
+      "sha256": "eb7ab887e422193686e74bcd0273c9e3741c8fa5818f5ae56727643c9088a5e2",
+      "bytes": 154983
+    },
+    {
+      "file": "gates-and-stop-summary.json",
+      "sha256": "dfb7c0cd6a66b015a6395bf0e5e390ce4eed12f01946a56987cc3545a1004eec",
+      "bytes": 2359
+    },
+    {
+      "file": "landing-browser.md",
+      "sha256": "c5cd2d17f6dd497649039c34f1257646361df5f7c97af21e5adbe19ece85444d",
+      "bytes": 3197
+    },
+    {
+      "file": "landing-desktop-current.jpg",
+      "sha256": "e6c8562a2d319bcbdd54769f64dd639ad753540cb200bc15ba865acde1d1b53c",
+      "bytes": 52238
+    },
+    {
+      "file": "landing-expiry-after.jpg",
+      "sha256": "b1907452d5a14e93c45fd6861e6296c82588809c4486bd16f2b00cd07c3c95a1",
+      "bytes": 51508
+    },
+    {
+      "file": "landing-expiry-after.json",
+      "sha256": "32d749bdd557a162902de30a13018b579b9599f566590af33bc6f650b56f904f",
+      "bytes": 110
+    },
+    {
+      "file": "landing-expiry-before.json",
+      "sha256": "da6dbfc759be5a65a691fa261e9d8ceb160140af1020dc6618c5e1a075ace2fb",
+      "bytes": 218
+    },
+    {
+      "file": "landing-fallback-results.json",
+      "sha256": "1829829a4c59ba6eb3a0d0ef91aede51c2d9b8c12c43d44c8301ad3b327b4b46",
+      "bytes": 2616
+    },
+    {
+      "file": "landing-harness-proof.json",
+      "sha256": "42479a18096f65d9e8357f66b39ea2974daa2f9f3866c8facdb29e0958f66639",
+      "bytes": 2214
+    },
+    {
+      "file": "landing-mobile-current.jpg",
+      "sha256": "6f0d0eb53484a779cb71cb177dd24f2b64a74de713e018d311e881f2d4274102",
+      "bytes": 36290
+    },
+    {
+      "file": "runtime-smoke.md",
+      "sha256": "e7e861432d64425dff1e9cb7959e4e5c1abc0833f13b44e436d94ec5a2902f41",
+      "bytes": 7518
+    },
+    {
+      "file": "screenshots-manifest.json",
+      "sha256": "62f8ef475865300f03364a1bce3c96573d029ee1eeb5bc210cea0881cd075f45",
+      "bytes": 2691
+    }
+  ],
+  "omissions": "No APKs, private config/client values, per-file source checksum manifests, runtime databases, relay payloads or diagnostic immediate-stop screenshot. Original validator verdict unchanged; publication copies redact private transport identifiers and declare omitted artifacts."
+}

@@ -1,5 +1,6 @@
 package com.tailormyresume.app
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -32,8 +33,22 @@ class MainActivity : ComponentActivity() {
     @javax.inject.Inject
     lateinit var uids: com.tailormyresume.core.domain.FirebaseUidProvider
 
+    @javax.inject.Inject
+    lateinit var referrals: com.tailormyresume.app.referrals.RemoteReferralGateway
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        referrals.receiveView(intent.action, intent.dataString)
+    }
+
+    override fun onPause() {
+        referrals.leaveForeground()
+        super.onPause()
+    }
+
     override fun onResume() {
         super.onResume()
+        lifecycleScope.launch { referrals.foregroundEntry() }
         if (uids.uid() != null) {
             lifecycleScope.launch {
                 wallet.refreshOrCached()
@@ -48,12 +63,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT), navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) referrals.receiveView(intent.action, intent.dataString)
 
         setContent {
             TmrTheme {
                 val rootState by appViewModel.rootState.collectAsStateWithLifecycle()
                 val hasHome by backTargetViewModel.hasHome.collectAsStateWithLifecycle()
-                TmrApp(rootState = rootState, hasHome = { hasHome }, google = google)
+                TmrApp(rootState = rootState, hasHome = { hasHome }, google = google, referrals = referrals)
             }
         }
     }

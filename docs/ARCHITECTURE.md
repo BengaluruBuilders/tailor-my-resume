@@ -368,3 +368,22 @@ checkpoint, selection, operation keys, receipt revisions and rate deadline. A ch
 offer still requires confirmation; committed request recovery precedes provider/policy lookups.
 Account deletion erases recovery and freezes late writes. Reauthentication never extends a server
 capability's expiry or authorizes an account switch.
+
+### Referral link entry
+
+Section 11 of `BACKEND_CONTRACT.md` adds transport to the existing referral gateway. `ReferralLinks`
+parses the exact variant-owned HTTPS origin and Play inner referrer. Disabled variant configuration
+adds no manifest filter and disables capture. No input chooses the API/Firebase environment.
+`PrivateReferralStore` keeps a small atomic installation inbox/consumed marker and the existing
+actor-owned journal with additive source MANUAL defaults. Capture and attach share the gateway mutex.
+The official service is injected through `InstallReferrerSource`; it has no reward authority.
+
+`MainActivity` forwards only fresh cold VIEW and warm intents; Activity recreation skips original
+intent delivery. Firebase initial auth state settles before a cold link binds to an actor. A fresh
+foreground event or visibly disclosed user Google continuation supplies one ephemeral permission.
+The gateway routes to the existing Invite friends surface without rooting or clearing drafts; the
+rendered offer acknowledges its code/revision before protected work. Policy change stops automatic
+submission and keeps the same durable business key for explicit reconfirmation. Passive reads and
+referrer callbacks cannot acquire fresh evidence. Account cleanup and generation/erase checks cancel
+late capture, responses and foreground permission. Own GET and committed replay remain the recovery
+path; no attribution grants, spends or tailors locally.

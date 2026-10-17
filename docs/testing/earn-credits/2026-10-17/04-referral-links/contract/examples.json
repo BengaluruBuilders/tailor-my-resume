@@ -1,0 +1,142 @@
+{
+  "contractVersion": "referral-links-v1",
+  "fixtureOnly": true,
+  "notDeployed": "All example.invalid hosts, synthetic fingerprints and 30/300-second publication values are isolated fixtures, never activation choices or served associations. Existing03 LINK canonical digest already covers source binding.",
+  "examples": [
+    {
+      "name": "disabled",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": false
+      }
+    },
+    {
+      "name": "configured-snapshot",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "https://referrals-staging.example.invalid",
+        "allowedOrigins": [
+          "https://referrals-staging.example.invalid"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [
+          "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+        ],
+        "publicOffer": {
+          "mode": "SNAPSHOT",
+          "maxAgeSeconds": 30,
+          "maxValiditySeconds": 300
+        }
+      }
+    },
+    {
+      "name": "configured-neutral",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "https://referrals-staging.example.invalid",
+        "allowedOrigins": [
+          "https://referrals-staging.example.invalid"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [
+          "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+        ],
+        "publicOffer": {
+          "mode": "NEUTRAL"
+        }
+      }
+    },
+    {
+      "name": "available-snapshot",
+      "schema": "offerSnapshot",
+      "value": {
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "version": "referral-local-v1",
+        "effectiveAt": "2026-10-17T00:00:00Z",
+        "expiresAt": "2026-10-17T00:05:00Z",
+        "availability": "AVAILABLE",
+        "rewardAmount": 5
+      }
+    },
+    {
+      "name": "paused-snapshot",
+      "schema": "offerSnapshot",
+      "value": {
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "version": "referral-local-v1",
+        "effectiveAt": "2026-10-17T00:00:00Z",
+        "expiresAt": "2026-10-17T00:05:00Z",
+        "availability": "UNAVAILABLE",
+        "rewardAmount": null
+      }
+    },
+    {
+      "name": "association-fixture-only",
+      "schema": "assetlinks",
+      "value": [
+        {
+          "relation": [
+            "delegate_permission/common.handle_all_urls"
+          ],
+          "target": {
+            "namespace": "android_app",
+            "package_name": "com.tailormyresume.app.staging",
+            "sha256_cert_fingerprints": [
+              "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "responseDelta": {
+    "newFields": [],
+    "enabledShareUrl": "https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "disabledShareUrl": null,
+    "unchangedSchemas": "03-manual-referrals/contract/schemas.json"
+  },
+  "play": {
+    "innerReferrer": "tmr_referral=tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "storeUrl": "https://play.google.com/store/apps/details?id=com.tailormyresume.app.staging&referrer=tmr_referral%3Dtailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+  },
+  "snapshotRendering": [
+    {
+      "name": "current",
+      "now": "2026-10-17T00:01:00Z",
+      "snapshot": "available-snapshot",
+      "expected": "CONDITIONAL_NUMERIC"
+    },
+    {
+      "name": "expired-boundary",
+      "now": "2026-10-17T00:05:00Z",
+      "snapshot": "available-snapshot",
+      "expected": "NEUTRAL"
+    },
+    {
+      "name": "not-effective",
+      "now": "2026-10-16T23:59:59Z",
+      "snapshot": "available-snapshot",
+      "expected": "NEUTRAL"
+    },
+    {
+      "name": "paused",
+      "now": "2026-10-17T00:01:00Z",
+      "snapshot": "paused-snapshot",
+      "expected": "NEUTRAL"
+    },
+    {
+      "name": "missing",
+      "now": "2026-10-17T00:01:00Z",
+      "snapshot": null,
+      "expected": "NEUTRAL"
+    }
+  ]
+}

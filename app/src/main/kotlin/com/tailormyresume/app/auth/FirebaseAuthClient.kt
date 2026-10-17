@@ -43,6 +43,27 @@ class FirebaseAuthClient @Inject constructor(
 
     private val auth: FirebaseAuth? by lazy { if (config.isComplete) createAuth() else null }
 
+    override suspend fun initializedUser(): FirebaseUser? = withContext(io) {
+        val firebaseAuth = auth ?: return@withContext null
+        suspendCancellableCoroutine { continuation ->
+            val listener = object : FirebaseAuth.AuthStateListener {
+                override fun onAuthStateChanged(auth: FirebaseAuth) {
+                    auth.removeAuthStateListener(this)
+                    val user = auth.currentUser
+                    if (continuation.isActive) {
+                        continuation.resume(
+                            user?.let {
+                                FirebaseUser(it.uid, it.displayName.orEmpty(), it.email.orEmpty(), if (it.isAnonymous) AccountMode.ANONYMOUS else AccountMode.GOOGLE, it.providerData.firstOrNull { provider -> provider.providerId == "google.com" }?.uid)
+                            },
+                        )
+                    }
+                }
+            }
+            continuation.invokeOnCancellation { firebaseAuth.removeAuthStateListener(listener) }
+            firebaseAuth.addAuthStateListener(listener)
+        }
+    }
+
     override suspend fun currentUser(): FirebaseUser? = withContext(io) {
         auth?.currentUser?.let { user ->
             FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), if (user.isAnonymous) AccountMode.ANONYMOUS else AccountMode.GOOGLE, user.providerData.firstOrNull { it.providerId == "google.com" }?.uid)

@@ -1,0 +1,102 @@
+{
+  "frontend": "a86e8e3ab7354acab6cb5c78309adb09f91c3796",
+  "backend": "a67d2ad56330c5522235bd4e1ae526b0cf5e3412",
+  "contractSha256": "5f1ee690c0a0ff7aed487f468400a4181a4298286210e492e18887cd9fa6f803",
+  "backendCheck": {
+    "exit": 0,
+    "tests": 772,
+    "pass": 772,
+    "fail": 0,
+    "skipped": 0,
+    "durationMs": 112914.8556,
+    "session": 75352
+  },
+  "frontendCheck": {
+    "exit": 0,
+    "session": 15349,
+    "durationSeconds": 8,
+    "tasks": 2065,
+    "executed": 35,
+    "upToDate": 2030,
+    "junitRetained": {
+      "suites": 511,
+      "tests": 2884,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "realScannerHarnessCases": 28,
+    "realScannerSkipped": 0,
+    "initialSetupFailureSession": 43660,
+    "initialFailure": "scanner directory instead of executable; retained; no source/gate edits"
+  },
+  "frontendSourceScan": {
+    "exit": 0,
+    "session": 99133,
+    "normalHooks": true,
+    "sourceRange": "893503c8c85573a064eb5fc640fc37e6b76a3558..a86e8e3ab7354acab6cb5c78309adb09f91c3796"
+  },
+  "backendHistoryScan": {
+    "exit": 0,
+    "version": "8.28.0",
+    "commits": 172,
+    "bytesApprox": 5127305
+  },
+  "contractVerifier": {
+    "exit": 0,
+    "schemasExamples": 6,
+    "negativeCases": 14,
+    "validVectors": 6,
+    "invalidVectors": 31
+  },
+  "terminalProcesses": {
+    "emulator": {
+      "session": 77523,
+      "exit": 0
+    },
+    "relay": {
+      "pid": 921846,
+      "session": 18853,
+      "exit": 142,
+      "reason": "bounded15-minute safety alarm; absent"
+    },
+    "landingServer": {
+      "pid": 929413,
+      "session": 79457,
+      "exit": 143,
+      "reason": "verified scoped TERM; absent"
+    },
+    "metadataObservers": {
+      "sessions": [
+        37989,
+        89439
+      ],
+      "exit": 124,
+      "detached": true
+    },
+    "remoteGradle": {
+      "pid": 218072,
+      "idleCpuTicks5sec": 0,
+      "stopped": true,
+      "absent": true
+    },
+    "candidateTracerPid": 0
+  },
+  "restoredEmulatorSettings": {
+    "http_proxy": ":0",
+    "global_http_proxy_host": null,
+    "global_http_proxy_port": null,
+    "global_http_proxy_exclusion_list": null,
+    "font_scale": "1.0"
+  },
+  "intentionallyPreservedRemotePids": [
+    190027,
+    114856,
+    55083,
+    28765,
+    40092
+  ],
+  "sourceChanges": false,
+  "phoneDataReset": false,
+  "publicationPerformed": false
+}

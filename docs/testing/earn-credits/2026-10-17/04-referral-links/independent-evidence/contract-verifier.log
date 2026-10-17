@@ -1,0 +1,1 @@
+PASS: 6 schemas/examples, 14 negative cases, 6 valid/31 invalid transport vectors, Play encoding, 5 snapshot boundaries, 24 acceptance requirements, unchanged prior contract/fixtures and frozen hashes

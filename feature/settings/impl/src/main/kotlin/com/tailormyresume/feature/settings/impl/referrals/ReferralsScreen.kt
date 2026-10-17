@@ -15,9 +15,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +42,7 @@ import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.ReferralMessage
 import com.tailormyresume.core.domain.ReferralUiState
 import com.tailormyresume.feature.settings.impl.R
+import kotlinx.coroutines.launch
 
 internal class ReferralActions(
     val refresh: () -> Unit,
@@ -50,11 +53,21 @@ internal class ReferralActions(
     val review: () -> Unit,
     val google: () -> Unit,
     val copy: (String) -> Unit,
+    val share: () -> Unit = {},
 )
 
 @Composable
 internal fun ReferralsRoute(modifier: Modifier = Modifier, viewModel: ReferralsViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val content = state as? ReferralUiState.Content
+    val request by viewModel.routeRequests.collectAsStateWithLifecycle()
+    LaunchedEffect(content?.candidate, content?.offerVersion, request) {
+        content?.candidate?.let { code ->
+            androidx.compose.runtime.withFrameNanos { }
+            viewModel.displayed(code, content.offerVersion)
+        }
+    }
+    val scope = rememberCoroutineScope()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(viewModel, lifecycle) {
         viewModel.refresh()
@@ -63,14 +76,34 @@ internal fun ReferralsRoute(modifier: Modifier = Modifier, viewModel: ReferralsV
         onDispose { lifecycle.removeObserver(observer) }
     }
     val context = LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val toast = LocalTmrToast.current
     val copied = stringResource(R.string.feature_settings_impl_referral_copied)
     val label = stringResource(R.string.feature_settings_impl_referral_my_code)
-    val actions = remember(viewModel, context, toast, copied, label) {
-        ReferralActions(viewModel::refresh, viewModel::issue, viewModel::save, viewModel::clear, viewModel::apply, viewModel::review, viewModel::google) { code ->
-            (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText(label, code))
-            toast.show(copied)
-        }
+    val actions = remember(viewModel, context, resources, toast, copied, label) {
+        ReferralActions(
+            viewModel::refresh, viewModel::issue, viewModel::save, viewModel::clear, viewModel::apply, viewModel::review, viewModel::google,
+            copy = { code ->
+                (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText(label, code))
+                toast.show(copied)
+            },
+            share = {
+                scope.launch {
+                    viewModel.share()?.let { value ->
+                        val destination = value.url ?: value.code
+                        val reward = value.reward
+                        val version = value.version
+                        val text = if (reward != null && version != null) {
+                            resources.getQuantityString(R.plurals.feature_settings_impl_referral_share_offer, reward, reward, version, destination)
+                        } else {
+                            context.getString(R.string.feature_settings_impl_referral_share_neutral, destination)
+                        }
+                        val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, text)
+                        context.startActivity(android.content.Intent.createChooser(send, context.getString(R.string.feature_settings_impl_referral_share)))
+                    }
+                }
+            },
+        )
     }
     ReferralsScreen(state, actions, modifier)
 }
@@ -94,10 +127,14 @@ internal fun ReferralsScreen(state: ReferralUiState, actions: ReferralActions, m
             style = TmrTheme.typography.body,
             color = TmrTheme.colors.textSecondary,
         )
+        content.offerVersion?.takeIf { content.reward != null }?.let { version ->
+            Text(stringResource(R.string.feature_settings_impl_referral_offer_version, version), style = TmrTheme.typography.caption, color = TmrTheme.colors.textMuted)
+        }
         val personalCode = content.code
         if (personalCode != null) {
             TmrReadOnlyField(personalCode, stringResource(R.string.feature_settings_impl_referral_my_code))
             TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_copy), { actions.copy(personalCode) }, Modifier.fillMaxWidth(), enabled = !content.busy)
+            if (content.shareUrl != null) TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_share), actions.share, Modifier.fillMaxWidth(), enabled = !content.busy)
         } else if (content.canIssue) {
             TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_create), actions.issue, Modifier.fillMaxWidth(), enabled = !content.busy)
         }
@@ -156,7 +193,15 @@ private fun ReferralEntry(content: ReferralUiState.Content, actions: ReferralAct
                     TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_review), actions.review, Modifier.fillMaxWidth(), enabled = !content.busy)
                 } else {
                     TmrPrimaryButton(
-                        stringResource(if (content.message == ReferralMessage.PolicyChanged) R.string.feature_settings_impl_referral_reconfirm else R.string.feature_settings_impl_referral_apply),
+                        stringResource(
+                            if (content.message == ReferralMessage.PolicyChanged) {
+                                R.string.feature_settings_impl_referral_reconfirm
+                            } else if (content.candidateSource == "LINK") {
+                                R.string.feature_settings_impl_referral_continue
+                            } else {
+                                R.string.feature_settings_impl_referral_apply
+                            },
+                        ),
                         actions.apply,
                         Modifier.fillMaxWidth(),
                         enabled = !content.busy && content.canAttach && content.retryAfterSeconds == null,

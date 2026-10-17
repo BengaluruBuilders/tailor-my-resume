@@ -51,6 +51,7 @@ class RemoteGuestTrialGateway @Inject constructor(
     private val cleaner: SignOutCleaner,
     private val wiper: LocalDataWiper,
     private val clock: Clock,
+    private val referrals: com.tailormyresume.app.referrals.RemoteReferralGateway? = null,
 ) : GuestTrialGateway {
     private val mutex = Mutex()
     private var actor: FirebaseUser? = null
@@ -71,6 +72,7 @@ class RemoteGuestTrialGateway @Inject constructor(
             apiResult { api.me() }.getOrThrow()
             ensureOwner(user.uid, generation)
             liveActor = user.uid
+            referrals?.entered()
             wallet.refreshOrCached()
             refreshPolicy(user.uid, generation)
         } catch (cancelled: CancellationException) {

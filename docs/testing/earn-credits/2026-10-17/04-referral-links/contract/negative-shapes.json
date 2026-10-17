@@ -1,0 +1,251 @@
+{
+  "contractVersion": "referral-links-v1",
+  "fixtureOnly": true,
+  "cases": [
+    {
+      "name": "partial-enabled",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true
+      }
+    },
+    {
+      "name": "disabled-extra-origin",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": false,
+        "origin": "https://referrals-staging.example.invalid"
+      }
+    },
+    {
+      "name": "http-origin",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "http://referrals.example.invalid",
+        "allowedOrigins": [
+          "https://referrals-staging.example.invalid"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [
+          "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+        ],
+        "publicOffer": {
+          "mode": "SNAPSHOT",
+          "maxAgeSeconds": 30,
+          "maxValiditySeconds": 300
+        }
+      }
+    },
+    {
+      "name": "origin-path",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "https://referrals-staging.example.invalid/r",
+        "allowedOrigins": [
+          "https://referrals-staging.example.invalid"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [
+          "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+        ],
+        "publicOffer": {
+          "mode": "SNAPSHOT",
+          "maxAgeSeconds": 30,
+          "maxValiditySeconds": 300
+        }
+      }
+    },
+    {
+      "name": "arbitrary-redirect",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "https://referrals-staging.example.invalid",
+        "allowedOrigins": [
+          "https://referrals-staging.example.invalid"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [
+          "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+        ],
+        "publicOffer": {
+          "mode": "SNAPSHOT",
+          "maxAgeSeconds": 30,
+          "maxValiditySeconds": 300
+        },
+        "redirect": "https://evil.invalid"
+      }
+    },
+    {
+      "name": "missing-cert",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "https://referrals-staging.example.invalid",
+        "allowedOrigins": [
+          "https://referrals-staging.example.invalid"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [],
+        "publicOffer": {
+          "mode": "SNAPSHOT",
+          "maxAgeSeconds": 30,
+          "maxValiditySeconds": 300
+        }
+      }
+    },
+    {
+      "name": "snapshot-private-field",
+      "schema": "offerSnapshot",
+      "value": {
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "version": "referral-local-v1",
+        "effectiveAt": "2026-10-17T00:00:00Z",
+        "expiresAt": "2026-10-17T00:05:00Z",
+        "availability": "AVAILABLE",
+        "rewardAmount": 5,
+        "inviterUid": "private"
+      }
+    },
+    {
+      "name": "snapshot-zero-reward",
+      "schema": "offerSnapshot",
+      "value": {
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "version": "referral-local-v1",
+        "effectiveAt": "2026-10-17T00:00:00Z",
+        "expiresAt": "2026-10-17T00:05:00Z",
+        "availability": "AVAILABLE",
+        "rewardAmount": 0
+      }
+    }
+  ],
+  "semanticCases": [
+    {
+      "name": "origin-not-allowlisted",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "https://referrals-staging.example.invalid",
+        "allowedOrigins": [
+          "https://other.example.invalid"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [
+          "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+        ],
+        "publicOffer": {
+          "mode": "SNAPSHOT",
+          "maxAgeSeconds": 30,
+          "maxValiditySeconds": 300
+        }
+      }
+    },
+    {
+      "name": "cache-exceeds-validity",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "https://referrals-staging.example.invalid",
+        "allowedOrigins": [
+          "https://referrals-staging.example.invalid"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [
+          "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+        ],
+        "publicOffer": {
+          "mode": "SNAPSHOT",
+          "maxAgeSeconds": 301,
+          "maxValiditySeconds": 300
+        }
+      }
+    },
+    {
+      "name": "ip-origin",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "https://127.0.0.1",
+        "allowedOrigins": [
+          "https://127.0.0.1"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [
+          "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+        ],
+        "publicOffer": {
+          "mode": "SNAPSHOT",
+          "maxAgeSeconds": 30,
+          "maxValiditySeconds": 300
+        }
+      }
+    },
+    {
+      "name": "internal-origin",
+      "schema": "linkConfig",
+      "value": {
+        "enabled": true,
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "origin": "https://links.local",
+        "allowedOrigins": [
+          "https://links.local"
+        ],
+        "packageName": "com.tailormyresume.app.staging",
+        "sha256CertFingerprints": [
+          "AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB:AB"
+        ],
+        "publicOffer": {
+          "mode": "SNAPSHOT",
+          "maxAgeSeconds": 30,
+          "maxValiditySeconds": 300
+        }
+      }
+    },
+    {
+      "name": "available-without-amount",
+      "schema": "offerSnapshot",
+      "value": {
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "version": "referral-local-v1",
+        "effectiveAt": "2026-10-17T00:00:00Z",
+        "expiresAt": "2026-10-17T00:05:00Z",
+        "availability": "AVAILABLE",
+        "rewardAmount": null
+      }
+    },
+    {
+      "name": "reverse-interval",
+      "schema": "offerSnapshot",
+      "value": {
+        "appId": "tailormyresume",
+        "environment": "staging",
+        "version": "referral-local-v1",
+        "effectiveAt": "2026-10-17T00:00:00Z",
+        "expiresAt": "2026-10-16T23:59:59Z",
+        "availability": "AVAILABLE",
+        "rewardAmount": 5
+      }
+    }
+  ]
+}
