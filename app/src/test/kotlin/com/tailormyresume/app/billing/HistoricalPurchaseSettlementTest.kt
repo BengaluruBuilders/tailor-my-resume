@@ -54,6 +54,26 @@ class HistoricalPurchaseSettlementTest {
         server.enqueue(MockResponse().setResponseCode(code).setBody(body))
     }
 
+    @Test fun startupAndCompletionListenerUseTheHistoricalSettlementPath() = runTest {
+        google()
+        billing.owned = listOf(paid.copy(state = PlayPurchaseState.PENDING))
+        val settlement = subject(backgroundScope)
+        PurchaseRestorer({ settlement }, { billing }, sessions, backgroundScope).start()
+        runCurrent()
+        assertThat(billing.queries).isEqualTo(1)
+        assertThat(server.requestCount).isEqualTo(0)
+        answer()
+        billing.owned = listOf(paid)
+        billing.unsolicitedPurchases.emit(paid)
+        runCurrent()
+        withContext(Dispatchers.IO) { kotlinx.coroutines.withTimeout(5_000) { wallet.wallet.first { it != null } } }
+        assertThat(wallet.cached?.purchasedCredits).isEqualTo(5)
+        sessions.signOut()
+        runCurrent()
+        assertThat(billing.unsolicitedPurchases.subscriptionCount.value).isEqualTo(0)
+        assertThat(settlement.repostCount()).isEqualTo(0)
+    }
+
     @Test fun startupRepostsPaidUnpostedTokenWithoutLoadingProducts() = runTest {
         google()
         billing.owned = listOf(paid)

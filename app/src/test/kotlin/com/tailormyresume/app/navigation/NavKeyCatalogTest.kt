@@ -16,8 +16,8 @@ class NavKeyCatalogTest {
     private val allNavKeys: List<NavKey> = CHROME_TABLE.map { it.key }
 
     @Test
-    fun exactlyTwentyEightKeysAndNoDeletedKeys() {
-        assertThat(allNavKeys).hasSize(28)
+    fun twentySevenDestinationsAndOneLegacyDecodeKey() {
+        assertThat(allNavKeys).hasSize(27)
         assertThat(allNavKeys.map { it::class }).containsNoDuplicates()
         assertThat(sourceKeyDeclarations()).isEqualTo(28)
 

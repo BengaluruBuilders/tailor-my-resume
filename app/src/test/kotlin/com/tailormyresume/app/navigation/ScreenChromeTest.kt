@@ -94,8 +94,8 @@ class ScreenChromeTest {
     }
 
     @Test
-    fun chromeMatchesTTableForAll28Keys() {
-        assertThat(CHROME_TABLE).hasSize(28)
+    fun chromeMatchesTableForAll27Destinations() {
+        assertThat(CHROME_TABLE).hasSize(27)
         assertThat(CHROME_TABLE.map { it.key::class }).containsNoDuplicates()
 
         CHROME_TABLE.forEach { row ->
