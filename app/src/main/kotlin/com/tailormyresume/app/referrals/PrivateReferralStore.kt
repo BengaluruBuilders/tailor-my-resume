@@ -52,8 +52,12 @@ class PrivateReferralStore @Inject constructor(
     internal suspend fun read(owner: String, environment: String): ReferralJournal? = withContext(io) {
         mutex.withLock {
             val target = file(owner, environment)
-            if (!target.baseFile.exists()) null else target.openRead().use { json.decodeFromString<ReferralJournal>(it.reader().readText()) }
-                .takeIf { it.owner == owner && it.environment == environment }
+            if (!target.baseFile.exists()) {
+                null
+            } else {
+                target.openRead().use { json.decodeFromString<ReferralJournal>(it.reader().readText()) }
+                    .takeIf { it.owner == owner && it.environment == environment }
+            }
         }
     }
     internal suspend fun write(value: ReferralJournal, expectedEpoch: Long, checkOwner: () -> Unit) = withContext(io) {

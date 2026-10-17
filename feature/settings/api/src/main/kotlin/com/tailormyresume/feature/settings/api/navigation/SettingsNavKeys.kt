@@ -25,7 +25,9 @@ data class PaywallNavKey(
 @Serializable
 data object ReferralsNavKey : NavKey
 
-fun Navigator.navigateToReferrals() { navigate(ReferralsNavKey) }
+fun Navigator.navigateToReferrals() {
+    navigate(ReferralsNavKey)
+}
 
 val DefaultSettingsNavKey = SettingsNavKey()
 

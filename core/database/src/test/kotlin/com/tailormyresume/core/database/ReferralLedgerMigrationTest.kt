@@ -11,6 +11,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ReferralLedgerMigrationTest {
     @get:Rule val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), TmrDatabase::class.java)
+
     @Test fun migrationPreservesLegacyIdsAndAddsScopedNullableUniqueServerIdentity() {
         helper.createDatabase("referral-ledger-v6", 5).apply {
             execSQL("INSERT INTO credit_ledger (id,kind,amount,createdAt) VALUES (17,'PURCHASE',15,12)")
@@ -28,7 +29,11 @@ class ReferralLedgerMigrationTest {
         db.execSQL("INSERT INTO credit_ledger (kind,amount,createdAt,owner,environment,serverId) VALUES ('REFERRAL_REWARD',13,13,'b','staging','reward-1')")
         db.execSQL("INSERT INTO credit_ledger (kind,amount,createdAt,owner,environment,serverId) VALUES ('REFERRAL_REWARD',13,13,'a','production','reward-1')")
         var rejected = false
-        try { db.execSQL("INSERT INTO credit_ledger (kind,amount,createdAt,owner,environment,serverId) VALUES ('REFERRAL_REWARD',13,13,'a','staging','reward-1')") } catch (_: android.database.sqlite.SQLiteConstraintException) { rejected = true }
+        try {
+            db.execSQL("INSERT INTO credit_ledger (kind,amount,createdAt,owner,environment,serverId) VALUES ('REFERRAL_REWARD',13,13,'a','staging','reward-1')")
+        } catch (_: android.database.sqlite.SQLiteConstraintException) {
+            rejected = true
+        }
         assertThat(rejected).isTrue()
         db.close()
     }

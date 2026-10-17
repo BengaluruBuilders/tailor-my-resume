@@ -10,7 +10,6 @@ import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.domain.ReferralGateway
 import com.tailormyresume.core.domain.ReferralMessage
 import com.tailormyresume.core.domain.ReferralUiState
-import com.tailormyresume.core.model.AccountMode
 import com.tailormyresume.core.network.ApiError
 import com.tailormyresume.core.network.ApiException
 import com.tailormyresume.core.network.TailorMyResumeApi
@@ -81,7 +80,10 @@ class RemoteReferralGateway @Inject constructor(
     private fun content() = mutable.value as? ReferralUiState.Content ?: ReferralUiState.Content()
     private suspend fun run(action: suspend (Owner) -> Unit) = mutex.withLock {
         val owner = owner()
-        if (shownOwner != owner.ticket.owner) { shown = null; mutable.value = ReferralUiState.Loading }
+        if (shownOwner != owner.ticket.owner) {
+            shown = null
+            mutable.value = ReferralUiState.Loading
+        }
         shownOwner = owner.ticket.owner
         try {
             mutable.value = content().copy(busy = true)
@@ -103,8 +105,12 @@ class RemoteReferralGateway @Inject constructor(
         val response = apiResult { api.referrals() }
         check(owner)
         if (response.isFailure) {
-            mutable.value = ReferralUiState.Content(candidate = journal.code, guest = uids.isAnonymous(), reviewRequired = journal.reviewFrom != null,
-                message = if (journal.phase == "READ_ONLY") ReferralMessage.ReadOnly else ReferralMessage.Unavailable)
+            mutable.value = ReferralUiState.Content(
+                candidate = journal.code,
+                guest = uids.isAnonymous(),
+                reviewRequired = journal.reviewFrom != null,
+                message = if (journal.phase == "READ_ONLY") ReferralMessage.ReadOnly else ReferralMessage.Unavailable,
+            )
             return
         }
         readSucceeded = true
@@ -132,7 +138,17 @@ class RemoteReferralGateway @Inject constructor(
             canIssue = result.offer.codeIssuance in setOf("AVAILABLE", "ACTIVATION_REQUIRED"), guest = uids.isAnonymous(), attached = result.attachment?.status == "ATTACHED",
             canAttach = available && result.offer.attachmentEligibility == "ELIGIBLE" && journal.phase != "READ_ONLY" && journal.reviewFrom == null,
             deadline = result.offer.deadline, reviewRequired = journal.reviewFrom != null,
-            message = if (message != ReferralMessage.None) message else if (!available) ReferralMessage.Unavailable else if (result.offer.attachmentEligibility == "NOT_ELIGIBLE") ReferralMessage.Ineligible else if (result.offer.attachmentEligibility == "EXPIRED") ReferralMessage.Expired else ReferralMessage.None,
+            message = if (message != ReferralMessage.None) {
+                message
+            } else if (!available) {
+                ReferralMessage.Unavailable
+            } else if (result.offer.attachmentEligibility == "NOT_ELIGIBLE") {
+                ReferralMessage.Ineligible
+            } else if (result.offer.attachmentEligibility == "EXPIRED") {
+                ReferralMessage.Expired
+            } else {
+                ReferralMessage.None
+            },
             retryAfterSeconds = remaining(journal),
         )
     }
@@ -155,7 +171,10 @@ class RemoteReferralGateway @Inject constructor(
     }
     override suspend fun clear() = run { owner ->
         var current = read(owner)
-        if (current.phase == "READ_ONLY") { refresh(owner); return@run }
+        if (current.phase == "READ_ONLY") {
+            refresh(owner)
+            return@run
+        }
         if (current.phase == "SENT") {
             refresh(owner)
             current = read(owner)
@@ -166,17 +185,26 @@ class RemoteReferralGateway @Inject constructor(
     }
     override suspend fun issue() = run { owner ->
         var current = read(owner)
-        if (uids.isAnonymous()) { refresh(owner); return@run }
+        if (uids.isAnonymous()) {
+            refresh(owner)
+            return@run
+        }
         if (shown?.codeIssuance == "ACTIVATION_REQUIRED") {
             current = observe(owner, current)
             refresh(owner)
         }
-        if (shown?.codeIssuance != "AVAILABLE") { refresh(owner); return@run }
+        if (shown?.codeIssuance != "AVAILABLE") {
+            refresh(owner)
+            return@run
+        }
         current = current.copy(issueRequestId = current.issueRequestId ?: UUID.randomUUID().toString())
         write(owner, current)
         val result = apiResult { api.referralCode(ReferralCodeRequest(checkNotNull(current.issueRequestId))) }
         check(owner)
-        if (result.isFailure) { fail(owner, current, result.exceptionOrNull()); return@run }
+        if (result.isFailure) {
+            fail(owner, current, result.exceptionOrNull())
+            return@run
+        }
         refresh(owner)
     }
     private suspend fun observe(owner: Owner, current: ReferralJournal): ReferralJournal {
@@ -189,12 +217,18 @@ class RemoteReferralGateway @Inject constructor(
 
     override suspend fun apply() = run { owner ->
         var current = read(owner)
-        if (uids.isAnonymous() || current.reviewFrom != null) { refresh(owner); return@run }
+        if (uids.isAnonymous() || current.reviewFrom != null) {
+            refresh(owner)
+            return@run
+        }
         val before = shown
         refresh(owner)
         current = read(owner)
         if (!readSucceeded || current.code == null || current.phase in setOf("ATTACHED", "READ_ONLY", "REQUIRES_NEW") || remaining(current) != null) return@run
-        if (shown?.codeIssuance == "ACTIVATION_REQUIRED") { current = observe(owner, current); refresh(owner) }
+        if (shown?.codeIssuance == "ACTIVATION_REQUIRED") {
+            current = observe(owner, current)
+            refresh(owner)
+        }
         val offer = shown ?: return@run
         if (!content().canAttach) return@run
         if (before?.version != offer.version) {
@@ -213,12 +247,20 @@ class RemoteReferralGateway @Inject constructor(
             mutable.value = content().copy(message = ReferralMessage.PolicyChanged)
             return@run
         }
-        current = current.copy(requestId = current.requestId ?: UUID.randomUUID().toString(), revision = revision,
-            payloadDigest = referralDigest(checkNotNull(current.code)), phase = "PREPARED", challengeId = null)
+        current = current.copy(
+            requestId = current.requestId ?: UUID.randomUUID().toString(),
+            revision = revision,
+            payloadDigest = referralDigest(checkNotNull(current.code)),
+            phase = "PREPARED",
+            challengeId = null,
+        )
         write(owner, current)
         val challenge = apiResult { api.referralChallenge(GrantChallengeRequest("REFERRAL_ATTACH", checkNotNull(current.requestId), revision, checkNotNull(current.payloadDigest))) }
         check(owner)
-        if (challenge.isFailure) { fail(owner, current, challenge.exceptionOrNull()); return@run }
+        if (challenge.isFailure) {
+            fail(owner, current, challenge.exceptionOrNull())
+            return@run
+        }
         val proof = challenge.getOrThrow()
         check(proof.bindingVersion == 1 && Instant.parse(proof.expiresAt) > clock.now())
         current = current.copy(challengeId = proof.challengeId)
@@ -257,13 +299,20 @@ class RemoteReferralGateway @Inject constructor(
                 refresh(owner)
                 return
             }
-            ApiError.PolicyChanged -> { refresh(owner); ReferralMessage.PolicyChanged }
+            ApiError.PolicyChanged -> {
+                refresh(owner)
+                ReferralMessage.PolicyChanged
+            }
             ApiError.ReferralCodeInvalid, ApiError.InvalidInput -> ReferralMessage.Invalid
             ApiError.ReferralSelf -> ReferralMessage.Self
             ApiError.ReferralIneligible -> ReferralMessage.Ineligible
             ApiError.ReferralWindowExpired -> ReferralMessage.Expired
             ApiError.IdempotencyConflict -> ReferralMessage.Conflict
-            ApiError.AccountDeleted -> { store.eraseFor(journal.owner, journal.environment); mutable.value = ReferralUiState.Loading; return }
+            ApiError.AccountDeleted -> {
+                store.eraseFor(journal.owner, journal.environment)
+                mutable.value = ReferralUiState.Loading
+                return
+            }
             is ApiError.RateLimited -> {
                 val seconds = error.retryAfterSeconds?.takeIf { it > 0 } ?: 60
                 write(owner, journal.copy(retryAt = clock.now().toEpochMilliseconds() + seconds.toLong() * 1000))
@@ -284,5 +333,9 @@ class RemoteReferralGateway @Inject constructor(
             refresh(owner, ReferralMessage.Saved)
         }
     }
-    fun invalidate() { shown = null; shownOwner = null; mutable.value = ReferralUiState.Loading }
+    fun invalidate() {
+        shown = null
+        shownOwner = null
+        mutable.value = ReferralUiState.Loading
+    }
 }

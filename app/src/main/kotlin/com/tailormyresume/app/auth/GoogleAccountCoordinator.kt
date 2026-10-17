@@ -234,8 +234,13 @@ class GoogleAccountCoordinator @Inject constructor(
             val candidate = referrals?.read(journal.source, config.baseUrl)
             referrals?.clearAll()
             if (candidate?.code != null) {
-                referrals?.write(candidate.copy(owner = user.uid, provider = user.mode.name, generation = fence.ticket(), requestId = null,
-                    revision = null, payloadDigest = null, challengeId = null, phase = "CANDIDATE", retryAt = null, reviewFrom = journal.source), checkNotNull(referrals).epoch()) {
+                referrals?.write(
+                    candidate.copy(
+                        owner = user.uid, provider = user.mode.name, generation = fence.ticket(), requestId = null,
+                        revision = null, payloadDigest = null, challengeId = null, phase = "CANDIDATE", retryAt = null, reviewFrom = journal.source,
+                    ),
+                    checkNotNull(referrals).epoch(),
+                ) {
                     check(uids.uid() == user.uid)
                 }
             }

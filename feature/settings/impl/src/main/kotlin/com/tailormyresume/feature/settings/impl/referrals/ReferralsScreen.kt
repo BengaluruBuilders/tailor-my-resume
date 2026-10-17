@@ -90,7 +90,8 @@ internal fun ReferralsScreen(state: ReferralUiState, actions: ReferralActions, m
         }
         Text(
             stringResource(if (content.reward != null) R.string.feature_settings_impl_referral_offer else R.string.feature_settings_impl_referral_unavailable, content.reward ?: 0),
-            style = TmrTheme.typography.body, color = TmrTheme.colors.textSecondary,
+            style = TmrTheme.typography.body,
+            color = TmrTheme.colors.textSecondary,
         )
         if (content.code != null) {
             TmrReadOnlyField(content.code, stringResource(R.string.feature_settings_impl_referral_my_code))
@@ -127,18 +128,29 @@ private fun ReferralEntry(content: ReferralUiState.Content, actions: ReferralAct
             Text(stringResource(R.string.feature_settings_impl_referral_entry), style = TmrTheme.typography.bodyLarge, color = TmrTheme.colors.text)
             Text(stringResource(R.string.feature_settings_impl_referral_optional), style = TmrTheme.typography.caption, color = TmrTheme.colors.textSecondary)
             if (content.candidate != null) TmrReadOnlyField(content.candidate, stringResource(R.string.feature_settings_impl_referral_saved_code))
-            TmrTextField(draft, { if (it.length <= 256) draft = it }, stringResource(R.string.feature_settings_impl_referral_code), enabled = !content.busy,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false))
+            TmrTextField(
+                draft,
+                { if (it.length <= 256) draft = it },
+                stringResource(R.string.feature_settings_impl_referral_code),
+                enabled = !content.busy,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
+            )
             TmrSecondaryButton(
                 stringResource(if (content.message == ReferralMessage.ReplaceRequired) R.string.feature_settings_impl_referral_replace else R.string.feature_settings_impl_referral_save),
-                { actions.save(draft, content.message == ReferralMessage.ReplaceRequired) }, Modifier.fillMaxWidth(), enabled = !content.busy && draft.isNotBlank(),
+                { actions.save(draft, content.message == ReferralMessage.ReplaceRequired) },
+                Modifier.fillMaxWidth(),
+                enabled = !content.busy && draft.isNotBlank(),
             )
             if (content.candidate != null) {
                 if (content.reviewRequired) {
                     TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_review), actions.review, Modifier.fillMaxWidth(), enabled = !content.busy)
                 } else {
-                    TmrPrimaryButton(stringResource(if (content.message == ReferralMessage.PolicyChanged) R.string.feature_settings_impl_referral_reconfirm else R.string.feature_settings_impl_referral_apply),
-                        actions.apply, Modifier.fillMaxWidth(), enabled = !content.busy && content.canAttach && content.retryAfterSeconds == null)
+                    TmrPrimaryButton(
+                        stringResource(if (content.message == ReferralMessage.PolicyChanged) R.string.feature_settings_impl_referral_reconfirm else R.string.feature_settings_impl_referral_apply),
+                        actions.apply,
+                        Modifier.fillMaxWidth(),
+                        enabled = !content.busy && content.canAttach && content.retryAfterSeconds == null,
+                    )
                 }
                 TmrTextButton(stringResource(R.string.feature_settings_impl_referral_clear), actions.clear, Modifier.fillMaxWidth(), enabled = !content.busy && content.message != ReferralMessage.ReadOnly)
             }

@@ -11,8 +11,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.navigation.Navigator
-import com.tailormyresume.feature.settings.api.navigation.navigateToReferrals
 import com.tailormyresume.feature.settings.api.navigation.navigateToPaywall
+import com.tailormyresume.feature.settings.api.navigation.navigateToReferrals
 
 @Composable
 internal fun CreditsRoute(

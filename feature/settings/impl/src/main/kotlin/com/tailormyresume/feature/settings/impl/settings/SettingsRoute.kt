@@ -18,8 +18,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrSheetHost
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.navigation.Navigator
-import com.tailormyresume.feature.settings.api.navigation.navigateToReferrals
 import com.tailormyresume.feature.settings.api.navigation.navigateToCredits
+import com.tailormyresume.feature.settings.api.navigation.navigateToReferrals
 import com.tailormyresume.feature.settings.impl.R
 import com.tailormyresume.feature.settings.impl.delete.DeleteAccountSheet
 import com.tailormyresume.feature.settings.impl.delete.DeleteAccountViewModel

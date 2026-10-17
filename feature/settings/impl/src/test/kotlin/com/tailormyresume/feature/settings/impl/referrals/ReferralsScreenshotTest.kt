@@ -25,7 +25,9 @@ class ReferralsScreenshotTest {
     @get:Rule val rule = createComposeRule()
     private var copies = 0
     private val actions = ReferralActions({}, {}, { _, _ -> }, {}, {}, {}, {}) { copies++ }
-    @Test @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
     fun serverOfferAndCopyCodeUseActualAmount() {
         rule.setTmrContent(TmrTestDevices.prototype) {
             ReferralsScreen(ReferralUiState.Content(code = "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567", reward = 13, creditedCount = 2, earnedCredits = 26, attached = true), actions)
@@ -35,7 +37,9 @@ class ReferralsScreenshotTest {
         rule.assertNoTruncatedText()
         rule.capture("referrals_inviter", TmrTestDevices.prototype)
     }
-    @Test @Config(qualifiers = NARROW_QUALIFIERS)
+
+    @Test
+    @Config(qualifiers = NARROW_QUALIFIERS)
     fun unavailableLargeTextHasNoRewardPromiseAndKeepsRefreshReachable() {
         rule.setTmrContent(NARROW_DEVICE) { ReferralsScreen(ReferralUiState.Content(message = ReferralMessage.ReadOnly), actions) }
         rule.assertNoTruncatedText()
