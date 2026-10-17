@@ -110,19 +110,21 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
             refreshNeeded = true
             return false
         }
+        val stored = synchronized(lock) {
+            val current = started == generation && owner == remote.owner() && environment == remote.environment()
+            if (current) {
+                held.value = Held(owner, snapshot, environment)
+                refreshNeeded = false
+            }
+            current
+        }
+        if (!stored) return false
         return persistence.withLock {
             if (synchronized(lock) { started != generation || owner != remote.owner() || environment != remote.environment() }) return@withLock false
             if (owner != null) {
                 creditLedgerDao.replaceOwned(owner, environment, snapshot.entries.map { it.asEntity().copy(owner = owner, environment = environment, serverId = it.id) })
             }
-            synchronized(lock) {
-                val stored = started == generation && owner == remote.owner() && environment == remote.environment()
-                if (stored) {
-                    held.value = Held(owner, snapshot, environment)
-                    refreshNeeded = false
-                }
-                stored
-            }
+            synchronized(lock) { started == generation && owner == remote.owner() && environment == remote.environment() }
         }
     }
 
