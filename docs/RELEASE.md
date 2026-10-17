@@ -143,3 +143,20 @@ Without them `assembleRelease` still works and produces an unsigned APK. `bundle
 - `TMR_VERSION_CODE`: integer from 1 to 2100000000. Default `1`. The workflow sets it to `github.run_number + TMR_VERSION_CODE_OFFSET`, so it grows with each new run. Re-running a job reuses its run number, and renaming the workflow file resets the run number. Raise `TMR_VERSION_CODE_OFFSET` above your last uploaded code if either happens. Play rejects a repeated code.
 
 Invalid values fail the build. `tools/ci/test-release-config.sh` checks this.
+
+
+### Guest trial integrity configuration
+
+Guest trial admission uses Standard Play Integrity with a non-secret cloud project number. Set
+`tailormyresumeStagingPlayIntegrityCloudProjectNumber` for debug/staging and
+`tailormyresumePlayIntegrityCloudProjectNumber` for release in user Gradle properties. Use the project
+that matches the backend verifier for that environment. Values must be positive decimal integers
+that fit a signed 64-bit value. Missing or invalid values disable trial verification only; the app
+retains existing account/work/balance access and shows temporary-unavailable recovery. Staging never
+falls back to the release value. Do not commit actual values or service credentials.
+
+The existing Firebase Auth dependency includes Integrity 1.3.0, whose Standard API the adapter uses.
+No new runtime SDK is added. Sideload/debug/emulator installs receive no trust bypass. Real admission
+needs matching Firebase anonymous-provider configuration, backend policy/admissions, finite capacity,
+package/certificate/version checks, Google verifier access and the production disclosure review in
+contract section 8. Test fixtures are application-logic evidence only.

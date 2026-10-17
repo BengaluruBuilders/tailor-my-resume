@@ -6,6 +6,7 @@ import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.domain.onboarding.ManualContact
 import com.tailormyresume.core.domain.onboarding.SaveManualProfileUseCase
+import com.tailormyresume.core.model.AccountMode
 import com.tailormyresume.core.model.EntryCategory
 import com.tailormyresume.core.model.FactSource
 import com.tailormyresume.core.model.ProfileEntry
@@ -23,11 +24,12 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
-internal enum class ManualField { FullName, Phone, City, JobTitle, Company }
+internal enum class ManualField { FullName, Email, Phone, City, JobTitle, Company }
 
 internal data class ManualProfileUiState(
     val fullName: String = "",
     val email: String = "",
+    val emailEditable: Boolean = false,
     val phone: String = "",
     val city: String = "",
     val jobTitle: String = "",
@@ -88,7 +90,12 @@ internal class ManualProfileViewModel @Inject constructor(
                         it.fullName,
                         profile?.fullName?.takeIf(String::isNotBlank) ?: account?.displayName.orEmpty(),
                     ),
-                    email = account?.email ?: profile?.email.orEmpty(),
+                    email = valueUnlessDirty(
+                        ManualField.Email,
+                        it.email,
+                        if (account?.mode == AccountMode.ANONYMOUS) profile?.email.orEmpty() else account?.email ?: profile?.email.orEmpty(),
+                    ),
+                    emailEditable = account?.mode == AccountMode.ANONYMOUS,
                     phone = valueUnlessDirty(ManualField.Phone, it.phone, profile?.phone.orEmpty()),
                     city = valueUnlessDirty(ManualField.City, it.city, profile?.city.orEmpty()),
                 )
@@ -104,6 +111,7 @@ internal class ManualProfileViewModel @Inject constructor(
         state.update {
             when (field) {
                 ManualField.FullName -> it.copy(fullName = value)
+                ManualField.Email -> if (it.emailEditable) it.copy(email = value) else it
                 ManualField.Phone -> it.copy(phone = value)
                 ManualField.City -> it.copy(city = value)
                 ManualField.JobTitle -> it.copy(jobTitle = value)

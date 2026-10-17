@@ -73,7 +73,7 @@ internal fun SettingsScreen(
         )
         TmrSectionLabel(stringResource(R.string.feature_settings_impl_section_account))
         SettingsGroup {
-            AccountIdentity(email = content.email)
+            AccountIdentity(email = content.email, guest = content.guest)
             SettingsValueRow(
                 label = stringResource(R.string.feature_settings_impl_credits_row),
                 value = content.credits?.let { pluralStringResource(R.plurals.feature_settings_impl_credits_left, it, it) }
@@ -124,11 +124,13 @@ internal fun SettingsScreen(
             )
         }
         Spacer(Modifier.height(spacing.xs))
-        TmrSecondaryButton(
-            label = stringResource(R.string.feature_settings_impl_sign_out),
-            onClick = actions.onSignOut,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        if (!content.guest) {
+            TmrSecondaryButton(
+                label = stringResource(R.string.feature_settings_impl_sign_out),
+                onClick = actions.onSignOut,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
         Text(
             text = stringResource(R.string.feature_settings_impl_footer, versionName),
             style = TmrTheme.typography.caption,
@@ -154,7 +156,7 @@ private fun SettingsGroup(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun AccountIdentity(email: String) {
+private fun AccountIdentity(email: String, guest: Boolean) {
     val colors = TmrTheme.colors
     Column(
         modifier = Modifier
@@ -164,9 +166,9 @@ private fun AccountIdentity(email: String) {
             .semantics(mergeDescendants = true) {},
         verticalArrangement = Arrangement.spacedBy(TmrTheme.spacing.xxs, Alignment.CenterVertically),
     ) {
-        Text(text = email, style = TmrTheme.typography.body, color = colors.text)
+        Text(text = if (guest) stringResource(R.string.feature_settings_impl_guest_account) else email, style = TmrTheme.typography.body, color = colors.text)
         Text(
-            text = stringResource(R.string.feature_settings_impl_signed_in_with_google),
+            text = stringResource(if (guest) R.string.feature_settings_impl_guest_session else R.string.feature_settings_impl_signed_in_with_google),
             style = TmrTheme.typography.caption,
             color = colors.textMuted,
         )

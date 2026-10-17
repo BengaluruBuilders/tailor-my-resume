@@ -7,6 +7,7 @@ internal data class PaywallUiState(
     val packs: List<ApplicationPack>,
     val selectedPackId: String?,
     val busy: Boolean,
+    val canPurchase: Boolean = true,
 ) {
     val selectedPack: ApplicationPack?
         get() = packs.firstOrNull { it.id == selectedPackId }

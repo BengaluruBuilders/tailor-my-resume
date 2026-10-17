@@ -59,6 +59,7 @@ class RemotePaymentGateway @Inject constructor(
     internal fun repostCount() = synchronized(reposts) { reposts.size }
 
     override suspend fun packs(): List<ApplicationPack> {
+        if (uids.isAnonymous()) return emptyList()
         val listed = apiResult { api.packs().packs }.getOrThrow()
         listedProductIds = listed.map { it.productId }.toSet()
         return listed.mapNotNull { pack ->
@@ -114,6 +115,7 @@ class RemotePaymentGateway @Inject constructor(
     }
 
     override suspend fun purchase(packId: String): PurchaseResult {
+        if (uids.isAnonymous()) return failed(PurchaseFailureReason.PurchaseUnavailable)
         val epoch = currentGeneration()
         val uid = uids.uid() ?: return failed(PurchaseFailureReason.PurchaseUnavailable)
         if (listedProductIds?.contains(packId) == false) return failed(PurchaseFailureReason.PurchaseUnavailable)
@@ -126,6 +128,7 @@ class RemotePaymentGateway @Inject constructor(
     }
 
     override suspend fun restorePurchases(): PurchaseEntitlement {
+        if (uids.isAnonymous()) return entitlement()
         val epoch = currentGeneration()
         billing.ownedPurchases().forEach { owned -> settle(owned, retries = 0, epoch = epoch) }
         return entitlement()

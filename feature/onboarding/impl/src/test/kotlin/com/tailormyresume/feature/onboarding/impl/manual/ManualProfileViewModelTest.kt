@@ -29,6 +29,20 @@ class ManualProfileViewModelTest {
     private fun viewModel() = ManualProfileViewModel(session, profile, SaveManualProfileUseCase(profile, FactIdAllocator()))
 
     @Test
+    fun guestCanProvideEmailAndResumeDoesNotEraseTheirDraft() = runTest {
+        session.sendAccount(SignInAccount("guest", "", "", com.tailormyresume.core.model.AccountMode.ANONYMOUS))
+        val subject = viewModel()
+        assertThat(subject.uiState.value.emailEditable).isTrue()
+        subject.onFieldChange(ManualField.FullName, "Asha Rao")
+        subject.onFieldChange(ManualField.Email, "asha@example.com")
+        subject.onRouteActive()
+        assertThat(subject.uiState.value.email).isEqualTo("asha@example.com")
+        subject.onContinue()
+        assertThat(profile.observeProfile().first()?.email).isEqualTo("asha@example.com")
+        assertThat(profile.observeProfile().first()?.fullName).isEqualTo("Asha Rao")
+    }
+
+    @Test
     fun startsWithTheAccountNameAndEmail() = runTest {
         val state = viewModel().uiState.value
 

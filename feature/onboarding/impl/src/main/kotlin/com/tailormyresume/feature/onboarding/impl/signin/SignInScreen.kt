@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
@@ -56,11 +58,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastAction
 import com.tailormyresume.core.designsystem.component.content.TmrStoryBars
+import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
+import com.tailormyresume.core.designsystem.component.input.TmrSecondaryButton
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.domain.GuestTrialOffer
+import com.tailormyresume.core.domain.GuestTrialResult
 import com.tailormyresume.feature.onboarding.impl.R
 
 internal object SignInTags {
@@ -102,7 +111,20 @@ internal fun SignInRoute(
     LaunchedEffect(viewModel) {
         viewModel.cancelled.collect { toast.show(message, TmrToastAction(retry, onContinue)) }
     }
-    SignInScreen(uiState, onContinue, modifier)
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(viewModel, lifecycle) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_RESUME) viewModel.onResume() }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+    SignInScreen(
+        uiState,
+        onContinue,
+        modifier,
+        onTryGuest = viewModel::onTryGuest,
+        onClaimTrial = viewModel::onClaimTrial,
+        onContinueGuest = viewModel::onContinueGuest,
+    )
 }
 
 @Composable
@@ -111,6 +133,9 @@ internal fun SignInScreen(
     onContinueWithGoogle: () -> Unit,
     modifier: Modifier = Modifier,
     story: SignInStoryState = rememberSignInStoryState(uiState == SignInUiState.SigningIn),
+    onTryGuest: () -> Unit = {},
+    onClaimTrial: () -> Unit = {},
+    onContinueGuest: () -> Unit = {},
 ) {
     val spec = SignInStories[story.index]
     Box(
@@ -126,7 +151,11 @@ internal fun SignInScreen(
                 story = story,
                 modifier = Modifier.weight(1f),
             )
-            SignInActions(uiState, onContinueWithGoogle)
+            if (uiState is SignInUiState.GuestOffer || uiState is SignInUiState.GuestResult || uiState == SignInUiState.PreparingGuest) {
+                GuestActions(uiState, onTryGuest, onClaimTrial, onContinueGuest)
+            } else {
+                SignInActions(uiState, onContinueWithGoogle, onTryGuest)
+            }
         }
     }
 }
@@ -216,8 +245,15 @@ private fun StoryHint(hint: String) {
 }
 
 @Composable
-private fun SignInActions(uiState: SignInUiState, onContinueWithGoogle: () -> Unit) {
+private fun SignInActions(uiState: SignInUiState, onContinueWithGoogle: () -> Unit, onTryGuest: () -> Unit) {
     Spacer(Modifier.height(24.dp))
+    TmrPrimaryButton(
+        label = stringResource(R.string.feature_onboarding_impl_guest_try),
+        onClick = onTryGuest,
+        enabled = uiState != SignInUiState.SigningIn,
+        modifier = Modifier.fillMaxWidth().testTag("signin_guest_action"),
+    )
+    Spacer(Modifier.height(12.dp))
     GoogleButton(uiState, onContinueWithGoogle)
     Spacer(Modifier.height(16.dp))
     Footer(Modifier.padding(bottom = 34.dp))
@@ -291,4 +327,51 @@ private fun Footer(modifier: Modifier = Modifier) {
         style = TmrTheme.typography.caption,
         textAlign = TextAlign.Center,
     )
+}
+
+@Composable
+private fun GuestActions(state: SignInUiState, onRetry: () -> Unit, onClaim: () -> Unit, onContinue: () -> Unit) {
+    val offer = (state as? SignInUiState.GuestOffer)?.offer
+    val result = (state as? SignInUiState.GuestResult)?.result
+    val busy = state == SignInUiState.PreparingGuest || (state as? SignInUiState.GuestOffer)?.busy == true
+    Column(
+        Modifier.fillMaxWidth().padding(vertical = 16.dp).verticalScroll(remember { ScrollState(0) }),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        val message = when {
+            busy -> stringResource(R.string.feature_onboarding_impl_guest_checking)
+            offer is GuestTrialOffer.Available -> pluralStringResource(R.plurals.feature_onboarding_impl_guest_offer, offer.credits, offer.credits)
+            result is GuestTrialResult.Granted -> pluralStringResource(R.plurals.feature_onboarding_impl_guest_granted, result.credits, result.credits)
+            offer == GuestTrialOffer.Existing || result == GuestTrialResult.Existing -> stringResource(R.string.feature_onboarding_impl_guest_existing)
+            offer == GuestTrialOffer.NotEligible || result == GuestTrialResult.NotEligible -> stringResource(R.string.feature_onboarding_impl_guest_ineligible)
+            offer is GuestTrialOffer.Unavailable && !offer.canContinue -> stringResource(R.string.feature_onboarding_impl_guest_signin_unavailable)
+            else -> stringResource(R.string.feature_onboarding_impl_guest_unavailable)
+        }
+        Text(message, color = TmrTheme.colors.ink, style = TmrTheme.typography.body)
+        if (offer is GuestTrialOffer.Available) {
+            if (offer.changed) Text(stringResource(R.string.feature_onboarding_impl_guest_changed), color = TmrTheme.colors.ink, style = TmrTheme.typography.label)
+            Text(stringResource(R.string.feature_onboarding_impl_guest_disclosure), color = TmrTheme.colors.ink, style = TmrTheme.typography.caption)
+            TmrPrimaryButton(
+                label = pluralStringResource(R.plurals.feature_onboarding_impl_guest_claim, offer.credits, offer.credits),
+                onClick = onClaim,
+                enabled = !busy,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (offer is GuestTrialOffer.Unavailable) {
+            TmrSecondaryButton(
+                label = stringResource(R.string.feature_onboarding_impl_signin_retry),
+                onClick = onRetry,
+                enabled = !busy,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (!busy && (offer !is GuestTrialOffer.Unavailable || offer.canContinue)) {
+            TmrSecondaryButton(
+                label = stringResource(R.string.feature_onboarding_impl_guest_continue),
+                onClick = onContinue,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
 }

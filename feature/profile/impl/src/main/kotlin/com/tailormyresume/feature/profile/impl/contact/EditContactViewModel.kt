@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.SessionRepository
+import com.tailormyresume.core.model.AccountMode
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.ProfileLimits
 import com.tailormyresume.feature.profile.impl.guidedform.ContactFieldValidator
@@ -28,6 +29,7 @@ internal data class EditContactDraft(
     val city: String = "",
     val linkedin: String = "",
     val portfolio: String = "",
+    val email: String = "",
 )
 
 internal sealed interface EditContactUiState {
@@ -38,6 +40,7 @@ internal sealed interface EditContactUiState {
         val email: String,
         val canSave: Boolean,
         val emailFromGoogle: Boolean = true,
+        val emailEditable: Boolean = false,
     ) : EditContactUiState
 }
 
@@ -46,7 +49,7 @@ internal enum class EditContactEvent { Saved }
 @HiltViewModel
 internal class EditContactViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
-    sessionRepository: SessionRepository,
+    private val sessionRepository: SessionRepository,
 ) : ViewModel() {
 
     private val draft = MutableStateFlow<EditContactDraft?>(null)
@@ -70,8 +73,9 @@ internal class EditContactViewModel @Inject constructor(
             EditContactUiState.Editing(
                 draft = contactDraft,
                 email = profile.email,
-                canSave = contactDraft.isValid(),
-                emailFromGoogle = account != null && profile.email.equals(account.email, ignoreCase = true),
+                canSave = contactDraft.isValid() && (account?.mode != AccountMode.ANONYMOUS || contactDraft.email.isBlank() || ContactFieldValidator.isValidEmail(contactDraft.email)),
+                emailFromGoogle = account?.mode == AccountMode.GOOGLE && profile.email.equals(account.email, ignoreCase = true),
+                emailEditable = account?.mode == AccountMode.ANONYMOUS,
             )
         }
     }.stateIn(
@@ -88,6 +92,8 @@ internal class EditContactViewModel @Inject constructor(
     }
 
     fun onFullNameChange(value: String): Unit = edit { it.copy(fullName = value) }
+
+    fun onEmailChange(value: String): Unit = edit { it.copy(email = value) }
 
     fun onPhoneChange(value: String): Unit = edit { it.copy(phone = value) }
 
@@ -113,10 +119,13 @@ internal class EditContactViewModel @Inject constructor(
         val contactDraft = draft.value ?: return
         if (!contactDraft.isValid()) return
         val profile = profileRepository.observeProfile().first() ?: return
+        val email = if (sessionRepository.observeAccount().first()?.mode == AccountMode.ANONYMOUS) contactDraft.email.trim() else profile.email
+        if (email.isNotBlank() && !ContactFieldValidator.isValidEmail(email)) return
         finished = true
         profileRepository.saveProfile(
             profile.copy(
                 fullName = contactDraft.fullName.trim(),
+                email = email,
                 phone = contactDraft.phone.trim(),
                 city = contactDraft.city.trim(),
                 linkedinUrl = contactDraft.linkedin.trim(),
@@ -134,6 +143,7 @@ internal class EditContactViewModel @Inject constructor(
 
 private fun CandidateProfile.toDraft() = EditContactDraft(
     fullName = fullName,
+    email = email,
     phone = phone,
     city = city,
     linkedin = linkedinUrl,

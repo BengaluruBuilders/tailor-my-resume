@@ -33,6 +33,24 @@ class CreditsScreenshotTests {
 
     @Test
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+    fun guestTrialCanBeClaimedWithoutPurchases() {
+        rule.setTmrContent(TmrTestDevices.prototype) {
+            CreditsScreen(
+                CreditsUiState.Content(
+                    credits = 0,
+                    history = emptyList(),
+                    canPurchase = false,
+                    trial = CreditsTrialState.Offer(com.tailormyresume.core.domain.GuestTrialOffer.Available(7)),
+                ),
+                onBuyMore = {},
+            )
+        }
+        rule.onNodeWithText("Get 7 trial credits").performClick()
+        rule.capture("guest_credits_offer", TmrTestDevices.prototype)
+    }
+
+    @Test
+    @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
     fun creditsReturningPrototype() {
         rule.setTmrContent(TmrTestDevices.prototype) {
             CreditsScreen(returningCreditsState(), onBuyMore = { buyMoreTaps += 1 })

@@ -29,6 +29,15 @@ class RemoteSignInGatewayTest {
     private fun failed(reason: SignInFailureReason) = SignInResult.Failed(reason)
 
     @Test
+    fun googleSwitchCannotReplaceAnActiveGuestSession() = runTest {
+        firebase.anonymous = true
+        assertThat(gateway().signIn()).isEqualTo(failed(SignInFailureReason.ProviderUnavailable))
+        assertThat(credentials.requests).isEqualTo(0)
+        assertThat(server.requestCount).isEqualTo(0)
+        assertThat(firebase.signedOut).isFalse()
+    }
+
+    @Test
     fun signInCallsMeAndKeepsTheAccount() = runTest {
         server.enqueue(jsonResponse(200, ME_BODY))
 

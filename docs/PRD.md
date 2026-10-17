@@ -161,7 +161,7 @@ The feature sections below are not yet rewritten; read them through this table.
 | Area | Simplified MVP | Was |
 |---|---|---|
 | Flow | Sign in → upload resume → review profile → paste job → job analysis → one quick question → tailor → tailored resume → export PDF → Applications | Paste JD first, sign in after first value, consent screen, fact-by-fact confirmation |
-| Sign-in | First screen, three story slides, Google only. 1 free credit at sign-in. No consent screen, no 18+ check. | After first value; consent notice; 18+ check |
+| Sign-in | First screen, three story slides, Google or guest entry. Guest trial uses the current server offer and an explicit protected admission request (contract section 8). No implicit sign-in grant. No consent screen, no 18+ check. | After first value; consent notice; 18+ check |
 | Profile | Import fills the profile; the user reviews it once and must fix required gaps (e.g. a missing end date) before going on. Paste-as-text and a 6-field manual form are the fallbacks. | Confirm every fact; guided form; fresher evidence path |
 | Gap analysis | Match now → after tailoring, have and missing keywords, must-haves with reasons. Missing skills are added only if the user confirms them. | Met / partly met / to prepare per requirement; "I have this" sheet; prep tasks |
 | Evidence | One quick question per tailoring about an unclear must-have; the answer is a source ("Your answer"). | Evidence path questions in the profile |
@@ -180,7 +180,7 @@ Do not build these, and do not raise them again as gaps, open questions, or revi
 
 1. No consent notice screen and no 18+ check.
 2. No light theme. The app is dark only.
-3. No "Continue with Apple". Sign-in is Google only, even though the prototype draws an Apple button.
+3. No "Continue with Apple". Google and guest entry are supported; the prototype Apple button remains cut.
 4. No follow-up reminders. Drop the "Follow-up reminders" toggle the prototype shows in Settings.
 5. No offline states, and no error states beyond the five the prototype draws (sign-in cancelled,
    unreadable file, not a job post, tailoring failed, payment failed). No separate 200% text frames.

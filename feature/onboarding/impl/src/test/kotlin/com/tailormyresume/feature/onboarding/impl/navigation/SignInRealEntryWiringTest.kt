@@ -51,6 +51,9 @@ class SignInEntryHostActivity : ComponentActivity()
 @InstallIn(SingletonComponent::class)
 object ScriptedSignInModule {
     @Provides
+    fun guests(): com.tailormyresume.core.domain.GuestTrialGateway = com.tailormyresume.core.testing.gateway.TestGuestTrialGateway()
+
+    @Provides
     @Singleton
     fun scripted(): ScriptedSignInGateway = ScriptedSignInGateway { SignInResult.Cancelled }
 

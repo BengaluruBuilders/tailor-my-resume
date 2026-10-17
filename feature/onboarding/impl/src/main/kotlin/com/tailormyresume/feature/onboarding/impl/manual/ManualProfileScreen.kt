@@ -64,10 +64,15 @@ internal fun ManualProfileScreen(
                 onValueChange = { onFieldChange(ManualField.FullName, it) },
                 label = stringResource(R.string.feature_onboarding_impl_manual_full_name),
             )
-            TmrReadOnlyField(
-                value = state.email,
-                label = stringResource(R.string.feature_onboarding_impl_manual_email),
-            )
+            if (state.emailEditable) {
+                TmrTextField(
+                    value = state.email,
+                    onValueChange = { onFieldChange(ManualField.Email, it) },
+                    label = stringResource(R.string.feature_onboarding_impl_manual_email),
+                )
+            } else {
+                TmrReadOnlyField(value = state.email, label = stringResource(R.string.feature_onboarding_impl_manual_email))
+            }
             TmrTextField(
                 value = state.phone,
                 onValueChange = { onFieldChange(ManualField.Phone, it) },

@@ -3,6 +3,7 @@ package com.tailormyresume.core.data.repository
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.mock.observeValue
 import com.tailormyresume.core.data.mock.writeValue
+import com.tailormyresume.core.model.AccountMode
 import com.tailormyresume.core.model.KeptJobDescription
 import com.tailormyresume.core.model.SignInAccount
 import kotlinx.coroutines.NonCancellable
@@ -28,7 +29,7 @@ internal class StoredSessionRepository @Inject constructor(
         store.observeValue(KEPT_JOB_KEY, KeptJobDto.serializer()).map { dto -> dto?.toModel() }
 
     override suspend fun saveAccount(account: SignInAccount) {
-        store.writeValue(ACCOUNT_KEY, AccountDto.serializer(), AccountDto(account.id, account.displayName, account.email))
+        store.writeValue(ACCOUNT_KEY, AccountDto.serializer(), AccountDto(account.id, account.displayName, account.email, account.mode))
     }
 
     override suspend fun lastAccountId(): String? = store.read(LAST_ACCOUNT_KEY)
@@ -70,8 +71,8 @@ internal class StoredSessionRepository @Inject constructor(
 }
 
 @Serializable
-private data class AccountDto(val id: String, val displayName: String, val email: String) {
-    fun toModel() = SignInAccount(id = id, displayName = displayName, email = email)
+private data class AccountDto(val id: String, val displayName: String, val email: String, val mode: AccountMode = AccountMode.GOOGLE) {
+    fun toModel() = SignInAccount(id = id, displayName = displayName, email = email, mode = mode)
 }
 
 @Serializable

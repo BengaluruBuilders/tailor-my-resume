@@ -31,7 +31,10 @@ import com.tailormyresume.core.designsystem.component.TmrDivider
 import com.tailormyresume.core.designsystem.component.content.TmrCard
 import com.tailormyresume.core.designsystem.component.content.TmrSectionLabel
 import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
+import com.tailormyresume.core.designsystem.component.input.TmrSecondaryButton
 import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.domain.GuestTrialOffer
+import com.tailormyresume.core.domain.GuestTrialResult
 import com.tailormyresume.feature.settings.impl.R
 
 internal const val CREDITS_LIST_TAG = "credits-list"
@@ -41,7 +44,7 @@ private val RowMinHeight = 68.dp
 private val BalanceGap = 16.dp
 
 @Composable
-internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifier: Modifier = Modifier) {
+internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifier: Modifier = Modifier, onCheckTrial: () -> Unit = {}, onClaimTrial: () -> Unit = {}) {
     val content = state as? CreditsUiState.Content ?: return
     val spacing = TmrTheme.spacing
     LazyColumn(
@@ -57,7 +60,12 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
             )
         }
         item(key = "balance") {
-            BalanceCard(credits = content.credits, onBuyMore = onBuyMore, modifier = Modifier.padding(bottom = spacing.md))
+            BalanceCard(credits = content.credits, onBuyMore = onBuyMore, canPurchase = content.canPurchase, modifier = Modifier.padding(bottom = spacing.md))
+        }
+        if (!content.canPurchase) {
+            item(key = "guest-trial") {
+                GuestTrialCard(content.trial, onCheckTrial, onClaimTrial)
+            }
         }
         item(key = "history-label") {
             TmrSectionLabel(
@@ -68,27 +76,31 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
         itemsIndexed(content.history, key = { _, row -> row.key }) { index, row ->
             HistoryRow(row = row, first = index == 0, last = index == content.history.lastIndex)
         }
-        item(key = "receipts") {
-            Text(
-                text = stringResource(R.string.feature_settings_impl_credits_receipts),
-                style = TmrTheme.typography.caption,
-                color = TmrTheme.colors.textMuted,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(top = spacing.md),
-            )
+        if (content.canPurchase) {
+            item(key = "receipts") {
+                Text(
+                    text = stringResource(R.string.feature_settings_impl_credits_receipts),
+                    style = TmrTheme.typography.caption,
+                    color = TmrTheme.colors.textMuted,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = spacing.md),
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun BalanceCard(credits: Int?, onBuyMore: () -> Unit, modifier: Modifier = Modifier) {
+private fun BalanceCard(credits: Int?, onBuyMore: () -> Unit, modifier: Modifier = Modifier, canPurchase: Boolean = true) {
     TmrCard(modifier = modifier) {
         BalanceHero(credits = credits)
-        TmrPrimaryButton(
-            label = stringResource(R.string.feature_settings_impl_credits_buy_more),
-            onClick = onBuyMore,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        if (canPurchase) {
+            TmrPrimaryButton(
+                label = stringResource(R.string.feature_settings_impl_credits_buy_more),
+                onClick = onBuyMore,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 
@@ -170,6 +182,7 @@ private fun HistoryRow(row: CreditsHistoryRow, first: Boolean, last: Boolean) {
 
 @Composable
 private fun HistoryTitle.text(): String = when (this) {
+    HistoryTitle.GuestTrial -> stringResource(R.string.feature_settings_impl_credits_guest_trial)
     HistoryTitle.FreeFirstResume -> stringResource(R.string.feature_settings_impl_credits_free_first_resume)
     is HistoryTitle.BoughtCredits -> pluralStringResource(R.plurals.feature_settings_impl_credits_bought, credits, credits)
     is HistoryTitle.Tailored -> jobTitle
@@ -187,4 +200,30 @@ private fun CreditsHistoryRow.subtitle(): String = when (detail) {
     )
     is HistoryDetail.Text -> stringResource(R.string.feature_settings_impl_credits_detail_date, detail.value, date)
     HistoryDetail.None -> date
+}
+
+@Composable
+private fun GuestTrialCard(state: CreditsTrialState, onCheck: () -> Unit, onClaim: () -> Unit) {
+    val offer = (state as? CreditsTrialState.Offer)?.value
+    val result = (state as? CreditsTrialState.Result)?.value
+    TmrCard(modifier = Modifier.padding(bottom = TmrTheme.spacing.md)) {
+        Column(verticalArrangement = Arrangement.spacedBy(TmrTheme.spacing.sm)) {
+            Text(stringResource(R.string.feature_settings_impl_credits_guest_trial), style = TmrTheme.typography.title, color = TmrTheme.colors.text)
+            val message = when {
+                state == CreditsTrialState.Loading -> stringResource(R.string.feature_settings_impl_trial_checking)
+                offer is GuestTrialOffer.Available -> pluralStringResource(R.plurals.feature_settings_impl_trial_offer, offer.credits, offer.credits)
+                result is GuestTrialResult.Granted -> pluralStringResource(R.plurals.feature_settings_impl_trial_granted, result.credits, result.credits)
+                offer == GuestTrialOffer.Existing || result == GuestTrialResult.Existing -> stringResource(R.string.feature_settings_impl_trial_existing)
+                offer == GuestTrialOffer.NotEligible || result == GuestTrialResult.NotEligible -> stringResource(R.string.feature_settings_impl_trial_ineligible)
+                else -> stringResource(R.string.feature_settings_impl_trial_unavailable)
+            }
+            if (state != CreditsTrialState.Idle) Text(message, style = TmrTheme.typography.body, color = TmrTheme.colors.text)
+            if (offer is GuestTrialOffer.Available) {
+                Text(stringResource(R.string.feature_settings_impl_trial_disclosure), style = TmrTheme.typography.caption, color = TmrTheme.colors.textSecondary)
+                if (offer.changed) Text(stringResource(R.string.feature_settings_impl_trial_changed), style = TmrTheme.typography.body, color = TmrTheme.colors.text)
+                TmrPrimaryButton(label = pluralStringResource(R.plurals.feature_settings_impl_trial_claim, offer.credits, offer.credits), onClick = onClaim, modifier = Modifier.fillMaxWidth())
+            }
+            if (state != CreditsTrialState.Loading) TmrSecondaryButton(label = stringResource(R.string.feature_settings_impl_trial_check), onClick = onCheck, modifier = Modifier.fillMaxWidth())
+        }
+    }
 }

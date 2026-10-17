@@ -16,6 +16,15 @@ class CreditsHistoryMapperTest {
     ) = toHistoryRows(entries, applications, ZoneOffset.UTC)
 
     @Test
+    fun guestTrialKeepsItsOriginalServerIdAndActualAmount() {
+        val entry = CreditLedgerEntry(CreditLedgerKind.GUEST_TRIAL, 8, null, null, Instant.parse("2026-10-17T00:00:00Z"), id = "original-server-id")
+        val row = toHistoryRows(listOf(entry), emptyList(), java.time.ZoneId.of("UTC")).single()
+        assertThat(row.key).isEqualTo("original-server-id")
+        assertThat(row.title).isEqualTo(HistoryTitle.GuestTrial)
+        assertThat(row.amountText).isEqualTo("+8")
+    }
+
+    @Test
     fun rowsAreNewestFirstWithPrototypeLabels() {
         val rows = rows()
 

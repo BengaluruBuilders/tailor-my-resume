@@ -16,7 +16,11 @@ import com.tailormyresume.app.auth.RemoteServerAccountDeleter
 import com.tailormyresume.app.auth.RemoteSignInGateway
 import com.tailormyresume.app.auth.RoomLocalDataWiper
 import com.tailormyresume.app.auth.SessionExpiryHandler
+import com.tailormyresume.app.credits.GuestEvidence
+import com.tailormyresume.app.credits.RemoteGuestTrialGateway
+import com.tailormyresume.app.credits.StandardGuestEvidence
 import com.tailormyresume.core.domain.FirebaseUidProvider
+import com.tailormyresume.core.domain.GuestTrialGateway
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.account.AccountWipeFinisher
 import com.tailormyresume.core.domain.account.ServerAccountDeleter
@@ -32,6 +36,12 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 interface SignInBindings {
+    @Binds
+    fun bindGuestTrialGateway(impl: RemoteGuestTrialGateway): GuestTrialGateway
+
+    @Binds
+    fun bindGuestEvidence(impl: StandardGuestEvidence): GuestEvidence
+
     @Binds
     fun bindSignInGateway(impl: RemoteSignInGateway): SignInGateway
 

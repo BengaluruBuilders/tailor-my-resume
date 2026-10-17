@@ -2,7 +2,7 @@ package com.tailormyresume.core.model
 
 import kotlin.time.Instant
 
-enum class CreditLedgerKind { FREE_GRANT, SPEND, PURCHASE, REFUND, MIGRATION }
+enum class CreditLedgerKind { FREE_GRANT, GUEST_TRIAL, SPEND, PURCHASE, REFUND, MIGRATION }
 
 data class CreditLedgerEntry(
     val kind: CreditLedgerKind,
@@ -10,4 +10,5 @@ data class CreditLedgerEntry(
     val applicationId: String?,
     val productId: String?,
     val createdAt: Instant,
+    val id: String? = null,
 )

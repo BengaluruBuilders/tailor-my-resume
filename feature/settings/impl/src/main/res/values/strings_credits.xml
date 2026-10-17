@@ -53,4 +53,27 @@
     <string name="feature_settings_impl_pay_unconfirmed_body">We haven\'t confirmed your payment yet. Your credits will appear once it is confirmed.</string>
     <string name="feature_settings_impl_pay_failed_retry">Try again</string>
     <string name="feature_settings_impl_pay_failed_cancel">Cancel</string>
+    <string name="feature_settings_impl_credits_guest_trial">Guest trial</string>
+    <string name="feature_settings_impl_trial_check">Check guest trial</string>
+    <string name="feature_settings_impl_trial_checking">Checking your guest trial…</string>
+    <plurals name="feature_settings_impl_trial_offer">
+        <item quantity="one">Your guest trial offers %1$d credit. Each successful tailoring uses one credit.</item>
+        <item quantity="other">Your guest trial offers %1$d credits. Each successful tailoring uses one credit.</item>
+    </plurals>
+    <plurals name="feature_settings_impl_trial_claim">
+        <item quantity="one">Get %1$d trial credit</item>
+        <item quantity="other">Get %1$d trial credits</item>
+    </plurals>
+    <string name="feature_settings_impl_trial_disclosure">To limit repeat trials on this device profile, we send an app-scoped Android ID and a Google Play Integrity token to our server. The server keeps a purpose-specific protected identifier for up to 180 days while your account is active and removes it when you delete your account. This does not identify a unique person.</string>
+    <plurals name="feature_settings_impl_trial_granted">
+        <item quantity="one">Your trial added %1$d credit.</item>
+        <item quantity="other">Your trial added %1$d credits.</item>
+    </plurals>
+    <string name="feature_settings_impl_trial_existing">Your guest trial is already recorded. Your remaining balance is shown above.</string>
+    <string name="feature_settings_impl_trial_ineligible">A new guest trial is not available for this session. Your existing balance and work remain available.</string>
+    <string name="feature_settings_impl_trial_unavailable">The guest trial is temporarily unavailable. Your existing balance and work remain available.</string>
+    <string name="feature_settings_impl_trial_changed">The trial offer changed. Review the current offer before continuing.</string>
+    <string name="feature_settings_impl_guest_credit_title">Guest credits</string>
+    <string name="feature_settings_impl_guest_credit_recovery">A successful tailoring needs one available credit. Check your current balance and guest trial in Credits. Your saved work remains available.</string>
+    <string name="feature_settings_impl_guest_credit_view">View credits</string>
 </resources>

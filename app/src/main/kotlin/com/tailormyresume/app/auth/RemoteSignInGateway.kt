@@ -31,7 +31,7 @@ class RemoteSignInGateway @Inject constructor(
     override suspend fun currentAccount(): SignInAccount? = sessionRepository.observeAccount().first()
 
     override suspend fun signIn(): SignInResult {
-        if (!config.isComplete) return AuthFailure.NotConfigured.toSignInResult()
+        if (!config.isComplete || firebase.hasAnonymousSession()) return AuthFailure.NotConfigured.toSignInResult()
         val googleToken = when (val outcome = credentials.idToken()) {
             is AuthOutcome.Success -> outcome.value
             is AuthOutcome.Failure -> return outcome.failure.toSignInResult()

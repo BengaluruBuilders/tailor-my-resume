@@ -185,7 +185,7 @@ internal class ExportedViewModel @AssistedInject constructor(
         var fundedByFree = false
         for (entry in sortedBy { it.createdAt }) {
             when (entry.kind) {
-                CreditLedgerKind.FREE_GRANT -> freeBalance += entry.amount
+                CreditLedgerKind.FREE_GRANT, CreditLedgerKind.GUEST_TRIAL -> freeBalance += entry.amount
                 CreditLedgerKind.PURCHASE -> Unit
                 CreditLedgerKind.REFUND -> Unit
                 CreditLedgerKind.MIGRATION -> Unit

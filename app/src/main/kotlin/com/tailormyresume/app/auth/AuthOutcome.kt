@@ -2,6 +2,7 @@ package com.tailormyresume.app.auth
 
 import com.tailormyresume.core.domain.SignInFailureReason
 import com.tailormyresume.core.domain.SignInResult
+import com.tailormyresume.core.model.AccountMode
 
 enum class AuthFailure {
     Cancelled,
@@ -24,7 +25,7 @@ sealed interface AuthOutcome<out T> {
     data class Failure(val failure: AuthFailure) : AuthOutcome<Nothing>
 }
 
-data class FirebaseUser(val uid: String, val displayName: String, val email: String)
+data class FirebaseUser(val uid: String, val displayName: String, val email: String, val mode: AccountMode = AccountMode.GOOGLE)
 
 interface GoogleCredentialSource {
     suspend fun idToken(): AuthOutcome<String>
@@ -33,6 +34,12 @@ interface GoogleCredentialSource {
 }
 
 interface FirebaseSessionClient {
+    fun isAnonymous(): Boolean = false
+
+    suspend fun hasAnonymousSession(): Boolean = isAnonymous()
+
+    suspend fun resumeGuest(): AuthOutcome<FirebaseUser> = AuthOutcome.Failure(AuthFailure.NotConfigured)
+
     suspend fun signIn(googleIdToken: String): AuthOutcome<FirebaseUser>
 
     fun signOut()

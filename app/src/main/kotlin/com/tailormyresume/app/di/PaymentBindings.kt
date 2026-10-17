@@ -7,6 +7,7 @@ import com.tailormyresume.app.billing.PlayBilling
 import com.tailormyresume.app.billing.PurchaseRestorer
 import com.tailormyresume.app.billing.RemotePaymentGateway
 import com.tailormyresume.app.credits.RemoteCreditsLedgerSource
+import com.tailormyresume.app.credits.WalletStartTask
 import com.tailormyresume.core.data.repository.RemoteLedgerSource
 import com.tailormyresume.core.domain.PaymentGateway
 import dagger.Binds
@@ -21,6 +22,10 @@ import java.util.Optional
 @Module
 @InstallIn(SingletonComponent::class)
 interface PaymentBindings {
+    @Binds
+    @IntoSet
+    fun bindWalletStartTask(impl: WalletStartTask): AppStartTask
+
     @BindsOptionalOf
     @PaymentGatewayOverride
     fun optionalPaymentGatewayOverride(): PaymentGateway

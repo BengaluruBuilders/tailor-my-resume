@@ -4,12 +4,13 @@ import com.tailormyresume.app.AppStartTask
 import com.tailormyresume.core.common.network.di.ApplicationScope
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.model.AccountMode
 import dagger.Lazy
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,9 +25,15 @@ class PurchaseRestorer @Inject constructor(
 
     override fun start() {
         scope.launch {
-            sessionRepository.observeAccount().map { it?.id }.distinctUntilChanged().filterNotNull().collect { restore() }
+            sessionRepository.observeAccount().distinctUntilChanged().collectLatest { account ->
+                if (account?.mode == AccountMode.GOOGLE) {
+                    coroutineScope {
+                        launch { restore() }
+                        billing.get().unsolicitedPurchases.collect { restore() }
+                    }
+                }
+            }
         }
-        scope.launch { billing.get().unsolicitedPurchases.collect { restore() } }
     }
 
     private suspend fun restore() {

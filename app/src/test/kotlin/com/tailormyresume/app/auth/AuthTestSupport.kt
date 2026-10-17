@@ -55,6 +55,10 @@ internal class ScriptedCredentials(var outcome: AuthOutcome<String> = AuthOutcom
 internal class ScriptedFirebase(
     var outcome: AuthOutcome<FirebaseUser> = AuthOutcome.Success(FirebaseUser("uid-1", "Priya", USER_EMAIL)),
 ) : FirebaseSessionClient {
+    var anonymous = false
+
+    override fun isAnonymous() = anonymous
+
     var signedOut = false
 
     override suspend fun signIn(googleIdToken: String): AuthOutcome<FirebaseUser> = outcome
