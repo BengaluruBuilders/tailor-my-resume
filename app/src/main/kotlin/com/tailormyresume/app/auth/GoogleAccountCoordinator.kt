@@ -67,7 +67,7 @@ class GoogleAccountCoordinator @Inject constructor(
             checkLive()
             if (firebase.hasAnonymousSession()) linkGuest() else directSignIn()
         } catch (cancelled: CancellationException) {
-            fence.release()
+            if (!switched(ownJournal()) && pendingWipe.state() == PendingWipeState.NONE) fence.release()
             mutable.value = GoogleAccountState.Retry(canCancel = false)
             throw cancelled
         } catch (failure: Exception) {
@@ -79,13 +79,17 @@ class GoogleAccountCoordinator @Inject constructor(
     override suspend fun open() = mutex.withLock { safely { reconcile() } }
 
     override suspend fun claim() = mutex.withLock {
-        safely {
+        safely("CLAIM") {
             checkLive()
             if (firebase.hasAnonymousSession()) {
                 linkGuest()
             } else {
                 val journal = ownJournal() ?: newJournal(checkNotNull(uids.uid()), "DIRECT_GOOGLE").also { journals.write(it) }
-                mutable.value = promotions.claim(journal)
+                if (journal.recentAuthRecovery != null) {
+                    mutable.value = GoogleAccountState.Retry(canCancel = true)
+                } else {
+                    mutable.value = promotions.claim(journal)
+                }
             }
         }
     }
@@ -251,13 +255,17 @@ class GoogleAccountCoordinator @Inject constructor(
         }
     }
 
-    private suspend fun reconcile() {
+    private suspend fun reconcile(recoveringAuth: Boolean = false) {
         checkLive()
         val user = firebase.currentUser() ?: run {
             mutable.value = GoogleAccountState.Idle
             return
         }
         val journal = ownJournal()
+        if (journal?.recentAuthRecovery != null && !recoveringAuth) {
+            mutable.value = GoogleAccountState.Retry(canCancel = !switched(journal))
+            return
+        }
         if (journal != null && journal.phase in setOf("DIRECT_SWITCHING", "DIRECT_LINKED") && user.mode == AccountMode.GOOGLE) {
             fence.freeze()
             apiResult { api.me() }.getOrThrow()
@@ -302,7 +310,45 @@ class GoogleAccountCoordinator @Inject constructor(
         }
     }
 
-    override suspend fun retry() = open()
+    override suspend fun retry() = mutex.withLock {
+        val journal = ownJournal()
+        safely(protectedJournal = journal) {
+            if (journal?.recentAuthRecovery == null) reconcile() else recoverRecentAuth(journal)
+        }
+    }
+
+    private suspend fun recoverRecentAuth(journal: UpgradeJournal) {
+        val recovery = checkNotNull(journal.recentAuthRecovery)
+        val generation = fence.ticket()
+        checkRecoveryOwner(recovery, generation)
+        val token = credential() ?: run {
+            mutable.value = GoogleAccountState.Retry(canCancel = !switched(journal))
+            return
+        }
+        checkRecoveryOwner(recovery, generation)
+        check(GoogleCredentialIdentity.digest(token) == recovery.googleDigest)
+        val result = firebase.reauthenticateGoogle(token, recovery.uid, recovery.googleDigest)
+        check(result is AuthOutcome.Success)
+        checkRecoveryOwner(recovery, generation)
+        check(result.value.uid == recovery.uid && result.value.googleSubject?.let(GoogleCredentialIdentity::digestSubject) == recovery.googleDigest)
+        if (recovery.operation == "CLAIM") {
+            mutable.value = promotions.resumeClaim(journal)
+        } else {
+            reconcile(recoveringAuth = true)
+        }
+        checkRecoveryOwner(recovery, generation)
+        ownJournal()?.takeIf { it.recentAuthRecovery == recovery }?.let { journals.write(it.copy(recentAuthRecovery = null)) }
+    }
+
+    private suspend fun checkRecoveryOwner(recovery: RecentGoogleAuthRecovery, generation: Long) {
+        checkLive()
+        check(fence.ticket() == generation)
+        val user = checkNotNull(firebase.currentUser())
+        check(uids.uid() == recovery.uid && user.uid == recovery.uid && user.mode == AccountMode.GOOGLE)
+        check(user.googleSubject?.let(GoogleCredentialIdentity::digestSubject) == recovery.googleDigest)
+    }
+
+    private fun switched(journal: UpgradeJournal?): Boolean = journal?.phase in setOf("SWITCHING", "SWITCHED", "AUTHORIZED", "IMPORTED", "DIRECT_SWITCHING", "DIRECT_LINKED")
 
     override suspend fun cancel() = mutex.withLock {
         val journal = ownJournal()
@@ -354,16 +400,16 @@ class GoogleAccountCoordinator @Inject constructor(
         check(pendingWipe.state() == PendingWipeState.NONE) { "Account deletion must finish first" }
     }
 
-    private suspend fun safely(action: suspend () -> Unit) {
+    private suspend fun safely(operation: String = "RECONCILE", protectedJournal: UpgradeJournal? = null, action: suspend () -> Unit) {
         mutable.value = GoogleAccountState.Busy
         try {
             action()
         } catch (cancelled: CancellationException) {
-            fence.release()
+            if (!switched(ownJournal() ?: protectedJournal) && pendingWipe.state() == PendingWipeState.NONE) fence.release()
             mutable.value = GoogleAccountState.Retry(canCancel = false)
             throw cancelled
         } catch (failure: Exception) {
-            recoverable(failure)
+            recoverable(failure, operation, protectedJournal)
         }
     }
 
@@ -374,10 +420,16 @@ class GoogleAccountCoordinator @Inject constructor(
         else -> false
     }
 
-    private suspend fun recoverable(failure: Exception) {
-        val journal = ownJournal()
-        val switched = journal?.phase in setOf("SWITCHING", "SWITCHED", "AUTHORIZED", "IMPORTED", "DIRECT_SWITCHING", "DIRECT_LINKED")
-        if (!switched) fence.release()
+    private suspend fun recoverable(failure: Exception, operation: String = "RECONCILE", protectedJournal: UpgradeJournal? = null) {
+        val journal = ownJournal() ?: protectedJournal
+        val switched = switched(journal)
+        if ((failure as? ApiException)?.error == ApiError.RecentGoogleAuthRequired && journal != null) {
+            val user = checkNotNull(firebase.currentUser())
+            check(user.mode == AccountMode.GOOGLE && user.uid == uids.uid())
+            val recovery = journal.recentAuthRecovery ?: RecentGoogleAuthRecovery(user.uid, GoogleCredentialIdentity.digestSubject(checkNotNull(user.googleSubject)), operation)
+            journals.write(journal.copy(recentAuthRecovery = recovery))
+        }
+        if (!switched && pendingWipe.state() == PendingWipeState.NONE) fence.release()
         val after = when (val error = (failure as? ApiException)?.error) {
             is ApiError.IdentityUnavailable -> error.retryAfterSeconds
             is ApiError.IntegrityUnavailable -> error.retryAfterSeconds

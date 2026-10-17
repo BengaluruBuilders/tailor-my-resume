@@ -17,7 +17,7 @@ class RemoteJobImporter @Inject constructor(private val api: TailorMyResumeApi, 
             throw AiException(AiFailure.InvalidInput)
         }
         val response = remoteAi { api.jobImport(JobImportRequest(link)) }
-        ticket?.let { ownership?.check(it) }
+        ticket?.let { ownership.check(it) }
         return ImportedJob(response.jobText, response.sourceHost)
     }
 

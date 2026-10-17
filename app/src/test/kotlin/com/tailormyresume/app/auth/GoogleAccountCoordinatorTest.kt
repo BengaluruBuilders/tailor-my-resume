@@ -26,6 +26,9 @@ import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -37,6 +40,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.File
 import java.util.Base64
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 @RunWith(RobolectricTestRunner::class)
 class GoogleAccountCoordinatorTest {
@@ -51,18 +55,31 @@ class GoogleAccountCoordinatorTest {
     private val firebase = Identity()
     private val credentials = ScriptedCredentials(AuthOutcome.Success(token("google-B")))
     private val environment = server.url("/").toString()
+    private val clock = object : Clock {
+        override fun now() = Instant.parse("2026-10-17T00:01:00Z")
+    }
     private var prepare: () -> MockResponse = { jsonResponse(201, """{"intentId":"intent","createdAt":"2026-10-17T00:00:00Z","expiresAt":"2026-10-18T00:00:00Z","state":"PREPARED"}""") }
     private var complete: () -> MockResponse = { jsonResponse(200, COMPLETE) }
+    private var observation: () -> MockResponse = { errorResponse(503, "IDENTITY_UNAVAILABLE") }
+    private var challenge: () -> MockResponse = { jsonResponse(201, com.tailormyresume.app.credits.TrialHarness.CHALLENGE) }
+    private var activation: () -> MockResponse = { jsonResponse(200, fixture("guestOneToSix")) }
+    private val calls = mutableListOf<Pair<String?, String>>()
 
     init {
         server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse = when (request.path) {
-                "/v1/tailormyresume/account/upgrade-intents" -> prepare()
-                "/v1/tailormyresume/account/upgrade-intents/complete" -> complete()
-                "/v1/tailormyresume/account/activation-observations" -> errorResponse(503, "IDENTITY_UNAVAILABLE")
-                "/v1/tailormyresume/wallet" -> jsonResponse(200, """{"wallet":${walletJson()}}""")
-                "/v1/me" -> jsonResponse(200, ME_BODY)
-                else -> errorResponse(404, "NOT_FOUND")
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                synchronized(calls) { calls += request.path to request.body.clone().readUtf8() }
+                return when (request.path) {
+                    "/v1/tailormyresume/account/upgrade-intents" -> prepare()
+                    "/v1/tailormyresume/account/upgrade-intents/complete" -> complete()
+                    "/v1/tailormyresume/account/activation-observations" -> observation()
+                    "/v1/tailormyresume/credits/policy" -> jsonResponse(200, policy())
+                    "/v1/tailormyresume/account/activation-challenges" -> challenge()
+                    "/v1/tailormyresume/account/activate" -> activation()
+                    "/v1/tailormyresume/wallet" -> jsonResponse(200, """{"wallet":${walletJson()}}""")
+                    "/v1/me" -> jsonResponse(200, ME_BODY)
+                    else -> errorResponse(404, "NOT_FOUND")
+                }
             }
         }
     }
@@ -157,6 +174,240 @@ class GoogleAccountCoordinatorTest {
         assertThat(checkpoints.read("A", environment)?.profile?.fullName).isEqualTo("Guest")
     }
 
+    @Test fun linkedRecentAuthRetryReauthenticatesSameUserWithoutSwitchingOrReplacingJournal() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        firebase.user = FirebaseUser("A", "", "", googleSubject = "google-B")
+        val original = journal().copy(phase = "LINKED", signupVersion = "original-signup", baseVersion = "original-base", retryAtMillis = 1)
+        journals.write(original)
+        observation = { errorResponse(403, "RECENT_GOOGLE_AUTH_REQUIRED") }
+        val coordinator = coordinator(checkpoints, journals)
+        coordinator.open()
+        val rejected = checkNotNull(journals.read())
+        assertThat(rejected.copy(recentAuthRecovery = null)).isEqualTo(original)
+        assertThat(rejected.recentAuthRecovery?.operation).isEqualTo("RECONCILE")
+        assertThat(credentials.requests).isEqualTo(0)
+        availableObservation()
+        coordinator.retry()
+        assertThat(firebase.authEvents).containsExactly("reauth:A", "refresh:A").inOrder()
+        assertThat(firebase.switches).isEqualTo(0)
+        assertThat(journals.read()).isEqualTo(original)
+        assertThat(coordinator.state.value).isInstanceOf(GoogleAccountState.Offer::class.java)
+        assertThat(db.profileDao().readProfile()?.fullName).isEqualTo("Guest")
+    }
+
+    @Test fun switchedRecoverySurvivesProcessDeathAndRetriesExactCompletionOnlyAfterExplicitCredentials() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        checkpoints.capture("A", environment)
+        val original = switchedJournal()
+        journals.write(original)
+        firebase.user = FirebaseUser("B", "B", "b@example.com", googleSubject = "google-B")
+        complete = { errorResponse(403, "RECENT_GOOGLE_AUTH_REQUIRED") }
+        coordinator(checkpoints, journals).open()
+        val rejected = checkNotNull(journals.read())
+        assertThat(rejected.copy(recentAuthRecovery = null)).isEqualTo(original)
+        val restartedStore = PrivateUpgradeStore(context, io)
+        val restarted = coordinator(checkpoints, restartedStore)
+        restarted.open()
+        assertThat(requests("/complete")).hasSize(1)
+        assertThat(credentials.requests).isEqualTo(0)
+        complete = { jsonResponse(200, COMPLETE) }
+        restarted.retry()
+        assertThat(firebase.authEvents).containsExactly("reauth:B", "refresh:B").inOrder()
+        assertThat(firebase.switches).isEqualTo(0)
+        assertThat(requests("/complete").distinct()).hasSize(1)
+        assertThat(requests("/complete")).hasSize(2)
+        assertThat(sessions.observeAccount().first()?.id).isEqualTo("B")
+        assertThat(db.localHandoffDao().find("completion")).isNotNull()
+        assertThat(checkpoints.read("A", environment)?.profile?.fullName).isEqualTo("Guest")
+        assertThat(restartedStore.read()).isNull()
+    }
+
+    @Test fun cancellationWrongSubjectAndProviderOutageRetainSwitchedRecoveryAndNeverSignIn() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        checkpoints.capture("A", environment)
+        journals.write(switchedJournal())
+        firebase.user = FirebaseUser("B", "B", "b@example.com", googleSubject = "google-B")
+        complete = { errorResponse(403, "RECENT_GOOGLE_AUTH_REQUIRED") }
+        val coordinator = coordinator(checkpoints, journals)
+        coordinator.open()
+        val rejected = journals.read()
+        for (outcome in listOf(AuthOutcome.Failure(AuthFailure.Cancelled), AuthOutcome.Success(token("google-C")), AuthOutcome.Failure(AuthFailure.Offline))) {
+            credentials.outcome = outcome
+            coordinator.retry()
+            assertThat(journals.read()).isEqualTo(rejected)
+            assertThat(coordinator.state.value).isEqualTo(GoogleAccountState.Retry(canCancel = false))
+            assertThat(firebase.authEvents).isEmpty()
+            assertThat(firebase.switches).isEqualTo(0)
+            assertThat(firebase.uid()).isEqualTo("B")
+            assertThat(db.localHandoffDao().find("completion")).isNull()
+            assertThat(checkpoints.read("A", environment)?.profile?.fullName).isEqualTo("Guest")
+            assertThat(runCatching { fence.check(fence.ticket()) }.isFailure).isTrue()
+        }
+        credentials.outcome = AuthOutcome.Success(token("google-B"))
+        firebase.reauthFailure = AuthFailure.Offline
+        coordinator.retry()
+        assertThat(journals.read()).isEqualTo(rejected)
+        assertThat(requests("/complete")).hasSize(1)
+    }
+
+    @Test fun claimFreshnessFailureResumesOriginalRequestAfterRestartAndCommittedReplayStaysLookupFree() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        firebase.user = FirebaseUser("A", "", "", googleSubject = "google-B")
+        journals.write(journal().copy(phase = "LINKED"))
+        availableObservation()
+        val first = coordinator(checkpoints, journals)
+        first.open()
+        activation = { errorResponse(403, "RECENT_GOOGLE_AUTH_REQUIRED") }
+        first.claim()
+        val rejected = checkNotNull(journals.read())
+        assertThat(rejected.recentAuthRecovery?.operation).isEqualTo("CLAIM")
+        val observations = requests("activation-observations").size
+        activation = { jsonResponse(200, fixture("guestOneToSix").replace("\"replayed\":false", "\"replayed\":true")) }
+        val restarted = coordinator(checkpoints, PrivateUpgradeStore(context, io))
+        restarted.open()
+        restarted.retry()
+        val bodies = requests("/activate").map { Json.parseToJsonElement(it).jsonObject }
+        assertThat(bodies).hasSize(2)
+        assertThat(bodies[1].filterKeys { it != "integrityToken" }).isEqualTo(bodies[0].filterKeys { it != "integrityToken" })
+        assertThat(requests("activation-observations")).hasSize(observations)
+        assertThat(requests("activation-challenges")).hasSize(1)
+        assertThat(journals.read()?.attemptCommitted).isTrue()
+        assertThat(journals.read()?.recentAuthRecovery).isNull()
+        assertThat(firebase.authEvents).containsExactly("reauth:A", "refresh:A").inOrder()
+        assertThat(firebase.switches).isEqualTo(0)
+    }
+
+    @Test fun deletionDuringReauthenticationErasesPrivateRecoveryAndRejectsLateCompletion() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        checkpoints.capture("A", environment)
+        journals.write(switchedJournal())
+        firebase.user = FirebaseUser("B", "B", "b@example.com", googleSubject = "google-B")
+        complete = { errorResponse(403, "RECENT_GOOGLE_AUTH_REQUIRED") }
+        val coordinator = coordinator(checkpoints, journals)
+        coordinator.open()
+        val erased = checkNotNull(journals.read())
+        firebase.beforeReauth = {
+            pending.current = com.tailormyresume.core.data.repository.PendingWipeState.REQUESTED
+            fence.freezeForErasure()
+            journals.eraseFor("B", environment)
+            checkpoints.erase("A", environment)
+        }
+        coordinator.retry()
+        assertThat(requests("/complete")).hasSize(1)
+        assertThat(journals.read()).isNull()
+        assertThat(runCatching { journals.write(erased) }.isFailure).isTrue()
+        assertThat(db.localHandoffDao().find("completion")).isNull()
+        assertThat(runCatching { fence.check(fence.ticket()) }.isFailure).isTrue()
+        assertThat(sessions.observeAccount().first()?.id).isEqualTo("A")
+    }
+
+    @Test fun expiredConflictCapabilityAfterFreshAuthenticationKeepsCheckpointWithoutImport() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        checkpoints.capture("A", environment)
+        journals.write(switchedJournal())
+        firebase.user = FirebaseUser("B", "B", "b@example.com", googleSubject = "google-B")
+        complete = { errorResponse(403, "RECENT_GOOGLE_AUTH_REQUIRED") }
+        val coordinator = coordinator(checkpoints, journals)
+        coordinator.open()
+        val rejected = journals.read()
+        complete = { errorResponse(409, "UPGRADE_INTENT_EXPIRED") }
+        coordinator.retry()
+        assertThat(journals.read()).isEqualTo(rejected)
+        assertThat(db.localHandoffDao().find("completion")).isNull()
+        assertThat(checkpoints.read("A", environment)?.profile?.fullName).isEqualTo("Guest")
+        assertThat(sessions.observeAccount().first()?.id).isEqualTo("A")
+    }
+
+    @Test fun differentFirebaseAccountDuringFreshCredentialsCannotAdoptPrivateHandoffOrReleaseItsFence() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        checkpoints.capture("A", environment)
+        journals.write(switchedJournal())
+        firebase.user = FirebaseUser("B", "B", "b@example.com", googleSubject = "google-B")
+        complete = { errorResponse(403, "RECENT_GOOGLE_AUTH_REQUIRED") }
+        val coordinator = coordinator(checkpoints, journals)
+        coordinator.open()
+        val rejected = journals.read()
+        firebase.beforeReauth = { firebase.user = FirebaseUser("C", "C", "c@example.com", googleSubject = "google-C") }
+        coordinator.retry()
+        assertThat(requests("/complete")).hasSize(1)
+        assertThat(journals.read()).isEqualTo(rejected)
+        assertThat(journals.readFor("C", environment, GoogleCredentialIdentity.digestSubject("google-C"))).isNull()
+        assertThat(db.localHandoffDao().find("completion")).isNull()
+        assertThat(sessions.observeAccount().first()?.id).isEqualTo("A")
+        assertThat(runCatching { fence.check(fence.ticket()) }.isFailure).isTrue()
+        assertThat(coordinator.state.value).isEqualTo(GoogleAccountState.Retry(canCancel = false))
+    }
+
+    @Test fun delayedPartialReceiptRecoveryRetainsRevisionsActionBindingAndRateDeadline() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        firebase.user = FirebaseUser("A", "", "", googleSubject = "google-B")
+        val original = journal().copy(
+            phase = "LINKED", path = "DIRECT_GOOGLE", proof = null, intentId = null,
+            requestId = "committed-partial-request", challengeId = "committed-challenge",
+            signupVersion = "original-signup-receipt", baseVersion = "original-base-revision",
+            requestedBase = true, continuityDigest = "original-continuity", attemptCommitted = true,
+            retryAtMillis = clock.now().toEpochMilliseconds() + 300_000,
+        )
+        journals.write(original)
+        observation = { errorResponse(403, "RECENT_GOOGLE_AUTH_REQUIRED") }
+        val coordinator = coordinator(checkpoints, journals)
+        coordinator.open()
+        availableObservation("directUnused")
+        coordinator.retry()
+        assertThat(journals.read()).isEqualTo(original)
+        assertThat(requests("/activate")).isEmpty()
+        assertThat(requests("activation-challenges")).isEmpty()
+        val offer = coordinator.state.value as GoogleAccountState.Offer
+        assertThat(offer.canClaim).isFalse()
+        assertThat(offer.retryAfterSeconds).isGreaterThan(0)
+        assertThat(firebase.switches).isEqualTo(0)
+    }
+
+    private fun switchedJournal() = journal().copy(phase = "SWITCHED", destination = "B", destinationGoogleDigest = GoogleCredentialIdentity.digestSubject("google-B"))
+
+    private fun availableObservation(example: String = "guestOneToSix") {
+        observation = {
+            val result = Json.parseToJsonElement(fixture(example)).jsonObject
+            jsonResponse(200, JsonObject(result.filterKeys { it in setOf("wallet", "activation", "grants", "referralEligibility") }).toString())
+        }
+    }
+
+    private fun requests(suffix: String): List<String> = synchronized(calls) { calls.filter { it.first?.endsWith(suffix) == true }.map { it.second } }
+
+    private fun fixture(name: String): String {
+        val root = generateSequence(File(".").absoluteFile) { it.parentFile }.first {
+            File(it, "docs/testing/earn-credits/2026-10-17/02-google-signup/fixtures/responses.json").isFile
+        }
+        return Json.parseToJsonElement(File(root, "docs/testing/earn-credits/2026-10-17/02-google-signup/fixtures/responses.json").readText())
+            .jsonObject.getValue("examples").jsonObject.getValue(name).toString()
+    }
+
+    private fun policy() = """{"policy":{"version":"guest-local-v1","effectiveAt":"2026-10-17T00:00:00Z","expiresAt":"2026-10-19T00:00:00Z","accountMode":"GOOGLE","guestTrial":{"status":"NOT_ELIGIBLE","reason":"ACCOUNT_MODE_INELIGIBLE","amount":null,"operation":"GUEST_TRIAL","integrity":"PLAY_INTEGRITY_STANDARD","continuity":"ANDROID_ID","bindingVersion":1},"signupBonus":${fixture("signupPolicyNewDirect")}}}"""
+
     private suspend fun guest() {
         db.profileDao().upsertProfile(ProfileEntity(fullName = "Guest", email = "", phone = "", headline = "", skills = emptyList()))
         sessions.saveLastAccountId("A")
@@ -175,9 +426,9 @@ class GoogleAccountCoordinatorTest {
                 wallet,
                 TestCreditsRepository(),
                 firebase,
-                Clock.System,
+                clock,
             ),
-            wallet, firebase, Clock.System, backgroundScope,
+            wallet, firebase, clock, backgroundScope,
         )
     }
 
@@ -187,6 +438,9 @@ class GoogleAccountCoordinatorTest {
         var user = FirebaseUser("A", "", "", AccountMode.ANONYMOUS)
         var conflict = true
         var switches = 0
+        val authEvents = mutableListOf<String>()
+        var reauthFailure: AuthFailure? = null
+        var beforeReauth: suspend () -> Unit = {}
         override fun uid() = user.uid
         override fun isAnonymous() = user.mode == AccountMode.ANONYMOUS
         override suspend fun currentUser() = user
@@ -197,6 +451,16 @@ class GoogleAccountCoordinatorTest {
             AuthOutcome.Success(user)
         }
         override suspend fun refreshGoogle() = AuthOutcome.Success(user)
+        override suspend fun reauthenticateGoogle(googleIdToken: String, expectedUid: String, expectedGoogleDigest: String): AuthOutcome<FirebaseUser> {
+            assertThat(expectedUid).isEqualTo(user.uid)
+            assertThat(expectedGoogleDigest).isEqualTo(GoogleCredentialIdentity.digestSubject(checkNotNull(user.googleSubject)))
+            assertThat(GoogleCredentialIdentity.digest(googleIdToken)).isEqualTo(expectedGoogleDigest)
+            authEvents += "reauth:$expectedUid"
+            beforeReauth()
+            reauthFailure?.let { return AuthOutcome.Failure(it) }
+            authEvents += "refresh:$expectedUid"
+            return AuthOutcome.Success(user)
+        }
         override suspend fun signIn(googleIdToken: String): AuthOutcome<FirebaseUser> {
             switches++
             user = FirebaseUser("B", "B", "b@example.com", googleSubject = "google-B")

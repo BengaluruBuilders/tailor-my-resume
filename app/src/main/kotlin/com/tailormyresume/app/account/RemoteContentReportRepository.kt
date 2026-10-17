@@ -35,7 +35,7 @@ class RemoteContentReportRepository @Inject constructor(
     override suspend fun report(report: ContentReport) {
         val ticket = ownership?.capture()
         local.report(report)
-        ticket?.let { ownership?.check(it) }
+        ticket?.let { ownership.check(it) }
         queue.add(report, ticket?.owner)
         scope.launch { flush() }
     }
@@ -43,9 +43,9 @@ class RemoteContentReportRepository @Inject constructor(
     suspend fun flush() = flushMutex.withLock {
         val ticket = ownership?.capture()
         queue.pending(ticket?.owner).forEach { report ->
-            ticket?.let { ownership?.check(it) }
+            ticket?.let { ownership.check(it) }
             val failure = apiResult { api.reportContent(report.toRequest()) }.exceptionOrNull()
-            ticket?.let { ownership?.check(it) }
+            ticket?.let { ownership.check(it) }
             if (failure == null || (failure as ApiException).error.isPermanent()) queue.remove(report, ticket?.owner)
         }
     }

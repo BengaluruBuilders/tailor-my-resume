@@ -18,7 +18,6 @@ class RemoteServerAccountDeleter @Inject constructor(private val api: TailorMyRe
         .recoverCatching { failure ->
             if ((failure as? ApiException)?.error == ApiError.AccountDeleted) {
                 privateWork?.erase()
-                Unit
             } else {
                 throw failure
             }

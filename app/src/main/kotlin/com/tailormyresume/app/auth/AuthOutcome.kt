@@ -41,6 +41,8 @@ interface FirebaseSessionClient {
 
     suspend fun refreshGoogle(): AuthOutcome<FirebaseUser> = AuthOutcome.Failure(AuthFailure.NotConfigured)
 
+    suspend fun reauthenticateGoogle(googleIdToken: String, expectedUid: String, expectedGoogleDigest: String): AuthOutcome<FirebaseUser> = AuthOutcome.Failure(AuthFailure.NotConfigured)
+
     fun isAnonymous(): Boolean = false
 
     suspend fun hasAnonymousSession(): Boolean = isAnonymous()

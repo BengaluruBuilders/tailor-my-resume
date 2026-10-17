@@ -80,6 +80,31 @@ class FirebaseAuthClient @Inject constructor(
         }
     }
 
+    override suspend fun reauthenticateGoogle(googleIdToken: String, expectedUid: String, expectedGoogleDigest: String): AuthOutcome<FirebaseUser> = withContext(io) {
+        val firebaseAuth = auth ?: return@withContext AuthOutcome.Failure(AuthFailure.NotConfigured)
+        val user = firebaseAuth.currentUser ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+        try {
+            fun verifyCurrent() {
+                val current = checkNotNull(firebaseAuth.currentUser)
+                check(current.uid == expectedUid && !current.isAnonymous)
+                check(current.providerData.single { it.providerId == "google.com" }.uid.let(GoogleCredentialIdentity::digestSubject) == expectedGoogleDigest)
+            }
+            verifyCurrent()
+            check(GoogleCredentialIdentity.digest(googleIdToken) == expectedGoogleDigest)
+            user.reauthenticate(GoogleAuthProvider.getCredential(googleIdToken, null)).await()
+            verifyCurrent()
+            user.reload().await()
+            verifyCurrent()
+            user.getIdToken(true).await()
+            verifyCurrent()
+            AuthOutcome.Success(checkNotNull(currentUser()))
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            AuthOutcome.Failure(failure.toAuthFailure())
+        }
+    }
+
     override suspend fun signIn(googleIdToken: String): AuthOutcome<FirebaseUser> = withContext(io) {
         val firebaseAuth = auth ?: return@withContext AuthOutcome.Failure(AuthFailure.NotConfigured)
         try {

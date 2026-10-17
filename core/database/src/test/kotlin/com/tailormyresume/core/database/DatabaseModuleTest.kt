@@ -19,7 +19,7 @@ class DatabaseModuleTest {
     val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), TmrDatabase::class.java)
 
     @Test
-    fun registersBothMigrationsWithoutDestructiveFallback() {
+    fun registersEveryMigrationWithoutDestructiveFallback() {
         helper.createDatabase(PRODUCTION_NAME, 1).apply {
             insert(
                 "profile",
@@ -39,7 +39,13 @@ class DatabaseModuleTest {
         val database = DatabaseModule.providesTmrDatabase(RuntimeEnvironment.getApplication())
         try {
             val version = database.openHelper.writableDatabase.version
-            assertThat(version).isEqualTo(4)
+            assertThat(version).isEqualTo(5)
+            database.openHelper.writableDatabase.query("SELECT name FROM sqlite_master WHERE type = 'table'").use { cursor ->
+                val tables = buildSet { while (cursor.moveToNext()) add(cursor.getString(0)) }
+                assertThat(tables).containsAtLeast("local_handoffs", "local_account_owner", "profile", "job_applications")
+            }
+            database.openHelper.writableDatabase.execSQL("INSERT INTO local_account_owner (id, owner, environment) VALUES (1, 'historical-owner', 'staging')")
+            database.openHelper.writableDatabase.execSQL("INSERT INTO local_handoffs (id, destination, source, mapping) VALUES ('handoff', 'destination', 'source', '{}')")
             database.openHelper.writableDatabase.query("SELECT fullName FROM profile").use { cursor ->
                 assertThat(cursor.moveToFirst()).isTrue()
                 assertThat(cursor.getString(0)).isEqualTo("Priya")

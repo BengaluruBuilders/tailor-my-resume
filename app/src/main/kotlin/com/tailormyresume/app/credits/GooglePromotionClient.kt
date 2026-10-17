@@ -42,6 +42,7 @@ class GooglePromotionClient @Inject constructor(
             journals.write(recovered)
             return prepare(recovered, changed)
         }
+        var policyChanged = changed
         val uid = uids.uid()
         val generation = wallet.generation()
         val remaining = retryRemaining(journal)
@@ -51,6 +52,7 @@ class GooglePromotionClient @Inject constructor(
             ensureOwner(uid, generation)
             if (replay.isSuccess) return finish(journal, replay.getOrThrow().first, generation, replay.getOrThrow().second)
             val error = (replay.exceptionOrNull() as? ApiException)?.error
+            if (error == ApiError.PolicyChanged) policyChanged = true
             if (error !in setOf(ApiError.IntegrityChallengeInvalid, ApiError.IntegrityRejected, ApiError.PolicyChanged)) {
                 throw checkNotNull(replay.exceptionOrNull())
             }
@@ -67,7 +69,20 @@ class GooglePromotionClient @Inject constructor(
         } else {
             journal
         }
-        return offer(policy, reconciled, changed)
+        return offer(policy, reconciled, policyChanged)
+    }
+
+    suspend fun resumeClaim(journal: UpgradeJournal): GoogleAccountState {
+        val result = prepare(journal)
+        if (result !is GoogleAccountState.Offer || !result.canClaim || result.changed) return result
+        val pending = checkNotNull(journals.readFor(checkNotNull(uids.uid()), journal.environment))
+        val signup = checkNotNull(displayed).signupBonus
+        val signupVersion = signup.grantPolicyVersion ?: signup.version
+        val baseVersion = if (pending.requestedBase) signup.baseTrial?.grantPolicyVersion ?: signup.baseTrial?.version else null
+        if (pending.requestId != null && !pending.attemptCommitted && (pending.signupVersion != signupVersion || pending.baseVersion != baseVersion)) {
+            return result.copy(changed = true)
+        }
+        return claim(pending)
     }
 
     suspend fun claim(journal: UpgradeJournal): GoogleAccountState {

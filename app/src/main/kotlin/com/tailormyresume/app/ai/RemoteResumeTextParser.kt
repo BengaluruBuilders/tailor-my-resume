@@ -25,7 +25,7 @@ class RemoteResumeTextParser @Inject constructor(
     override suspend fun parse(rawText: String, keptEntries: Int): CandidateProfile {
         val ticket = ownership?.capture()
         val response = remoteAi { api.parseResume(ResumeParseRequest(rawText)) }
-        ticket?.let { ownership?.check(it) }
+        ticket?.let { ownership.check(it) }
         val parsed = response.profile
         return CandidateProfile(
             fullName = parsed.fullName.orEmpty(),

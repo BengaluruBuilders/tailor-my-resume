@@ -51,6 +51,7 @@ class GooglePromotionClientTest {
     private var signupAvailable = true
     private var baseCommitted = false
     private var signupAmount = 5
+    private var signupVersion = "signup-local-v1"
     private var activate: () -> MockResponse = { jsonResponse(200, example("directUnused")) }
     private val fixtures = fixtureResponses()
 
@@ -211,6 +212,31 @@ class GooglePromotionClientTest {
         assertThat(wallet.cached).isNull()
     }
 
+    @Test fun freshAuthRecoveryRequiresConfirmationWhenUncommittedPolicyChanges() = runTest {
+        val store = PrivateUpgradeStore(context, UnconfinedTestDispatcher(testScheduler))
+        val client = client(store)
+        val original = journal()
+        store.write(original)
+        client.prepare(original)
+        activate = { jsonResponse(403, """{"error":{"code":"RECENT_GOOGLE_AUTH_REQUIRED"}}""") }
+        assertThat(runCatching { client.claim(original) }.isFailure).isTrue()
+        val pending = checkNotNull(store.read())
+        signupAmount = 6
+        signupVersion = "signup-local-v2"
+        activate = { jsonResponse(409, """{"error":{"code":"POLICY_CHANGED"}}""") }
+        assertThat(client.resumeClaim(pending)).isEqualTo(GoogleAccountState.Offer(6, 2, true, changed = true))
+        assertThat(posted()).hasSize(2)
+        assertThat(requests("activation-challenges")).isEqualTo(1)
+        assertThat(posted()[0]["requestId"]).isEqualTo(posted()[1]["requestId"])
+        assertThat(posted()[1]["policyVersion"]?.jsonPrimitive?.content).isEqualTo("signup-local-v1")
+        assertThat(store.read()).isEqualTo(pending)
+        activate = { jsonResponse(200, example("directUnused")) }
+        client.claim(pending)
+        assertThat(posted().last()["policyVersion"]?.jsonPrimitive?.content).isEqualTo("signup-local-v2")
+        assertThat(posted().last()["requestId"]).isEqualTo(posted()[0]["requestId"])
+        assertThat(posted().last()["continuity"]).isEqualTo(posted()[0]["continuity"])
+    }
+
     @Test fun displayedAmountComesFromPolicyWithoutAClientSignupConstant() = runTest {
         val store = PrivateUpgradeStore(context, UnconfinedTestDispatcher(testScheduler))
         signupAmount = 13
@@ -251,7 +277,7 @@ class GooglePromotionClientTest {
                     },
                 ),
             )
-            put("version", if (signupAvailable) JsonPrimitive("signup-local-v1") else JsonNull)
+            put("version", if (signupAvailable) JsonPrimitive(signupVersion) else JsonNull)
             put("grantPolicyVersion", if (signupCommitted) JsonPrimitive("signup-local-v1") else JsonNull)
         }
         return """{"policy":{"version":"guest-local-v1","effectiveAt":"2026-10-17T00:00:00Z","expiresAt":"2026-10-19T00:00:00Z","accountMode":"GOOGLE","guestTrial":{"status":"NOT_ELIGIBLE","reason":"ACCOUNT_MODE_INELIGIBLE","amount":null,"operation":"GUEST_TRIAL","integrity":"PLAY_INTEGRITY_STANDARD","continuity":"ANDROID_ID","bindingVersion":1},"signupBonus":${JsonObject(signup)}}} """

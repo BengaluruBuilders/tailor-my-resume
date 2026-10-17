@@ -41,7 +41,7 @@ class RemoteJobAnalysisSource @Inject constructor(
         val key = ticket?.owner.orEmpty() + ":" + cacheKey(rawJobText)
         synchronized(cache) { cache[key] }?.let { return rematch(it, profile) }
         val response = remoteAi { api.analyse(AnalysisRequest(rawJobText, facts)) }
-        ticket?.let { ownership?.check(it) }
+        ticket?.let { ownership.check(it) }
         val job = response.job.toJobDescription(rawJobText)
         val factIds = profile.sendableFacts().evidenceIds()
         val matches = matchesOf(job, response.matches, factIds)

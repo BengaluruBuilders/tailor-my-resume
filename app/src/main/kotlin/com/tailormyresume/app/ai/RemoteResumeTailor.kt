@@ -60,7 +60,7 @@ class RemoteResumeTailor @Inject constructor(
                     pending.clear(runId, applicationId)
                     throw AiException(finished.failureCode.toAiFailure())
                 }
-            ticket?.let { ownership?.check(it) }
+            ticket?.let { ownership.check(it) }
             return result.toTailoredResume(profile)
         } catch (failure: AiException) {
             if (failure.failure !in RESUMABLE) pending.clear(runId, applicationId)

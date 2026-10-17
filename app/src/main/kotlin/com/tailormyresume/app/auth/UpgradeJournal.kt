@@ -38,7 +38,11 @@ data class UpgradeJournal(
     val retryAtMillis: Long? = null,
     val profileChoiceConfirmed: Boolean = false,
     val destinationGoogleDigest: String? = null,
+    val recentAuthRecovery: RecentGoogleAuthRecovery? = null,
 )
+
+@Serializable
+data class RecentGoogleAuthRecovery(val uid: String, val googleDigest: String, val operation: String)
 
 @Singleton
 class PrivateUpgradeStore @Inject constructor(
