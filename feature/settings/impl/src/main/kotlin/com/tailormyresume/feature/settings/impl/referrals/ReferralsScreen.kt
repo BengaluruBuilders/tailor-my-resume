@@ -90,8 +90,10 @@ internal fun ReferralsRoute(modifier: Modifier = Modifier, viewModel: ReferralsV
                 scope.launch {
                     viewModel.share()?.let { value ->
                         val destination = value.url ?: value.code
-                        val text = if (value.reward != null && value.version != null) {
-                            context.getString(R.string.feature_settings_impl_referral_share_offer, value.reward, value.version, destination)
+                        val reward = value.reward
+                        val version = value.version
+                        val text = if (reward != null && version != null) {
+                            context.resources.getQuantityString(R.plurals.feature_settings_impl_referral_share_offer, reward, reward, version, destination)
                         } else {
                             context.getString(R.string.feature_settings_impl_referral_share_neutral, destination)
                         }

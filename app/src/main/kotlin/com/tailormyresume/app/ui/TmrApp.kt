@@ -119,8 +119,8 @@ internal fun PendingToastHost() {
 @Composable
 internal fun TmrAccountRoot(
     ready: AppRootState.Ready,
-    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
     modifier: Modifier = Modifier,
+    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
 ) {
@@ -146,8 +146,8 @@ private fun StartDestination.navKey(): NavKey = when (this) {
 internal fun TmrRoot(
     root: AccountRoot,
     startKey: NavKey,
-    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
     modifier: Modifier = Modifier,
+    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
     initialKeys: () -> List<NavKey> = PendingNavigation::consume,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
