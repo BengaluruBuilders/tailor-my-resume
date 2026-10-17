@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "command": "npm run check",
+  "exit_code": 0,
+  "elapsed_seconds": 112.04,
+  "tests": {
+    "total": 721,
+    "passed": 720,
+    "failed": 0,
+    "skipped": 1,
+    "skip": "test/backup.test.ts: real pg_dump custom-format archive; pg_dump unavailable on required-check PATH"
+  },
+  "candidate_backend_sha": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "contract_revision": "google-activation-v1-rate-limit-1",
+  "contract_sha256": "2143cac25a92c6b0b9a26c5b65932f638f20373c76f1c7048785b44ba244391a",
+  "source_raw_log_sha256": "a0ef92ffd9bdaa50bca87c084598916e60e1cf3c82a4072d208398089d586fd6",
+  "published_sanitized_log_sha256": "20bb462e53d60f0ab011ca35466255834a14752a4455cc1570ccc6da947253be",
+  "redactions": [
+    "Synthetic fixture account labels alice/bob generalized to user-a/user-b; no other matched content changed."
+  ],
+  "resource": {
+    "minimum_available_kib": 9034760,
+    "maximum_child_rss_kib": 1128760,
+    "memory_psi_avg10_some_full": "0.00",
+    "sample_interval_seconds": 2,
+    "source_memory_csv_sha256": "d903f593ab1e614c62ce12c6c8092e7cb7b782806addf4b9ae847cf37decda72"
+  },
+  "repair_accounting": {
+    "first_required_check": "FAIL: 721 total / 719 pass / 1 fail / 1 skip; sole failure was shared-app fixture cleanup omitting four new TMR tables.",
+    "repair_count": 1,
+    "repair": "test cleanup list only; original assertion preserved.",
+    "repair_focused_confirmation": "5/5 pass, session 39373, 1.15 s.",
+    "final_required_check": "PASS after one repair."
+  },
+  "scope_limits": [
+    "Fixture application tests only; no genuine Google/Play acceptance.",
+    "The skipped pg_dump archive case is not validated here; independent candidate-schema dump/restore remains pending.",
+    "Frontend candidate and synchronized pair verdict remain pending.",
+    "Google integrity, admissions, device behavior, and paired runtime are not claimed."
+  ],
+  "precheck_manifest_sha256": "2ccac6580487115efd2553d75eb60b5165100a0757d391717595f42ac19006bb",
+  "other_source_hashes": {
+    "focused_finaldev_log": "ffd21788cf06fd2071a8d5ee605f1b451d62d962ccd82851bc2948d5e145a95a",
+    "shared_repair1_log": "f94f72ba647906fecf1fb4f75106bebc001716e300958a72967b501088ce8cbe"
+  },
+  "publication": "pending independent validation and publisher selection"
+}

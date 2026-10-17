@@ -1,0 +1,78 @@
+{
+  "fixture": "unchanged bounded CONNECT TLS-passthrough relay; no TLS termination",
+  "binding": "127.0.0.1:18765",
+  "actualConnections": [
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T08:42:00Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T08:42:38Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T08:44:42Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T08:46:37Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T08:46:37Z"
+    }
+  ],
+  "deniedCount": 31,
+  "closedTunnelByteCounts": [
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 1949,
+      "serverBytes": 1720
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 1824,
+      "serverBytes": 2775
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 1675,
+      "serverBytes": 2321
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 723,
+      "serverBytes": 1504
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 1664,
+      "serverBytes": 2127
+    }
+  ],
+  "proxyInitial": [
+    "null",
+    "null"
+  ],
+  "proxyRestored": [
+    "null",
+    "null"
+  ],
+  "relayPidStopped": 710503,
+  "emulatorSession": "99466",
+  "relaySession": "5287",
+  "emulatorExit": 0,
+  "relayExit": 143,
+  "personalPixelOperated": false
+}

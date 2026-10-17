@@ -1,0 +1,64 @@
+{
+  "frontendSha": "01cfb637e26ca075df78892a352b8b7c62e8531d",
+  "backendSha": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "variant": "staging",
+  "applicationId": "com.tailormyresume.app.staging",
+  "sourceManifestSha256": "8c1d78b34e8dbe3b486fe86ab07e185ceb56c5d25e36643837d8630cc2b1b8bc",
+  "trackedInputs": 2222,
+  "sourceMismatches": [],
+  "artifact": "/tmp/tmr-slice02-fixer-01cfb637-staging.apk",
+  "originalArtifact": "/tmp/tmr-earn-20261017-frontend02/app/build/outputs/apk/staging/app-staging.apk",
+  "bytes": 6032782,
+  "sha256": "b174910dedae7fdb590113a2bdce87cc4bc106564c2b6908a55f5c63ddcb5bff",
+  "apiEndpoint": "https://abhishek-dubey-MS-7B16.local:20002/",
+  "firebaseProjectId": "tailormy-resume-staging",
+  "endpointAndProjectPresentInActualDex": true,
+  "privateClientSettingsPresentInDex": {
+    "TAILORMYRESUME_FIREBASE_API_KEY": true,
+    "TAILORMYRESUME_FIREBASE_APP_ID": true,
+    "TAILORMYRESUME_WEB_CLIENT_ID": true
+  },
+  "integrityCloudProjectNumberConfigured": false,
+  "signatureVerified": true,
+  "verifiedScheme": "v2",
+  "signerCount": 1,
+  "signingCertificateSha256": "cd42a070ed44e41b40e5d8c8b24b26c0df70a7e97f3aa33da405b38984ce549c",
+  "publicPackageMetadata": "package: name='com.tailormyresume.app.staging' versionCode='1' versionName='0.1.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'\nminSdkVersion:'26'\ntargetSdkVersion:'36'",
+  "buildMetadata": {
+    "version": 3,
+    "artifactType": {
+      "type": "APK",
+      "kind": "Directory"
+    },
+    "applicationId": "com.tailormyresume.app.staging",
+    "variantName": "staging",
+    "elements": [
+      {
+        "type": "SINGLE",
+        "filters": [],
+        "attributes": [],
+        "versionCode": 1,
+        "versionName": "0.1.0",
+        "outputFile": "app-staging.apk"
+      }
+    ],
+    "elementType": "File",
+    "baselineProfiles": [
+      {
+        "minApi": 28,
+        "maxApi": 30,
+        "baselineProfiles": [
+          "baselineProfiles/1/app-staging.dm"
+        ]
+      },
+      {
+        "minApi": 31,
+        "maxApi": 2147483647,
+        "baselineProfiles": [
+          "baselineProfiles/0/app-staging.dm"
+        ]
+      }
+    ],
+    "minSdkVersionForDexing": 26
+  }
+}

@@ -1,0 +1,13 @@
+✔ same shared primitives use independent app/environment database, amount and qualifying event (30.864847ms)
+✔ sink failure rolls back grant, continuity allocation, ledger and campaign capacity (19.012453ms)
+✔ policy version is immutable and lifetime entitlement cannot change on publication (11.486701ms)
+✔ account deletion cascades shared fixtures while consumed capacity and other database remain (5.939083ms)
+✔ drops shared app fixtures (37.770124ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1148.178043

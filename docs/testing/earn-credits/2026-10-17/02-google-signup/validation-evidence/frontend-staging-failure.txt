@@ -1,0 +1,11 @@
+e: warnings found and -Werror specified
+e: file:///tmp/tmr-earn-20261017-frontend02/app/src/main/kotlin/com/tailormyresume/app/account/RemoteContentReportRepository.kt:38:32 Unnecessary safe call on a non-null receiver of type 'AccountOperationGuard'.
+e: file:///tmp/tmr-earn-20261017-frontend02/app/src/main/kotlin/com/tailormyresume/app/account/RemoteContentReportRepository.kt:46:36 Unnecessary safe call on a non-null receiver of type 'AccountOperationGuard'.
+e: file:///tmp/tmr-earn-20261017-frontend02/app/src/main/kotlin/com/tailormyresume/app/account/RemoteContentReportRepository.kt:48:36 Unnecessary safe call on a non-null receiver of type 'AccountOperationGuard'.
+e: file:///tmp/tmr-earn-20261017-frontend02/app/src/main/kotlin/com/tailormyresume/app/ai/RemoteJobAnalysisSource.kt:44:32 Unnecessary safe call on a non-null receiver of type 'AccountOperationGuard'.
+e: file:///tmp/tmr-earn-20261017-frontend02/app/src/main/kotlin/com/tailormyresume/app/ai/RemoteJobImporter.kt:20:32 Unnecessary safe call on a non-null receiver of type 'AccountOperationGuard'.
+e: file:///tmp/tmr-earn-20261017-frontend02/app/src/main/kotlin/com/tailormyresume/app/ai/RemoteResumeTailor.kt:63:36 Unnecessary safe call on a non-null receiver of type 'AccountOperationGuard'.
+e: file:///tmp/tmr-earn-20261017-frontend02/app/src/main/kotlin/com/tailormyresume/app/ai/RemoteResumeTextParser.kt:28:32 Unnecessary safe call on a non-null receiver of type 'AccountOperationGuard'.
+e: file:///tmp/tmr-earn-20261017-frontend02/app/src/main/kotlin/com/tailormyresume/app/auth/RemoteServerAccountDeleter.kt:21:17 Expression is unused.
+BUILD FAILED in 2m 24s
+Runner result: exit=1; minAvailableMiB=6819; cancelledForPressure=False

@@ -1,0 +1,74 @@
+{
+  "backendSha": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "observations": [
+    {
+      "observedAt": "2026-10-17T08:42:00.279Z",
+      "counts": {
+        "users": 0,
+        "promotion_policies": 0,
+        "promotion_grants": 0,
+        "tailormyresume_wallets": 0,
+        "tailormyresume_credit_ledger": 0,
+        "tailormyresume_google_activations": 0,
+        "tailormyresume_upgrade_intents": 0,
+        "tailormyresume_activation_operations": 0
+      },
+      "userCreationDates": {
+        "first": null,
+        "last": null
+      }
+    },
+    {
+      "observedAt": "2026-10-17T08:43:02.649Z",
+      "counts": {
+        "users": 0,
+        "promotion_policies": 0,
+        "promotion_grants": 0,
+        "tailormyresume_wallets": 0,
+        "tailormyresume_credit_ledger": 0,
+        "tailormyresume_google_activations": 0,
+        "tailormyresume_upgrade_intents": 0,
+        "tailormyresume_activation_operations": 0
+      },
+      "userCreationDates": {
+        "first": null,
+        "last": null
+      }
+    },
+    {
+      "observedAt": "2026-10-17T08:44:57.748Z",
+      "counts": {
+        "users": 0,
+        "promotion_policies": 0,
+        "promotion_grants": 0,
+        "tailormyresume_wallets": 0,
+        "tailormyresume_credit_ledger": 0,
+        "tailormyresume_google_activations": 0,
+        "tailormyresume_upgrade_intents": 0,
+        "tailormyresume_activation_operations": 0
+      },
+      "userCreationDates": {
+        "first": null,
+        "last": null
+      }
+    },
+    {
+      "observedAt": "2026-10-17T08:46:55.369Z",
+      "counts": {
+        "users": 0,
+        "promotion_policies": 0,
+        "promotion_grants": 0,
+        "tailormyresume_wallets": 0,
+        "tailormyresume_credit_ledger": 0,
+        "tailormyresume_google_activations": 0,
+        "tailormyresume_upgrade_intents": 0,
+        "tailormyresume_activation_operations": 0
+      },
+      "userCreationDates": {
+        "first": null,
+        "last": null
+      }
+    }
+  ],
+  "note": "read-only successful wallet/policy routes need not create rows; zero row counts prove no economic/activation writes, not absence of contact"
+}

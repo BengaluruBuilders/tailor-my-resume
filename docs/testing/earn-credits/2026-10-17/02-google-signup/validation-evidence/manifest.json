@@ -1,0 +1,33 @@
+{
+  "frontendSha": "83f0ae0b2678e3a559cd3a3ddac154ceb0d5fa4b",
+  "backendSha": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "contractSha256": "2143cac25a92c6b0b9a26c5b65932f638f20373c76f1c7048785b44ba244391a",
+  "files": {
+    "backend-dump-restore-fixture.ts": {
+      "bytes": 6103,
+      "sha256": "1851abe84eeba3378722356c712044cabffc77f1e8f3af0d4110a440300d6688"
+    },
+    "backend-dump-restore-summary.json": {
+      "bytes": 1258,
+      "sha256": "1f2cc39e3b8c5e93d471b78314aafd5d0899fa8b108b94807f72718832864805"
+    },
+    "backend-recent-auth-conflict.log": {
+      "bytes": 233,
+      "sha256": "e33ee562574e9fa59622194ba5caeec099f4cba6973c46b051f107535408adc5"
+    },
+    "database-module-failure.xml": {
+      "bytes": 856,
+      "sha256": "05b80b076d7fea9cbb2497685984118680e76dad7bae0da8ff8f1ba34e9fcd54"
+    },
+    "frontend-required-gate.log": {
+      "bytes": 157467,
+      "sha256": "4294fd5ce470b62c5a17a85f1bf06f202e6952e8b10d5b9d74a5629bf263e202"
+    },
+    "frontend-staging-failure.txt": {
+      "bytes": 1713,
+      "sha256": "2521c9bc0730862fdcc45bb4a8ad67b314c7da628ea66d3da3d4e779e0142f5b"
+    }
+  },
+  "originalStagingLogSha256": "10239ae4d915811fb2b8f12332e13a4e4c77e4f9b67d032d0259c088d1fa48af",
+  "publication": "not published; local independent validation evidence"
+}
