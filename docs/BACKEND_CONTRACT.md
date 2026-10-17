@@ -1769,11 +1769,28 @@ Example fixture namespace is `tailormyresume.staging`, not a new live setting.
 
 Raw input is 1..256 ASCII characters. Trim only outer ASCII SP/TAB/CR/LF; lowercase only ASCII
 A-Z; then require the exact full three-part grammar, maximum 98 canonical characters. Reject
-interior whitespace, Unicode, percent escapes, URLs, extra parts, `0/1/8/9` in payload and wrong
-scope. Never strip a namespace or resolve another environment by suffix. A syntactically valid
-candidate is not proof that a code exists. Creation tries at most 5 independently generated
-payloads on unique collisions, then 503 PROMOTION_UNAVAILABLE; concurrent same-owner creation
-returns one winning code. Namespace mapping cannot be changed silently for existing codes.
+interior whitespace, Unicode, percent escapes, URLs, extra parts and `0/1/8/9` in the payload.
+
+Android validates candidate syntax only, without assuming the configured namespace tokens.
+A structurally valid full code from another namespace may be saved as a pending candidate.
+Saving it does not validate its scope, existence or eligibility and never means Referral applied.
+The server rejects codes outside its explicitly configured app/environment mapping and resolves
+the complete code only within the authenticated deployment scope. Code tokens never choose the
+request's API app, deployment environment, database, identity or challenge binding scope. Keep
+the full canonical code and the existing independent journal ownership/environment fences;
+never strip or rewrite a namespace or resolve another environment by suffix.
+
+The existing canonical vectors and their hashes remain unchanged. Their invalidCodes list contains
+both syntax failures and server-scope negatives: the structurally valid foreign prefixes remain
+server-scoped rejection cases. Android consumer tests must distinguish them from malformed
+candidate syntax; the scoped fixture verifier is not the Android candidate parser.
+
+Creation tries at most 5 independently generated payloads on unique collisions, then 503
+PROMOTION_UNAVAILABLE; concurrent same-owner creation returns one winning code. Namespace
+mapping cannot be changed silently for existing codes. New issuance must atomically enforce
+compatibility with retained scoped codes and report codeIssuance UNAVAILABLE on a conflicting
+mapping; existing own-code reads/recovery retain their existing precedence. No namespace
+rotation/migration API, new metadata field or live namespace choice is introduced.
 
 ```json
 {"requestId":"11111111-1111-4111-8111-111111111111","code":"tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567","source":"MANUAL","policyVersion":"referral-local-v1","continuity":null,"challengeId":"22222222-2222-4222-8222-222222222222","integrityToken":"synthetic-token-not-valid-in-any-environment"}

@@ -1,7 +1,7 @@
 # Slice03 manual referral contract handoff
 
-Contract-only phase complete: `manual-referrals-v1`. Contract SHA-256:
-`09507f4e322e72e7e34ecf4797dca8bc89178d2c33cdb1280142b025c58dc3a0`.
+Contract-only phase complete: `manual-referrals-v1`, namespace clarification `namespace-1` (no wire change). Contract SHA-256:
+`66db09b4ccb06e8224a4c039c491a4e90dec434f56ee78aab478c0a5bb293add`.
 No runtime, database, deployment or live policy was changed. Both implementation writers must agree to this exact revision before root releases application implementation.
 
 ## Revisions and ownership
@@ -40,3 +40,11 @@ Accepted decisions are copied as `lifecycle-decision.md` and `constitution-decis
 Inherited slice02 full Google/Integrity/admitted-grant/spend acceptance remains BLOCKED despite attainable publication audit PASS. Genuine matching staging provider/project/package/certificate/licensing evidence, signed device tests and live capacity/window/retention/namespace/ingress/disclosure decisions remain BLOCKED. Fixture24h/5/100 values are not live choices. External-gate-decision permits coding only with honest blockers/draft disposition. No merge, auto-merge, release, remote migration or live admissions.
 
 Stop condition reached: frozen contract and fixtures plus normal commit. Root obtains both exact-hash agreements, then releases at most one frontend and one backend writer on slice03. No material design decision remains pending in this contract; implementation may report evidence-based mismatches through root.
+
+## Namespace clarification follow-up
+
+Root accepted namespace-decision.md after source inspection found Android's hardcoded namespace restriction. Section 10.4 now separates syntax-only Android candidate validation from authoritative server app/environment mapping and full-code lookup. A saved candidate is not proof of scope, existence or eligibility; code tokens never choose API app/environment or challenge scope. Original valid vectors and mixed invalidCodes remain byte-for-byte unchanged: legal foreign-prefix negatives are classified in consumer tests, not rewritten in canonical fixtures. New issuance must enforce the existing no-silent-namespace-change rule atomically while preserving own-code recovery. No route/schema/field or live setting changed.
+
+Previous contract SHA-256: `09507f4e322e72e7e34ecf4797dca8bc89178d2c33cdb1280142b025c58dc3a0`. This clarification is based on FE `12099d51b1416b1ac8d735fea55a8ced1d91fe4a` and inspected namespace-decision input BE `2a20be12598cb268bd57e4ac029b984d8fbcbea4`; it is a docs-only follow-up to the original freeze commit `5a81ca278357a7d42bfd0349b9a7ceaf018f93df`. Application writers were held during this edit. Renew both exact-hash agreements before root releases fixes. Existing failed full-gate expectations/plurals lint and provisional signed APK remain implementation evidence with their prior limitations; this clarification does not convert them to PASS. No heavy checks, runtime edits or PR publication in this follow-up.
+
+Current freeze manifest SHA-256: `0d4878c86324d02a328f999c264c0bd18a73cb30b29a16953ab89cf12bac1ff8`.
