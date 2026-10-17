@@ -21,6 +21,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.app.R
 import com.tailormyresume.core.designsystem.component.input.TmrPrimaryButton
@@ -41,16 +43,27 @@ internal fun GoogleAccountOverlay(gateway: GoogleAccountGateway, modifier: Modif
             scope.launch { gateway.dismiss() }
         }
     }
-    GoogleAccountPanel(
-        state,
-        onClaim = { scope.launch { gateway.claim() } },
-        onRetry = { scope.launch { gateway.retry() } },
-        onCancel = { scope.launch { gateway.cancel() } },
-        onClose = { scope.launch { gateway.dismiss() } },
-        onConflict = { profile, apps -> scope.launch { gateway.continueConflict(profile, apps) } },
-        onProfileChoice = { useGuest -> scope.launch { gateway.chooseProfile(useGuest) } },
-        modifier = modifier,
-    )
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+        ),
+    ) {
+        GoogleAccountPanel(
+            state,
+            onClaim = { scope.launch { gateway.claim() } },
+            onRetry = { scope.launch { gateway.retry() } },
+            onCancel = { scope.launch { gateway.cancel() } },
+            onClose = { scope.launch { gateway.dismiss() } },
+            onConflict = { profile, apps -> scope.launch { gateway.continueConflict(profile, apps) } },
+            onProfileChoice = { useGuest -> scope.launch { gateway.chooseProfile(useGuest) } },
+            modifier = modifier,
+        )
+    }
+
 }
 
 @Composable
