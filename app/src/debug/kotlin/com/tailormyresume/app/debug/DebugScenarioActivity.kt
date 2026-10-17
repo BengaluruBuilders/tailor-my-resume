@@ -65,8 +65,8 @@ class DebugScenarioActivity : ComponentActivity() {
     private val previewLifecycle by lazy {
         DebugPreviewLifecycle(
             previewMode = previewMode,
-            forcePayment = { menuViewModel.forcePaymentScenario(target, scenario) },
-            releasePayment = menuViewModel::releasePaymentScenario,
+            forcePayment = { menuViewModel.forceWalletScenario(target, scenario) },
+            releasePayment = menuViewModel::releaseWalletScenario,
         )
     }
 

@@ -7,11 +7,9 @@ import com.tailormyresume.app.ai.FixedIds
 import com.tailormyresume.app.ai.PendingTailoringIds
 import com.tailormyresume.app.ai.RemoteJobAnalysisSource
 import com.tailormyresume.app.ai.candidate
-import com.tailormyresume.app.billing.FakePlayBilling
 import com.tailormyresume.app.billing.FakeUid
-import com.tailormyresume.app.billing.RemotePaymentGateway
+import com.tailormyresume.app.billing.RemoteAccountWallet
 import com.tailormyresume.app.billing.WalletSource
-import com.tailormyresume.app.billing.idleScope
 import com.tailormyresume.app.billing.walletJson
 import com.tailormyresume.core.data.repository.PendingReportQueue
 import com.tailormyresume.core.model.ContentReport
@@ -31,7 +29,7 @@ class SignOutCleanerTest {
     private val store = TestMockStateStore()
     private val wallet = WalletSource(backend.api)
     private val credits = TestCreditsRepository()
-    private val payments = RemotePaymentGateway(backend.api, wallet, FakePlayBilling(), FakeUid("uid-1"), idleScope(), TestCreditsRepository())
+    private val payments = RemoteAccountWallet(backend.api, wallet, FakeUid("uid-1"))
     private val analysis = RemoteJobAnalysisSource(backend.api, NoMatcher)
     private val reports = PendingReportQueue(store)
     private val cleaner = SignOutCleaner(payments, analysis, reports, store, credits)

@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ForcedPaymentScenario @Inject constructor() {
+class ForcedWalletScenario @Inject constructor() {
     private val current = MutableStateFlow(DebugScenario.DEFAULT)
 
     val scenarios: StateFlow<DebugScenario> = current

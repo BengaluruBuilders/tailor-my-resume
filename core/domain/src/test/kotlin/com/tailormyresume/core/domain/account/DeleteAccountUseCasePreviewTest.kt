@@ -4,13 +4,13 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.offline.OfflineServerAccountDeleter
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.JobApplication
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
@@ -33,8 +33,8 @@ class DeleteAccountUseCasePreviewTest {
     @Test
     fun previewUsesCachedCredits() = runTest {
         var entitlementCalls = 0
-        val delegate = TestPaymentGateway().withFreeCredits(4)
-        val gateway = object : PaymentGateway by delegate {
+        val delegate = TestAccountWallet().withFreeCredits(4)
+        val gateway = object : AccountWallet by delegate {
             override suspend fun entitlement(): PurchaseEntitlement {
                 entitlementCalls++
                 return delegate.entitlement()
@@ -49,7 +49,7 @@ class DeleteAccountUseCasePreviewTest {
 
     @Test
     fun refreshedPreviewUsesTheFreshEntitlement() = runTest {
-        val gateway = TestPaymentGateway().withFreeCredits(4)
+        val gateway = TestAccountWallet().withFreeCredits(4)
 
         val counts = useCase(gateway).refreshedPreview()
 
@@ -58,7 +58,7 @@ class DeleteAccountUseCasePreviewTest {
 
     @Test
     fun refreshedPreviewFallsBackToTheCachedCreditsWhenTheWalletFails() = runTest {
-        val gateway = object : PaymentGateway by TestPaymentGateway().withFreeCredits(4) {
+        val gateway = object : AccountWallet by TestAccountWallet().withFreeCredits(4) {
             override suspend fun entitlement(): PurchaseEntitlement = throw java.io.IOException("offline")
 
             override fun observeEntitlement(): Flow<PurchaseEntitlement> = flowOf(PurchaseEntitlement(0, 3, emptyList()))
@@ -69,7 +69,7 @@ class DeleteAccountUseCasePreviewTest {
         assertThat(counts.unusedCredits).isEqualTo(3)
     }
 
-    private fun useCase(gateway: PaymentGateway): DeleteAccountUseCase = DeleteAccountUseCase(
+    private fun useCase(gateway: AccountWallet): DeleteAccountUseCase = DeleteAccountUseCase(
         exportHistoryRepository = exportHistory,
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),

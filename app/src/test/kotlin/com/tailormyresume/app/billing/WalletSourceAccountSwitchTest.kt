@@ -22,7 +22,7 @@ class WalletSourceAccountSwitchTest {
     private val api = tailormyresumeApi(TailorMyResumeApiConfig(server.url("/").toString()), tailormyresumeOkHttpClient(FixedToken), tailormyresumeJson())
     private val account = SwitchableUid("uid-1")
     private val source = WalletSource(api, account)
-    private val gateway = RemotePaymentGateway(api, source, FakePlayBilling(), account, idleScope(), TestCreditsRepository())
+    private val gateway = RemoteAccountWallet(api, source, account)
 
     @After
     fun tearDown() {

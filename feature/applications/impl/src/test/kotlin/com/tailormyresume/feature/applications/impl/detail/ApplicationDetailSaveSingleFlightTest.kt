@@ -8,7 +8,7 @@ import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
@@ -42,7 +42,7 @@ class ApplicationDetailSaveSingleFlightTest {
         backing.sendApplications(listOf(prototypeApplication("kb")))
         val viewModel = ApplicationDetailViewModel(
             applicationRepository = applicationRepository,
-            creditBalance = testAccountCreditBalance(TestPaymentGateway().withFreeCredits(1)),
+            creditBalance = testAccountCreditBalance(TestAccountWallet().withFreeCredits(1)),
             setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, TestClock()),
             tailorResume = TailorResumeUseCase(OfflineResumeTailor(), AllowAllFabricationGuard),
             exportedPdfIntents = FakeExportedPdfIntents(),

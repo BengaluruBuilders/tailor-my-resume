@@ -18,7 +18,7 @@ import com.tailormyresume.feature.onboarding.api.navigation.ReadingNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.ReviewProfileNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.SignInNavKey
 import com.tailormyresume.feature.onboarding.api.navigation.UploadNavKey
-import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
+import com.tailormyresume.feature.settings.api.navigation.LegacyPaymentNavKey
 import com.tailormyresume.feature.tailor.api.navigation.ExportedNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoredNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoringNavKey
@@ -113,8 +113,8 @@ class ShellWalkTest {
     fun paywallCloseGoesBack() {
         shell.hasHome = true
         shell.show(DefaultApplicationsNavKey)
-        shell.go(JobNavKey(), JobResultNavKey(ID), PaywallNavKey(ID))
-        rule.onAllNodesWithText(name(PaywallNavKey(ID))).assertCountEquals(1)
+        shell.go(JobNavKey(), JobResultNavKey(ID), LegacyPaymentNavKey(ID))
+        rule.onAllNodesWithText(name(LegacyPaymentNavKey(ID))).assertCountEquals(1)
 
         shell.clickClose()
 

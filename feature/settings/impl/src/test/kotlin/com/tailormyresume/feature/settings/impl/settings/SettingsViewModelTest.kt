@@ -97,7 +97,7 @@ class SettingsViewModelTest {
             assertThat(content.productUpdates).isTrue()
             assertThat(content.credits).isEqualTo(5)
 
-            fixture.payment.unlock("application-1")
+            (fixture.payment as com.tailormyresume.core.testing.gateway.TestAccountWallet).spendFixtureCredit("application-1")
 
             assertThat(awaitContent().credits).isEqualTo(4)
         }
@@ -106,7 +106,7 @@ class SettingsViewModelTest {
     @Test
     fun settingsAndTheDeleteSheetShowTheSameCreditsForOneBalance() = runTest {
         val fixture = SettingsFixture()
-        fixture.payment.unlock("application-1")
+        (fixture.payment as com.tailormyresume.core.testing.gateway.TestAccountWallet).spendFixtureCredit("application-1")
         val deleteSheet = DeleteFixture(payment = fixture.payment).seed().viewModel()
 
         val settingsCredits = fixture.viewModel().uiState.first { it is SettingsUiState.Content }

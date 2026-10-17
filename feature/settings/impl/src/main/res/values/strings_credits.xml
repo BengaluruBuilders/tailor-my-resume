@@ -5,9 +5,7 @@
         <item quantity="one">credit left. It never expires.</item>
         <item quantity="other">credits left. They never expire.</item>
     </plurals>
-    <string name="feature_settings_impl_credits_buy_more">Buy more</string>
     <string name="feature_settings_impl_credits_history">History</string>
-    <string name="feature_settings_impl_credits_receipts">Receipts go to the email of your Google Play account</string>
     <string name="feature_settings_impl_credits_free_first_resume">Free first resume</string>
     <string name="feature_settings_impl_credits_welcome">Welcome</string>
     <plurals name="feature_settings_impl_credits_bought">
@@ -18,41 +16,6 @@
     <string name="feature_settings_impl_credits_refund">Refund</string>
     <string name="feature_settings_impl_credits_carried_over">Credits carried over</string>
     <string name="feature_settings_impl_credits_detail_date">%1$s · %2$s</string>
-    <plurals name="feature_settings_impl_paywall_credits_left">
-        <item quantity="one">%1$d credit left</item>
-        <item quantity="other">%1$d credits left</item>
-    </plurals>
-    <string name="feature_settings_impl_paywall_headline">Keep tailoring for every job</string>
-    <string name="feature_settings_impl_paywall_explainer">1 credit = 1 tailored resume. Credits never expire.</string>
-    <plurals name="feature_settings_impl_paywall_pack_credits">
-        <item quantity="one">%1$d credit</item>
-        <item quantity="other">%1$d credits</item>
-    </plurals>
-    <string name="feature_settings_impl_paywall_per_resume">%1$s per resume</string>
-    <string name="feature_settings_impl_paywall_best_value">Best value</string>
-    <plurals name="feature_settings_impl_paywall_buy">
-        <item quantity="one">Buy %1$d credit · %2$s</item>
-        <item quantity="other">Buy %1$d credits · %2$s</item>
-    </plurals>
-    <string name="feature_settings_impl_paywall_buy_idle">Buy credits</string>
-    <string name="feature_settings_impl_paywall_processing">Processing…</string>
-    <string name="feature_settings_impl_paywall_restore">One-time payment · Restore purchases</string>
-    <string name="feature_settings_impl_paywall_plus_one" translatable="false">+1</string>
-    <plurals name="feature_settings_impl_toast_credits_added">
-        <item quantity="one">%1$d credit added</item>
-        <item quantity="other">%1$d credits added</item>
-    </plurals>
-    <string name="feature_settings_impl_toast_payment_pending">Payment is pending. Credits arrive when it completes.</string>
-    <string name="feature_settings_impl_toast_no_purchases">No previous purchases found</string>
-    <string name="feature_settings_impl_toast_restore_failed">Couldn\'t check purchases. Try again.</string>
-    <string name="feature_settings_impl_toast_prices_failed">Couldn\'t load prices. Try again.</string>
-    <string name="feature_settings_impl_pay_failed_mark" translatable="false">!</string>
-    <string name="feature_settings_impl_pay_failed_title">Payment didn\'t go through</string>
-    <string name="feature_settings_impl_pay_failed_title_broken">Payment didn\'t\ngo through</string>
-    <string name="feature_settings_impl_pay_failed_body">You weren\'t charged. Try again, or pick another payment method.</string>
-    <string name="feature_settings_impl_pay_unconfirmed_body">We haven\'t confirmed your payment yet. Your credits will appear once it is confirmed.</string>
-    <string name="feature_settings_impl_pay_failed_retry">Try again</string>
-    <string name="feature_settings_impl_pay_failed_cancel">Cancel</string>
     <string name="feature_settings_impl_credits_guest_trial">Guest trial</string>
     <string name="feature_settings_impl_trial_check">Check guest trial</string>
     <string name="feature_settings_impl_trial_checking">Checking your guest trial…</string>

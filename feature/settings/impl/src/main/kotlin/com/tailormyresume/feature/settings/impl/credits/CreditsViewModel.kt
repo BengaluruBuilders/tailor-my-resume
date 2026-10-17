@@ -42,7 +42,7 @@ internal class CreditsViewModel @Inject constructor(
     ) { credits, entries, applications, trial ->
         CreditsUiState.Content(
             credits = credits,
-            canPurchase = !uids.isAnonymous(),
+            isGuest = uids.isAnonymous(),
             trial = trial,
             history = toHistoryRows(entries, applications, ZoneId.systemDefault()),
         )
@@ -90,6 +90,7 @@ internal class CreditsViewModel @Inject constructor(
     }
 
     fun onResume() {
+        viewModelScope.launch { creditsRepository.refresh() }
         if (trial.value != CreditsTrialState.Idle && trial.value != CreditsTrialState.Loading) onCheckTrial()
     }
 

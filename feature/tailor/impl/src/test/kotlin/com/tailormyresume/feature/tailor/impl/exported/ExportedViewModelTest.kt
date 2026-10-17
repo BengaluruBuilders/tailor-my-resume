@@ -6,7 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.CreditsRepository
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
 import com.tailormyresume.core.domain.account.AccountCreditBalance
@@ -14,7 +14,7 @@ import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.model.JobApplication
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
@@ -64,7 +64,7 @@ class ExportedViewModelTest {
     private val settingsRepository = TestResumeSettingsRepository()
     private val exportHistory = TestExportHistoryRepository()
     private val creditsRepository = TestCreditsRepository()
-    private val paymentGateway = TestPaymentGateway().withFreeCredits(0)
+    private val paymentGateway = TestAccountWallet().withFreeCredits(0)
     private val clock = TestClock()
 
     private val b1 = acceptedBullet(
@@ -219,7 +219,7 @@ class ExportedViewModelTest {
     @Test
     fun unknownWalletIsNotZeroCredits() = runTest {
         val unknown = PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false)
-        val gateway = object : PaymentGateway by paymentGateway {
+        val gateway = object : AccountWallet by paymentGateway {
             override fun observeEntitlement() = flowOf(unknown)
         }
         seed()

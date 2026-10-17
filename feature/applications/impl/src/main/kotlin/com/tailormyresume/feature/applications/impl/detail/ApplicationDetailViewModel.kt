@@ -96,7 +96,7 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
             val event = when {
                 tailorResume.hasUnfinishedRequest(applicationId) -> ApplicationDetailEvent.StartTailoring(applicationId)
                 credits == null -> ApplicationDetailEvent.BalanceUnavailable
-                credits <= 0 -> ApplicationDetailEvent.OpenPaywall(applicationId)
+                credits <= 0 -> ApplicationDetailEvent.EarnCredits(applicationId)
                 hasQuestion() -> ApplicationDetailEvent.OpenQuickQuestion(applicationId)
                 else -> ApplicationDetailEvent.StartTailoring(applicationId)
             }

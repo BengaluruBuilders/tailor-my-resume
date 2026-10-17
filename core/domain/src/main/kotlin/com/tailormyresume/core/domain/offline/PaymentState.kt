@@ -11,6 +11,7 @@ internal const val PAYMENT_STATE_KEY = "payment.state"
 @Serializable
 internal data class PaymentState(
     val freeCredits: Int,
+    val purchasedCreditAmount: Int? = null,
     val spentPurchasedCredits: Int = 0,
     val confirmedPackIds: List<String> = emptyList(),
     val pendingPackIds: List<String> = emptyList(),
@@ -19,7 +20,7 @@ internal data class PaymentState(
     val unlockedApplicationIds: List<String> = emptyList(),
 ) {
     val purchasedCredits: Int
-        get() = (confirmedPackIds.sumOf(::creditsOf) - spentPurchasedCredits).coerceAtLeast(0)
+        get() = purchasedCreditAmount ?: (confirmedPackIds.sumOf(::creditsOf) - spentPurchasedCredits).coerceAtLeast(0)
 
     fun toEntitlement() = PurchaseEntitlement(
         freeCredits = freeCredits,
@@ -70,5 +71,9 @@ internal data class PurchaseDto(
     )
 }
 
-private fun creditsOf(packId: String): Int =
-    MockPackCatalogue.all.find { pack -> pack.id == packId }?.credits ?: 0
+private fun creditsOf(packId: String): Int = when (packId) {
+    "application_pack_5" -> 5
+    "application_pack_15" -> 15
+    "application_pack_40" -> 40
+    else -> 0
+}

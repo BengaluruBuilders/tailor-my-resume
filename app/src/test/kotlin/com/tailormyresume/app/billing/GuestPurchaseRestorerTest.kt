@@ -3,7 +3,7 @@ package com.tailormyresume.app.billing
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.model.AccountMode
 import com.tailormyresume.core.model.SignInAccount
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -16,11 +16,11 @@ class GuestPurchaseRestorerTest {
         var paymentStarts = 0
         var billingStarts = 0
         val billing = FakePlayBilling()
-        val payments = TestPaymentGateway()
+
         PurchaseRestorer(
             {
                 paymentStarts++
-                payments
+                error("Guest must not initialize settlement")
             },
             {
                 billingStarts++

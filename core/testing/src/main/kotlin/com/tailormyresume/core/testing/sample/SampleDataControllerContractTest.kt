@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.SessionRepository
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.sample.SampleDataController
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -17,7 +17,7 @@ abstract class SampleDataControllerContractTest {
         val sessionRepository: SessionRepository,
         val profileRepository: ProfileRepository,
         val applicationRepository: ApplicationRepository,
-        val paymentGateway: PaymentGateway,
+        val paymentGateway: AccountWallet,
     )
 
     protected abstract fun createFixture(): Fixture

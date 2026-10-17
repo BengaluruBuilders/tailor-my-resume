@@ -1,7 +1,7 @@
 package com.tailormyresume.app.debug
 
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.domain.offline.ForcedPaymentScenario
+import com.tailormyresume.core.domain.offline.ForcedWalletScenario
 import com.tailormyresume.core.model.DebugScenario
 import com.tailormyresume.core.testing.sample.TestSampleDataController
 import com.tailormyresume.core.testing.util.MainDispatcherRule
@@ -16,7 +16,7 @@ class DebugMenuViewModelForcedPaymentTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val forced = ForcedPaymentScenario()
+    private val forced = ForcedWalletScenario()
     private fun viewModel() = DebugMenuViewModel(TestSampleDataController(), forced)
 
     @Test
@@ -61,16 +61,16 @@ class DebugMenuViewModelForcedPaymentTest {
         val subject = viewModel()
         subject.openPreview(DebugScenarioTarget.Credits, DebugScenario.PENDING) {}
 
-        subject.releasePaymentScenario()
+        subject.releaseWalletScenario()
         assertThat(forced.scenario).isEqualTo(DebugScenario.DEFAULT)
 
-        subject.forcePaymentScenario(DebugScenarioTarget.Credits, DebugScenario.PENDING)
+        subject.forceWalletScenario(DebugScenarioTarget.Credits, DebugScenario.PENDING)
         assertThat(forced.scenario).isEqualTo(DebugScenario.PENDING)
     }
 
     @Test
     fun reforcingForAScreenThatForcesNothingKeepsTheDefault() = runTest {
-        viewModel().forcePaymentScenario(DebugScenarioTarget.Profile, DebugScenario.PENDING)
+        viewModel().forceWalletScenario(DebugScenarioTarget.Profile, DebugScenario.PENDING)
 
         assertThat(forced.scenario).isEqualTo(DebugScenario.DEFAULT)
     }

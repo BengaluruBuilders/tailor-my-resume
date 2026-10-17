@@ -2,7 +2,7 @@ package com.tailormyresume.app.debug
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tailormyresume.core.domain.offline.ForcedPaymentScenario
+import com.tailormyresume.core.domain.offline.ForcedWalletScenario
 import com.tailormyresume.core.domain.sample.SampleDataController
 import com.tailormyresume.core.model.DebugScenario
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +23,7 @@ data class DebugMenuUiState(
 @HiltViewModel
 class DebugMenuViewModel @Inject constructor(
     private val sampleDataController: SampleDataController,
-    private val forcedPaymentScenario: ForcedPaymentScenario = ForcedPaymentScenario(),
+    private val forcedWalletScenario: ForcedWalletScenario = ForcedWalletScenario(),
 ) : ViewModel() {
 
     private val work = MutableStateFlow(DebugMenuUiState())
@@ -37,21 +37,21 @@ class DebugMenuViewModel @Inject constructor(
     fun openPreview(target: DebugScenarioTarget, scenario: DebugScenario = DebugScenario.defaultValue, onReady: () -> Unit) {
         viewModelScope.launch {
             if (target.needsSampleJob) sampleDataController.keepSampleJobDescription()
-            forcePaymentScenario(target, scenario)
+            forceWalletScenario(target, scenario)
             onReady()
         }
     }
 
-    fun forcePaymentScenario(target: DebugScenarioTarget, scenario: DebugScenario) {
-        forcedPaymentScenario.scenario = if (target.forcesPayment) scenario else DebugScenario.defaultValue
+    fun forceWalletScenario(target: DebugScenarioTarget, scenario: DebugScenario) {
+        forcedWalletScenario.scenario = if (target.forcesWallet) scenario else DebugScenario.defaultValue
     }
 
-    fun releasePaymentScenario() {
-        forcedPaymentScenario.scenario = DebugScenario.defaultValue
+    fun releaseWalletScenario() {
+        forcedWalletScenario.scenario = DebugScenario.defaultValue
     }
 
     fun closePreview(target: DebugScenarioTarget) {
-        releasePaymentScenario()
+        releaseWalletScenario()
         if (target.needsSampleJob) viewModelScope.launch { sampleDataController.clearSampleJobDescription() }
     }
 

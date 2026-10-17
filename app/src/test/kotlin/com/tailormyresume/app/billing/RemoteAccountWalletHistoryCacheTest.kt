@@ -23,11 +23,11 @@ import org.junit.Test
 import java.util.concurrent.TimeUnit
 import kotlin.time.Instant
 
-class RemotePaymentGatewayHistoryCacheTest {
+class RemoteAccountWalletHistoryCacheTest {
     private val server = MockWebServer().apply { start() }
     private val api = tailormyresumeApi(TailorMyResumeApiConfig(server.url("/").toString()), tailormyresumeOkHttpClient(FixedToken), tailormyresumeJson())
     private val account = SwitchableUid("uid-1")
-    private val gateway = RemotePaymentGateway(api, WalletSource(api, account), FakePlayBilling(), account, idleScope(), TestCreditsRepository())
+    private val gateway = RemoteAccountWallet(api, WalletSource(api, account), account)
 
     @After
     fun tearDown() {
@@ -103,10 +103,10 @@ class RemotePaymentGatewayHistoryCacheTest {
     @Test
     fun anAnswerFromBeforeTheClearIsNotStored() = runBlocking<Unit> {
         answer(purchasesBody("GPA.7"), delayMillis = SLOW_ANSWER_MILLIS / 2)
-        val inFlight = async(Dispatchers.IO) { gateway.purchaseHistory() }
+        val inFlight = async(Dispatchers.IO) { runCatching { gateway.purchaseHistory() } }
         server.takeRequest(SLOW_ANSWER_MILLIS, TimeUnit.MILLISECONDS)
         gateway.clearCredits()
-        inFlight.await()
+        assertThat(inFlight.await().isFailure).isTrue()
         answer(purchasesBody("GPA.9"), delayMillis = SLOW_ANSWER_MILLIS)
 
         val early = withTimeoutOrNull(FAST_WAIT_MILLIS) { gateway.observePurchaseHistory().first() }
@@ -139,10 +139,10 @@ class RemotePaymentGatewayHistoryCacheTest {
     @Test
     fun anAnswerFetchedForAnotherAccountIsNotStored() = runBlocking<Unit> {
         answer(purchasesBody("GPA.7"), delayMillis = SLOW_ANSWER_MILLIS / 2)
-        val inFlight = async(Dispatchers.IO) { gateway.purchaseHistory() }
+        val inFlight = async(Dispatchers.IO) { runCatching { gateway.purchaseHistory() } }
         server.takeRequest(SLOW_ANSWER_MILLIS, TimeUnit.MILLISECONDS)
         account.value = "uid-2"
-        inFlight.await()
+        assertThat(inFlight.await().isFailure).isTrue()
         answer(purchasesBody("GPA.9"), delayMillis = SLOW_ANSWER_MILLIS)
 
         val early = withTimeoutOrNull(FAST_WAIT_MILLIS) { gateway.observePurchaseHistory().first() }

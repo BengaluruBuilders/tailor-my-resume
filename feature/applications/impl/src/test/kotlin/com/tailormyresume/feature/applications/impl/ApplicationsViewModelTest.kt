@@ -6,7 +6,7 @@ import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.TailoredResume
 import com.tailormyresume.core.testing.data.PrototypeFixtures
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
@@ -23,7 +23,7 @@ class ApplicationsViewModelTest {
 
     private val applicationRepository = TestApplicationRepository()
     private val creditsRepository = TestCreditsRepository()
-    private val paymentGateway = TestPaymentGateway().withFreeCredits(3)
+    private val paymentGateway = TestAccountWallet().withFreeCredits(3)
     private val creditBalance = AccountCreditBalance(paymentGateway, creditsRepository)
     private val profileRepository = TestProfileRepository()
     private val scenario = PrototypeFixtures.returning()

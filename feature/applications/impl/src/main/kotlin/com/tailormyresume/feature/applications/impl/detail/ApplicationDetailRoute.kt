@@ -15,7 +15,7 @@ import com.tailormyresume.feature.analysis.api.navigation.navigateToJobResult
 import com.tailormyresume.feature.analysis.api.navigation.navigateToQuickQuestion
 import com.tailormyresume.feature.applications.impl.R
 import com.tailormyresume.feature.applications.impl.toTmrStatus
-import com.tailormyresume.feature.settings.api.navigation.navigateToPaywall
+import com.tailormyresume.feature.settings.api.navigation.navigateToEarnCredits
 import com.tailormyresume.feature.tailor.api.navigation.navigateToTailored
 import com.tailormyresume.feature.tailor.api.navigation.navigateToTailoring
 
@@ -43,7 +43,7 @@ internal fun ApplicationDetailRoute(viewModel: ApplicationDetailViewModel, navig
                 is ApplicationDetailEvent.OpenQuickQuestion -> navigator.navigateToQuickQuestion(event.applicationId)
                 is ApplicationDetailEvent.StartTailoring -> navigator.navigateToTailoring(event.applicationId)
                 is ApplicationDetailEvent.ReviewTailoredResume -> navigator.navigateToTailored(event.applicationId)
-                is ApplicationDetailEvent.OpenPaywall -> navigator.navigateToPaywall(event.applicationId)
+                is ApplicationDetailEvent.EarnCredits -> navigator.navigateToEarnCredits(event.applicationId)
             }
         }
     }

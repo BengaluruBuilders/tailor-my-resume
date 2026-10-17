@@ -24,7 +24,6 @@ import com.tailormyresume.feature.profile.api.navigation.ListEditNavKey
 import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
 import com.tailormyresume.feature.profile.api.navigation.SkillsNavKey
 import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
-import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
 import com.tailormyresume.feature.tailor.api.navigation.EditResumeNavKey
 import com.tailormyresume.feature.tailor.api.navigation.ExportedNavKey
@@ -73,7 +72,7 @@ fun chromeFor(
         is TailoringNavKey -> bar(step = 3, leading = TmrTopBarLeading.None)
 
         is EditResumeNavKey -> bar(title = R.string.shell_title_resume, action = ChromeAction.Save)
-        is ExportedNavKey, is PaywallNavKey -> bar(leading = TmrTopBarLeading.Close)
+        is ExportedNavKey -> bar(leading = TmrTopBarLeading.Close)
 
         is ApplicationDetailNavKey -> bar(title = R.string.shell_title_application)
 

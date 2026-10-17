@@ -4,7 +4,7 @@ import android.content.Intent
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.CreditsRepository
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.SetApplicationStatusUseCase
@@ -17,7 +17,7 @@ import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.KeywordCoverage
 import com.tailormyresume.core.model.QuickQuestion
 import com.tailormyresume.core.model.TailoredResume
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
@@ -40,7 +40,7 @@ class ApplicationDetailViewModelTest {
 
     private val applicationRepository = TestApplicationRepository()
     private val creditsRepository = TestCreditsRepository()
-    private val paymentGateway = TestPaymentGateway().withFreeCredits(0)
+    private val paymentGateway = TestAccountWallet().withFreeCredits(0)
     private val creditBalance = AccountCreditBalance(paymentGateway, creditsRepository)
     private val intents = FakeExportedPdfIntents()
     private val clock = TestClock()
@@ -247,7 +247,7 @@ class ApplicationDetailViewModelTest {
         viewModel.events.test {
             viewModel.onRetailor()
 
-            assertThat(awaitItem()).isEqualTo(ApplicationDetailEvent.OpenPaywall("kb"))
+            assertThat(awaitItem()).isEqualTo(ApplicationDetailEvent.EarnCredits("kb"))
         }
     }
 
@@ -267,7 +267,7 @@ class ApplicationDetailViewModelTest {
     @Test
     fun retailorWithUnknownWalletShowsUnavailableWithoutPaywall() = runTest {
         seed(prototypeApplication("kb"))
-        val gateway = object : PaymentGateway by paymentGateway {
+        val gateway = object : AccountWallet by paymentGateway {
             override fun observeEntitlement() = flowOf(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
         }
         val unknownCredits = object : CreditsRepository by creditsRepository {
@@ -286,7 +286,7 @@ class ApplicationDetailViewModelTest {
     @Test
     fun retailorWithAnUnfinishedRequestStartsTailoringWhenTheWalletIsUnknown() = runTest {
         seed(prototypeApplication("kb").copy(gapAnalysis = questionAnalysis))
-        val gateway = object : PaymentGateway by paymentGateway {
+        val gateway = object : AccountWallet by paymentGateway {
             override fun observeEntitlement() = flowOf(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
         }
         val unknownCredits = object : CreditsRepository by creditsRepository {

@@ -6,7 +6,7 @@ import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.ResumeSettingsRepository
 import com.tailormyresume.core.data.repository.SessionRepository
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import kotlin.time.Clock
@@ -16,7 +16,7 @@ class CollectAccountDataUseCase @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val applicationRepository: ApplicationRepository,
     private val exportHistoryRepository: ExportHistoryRepository,
-    private val paymentGateway: PaymentGateway,
+    private val paymentGateway: AccountWallet,
     private val creditsRepository: CreditsRepository,
     private val resumeSettingsRepository: ResumeSettingsRepository,
     private val clock: Clock,

@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.mock.MockLatency
 import com.tailormyresume.core.data.mock.MockOperation
 import com.tailormyresume.core.data.mock.NoMockLatency
-import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.domain.SignInAccount
 import com.tailormyresume.core.domain.SignInOutcome
 import com.tailormyresume.core.testing.mock.TestMockStateStore
@@ -70,10 +69,10 @@ class OfflineSignInGatewayStateTest {
     @Test
     fun aNewSignInAfterSignOutKeepsTheSpentCredit() = runTest {
         val store = TestMockStateStore()
-        val payment = OfflinePaymentGateway(store, NoMockLatency, TestClock(Instant.fromEpochSeconds(1)), TestIdGenerator("order"))
+        val payment = OfflineAccountWallet(store, NoMockLatency, TestClock(Instant.fromEpochSeconds(1)), TestIdGenerator("order"))
         val gateway = OfflineSignInGateway(session, NoMockLatency, store)
         gateway.signIn()
-        payment.unlock("application-1")
+        payment.spendFixtureCredit("application-1")
         assertThat(payment.entitlement().totalCredits).isEqualTo(0)
 
         gateway.signOut()
@@ -85,10 +84,10 @@ class OfflineSignInGatewayStateTest {
     @Test
     fun aNewSignInAfterSignOutKeepsThePurchasedCredits() = runTest {
         val store = TestMockStateStore()
-        val payment = OfflinePaymentGateway(store, NoMockLatency, TestClock(Instant.fromEpochSeconds(1)), TestIdGenerator("order"))
+        val payment = OfflineAccountWallet(store, NoMockLatency, TestClock(Instant.fromEpochSeconds(1)), TestIdGenerator("order"))
         val gateway = OfflineSignInGateway(session, NoMockLatency, store)
         gateway.signIn()
-        payment.purchase(ApplicationPack.APPLICATION_PACK_FIVE)
+        payment.withHistoricalPurchase("application_pack_5")
         val before = payment.entitlement()
 
         gateway.signOut()
@@ -100,10 +99,10 @@ class OfflineSignInGatewayStateTest {
     @Test
     fun aNewSignInAfterTheCreditsWereClearedStartsWithTheFreeCredit() = runTest {
         val store = TestMockStateStore()
-        val payment = OfflinePaymentGateway(store, NoMockLatency, TestClock(Instant.fromEpochSeconds(1)), TestIdGenerator("order"))
+        val payment = OfflineAccountWallet(store, NoMockLatency, TestClock(Instant.fromEpochSeconds(1)), TestIdGenerator("order"))
         val gateway = OfflineSignInGateway(session, NoMockLatency, store)
         gateway.signIn()
-        payment.purchase(ApplicationPack.APPLICATION_PACK_FIVE)
+        payment.withHistoricalPurchase("application_pack_5")
 
         payment.clearCredits()
         assertThat(payment.entitlement().totalCredits).isEqualTo(0)
