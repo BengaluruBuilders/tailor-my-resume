@@ -30,6 +30,7 @@ import javax.inject.Inject
 class RemoteResumeTailor @Inject constructor(
     private val api: TailorMyResumeApi,
     private val pending: PendingTailoringIds,
+    private val ownership: com.tailormyresume.app.auth.AccountOperationGuard? = null,
 ) : ResumeTailor {
     override suspend fun resultStored(applicationId: String, runId: String) = pending.settle(runId, applicationId)
 
@@ -43,6 +44,7 @@ class RemoteResumeTailor @Inject constructor(
         answer: QuickAnswer?,
         runId: String,
     ): TailoredResume {
+        val ticket = ownership?.capture()
         val request = TailoringStartRequest(
             requestId = pending.idFor(runId, applicationId),
             applicationId = applicationId,
@@ -52,12 +54,13 @@ class RemoteResumeTailor @Inject constructor(
             answer = answer?.toAnswerDto(job),
         )
         try {
-            val finished = awaitFinished(start(request))
+            val finished = awaitFinished(start(request, ticket), ticket)
             val result = finished.result?.takeIf { finished.status == TailoringStatus.SUCCEEDED }
                 ?: run {
                     pending.clear(runId, applicationId)
                     throw AiException(finished.failureCode.toAiFailure())
                 }
+            ticket?.let { ownership?.check(it) }
             return result.toTailoredResume(profile)
         } catch (failure: AiException) {
             if (failure.failure !in RESUMABLE) pending.clear(runId, applicationId)
@@ -65,10 +68,12 @@ class RemoteResumeTailor @Inject constructor(
         }
     }
 
-    private suspend fun start(request: TailoringStartRequest): TailoringDto {
+    private suspend fun start(request: TailoringStartRequest, ticket: com.tailormyresume.app.auth.AccountOperationGuard.Ticket?): TailoringDto {
         var attempt = 1
         while (true) {
+            ticket?.let { ownership?.check(it) }
             val result = apiResult { api.startTailoring(request) }
+            ticket?.let { ownership?.check(it) }
             val error = (result.exceptionOrNull() as? ApiException)?.error
             if (error !is ApiError.RateLimited || attempt >= START_ATTEMPTS) return result.orAiFailure().tailoring
             val advised = error.retryAfterSeconds
@@ -79,7 +84,7 @@ class RemoteResumeTailor @Inject constructor(
         }
     }
 
-    private suspend fun awaitFinished(started: TailoringDto): TailoringDto {
+    private suspend fun awaitFinished(started: TailoringDto, ticket: com.tailormyresume.app.auth.AccountOperationGuard.Ticket?): TailoringDto {
         var current = started
         var waited = 0L
         var step = FIRST_POLL_MILLIS
@@ -87,7 +92,9 @@ class RemoteResumeTailor @Inject constructor(
             if (waited >= GIVE_UP_AFTER_MILLIS) throw AiException(AiFailure.Timeout)
             delay(step)
             waited += step
+            ticket?.let { ownership?.check(it) }
             current = remoteAi { api.tailoring(current.id) }.tailoring
+            ticket?.let { ownership?.check(it) }
             step = minOf(step + POLL_BACKOFF_MILLIS, MAX_POLL_MILLIS)
         }
         return current

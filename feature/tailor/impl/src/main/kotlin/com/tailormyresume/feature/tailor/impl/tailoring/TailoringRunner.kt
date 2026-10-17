@@ -29,8 +29,11 @@ class TailoringRunner @Inject constructor(
     private val tailorResume: TailorResumeUseCase,
     private val clock: Clock,
     @Dispatcher(TmrDispatchers.Default) private val dispatcher: CoroutineDispatcher,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) {
     suspend operator fun invoke(applicationId: String, runId: String): TailoringResult = try {
+        val ticket = workFence.ticket()
+        workFence.check(ticket)
         val application = checkNotNull(applicationRepository.observeApplication(applicationId).first())
         val profile = checkNotNull(profileRepository.observeProfile().first())
         val gap = checkNotNull(application.gapAnalysis)
@@ -53,6 +56,7 @@ class TailoringRunner @Inject constructor(
                 val tailored = withContext(dispatcher) {
                     tailorResume(profile, application.job, gap, applicationId, runId, quickAnswer = application.quickAnswer)
                 }
+                workFence.check(ticket)
                 applicationRepository.upsertApplication(
                     application.copy(
                         tailoredResume = tailored.copy(runId = runId),

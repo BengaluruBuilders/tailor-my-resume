@@ -70,7 +70,10 @@ internal enum class ListEditEvent { Saved }
 internal class ListEditViewModel @AssistedInject constructor(
     private val profileRepository: ProfileRepository,
     @Assisted private val section: ProfileListSection,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
+
 
     private val items = MutableStateFlow<List<ListEditItem>?>(null)
 
@@ -112,6 +115,7 @@ internal class ListEditViewModel @AssistedInject constructor(
     }
 
     fun onTextChange(index: Int, value: String) {
+        workFence.editing(this, true)
         if (section == ProfileListSection.EDUCATION) return
         items.update { listItems ->
             listItems?.takeIf { index in it.indices }?.toMutableList()?.apply { set(index, this[index].copy(text = value)) }
@@ -120,6 +124,7 @@ internal class ListEditViewModel @AssistedInject constructor(
     }
 
     fun onEducationChange(index: Int, field: EducationField, value: String) {
+        workFence.editing(this, true)
         if (section != ProfileListSection.EDUCATION) return
         items.update { listItems ->
             listItems?.takeIf { index in it.indices }?.toMutableList()?.apply {
@@ -141,6 +146,7 @@ internal class ListEditViewModel @AssistedInject constructor(
     }
 
     fun onAdd() {
+        workFence.editing(this, true)
         items.update { listItems ->
             if (section == ProfileListSection.SUMMARY) {
                 listItems
@@ -179,7 +185,9 @@ internal class ListEditViewModel @AssistedInject constructor(
             ProfileListSection.ACHIEVEMENTS -> profile.withListSaved(EntryCategory.ACHIEVEMENT, listItems)
         }
         finished = true
+        workFence.check(workTicket)
         profileRepository.saveProfile(updated)
+        workFence.editing(this, false)
         channel.send(ListEditEvent.Saved)
     }
 
@@ -199,6 +207,11 @@ internal class ListEditViewModel @AssistedInject constructor(
     interface Factory {
         fun create(section: ProfileListSection): ListEditViewModel
     }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
+    }
+
 }
 
 private fun CandidateProfile.entryItems(category: EntryCategory): List<ListEditItem> {

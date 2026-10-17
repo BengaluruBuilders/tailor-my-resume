@@ -47,7 +47,10 @@ internal class ManualProfileViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val profileRepository: ProfileRepository,
     private val saveManualProfile: SaveManualProfileUseCase,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
+
 
     private val state = MutableStateFlow(ManualProfileUiState())
 
@@ -107,6 +110,7 @@ internal class ManualProfileViewModel @Inject constructor(
         if (field in dirtyFields) current else refreshed
 
     fun onFieldChange(field: ManualField, value: String) {
+        workFence.editing(this, true)
         dirtyFields += field
         state.update {
             when (field) {
@@ -126,12 +130,14 @@ internal class ManualProfileViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val idsBefore = profileRepository.observeProfile().first()?.entries.orEmpty().map { it.id }.toSet()
+                workFence.check(workTicket)
                 val saved = saveManualProfile(
                     ManualContact(current.fullName, current.email, current.phone, current.city, current.jobTitle, current.company),
                     savedRoleId,
                 )
                 savedRoleId = saved.entries.firstOrNull { it.id !in idsBefore }?.id ?: savedRoleId.takeIf { id -> saved.entries.any { it.id == id } }
                 dirtyFields.clear()
+                workFence.editing(this, false)
                 eventChannel.trySend(ManualProfileEvent.Saved)
             } catch (cancellation: CancellationException) {
                 throw cancellation
@@ -142,4 +148,9 @@ internal class ManualProfileViewModel @Inject constructor(
             }
         }
     }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
+    }
+
 }

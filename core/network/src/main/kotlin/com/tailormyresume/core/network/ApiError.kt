@@ -3,6 +3,13 @@ package com.tailormyresume.core.network
 import kotlinx.serialization.Serializable
 
 sealed interface ApiError {
+    data object GoogleIdentityRejected : ApiError
+    data object RecentGoogleAuthRequired : ApiError
+    data object AccountLinkConflict : ApiError
+    data object UpgradeIntentExpired : ApiError
+    data object UpgradeIntentRequired : ApiError
+    data class IdentityUnavailable(val retryAfterSeconds: Int?) : ApiError
+
     data object GuestRequired : ApiError
     data object GoogleRequired : ApiError
     data object ProviderNotSupported : ApiError
@@ -51,6 +58,12 @@ internal data class ErrorEnvelope(val error: ErrorBody? = null)
 internal data class ErrorBody(val code: String? = null, val message: String? = null)
 
 internal fun apiErrorOf(httpStatus: Int, code: String?, retryAfterSeconds: Int?): ApiError = when (code) {
+    "GOOGLE_IDENTITY_REJECTED" -> ApiError.GoogleIdentityRejected
+    "RECENT_GOOGLE_AUTH_REQUIRED" -> ApiError.RecentGoogleAuthRequired
+    "ACCOUNT_LINK_CONFLICT" -> ApiError.AccountLinkConflict
+    "UPGRADE_INTENT_EXPIRED" -> ApiError.UpgradeIntentExpired
+    "UPGRADE_INTENT_REQUIRED" -> ApiError.UpgradeIntentRequired
+    "IDENTITY_UNAVAILABLE" -> ApiError.IdentityUnavailable(retryAfterSeconds)
     "GUEST_REQUIRED" -> ApiError.GuestRequired
     "GOOGLE_REQUIRED" -> ApiError.GoogleRequired
     "PROVIDER_NOT_SUPPORTED" -> ApiError.ProviderNotSupported

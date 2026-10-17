@@ -10,12 +10,13 @@ enum class AuthFailure {
     Offline,
     Failed,
     NotConfigured,
+    CredentialConflict,
     ;
 
     fun toSignInResult(): SignInResult = when (this) {
         Cancelled -> SignInResult.Cancelled
         Offline -> SignInResult.Failed(SignInFailureReason.NetworkUnavailable)
-        NoAccount, Failed, NotConfigured -> SignInResult.Failed(SignInFailureReason.ProviderUnavailable)
+        NoAccount, Failed, NotConfigured, CredentialConflict -> SignInResult.Failed(SignInFailureReason.ProviderUnavailable)
     }
 }
 
@@ -34,6 +35,12 @@ interface GoogleCredentialSource {
 }
 
 interface FirebaseSessionClient {
+    suspend fun currentUser(): FirebaseUser? = null
+
+    suspend fun linkGoogle(googleIdToken: String): AuthOutcome<FirebaseUser> = AuthOutcome.Failure(AuthFailure.NotConfigured)
+
+    suspend fun refreshGoogle(): AuthOutcome<FirebaseUser> = AuthOutcome.Failure(AuthFailure.NotConfigured)
+
     fun isAnonymous(): Boolean = false
 
     suspend fun hasAnonymousSession(): Boolean = isAnonymous()

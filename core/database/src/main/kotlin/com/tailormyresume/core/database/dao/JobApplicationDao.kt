@@ -12,6 +12,12 @@ import kotlin.time.Instant
 @Dao
 interface JobApplicationDao {
     @Query("SELECT * FROM job_applications ORDER BY updatedAt DESC, id ASC")
+    suspend fun readAll(): List<JobApplicationEntity>
+
+    @Query("DELETE FROM job_applications")
+    suspend fun deleteAll()
+
+    @Query("SELECT * FROM job_applications ORDER BY updatedAt DESC, id ASC")
     fun observeApplications(): Flow<List<JobApplicationEntity>>
 
     @Query("SELECT * FROM job_applications WHERE id = :id")

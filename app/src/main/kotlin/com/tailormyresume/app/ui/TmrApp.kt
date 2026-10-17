@@ -80,6 +80,7 @@ fun TmrApp(
     modifier: Modifier = Modifier,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
+    google: com.tailormyresume.core.domain.GoogleAccountGateway? = null,
 ) {
     val stores = rememberRootViewModelStores()
     LaunchedEffect(rootState) {
@@ -96,6 +97,7 @@ fun TmrApp(
                 )
             }
             PendingToastHost()
+            google?.let { GoogleAccountOverlay(it) }
         }
     }
 }

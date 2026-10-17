@@ -34,7 +34,10 @@ internal class SettingsViewModel @Inject constructor(
     private val resumeSettingsRepository: ResumeSettingsRepository,
     private val exportAccountData: ExportAccountDataUseCase,
     private val signInGateway: SignInGateway,
+    private val google: com.tailormyresume.core.domain.GoogleAccountGateway? = null,
 ) : ViewModel() {
+
+    fun onGoogleAccount() { viewModelScope.launch { google?.open() } }
 
     val uiState: StateFlow<SettingsUiState> = combine(
         sessionRepository.observeAccount(),

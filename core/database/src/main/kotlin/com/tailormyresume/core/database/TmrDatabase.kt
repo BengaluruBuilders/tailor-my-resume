@@ -15,12 +15,13 @@ import com.tailormyresume.core.database.util.JsonConverters
 
 @Database(
     entities = [
+        com.tailormyresume.core.database.model.LocalHandoffEntity::class,
         ProfileEntity::class,
         ProfileEntryEntity::class,
         JobApplicationEntity::class,
         CreditLedgerEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 @TypeConverters(
@@ -28,6 +29,7 @@ import com.tailormyresume.core.database.util.JsonConverters
     JsonConverters::class,
 )
 abstract class TmrDatabase : RoomDatabase() {
+    abstract fun localHandoffDao(): com.tailormyresume.core.database.dao.LocalHandoffDao
     abstract fun profileDao(): ProfileDao
     abstract fun jobApplicationDao(): JobApplicationDao
     abstract fun creditLedgerDao(): CreditLedgerDao

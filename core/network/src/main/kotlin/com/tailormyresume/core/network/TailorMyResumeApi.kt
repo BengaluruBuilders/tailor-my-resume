@@ -24,6 +24,17 @@ import com.tailormyresume.core.network.dto.ServerExportResponse
 import com.tailormyresume.core.network.dto.TailoringResponse
 import com.tailormyresume.core.network.dto.TailoringStartRequest
 import com.tailormyresume.core.network.dto.WalletResponse
+import com.tailormyresume.core.network.dto.UpgradeIntentRequest
+import com.tailormyresume.core.network.dto.UpgradeIntentDto
+import com.tailormyresume.core.network.dto.UpgradeProofDto
+import com.tailormyresume.core.network.dto.UpgradeStatusResponse
+import com.tailormyresume.core.network.dto.UpgradeCompleteRequest
+import com.tailormyresume.core.network.dto.UpgradeCompleteResponse
+import com.tailormyresume.core.network.dto.ActivationObservationRequest
+import com.tailormyresume.core.network.dto.ActivationChallengeRequest
+import com.tailormyresume.core.network.dto.ActivationReadResponse
+import com.tailormyresume.core.network.dto.GoogleActivationRequest
+import com.tailormyresume.core.network.dto.GoogleActivationResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -31,6 +42,27 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface TailorMyResumeApi {
+    @POST("v1/tailormyresume/account/upgrade-intents")
+    suspend fun prepareUpgrade(@Body body: UpgradeIntentRequest): UpgradeIntentDto
+
+    @POST("v1/tailormyresume/account/upgrade-intents/status")
+    suspend fun upgradeStatus(@Body body: UpgradeProofDto): UpgradeStatusResponse
+
+    @POST("v1/tailormyresume/account/upgrade-intents/complete")
+    suspend fun completeUpgrade(@Body body: UpgradeCompleteRequest): UpgradeCompleteResponse
+
+    @POST("v1/tailormyresume/account/activation-observations")
+    suspend fun observeActivation(@Body body: ActivationObservationRequest): ActivationReadResponse
+
+    @GET("v1/tailormyresume/account/activation")
+    suspend fun activation(): ActivationReadResponse
+
+    @POST("v1/tailormyresume/account/activation-challenges")
+    suspend fun activationChallenge(@Body body: ActivationChallengeRequest): GrantChallengeResponse
+
+    @POST("v1/tailormyresume/account/activate")
+    suspend fun activateGoogle(@Body body: GoogleActivationRequest): GoogleActivationResponse
+
     @GET("v1/tailormyresume/credits/policy")
     suspend fun creditPolicy(): CreditPolicyResponse
 

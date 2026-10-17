@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlin.time.Instant
 
+@kotlinx.serialization.Serializable
 @Entity(tableName = "profile")
 data class ProfileEntity(
     @PrimaryKey

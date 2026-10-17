@@ -27,6 +27,7 @@ class RemoteJobAnalysisSource @Inject constructor(
     private val api: TailorMyResumeApi,
     private val matcher: GapMatcher,
     private val clock: Clock = Clock.System,
+    private val ownership: com.tailormyresume.app.auth.AccountOperationGuard? = null,
 ) : JobAnalysisSource {
     private data class Entry(val result: JobAnalysisResult, val baselineProfile: CandidateProfile)
 
@@ -35,10 +36,12 @@ class RemoteJobAnalysisSource @Inject constructor(
     }
 
     override suspend fun analyse(profile: CandidateProfile, rawJobText: String): JobAnalysisResult {
+        val ticket = ownership?.capture()
         val facts = profile.toFactsDto()
-        val key = cacheKey(rawJobText)
+        val key = ticket?.owner.orEmpty() + ":" + cacheKey(rawJobText)
         synchronized(cache) { cache[key] }?.let { return rematch(it, profile) }
         val response = remoteAi { api.analyse(AnalysisRequest(rawJobText, facts)) }
+        ticket?.let { ownership?.check(it) }
         val job = response.job.toJobDescription(rawJobText)
         val factIds = profile.sendableFacts().evidenceIds()
         val matches = matchesOf(job, response.matches, factIds)

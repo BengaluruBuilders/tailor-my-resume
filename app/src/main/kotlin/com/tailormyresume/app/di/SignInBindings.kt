@@ -3,6 +3,8 @@ package com.tailormyresume.app.di
 import com.tailormyresume.app.AppStartTask
 import com.tailormyresume.app.BuildConfig
 import com.tailormyresume.app.auth.CredentialManagerGoogleSource
+import com.tailormyresume.app.auth.GoogleAccountCoordinator
+import com.tailormyresume.core.domain.GoogleAccountGateway
 import com.tailormyresume.app.auth.FirebaseAuthClient
 import com.tailormyresume.app.auth.FirebaseConfig
 import com.tailormyresume.app.auth.FirebaseSessionClient
@@ -36,6 +38,13 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 interface SignInBindings {
+    @Binds
+    fun bindGoogleAccountGateway(impl: GoogleAccountCoordinator): GoogleAccountGateway
+
+    @Binds
+    @IntoSet
+    fun bindGoogleAccountStartTask(impl: GoogleAccountCoordinator): AppStartTask
+
     @Binds
     fun bindGuestTrialGateway(impl: RemoteGuestTrialGateway): GuestTrialGateway
 

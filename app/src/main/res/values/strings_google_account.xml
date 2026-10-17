@@ -1,0 +1,29 @@
+<resources>
+    <string name="google_account_title">Your Google account</string>
+    <string name="google_account_working">Saving your progress. Keep this app open.</string>
+    <string name="google_account_save_edits">Save your open edits or finish your resume import before changing accounts. Your work is still here.</string>
+    <string name="google_account_return">Return to my work</string>
+    <string name="google_account_guest_intro">Keep your profile, applications and remaining credits by linking this guest account to Google.</string>
+    <string name="google_account_offer_intro">Your account is ready. Eligible credit offers are shown below.</string>
+    <string name="google_account_neutral">No credit offer is available right now. Your account, work and existing balance are available.</string>
+    <string name="google_account_offer_changed">The offer changed. Review it before continuing.</string>
+    <string name="google_account_claim">Add eligible credits</string>
+    <string name="google_account_continue_google">Continue with Google</string>
+    <string name="google_account_check_again">Check offers again</string>
+    <string name="google_account_close">Back to my work</string>
+    <string name="google_account_retry_body">We could not finish this step. Your saved work is protected. Try again to continue.</string>
+    <string name="google_account_retry">Try again</string>
+    <string name="google_account_ready">Your Google account and saved work are ready. Your balance shows the credits available now.</string>
+    <string name="google_account_work_preserved">Your selected work is ready in your existing Google account.</string>
+    <string name="google_account_check_remaining">Check remaining eligible offers</string>
+    <string name="google_account_conflict_body">This Google account already exists. Choose which guest work to keep before you switch. Only the work you select will appear in that account.</string>
+    <string name="google_account_conflict_credits">Guest credits stay with the guest account. Purchases and running jobs do not move. This switch does not earn a signup bonus. An anonymous guest account cannot be signed into again after switching.</string>
+    <string name="google_account_keep_profile">Use my guest profile</string>
+    <string name="google_account_profile_choice">If a profile is saved for this Google account on this device, this choice replaces it. Turn this off to keep that profile.</string>
+    <string name="google_account_existing_continue">Switch and keep selected work</string>
+    <string name="google_account_keep_guest">Keep using this guest account</string>
+    <plurals name="google_account_signup_offer"><item quantity="one">Add %d credit for an eligible first Google signup.</item><item quantity="other">Add %d credits for an eligible first Google signup.</item></plurals>
+    <plurals name="google_account_base_offer"><item quantity="one">A separate eligible trial offers %d credit. The device trial check still applies.</item><item quantity="other">A separate eligible trial offers %d credits. The device trial check still applies.</item></plurals>
+    <plurals name="google_account_signup_received"><item quantity="one">Google signup: %d credit added.</item><item quantity="other">Google signup: %d credits added.</item></plurals>
+    <plurals name="google_account_base_received"><item quantity="one">Trial: %d credit added.</item><item quantity="other">Trial: %d credits added.</item></plurals>
+</resources>

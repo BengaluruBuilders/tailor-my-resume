@@ -76,4 +76,6 @@
     <string name="feature_settings_impl_guest_credit_title">Guest credits</string>
     <string name="feature_settings_impl_guest_credit_recovery">A successful tailoring needs one available credit. Check your current balance and guest trial in Credits. Your saved work remains available.</string>
     <string name="feature_settings_impl_guest_credit_view">View credits</string>
+    <string name="feature_settings_impl_google_account">Google account &amp; credit offers</string>
+    <string name="feature_settings_impl_credits_google_signup">Google signup</string>
 </resources>

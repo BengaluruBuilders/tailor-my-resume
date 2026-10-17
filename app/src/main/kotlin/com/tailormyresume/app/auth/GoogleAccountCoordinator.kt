@@ -1,0 +1,333 @@
+package com.tailormyresume.app.auth
+
+import com.tailormyresume.app.AppStartTask
+import com.tailormyresume.app.billing.WalletSource
+import com.tailormyresume.app.credits.GooglePromotionClient
+import com.tailormyresume.core.common.network.di.ApplicationScope
+import com.tailormyresume.core.data.account.LocalWorkCheckpoint
+import com.tailormyresume.core.data.account.LocalWorkFence
+import com.tailormyresume.core.data.repository.PendingAccountWipe
+import com.tailormyresume.core.data.repository.PendingWipeState
+import com.tailormyresume.core.data.repository.SessionRepository
+import com.tailormyresume.core.domain.FirebaseUidProvider
+import com.tailormyresume.core.domain.GoogleAccountGateway
+import com.tailormyresume.core.domain.GoogleAccountState
+import com.tailormyresume.core.domain.SignInFailureReason
+import com.tailormyresume.core.domain.SignInResult
+import com.tailormyresume.core.model.AccountMode
+import com.tailormyresume.core.model.SignInAccount
+import com.tailormyresume.core.network.ApiError
+import com.tailormyresume.core.network.ApiException
+import com.tailormyresume.core.network.TailorMyResumeApi
+import com.tailormyresume.core.network.TailorMyResumeApiConfig
+import com.tailormyresume.core.network.apiResult
+import com.tailormyresume.core.network.dto.UpgradeCompleteRequest
+import com.tailormyresume.core.network.dto.UpgradeIntentRequest
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import java.security.SecureRandom
+import java.util.Base64
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class GoogleAccountCoordinator @Inject constructor(
+    private val firebase: FirebaseSessionClient,
+    private val credentials: GoogleCredentialSource,
+    private val api: TailorMyResumeApi,
+    private val config: TailorMyResumeApiConfig,
+    private val sessions: SessionRepository,
+    private val journals: PrivateUpgradeStore,
+    private val checkpoints: LocalWorkCheckpoint,
+    private val fence: LocalWorkFence,
+    private val pendingWipe: PendingAccountWipe,
+    private val cleaner: SignOutCleaner,
+    private val promotions: GooglePromotionClient,
+    private val wallet: WalletSource,
+    private val uids: FirebaseUidProvider,
+    @ApplicationScope private val scope: CoroutineScope,
+) : GoogleAccountGateway, AppStartTask {
+    private val mutable = MutableStateFlow<GoogleAccountState>(GoogleAccountState.Idle)
+    override val state: StateFlow<GoogleAccountState> = mutable
+    private val mutex = Mutex()
+
+    override suspend fun signIn(): SignInResult = mutex.withLock {
+        mutable.value = GoogleAccountState.Busy
+        try {
+            checkLive()
+            if (firebase.hasAnonymousSession()) linkGuest() else directSignIn()
+        } catch (cancelled: CancellationException) {
+            fence.release()
+            throw cancelled
+        } catch (failure: Exception) {
+            recoverable(failure)
+            SignInResult.Failed(SignInFailureReason.ProviderUnavailable)
+        }
+    }
+
+    override suspend fun open() = mutex.withLock { safely { reconcile() } }
+
+    override suspend fun claim() = mutex.withLock {
+        safely {
+            checkLive()
+            if (firebase.hasAnonymousSession()) {
+                linkGuest()
+            } else {
+                val journal = ownJournal() ?: newJournal(checkNotNull(uids.uid()), "DIRECT_GOOGLE").also { journals.write(it) }
+                mutable.value = promotions.claim(journal)
+            }
+        }
+    }
+
+    private suspend fun linkGuest(): SignInResult {
+        val user = checkNotNull(firebase.currentUser())
+        check(sessions.lastAccountId()?.let { it == user.uid } != false)
+        try {
+            fence.freeze()
+        } catch (unsaved: IllegalStateException) {
+            mutable.value = GoogleAccountState.SaveEdits
+            return SignInResult.Cancelled
+        }
+        checkpoints.capture(user.uid, config.baseUrl)
+        var journal = newJournal(user.uid, "GUEST_LINK")
+        journals.write(journal)
+        val intent = apiResult { api.prepareUpgrade(UpgradeIntentRequest(journal.prepareKey, checkNotNull(journal.proof))) }.getOrThrow()
+        journal = journal.copy(intentId = intent.intentId, phase = "LINKING")
+        journals.write(journal)
+        val token = credential() ?: return cancelBeforeSwitch()
+        val outcome = firebase.linkGoogle(token)
+        checkLive()
+        if (outcome is AuthOutcome.Failure && outcome.failure == AuthFailure.CredentialConflict) {
+            val snapshot = checkNotNull(checkpoints.read(user.uid, config.baseUrl))
+            journals.write(journal.copy(phase = "CONFLICT"))
+            mutable.value = GoogleAccountState.Conflict(snapshot.profile != null, snapshot.applications.map { it.id to "${it.jobTitle} · ${it.company}" })
+            fence.release()
+            return SignInResult.Cancelled
+        }
+        val linked = (outcome as? AuthOutcome.Success)?.value ?: firebase.currentUser()?.takeIf { it.uid == user.uid && it.mode == AccountMode.GOOGLE }
+        if (linked == null) {
+            fence.release()
+            throw IllegalStateException("Google linking is unavailable")
+        }
+        check(linked.uid == user.uid)
+        journal = journal.copy(phase = "LINKED")
+        journals.write(journal)
+        publish(linked)
+        fence.release()
+        mutable.value = promotions.prepare(journal)
+        return SignInResult.SignedIn(linked.account())
+    }
+
+    private suspend fun directSignIn(): SignInResult {
+        val previous = sessions.observeAccount().first()
+        try {
+            fence.freeze()
+        } catch (unsaved: IllegalStateException) {
+            mutable.value = GoogleAccountState.SaveEdits
+            return SignInResult.Cancelled
+        }
+        previous?.let { checkpoints.capture(it.id, config.baseUrl) }
+        val token = credential() ?: return cancelBeforeSwitch()
+        fence.invalidate()
+        val outcome = firebase.signIn(token)
+        val user = (outcome as? AuthOutcome.Success)?.value ?: run {
+            fence.release()
+            return (outcome as AuthOutcome.Failure).failure.toSignInResult()
+        }
+        checkLive()
+        apiResult { api.me() }.getOrThrow()
+        if (previous?.id != user.uid) {
+            cleaner.clear()
+            checkpoints.restore(user.uid, config.baseUrl)
+        }
+        val journal = newJournal(user.uid, "DIRECT_GOOGLE").copy(phase = "LINKED")
+        journals.write(journal)
+        publish(user)
+        fence.release()
+        mutable.value = promotions.prepare(journal)
+        return SignInResult.SignedIn(user.account())
+    }
+
+    override suspend fun continueConflict(useProfile: Boolean, applications: Set<String>) = mutex.withLock {
+        safely {
+            checkLive()
+            var journal = checkNotNull(ownJournal())
+            check(journal.phase == "CONFLICT" && firebase.hasAnonymousSession() && uids.uid() == journal.source)
+            fence.freeze()
+            val snapshot = checkpoints.capture(journal.source, config.baseUrl)
+            check(applications.all { id -> snapshot.applications.any { it.id == id } })
+            journal = journal.copy(useProfile = useProfile, applications = applications, phase = "SWITCHING")
+            journals.write(journal)
+            val token = credential()
+            if (token == null) {
+                journals.write(journal.copy(phase = "CONFLICT"))
+                fence.release()
+                mutable.value = GoogleAccountState.Conflict(snapshot.profile != null, snapshot.applications.map { it.id to "${it.jobTitle} · ${it.company}" })
+                return@safely
+            }
+            fence.invalidate()
+        val outcome = firebase.signIn(token)
+            val user = (outcome as? AuthOutcome.Success)?.value ?: throw IllegalStateException("Google sign-in is unavailable")
+            check(user.uid != journal.source)
+            journal = journal.copy(destination = user.uid, phase = "SWITCHED")
+            journals.write(journal)
+            completeConflict(journal, user)
+        }
+    }
+
+    private suspend fun completeConflict(original: UpgradeJournal, user: FirebaseUser) {
+        var journal = original
+        check(journal.destination == user.uid)
+        checkLive()
+        val result = apiResult {
+            api.completeUpgrade(UpgradeCompleteRequest(journal.completionKey, checkNotNull(journal.intentId), checkNotNull(journal.proof), "PRESERVE_LOCAL_WORK"))
+        }.getOrThrow()
+        checkLive()
+        check(uids.uid() == user.uid)
+        check(result.completion.kind == "EXISTING_ACCOUNT" && result.completion.creditsTransferred == 0 &&
+            !result.completion.purchasesTransferred && !result.completion.runningJobsTransferred)
+        journal = journal.copy(phase = "AUTHORIZED")
+        journals.write(journal)
+        withContext(NonCancellable) {
+            if (original.phase != "AUTHORIZED" && original.phase != "IMPORTED") {
+                cleaner.clear()
+                checkpoints.restore(user.uid, config.baseUrl)
+            }
+            checkLive()
+            check(uids.uid() == user.uid)
+            checkpoints.importSelected(journal.completionKey, journal.source, user.uid, config.baseUrl, journal.useProfile, journal.applications)
+            journals.write(journal.copy(phase = "IMPORTED"))
+            publish(user)
+            wallet.refreshOrCached()
+            journals.clear()
+        }
+        fence.release()
+        mutable.value = GoogleAccountState.Complete(null, null, preservedWork = true)
+    }
+
+    private suspend fun reconcile() {
+        checkLive()
+        val user = firebase.currentUser() ?: run { mutable.value = GoogleAccountState.Idle; return }
+        val journal = ownJournal()
+        if (journal != null && journal.phase in setOf("SWITCHING", "SWITCHED", "AUTHORIZED", "IMPORTED") && user.uid != journal.source) {
+            check(journal.destination == null || journal.destination == user.uid)
+            fence.freeze()
+            val bound = journal.copy(destination = user.uid, phase = if (journal.phase == "SWITCHING") "SWITCHED" else journal.phase)
+            journals.write(bound)
+            completeConflict(bound, user)
+            return
+        }
+        if (user.mode == AccountMode.ANONYMOUS) {
+            if (journal?.phase == "CONFLICT") {
+                val snapshot = checkNotNull(checkpoints.read(user.uid, config.baseUrl))
+                mutable.value = GoogleAccountState.Conflict(snapshot.profile != null, snapshot.applications.map { it.id to "${it.jobTitle} · ${it.company}" })
+                return
+            }
+            val policy = apiResult { api.creditPolicy().policy }.getOrNull()
+            val signup = policy?.signupBonus
+            mutable.value = GoogleAccountState.Offer(signup?.amount?.takeIf { signup.status == "AVAILABLE" && it > 0 }, null, false, google = false)
+        } else {
+            val pending = journal ?: newJournal(user.uid, "DIRECT_GOOGLE").copy(phase = "LINKED").also { journals.write(it) }
+            publish(user)
+            fence.release()
+            mutable.value = promotions.prepare(pending)
+        }
+    }
+
+    override suspend fun retry() = open()
+
+    override suspend fun cancel() = mutex.withLock {
+        val journal = ownJournal()
+        check(journal == null || journal.phase !in setOf("SWITCHING", "SWITCHED", "AUTHORIZED", "IMPORTED"))
+        if (firebase.hasAnonymousSession()) journals.clear()
+        fence.release()
+        mutable.value = GoogleAccountState.Idle
+    }
+
+    override suspend fun dismiss() = mutex.withLock {
+        val journal = ownJournal()
+        if (journal?.phase in setOf("SWITCHING", "SWITCHED", "AUTHORIZED", "IMPORTED")) return@withLock
+        fence.release()
+        mutable.value = GoogleAccountState.Idle
+    }
+
+    override fun start() {
+        scope.launch {
+            if (journals.read() != null) open()
+        }
+    }
+
+    private suspend fun credential(): String? = when (val result = credentials.idToken()) {
+        is AuthOutcome.Success -> result.value
+        is AuthOutcome.Failure -> if (result.failure == AuthFailure.Cancelled) null else error("Google sign-in is unavailable")
+    }
+
+    private suspend fun cancelBeforeSwitch(): SignInResult {
+        journals.clear()
+        fence.release()
+        mutable.value = GoogleAccountState.Idle
+        return SignInResult.Cancelled
+    }
+
+    private suspend fun ownJournal(): UpgradeJournal? {
+        val journal = journals.read() ?: return null
+        if (journal.environment != config.baseUrl) return null
+        val uid = uids.uid() ?: return null
+        return journal.takeIf { it.source == uid || it.destination == uid || (it.destination == null && it.phase == "SWITCHING") }
+    }
+
+    private suspend fun publish(user: FirebaseUser) {
+        checkLive()
+        check(uids.uid() == user.uid)
+        sessions.saveLastAccountId(user.uid)
+        sessions.saveAccount(user.account())
+    }
+
+    private suspend fun checkLive() {
+        check(pendingWipe.state() == PendingWipeState.NONE) { "Account deletion must finish first" }
+    }
+
+    private suspend fun safely(action: suspend () -> Unit) {
+        mutable.value = GoogleAccountState.Busy
+        try {
+            action()
+        } catch (cancelled: CancellationException) {
+            fence.release()
+            throw cancelled
+        } catch (failure: Exception) {
+            recoverable(failure)
+        }
+    }
+
+    private suspend fun recoverable(failure: Exception) {
+        val journal = ownJournal()
+        val switched = journal?.phase in setOf("SWITCHING", "SWITCHED", "AUTHORIZED", "IMPORTED")
+        if (!switched) fence.release()
+        val after = when (val error = (failure as? ApiException)?.error) {
+            is ApiError.IdentityUnavailable -> error.retryAfterSeconds
+            is ApiError.IntegrityUnavailable -> error.retryAfterSeconds
+            is ApiError.PromotionUnavailable -> error.retryAfterSeconds
+            is ApiError.RateLimited -> error.retryAfterSeconds
+            else -> null
+        }
+        mutable.value = GoogleAccountState.Retry(canCancel = !switched, retryAfterSeconds = after)
+    }
+
+    private fun newJournal(uid: String, path: String): UpgradeJournal = UpgradeJournal(
+        environment = config.baseUrl, source = uid, prepareKey = newId(),
+        proof = if (path == "GUEST_LINK") Base64.getUrlEncoder().withoutPadding().encodeToString(ByteArray(32).also { SecureRandom().nextBytes(it) }) else null,
+        completionKey = newId(), observationKey = newId(), path = path,
+    )
+
+    private fun newId() = UUID.randomUUID().toString()
+    private fun FirebaseUser.account() = SignInAccount(uid, displayName.ifBlank { email }, email, AccountMode.GOOGLE)
+}

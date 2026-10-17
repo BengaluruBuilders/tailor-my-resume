@@ -19,7 +19,10 @@ import javax.inject.Inject
 internal class JobLinkViewModel @Inject constructor(
     private val importer: JobImporter,
     private val draftStore: JobDraftStore,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
+
 
     private val state = MutableStateFlow(JobLinkUiState(link = draftStore.link.value))
     private val eventChannel = Channel<JobLinkEvent>(Channel.BUFFERED)
@@ -29,6 +32,7 @@ internal class JobLinkViewModel @Inject constructor(
     val events: Flow<JobLinkEvent> = eventChannel.receiveAsFlow()
 
     fun onLinkChange(link: String) {
+        workFence.editing(this, true)
         state.update { it.copy(link = link) }
         draftStore.setLink(link)
     }
@@ -69,4 +73,9 @@ internal class JobLinkViewModel @Inject constructor(
         const val HTTPS_PREFIX = "https://"
         const val MAX_LINK_CHARS = 2048
     }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
+    }
+
 }

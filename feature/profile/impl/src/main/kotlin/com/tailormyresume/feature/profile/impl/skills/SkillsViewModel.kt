@@ -40,7 +40,10 @@ internal enum class SkillsEvent { Saved }
 @HiltViewModel
 internal class SkillsViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
+
 
     private val draft = MutableStateFlow<SkillsDraft?>(null)
 
@@ -102,13 +105,21 @@ internal class SkillsViewModel @Inject constructor(
             skillsDraft.skills.containsIgnoringCase(it) && !kept.containsIgnoringCase(it)
         }
         finished = true
+        workFence.check(workTicket)
         profileRepository.saveProfile(profile.copy(skills = skillsDraft.skills, userStatedSkills = kept + added))
+        workFence.editing(this, false)
         channel.send(SkillsEvent.Saved)
     }
 
     private fun edit(transform: (SkillsDraft) -> SkillsDraft) {
+        workFence.editing(this, true)
         draft.update { skillsDraft -> skillsDraft?.let(transform) }
     }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
+    }
+
 }
 
 private fun List<String>.containsIgnoringCase(name: String): Boolean = any { it.equals(name, ignoreCase = true) }

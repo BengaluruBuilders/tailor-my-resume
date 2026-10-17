@@ -152,7 +152,7 @@ internal fun SignInScreen(
                 modifier = Modifier.weight(1f),
             )
             if (uiState is SignInUiState.GuestOffer || uiState is SignInUiState.GuestResult || uiState == SignInUiState.PreparingGuest) {
-                GuestActions(uiState, onTryGuest, onClaimTrial, onContinueGuest)
+                GuestActions(uiState, onTryGuest, onClaimTrial, onContinueGuest, onContinueWithGoogle)
             } else {
                 SignInActions(uiState, onContinueWithGoogle, onTryGuest)
             }
@@ -330,7 +330,7 @@ private fun Footer(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun GuestActions(state: SignInUiState, onRetry: () -> Unit, onClaim: () -> Unit, onContinue: () -> Unit) {
+private fun GuestActions(state: SignInUiState, onRetry: () -> Unit, onClaim: () -> Unit, onContinue: () -> Unit, onGoogle: () -> Unit) {
     val offer = (state as? SignInUiState.GuestOffer)?.offer
     val result = (state as? SignInUiState.GuestResult)?.result
     val busy = state == SignInUiState.PreparingGuest || (state as? SignInUiState.GuestOffer)?.busy == true
@@ -366,6 +366,7 @@ private fun GuestActions(state: SignInUiState, onRetry: () -> Unit, onClaim: () 
                 modifier = Modifier.fillMaxWidth(),
             )
         }
+        if (!busy) GoogleButton(SignInUiState.Ready, onGoogle)
         if (!busy && (offer !is GuestTrialOffer.Unavailable || offer.canContinue)) {
             TmrSecondaryButton(
                 label = stringResource(R.string.feature_onboarding_impl_guest_continue),

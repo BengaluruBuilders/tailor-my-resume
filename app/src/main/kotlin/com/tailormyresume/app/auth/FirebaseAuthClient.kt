@@ -9,6 +9,7 @@ import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GetTokenResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.tailormyresume.core.common.network.Dispatcher
@@ -41,6 +42,43 @@ class FirebaseAuthClient @Inject constructor(
 ) : FirebaseSessionClient, IdTokenProvider, FirebaseUidProvider {
 
     private val auth: FirebaseAuth? by lazy { if (config.isComplete) createAuth() else null }
+
+    override suspend fun currentUser(): FirebaseUser? = withContext(io) {
+        auth?.currentUser?.let { user ->
+            FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), if (user.isAnonymous) AccountMode.ANONYMOUS else AccountMode.GOOGLE)
+        }
+    }
+
+    override suspend fun linkGoogle(googleIdToken: String): AuthOutcome<FirebaseUser> = withContext(io) {
+        val user = auth?.currentUser?.takeIf { it.isAnonymous }
+            ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+        try {
+            val linked = user.linkWithCredential(GoogleAuthProvider.getCredential(googleIdToken, null)).await().user
+                ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+            check(linked.uid == user.uid)
+            refreshGoogle()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (conflict: FirebaseAuthUserCollisionException) {
+            AuthOutcome.Failure(AuthFailure.CredentialConflict)
+        } catch (failure: Exception) {
+            AuthOutcome.Failure(failure.toAuthFailure())
+        }
+    }
+
+    override suspend fun refreshGoogle(): AuthOutcome<FirebaseUser> = withContext(io) {
+        val user = auth?.currentUser ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
+        try {
+            user.reload().await()
+            check(!user.isAnonymous && user.providerData.any { it.providerId == "google.com" })
+            user.getIdToken(true).await()
+            AuthOutcome.Success(FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty()))
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            AuthOutcome.Failure(failure.toAuthFailure())
+        }
+    }
 
     override suspend fun signIn(googleIdToken: String): AuthOutcome<FirebaseUser> = withContext(io) {
         val firebaseAuth = auth ?: return@withContext AuthOutcome.Failure(AuthFailure.NotConfigured)

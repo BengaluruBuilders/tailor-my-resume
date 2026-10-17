@@ -50,7 +50,10 @@ internal class EditResumeViewModel @AssistedInject constructor(
     private val clock: kotlin.time.Clock,
     private val renderer: ResumePdfRenderer,
     @Assisted val applicationId: String,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
+
 
     private val drafts = MutableStateFlow(EditResumeDrafts())
 
@@ -77,14 +80,17 @@ internal class EditResumeViewModel @AssistedInject constructor(
     val events: Flow<EditResumeEvent> = eventChannel.receiveAsFlow()
 
     fun onBulletChange(bulletId: String, text: String) {
+        workFence.editing(this, true)
         drafts.value = drafts.value.copy(bullets = drafts.value.bullets + (bulletId to text))
     }
 
     fun onSummaryChange(text: String) {
+        workFence.editing(this, true)
         drafts.value = drafts.value.copy(summary = text)
     }
 
     fun onSkillsChange(text: String) {
+        workFence.editing(this, true)
         drafts.value = drafts.value.copy(skills = text)
     }
 
@@ -117,6 +123,7 @@ internal class EditResumeViewModel @AssistedInject constructor(
                         val keywordCoverage = application.gapAnalysis?.let { gap ->
                             KeywordCoverageCalculator.compute(gap.matches, application.quickAnswer, edited, profile)
                         } ?: application.keywordCoverage
+                        workFence.check(workTicket)
                         applicationRepository.upsertApplication(
                             application.copy(
                                 tailoredResume = edited,
@@ -133,6 +140,7 @@ internal class EditResumeViewModel @AssistedInject constructor(
                         }
                     }
                     drafts.value = EditResumeDrafts()
+                    workFence.editing(this, false)
                     eventChannel.send(EditResumeEvent.Saved)
                 }
             } catch (cancelled: CancellationException) {
@@ -234,6 +242,11 @@ internal class EditResumeViewModel @AssistedInject constructor(
     interface Factory {
         fun create(applicationId: String): EditResumeViewModel
     }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
+    }
+
 }
 
 private data class EditResumeDrafts(

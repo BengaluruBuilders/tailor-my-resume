@@ -26,7 +26,10 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
     private val applicationRepository: ApplicationRepository,
     private val profileRepository: ProfileRepository,
     @Assisted val applicationId: String,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
+
 
     private val picked = MutableStateFlow<QuickChoice?>(null)
     private val detail = MutableStateFlow("")
@@ -49,11 +52,13 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
     val events: Flow<QuickQuestionEvent> = eventChannel.receiveAsFlow()
 
     fun onPick(choice: QuickChoice) {
+        workFence.editing(this, true)
         picked.value = choice
         if (!choice.takesDetail) detail.value = ""
     }
 
     fun onDetailChange(text: String) {
+        workFence.editing(this, true)
         if (picked.value?.takesDetail != true) return
         detail.value = text.take(QUICK_DETAIL_MAX)
     }
@@ -76,6 +81,7 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val saved = save(choice, answerDetail)
             if (saved || forwardEvenIfUnsaved) {
+                workFence.editing(this, false)
                 eventChannel.send(QuickQuestionEvent.Tailor(applicationId))
             } else {
                 forwarding = false
@@ -93,6 +99,7 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
         } else {
             null
         }
+        workFence.check(workTicket)
         applicationRepository.upsertApplication(
             current.copy(
                 quickAnswer = answer,
@@ -106,4 +113,9 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
     interface Factory {
         fun create(applicationId: String): QuickQuestionViewModel
     }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
+    }
+
 }

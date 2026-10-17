@@ -81,11 +81,6 @@ internal class SignInViewModel @Inject constructor(
     }
 
     fun onContinueWithGoogle() {
-        if (state.value is SignInUiState.GuestOffer || state.value is SignInUiState.GuestResult ||
-            state.value == SignInUiState.PreparingGuest
-        ) {
-            return
-        }
         if (state.getAndUpdate { SignInUiState.SigningIn } == SignInUiState.SigningIn) return
         viewModelScope.launch {
             val result = try {

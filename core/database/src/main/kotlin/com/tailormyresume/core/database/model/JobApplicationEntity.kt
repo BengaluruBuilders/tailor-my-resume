@@ -9,6 +9,7 @@ import com.tailormyresume.core.database.json.TailoredResumeDto
 import com.tailormyresume.core.model.ApplicationStatus
 import kotlin.time.Instant
 
+@kotlinx.serialization.Serializable
 @Entity(tableName = "job_applications")
 data class JobApplicationEntity(
     @PrimaryKey

@@ -49,7 +49,10 @@ internal class JobViewModel @Inject constructor(
     private val idGenerator: IdGenerator,
     private val clock: Clock,
     @Dispatcher(TmrDispatchers.Default) private val defaultDispatcher: CoroutineDispatcher,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
+
 
     private val text = MutableStateFlow("")
     private val notAJobPost = MutableStateFlow(false)
@@ -98,10 +101,12 @@ internal class JobViewModel @Inject constructor(
     }
 
     fun onTextChange(text: String) {
+        workFence.editing(this, true)
         setText(text)
     }
 
     fun onClear() {
+        workFence.editing(this, false)
         draftStore.clear()
         text.value = ""
         notAJobPost.value = false
@@ -139,9 +144,11 @@ internal class JobViewModel @Inject constructor(
                     location = result.job.location.orEmpty(),
                     keywordCoverage = KeywordCoverageCalculator.compute(result.gap.matches, null, null, profile),
                 )
+                workFence.check(workTicket)
                 applicationRepository.upsertApplication(application)
                 notAJobPost.value = false
                 percent.value = null
+                workFence.editing(this, false)
                 eventChannel.send(JobEvent.Analyzed(application.id))
             } catch (e: CancellationException) {
                 throw e
@@ -161,6 +168,7 @@ internal class JobViewModel @Inject constructor(
     }
 
     private fun setText(newText: String) {
+        workFence.editing(this, newText.isNotBlank())
         text.value = newText.take(MAX_JOB_CHARS)
         notAJobPost.value = false
     }
@@ -187,4 +195,9 @@ internal class JobViewModel @Inject constructor(
     private companion object {
         const val LABEL_DEBOUNCE_MILLIS = 300L
     }
+    override fun onCleared() {
+        workFence.editing(this, false)
+        super.onCleared()
+    }
+
 }
