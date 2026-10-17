@@ -168,3 +168,26 @@ No new runtime SDK is added. Sideload/debug/emulator installs receive no trust b
 needs matching Firebase anonymous-provider configuration, backend policy/admissions, finite capacity,
 package/certificate/version checks, Google verifier access and the production disclosure review in
 contract section 8. Test fixtures are application-logic evidence only.
+
+## Referral App Links (disabled by default)
+
+Optional Gradle properties `tailormyresumeStagingReferralOrigin` (debug/staging) and
+`tailormyresumeReferralOrigin` (release) independently pin separate approved lowercase HTTPS DNS
+origins. Leave them absent until owned hosting and association inputs are reviewed. Empty config
+adds no referral VIEW filter and disables link/referrer capture and link share. Enabled config adds
+only HTTPS `/r/` routing; strict runtime parsing remains mandatory. No `.invalid` host is shipped
+enabled. Parser tests inject fixture origins directly.
+
+The backend owns the sole landing, public-offer and assetlinks packager plus publication runbook.
+Use the exact environment package and actual installed signing certificate: staging uses
+`com.tailormyresume.app.staging`; release uses `com.tailormyresume.app`. Production requires the Play
+App Signing certificate, not the upload key. Serve `/.well-known/assetlinks.json` on the exact owned
+HTTPS host with no redirect. Configure the matching backend share origin. A server URL outside
+Android's pinned origin/path/displayed own code cannot expand trust or be shared.
+
+Real installed cold/warm App Links and a supported Play install through the configured landing/store
+link remain BLOCKED external gates. Forced intents, sideloads, fake referrers and generated static
+artifacts are implementation evidence only. The official Install Referrer 2.2 adapter closes its
+connection in every path. A minimal consumed marker survives account cleanup; terminal capture and
+consumption are atomic. Transient failures allow at most three foreground collection attempts,
+with manual code entry immediately available. No remote service or live origin is activated here.

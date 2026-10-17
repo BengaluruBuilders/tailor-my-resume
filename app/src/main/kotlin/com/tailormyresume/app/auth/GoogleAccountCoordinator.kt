@@ -143,6 +143,7 @@ class GoogleAccountCoordinator @Inject constructor(
         journals.write(journal)
         publish(linked)
         fence.release()
+        referralGateway?.entered()
         mutable.value = promotions.prepare(journal)
         return SignInResult.SignedIn(linked.account())
     }
@@ -181,6 +182,7 @@ class GoogleAccountCoordinator @Inject constructor(
         journals.write(journal.copy(phase = "LINKED"))
         publish(user)
         fence.release()
+        referralGateway?.entered()
         mutable.value = promotions.prepare(journal)
         return SignInResult.SignedIn(user.account())
     }

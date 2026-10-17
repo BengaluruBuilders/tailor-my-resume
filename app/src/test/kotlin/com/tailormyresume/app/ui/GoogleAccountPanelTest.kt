@@ -24,6 +24,22 @@ class GoogleAccountPanelTest {
 
     @get:Rule val rule = createComposeRule()
 
+    @Test fun linkDisclosureShowsCurrentOfferAndClearOnExistingGoogleSurface() {
+        var clears = 0
+        rule.setContent {
+            TmrTheme {
+                GoogleAccountPanel(
+                    GoogleAccountState.Offer(null, null, false), {}, {}, {}, {}, { _, _ -> },
+                    referral = com.tailormyresume.core.domain.ReferralEntryState("tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567", 13, "referral-v2", "2026-10-18T00:00:00Z"),
+                    onClearReferral = { clears++ },
+                )
+            }
+        }
+        rule.onNodeWithText("An eligible referral may earn the inviter 13 credits. Offer referral-v2. Check availability in the app.").performScrollTo().assertIsDisplayed()
+        rule.onNodeWithText("Clear referral code").performScrollTo().performClick()
+        assertThat(clears).isEqualTo(1)
+    }
+
     @Test fun independentServerOfferShowsOnlyTheAvailableGrantAndExplicitClaim() {
         var claims = 0
         rule.setContent {

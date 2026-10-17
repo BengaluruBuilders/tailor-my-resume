@@ -41,6 +41,11 @@ class MainActivity : ComponentActivity() {
         referrals.receiveView(intent.action, intent.dataString)
     }
 
+    override fun onPause() {
+        referrals.leaveForeground()
+        super.onPause()
+    }
+
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch { referrals.foregroundEntry() }

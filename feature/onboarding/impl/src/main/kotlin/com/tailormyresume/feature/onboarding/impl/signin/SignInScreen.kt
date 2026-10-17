@@ -166,7 +166,7 @@ internal fun SignInScreen(
                 Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(stringResource(R.string.feature_onboarding_impl_referral_pending, code), style = TmrTheme.typography.caption, color = TmrTheme.colors.ink)
                     Text(stringResource(R.string.feature_onboarding_impl_referral_check), style = TmrTheme.typography.caption, color = TmrTheme.colors.ink)
-                    com.tailormyresume.core.designsystem.component.input.TmrTextButton(stringResource(R.string.feature_onboarding_impl_referral_clear), onClearReferral, Modifier.fillMaxWidth(), enabled = uiState != SignInUiState.SigningIn)
+                    com.tailormyresume.core.designsystem.component.input.TmrSecondaryButton(stringResource(R.string.feature_onboarding_impl_referral_clear), onClearReferral, Modifier.fillMaxWidth(), enabled = uiState != SignInUiState.SigningIn)
                 }
             }
             if (uiState is SignInUiState.GuestOffer || uiState is SignInUiState.GuestResult || uiState == SignInUiState.PreparingGuest) {

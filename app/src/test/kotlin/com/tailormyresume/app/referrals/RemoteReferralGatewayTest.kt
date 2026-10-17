@@ -60,6 +60,7 @@ class RemoteReferralGatewayTest {
     private var available = true
     private var codeAvailable = true
     private var ownCode: String? = null
+    private var serverShareUrl: String? = null
     private var continuityMode = "NONE"
     private var attached = false
     private var getFailure = false
@@ -114,7 +115,7 @@ class RemoteReferralGatewayTest {
                     } else {
                         jsonResponse(
                             200,
-                            """{"code":${ownCode?.let { """{"value":"$it","createdAt":"2026-10-17T00:00:00Z"}""" } ?: "null"},"shareUrl":null,"offer":${offer()},"attachment":${if (attached) receipt() else "null"},"stats":{"creditedCount":2,"earnedCredits":26}}""",
+                            """{"code":${ownCode?.let { """{"value":"$it","createdAt":"2026-10-17T00:00:00Z"}""" } ?: "null"},"shareUrl":${serverShareUrl?.let { kotlinx.serialization.json.JsonPrimitive(it).toString() } ?: "null"},"offer":${offer()},"attachment":${if (attached) receipt() else "null"},"stats":{"creditedCount":2,"earnedCredits":26}}""",
                         )
                     }
                     "/v1/tailormyresume/referrals/code" -> {
@@ -172,6 +173,7 @@ class RemoteReferralGatewayTest {
         assertThat(client.routeRequests.value).isEqualTo(0)
         val continuation = client.googleStarting()
         assertThat(continuation).isNotNull()
+        client.leaveForeground()
         guest = false
         client.googleContinued(continuation)
         assertThat(tokenCalls).isEqualTo(0)
@@ -241,6 +243,81 @@ class RemoteReferralGatewayTest {
         client.apply()
         assertThat(tokenCalls).isEqualTo(1)
         assertThat(content(client).attached).isTrue()
+    }
+
+    @Test fun pausedViewAndRestoredCandidateRequireNewExplicitAction() = runTest {
+        linkOrigin = "https://links.example.invalid"
+        val client = client()
+        client.captureView(android.content.Intent.ACTION_VIEW, "$linkOrigin/r/$CODE")
+        client.leaveForeground()
+        client.displayed(CODE, version)
+        assertThat(tokenCalls).isEqualTo(0)
+        val restored = client(store)
+        restored.refresh()
+        restored.displayed(CODE, version)
+        assertThat(tokenCalls).isEqualTo(0)
+        restored.apply()
+        assertThat(tokenCalls).isEqualTo(1)
+    }
+
+    @Test fun lateInstallCallbackAfterSignoutCannotRepopulateAnotherOwner() = runTest {
+        linkOrigin = "https://links.example.invalid"
+        val callback = kotlinx.coroutines.CompletableDeferred<InstallReferrerResult>()
+        referrer = { callback.await() }
+        val client = client()
+        val collection = launch { client.foregroundEntry() }
+        kotlinx.coroutines.yield()
+        store.clearAll()
+        uid = "different-owner"
+        fence.invalidate()
+        fence.release()
+        callback.complete(InstallReferrerResult.Terminal("tmr_referral=$CODE"))
+        collection.join()
+        client.refresh()
+        assertThat(content(client).candidate).isNull()
+        assertThat(store.inbox(server.url("/").toString())).isNull()
+        assertThat(tokenCalls).isEqualTo(0)
+    }
+
+    @Test fun installCandidateBindsOnDeliberateGuestEntryWithoutEvidence() = runTest {
+        linkOrigin = "https://links.example.invalid"
+        authPresent = false
+        referrer = { InstallReferrerResult.Terminal("tmr_referral=$CODE") }
+        val client = client()
+        client.foregroundEntry()
+        guest = true
+        authPresent = true
+        client.entered()
+        client.displayed(CODE, version)
+        assertThat(content(client).candidateSource).isEqualTo("LINK")
+        assertThat(tokenCalls).isEqualTo(0)
+        val continuation = client.googleStarting()
+        guest = false
+        client.googleContinued(continuation)
+        client.displayed(CODE, version)
+        assertThat(tokenCalls).isEqualTo(1)
+    }
+
+    @Test fun shareRefreshesCoherentOfferAndUsesNeutralCopyOnUnavailableOrFailedRead() = runTest {
+        linkOrigin = "https://links.example.invalid"
+        ownCode = CODE
+        serverShareUrl = "$linkOrigin/r/$CODE"
+        val client = client()
+        client.refresh()
+        val fresh = checkNotNull(client.share())
+        assertThat(fresh.reward).isEqualTo(13)
+        assertThat(fresh.version).isEqualTo(version)
+        assertThat(fresh.url).isEqualTo(serverShareUrl)
+        available = false
+        assertThat(checkNotNull(client.share()).reward).isNull()
+        getFailure = true
+        val offline = checkNotNull(client.share())
+        assertThat(offline.reward).isNull()
+        assertThat(offline.version).isNull()
+        assertThat(offline.url).isEqualTo(serverShareUrl)
+        getFailure = false
+        serverShareUrl = "https://evil.invalid/r/$CODE"
+        assertThat(checkNotNull(client.share()).url).isNull()
     }
 
     @Test fun optionalAndNoneUseNullAndPassiveReadsNeverCollectEvidence() = runTest {

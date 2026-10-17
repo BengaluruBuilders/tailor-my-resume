@@ -27,6 +27,22 @@ import org.robolectric.annotation.GraphicsMode
 class ReferralsInputPrivacyTest {
     @get:Rule val rule = createComposeRule()
 
+    @Test fun configuredLinkExposesShareAndLinkContinueUsesExistingAction() {
+        var shares = 0
+        var continues = 0
+        val actions = ReferralActions({}, {}, { _, _ -> }, {}, { continues++ }, {}, {}, {}, share = { shares++ })
+        val code = "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+        rule.setContent {
+            TmrTheme {
+                ReferralsScreen(ReferralUiState.Content(code = code, shareUrl = "https://links.example.invalid/r/$code", candidate = code, candidateSource = "LINK", reward = 13, offerVersion = "v2", canAttach = true), actions)
+            }
+        }
+        rule.onNodeWithText("Share referral link").performScrollTo().performClick()
+        rule.onNodeWithText("Continue referral").performScrollTo().performClick()
+        assertThat(shares).isEqualTo(1)
+        assertThat(continues).isEqualTo(1)
+    }
+
     @Test
     fun readOnlyTransitionAndSavedStateRestorationCannotRestoreTypedOrSavedCode() {
         val state = mutableStateOf<ReferralUiState>(ReferralUiState.Content(candidate = "synthetic-saved-code", canAttach = true))

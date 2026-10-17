@@ -63,6 +63,7 @@ class RemoteReferralGateway @Inject constructor(
     private var disclosedCode: String? = null
     private var automatic: Automatic? = null
     private var collecting = false
+    private var foregroundEpoch = 0L
     private data class Automatic(val owner: Owner, val code: String)
     internal data class GoogleContinuation(val code: String, val owner: String?, val epoch: Long)
 
@@ -136,12 +137,21 @@ class RemoteReferralGateway @Inject constructor(
     }
 
     fun receiveView(action: String?, raw: String?) {
-        scope.launch { captureView(action, raw) }
+        scope.launch {
+            try {
+                captureView(action, raw)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                automatic = null
+            }
+        }
     }
 
     suspend fun captureView(action: String?, raw: String?) {
         if (action != android.content.Intent.ACTION_VIEW) return
         val code = links.parseUrl(raw) ?: return
+        val actionEpoch = foregroundEpoch
         val epoch = store.epoch()
         mutex.withLock {
             if (epoch != store.epoch()) return@withLock
@@ -154,7 +164,7 @@ class RemoteReferralGateway @Inject constructor(
                 execute { owner ->
                     val candidate = bind(owner)
                     refresh(owner)
-                    if (!uids.isAnonymous() && candidate.code == code && candidate.source == "LINK" && candidate.requestId == null && candidate.reviewFrom == null && candidate.phase == "CANDIDATE" && !candidate.requiresConfirmation) {
+                    if (actionEpoch == foregroundEpoch && !uids.isAnonymous() && candidate.code == code && candidate.source == "LINK" && candidate.requestId == null && candidate.reviewFrom == null && candidate.phase == "CANDIDATE" && !candidate.requiresConfirmation) {
                         automatic = Automatic(owner, code)
                         routes.value++
                     }
@@ -189,6 +199,16 @@ class RemoteReferralGateway @Inject constructor(
         } finally {
             collecting = false
         }
+    }
+
+    fun leaveForeground() {
+        foregroundEpoch++
+        automatic = null
+    }
+
+    internal suspend fun entered() = run { owner ->
+        bind(owner)
+        refresh(owner)
     }
 
     private suspend fun bind(owner: Owner): ReferralJournal {
@@ -310,7 +330,9 @@ class RemoteReferralGateway @Inject constructor(
             canIssue = result.offer.codeIssuance in setOf("AVAILABLE", "ACTIVATION_REQUIRED"), guest = uids.isAnonymous(), attached = result.attachment?.status == "ATTACHED",
             canAttach = available && result.offer.attachmentEligibility == "ELIGIBLE" && journal.phase !in setOf("READ_ONLY", "REQUIRES_NEW") && journal.reviewFrom == null,
             deadline = result.offer.deadline, reviewRequired = journal.reviewFrom != null,
-            message = if (message != ReferralMessage.None) {
+            message = if (journal.requiresConfirmation) {
+                ReferralMessage.PolicyChanged
+            } else if (message != ReferralMessage.None) {
                 message
             } else if (!available) {
                 ReferralMessage.Unavailable
@@ -438,6 +460,10 @@ class RemoteReferralGateway @Inject constructor(
             challengeId = null,
         )
         write(owner, current)
+        if (current.source == "LINK" && foreground.current() == null) {
+            mutable.value = content().copy(busy = false, message = ReferralMessage.Retry)
+            return
+        }
         val challenge = apiResult { api.referralChallenge(GrantChallengeRequest("REFERRAL_ATTACH", checkNotNull(current.requestId), revision, checkNotNull(current.payloadDigest))) }
         check(owner)
         if (challenge.isFailure) {
@@ -503,8 +529,15 @@ class RemoteReferralGateway @Inject constructor(
                 mutable.value = ReferralUiState.Loading
                 return
             }
-            is ApiError.RateLimited -> {
-                val seconds = error.retryAfterSeconds?.takeIf { it > 0 } ?: 60
+            is ApiError.RateLimited, is ApiError.IntegrityUnavailable, is ApiError.PromotionUnavailable, is ApiError.IdentityUnavailable -> {
+                val advertised = when (error) {
+                    is ApiError.RateLimited -> error.retryAfterSeconds
+                    is ApiError.IntegrityUnavailable -> error.retryAfterSeconds
+                    is ApiError.PromotionUnavailable -> error.retryAfterSeconds
+                    is ApiError.IdentityUnavailable -> error.retryAfterSeconds
+                    else -> null
+                }
+                val seconds = advertised?.takeIf { it > 0 } ?: 60
                 write(owner, journal.copy(retryAt = clock.now().toEpochMilliseconds() + seconds.toLong() * 1000))
                 ReferralMessage.Retry
             }
