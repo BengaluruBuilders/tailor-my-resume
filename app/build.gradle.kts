@@ -161,7 +161,13 @@ android {
                     doLast {
                         val overlay = template.asFile.readText().substringAfter("<application>").substringBefore("</application>")
                         val base = if (original.asFile.exists()) original.asFile.readText() else template.asFile.readText().replace(overlay, "")
-                        generated.get().asFile.apply { parentFile.mkdirs(); writeText(base.replace("</application>", "$overlay</application>")) }
+                        val activity = "<activity android:name=\".MainActivity\">"
+                        val merged = if (base.contains(activity)) {
+                            base.replace(activity, activity + overlay.substringAfter(activity).substringBefore("</activity>"))
+                        } else {
+                            base.replace("</application>", "$overlay</application>")
+                        }
+                        generated.get().asFile.apply { parentFile.mkdirs(); writeText(merged) }
                     }
                 }
                 getByName(variant).manifest.srcFile(generated)
