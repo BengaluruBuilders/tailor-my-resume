@@ -1,0 +1,123 @@
+[
+  {
+    "path": "screenshots/01-guest-unavailable.png",
+    "bytes": 127610,
+    "sha256": "3ca6256acce3c61e41f6401ea4b0004ca1849cb74402618c503763134c845565",
+    "caption": "Actual staging guest: Invite friends opens, unavailable copy states no reward amount.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/02-keyboard-entry.png",
+    "bytes": 200278,
+    "sha256": "ede5f13b719888e91797dae1210d51bfcbc8bbd44e9d7e52c9ce3ee9a91bedd3",
+    "caption": "Actual Gboard visible; synthetic non-fixture namespace full code entered and Save reachable.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/03-saved-candidate.png",
+    "bytes": 166344,
+    "sha256": "49af73083d1bdacbd7eef354f13e660c1fe17411d3aeb13e8fff39b13c68f214",
+    "caption": "Full resume-demo.preview-2 candidate saved privately; Apply disabled for guest.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/04-replace-confirmation.png",
+    "bytes": 188356,
+    "sha256": "a684b8a0f7215a3f206aa2c2cdaac0d940d4a3bcd8336f871ebfdf9e2f79353f",
+    "caption": "Second synthetic code entered; first saved candidate retained until explicit Replace.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/05-explicitly-replaced.png",
+    "bytes": 195198,
+    "sha256": "4390573d4c948d5aa5ccb6ba179991b9d6a69094bfd6cbf176bad41cdddb5f36",
+    "caption": "Explicit Replace changes saved full code to other-demo.preview-3; keyboard visible.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/06-pending-after-restart.png",
+    "bytes": 169428,
+    "sha256": "b2f3e743ee011aec810b2d2d0796b265df30886a9f4252c16d7fe0b069efd5b9",
+    "caption": "After adb force-stop/open and normal navigation the full replacement remains; draft is blank.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/07-large-text-top.png",
+    "bytes": 202142,
+    "sha256": "d5b32e5713105d63d5b71a2d93dbb3cdad2e466c74aa247dcfc520b89e7dd674",
+    "caption": "200% text: top and saved code wrap; content scrolls.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/08-large-text-actions.png",
+    "bytes": 179328,
+    "sha256": "ae1c58e424925946e8313a1ab7b9b18968edb63965fd4e5a9f2185e9ee39f782",
+    "caption": "200% text after scroll: Apply disabled, Clear/Google/Refresh reachable.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/09-cleared-large-text.png",
+    "bytes": 179747,
+    "sha256": "1eb10f088e71da7fbd2a73de5652accd96876cfbf97ebdfcf68a572be1f3dc44",
+    "caption": "Explicit Clear removes saved code and Apply at 200% text.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/10-wallet-preserved.png",
+    "bytes": 79108,
+    "sha256": "567b215785ce07f188aa0bd91ac87413eed36fee47ffedc205d379077c429032",
+    "caption": "Credits opens after referral actions: zero displayed credits and empty history; no reward/spend claimed.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  },
+  {
+    "path": "screenshots/11-ordinary-work-return.png",
+    "bytes": 110751,
+    "sha256": "62f281ce96402642d62261c23966fe08c4b5f1620e09f0011a4138d9c9fa4772",
+    "caption": "Back returns to synthetic Applications with zero credits; no automatic tailoring.",
+    "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "device": "TmrGuestValidator/emulator-5582 Android16 API36 Google APIs x86_64",
+    "variant": "signed staging; executable27cc53d7 mapped docs-only to aa4b417",
+    "syntheticOnly": true
+  }
+]

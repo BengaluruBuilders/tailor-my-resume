@@ -1,0 +1,35 @@
+▶ real referral routes reject each substituted binding without economics or challenge consumption
+  ✔ actor (67.757826ms)
+  ✔ request key (56.016749ms)
+  ✔ code (47.530031ms)
+  ✔ source (36.725954ms)
+  ✔ signal (29.022306ms)
+  ✔ revision (31.459724ms)
+  ✔ challenge (36.196831ms)
+  ✔ decoded request hash (63.364063ms)
+  ✔ action discriminator (9.692541ms)
+  ✔ GUEST_TRIAL evidence reuse (90.601696ms)
+  ✔ GOOGLE_ACTIVATION evidence reuse (86.40747ms)
+✔ real referral routes reject each substituted binding without economics or challenge consumption (1242.245881ms)
+✔ simultaneous different inviter codes for one invitee commit exactly one full reward and safe recovery (571.820284ms)
+{"event":"request_failed","app_id":"tailormyresume","route":"/v1/tailormyresume/referrals/attach","status":503,"code":"PROMOTION_UNAVAILABLE"}
+✔ advertised five-credit reward refuses four remaining with no partial attribution or evidence consumption (379.865966ms)
+{"event":"deletion_step_failed","app_id":"tailormyresume","step":"files","code":"Error"}
+✔ inviter erasure detaches receipt and scrubs code fingerprints; every valid POST conflicts before providers/policy/code (687.687271ms)
+✔ invitee erasure preserves inviter own economics and detached source, then survivor erasure cleans its receipt (449.553319ms)
+✔ partial rows and Firebase failures retry the durable job without duplicate detach or cross-owner loss (441.190222ms)
+✔ reciprocal referrals, concurrent survivor deletion and sorted erasure never deadlock or recreate owners (502.742512ms)
+✔ deletion winning during provider lookup prevents a fresh reward; live guard prevents later owner writes (314.91621ms)
+✔ local PostgreSQL dump/restore preserves detached receipt, consumed capacity and erasure reconciliation (940.437558ms)
+✔ pre-erasure dump restores intact provenance offline; external later tombstone replays rows failure/retry before route exposure (1198.179108ms)
+ℹ {"event":"pre_erasure_backup_and_external_journal","backupSha256":"cd2417bc12aca945ea218d479cc541dc4cdb59b069030c93bfb224893fa096f0","journalSha256":"b1b8dece1c9eeac31c7968251df7f2fdb522490435cb0d51fe31ff6eb8af685a","authoritativeConsumed":10,"backupDeletionRequests":0,"laterDeletionRequests":1}
+✔ backup before a later award refuses attempted route exposure when later records/checkpoint are unavailable or stale (867.830459ms)
+ℹ {"event":"pre_award_backup_and_external_checkpoint","backupSha256":"8e046a9b8bf7715b44b6d11b073d2e29544183caeeaf82a7f91b844dffc40812","checkpointSha256":"6572dde64d5e0e4bc7b38e5923627aa76f211790c8fdc23d4fd1a9bc3e198cb4","authoritativeConsumed":5,"restoredConsumed":0,"laterEconomicRecordsAvailable":false}
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10604.676913

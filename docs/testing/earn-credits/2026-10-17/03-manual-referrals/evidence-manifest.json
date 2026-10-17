@@ -1,0 +1,161 @@
+{
+  "slice": "03-manual-referrals",
+  "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+  "backend": "1794265b83139158dd3379618b7fd539bf7db45c",
+  "contractSha256": "66db09b4ccb06e8224a4c039c491a4e90dec434f56ee78aab478c0a5bb293add",
+  "freezeSha256": "0d4878c86324d02a328f999c264c0bd18a73cb30b29a16953ab89cf12bac1ff8",
+  "note": "Original device screenshots and encrypted contact were captured with BE 06bcccf5625b6d92e5c016a5ffd11ebad87a49c0; reused for BE 1794265b83139158dd3379618b7fd539bf7db45c only through independently verified byte-identical serving runtime, unchanged APK and source/schema/config/harness. Screenshots retain their original tested-pair captions. This manifest excludes itself.",
+  "totalBytes": 2245234,
+  "files": [
+    {
+      "path": "backend-handoff.md",
+      "bytes": 8227,
+      "sha256": "fd84ebd09b9318355989865e478d15c1d69c19e4bf6e6107f3f1a6f94471b916"
+    },
+    {
+      "path": "findings.md",
+      "bytes": 11534,
+      "sha256": "07dd143d8fc306a49cfa325d532b9bfa33a9fb1f7dda79a908997b416a6163e3"
+    },
+    {
+      "path": "fix-resolution.md",
+      "bytes": 5969,
+      "sha256": "9db42724d015c835735e7cebfb4b06be42d094c5c3f16a0059b7e2294d5f78ec"
+    },
+    {
+      "path": "frontend-evidence/remote-final/slice03-verify-03-summary.json",
+      "bytes": 161446,
+      "sha256": "37aba30322e172ffe9887e7fbc2a5c36234389be1f46ba04f8a4577681bf7b07"
+    },
+    {
+      "path": "frontend-evidence/remote-final/slice03-verify-03.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "frontend-evidence/remote-final/slice03-verify-03.log",
+      "bytes": 154317,
+      "sha256": "db4cda1e31e1cc76fec4d56e96064ed00488ae8d0477c9545eb84bca5db9ec7f"
+    },
+    {
+      "path": "revalidation.md",
+      "bytes": 8717,
+      "sha256": "1e075cbbd9fc88e699e98af42f439c62dc586c61373445d62268cab5c12d0358"
+    },
+    {
+      "path": "staging-handoff.md",
+      "bytes": 18524,
+      "sha256": "838adc39c378215d00eb1cf03f87e6bfe94a4798f7d0379a731b110888e95882"
+    },
+    {
+      "path": "validation-evidence/acceptance-map.json",
+      "bytes": 34104,
+      "sha256": "c5bd6bb574ae1c02b5473352a362aa89ae94c6fef732ef0cd479eaa8bb6cc5c1"
+    },
+    {
+      "path": "validation-evidence/acceptance-map.md",
+      "bytes": 26069,
+      "sha256": "8e5568108d7b6e3276b6f7c3745872b1056de98932ba997c72ebceecf7294ec7"
+    },
+    {
+      "path": "validation-evidence/device-smoke.md",
+      "bytes": 2864,
+      "sha256": "54282b55680920f7032466f1a55c5577224914342cb8687126620a6c95d7f41f"
+    },
+    {
+      "path": "validation-evidence/independent-input-verification.json",
+      "bytes": 441,
+      "sha256": "d7d16f54f1d62444f46be395cd5d3d9ada7c69167e4792550a1dd53036057190"
+    },
+    {
+      "path": "validation-evidence/independent-revalidation.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "validation-evidence/independent-revalidation.log",
+      "bytes": 2836,
+      "sha256": "d1cd820a1f44add777927280b78d1b475013b1e3bb26706d755d79d395317e63"
+    },
+    {
+      "path": "validation-evidence/remote-readback.json",
+      "bytes": 848,
+      "sha256": "425d5a5651f44408f40f9fd9a2633cc3bcf79fb43471da0a3a23c8a5dea1d5cd"
+    },
+    {
+      "path": "validation-evidence/revalidation-inputs.json",
+      "bytes": 359,
+      "sha256": "2e33fac534d284a72f79f34125ccfe637418ec51b05144f7426c9d9dd4c82c12"
+    },
+    {
+      "path": "validation-evidence/revalidation-runtime.json",
+      "bytes": 843,
+      "sha256": "bb8dec4ea1adc7b55277c59a5f6f64d013fea0e62cc16b9469fd16f0c45d284f"
+    },
+    {
+      "path": "validation-evidence/runtime-provenance.json",
+      "bytes": 3530,
+      "sha256": "7c6641917193f391d489c57ec9780e927d56effdf62602f6987e60679e11462f"
+    },
+    {
+      "path": "validation-evidence/screenshots-manifest.json",
+      "bytes": 6312,
+      "sha256": "64c8df8ec1d9bdacaa7d5c968de84e76407ec54921dce07671139eaef8fec511"
+    },
+    {
+      "path": "validation-evidence/screenshots/01-guest-unavailable.png",
+      "bytes": 127610,
+      "sha256": "3ca6256acce3c61e41f6401ea4b0004ca1849cb74402618c503763134c845565"
+    },
+    {
+      "path": "validation-evidence/screenshots/02-keyboard-entry.png",
+      "bytes": 200278,
+      "sha256": "ede5f13b719888e91797dae1210d51bfcbc8bbd44e9d7e52c9ce3ee9a91bedd3"
+    },
+    {
+      "path": "validation-evidence/screenshots/03-saved-candidate.png",
+      "bytes": 166344,
+      "sha256": "49af73083d1bdacbd7eef354f13e660c1fe17411d3aeb13e8fff39b13c68f214"
+    },
+    {
+      "path": "validation-evidence/screenshots/04-replace-confirmation.png",
+      "bytes": 188356,
+      "sha256": "a684b8a0f7215a3f206aa2c2cdaac0d940d4a3bcd8336f871ebfdf9e2f79353f"
+    },
+    {
+      "path": "validation-evidence/screenshots/05-explicitly-replaced.png",
+      "bytes": 195198,
+      "sha256": "4390573d4c948d5aa5ccb6ba179991b9d6a69094bfd6cbf176bad41cdddb5f36"
+    },
+    {
+      "path": "validation-evidence/screenshots/06-pending-after-restart.png",
+      "bytes": 169428,
+      "sha256": "b2f3e743ee011aec810b2d2d0796b265df30886a9f4252c16d7fe0b069efd5b9"
+    },
+    {
+      "path": "validation-evidence/screenshots/07-large-text-top.png",
+      "bytes": 202142,
+      "sha256": "d5b32e5713105d63d5b71a2d93dbb3cdad2e466c74aa247dcfc520b89e7dd674"
+    },
+    {
+      "path": "validation-evidence/screenshots/08-large-text-actions.png",
+      "bytes": 179328,
+      "sha256": "ae1c58e424925946e8313a1ab7b9b18968edb63965fd4e5a9f2185e9ee39f782"
+    },
+    {
+      "path": "validation-evidence/screenshots/09-cleared-large-text.png",
+      "bytes": 179747,
+      "sha256": "1eb10f088e71da7fbd2a73de5652accd96876cfbf97ebdfcf68a572be1f3dc44"
+    },
+    {
+      "path": "validation-evidence/screenshots/10-wallet-preserved.png",
+      "bytes": 79108,
+      "sha256": "567b215785ce07f188aa0bd91ac87413eed36fee47ffedc205d379077c429032"
+    },
+    {
+      "path": "validation-evidence/screenshots/11-ordinary-work-return.png",
+      "bytes": 110751,
+      "sha256": "62f281ce96402642d62261c23966fe08c4b5f1620e09f0011a4138d9c9fa4772"
+    }
+  ]
+}

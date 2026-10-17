@@ -1,0 +1,12 @@
+{
+  "head": "1794265b83139158dd3379618b7fd539bf7db45c",
+  "count": 228,
+  "manifestSha256": "1c3cb56e413b36123f8273f5e6fd75c122045256bd53d094672c1d3f6e610b5a",
+  "mismatches": [],
+  "oldInputChanges": [],
+  "added": [
+    "test/tailormyresume-referrals-adversarial.test.ts",
+    "test/tailormyresume-referrals-restore.test.ts"
+  ],
+  "runtimeDiffPaths": []
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "repo": "backend",
+    "head": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+    "inputs": 226,
+    "mismatches": [],
+    "manifestSha256": "0dd03db8e1bae5ee01183caeae6a2d072a5e4193b8acdbb29ac154b3b4d41ba0"
+  },
+  {
+    "repo": "frontend",
+    "head": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "inputs": 2321,
+    "mismatches": [],
+    "manifestSha256": "536afe1adae2dbafc4a8eacd20aeaeb1ec854cf7c139ddff5410576fd395930c"
+  }
+]

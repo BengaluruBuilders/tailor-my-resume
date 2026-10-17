@@ -1,0 +1,25 @@
+{
+  "backendHead": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+  "managedProject": "tailormyresume-earn-credits/main",
+  "inputs": 226,
+  "mismatches": [],
+  "manifestSha256": "0dd03db8e1bae5ee01183caeae6a2d072a5e4193b8acdbb29ac154b3b4d41ba0",
+  "candidatePid": 174517,
+  "candidateCwd": "/home/codex/projects/tailormyresume-earn-credits/repo",
+  "command": "Node24.21.0 with private env test/guest-trial-local-server.ts --serve-local-guest",
+  "preservedProcessIdsExist": [
+    114856,
+    55083,
+    28765,
+    40092
+  ],
+  "frontendHead": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+  "frontendJUnitFiles": 509,
+  "frontendJUnitTotals": {
+    "tests": 2867,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "operations": "Read only under hub-project exec; no runtime/DB/env/source mutation. JUnit cache reuse disclosed separately."
+}
