@@ -53,8 +53,13 @@ for api in https://apps-backend.fly.dev https://example.com http://abhishek-dube
   reject "unapproved API $api" 'requires the approved LAN HTTPS staging API' \
     :app:verifyStagingPlayIdentity "${props[@]}" "-PtailormyresumeStagingApiBaseUrl=$api" -q
 done
+# https://docs.gradle.org/current/userguide/signing_plugin.html
+# These are configuration-only fixtures, never key material or artifacts.
+touch "$fixtures/staging.jks"
+signing=(-PTMR_STAGING_UPLOAD_KEYSTORE_FILE="$fixtures/staging.jks" -PTMR_STAGING_UPLOAD_STORE_PASSWORD=fixture \
+  -PTMR_STAGING_UPLOAD_KEY_ALIAS=fixture -PTMR_STAGING_UPLOAD_KEY_PASSWORD=fixture)
 for task in assembleStagingPlay bundleStagingPlay installStagingPlay; do
-  plan="$(run ":app:$task" --dry-run "${props[@]}" 2>&1)"
+  plan="$(run ":app:$task" --dry-run "${props[@]}" "${signing[@]}" 2>&1)"
   for check in verifyStagingBackendConfig verifyStagingPlayIdentity verifyStagingUploadSigning; do
     grep -qF ":app:$check" <<<"$plan"
   done
@@ -66,7 +71,7 @@ gradle.beforeProject { project ->
         project.afterEvaluate {
             def android = project.extensions.getByName('android')
             def types = android.buildTypes.collectEntries { type ->
-                [(type.name): [signer: type.signingConfig?.name, minify: type.minifyEnabled,
+                [(type.name): [signer: type.signingConfig?.name, debuggable: type.debuggable, minify: type.minifyEnabled,
                  shrink: type.shrinkResources, suffix: type.applicationIdSuffix,
                  api: type.buildConfigFields['TAILORMYRESUME_API_BASE_URL']?.value,
                  project: type.buildConfigFields['TAILORMYRESUME_FIREBASE_PROJECT_ID']?.value,
@@ -86,6 +91,7 @@ import json, sys
 m=json.loads(next(line.removeprefix('BUILD_MODEL=') for line in open(sys.argv[1]) if line.startswith('BUILD_MODEL=')))
 assert m['debug']['signer']=='debug' and m['staging']['signer']=='debug'
 assert m['release']['signer'] is None and m['stagingPlay']['signer'] is None
+assert not m['stagingPlay']['debuggable']
 for name in ['staging','stagingPlay','release']:
     assert m[name]['minify'] and m[name]['shrink']
 for name in ['debug','staging','stagingPlay']:
@@ -96,11 +102,6 @@ assert m['release']['api']=='"https://apps-backend.fly.dev"'
 assert m['stagingPlay']['fallbacks']==['release']
 print('ok   unchanged default signer/environment model and minified stagingPlay')
 PY
-# https://docs.gradle.org/current/userguide/signing_plugin.html
-# These are configuration-only fixtures, never key material or artifacts.
-touch "$fixtures/staging.jks"
-signing=(-PTMR_STAGING_UPLOAD_KEYSTORE_FILE="$fixtures/staging.jks" -PTMR_STAGING_UPLOAD_STORE_PASSWORD=fixture \
-  -PTMR_STAGING_UPLOAD_KEY_ALIAS=fixture -PTMR_STAGING_UPLOAD_KEY_PASSWORD=fixture)
 run :app:verifyStagingUploadSigning "${signing[@]}" -q
 reject 'same production keystore path rejected' 'existing dedicated staging upload keystore' \
   :app:verifyStagingUploadSigning "${signing[@]}" -PTMR_UPLOAD_KEYSTORE_FILE="$fixtures/staging.jks" -q

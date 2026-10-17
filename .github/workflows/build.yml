@@ -450,7 +450,9 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Test the release config
-        run: tools/ci/test-release-config.sh
+        run: |
+          tools/ci/test-release-config.sh
+          tools/ci/test-staging-play-config.sh
 
       - name: Check release dependency guard
         run: ./gradlew :app:dependencyGuard -PwarningsAsErrors=true
