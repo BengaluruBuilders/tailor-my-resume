@@ -75,6 +75,40 @@ class GooglePromotionClientTest {
         File(context.filesDir, "account-upgrades").deleteRecursively()
     }
 
+    @Test fun linkedGuestTwoToSevenAndSpentOneToSixNeverRequestsAnotherBaseGrant() = runTest {
+        val store = PrivateUpgradeStore(context, UnconfinedTestDispatcher(testScheduler))
+        for ((fixture, balance) in listOf("guestTwoToSeven" to 7, "guestOneToSix" to 6)) {
+            val pending = journal().copy(prepareKey = fixture, path = "GUEST_LINK", proof = "private-proof", intentId = "intent")
+            store.write(pending)
+            val client = client(store)
+            client.prepare(pending)
+            activate = { jsonResponse(200, example(fixture)) }
+            assertThat(client.claim(pending)).isEqualTo(GoogleAccountState.Complete(5, null))
+            assertThat(wallet.cached?.credits).isEqualTo(balance)
+            val body = posted().last()
+            assertThat(body["continuity"]).isEqualTo(JsonNull)
+            assertThat(body["trialPolicyVersion"]).isEqualTo(JsonNull)
+        }
+        assertThat(evidence.reads).isEqualTo(0)
+    }
+
+    @Test fun lostShortProofUsesDurableGuestProvenanceWithANewNullIntentRequest() = runTest {
+        val store = PrivateUpgradeStore(context, UnconfinedTestDispatcher(testScheduler))
+        val lost = journal().copy(path = "GUEST_LINK", intentId = "expired-short-secret", proof = null,
+            requestId = "old-canonical-key", challengeId = "old-challenge")
+        store.write(lost)
+        val client = client(store)
+        client.prepare(lost)
+        val recovered = checkNotNull(store.read())
+        assertThat(recovered.intentId).isNull()
+        assertThat(recovered.requestId).isNull()
+        activate = { jsonResponse(200, example("guestOneToSix")) }
+        assertThat(client.claim(recovered)).isEqualTo(GoogleAccountState.Complete(5, null))
+        assertThat(posted().single()["upgradeIntent"]).isEqualTo(JsonNull)
+        assertThat(posted().single()["requestId"]?.jsonPrimitive?.content).isNotEqualTo("old-canonical-key")
+        assertThat(wallet.cached?.credits).isEqualTo(6)
+    }
+
     @Test fun directSignupBindsBothActionsAndUsesServerAmounts() = runTest {
         val store = PrivateUpgradeStore(context, UnconfinedTestDispatcher(testScheduler))
         val journal = journal()

@@ -100,15 +100,23 @@ class GoogleAccountCoordinator @Inject constructor(
             return SignInResult.AwaitingChoice
         }
         checkpoints.capture(user.uid, config.baseUrl)
-        var journal = newJournal(user.uid, "GUEST_LINK")
+        var journal = ownJournal()?.takeIf { it.source == user.uid && it.path == "GUEST_LINK" && it.proof != null }
+            ?: newJournal(user.uid, "GUEST_LINK")
         journals.write(journal)
-        val intent = apiResult { api.prepareUpgrade(UpgradeIntentRequest(journal.prepareKey, checkNotNull(journal.proof))) }.getOrThrow()
-        journal = journal.copy(intentId = intent.intentId, phase = "LINKING")
+        val prepared = apiResult { api.prepareUpgrade(UpgradeIntentRequest(journal.prepareKey, checkNotNull(journal.proof))) }
+        val failure = prepared.exceptionOrNull()
+        if (failure != null && !preparationUnavailable(failure)) throw failure
+        journal = journal.copy(intentId = prepared.getOrNull()?.intentId, phase = "LINKING")
         journals.write(journal)
         val token = credential() ?: return cancelBeforeSwitch()
         val outcome = firebase.linkGoogle(token)
         checkLive()
         if (outcome is AuthOutcome.Failure && outcome.failure == AuthFailure.CredentialConflict) {
+            if (journal.intentId == null) {
+                fence.release()
+                mutable.value = GoogleAccountState.Retry(canCancel = true)
+                return SignInResult.AwaitingChoice
+            }
             val snapshot = checkNotNull(checkpoints.read(user.uid, config.baseUrl))
             journals.write(journal.copy(phase = "CONFLICT"))
             mutable.value = GoogleAccountState.Conflict(snapshot.profile != null, snapshot.applications.map { it.id to "${it.jobTitle} · ${it.company}" })
@@ -352,6 +360,12 @@ class GoogleAccountCoordinator @Inject constructor(
         } catch (failure: Exception) {
             recoverable(failure)
         }
+    }
+
+    private fun preparationUnavailable(failure: Throwable): Boolean = when ((failure as? ApiException)?.error) {
+        is ApiError.IdentityUnavailable, is ApiError.PromotionUnavailable, is ApiError.RateLimited,
+        ApiError.Offline, ApiError.Timeout, ApiError.InternalError -> true
+        else -> false
     }
 
     private suspend fun recoverable(failure: Exception) {

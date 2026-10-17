@@ -17,6 +17,8 @@ import com.tailormyresume.core.database.model.ProfileEntryEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
@@ -45,10 +47,19 @@ class LocalWorkCheckpoint @Inject constructor(
     private val store: MockStateStore,
     @Dispatcher(TmrDispatchers.IO) private val io: CoroutineDispatcher,
 ) {
+    private val ownershipMutex = Mutex()
     private val json = Json { encodeDefaults = true }
+    private val erased = java.util.concurrent.ConcurrentHashMap.newKeySet<Pair<String, String>>()
+
+    private fun requireLive(owner: String, environment: String) {
+        check((environment to owner) !in erased) { "Account work was erased" }
+    }
 
     suspend fun capture(owner: String, environment: String): WorkSnapshot = withContext(io) {
+        ownershipMutex.withLock {
+        requireLive(owner, environment)
         val snapshot = database.withTransaction {
+            requireLive(owner, environment)
             val held = database.localHandoffDao().owner()
             check(held == null || (held.owner == owner && held.environment == environment))
             database.localHandoffDao().setOwner(LocalAccountOwnerEntity(owner = owner, environment = environment))
@@ -62,19 +73,27 @@ class LocalWorkCheckpoint @Inject constructor(
         val target = folder(owner, environment)
         val files = File(target, "exports").also { it.deleteRecursively(); it.mkdirs() }
         File(context.filesDir, "exports").takeIf { it.exists() }?.copyRecursively(files, overwrite = true)
+        requireLive(owner, environment)
         atomicWrite(File(target, "snapshot.json"), json.encodeToString(WorkSnapshot.serializer(), snapshot))
+        if ((environment to owner) in erased) { target.deleteRecursively(); error("Account work was erased") }
         snapshot
+    
+        }
     }
 
     suspend fun read(owner: String, environment: String): WorkSnapshot? = withContext(io) {
+        if ((environment to owner) in erased) return@withContext null
         val file = File(folder(owner, environment), "snapshot.json")
         if (!file.exists()) null else json.decodeFromString(WorkSnapshot.serializer(), AtomicFile(file).openRead().use { it.reader().readText() })
             .also { check(it.owner == owner && it.environment == environment) }
     }
 
     suspend fun restore(owner: String, environment: String) = withContext(io) {
+        ownershipMutex.withLock {
+        requireLive(owner, environment)
         val snapshot = read(owner, environment)
         database.withTransaction {
+            requireLive(owner, environment)
             val held = database.localHandoffDao().owner()
             if (held?.owner != owner || held.environment != environment) {
                 database.profileDao().deleteProfile()
@@ -92,6 +111,8 @@ class LocalWorkCheckpoint @Inject constructor(
         File(context.filesDir, "exports").deleteRecursively()
         File(folder(owner, environment), "exports").takeIf { it.exists() }
             ?.copyRecursively(File(context.filesDir, "exports"), overwrite = true)
+    
+        }
     }
 
     suspend fun importSelected(
@@ -102,10 +123,15 @@ class LocalWorkCheckpoint @Inject constructor(
         useProfile: Boolean,
         applicationIds: Set<String>,
     ) = withContext(io) {
+        ownershipMutex.withLock {
+        requireLive(source, environment)
+        requireLive(destination, environment)
         val snapshot = checkNotNull(read(source, environment))
         val selected = snapshot.applications.filter { it.id in applicationIds }
         val serializer = MapSerializer(String.serializer(), String.serializer())
         val mapping = database.withTransaction {
+            requireLive(source, environment)
+            requireLive(destination, environment)
             val held = checkNotNull(database.localHandoffDao().owner())
             check(held.owner == destination && held.environment == environment)
             val previous = database.localHandoffDao().find(handoff)
@@ -130,6 +156,8 @@ class LocalWorkCheckpoint @Inject constructor(
                 allocated
             }
         }
+        requireLive(source, environment)
+        requireLive(destination, environment)
         stageFiles(snapshot, mapping)
         mapping.forEach { (old, new) ->
             listOf("tailor.edited.", "tailor.regenerations.").forEach { prefix ->
@@ -141,11 +169,19 @@ class LocalWorkCheckpoint @Inject constructor(
             snapshot.local["session.keptJobDescription"]?.let { store.write("session.keptJobDescription", it) }
         }
         if (useProfile) snapshot.local["session.onboardingComplete"]?.let { store.write("session.onboardingComplete", it) }
+        requireLive(source, environment)
+        requireLive(destination, environment)
+    
+        }
     }
 
     suspend fun erase(owner: String, environment: String) = withContext(io) {
+        ownershipMutex.withLock {
+        erased.add(environment to owner)
         folder(owner, environment).deleteRecursively()
         database.localHandoffDao().erase(owner)
+    
+        }
     }
 
     private fun stageFiles(snapshot: WorkSnapshot, mapping: Map<String, String>) {
