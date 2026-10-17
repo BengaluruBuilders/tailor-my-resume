@@ -48,5 +48,13 @@
       "originalSha256": "df0914adce2cd731ffb8b3f10c27f87298f28b6b9487dac732dbeef45087f1f0",
       "note": "Byte-for-byte copy stored with .txt extension so GitHub treats the validation fixture as non-executable evidence."
     }
+  },
+  "supplementalEvidence": {
+    "report": "../post-publication.md",
+    "routingDecision": "../../emulator-routing-decision.md",
+    "manifest": "../post-publication-evidence/manifest.json",
+    "manifestSha256": "f50cdb100814e7de8e0b3ede0edcdb3751a898cdd64a3eb0b6d62b469e0283f0",
+    "files": 15,
+    "status": "Published-head closed-admission smoke PASS; GT01-B001 resolved; GT01-B002 test-transport workaround verified; GT01-B003 blocked; no admitted reward or spending claim."
   }
 }

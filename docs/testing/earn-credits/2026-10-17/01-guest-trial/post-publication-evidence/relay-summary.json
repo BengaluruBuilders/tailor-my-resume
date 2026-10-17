@@ -1,0 +1,58 @@
+{
+  "counts": {
+    "('listening', '')": 1,
+    "('connected', 'candidate')": 4,
+    "('closed', 'candidate')": 3,
+    "('denied', '')": 6286,
+    "('closed', 'rejected')": 6286
+  },
+  "acceptedTunnels": [
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T05:56:41Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T05:59:11Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T06:02:47Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T06:02:47Z"
+    }
+  ],
+  "closedAllowedTunnels": [
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 1949,
+      "serverBytes": 1721
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 1949,
+      "serverBytes": 3372
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 627,
+      "serverBytes": 1540
+    }
+  ],
+  "authorityAllowlist": [
+    "abhishek-dubey-MS-7B16.local:20002",
+    "identitytoolkit.googleapis.com:443",
+    "securetoken.googleapis.com:443"
+  ],
+  "binding": "127.0.0.1:18765",
+  "pidStopped": 619401
+}

@@ -1,0 +1,47 @@
+import socket,socketserver,threading,select,time,ipaddress,json,os,re,signal
+from pathlib import Path
+ALLOW={'abhishek-dubey-ms-7b16.local:20002':('candidate','abhishek-dubey-MS-7B16.local',20002),'identitytoolkit.googleapis.com:443':('firebase-signup','identitytoolkit.googleapis.com',443),'securetoken.googleapis.com:443':('firebase-refresh','securetoken.googleapis.com',443)}
+GATE=threading.BoundedSemaphore(6)
+def emit(**values):print(json.dumps(values),flush=True)
+class Handler(socketserver.BaseRequestHandler):
+ def handle(self):
+  if not GATE.acquire(False):self.request.sendall(b'HTTP/1.1 503 Busy\r\n\r\n');return
+  upstream=None;label='rejected';counts=[0,0]
+  try:
+   self.request.settimeout(5);header=b''
+   while b'\r\n\r\n' not in header:
+    chunk=self.request.recv(1024)
+    if not chunk:return
+    header+=chunk
+    if len(header)>8192:raise ValueError('header-size')
+   first=header.split(b'\r\n',1)[0].decode('ascii');parts=first.split(' ')
+   if len(parts)!=3 or parts[0]!='CONNECT' or parts[2] not in ('HTTP/1.1','HTTP/1.0') or parts[1].lower() not in ALLOW:
+    self.request.sendall(b'HTTP/1.1 403 Forbidden\r\n\r\n');emit(event='denied');return
+   label,host,port=ALLOW[parts[1].lower()]
+   addresses=sorted(set(item[4][0] for item in socket.getaddrinfo(host,port,socket.AF_INET,socket.SOCK_STREAM)))
+   if label=='candidate':
+    if addresses!=['192.168.88.15']:raise ValueError('workstation-address-changed')
+   elif not addresses or any(not ipaddress.ip_address(a).is_global for a in addresses):raise ValueError('nonpublic-address')
+   upstream=socket.create_connection((addresses[0],port),timeout=5)
+   self.request.sendall(b'HTTP/1.1 200 Connection Established\r\n\r\n')
+   emit(event='connected',label=label,utc=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()))
+   sockets=[self.request,upstream];started=last=time.monotonic()
+   while time.monotonic()-started<300 and time.monotonic()-last<90:
+    readable,_,_=select.select(sockets,[],[],1)
+    for source in readable:
+     data=source.recv(65536)
+     if not data:return
+     destination=upstream if source is self.request else self.request
+     destination.sendall(data);counts[0 if source is self.request else 1]+=len(data);last=time.monotonic()
+  except (OSError,ValueError,UnicodeError) as e:emit(event='transport-error',label=label,kind=type(e).__name__)
+  finally:
+   if upstream:upstream.close()
+   emit(event='closed',label=label,clientBytes=counts[0],serverBytes=counts[1]);GATE.release()
+class Server(socketserver.ThreadingTCPServer):
+ allow_reuse_address=True
+ daemon_threads=True
+Path('.validation-runtime/slice01-relay/relay.pid').write_text(str(os.getpid()))
+with Server(('127.0.0.1',18765),Handler) as server:
+ emit(event='listening',binding='127.0.0.1:18765')
+ signal.alarm(900)
+ server.serve_forever()

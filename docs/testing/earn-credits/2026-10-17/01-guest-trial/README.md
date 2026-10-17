@@ -17,9 +17,11 @@ This evidence set was captured against frontend `13aa4fef53057036c52fa25aa475e7a
 - [Frontend required-check summary](prepared-evidence/frontend-final-summary.md) and [backend required-check summary](prepared-evidence/backend-required-checks-summary.md). Backend full check passed on its second attempt with one existing `pg_dump` skip; the earlier failed attempt remains disclosed there.
 - [Evidence manifest](independent-evidence/manifest.json) records artifact sizes and SHA-256 values.
 
-## Current staging gates
+## Post-publication runtime result
 
-The [guarded staging authentication setup](staging-auth-setup.md) enabled only `signIn.anonymous.enabled` in `tailormy-resume-staging` and read the value back successfully. The client signup and app-to-candidate flow have not been retested, so the earlier anonymous-auth failure is a historical reproduction and remains pending independent retest. Fresh-emulator `.local` routing and genuine Play Integrity/admission activation remain blocked; see [publication status](publication-status.md) and [independent findings](findings.md). No genuine guest grant or completed authenticated app journey is claimed.
+The [independent post-publication verdict](post-publication.md) confirms genuine anonymous signup, authenticated contact with the exact candidate, the closed-policy unavailable screen, Continue, process resume, authoritative zero-credit history and guest-trial recheck. B001 is resolved. B002 has a verified test-transport workaround through a disposable emulator system proxy with normal TLS; inherent `.local` resolution is not claimed fixed. B003 remains blocked: there is no genuine Integrity verdict or active policy, so no real grant or paid tailoring is claimed. The earlier signup-failure evidence below remains as historical context.
+
+The [routing decision](../emulator-routing-decision.md), [post-publication manifest](post-publication-evidence/manifest.json), [actual candidate-state screenshot](post-publication-evidence/08-guest-candidate-state.png), [Continue screenshot](post-publication-evidence/09-guest-continued.png), [process-resume screenshot](post-publication-evidence/11-guest-process-resume.png), [zero-credit/history screenshot](post-publication-evidence/12-authoritative-zero-credits.png), and [recheck screenshot](post-publication-evidence/13-guest-trial-recheck.png) document the updated runtime result. All new evidence is bound to the same APK and code pair.
 
 ## Implementation handoffs
 

@@ -4,6 +4,16 @@
 
 The validator was distinct from both implementers; both writers were idle. Application source, acceptance criteria, live policy, provider configuration and TLS checks stayed frozen. New work consists of isolated validation fixtures and sanitized evidence only. Backend required-check repair accounting remains **1 of maximum 2**; the standalone validator fixture initially had a CommonJS import-shape error, corrected before it executed any database work. That fixture correction changed no application code or repository check.
 
+## Post-publication update — 2026-10-17, through06:04:44Z
+
+**Current disposition: attainable implementation and published closed-admission smoke PASS; genuine admitted-grant acceptance remains BLOCKED by GT01-B003.** Draft frontend PR406 at `037d3ee88765d9f22d2199396d79996e155ee97a` and backend PR124 at `69797ec759f3493b6d4f5d6912a82b1429e30fdb` are open/unmerged. Actual bases match the table below. Frontend's22 later changed paths are docs/evidence only, with no contract/build/application difference from the checked code; exact APK remains unchanged. All11 frontend and2 backend reported checks completed SUCCESS.
+
+GT01-B001 is **resolved by genuine runtime observation**, after the separately authorized staging-only provider correction. Exact installed app anonymous entry reached the protected candidate at05:59:11Z, received the real closed-policy UI, and Continue worked. Candidate user count changed0→1 with creation05:59:11.800Z; no policy/grants/wallet/ledger rows appeared. GT01-B002 has a **verified test-transport workaround** through the disposable emulator's Android system proxy and loopback-only allowlisted CONNECT relay, preserving the original hostname and normal TLS. Inherent `.local` multicast/namespace resolution is not claimed fixed.
+
+Process restart retained the actual guest and synthetic profile, showed0credits, and opened empty Credits history. “Check guest trial” returned the genuine unavailable response without reward. This proves authenticated app→candidate contact, closed-admission Continue/recheck, authoritative zero-wallet and process-resume behavior. It does not prove a real admitted2-credit grant, Play Integrity or live spending. No paid AI or cloud deletion occurred. Proxy settings were restored to originalnull/null; session/emulator/relay stopped and listener removal verified. Pixel/originalAVD remained untouched. The deliberately disposable staging identity is retained, without credentials/identifier publication.
+
+[Post-publication verdict](post-publication.md), [new evidence manifest](post-publication-evidence/manifest.json), [policy unavailable](post-publication-evidence/08-guest-candidate-state.png), [resumed zero balance](post-publication-evidence/11-guest-process-resume.png), [Credits](post-publication-evidence/12-authoritative-zero-credits.png), and [recheck](post-publication-evidence/13-guest-trial-recheck.png) supersede the corresponding historical runtime blockers below. Earlier images/results remain unchanged as historical evidence; the earlier source/security/restore assessment remains valid. No additional full-suite run was warranted.
+
 ## Exact tested identities
 
 | Input | Verified value |
@@ -45,7 +55,7 @@ This review and the observed tests support the narrower implementation verdict a
 
 ## Stable external findings — no source fix assigned
 
-### GT01-B001 — BLOCKED: staging anonymous authentication
+### GT01-B001 — RESOLVED; historical staging-auth blocker below
 
 **Severity:** acceptance blocker; external configuration/platform prerequisite. **Expected:** a fresh staging app obtains a real anonymous Firebase identity, then calls the candidate with its verified token. **Observed:** actual app Try as guest shows “Guest sign-in is temporarily unavailable. Retry to continue.” Repeating Retry returns the same state. A diagnostic using the exact APK's private staging BuildConfig receives HTTP400 **`ADMIN_ONLY_OPERATION`** from anonymous signup; only that whitelisted code/status was recorded. No identity was created by the rejected request; no persisted Firebase user was observed on the fresh emulator. The inspected candidate database has0users/0policies/0grants.
 
@@ -53,7 +63,7 @@ This review and the observed tests support the narrower implementation verdict a
 
 **Unproven:** real anonymous registration, authenticated app→candidate request provenance, live policy/disclosure, grant, resumed wallet/history, live tailoring/debits and live export/deletion. Do not label this screen candidate “admissions unavailable”: policy was never reached. Next action is an authorized staging configuration assessment/correction followed by affected runtime revalidation; no provider activation or identity workaround was performed by this validator.
 
-### GT01-B002 — BLOCKED: emulator `.local` routing
+### GT01-B002 — TEST TRANSPORT RESOLVED; historical `.local` blocker below
 
 **Severity:** environment blocker for this fallback device; separate from B001. **Expected:** the unchanged hostname resolves to the candidate while preserving ordinary CA/hostname checks. **Observed:** fresh emulator resolves/reaches Google and pings verified workstation192.168.88.15, but `.local` reports unknown host. A temporary hosts bind inside this disposable emulator contains that mapping, yet its resolver still fails. Host-side explicit-resolve HTTPS health200/auth401 passes. No app/backend/TLS source changed. Further routing work stopped because it cannot resolve independent B001. Pixel routing is not reclassified as failed; its earlier evidence is historical, and this candidate was not launched there.
 
@@ -75,6 +85,6 @@ Task-owned runtime can be restarted with `ANDROID_USER_HOME=/tmp/tmr-validator-a
 
 ## Handoff
 
-Evidence integrity/size manifest: [manifest.json](independent-evidence/manifest.json). New reports/evidence are in the original frontend report directory and remain uncommitted for the publisher; application candidate source is unchanged. The binary dump is private `/tmp/tmr-validator-evidence/promotions.dump` and is deliberately not published; the rehearsal result records its hash. Both disposable databases were dropped. No code fixer is needed from this bounded verdict. No attainable source/security/restore gate was left unexplained; authenticated device journey is prevented by B001, and genuine grant by B001/B003, with B002 additionally affecting this emulator.
+Evidence integrity/size manifest: [manifest.json](independent-evidence/manifest.json). New reports/evidence are in the original frontend report directory and remain uncommitted for the publisher; application candidate source is unchanged. The binary dump is private `/tmp/tmr-validator-evidence/promotions.dump` and is deliberately not published; the rehearsal result records its hash. Both disposable databases were dropped. No code fixer is needed from this bounded verdict. No attainable source/security/restore gate was left unexplained. The post-publication update resolves B001 and supplies a verified B002 test-transport workaround; genuine admitted grants remain blocked by B003.
 
-Parent may prepare **draft** PRs with these explicit external blockers under the existing workflow exception, then independently verify published heads/bases/CI and artifact links. Ordinary ready/merge/release/full-slice completion remains blocked. Later runtime correction invalidates only the affected runtime verdict and should be revalidated against the same frozen pair; a source change requires the affected code gates again. No later slice was implemented here.
+Parent may maintain the existing **draft** PRs and publish the new evidence with these explicit external blockers under the existing workflow exception, then independently verify published heads/bases/CI and artifact links. Ordinary ready/merge/release/full-slice completion remains blocked. Later runtime correction invalidates only the affected runtime verdict and should be revalidated against the same frozen pair; a source change requires the affected code gates again. No later slice was implemented here.

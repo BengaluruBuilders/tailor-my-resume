@@ -1,0 +1,75 @@
+{
+  "capturedUTC": "2026-10-17T06:06:22.014439+00:00",
+  "frontendCode": "13aa4fef53057036c52fa25aa475e7a1ab303d83",
+  "frontendPublishedHead": "037d3ee88765d9f22d2199396d79996e155ee97a",
+  "backendCodeAndPublishedHead": "69797ec759f3493b6d4f5d6912a82b1429e30fdb",
+  "frontendBase": "6d73a22dc392451f27fc2999eb788f7b048880f0",
+  "backendBase": "3abd46cafb45abaee4f0806f0efa32a02f992375",
+  "contractSha256": "b76d2202bf1e76f25dfec6191e2b3e2d04cb9dbb419deccfa33979444071a2a6",
+  "apkSha256": "cd0082b09855dba860b73ad6e44bd9e0b39977ffd5cbd7ddc7dae5c9b918e4fa",
+  "variant": "staging",
+  "firebaseProject": "tailormy-resume-staging",
+  "endpoint": "https://abhishek-dubey-MS-7B16.local:20002/",
+  "policy": "no published policy; admissions closed",
+  "device": "TmrGuestValidator; emulator-5582; Android16/API36 Google APIs x86_64; existing task-only fresh SDK userdata",
+  "agentDevice": "0.21.28; session tmr-guest-postpr",
+  "GT01-B001": "RESOLVED by genuine actual app anonymous signup, protected candidate contact and Continue at05:59:11Z after staging-only correction; historical ADMIN_ONLY_OPERATION assets preserved",
+  "GT01-B002": "Test transport AVAILABLE through emulator Android global system proxy; inherent .local multicast/namespace resolution not repaired or reclassified",
+  "GT01-B003": "BLOCKED, unchanged: missing genuine Integrity/package/license/verdict and serving policy; no real grant/spend acceptance",
+  "proxy": {
+    "initialHttpProxy": null,
+    "initialExclusionList": null,
+    "activeHttpProxy": "10.0.2.2:18765",
+    "activeExclusionList": [],
+    "setup": "Android global system proxy setting; not Emulator Proxy and not per-SSID Wi-Fi UI. Effective default selection proven by actual candidate CONNECT/UI/DB correlation. Initial empty-list shell command reported Bad arguments; effective list read empty. Cleanup deletes both keys and reads null/null.",
+    "relayBinding": "127.0.0.1:18765",
+    "tlsInterception": false,
+    "newTrustInstalled": false,
+    "appNetworkOverride": false,
+    "cleanupVerified": true
+  },
+  "runtime": {
+    "genuineClosedPolicyScreen": true,
+    "continueToOnboarding": true,
+    "syntheticManualProfile": "Synthetic Guest only; email field fill did not execute due stale ref, so no email supplied",
+    "paidAiWork": false,
+    "processResumeShowsZeroCredits": true,
+    "creditsHistoryEmpty": true,
+    "guestTrialRecheckUnavailable": true,
+    "newReward": false,
+    "serverUsersBefore": 0,
+    "serverUsersAfterAndFinal": 1,
+    "serverUserCreatedUTC": "2026-10-17T05:59:11.800Z",
+    "appCandidateConnectUTC": "2026-10-17T05:59:11Z",
+    "noTokenOrIdentityLogging": true
+  },
+  "cleanup": {
+    "proxyOriginalStateRestored": true,
+    "agentDeviceSessionClosed": true,
+    "emulatorStoppedExit": 0,
+    "relayTerminatedExit": 143,
+    "loopbackListenerGone": true,
+    "pixelUntouched": true,
+    "originalAvdUntouched": true,
+    "testCloudIdentityRetained": true,
+    "servingPolicyAndIntegrityUnchanged": true
+  },
+  "ci": {
+    "frontend": {
+      "completedSuccess": 11,
+      "failures": 0
+    },
+    "backend": {
+      "completedSuccess": 2,
+      "failures": 0
+    }
+  },
+  "evidenceAudit": {
+    "documentationOnlyPathsAfterCode": 22,
+    "publishedEvidenceBlobsMatched": 26,
+    "publishedManifestFilesMatched": 9,
+    "brokenRelativeLinksInReadmeAndFindings": 0,
+    "authenticatedGitHubReadmeAndManifestReadable": true
+  },
+  "video": "07: Android encoded7.6s during10.4s capture; exact app, genuine actual policy unavailable, no reward shown"
+}
