@@ -164,9 +164,14 @@ android {
                         val activity = "<activity android:name=\".MainActivity\">"
                         val merged = if (base.contains(activity)) {
                             base.replace(activity, activity + overlay.substringAfter(activity).substringBefore("</activity>"))
-                        } else {
+                        } else if (base.contains("</application>")) {
                             base.replace("</application>", "$overlay</application>")
+                        } else {
+                            base.replace(Regex("<application\\b([^>]*)/>")) { match ->
+                                "<application${match.groupValues[1]}>$overlay</application>"
+                            }
                         }
+                        require(merged.contains("android.intent.action.VIEW")) { "Referral manifest must include the link filter" }
                         generated.get().asFile.apply { parentFile.mkdirs(); writeText(merged) }
                     }
                 }
