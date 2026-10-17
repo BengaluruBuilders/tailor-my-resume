@@ -1,0 +1,506 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Isolated Projects is an incubating feature.
+Calculating task graph as no cached configuration is available for tasks: :core:model:test :core:domain:testDebugUnitTest :feature:onboarding:impl:testDebugUnitTest
+Type-safe project accessors is an incubating feature.
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+> Task :core:model:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:common:preBuild UP-TO-DATE
+> Task :core:common:preDebugBuild UP-TO-DATE
+> Task :core:model:processTestResources NO-SOURCE
+> Task :core:model:processResources NO-SOURCE
+> Task :core:common:processDebugNavigationResources FROM-CACHE
+> Task :core:common:javaPreCompileDebug FROM-CACHE
+> Task :core:common:generateDebugResources FROM-CACHE
+> Task :core:data:preBuild UP-TO-DATE
+> Task :core:database:preBuild UP-TO-DATE
+> Task :core:database:preDebugBuild UP-TO-DATE
+> Task :core:data:preDebugBuild UP-TO-DATE
+> Task :core:database:generateDebugResources FROM-CACHE
+> Task :core:data:generateDebugResources FROM-CACHE
+> Task :core:data:processDebugNavigationResources FROM-CACHE
+> Task :core:common:packageDebugResources FROM-CACHE
+> Task :core:data:packageDebugResources FROM-CACHE
+> Task :core:database:packageDebugResources FROM-CACHE
+> Task :core:database:processDebugNavigationResources FROM-CACHE
+> Task :core:common:parseDebugLocalResources FROM-CACHE
+> Task :core:database:parseDebugLocalResources FROM-CACHE
+> Task :core:data:parseDebugLocalResources FROM-CACHE
+> Task :core:common:generateDebugRFile FROM-CACHE
+> Task :core:database:generateDebugRFile FROM-CACHE
+> Task :core:data:generateDebugRFile FROM-CACHE
+> Task :core:data:javaPreCompileDebug FROM-CACHE
+> Task :core:domain:preBuild UP-TO-DATE
+> Task :core:domain:preDebugBuild UP-TO-DATE
+> Task :core:database:javaPreCompileDebug FROM-CACHE
+> Task :core:domain:generateDebugResources FROM-CACHE
+> Task :core:domain:processDebugNavigationResources FROM-CACHE
+> Task :core:domain:javaPreCompileDebug FROM-CACHE
+> Task :core:domain:preDebugUnitTestBuild UP-TO-DATE
+> Task :core:testing:preBuild UP-TO-DATE
+> Task :core:testing:preDebugBuild UP-TO-DATE
+> Task :core:testing:generateDebugResources FROM-CACHE
+> Task :core:domain:packageDebugResources FROM-CACHE
+> Task :core:domain:parseDebugLocalResources FROM-CACHE
+> Task :core:testing:packageDebugResources FROM-CACHE
+> Task :core:testing:processDebugNavigationResources FROM-CACHE
+> Task :core:domain:generateDebugRFile FROM-CACHE
+> Task :core:common:kspDebugKotlin FROM-CACHE
+> Task :core:model:compileKotlin
+> Task :core:testing:parseDebugLocalResources FROM-CACHE
+> Task :core:model:compileJava NO-SOURCE
+> Task :core:model:classes UP-TO-DATE
+> Task :core:domain:koverFindJar
+> Task :core:testing:javaPreCompileDebug FROM-CACHE
+> Task :core:testing:generateDebugRFile FROM-CACHE
+> Task :core:domain:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :core:designsystem:preBuild UP-TO-DATE
+> Task :core:designsystem:preDebugBuild UP-TO-DATE
+> Task :core:designsystem:generateDebugResources FROM-CACHE
+> Task :core:designsystem:packageDebugResources FROM-CACHE
+> Task :core:designsystem:processDebugNavigationResources FROM-CACHE
+> Task :core:designsystem:parseDebugLocalResources FROM-CACHE
+> Task :core:designsystem:generateDebugRFile FROM-CACHE
+> Task :core:model:jar
+> Task :core:common:compileDebugKotlin FROM-CACHE
+> Task :core:domain:generateDebugUnitTestStubRFile FROM-CACHE
+> Task :core:common:processDebugJavaRes
+> Task :core:designsystem:compileDebugKotlin FROM-CACHE
+> Task :core:designsystem:javaPreCompileDebug FROM-CACHE
+> Task :core:designsystem:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:designsystem:bundleLibRuntimeToJarDebug
+> Task :core:designsystem:processDebugJavaRes
+> Task :core:navigation:preBuild UP-TO-DATE
+> Task :core:navigation:preDebugBuild UP-TO-DATE
+> Task :core:navigation:generateDebugResources FROM-CACHE
+> Task :core:model:compileTestKotlin
+> Task :core:common:compileDebugJavaWithJavac FROM-CACHE
+> Task :core:model:compileTestJava NO-SOURCE
+> Task :core:model:testClasses UP-TO-DATE
+> Task :core:navigation:packageDebugResources FROM-CACHE
+> Task :core:navigation:processDebugNavigationResources FROM-CACHE
+> Task :core:navigation:parseDebugLocalResources FROM-CACHE
+> Task :core:navigation:generateDebugRFile FROM-CACHE
+> Task :core:common:transformDebugClassesWithAsm FROM-CACHE
+> Task :core:common:bundleLibRuntimeToJarDebug
+> Task :core:common:bundleLibCompileToJarDebug
+> Task :core:navigation:javaPreCompileDebug FROM-CACHE
+> Task :core:screenshot:preBuild UP-TO-DATE
+> Task :core:screenshot:preDebugBuild UP-TO-DATE
+> Task :core:screenshot:generateDebugResources FROM-CACHE
+> Task :core:screenshot:packageDebugResources FROM-CACHE
+> Task :core:screenshot:processDebugNavigationResources FROM-CACHE
+> Task :core:screenshot:parseDebugLocalResources FROM-CACHE
+> Task :core:screenshot:generateDebugRFile FROM-CACHE
+> Task :core:navigation:compileDebugKotlin FROM-CACHE
+> Task :core:navigation:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:navigation:bundleLibRuntimeToJarDebug
+> Task :core:screenshot:compileDebugKotlin FROM-CACHE
+> Task :core:navigation:processDebugJavaRes
+> Task :core:screenshot:javaPreCompileDebug FROM-CACHE
+> Task :core:screenshot:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:screenshot:processDebugJavaRes
+> Task :core:screenshot:bundleLibRuntimeToJarDebug
+> Task :feature:analysis:api:preBuild UP-TO-DATE
+> Task :feature:analysis:api:preDebugBuild UP-TO-DATE
+> Task :core:navigation:bundleLibCompileToJarDebug
+> Task :feature:analysis:api:processDebugNavigationResources FROM-CACHE
+> Task :feature:analysis:api:generateDebugResources FROM-CACHE
+> Task :feature:analysis:api:javaPreCompileDebug FROM-CACHE
+> Task :feature:applications:api:preBuild UP-TO-DATE
+> Task :feature:applications:api:preDebugBuild UP-TO-DATE
+> Task :feature:applications:api:generateDebugResources FROM-CACHE
+> Task :feature:analysis:api:packageDebugResources FROM-CACHE
+> Task :feature:applications:api:packageDebugResources FROM-CACHE
+> Task :feature:analysis:api:parseDebugLocalResources FROM-CACHE
+> Task :feature:applications:api:processDebugNavigationResources FROM-CACHE
+> Task :feature:applications:api:parseDebugLocalResources FROM-CACHE
+> Task :feature:analysis:api:generateDebugRFile FROM-CACHE
+> Task :feature:applications:api:generateDebugRFile FROM-CACHE
+
+> Task :core:model:test FAILED
+
+CountLogicalEntriesTest > identicalRolesSeparatedByAnotherEntryAreDistinct FAILED
+    java.lang.AssertionError at CountLogicalEntriesTest.kt:36
+
+CountLogicalEntriesTest > onlyTheRequestedCategoryCounts FAILED
+    java.lang.AssertionError at CountLogicalEntriesTest.kt:27
+
+CountLogicalEntriesTest > continuationCountsOnce FAILED
+    java.lang.AssertionError at CountLogicalEntriesTest.kt:20
+
+7 tests completed, 3 failed
+
+> Task :feature:applications:api:javaPreCompileDebug FROM-CACHE
+> Task :feature:onboarding:api:preBuild UP-TO-DATE
+> Task :feature:onboarding:api:preDebugBuild UP-TO-DATE
+> Task :feature:onboarding:api:generateDebugResources FROM-CACHE
+> Task :feature:onboarding:api:packageDebugResources FROM-CACHE
+> Task :feature:onboarding:api:processDebugNavigationResources FROM-CACHE
+> Task :feature:onboarding:api:parseDebugLocalResources FROM-CACHE
+> Task :feature:onboarding:api:generateDebugRFile FROM-CACHE
+> Task :feature:applications:api:compileDebugKotlin
+> Task :feature:analysis:api:compileDebugKotlin
+> Task :feature:onboarding:api:compileDebugKotlin
+> Task :feature:analysis:api:compileDebugJavaWithJavac NO-SOURCE
+> Task :feature:applications:api:compileDebugJavaWithJavac NO-SOURCE
+> Task :feature:applications:api:bundleLibRuntimeToJarDebug
+> Task :feature:analysis:api:processDebugJavaRes
+> Task :feature:analysis:api:bundleLibRuntimeToJarDebug
+> Task :feature:onboarding:api:javaPreCompileDebug FROM-CACHE
+> Task :feature:onboarding:api:compileDebugJavaWithJavac NO-SOURCE
+> Task :feature:applications:api:processDebugJavaRes
+> Task :feature:onboarding:api:processDebugJavaRes
+> Task :feature:onboarding:impl:preBuild UP-TO-DATE
+> Task :feature:onboarding:impl:preDebugBuild UP-TO-DATE
+> Task :feature:onboarding:api:bundleLibRuntimeToJarDebug
+> Task :feature:analysis:api:bundleLibCompileToJarDebug
+> Task :feature:applications:api:bundleLibCompileToJarDebug
+> Task :feature:onboarding:impl:generateDebugResources FROM-CACHE
+> Task :feature:onboarding:api:bundleLibCompileToJarDebug
+> Task :feature:onboarding:impl:processDebugNavigationResources FROM-CACHE
+> Task :feature:profile:api:preBuild UP-TO-DATE
+> Task :feature:profile:api:preDebugBuild UP-TO-DATE
+> Task :feature:profile:api:generateDebugResources FROM-CACHE
+> Task :feature:profile:api:packageDebugResources FROM-CACHE
+> Task :feature:profile:api:processDebugNavigationResources FROM-CACHE
+> Task :core:designsystem:bundleLibCompileToJarDebug
+> Task :feature:onboarding:impl:packageDebugResources FROM-CACHE
+> Task :feature:profile:api:parseDebugLocalResources FROM-CACHE
+> Task :feature:profile:api:javaPreCompileDebug FROM-CACHE
+> Task :feature:profile:api:generateDebugRFile FROM-CACHE
+> Task :feature:onboarding:impl:parseDebugLocalResources FROM-CACHE
+> Task :feature:onboarding:impl:javaPreCompileDebug FROM-CACHE
+> Task :core:common:generateDebugAssets UP-TO-DATE
+> Task :feature:onboarding:impl:generateDebugRFile FROM-CACHE
+> Task :core:data:generateDebugAssets UP-TO-DATE
+> Task :core:data:mergeDebugAssets
+> Task :core:common:mergeDebugAssets
+> Task :core:database:generateDebugAssets UP-TO-DATE
+> Task :core:designsystem:generateDebugAssets UP-TO-DATE
+> Task :core:database:mergeDebugAssets
+> Task :core:designsystem:mergeDebugAssets
+> Task :core:navigation:generateDebugAssets UP-TO-DATE
+> Task :core:domain:generateDebugAssets UP-TO-DATE
+> Task :core:navigation:mergeDebugAssets
+> Task :core:domain:mergeDebugAssets
+> Task :core:testing:generateDebugAssets UP-TO-DATE
+> Task :core:screenshot:generateDebugAssets UP-TO-DATE
+> Task :core:screenshot:mergeDebugAssets
+> Task :core:testing:mergeDebugAssets
+> Task :feature:analysis:api:generateDebugAssets UP-TO-DATE
+> Task :feature:applications:api:generateDebugAssets UP-TO-DATE
+> Task :feature:applications:api:mergeDebugAssets
+> Task :feature:analysis:api:mergeDebugAssets
+> Task :feature:onboarding:api:generateDebugAssets UP-TO-DATE
+> Task :feature:onboarding:impl:generateDebugUnitTestAssets UP-TO-DATE
+> Task :feature:onboarding:impl:generateDebugAssets UP-TO-DATE
+> Task :feature:onboarding:api:mergeDebugAssets
+> Task :feature:onboarding:impl:mergeDebugAssets
+> Task :feature:onboarding:impl:preDebugUnitTestBuild UP-TO-DATE
+> Task :feature:profile:api:generateDebugAssets UP-TO-DATE
+> Task :feature:profile:api:mergeDebugAssets
+> Task :core:common:mapDebugSourceSetPaths
+> Task :core:common:compileDebugLibraryResources FROM-CACHE
+> Task :core:data:mapDebugSourceSetPaths
+> Task :core:data:compileDebugLibraryResources FROM-CACHE
+> Task :core:database:mapDebugSourceSetPaths
+> Task :core:database:compileDebugLibraryResources FROM-CACHE
+> Task :core:designsystem:mapDebugSourceSetPaths
+> Task :core:designsystem:compileDebugLibraryResources FROM-CACHE
+> Task :core:domain:mapDebugSourceSetPaths
+> Task :core:domain:compileDebugLibraryResources FROM-CACHE
+> Task :core:navigation:mapDebugSourceSetPaths
+> Task :core:navigation:compileDebugLibraryResources FROM-CACHE
+> Task :core:screenshot:mapDebugSourceSetPaths
+> Task :core:screenshot:compileDebugLibraryResources FROM-CACHE
+> Task :core:testing:mapDebugSourceSetPaths
+> Task :core:testing:compileDebugLibraryResources FROM-CACHE
+> Task :feature:analysis:api:mapDebugSourceSetPaths
+> Task :feature:analysis:api:compileDebugLibraryResources FROM-CACHE
+> Task :feature:applications:api:mapDebugSourceSetPaths
+> Task :feature:applications:api:compileDebugLibraryResources FROM-CACHE
+> Task :feature:onboarding:api:mapDebugSourceSetPaths
+> Task :feature:onboarding:api:compileDebugLibraryResources FROM-CACHE
+> Task :feature:profile:api:compileDebugKotlin
+> Task :feature:profile:api:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:common:writeDebugAarMetadata
+> Task :feature:profile:api:bundleLibCompileToJarDebug
+> Task :feature:profile:api:bundleLibRuntimeToJarDebug
+> Task :core:data:writeDebugAarMetadata
+> Task :core:database:writeDebugAarMetadata
+> Task :core:designsystem:writeDebugAarMetadata
+> Task :core:domain:writeDebugAarMetadata
+> Task :core:screenshot:writeDebugAarMetadata
+> Task :core:testing:writeDebugAarMetadata
+> Task :core:navigation:writeDebugAarMetadata
+> Task :feature:analysis:api:writeDebugAarMetadata
+> Task :feature:applications:api:writeDebugAarMetadata
+> Task :feature:onboarding:impl:writeDebugAarMetadata
+> Task :feature:onboarding:api:writeDebugAarMetadata
+> Task :feature:onboarding:impl:mergeDebugUnitTestAssets
+> Task :feature:onboarding:impl:mapDebugSourceSetPaths
+> Task :feature:profile:api:writeDebugAarMetadata
+> Task :feature:onboarding:impl:mapDebugUnitTestSourceSetPaths
+> Task :feature:onboarding:impl:compileDebugLibraryResources FROM-CACHE
+> Task :feature:onboarding:impl:generateDebugUnitTestResources FROM-CACHE
+> Task :core:common:extractDeepLinksDebug FROM-CACHE
+> Task :core:common:processDebugManifest FROM-CACHE
+> Task :core:data:extractDeepLinksDebug FROM-CACHE
+> Task :core:data:processDebugManifest FROM-CACHE
+> Task :core:database:extractDeepLinksDebug FROM-CACHE
+> Task :core:database:processDebugManifest FROM-CACHE
+> Task :core:designsystem:extractDeepLinksDebug FROM-CACHE
+> Task :core:designsystem:processDebugManifest FROM-CACHE
+> Task :core:domain:extractDeepLinksDebug FROM-CACHE
+> Task :core:domain:processDebugManifest FROM-CACHE
+> Task :core:navigation:extractDeepLinksDebug FROM-CACHE
+> Task :core:navigation:processDebugManifest FROM-CACHE
+> Task :core:screenshot:extractDeepLinksDebug FROM-CACHE
+> Task :core:screenshot:processDebugManifest FROM-CACHE
+> Task :core:testing:extractDeepLinksDebug FROM-CACHE
+> Task :core:testing:processDebugManifest FROM-CACHE
+> Task :feature:analysis:api:extractDeepLinksDebug FROM-CACHE
+> Task :feature:analysis:api:processDebugManifest FROM-CACHE
+> Task :feature:applications:api:extractDeepLinksDebug FROM-CACHE
+> Task :feature:applications:api:processDebugManifest FROM-CACHE
+> Task :feature:onboarding:api:extractDeepLinksDebug FROM-CACHE
+> Task :feature:onboarding:api:processDebugManifest FROM-CACHE
+> Task :feature:onboarding:impl:extractDeepLinksDebug FROM-CACHE
+> Task :feature:onboarding:impl:checkDebugUnitTestAarMetadata
+> Task :feature:onboarding:impl:processDebugManifest FROM-CACHE
+> Task :feature:profile:api:extractDeepLinksDebug FROM-CACHE
+> Task :feature:profile:api:processDebugManifest FROM-CACHE
+> Task :feature:profile:api:mapDebugSourceSetPaths
+> Task :feature:profile:api:compileDebugLibraryResources FROM-CACHE
+> Task :feature:onboarding:impl:mergeDebugUnitTestResources FROM-CACHE
+> Task :feature:onboarding:impl:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :core:screenshot:bundleLibCompileToJarDebug
+> Task :feature:profile:api:processDebugJavaRes
+> Task :feature:onboarding:impl:mergeDebugUnitTestManifest
+> Task :feature:onboarding:impl:processDebugUnitTestManifest
+> Task :feature:onboarding:impl:processDebugUnitTestResources FROM-CACHE
+> Task :feature:onboarding:impl:packageDebugUnitTestForUnitTest
+> Task :feature:onboarding:impl:generateDebugUnitTestConfig
+> Task :core:database:kspDebugKotlin
+> Task :core:database:compileDebugKotlin
+> Task :core:database:processDebugJavaRes
+> Task :core:database:compileDebugJavaWithJavac
+> Task :core:database:copyRoomSchemas NO-SOURCE
+> Task :core:database:transformDebugClassesWithAsm
+> Task :core:database:bundleLibCompileToJarDebug
+> Task :core:database:bundleLibRuntimeToJarDebug
+> Task :core:data:kspDebugKotlin
+> Task :core:data:compileDebugKotlin
+> Task :core:data:processDebugJavaRes
+> Task :core:data:compileDebugJavaWithJavac
+> Task :core:data:transformDebugClassesWithAsm
+> Task :core:data:bundleLibRuntimeToJarDebug
+> Task :core:data:bundleLibCompileToJarDebug
+> Task :core:domain:kspDebugKotlin
+> Task :core:domain:compileDebugKotlin
+> Task :core:domain:processDebugJavaRes
+> Task :core:domain:compileDebugJavaWithJavac
+> Task :core:domain:transformDebugClassesWithAsm
+> Task :core:domain:bundleLibCompileToJarDebug
+> Task :core:domain:bundleLibRuntimeToJarDebug
+> Task :feature:onboarding:impl:kspDebugKotlin
+> Task :core:testing:compileDebugKotlin
+> Task :core:testing:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:testing:processDebugJavaRes
+> Task :core:testing:bundleLibCompileToJarDebug
+> Task :core:testing:bundleLibRuntimeToJarDebug
+> Task :core:domain:kspDebugUnitTestKotlin
+> Task :feature:onboarding:impl:compileDebugKotlin
+> Task :feature:onboarding:impl:processDebugJavaRes
+> Task :feature:onboarding:impl:compileDebugJavaWithJavac
+> Task :feature:onboarding:impl:transformDebugClassesWithAsm
+> Task :feature:onboarding:impl:bundleLibCompileToJarDebug
+> Task :feature:onboarding:impl:bundleLibRuntimeToJarDebug
+> Task :core:domain:compileDebugUnitTestKotlin
+> Task :core:domain:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :core:domain:hiltCollectClassesDebugUnitTest
+> Task :core:domain:processDebugUnitTestJavaRes
+> Task :feature:onboarding:impl:kspDebugUnitTestKotlin
+> Task :core:domain:hiltAggregateDepsDebugUnitTest FROM-CACHE
+> Task :core:domain:hiltJavaCompileDebugUnitTest NO-SOURCE
+> Task :core:domain:transformDebugUnitTestClassesWithAsm
+> Task :feature:onboarding:impl:compileDebugUnitTestKotlin
+> Task :feature:onboarding:impl:processDebugUnitTestJavaRes
+> Task :feature:onboarding:impl:compileDebugUnitTestJavaWithJavac
+> Task :feature:onboarding:impl:hiltCollectClassesDebugUnitTest
+> Task :feature:onboarding:impl:hiltAggregateDepsDebugUnitTest
+> Task :feature:onboarding:impl:hiltJavaCompileDebugUnitTest
+> Task :feature:onboarding:impl:transformDebugUnitTestClassesWithAsm
+
+> Task :core:domain:testDebugUnitTest
+
+MarkProfileReviewedUseCaseTest > confirmsOnlyExperienceAndEducation FAILED
+    com.google.common.truth.AssertionErrorWithFacts at MarkProfileReviewedUseCaseTest.kt:60
+
+MarkProfileReviewedUseCaseTest > refusesWithRequiredGapAndLeavesProfileUntouched FAILED
+    com.google.common.truth.AssertionErrorWithFacts at MarkProfileReviewedUseCaseTest.kt:95
+
+MarkProfileReviewedUseCaseTest > setsReviewedAtFromInjectedClock FAILED
+    com.google.common.truth.AssertionErrorWithFacts at MarkProfileReviewedUseCaseTest.kt:49
+
+SaveManualProfileUseCaseTest > doesNotReplaceARoleThatHasDatesEvenIfUserStated FAILED
+    com.google.common.truth.Platform$ComparisonFailureWithFacts at SaveManualProfileUseCaseTest.kt:103
+
+729 tests completed, 4 failed
+
+> Task :core:domain:testDebugUnitTest FAILED
+
+> Task :feature:onboarding:impl:testDebugUnitTest
+
+OnboardingRealEntryHiltTest > reviewAddLinkedinOpensEditContact FAILED
+    java.lang.IllegalStateException at OnboardingRealEntryHiltTest.kt:90
+
+OnboardingRealEntryHiltTest > reviewContinueSetsReviewedAtAndOpensJob FAILED
+    java.lang.IllegalStateException at OnboardingRealEntryHiltTest.kt:90
+
+ReviewLayoutTest > noLabelBreaksInsideAWordAtFontScale2 FAILED
+    java.lang.AssertionError at ReviewLayoutTest.kt:28
+
+ReviewMapperTest > fixedProfileHasNoGapAndCanContinue FAILED
+    com.google.common.truth.Platform$ComparisonFailureWithFacts at ReviewMapperTest.kt:38
+
+ReviewMapperTest > skillsOverFiveShowPlusN FAILED
+    com.google.common.truth.AssertionErrorWithFacts at ReviewMapperTest.kt:94
+
+ReviewMapperTest > linkedinHidesTheOptionalRowAndLiftsTheScoreTo100 FAILED
+    com.google.common.truth.Platform$ComparisonFailureWithFacts at ReviewMapperTest.kt:47
+
+ReviewMapperTest > presentEndDateReadsNowAndIsNotAGap FAILED
+    java.lang.IndexOutOfBoundsException at ReviewMapperTest.kt:60
+
+ReviewMapperTest > freshProfileMapsToBannerOptionalRowAndAmberDates FAILED
+    com.google.common.truth.AssertionErrorWithFacts at ReviewMapperTest.kt:18
+
+ReviewMapperTest > skillsAtOrUnderFiveShowNoPill FAILED
+    com.google.common.truth.Platform$ComparisonFailureWithFacts at ReviewMapperTest.kt:102
+
+ReviewMapperTest > roleWithoutStartDateShowsNoDates FAILED
+    java.util.NoSuchElementException at ReviewMapperTest.kt:71
+
+ReviewMapperTest > splitRoleShowsOneRowAndCountsOnce FAILED
+    com.google.common.truth.AssertionErrorWithFacts at ReviewMapperTest.kt:85
+
+ReviewMapperTest > manualProfileMapsWithoutEmptyCards FAILED
+    com.google.common.truth.AssertionErrorWithFacts at ReviewMapperTest.kt:123
+
+ReviewRouteNavigationTest > experienceOpensExperience FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewRouteNavigationTest.kt:47
+
+ReviewRouteNavigationTest > continuePushesJobNavKey FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewRouteNavigationTest.kt:47
+
+ReviewRouteNavigationTest > contactAndLinkedinOpenEditContact FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewRouteNavigationTest.kt:47
+
+ReviewRouteNavigationTest > skillsOpensSkills FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewRouteNavigationTest.kt:47
+
+ReviewRouteNavigationTest > addDateOpensEditRoleWithGapEntryId FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewRouteNavigationTest.kt:47
+
+ReviewRouteNavigationTest > educationCardIsNotTappable FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewRouteNavigationTest.kt:47
+
+ReviewRouteNavigationTest > emptyProfileReplacesWithUpload FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewRouteNavigationTest.kt:114
+
+ReviewScreenTest > needsFixStateShowsEveryPrototypeString FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewScreenTest.kt:46
+
+ReviewScreenTest > fixedStateShowsDoneBannerAndNoRequiredBanner FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewScreenTest.kt:46
+
+ReviewScreenTest > tappingDisabledContinueShowsToast FAILED
+    androidx.compose.ui.test.ComposeTimeoutException at ReviewScreenTest.kt:46
+
+ReviewViewModelTest > continueWorksAgainAfterComingBack FAILED
+    app.cash.turbine.TurbineAssertionError at ReviewViewModelTest.kt:147
+
+ReviewViewModelTest > stateRecomputesWhenTheProfileChanges FAILED
+    java.lang.ClassCastException at ReviewViewModelTest.kt:70
+        Caused by: java.lang.ClassCastException at ReviewViewModelTest.kt:65
+
+ReviewViewModelTest > fixedProfileShowsDoneBannerEnabledCtaAnd96And100WithLinkedin FAILED
+    kotlinx.coroutines.test.UncompletedCoroutinesError at TestBuilders.kt:353
+
+ReviewViewModelTest > doubleTapContinuesOnce FAILED
+    app.cash.turbine.TurbineAssertionError at ReviewViewModelTest.kt:128
+
+ReviewViewModelTest > continueWithoutGapSetsReviewedAtAndEmitsContinue FAILED
+    app.cash.turbine.TurbineAssertionError at ReviewViewModelTest.kt:113
+
+ReviewViewModelTest > continueOnAnEmptyProfileEmitsNothingToReviewAndSavesNothing FAILED
+    app.cash.turbine.TurbineAssertionError at ReviewViewModelTest.kt:170
+
+ReviewViewModelTest > keepsEditsSavedAfterTheScreenState FAILED
+    kotlinx.coroutines.test.UncompletedCoroutinesError at TestBuilders.kt:353
+
+ReviewViewModelTest > continueRefusedWithRequiredGapSavesNothingAndToasts FAILED
+    app.cash.turbine.TurbineAssertionError at ReviewViewModelTest.kt:96
+
+ReviewViewModelTest > emptyProfileEmitsNothingToReview FAILED
+    app.cash.turbine.TurbineAssertionError at ReviewViewModelTest.kt:161
+
+ReviewViewModelTest > openingReviewWritesNothingAndConfirmsNothing FAILED
+    kotlinx.coroutines.test.UncompletedCoroutinesError at TestBuilders.kt:353
+
+158 tests completed, 32 failed
+
+> Task :feature:onboarding:impl:testDebugUnitTest FAILED
+> Task :feature:onboarding:impl:finalizeTestRoborazziDebug SKIPPED
+
+[Incubating] Problems report is available at: file:///Users/aibuilders/Documents/dev/products/hirehop-wt/issue-275/build/reports/problems/problems-report.html
+
+FAILURE: Build completed with 3 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':core:model:test'.
+> There were failing tests. See the report at: file:///Users/aibuilders/Documents/dev/products/hirehop-wt/issue-275/core/model/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':core:domain:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///Users/aibuilders/Documents/dev/products/hirehop-wt/issue-275/core/domain/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+==============================================================================
+
+3: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':feature:onboarding:impl:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///Users/aibuilders/Documents/dev/products/hirehop-wt/issue-275/feature/onboarding/impl/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+==============================================================================
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 4m 55s
+259 actionable tasks: 124 executed, 131 from cache, 4 up-to-date
+Configuration cache entry stored.
