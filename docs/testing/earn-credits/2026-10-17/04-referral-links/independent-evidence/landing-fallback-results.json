@@ -1,0 +1,56 @@
+[
+  {
+    "state": "paused",
+    "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "fonts": "loaded",
+    "install": "https://play.google.com/store/apps/details?id=com.tailormyresume.app.staging&referrer=tmr_referral%3Dtailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "offer": "Open TailorMyResume to check the current referral offer.",
+    "overflow": false,
+    "utc": "2026-10-17T14:24:55.002Z"
+  },
+  {
+    "state": "expired",
+    "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "fonts": "loaded",
+    "install": "https://play.google.com/store/apps/details?id=com.tailormyresume.app.staging&referrer=tmr_referral%3Dtailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "offer": "Open TailorMyResume to check the current referral offer.",
+    "overflow": false,
+    "utc": "2026-10-17T14:24:55.325Z"
+  },
+  {
+    "state": "future",
+    "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "fonts": "loaded",
+    "install": "https://play.google.com/store/apps/details?id=com.tailormyresume.app.staging&referrer=tmr_referral%3Dtailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "offer": "Open TailorMyResume to check the current referral offer.",
+    "overflow": false,
+    "utc": "2026-10-17T14:24:55.559Z"
+  },
+  {
+    "state": "missing",
+    "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "fonts": "loaded",
+    "install": "https://play.google.com/store/apps/details?id=com.tailormyresume.app.staging&referrer=tmr_referral%3Dtailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "offer": "Open TailorMyResume to check the current referral offer.",
+    "overflow": false,
+    "utc": "2026-10-17T14:24:55.839Z"
+  },
+  {
+    "state": "invalid",
+    "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "fonts": "loaded",
+    "install": "https://play.google.com/store/apps/details?id=com.tailormyresume.app.staging&referrer=tmr_referral%3Dtailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "offer": "Open TailorMyResume to check the current referral offer.",
+    "overflow": false,
+    "utc": "2026-10-17T14:24:56.168Z"
+  },
+  {
+    "state": "neutral",
+    "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "fonts": "loaded",
+    "install": "https://play.google.com/store/apps/details?id=com.tailormyresume.app.staging&referrer=tmr_referral%3Dtailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+    "offer": "Open TailorMyResume to check the current referral offer.",
+    "overflow": false,
+    "utc": "2026-10-17T14:24:56.381Z"
+  }
+]

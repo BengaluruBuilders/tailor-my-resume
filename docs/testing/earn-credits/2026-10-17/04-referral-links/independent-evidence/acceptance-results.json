@@ -1,0 +1,176 @@
+{
+  "frontend": "a86e8e3ab7354acab6cb5c78309adb09f91c3796",
+  "backend": "a67d2ad56330c5522235bd4e1ae526b0cf5e3412",
+  "contractVersion": "referral-links-v1",
+  "status": "ATTAINABLE_IMPLEMENTATION_PASS_EXTERNAL_AND_EXACT_ORIGIN_ACCEPTANCE_BLOCKED",
+  "cases": [
+    {
+      "id": "04-L01",
+      "implementation": "PASS",
+      "acceptance": "PASS_ATTAINABLE",
+      "evidence": "BE configured/disabled route test; default packaged filter absent; default forced VIEW no candidate; closed staging flags",
+      "limits": "No real campaign activated."
+    },
+    {
+      "id": "04-L02",
+      "implementation": "PASS",
+      "acceptance": "PASS_FIXTURE",
+      "evidence": "Fresh BE own/new/replayed GET/POST exact URL test with real localPG/injected identity",
+      "limits": "Public share capability not enabled; runtime own-code Google path blocked."
+    },
+    {
+      "id": "04-L03",
+      "implementation": "PASS",
+      "acceptance": "PASS_ATTAINABLE",
+      "evidence": "Frozen verifier31 invalid transport cases; BE strict schema/variant/scope tests; APK package/filter identity",
+      "limits": "Owned origin/certificate provisioning external."
+    },
+    {
+      "id": "04-L04",
+      "implementation": "PASS",
+      "acceptance": "PASS_FIXTURE",
+      "evidence": "RemoteReferralGatewayTest.shareRefreshesCoherentOfferAndUsesNeutralCopyOnUnavailableOrFailedRead; strict shareUrl source review",
+      "limits": "Actual Google own-code sharesheet unavailable under closed staging."
+    },
+    {
+      "id": "04-L05",
+      "implementation": "PASS",
+      "acceptance": "PASS_SYNTHETIC_DEVICE",
+      "evidence": "Cold forced VIEW captured LINK; normal home; confirmed-capture restart restores; no draft loss on warm event",
+      "limits": "Forced component, guest and closed policy; genuine verified cold App Link blocked."
+    },
+    {
+      "id": "04-L06",
+      "implementation": "PASS",
+      "acceptance": "PASS_SYNTHETIC_DEVICE",
+      "evidence": "Warm different-code VIEW retained first candidate and unsaved draft; gateway once-only/display tests",
+      "limits": "Eligible authenticated automatic path fixture-only."
+    },
+    {
+      "id": "04-L07",
+      "implementation": "PASS",
+      "acceptance": "PASS_ATTAINABLE",
+      "evidence": "Frozen parser vectors; actual forced foreign-host/extra-path/query leave cleared candidate absent; fixed API unchanged",
+      "limits": "No deployed exact-domain origin proof."
+    },
+    {
+      "id": "04-L08",
+      "implementation": "PASS",
+      "acceptance": "PASS_FIXTURE",
+      "evidence": "ReferralLinksTest exact inner grammar/encoding vectors and injected referrer gateway tests",
+      "limits": "Real Play-returned referrer blocked."
+    },
+    {
+      "id": "04-L09",
+      "implementation": "PASS_CODE_REVIEW_AND_FIXTURE",
+      "acceptance": "BLOCKED_REAL_PLATFORM",
+      "evidence": "Official source timeout5s, cancellation and finally endConnection reviewed; high-level Retry/Terminal store tests; manual UI usable",
+      "limits": "No genuine controlled Play service timeout/disconnect/close telemetry. Not claimed as an executed real adapter failure."
+    },
+    {
+      "id": "04-L10",
+      "implementation": "PASS",
+      "acceptance": "PASS_FIXTURE",
+      "evidence": "ReferralInstallationStoreTest terminal durable consumed marker/bounded retry; gateway late callback after signout test; actual Clear/new valid link",
+      "limits": "No genuine Play callback result."
+    },
+    {
+      "id": "04-L11",
+      "implementation": "PASS",
+      "acceptance": "PASS_ATTAINABLE",
+      "evidence": "Source mutex/store atomic capture; manualFirstWins tests; actual first LINK wins/clear/draft preservation",
+      "limits": "Concurrent transport race proven by deterministic tests, not real simultaneous installers."
+    },
+    {
+      "id": "04-L12",
+      "implementation": "PASS",
+      "acceptance": "BLOCKED_REAL_PLATFORM",
+      "evidence": "Gateway preauth inbox/direct cleanup/delayed auth/sameUID continuation tests; actual durable LINK restart",
+      "limits": "Real Google sameUID activation and automatic LINK under admitted offer unavailable."
+    },
+    {
+      "id": "04-L13",
+      "implementation": "PASS",
+      "acceptance": "BLOCKED_REAL_PLATFORM",
+      "evidence": "Gateway conflictCandidateRequiresExplicitRebindAndCannotReplaceDestinationCandidate and owner-switch tests; coordinator review",
+      "limits": "No genuine Google credential conflict/account switch performed."
+    },
+    {
+      "id": "04-L14",
+      "implementation": "PASS",
+      "acceptance": "BLOCKED_REAL_PLATFORM",
+      "evidence": "Gateway freshForegroundLinkWaitsForDisplayThenUsesLinkBoundChallengeOnce; passive/referrer/restored no-evidence tests; MainActivity lifecycle review",
+      "limits": "Real action-bound Play Integrity/Google/eligible offer not available."
+    },
+    {
+      "id": "04-L15",
+      "implementation": "PASS",
+      "acceptance": "PASS_FIXTURE",
+      "evidence": "PolicyChangeStopsAutomaticThenOneExplicitReconfirmationUsesSameInput and stable-key tests; BE stale-policy tests",
+      "limits": "Live policy changes not enabled."
+    },
+    {
+      "id": "04-L16",
+      "implementation": "PASS",
+      "acceptance": "PASS_FIXTURE",
+      "evidence": "Gateway retryDeadlineAndOriginalRequestKeySurviveRecreation; GET-first SENT source; BE committed replay/pause/outage tests",
+      "limits": "No live provider outage induced."
+    },
+    {
+      "id": "04-L17",
+      "implementation": "PASS",
+      "acceptance": "BLOCKED_REAL_PLATFORM",
+      "evidence": "Fresh BE actual LINK challenge+concurrent different-key attach test localPG; one full inviter+5/invitee unchanged; binding/source rejection; no AI call",
+      "limits": "Injected Firebase/Integrity only; genuine reward/spend unavailable."
+    },
+    {
+      "id": "04-L18",
+      "implementation": "PASS",
+      "acceptance": "PASS_FIXTURE",
+      "evidence": "Gateway lostResponseThenDetachedGetClearsAllPrivateAttemptEvidence/alreadyAttached contradiction tests; fresh BE erasure/restore suites",
+      "limits": "No live account deletion or personal data mutation."
+    },
+    {
+      "id": "04-L19",
+      "implementation": "PASS",
+      "acceptance": "PASS_FIXTURE",
+      "evidence": "Gateway ownerSwitchDuringEvidence/erasureDuringEvidence/lateInstallCallback; private journal fences and Google coordinator review",
+      "limits": "Real account switch provider journey blocked."
+    },
+    {
+      "id": "04-L20",
+      "implementation": "PASS",
+      "acceptance": "PASS_ATTAINABLE",
+      "evidence": "ReferralJournal default source MANUAL; unchanged03 contract/fixtures; no Room/schema/migration delta; source review",
+      "limits": "No destructive migration or wallet change introduced."
+    },
+    {
+      "id": "04-L21",
+      "implementation": "PASS_ACCOMMODATED_BROWSER_AND_FIXTURE",
+      "acceptance": "BLOCKED_EXACT_ORIGIN_AND_DEPLOYMENT",
+      "evidence": "Real CUA mobile/desktop/current/six neutral/expiry/hostile renders; immutable packager assets; source publication/cache coupling review",
+      "limits": "One HTML origin substitution explicitly declared; original configured HTTPS/rendering/operational publication coupling unproven."
+    },
+    {
+      "id": "04-L22",
+      "implementation": "NOT_A_PLATFORM_RESULT",
+      "acceptance": "BLOCKED_EXTERNAL",
+      "evidence": "Signed packaging/filter only; forced intents are not resolver evidence",
+      "limits": "Missing owned deployed HTTPS association and actual variant signing/default resolver proof."
+    },
+    {
+      "id": "04-L23",
+      "implementation": "NOT_A_PLATFORM_RESULT",
+      "acceptance": "BLOCKED_EXTERNAL",
+      "evidence": "Strict parser/injected referrer only; no Play distribution executed",
+      "limits": "Missing actual supported Play install/referrer journey and eligible Google/Integrity LINK attach."
+    },
+    {
+      "id": "04-L24",
+      "implementation": "PASS",
+      "acceptance": "PASS_ATTAINABLE",
+      "evidence": "Independent BE772/772 zero skips including inherited03 regressions/restore; independent fullFE gate and unchanged retained XML; no gate changes",
+      "limits": "FE35 executed2030 up-to-date; earlier implementation outputs reused only where hashes unchanged; genuine inherited release gates remain blocked."
+    }
+  ]
+}
