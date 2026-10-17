@@ -32,7 +32,7 @@ internal class SignInViewModel @Inject constructor(
     val uiState: StateFlow<SignInUiState> = state.asStateFlow()
     val referralEntry: StateFlow<com.tailormyresume.core.domain.ReferralEntryState> = referrals?.entry ?: MutableStateFlow(com.tailormyresume.core.domain.ReferralEntryState())
     init {
-        viewModelScope.launch { referrals?.refresh() }
+        referrals?.let { gateway -> viewModelScope.launch { gateway.refresh() } }
     }
     fun clearReferral() {
         viewModelScope.launch { referrals?.clearEntry() }

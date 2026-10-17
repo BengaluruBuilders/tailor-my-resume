@@ -76,10 +76,11 @@ internal fun ReferralsRoute(modifier: Modifier = Modifier, viewModel: ReferralsV
         onDispose { lifecycle.removeObserver(observer) }
     }
     val context = LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val toast = LocalTmrToast.current
     val copied = stringResource(R.string.feature_settings_impl_referral_copied)
     val label = stringResource(R.string.feature_settings_impl_referral_my_code)
-    val actions = remember(viewModel, context, toast, copied, label) {
+    val actions = remember(viewModel, context, resources, toast, copied, label) {
         ReferralActions(
             viewModel::refresh, viewModel::issue, viewModel::save, viewModel::clear, viewModel::apply, viewModel::review, viewModel::google,
             copy = { code ->
@@ -93,7 +94,7 @@ internal fun ReferralsRoute(modifier: Modifier = Modifier, viewModel: ReferralsV
                         val reward = value.reward
                         val version = value.version
                         val text = if (reward != null && version != null) {
-                            context.resources.getQuantityString(R.plurals.feature_settings_impl_referral_share_offer, reward, reward, version, destination)
+                            resources.getQuantityString(R.plurals.feature_settings_impl_referral_share_offer, reward, reward, version, destination)
                         } else {
                             context.getString(R.string.feature_settings_impl_referral_share_neutral, destination)
                         }
