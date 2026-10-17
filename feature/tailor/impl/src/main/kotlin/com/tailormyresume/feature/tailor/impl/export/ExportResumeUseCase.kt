@@ -6,6 +6,7 @@ import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.data.repository.ResumeSettingsRepository
 import com.tailormyresume.core.domain.ExportCheck
 import com.tailormyresume.core.domain.ExportReadiness
+import com.tailormyresume.core.domain.coverage.withFinalMeasuredOn
 import com.tailormyresume.core.domain.export.ExportFileName
 import com.tailormyresume.core.domain.export.ExportFileNameFormat
 import com.tailormyresume.core.model.ExportFormat
@@ -42,7 +43,7 @@ internal class ExportResumeUseCase @Inject constructor(
     suspend operator fun invoke(applicationId: String): ExportOutcome {
         val application = applicationRepository.observeApplication(applicationId).first() ?: return ExportOutcome.Refused
         if (ExportReadiness.check(application) != ExportCheck.ALLOWED) return ExportOutcome.Refused
-        val resume = application.tailoredResume ?: return ExportOutcome.Refused
+        val resume = application.tailoredResume?.withPendingAccepted() ?: return ExportOutcome.Refused
         val profile = profileRepository.observeProfile().first() ?: return ExportOutcome.Refused
         val settings = settingsRepository.observeSettings().first()
         val fileName = ExportFileName.build(profile, application.job, settings.fileNameFormat.toExportFormat())
@@ -55,7 +56,7 @@ internal class ExportResumeUseCase @Inject constructor(
         )
         val exportedAt = clock.now()
         applicationRepository.observeApplication(applicationId).first()?.let { latest ->
-            applicationRepository.upsertApplication(latest.copy(exportFileName = fileName, updatedAt = exportedAt))
+            applicationRepository.upsertApplication(latest.withFinalMeasuredOn(resume, profile).copy(exportFileName = fileName, updatedAt = exportedAt))
         }
         exportHistory.record(
             ExportRecord(

@@ -1,12 +1,22 @@
 package com.tailormyresume.feature.tailor.impl.export
 
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.model.ApplicationKeywordCoverage
 import com.tailormyresume.core.model.BulletDecision
 import com.tailormyresume.core.model.CandidateProfile
+import com.tailormyresume.core.model.EditType
 import com.tailormyresume.core.model.ExportFormat
 import com.tailormyresume.core.model.FileNameFormat
+import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobApplication
+import com.tailormyresume.core.model.JobRequirement
+import com.tailormyresume.core.model.KeywordCoverage
+import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.PageSize
+import com.tailormyresume.core.model.RequirementMatch
+import com.tailormyresume.core.model.RequirementPriority
+import com.tailormyresume.core.model.RequirementType
+import com.tailormyresume.core.model.TailoredText
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
@@ -17,6 +27,7 @@ import com.tailormyresume.feature.tailor.impl.acceptedBullet
 import com.tailormyresume.feature.tailor.impl.document.ResumeDocumentAssembler
 import com.tailormyresume.feature.tailor.impl.document.TestResumeHeadings
 import com.tailormyresume.feature.tailor.impl.entryFor
+import com.tailormyresume.feature.tailor.impl.testBullet
 import com.tailormyresume.feature.tailor.impl.testProfile
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -194,5 +205,54 @@ class ExportResumeUseCaseTest {
         assertThat(reexported.file.exists()).isTrue()
         assertThat(first.file.exists()).isFalse()
         assertThat(second.file.readText()).isEqualTo("render of app-2")
+    }
+
+    @Test
+    fun zeroChangeExportKeepsTheSummaryThePreviewShows() = runTest {
+        val unchanged = testBullet("b1", original = "Built an internal tool", proposed = "Built an internal tool")
+        val application = acceptedApplication(listOf(unchanged), summary = TailoredText("My summary", "My summary"), accepted = false)
+        seed(application, profile(bullet = unchanged).copy(summary = "My summary"))
+
+        useCase("app-1").exported()
+
+        assertThat(renderer.lastDocument?.summary).isEqualTo("My summary")
+    }
+
+    @Test
+    fun zeroChangeExportKeepsTheReorderThePreviewShows() = runTest {
+        val a = testBullet("a", original = "Bullet A", proposed = "Bullet A", editTypes = listOf(EditType.REORDER))
+        val b = testBullet("b", original = "Bullet B", proposed = "Bullet B", editTypes = listOf(EditType.REORDER))
+        seed(acceptedApplication(listOf(b, a), accepted = false), testProfile(listOf(entryFor("exp-1", a, b))))
+
+        useCase("app-1").exported()
+
+        val bullets = renderer.lastDocument?.sections?.flatMap { it.entries }?.flatMap { it.bullets }
+        assertThat(bullets).containsExactly("Bullet B", "Bullet A").inOrder()
+    }
+
+    @Test
+    fun storedFinalExcludesAKeywordTheUserUndid() = runTest {
+        val undone = acceptedBullet(
+            id = "b1",
+            original = "Built an internal tool",
+            proposed = "Built an internal tool in Python",
+            decision = BulletDecision.REJECTED,
+        )
+        val python = RequirementMatch(
+            requirement = JobRequirement("r1", "Python", RequirementType.SKILL, RequirementPriority.MUST_HAVE, listOf("python")),
+            status = MatchStatus.GAP,
+            evidenceIds = emptyList(),
+        )
+        seed(
+            acceptedApplication(listOf(undone)).copy(
+                gapAnalysis = GapAnalysis(listOf(python), KeywordCoverage(0, 100)),
+                keywordCoverage = ApplicationKeywordCoverage(0, 100, 100),
+            ),
+            profile(bullet = undone),
+        )
+
+        useCase("app-1").exported()
+
+        assertThat(applicationRepository.observeApplication("app-1").first()?.keywordCoverage?.final).isEqualTo(0)
     }
 }

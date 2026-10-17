@@ -136,7 +136,7 @@ class UpdateBulletDecisionUseCaseTest {
 
         useCase("app-1", UpdateBulletDecisionUseCase.SUMMARY_CHANGE_ID, BulletDecision.REJECTED)
         useCase("app-1", UpdateBulletDecisionUseCase.SKILLS_CHANGE_ID, BulletDecision.REJECTED)
-        AcceptChangesUseCase(repository, clock)("app-1")
+        AcceptChangesUseCase(repository, FakeProfileRepository(), clock)("app-1")
 
         val saved = checkNotNull(checkNotNull(repository.current("app-1")).tailoredResume)
         assertThat(saved.summary?.decision).isEqualTo(BulletDecision.REJECTED)
@@ -153,7 +153,7 @@ class UpdateBulletDecisionUseCaseTest {
                 repository.observeApplication(id).onEach { delay(10) }
         }
         val undo = UpdateBulletDecisionUseCase(slowReads, clock)
-        val accept = AcceptChangesUseCase(slowReads, clock)
+        val accept = AcceptChangesUseCase(slowReads, FakeProfileRepository(), clock)
 
         launch { undo("app-1", "b1", BulletDecision.REJECTED) }
         launch { accept("app-1") }

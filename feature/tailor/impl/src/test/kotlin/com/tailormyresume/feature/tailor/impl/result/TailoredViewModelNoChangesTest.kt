@@ -39,7 +39,7 @@ class TailoredViewModelNoChangesTest {
         applicationRepository.sendApplications(listOf(testApplication(listOf(unchanged))))
         profileRepository.sendProfile(testProfile(listOf(entryFor("exp-1", unchanged))))
 
-        AcceptChangesUseCase(applicationRepository, TestClock())("app-1")
+        AcceptChangesUseCase(applicationRepository, profileRepository, TestClock())("app-1")
 
         val ready = viewModel.state.value as TailoredUiState.Ready
         assertThat(ready.changes).isEmpty()

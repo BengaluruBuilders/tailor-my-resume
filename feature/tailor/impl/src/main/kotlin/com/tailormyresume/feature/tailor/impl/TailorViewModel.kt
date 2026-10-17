@@ -47,7 +47,7 @@ internal sealed interface TailorEvent {
 @HiltViewModel(assistedFactory = TailorViewModel.Factory::class)
 internal class TailorViewModel @AssistedInject constructor(
     private val applicationRepository: ApplicationRepository,
-    profileRepository: ProfileRepository,
+    private val profileRepository: ProfileRepository,
     private val reviewStateRepository: TailoringReviewStateRepository,
     private val contentReportRepository: ContentReportRepository,
     private val clock: Clock,
@@ -59,7 +59,7 @@ internal class TailorViewModel @AssistedInject constructor(
 
     private val decisionMutex = Mutex()
 
-    private val acceptChanges = AcceptChangesUseCase(applicationRepository, clock)
+    private val acceptChanges = AcceptChangesUseCase(applicationRepository, profileRepository, clock)
 
     private val activeScenario = MutableStateFlow(scenario)
 

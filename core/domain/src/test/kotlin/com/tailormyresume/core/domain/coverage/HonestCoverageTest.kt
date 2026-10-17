@@ -115,4 +115,27 @@ class HonestCoverageTest {
             }
         }
     }
+
+    @Test
+    fun metKeywordWhoseOnlyCitedBulletWasDeletedIsMissingAndDropsTheNumber() {
+        val met = RequirementMatch(
+            requirement = JobRequirement(
+                id = "r1",
+                text = "Python",
+                type = RequirementType.SKILL,
+                priority = RequirementPriority.MUST_HAVE,
+                keywords = listOf("python"),
+            ),
+            status = MatchStatus.MET,
+            evidenceIds = listOf("exp-1-b9"),
+        )
+
+        val screen = ScreenForKeywords(listOf(met), evidenceProfile)
+        val coverage = KeywordCoverageCalculator.compute(listOf(met), null, null, evidenceProfile)
+
+        assertThat(screen.have).isEmpty()
+        assertThat(screen.missing).containsExactly("Python")
+        assertThat(coverage.now).isEqualTo(0)
+        assertThat(coverage.upTo).isEqualTo(0)
+    }
 }

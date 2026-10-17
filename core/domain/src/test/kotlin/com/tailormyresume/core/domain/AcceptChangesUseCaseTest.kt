@@ -18,7 +18,7 @@ import kotlin.time.Instant
 class AcceptChangesUseCaseTest {
     private val repository = FakeApplicationRepository()
     private val clock = FixedClock(Instant.fromEpochSeconds(2_000_000_000))
-    private val useCase = AcceptChangesUseCase(repository, clock)
+    private val useCase = AcceptChangesUseCase(repository, FakeProfileRepository(), clock)
     private val created = Instant.fromEpochSeconds(1_000)
 
     private fun bullet(id: String, decision: BulletDecision) = TailoredBullet(

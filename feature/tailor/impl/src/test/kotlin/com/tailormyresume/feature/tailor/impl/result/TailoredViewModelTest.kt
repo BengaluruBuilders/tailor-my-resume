@@ -91,7 +91,7 @@ class TailoredViewModelTest {
         assertThat(before.blocks.flatMap { it.lines }.map { line -> line.joinToString("") { it.text } })
             .contains("Developed an internal tool")
 
-        AcceptChangesUseCase(applicationRepository, clock)("app-1")
+        AcceptChangesUseCase(applicationRepository, profileRepository, clock)("app-1")
 
         val after = viewModel.ready()
         assertThat(after.accepted).isTrue()
