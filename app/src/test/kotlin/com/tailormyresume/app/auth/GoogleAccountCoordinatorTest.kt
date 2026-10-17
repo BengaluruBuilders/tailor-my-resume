@@ -145,7 +145,10 @@ class GoogleAccountCoordinatorTest {
         checkpoints.capture("A", environment)
         journals.write(journal().copy(phase = "SWITCHED", destination = "B", destinationGoogleDigest = GoogleCredentialIdentity.digestSubject("google-B")))
         firebase.user = FirebaseUser("B", "B", "b@example.com", googleSubject = "google-B")
-        complete = { pending.current = com.tailormyresume.core.data.repository.PendingWipeState.REQUESTED; jsonResponse(200, COMPLETE) }
+        complete = {
+            pending.current = com.tailormyresume.core.data.repository.PendingWipeState.REQUESTED
+            jsonResponse(200, COMPLETE)
+        }
         val coordinator = coordinator(checkpoints, journals)
         coordinator.open()
         assertThat(coordinator.state.value).isInstanceOf(GoogleAccountState.Retry::class.java)
@@ -162,9 +165,20 @@ class GoogleAccountCoordinatorTest {
 
     private fun kotlinx.coroutines.test.TestScope.coordinator(checkpoints: LocalWorkCheckpoint, journals: PrivateUpgradeStore): GoogleAccountCoordinator {
         val wallet = WalletSource(api, firebase)
-        return GoogleAccountCoordinator(firebase, credentials, api, TailorMyResumeApiConfig(environment), sessions, journals,
-            checkpoints, fence, pending, server.signOutCleaner(), GooglePromotionClient(api, TrialEvidence(), journals,
-                wallet, TestCreditsRepository(), firebase, Clock.System), wallet, firebase, Clock.System, backgroundScope)
+        return GoogleAccountCoordinator(
+            firebase, credentials, api, TailorMyResumeApiConfig(environment), sessions, journals,
+            checkpoints, fence, pending, server.signOutCleaner(),
+            GooglePromotionClient(
+                api,
+                TrialEvidence(),
+                journals,
+                wallet,
+                TestCreditsRepository(),
+                firebase,
+                Clock.System,
+            ),
+            wallet, firebase, Clock.System, backgroundScope,
+        )
     }
 
     private fun journal() = UpgradeJournal(environment, "A", "prepare", "proof", intentId = "intent", completionKey = "completion", observationKey = "observation")
@@ -176,7 +190,9 @@ class GoogleAccountCoordinatorTest {
         override fun uid() = user.uid
         override fun isAnonymous() = user.mode == AccountMode.ANONYMOUS
         override suspend fun currentUser() = user
-        override suspend fun linkGoogle(googleIdToken: String): AuthOutcome<FirebaseUser> = if (conflict) AuthOutcome.Failure(AuthFailure.CredentialConflict) else {
+        override suspend fun linkGoogle(googleIdToken: String): AuthOutcome<FirebaseUser> = if (conflict) {
+            AuthOutcome.Failure(AuthFailure.CredentialConflict)
+        } else {
             user = user.copy(mode = AccountMode.GOOGLE, googleSubject = "google-B")
             AuthOutcome.Success(user)
         }

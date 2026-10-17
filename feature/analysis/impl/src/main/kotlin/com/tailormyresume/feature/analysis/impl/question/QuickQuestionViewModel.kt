@@ -30,7 +30,6 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val picked = MutableStateFlow<QuickChoice?>(null)
     private val detail = MutableStateFlow("")
     private val eventChannel = Channel<QuickQuestionEvent>(Channel.BUFFERED)
@@ -117,5 +116,4 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }

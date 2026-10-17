@@ -4,17 +4,18 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicLong
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class LocalWorkFence @Inject constructor() {
     private val generation = AtomicLong()
     private val mutations = Mutex()
     private val dirty = mutableSetOf<Any>()
+
     @Volatile private var frozen = false
 
     fun ticket(): Long {
@@ -71,7 +72,11 @@ class LocalWorkFence @Inject constructor() {
         action().also { check(ticket) }
     }
 
-    fun release() { frozen = false }
+    fun release() {
+        frozen = false
+    }
 
-    fun invalidate() { generation.incrementAndGet() }
+    fun invalidate() {
+        generation.incrementAndGet()
+    }
 }

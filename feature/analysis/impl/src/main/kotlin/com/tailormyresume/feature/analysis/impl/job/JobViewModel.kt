@@ -53,7 +53,6 @@ internal class JobViewModel @Inject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val text = MutableStateFlow("")
     private val notAJobPost = MutableStateFlow(false)
     private val percent = MutableStateFlow<Int?>(null)
@@ -199,5 +198,4 @@ internal class JobViewModel @Inject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }

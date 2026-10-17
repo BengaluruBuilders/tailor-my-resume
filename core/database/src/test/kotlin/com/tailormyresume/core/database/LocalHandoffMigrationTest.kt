@@ -15,14 +15,18 @@ class LocalHandoffMigrationTest {
 
     @Test fun upgradeKeepsExistingProfileAndLedgerAndCreatesEmptyOwnershipTables() {
         helper.createDatabase("local-handoff-v5", 4).apply {
-            insert("profile", android.database.sqlite.SQLiteDatabase.CONFLICT_FAIL, ContentValues().apply {
-                put("id", 1)
-                put("fullName", "Local profile")
-                put("email", "")
-                put("phone", "")
-                put("headline", "Saved work")
-                put("skills", "[\"SQL\"]")
-            })
+            insert(
+                "profile",
+                android.database.sqlite.SQLiteDatabase.CONFLICT_FAIL,
+                ContentValues().apply {
+                    put("id", 1)
+                    put("fullName", "Local profile")
+                    put("email", "")
+                    put("phone", "")
+                    put("headline", "Saved work")
+                    put("skills", "[\"SQL\"]")
+                },
+            )
             execSQL("INSERT INTO credit_ledger (id,kind,amount,applicationId,productId,createdAt) VALUES (1,'FREE_GRANT',2,NULL,NULL,0)")
             close()
         }

@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.tailormyresume.core.database.MIGRATION_1_2
 import com.tailormyresume.core.database.MIGRATION_2_3
-import com.tailormyresume.core.database.MIGRATION_4_5
 import com.tailormyresume.core.database.MIGRATION_3_4
+import com.tailormyresume.core.database.MIGRATION_4_5
 import com.tailormyresume.core.database.TmrDatabase
 import dagger.Module
 import dagger.Provides

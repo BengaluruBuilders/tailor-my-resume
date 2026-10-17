@@ -1,10 +1,10 @@
 package com.tailormyresume.app.auth
 
-import java.security.MessageDigest
-import java.util.Base64
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.security.MessageDigest
+import java.util.Base64
 
 internal object GoogleCredentialIdentity {
     fun digest(token: String): String {

@@ -11,9 +11,17 @@ class RemoteServerAccountDeleter @Inject constructor(private val api: TailorMyRe
     override val deletesRemoteData = true
 
     override suspend fun delete(): Result<Unit> = apiResult { api.deleteMe() }
-        .map { privateWork?.erase(); Unit }
+        .map {
+            privateWork?.erase()
+            Unit
+        }
         .recoverCatching { failure ->
-            if ((failure as? ApiException)?.error == ApiError.AccountDeleted) { privateWork?.erase(); Unit } else throw failure
+            if ((failure as? ApiException)?.error == ApiError.AccountDeleted) {
+                privateWork?.erase()
+                Unit
+            } else {
+                throw failure
+            }
         }
 
     override fun mayHaveReachedServer(failure: Throwable): Boolean = when (val error = (failure as? ApiException)?.error) {
@@ -25,7 +33,12 @@ class RemoteServerAccountDeleter @Inject constructor(private val api: TailorMyRe
     override suspend fun isClosed(): Result<Boolean> = apiResult { api.me() }.fold(
         onSuccess = { Result.success(false) },
         onFailure = { failure ->
-            if ((failure as? ApiException)?.error == ApiError.AccountDeleted) { privateWork?.erase(); Result.success(true) } else Result.failure(failure)
+            if ((failure as? ApiException)?.error == ApiError.AccountDeleted) {
+                privateWork?.erase()
+                Result.success(true)
+            } else {
+                Result.failure(failure)
+            }
         },
     )
 

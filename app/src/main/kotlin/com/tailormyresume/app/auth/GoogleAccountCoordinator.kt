@@ -212,8 +212,10 @@ class GoogleAccountCoordinator @Inject constructor(
         }.getOrThrow()
         checkLive()
         check(uids.uid() == user.uid)
-        check(result.completion.kind == "EXISTING_ACCOUNT" && result.completion.creditsTransferred == 0 &&
-            !result.completion.purchasesTransferred && !result.completion.runningJobsTransferred)
+        check(
+            result.completion.kind == "EXISTING_ACCOUNT" && result.completion.creditsTransferred == 0 &&
+                !result.completion.purchasesTransferred && !result.completion.runningJobsTransferred,
+        )
         journal = journal.copy(phase = "AUTHORIZED")
         journals.write(journal)
         val destinationProfile = checkpoints.read(user.uid, config.baseUrl)?.profile
@@ -251,7 +253,10 @@ class GoogleAccountCoordinator @Inject constructor(
 
     private suspend fun reconcile() {
         checkLive()
-        val user = firebase.currentUser() ?: run { mutable.value = GoogleAccountState.Idle; return }
+        val user = firebase.currentUser() ?: run {
+            mutable.value = GoogleAccountState.Idle
+            return
+        }
         val journal = ownJournal()
         if (journal != null && journal.phase in setOf("DIRECT_SWITCHING", "DIRECT_LINKED") && user.mode == AccountMode.GOOGLE) {
             fence.freeze()
@@ -364,7 +369,8 @@ class GoogleAccountCoordinator @Inject constructor(
 
     private fun preparationUnavailable(failure: Throwable): Boolean = when ((failure as? ApiException)?.error) {
         is ApiError.IdentityUnavailable, is ApiError.PromotionUnavailable, is ApiError.RateLimited,
-        ApiError.Offline, ApiError.Timeout, ApiError.InternalError -> true
+        ApiError.Offline, ApiError.Timeout, ApiError.InternalError,
+        -> true
         else -> false
     }
 
@@ -388,9 +394,13 @@ class GoogleAccountCoordinator @Inject constructor(
     }
 
     private fun newJournal(uid: String, path: String): UpgradeJournal = UpgradeJournal(
-        environment = config.baseUrl, source = uid, prepareKey = newId(),
+        environment = config.baseUrl,
+        source = uid,
+        prepareKey = newId(),
         proof = if (path == "GUEST_LINK") Base64.getUrlEncoder().withoutPadding().encodeToString(ByteArray(32).also { SecureRandom().nextBytes(it) }) else null,
-        completionKey = newId(), observationKey = newId(), path = path,
+        completionKey = newId(),
+        observationKey = newId(),
+        path = path,
     )
 
     private fun newId() = UUID.randomUUID().toString()

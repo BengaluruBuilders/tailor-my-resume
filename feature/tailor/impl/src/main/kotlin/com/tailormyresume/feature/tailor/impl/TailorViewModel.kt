@@ -59,7 +59,6 @@ internal class TailorViewModel @AssistedInject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val decisionMutex = Mutex()
 
     private val acceptChanges = AcceptChangesUseCase(applicationRepository, clock)

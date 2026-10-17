@@ -54,7 +54,6 @@ internal class EditResumeViewModel @AssistedInject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val drafts = MutableStateFlow(EditResumeDrafts())
 
     private val saveMutex = Mutex()
@@ -246,7 +245,6 @@ internal class EditResumeViewModel @AssistedInject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }
 
 private data class EditResumeDrafts(

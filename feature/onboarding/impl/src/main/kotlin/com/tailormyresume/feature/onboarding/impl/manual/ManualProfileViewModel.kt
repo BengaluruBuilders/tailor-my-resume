@@ -51,7 +51,6 @@ internal class ManualProfileViewModel @Inject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val state = MutableStateFlow(ManualProfileUiState())
 
     private val eventChannel = Channel<ManualProfileEvent>(Channel.BUFFERED)
@@ -152,5 +151,4 @@ internal class ManualProfileViewModel @Inject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }

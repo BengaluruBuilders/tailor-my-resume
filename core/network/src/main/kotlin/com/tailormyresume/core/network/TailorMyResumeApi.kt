@@ -1,5 +1,8 @@
 package com.tailormyresume.core.network
 
+import com.tailormyresume.core.network.dto.ActivationChallengeRequest
+import com.tailormyresume.core.network.dto.ActivationObservationRequest
+import com.tailormyresume.core.network.dto.ActivationReadResponse
 import com.tailormyresume.core.network.dto.AnalysisRequest
 import com.tailormyresume.core.network.dto.AnalysisResponse
 import com.tailormyresume.core.network.dto.ContentReportRequest
@@ -7,6 +10,8 @@ import com.tailormyresume.core.network.dto.ContentReportResponse
 import com.tailormyresume.core.network.dto.CreditPolicyResponse
 import com.tailormyresume.core.network.dto.CreditsResponse
 import com.tailormyresume.core.network.dto.DeletionResponse
+import com.tailormyresume.core.network.dto.GoogleActivationRequest
+import com.tailormyresume.core.network.dto.GoogleActivationResponse
 import com.tailormyresume.core.network.dto.GrantChallengeRequest
 import com.tailormyresume.core.network.dto.GrantChallengeResponse
 import com.tailormyresume.core.network.dto.GuestInitializeRequest
@@ -23,18 +28,13 @@ import com.tailormyresume.core.network.dto.ResumeParseResponse
 import com.tailormyresume.core.network.dto.ServerExportResponse
 import com.tailormyresume.core.network.dto.TailoringResponse
 import com.tailormyresume.core.network.dto.TailoringStartRequest
-import com.tailormyresume.core.network.dto.WalletResponse
-import com.tailormyresume.core.network.dto.UpgradeIntentRequest
-import com.tailormyresume.core.network.dto.UpgradeIntentDto
-import com.tailormyresume.core.network.dto.UpgradeProofDto
-import com.tailormyresume.core.network.dto.UpgradeStatusResponse
 import com.tailormyresume.core.network.dto.UpgradeCompleteRequest
 import com.tailormyresume.core.network.dto.UpgradeCompleteResponse
-import com.tailormyresume.core.network.dto.ActivationObservationRequest
-import com.tailormyresume.core.network.dto.ActivationChallengeRequest
-import com.tailormyresume.core.network.dto.ActivationReadResponse
-import com.tailormyresume.core.network.dto.GoogleActivationRequest
-import com.tailormyresume.core.network.dto.GoogleActivationResponse
+import com.tailormyresume.core.network.dto.UpgradeIntentDto
+import com.tailormyresume.core.network.dto.UpgradeIntentRequest
+import com.tailormyresume.core.network.dto.UpgradeProofDto
+import com.tailormyresume.core.network.dto.UpgradeStatusResponse
+import com.tailormyresume.core.network.dto.WalletResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET

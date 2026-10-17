@@ -54,7 +54,6 @@ internal class EditContactViewModel @Inject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val draft = MutableStateFlow<EditContactDraft?>(null)
 
     private val channel = Channel<EditContactEvent>(Channel.BUFFERED)
@@ -149,7 +148,6 @@ internal class EditContactViewModel @Inject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }
 
 private fun CandidateProfile.toDraft() = EditContactDraft(

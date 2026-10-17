@@ -34,7 +34,6 @@ internal class ReviewViewModel @Inject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val eventChannel = Channel<ReviewEvent>(Channel.BUFFERED)
 
     private val continuing = AtomicBoolean(false)

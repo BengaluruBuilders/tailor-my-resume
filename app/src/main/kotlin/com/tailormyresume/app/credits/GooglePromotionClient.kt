@@ -21,8 +21,8 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 @Singleton
 class GooglePromotionClient @Inject constructor(
@@ -64,7 +64,9 @@ class GooglePromotionClient @Inject constructor(
         val reconciled = if (observed.activation?.source == "GUEST_LINK" && journal.path != "GUEST_LINK") {
             journal.copy(path = "GUEST_LINK", proof = null, intentId = null, requestId = null, challengeId = null, requestedBase = false, baseVersion = null)
                 .also { journals.write(it) }
-        } else journal
+        } else {
+            journal
+        }
         return offer(policy, reconciled, changed)
     }
 

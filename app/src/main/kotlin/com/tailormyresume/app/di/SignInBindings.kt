@@ -3,13 +3,12 @@ package com.tailormyresume.app.di
 import com.tailormyresume.app.AppStartTask
 import com.tailormyresume.app.BuildConfig
 import com.tailormyresume.app.auth.CredentialManagerGoogleSource
-import com.tailormyresume.app.auth.GoogleAccountCoordinator
-import com.tailormyresume.core.domain.GoogleAccountGateway
 import com.tailormyresume.app.auth.FirebaseAuthClient
 import com.tailormyresume.app.auth.FirebaseConfig
 import com.tailormyresume.app.auth.FirebaseSessionClient
 import com.tailormyresume.app.auth.ForegroundActivity
 import com.tailormyresume.app.auth.ForegroundActivityTracker
+import com.tailormyresume.app.auth.GoogleAccountCoordinator
 import com.tailormyresume.app.auth.GoogleCredentialSource
 import com.tailormyresume.app.auth.LocalDataWiper
 import com.tailormyresume.app.auth.PendingWipeStartTask
@@ -22,6 +21,7 @@ import com.tailormyresume.app.credits.GuestEvidence
 import com.tailormyresume.app.credits.RemoteGuestTrialGateway
 import com.tailormyresume.app.credits.StandardGuestEvidence
 import com.tailormyresume.core.domain.FirebaseUidProvider
+import com.tailormyresume.core.domain.GoogleAccountGateway
 import com.tailormyresume.core.domain.GuestTrialGateway
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.account.AccountWipeFinisher

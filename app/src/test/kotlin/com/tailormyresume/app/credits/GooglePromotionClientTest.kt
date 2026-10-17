@@ -43,7 +43,9 @@ class GooglePromotionClientTest {
     private val wallet = WalletSource(api, uids)
     private val evidence = TrialEvidence()
     private var now = Instant.parse("2026-10-17T00:01:00Z")
-    private val clock = object : Clock { override fun now() = now }
+    private val clock = object : Clock {
+        override fun now() = now
+    }
     private val calls = mutableListOf<Pair<String?, String>>()
     private var signupCommitted = false
     private var signupAvailable = true
@@ -94,8 +96,13 @@ class GooglePromotionClientTest {
 
     @Test fun lostShortProofUsesDurableGuestProvenanceWithANewNullIntentRequest() = runTest {
         val store = PrivateUpgradeStore(context, UnconfinedTestDispatcher(testScheduler))
-        val lost = journal().copy(path = "GUEST_LINK", intentId = "expired-short-secret", proof = null,
-            requestId = "old-canonical-key", challengeId = "old-challenge")
+        val lost = journal().copy(
+            path = "GUEST_LINK",
+            intentId = "expired-short-secret",
+            proof = null,
+            requestId = "old-canonical-key",
+            challengeId = "old-challenge",
+        )
         store.write(lost)
         val client = client(store)
         client.prepare(lost)
@@ -232,7 +239,18 @@ class GooglePromotionClientTest {
         val signup = original.toMutableMap().apply {
             put("baseTrial", JsonObject(base))
             put("amount", if (signupAvailable) JsonPrimitive(signupAmount) else JsonNull)
-            put("status", JsonPrimitive(if (signupCommitted) "ALREADY_GRANTED" else if (signupAvailable) "AVAILABLE" else "UNAVAILABLE"))
+            put(
+                "status",
+                JsonPrimitive(
+                    if (signupCommitted) {
+                        "ALREADY_GRANTED"
+                    } else if (signupAvailable) {
+                        "AVAILABLE"
+                    } else {
+                        "UNAVAILABLE"
+                    },
+                ),
+            )
             put("version", if (signupAvailable) JsonPrimitive("signup-local-v1") else JsonNull)
             put("grantPolicyVersion", if (signupCommitted) JsonPrimitive("signup-local-v1") else JsonNull)
         }

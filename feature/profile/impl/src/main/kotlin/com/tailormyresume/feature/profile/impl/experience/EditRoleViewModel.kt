@@ -66,7 +66,6 @@ internal class EditRoleViewModel @AssistedInject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val draft = MutableStateFlow<EditRoleDraft?>(null)
 
     private val channel = Channel<EditRoleEvent>(Channel.BUFFERED)
@@ -222,7 +221,6 @@ internal class EditRoleViewModel @AssistedInject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }
 
 private fun EditRoleDraft.toEntry(

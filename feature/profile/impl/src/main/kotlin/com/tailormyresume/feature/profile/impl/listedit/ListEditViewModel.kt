@@ -74,7 +74,6 @@ internal class ListEditViewModel @AssistedInject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val items = MutableStateFlow<List<ListEditItem>?>(null)
 
     private val channel = Channel<ListEditEvent>(Channel.BUFFERED)
@@ -211,7 +210,6 @@ internal class ListEditViewModel @AssistedInject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }
 
 private fun CandidateProfile.entryItems(category: EntryCategory): List<ListEditItem> {

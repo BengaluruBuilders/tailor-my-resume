@@ -57,7 +57,6 @@ internal class ExportedViewModel @AssistedInject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val outcome = MutableStateFlow<ExportOutcome?>(null)
 
     private val statusSheet = MutableStateFlow<ApplicationStatus?>(null)

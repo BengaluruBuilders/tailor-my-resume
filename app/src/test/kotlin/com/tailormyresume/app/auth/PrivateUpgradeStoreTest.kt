@@ -16,7 +16,9 @@ import java.util.Base64
 class PrivateUpgradeStoreTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
-    @After fun clean() { File(context.filesDir, "account-upgrades").deleteRecursively() }
+    @After fun clean() {
+        File(context.filesDir, "account-upgrades").deleteRecursively()
+    }
 
     @Test fun crashBeforeFirebaseReturnsIsBoundToTheChosenGoogleProvider() = runTest {
         val store = PrivateUpgradeStore(context, UnconfinedTestDispatcher(testScheduler))

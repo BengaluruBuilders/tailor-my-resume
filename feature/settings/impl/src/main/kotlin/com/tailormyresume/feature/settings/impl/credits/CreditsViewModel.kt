@@ -51,7 +51,9 @@ internal class CreditsViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = CreditsUiState.Loading,
     )
-    fun onGoogleAccount() { viewModelScope.launch { google?.open() } }
+    fun onGoogleAccount() {
+        viewModelScope.launch { google?.open() }
+    }
 
     fun onCheckTrial() {
         if (trialJob?.isActive == true) return

@@ -23,7 +23,6 @@ internal class JobLinkViewModel @Inject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val state = MutableStateFlow(JobLinkUiState(link = draftStore.link.value))
     private val eventChannel = Channel<JobLinkEvent>(Channel.BUFFERED)
 
@@ -79,5 +78,4 @@ internal class JobLinkViewModel @Inject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }

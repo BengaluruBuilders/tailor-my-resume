@@ -4,9 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.tailormyresume.core.database.model.LocalHandoffEntity
-import com.tailormyresume.core.database.model.LocalAccountOwnerEntity
 import androidx.room.Upsert
+import com.tailormyresume.core.database.model.LocalAccountOwnerEntity
+import com.tailormyresume.core.database.model.LocalHandoffEntity
 
 @Dao
 interface LocalHandoffDao {

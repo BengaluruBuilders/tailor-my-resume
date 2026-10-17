@@ -25,7 +25,6 @@ internal class PasteResumeViewModel @Inject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val state = MutableStateFlow(PasteResumeUiState())
 
     private val eventChannel = Channel<PasteResumeEvent>(Channel.BUFFERED)
@@ -51,5 +50,4 @@ internal class PasteResumeViewModel @Inject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }

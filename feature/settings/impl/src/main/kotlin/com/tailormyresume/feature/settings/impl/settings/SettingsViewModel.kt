@@ -39,8 +39,9 @@ internal class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
-    fun onGoogleAccount() { viewModelScope.launch(workFence.context(workTicket)) { google?.open() } }
+    fun onGoogleAccount() {
+        viewModelScope.launch(workFence.context(workTicket)) { google?.open() }
+    }
 
     val uiState: StateFlow<SettingsUiState> = combine(
         sessionRepository.observeAccount(),

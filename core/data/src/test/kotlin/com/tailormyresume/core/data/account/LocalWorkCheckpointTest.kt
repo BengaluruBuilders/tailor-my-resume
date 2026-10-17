@@ -36,7 +36,10 @@ class LocalWorkCheckpointTest {
         database.profileDao().upsertProfile(profile("Guest"))
         val original = testApplication.asEntity().copy(notes = "Guest notes", exportFileName = "resume.pdf")
         database.jobApplicationDao().upsertApplication(original)
-        val originalFile = File(context.filesDir, "exports/${original.id}/resume.pdf").also { it.parentFile?.mkdirs(); it.writeText("private guest PDF") }
+        val originalFile = File(context.filesDir, "exports/${original.id}/resume.pdf").also {
+            it.parentFile?.mkdirs()
+            it.writeText("private guest PDF")
+        }
         store.write("exports.history", """[{"applicationId":"${original.id}","format":"PDF","fileName":"resume.pdf","exportedAtMillis":1,"creditKind":"PURCHASED","pageCount":2}]""")
         store.write("tailor.edited.${original.id}", "edited-bullet")
         store.write("tailoring.request.unfinished.${original.id}", "remote-request")

@@ -45,7 +45,6 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val statusSheet = MutableStateFlow<ApplicationStatus?>(null)
 
     private val fileRequestRunning = AtomicBoolean(false)

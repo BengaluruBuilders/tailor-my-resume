@@ -27,6 +27,7 @@ class LocalWorkFenceTest {
         assertThat(runCatching { fence.check(ticket) }.exceptionOrNull()).isInstanceOf(CancellationException::class.java)
         fence.check(fence.ticket())
     }
+
     @Test fun oldCoroutineCannotAcquireANewMutationTicketAfterSwitch() = kotlinx.coroutines.test.runTest {
         val fence = LocalWorkFence()
         val old = fence.ticket()
@@ -50,5 +51,4 @@ class LocalWorkFenceTest {
         fence.freeze()
         fence.release()
     }
-
 }

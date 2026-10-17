@@ -44,7 +44,6 @@ internal class SkillsViewModel @Inject constructor(
 ) : ViewModel() {
     private val workTicket = workFence.ticket()
 
-
     private val draft = MutableStateFlow<SkillsDraft?>(null)
 
     private val channel = Channel<SkillsEvent>(Channel.BUFFERED)
@@ -119,7 +118,6 @@ internal class SkillsViewModel @Inject constructor(
         workFence.editing(this, false)
         super.onCleared()
     }
-
 }
 
 private fun List<String>.containsIgnoringCase(name: String): Boolean = any { it.equals(name, ignoreCase = true) }
