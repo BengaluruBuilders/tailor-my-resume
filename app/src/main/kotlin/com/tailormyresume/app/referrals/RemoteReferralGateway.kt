@@ -548,7 +548,6 @@ class RemoteReferralGateway @Inject constructor(
                     is ApiError.IntegrityUnavailable -> error.retryAfterSeconds
                     is ApiError.PromotionUnavailable -> error.retryAfterSeconds
                     is ApiError.IdentityUnavailable -> error.retryAfterSeconds
-                    else -> null
                 }
                 val seconds = advertised?.takeIf { it > 0 } ?: 60
                 write(owner, journal.copy(retryAt = clock.now().toEpochMilliseconds() + seconds.toLong() * 1000))
