@@ -1,0 +1,4092 @@
+{
+  "head": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+  "time": "2026-10-17T10:57:24.209959+00:00",
+  "exit": 0,
+  "junitResultFiles": 509,
+  "junitTotals": {
+    "tests": 2867,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "realGitleaksToolSkips": 28,
+  "results": [
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.NewApplicationTest.xml",
+      "sha256": "43ffbe0c408b56124b40bf4d10dcfc6536eb20b127ad9791aebf003c63d72453",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteAnalysisTimestampTest.xml",
+      "sha256": "43754dc4fd1843ae290fca896bf0e847956e313d936a61c653bf7a672cc64a1a",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.NavigatorSeamTest.xml",
+      "sha256": "168c56c21ba8198d8ff0b71623e4d99530d4debe143ec002be690becabbb5bb4",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.PurchaseSettleV2Test.xml",
+      "sha256": "95883b87f0f8e2e31982e4407996ef060e922cd3cef1fe9052b1e66bb56c6254",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.WalletSourceTest.xml",
+      "sha256": "880734c0746f256ae0eabdc6362e4582d43b1093fad003d9470d48cd2ab5f07c",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.SignOutRecordsAccountTest.xml",
+      "sha256": "9b1834b64c4e1cb5dcd4839ff0d20b81a56e7cbcf5d4a92fdd682e207c67993d",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugPreviewKeepOnlyTest.xml",
+      "sha256": "192872fb777d35d2cbd5053d4a3aad6fd4f608122e910f83ac1d880d897f0481",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.LocalDataWiperSimplifiedFlowTest.xml",
+      "sha256": "bdf59e98ea1c0671e1bc63592fbc680b12b31a56f9b8b65b9f858aea155878d3",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.RemotePaymentGatewayHistoryCacheTest.xml",
+      "sha256": "7beb4278b42183079f1997fe6cee8e175a3a83ed9ddcf6ffd4a8d9f8cf3ea22c",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteKeptEntriesCapTest.xml",
+      "sha256": "4c4a0160f23c5d7e4060a6384445add82673b3ffe0c7377527ebe2bb0ac07f36",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RequestedMarkerProbeTest.xml",
+      "sha256": "9f78641b1966f16634a8c5accec03922a402bff1351c270a972f4ac834b13635",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.account.RemoteAccountDataExporterTest.xml",
+      "sha256": "fce29a3a5b7ee461f962ce6b35e5d04f03cc84cf97386a8a8832953c491d8cf3",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.RemotePaymentGatewayTest.xml",
+      "sha256": "bd65ae388e4d9e1e8be4f2719cd7974f97a997f856adf6e05e2d4ce5fc59ebef",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.di.AiBindingsTest.xml",
+      "sha256": "60e246cd905e402d095252fe807436e76e01351b61d4bb3072006ae2c8ced6e2",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.credits.RemoteLedgerSourceTest.xml",
+      "sha256": "2d3e9d4e34453f6c28fc3ab60917e1557200f46cdf2bc577e0fefea63c89d8eb",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.credits.GuestEvidenceTest.xml",
+      "sha256": "60f191bcf19b4b22042ed46c0d29c463edf9a64fdbc3139188ae376e124f18a7",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RemoteAccountServerTest.xml",
+      "sha256": "dca7fc81883241d703484b9497bd0fae15aa6101d9f813ece9b42db6aa4199d4",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ui.AppViewModelGateTest.xml",
+      "sha256": "c0c5d4f680a04ba19d12178549adc14c84d3f8453e0a5c7ffb0606d8243b06d5",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.ReducedMotionShellTest.xml",
+      "sha256": "0d4c97733514feb9ff7fb8acf3ce11b3667ddd102f74833b99856e16128a4cdd",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.FailureMappingTest.xml",
+      "sha256": "92bc75979ee47f1b39b57b5cda143218802bdd64ea61caa600be00dbcd07f6b7",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.credits.RemoteGuestTrialGatewayTest.xml",
+      "sha256": "81dc86897e190278f4c81ab06314fb1161b57d55f4ef2c4501525f19835b3117",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.SessionExpiryHandlerTest.xml",
+      "sha256": "699b4d6672ef2fbc83284d7edb65e63cb7490b005a79811b4d1b83bb4d7591c1",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.account.ExportedFilesCleanerTest.xml",
+      "sha256": "a2772be0495f6950b7a64fb8d64062ca145b561ef83774baf22643f58792b352",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.LocalDataWiperTest.xml",
+      "sha256": "8e5638b65f611d9bd6ed2c012f3db68749ca0e3785e9f33853a9eda39a17b1be",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.credits.GoogleActivationDigestTest.xml",
+      "sha256": "6ae31199cfe95abeeab7ed006ff2ccc5f15e360e0b795e4b9c21b0a95fa055a7",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.account.RemoteContentReportRepositoryTest.xml",
+      "sha256": "0cef6547675a044589fab02e41316f13abf1af1b88ce150c32008cdcf9ae1e55",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.NavKeyCatalogTest.xml",
+      "sha256": "4a836ed0ab9b544bcee37bf0ea123533c31fcd4673ef74e313f3705c3b755ebe",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.JobDraftNavigationTest.xml",
+      "sha256": "e100b7e211c8a37cf4adbc47012c7ffd681bc34dc7c0c6064c775f1a08ab0b83",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.AiFailureMappingTest.xml",
+      "sha256": "bb128ccf260aa198d8ecfbf7e3c326ac00ec28cdea035a9fe8bd482373b3bb41",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.PurchaseProcessDeathRecoveryTest.xml",
+      "sha256": "6823a16b5dbcef9043a4deb446e21792aec431df03eecbdb7d898e9ee7069a6f",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.LocalDataWiperOrderTest.xml",
+      "sha256": "2cea65f1332566c475170ff777fea43edfae8e2c89d0706b45ee83678da90cda",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.FirebaseUserNotFoundTest.xml",
+      "sha256": "3ee51539a5ae622ba255fb98b7e4c9b37b5b43f96d14c557a1bc7d1be3fd5fa1",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteResumeTailorAnswerTest.xml",
+      "sha256": "e0df06f9ead07bac4a68812d66c069e883bb9834e98e4593d3ba541846ba3753",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.AccountSwitchSignInTest.xml",
+      "sha256": "171792ed8f9ee6f9aed1ac285947d9ad0c2d3af34898dc44fe729912fb4eb2ec",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.SendableFactsEvidenceTest.xml",
+      "sha256": "3ff33f27a82660140ce6502032b04c4ff0d746251f590e5ae1791697433644b3",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.credits.GooglePromotionClientTest.xml",
+      "sha256": "0baaecb152867f808ff992cde852fe9138d57f0e1238f7ae238940e266d69335",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugPreviewLifecycleObserverTest.xml",
+      "sha256": "e8537bd500ba9b12409592909e7a6ed63e960bb9dc219316d41a8bce87a17962",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.SignOutCleanerTest.xml",
+      "sha256": "2640bc2b8991cfcd389318e0c21fcc98dc54dc3bf99d022c1779e97ad75baf21",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.PrivateUpgradeStoreTest.xml",
+      "sha256": "ef0badd0b9a8d684ba1679e0af8cf0020cf3814c61ce67080a9a7daa6836f717",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RemoteTransientDataCleanerTest.xml",
+      "sha256": "8a0f986a0b0e6e7ca0f19ee5253b65f943f954f0b61d88710735f552bad60d0d",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RemoteSignInGatewayCancelledWipeTest.xml",
+      "sha256": "18385e3c6f4af7db7c83dfaf5336a54be08c145c96105c27afacb897964b0bed",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ui.RootViewModelStoresTest.xml",
+      "sha256": "0f3cc76b1159a6dc187d9c1080fca1e0fce741a2ea2f5957144d76145c36498d",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteResumeTextParserV2Test.xml",
+      "sha256": "58f000ce200ec4f0e50e029ec46ada4cb912aa1be51b93db806462d3a291e638",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.RemotePaymentGatewayUnlockTest.xml",
+      "sha256": "c9acb0279ada883de8cd7787eeed059ab83385c72018bcb4911084fd78a0f043",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.RemotePaymentGatewayPacksTest.xml",
+      "sha256": "767ad2e6517e33ba4e4ac9bbd3a46232d8cdb7c440fefb1a050b7aef479609d6",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.BackFallbackTest.xml",
+      "sha256": "f9a7959280739cc5f365e807fffa4446aa7377097e9a2daba414219757318f2b",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.FirebaseAuthClientNoUserTest.xml",
+      "sha256": "55b9032e8dae958ebe595a05f975183fc6a288e60b89c245ccc48f76e4a53d8f",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.ShellWalkTest.xml",
+      "sha256": "86ec12d067631d609a44948e0f279ec7f0af899b5372e7426df80b403379cf41",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.ScenarioPaymentGatewayTest.xml",
+      "sha256": "4b70018b5333b2a342ab1b4e70bfe1fac2835d03d2b7317a22b1700a66c5499f",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugPreviewNavigationRootTest.xml",
+      "sha256": "cec6de502debe1857661b658d55ba1474799461c663e1a1319e9009c0063f53f",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ui.GoogleAccountPanelTest.xml",
+      "sha256": "7a3540634c7f36395bf15d4c7c47c3b5ab532547780493d4f9b4d1364e42d823",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugManifestDisplaySizeTest.xml",
+      "sha256": "c76d183e6a3add8b0d4c9b26106bfacfe1aaad20804a0a57bdc0922178ea1d21",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.AiFailureMappingV2Test.xml",
+      "sha256": "89496df3097660f2b9a9d5d1200e50ae5db8ee6fd58df3c95d88ff5343b7fd25",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RemoteServerAccountDeleterAmbiguityTest.xml",
+      "sha256": "b8554de0b2f1e6b4401168258448d31bfd395b76faa37e7607f8c85b996d0b88",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.LauncherIconResourcesTest.xml",
+      "sha256": "4ccf87d437851df0f8dbc44a61179df57a9adb70c6503b16bf18dd0bd8c267fd",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.RemotePaymentGatewayPurchaseTest.xml",
+      "sha256": "a880a34c2474a25fc2b26cec8d8d55e4bf30cd24942857436d4d7cbb0047fc69",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugMenuViewModelTest.xml",
+      "sha256": "064397990a28a5566c3bcae675b5eea3d32bd4fe3dfe8b67bd9025e7268c8528",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RemoteAccountWipeFinisherGuardTest.xml",
+      "sha256": "850dc65180e61f67cc9738c4b2a2a393757bfa1bcf03a1ef875b88eb264b20a8",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.GuardedJobAnalysisSourceTest.xml",
+      "sha256": "6aa8df0df1dac1bda566c07054cc55f8b390c4e81495b43d8b4f84078eec7a69",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteBulletCapImportTest.xml",
+      "sha256": "76d20ad4c04bae267dd61a4bd84c2d173689b99a32edda651d05fa309462423f",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.SignOutCleanerExportFilesTest.xml",
+      "sha256": "3bdaa4dfa048dd88d0c6f2459441286c77b427943fe3eafe000f395070fce26e",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.PurchaseRestorerTest.xml",
+      "sha256": "c8fb18ea044b81222d3ead5f3168a96a386cb7914af2951b06cf5644da676fff",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.DebugPreviewJobsTest.xml",
+      "sha256": "aa823e78c77ccb947a5e8359bb11e8b326b40fb94dc977a3797d0a9289196c76",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteJobImporterTest.xml",
+      "sha256": "2135330841a033ca9a385ccb59159080cd5df7b699507db55b190c8be12249c9",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.LegacyDataPurgeStartTaskTest.xml",
+      "sha256": "0332164635af89ab0333bafcd490ad66b18a92d94750a447dfa089501c705e89",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.ShellHostsTest.xml",
+      "sha256": "f7c1bda3d3eaed4f4157c0d6ada632a87116aaf98b46d5c76bf036e625e1907a",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.ReadingChromeTransitionTest.xml",
+      "sha256": "049886a7c2786ed92693843159e5982e235ac4371e35dd6243f9ffbd5c9b203a",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.ObfuscatedAccountIdTest.xml",
+      "sha256": "262646cc482aff5bc567a0cde03d83cadeef544ca9df101175240473fb26d14f",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.PlayBillingMappingTest.xml",
+      "sha256": "84f3bb7a2e46027d733cec64dc093aebfb3b5ddb7ae07e6417c6eaa253e265f3",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.di.AiBindingsJobImporterTest.xml",
+      "sha256": "f00a4d0700be0cef32fe745c4d60683def803e6e0c73970e71476770aad06854",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteResumeTailorTest.xml",
+      "sha256": "4b2cf5dd2600e474504575b7cb391b6c115fd5113e99c40d233a1f09195a9685",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugLauncherOpenTest.xml",
+      "sha256": "2c90faf2ac6b3ca3eca2f59a611312bb425dc4e743093687fa819690f66a0261",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.referrals.ReferralCodeTest.xml",
+      "sha256": "a5bfba4e7e241cb1465db4e245b310d3ebb086d0a74544ae529fa07c3ec6bc42",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.credits.GuestPurchaseAccessTest.xml",
+      "sha256": "47edfedaf270664bfc9fa38a975b1aeab459a016a35fb9bb8a76449c0fc6fac3",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugMenuViewModelForcedPaymentTest.xml",
+      "sha256": "641cfa4b5263183f4759fb448bfe334e215727d96543d830c84846105a9e06d4",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.ScreenChromeTest.xml",
+      "sha256": "56c97c5d2591bf04905a9a8068c6dcd555caa2cfab0b5e3a4c06fbc0969ba3ee",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RemoteServerPrivateErasureTest.xml",
+      "sha256": "5b516e5de3bcd6264e6d87b2dbaba9920c36cf3ff367abb65933ace2a6df9b70",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.NoDockReferencesTest.xml",
+      "sha256": "39cbf764a8a28328ce1bfad88d3c8ec29533155177d6e7c7f6eccaae664e604a",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteLongBulletImportTest.xml",
+      "sha256": "42cc5069b8945e9b2ad162a07df25c83f5aab95044b5e76bf261a2f0e2b3aa36",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.PurchaseRestorerPacksTest.xml",
+      "sha256": "5367b66a9735d8a7296220e153f5f5e422cc7b9b55741a69944b48d52b96ed78",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.account.DataExportsStartTaskTest.xml",
+      "sha256": "8822682ea8686bf4c891bbee549b45daf7aca4f49a00ce8c4be25a98e9521c3d",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.NavigationStateRestoreTest.xml",
+      "sha256": "51c1428e226341e8d8ecf8dd954bbaa132562ea8d6e944d5d74b5feea4ca49ed",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.RemotePaymentGatewayAccountSwitchTest.xml",
+      "sha256": "46f700b166a43562dba6730a7fb276e10e01030f8c6be15b33d07818df4ac764",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.TopLevelNavItemTest.xml",
+      "sha256": "b432a8894e12a29d48abcd7c3bb0b55d836866256a6d080fb68286c14c81154c",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.PurchaseSettleTest.xml",
+      "sha256": "c5f79205f8d187ced093cc2536644330ef4843c29c0cdf80faa0fda5e6386b8e",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.ArchitectureDocNavKeysTest.xml",
+      "sha256": "639dd4deaf54bc664a65f9ca13d5fdf23c4b7b4194cbb6b0f08d4c6ebcfe524e",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugPreviewLifecycleTest.xml",
+      "sha256": "8a08555e2c83da8479f8b87955ac70c209e0c395c79fbdb41bfa2b731a63ab7c",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.PendingWipeStartTaskTest.xml",
+      "sha256": "2f3aaa1cc939c5bf2905b7f59be9dfff0e6bf73b7fa4bafdd23608b65b0eb4db",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.FirebaseAuthClientExpiryTest.xml",
+      "sha256": "7849057aa70750829b7f3bc4f49833439fc28b65888203967b65d92af9fb1964",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteAnalysisV2Test.xml",
+      "sha256": "7db4b7dbd1bac218f4764dd6b0c879aba9a806e33030814e0880a616653cc757",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteAnalysisRematchTest.xml",
+      "sha256": "0307e81bf011f01ca666d64e534c0a5bda3e681c99b4b1d1a17f0e1be6efaf73",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteResumeTailorV2ResultTest.xml",
+      "sha256": "c824d00ef27b9b6c38209bb748eea316204d7cea3bac0dd232afad9dcf6e52b2",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.TopLevelKeysTest.xml",
+      "sha256": "389c12f6e6fe380aed5efc4f6cb5e7a4618ca6fb352149eed42020fc08af316d",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.ShellChromeScreenshotTest.xml",
+      "sha256": "b78a2002ed23cb106f88e914f59c06d4ae750eab7bec9fde3bcdf5e88172c3ff",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.PurchaseRestorerSameAccountTest.xml",
+      "sha256": "f95a8f049f569b6dc8d4aba10303222817c40b58d2d90355c7bf7b7bee562ab9",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.PendingMarkerAccountSwitchTest.xml",
+      "sha256": "08954cecc761d2e4bf5663ebf306754c688cbdb9a65984b0eedc31821bf9673f",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.TabBarVisibilityTest.xml",
+      "sha256": "b6c001a3664ec312f058dcc581388b8c2e0b08ab15fefebdd45579bd03bf63a2",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.SessionExpiryHandlerAccountGoneTest.xml",
+      "sha256": "ae5f7745db270a0182b084de54ab65306e0e4f1bef32970de8867ea5762c7397",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugPreviewPendingToastTest.xml",
+      "sha256": "42ad453e308c87fae6c47104487084ace0630917fc605d881342b3d8044d6607",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.WalletSourceAccountSwitchTest.xml",
+      "sha256": "e66ffbba9c6fcd7b2c72a61a341a02471ceb96a2ec07c0b74886c2de47fba042",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ui.RootViewModelStoresAccountTest.xml",
+      "sha256": "c2cabf0caede3d6d0fb0f3ad3a79796484d2e68e8b8ea06853ec166d8299563c",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ui.AppViewModelDeleteThenSignInTest.xml",
+      "sha256": "70b79f9724a5dd6392eab331c1fecfdbfc115d0030e48bf162e4d0b723b8c9cf",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteResumeTailorRetryAfterTest.xml",
+      "sha256": "741a8d46da53149fa641bb83fbda6deed09ddd277a952f28dd979cc3df84d677",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ui.TmrAppRootTest.xml",
+      "sha256": "d1ff7d6895b7340e991a70149b2f54c6865975274751985d2190241cf5413e4c",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.TailoringRecoveryIntegrationTest.xml",
+      "sha256": "29e37b46707fcff8cab743dd4acb229c8f3d346dc20a79b6a47759151a49fb3c",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RemoteAccountWipeFinisherTest.xml",
+      "sha256": "fd5cc049ce68614945a2f7bca6d5c2e4f9488305faf23aea20ba448c085c5974",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteAiRoutesTest.xml",
+      "sha256": "88594167d4115f8c006af59dcd7af4be518125fe5586b711279dfc24667d7403",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteAnalysisCacheTest.xml",
+      "sha256": "478941f9f4ea3c8ff54ec68aa683a7415964b4df1a3b84c33825f7860fe1b74d",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugManifestConfigChangesTest.xml",
+      "sha256": "7488b27e66a84ec14e7b92904a4e93b0d19bf7258f50f3921e2ba0473ab6cd8a",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ui.BackTargetViewModelTest.xml",
+      "sha256": "1097273f1f1cb810fb10d365528f92a41db9a70ad3bc1d0ab5441641f3e92beb",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.GoogleAccountCoordinatorTest.xml",
+      "sha256": "a9e405f93075d764f718a11df371533079d8a4817ad9a0ab4cd0d9d2d6ca88f5",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.PurchaseGrantRefreshTest.xml",
+      "sha256": "3efa1f5227104ef190b31f8200cb6d6e97a5118c46e075de4c089cc19fe618da",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.BillingNoSensitiveLoggingTest.xml",
+      "sha256": "1830dce9b1d0fca779414440d67e32b1218cb176945dde0061d88a56b0d85abc",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.debug.DebugPreviewRootTest.xml",
+      "sha256": "b41e8fb440ba53cbdb190ae0cc6006176801a268891f073cd5eec70b1a8e4fd3",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.AccountSwitchBillingClearTest.xml",
+      "sha256": "722658951ae93f1972019444895b512dd4daaa8b28331d14d63e5d73f8bb0a75",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.ShellInsetsTest.xml",
+      "sha256": "af4e4e737b404c8529c5f49a0bcf1f1582fbb39c62e3dda0b99205d3cf44cf47",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteResumeTailorRunIdTest.xml",
+      "sha256": "673655bb5f6597b638e4f61478a8da1ec7261aafbde7780acf917b61edb20441",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.navigation.TopLevelDestinationTest.xml",
+      "sha256": "5edc5e798dbab1f2a129788ecb9bedce56f4ea180b92830c0f322738cdb65d0f",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.billing.GuestPurchaseRestorerTest.xml",
+      "sha256": "6230c2b8f036f0e928d3c984337a55c77c5ad56c5c4e80951a0cec2b92f4e2c2",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteResumeTailorRequestIdTest.xml",
+      "sha256": "a7108654f0f51c5b2d2c8864d2916fbfd5e39bc0efc515b8d18a682cfc5f8715",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.ai.RemoteResumeTailorFailureTest.xml",
+      "sha256": "5727396d432dfb11609c49c3a5ee3b5557f8c76cbff4281dc75d7ba7a36bd3ed",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.referrals.RemoteReferralGatewayTest.xml",
+      "sha256": "fb1402fc268cb977cbba8642eed78b8285bff303c09bfc19558390b68bb2ade5",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RemoteAccountClosedProbeTest.xml",
+      "sha256": "422ba811f4f9a6ec1765ab5b904ab93f506a98f0fb1525316a6bf46b7568a2f0",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "app/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.app.auth.RemoteSignInGatewayTest.xml",
+      "sha256": "26417e93a3a0ba1d42d4a4856ca01c725e05a02080d19e8b90a3810690cbd83c",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestResumeSettingsRepositoryContractTest.xml",
+      "sha256": "a11a12c110cec9116e35c657abf3be8399e924709e0726380a5e590b7c4bc23e",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestSignInGatewayContractTest.xml",
+      "sha256": "0eae50da3a12aa4ee90bd1354ad2cdd918b7c404cd0a8ec41d4aeec4803ef880",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.repository.TestApplicationRepositoryTest.xml",
+      "sha256": "8300ce23c28a5ff880432e548d875b25ddf04dd1ef9847bd3d671382ebd6eff5",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestSampleDataControllerTest.xml",
+      "sha256": "d757b46fe3dceecacde068588b5b0870e5a204b20d001aabf2e03af662bbcad4",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestPaymentGatewayContractTest.xml",
+      "sha256": "567a6bedc2dd8ef8366c6fe295734f07518943e37a69d824df1279a26294d7c7",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestMockStateStoreContractTest.xml",
+      "sha256": "bd4179a666cd93a29777f0a7ce505a2e8756367a03b2b30de32803d02e75ef83",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.repository.TestProfileRepositoryTest.xml",
+      "sha256": "4f8da3b534af1263675f9b26fd1f9a7f5036083ba19933feff7834aa7b89e574",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestCreditsRepositoryContractTest.xml",
+      "sha256": "b9547e57e32e5ef90a0e2249c7838ddbc38ba3c44d3df100951889569794ecb9",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestTailoringReviewStateRepositoryContractTest.xml",
+      "sha256": "d9864f0e76e930c1de1bf5bd6271dbf01f83df406b2df8c8668619469942648f",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestAccountDataExporterContractTest.xml",
+      "sha256": "7154ec279ffeabdd0487f20ddf669ae442b201033a800c3d58b6110c7e60909d",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.data.PrototypeFixturesTest.xml",
+      "sha256": "7f4b63019d60785e2628032ac11158b09cc15a458dc1cc8ecba9b998b12e7d24",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestExportHistoryRepositoryContractTest.xml",
+      "sha256": "f9a2aef8c3ef921ad63bf07ecede741a5dbae8fdca199bb7e5bcdf6aa676c8da",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestSessionRepositoryContractTest.xml",
+      "sha256": "07700601e1d9dacf30d38f350be285113596f6ef61a95356c7a8db000226c702",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/testing/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.testing.fakes.TestContentReportRepositoryContractTest.xml",
+      "sha256": "64ebae903cc9d1621e6c1633c7c437937c6ea394512f4fba2b639adf6dc4b3fd",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/model/build/test-results/test/TEST-com.tailormyresume.core.model.CountLogicalEntriesTest.xml",
+      "sha256": "b1c48e739b075385e5a977440fc6c13710d9be102075f981ff74724e490aca73",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/model/build/test-results/test/TEST-com.tailormyresume.core.model.SimplifiedFlowModelTest.xml",
+      "sha256": "b95dc3b7479d9146fcce69385d8785c8d714949efb86e23535a0e4394fd35247",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/model/build/test-results/test/TEST-com.tailormyresume.core.model.SendableFactsTest.xml",
+      "sha256": "42674460d8125c3fe6756b33d60ce5cd141aecbe19cd3b41fbdb636a24614865",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.sample.SampleDataLedgerTest.xml",
+      "sha256": "9a250a391070a2947af5684d8d4db78b895ffc169958fc4f4eafdb5af58703cb",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineBulletCapImportTest.xml",
+      "sha256": "fb334413523590e4e46aa3ca96759fd5b5819c97ab2317427f7066d46152013f",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.WelcomeCreditGrantTest.xml",
+      "sha256": "93b2b1d057c5a346faea8fe94983f8f1208d7c80af753ccb469881aac8e9b6eb",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.FactDateFormatTest.xml",
+      "sha256": "45d5852c168494ca882e66d7026a4a19f3c4ba156c2bc0f0b8615c2fa3050361",
+      "tests": 29,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteAccountUseCasePreviewTest.xml",
+      "sha256": "0e448f93d55ac2f9fac5527037dd22c12d79e5bf8212f0cf3682fa677782126d",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.FinishPendingAccountWipeUseCaseTest.xml",
+      "sha256": "808516b4ed9331feb3d9050f3ed8b4f25b898cd5d6a25fbebdb3998421501058",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteAccountSimplifiedFlowDataTest.xml",
+      "sha256": "afd7d1d6c061ad28a60b8f1c05c71a857fb54fbe2c7083ea7cf73afe78db489a",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.CreateApplicationUseCaseTest.xml",
+      "sha256": "1def661a684b2f8be40745eb8be700a28ac27cea2293f91d32e05889a59b26ef",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.onboarding.SaveManualProfileUseCaseTest.xml",
+      "sha256": "f57bfd0ea7a8f30f5481c7e2b544ae3ab5aa9ad78c0460c2a4c1eedafe8d7bd0",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteAccountUidlessMarkerTest.xml",
+      "sha256": "7642f3e8a6eca758e55029e27f72ab10f48f202f73676d8245706407cb8fd975",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineLongBulletImportTest.xml",
+      "sha256": "8d0c5ded6094dfa709dd146442cd5f02703a42d8c4283e771c1c470c9eb957c1",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.CompanySentenceBoundaryTest.xml",
+      "sha256": "3b2f7ea409c778326e4e3f331aa5cb5e596018599237f7a8c9dc441a77a61603",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.gateway.OfflineSignInGatewayContractTest.xml",
+      "sha256": "be5b51a54a275f4ef829e0d8e5e8f831e7cd5e37d2c1ea308f813f50e90b2ccd",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteAccountLostReplyTest.xml",
+      "sha256": "a792e496502dec750df6f770f6e558477edc11a855931f2d2ebe3f2be9d753a8",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.sample.SampleJobPreviewTest.xml",
+      "sha256": "4ee20890874970cae6fbfdc93ba7589dee774f3a66805b4142a0a7d814063e16",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.MockPackCatalogueTest.xml",
+      "sha256": "5465c5c27cabdda8ef1c6f0845af2553ad0462259111d42d40ab414cc9df96bb",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineJobDescriptionAnalyzerTest.xml",
+      "sha256": "a59cfebf5f9f80b774e022c01bb016610b0ae418b60ad6a1a5da76998ad0f271",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.sample.SampleDataWiringTest.xml",
+      "sha256": "a90e82bb21d463fabc8e522dd55b2cc1637d24ece2fa386f03e013bacf40c75f",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.ProfileFactCountsTest.xml",
+      "sha256": "5232bf51ec235b71098accd528bbed1549f66ab20e6c05cd33304376354862f4",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.onboarding.ObserveStartDestinationUploadTest.xml",
+      "sha256": "0b5f9d8e4fad169f802ee4585a76381db62833765a05388edaa9c245646c2f16",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.FactDraftValidatorTest.xml",
+      "sha256": "77d5f4f26d4849592e71ce4a5d1cffa7ddf585b10b87f994b9e24df0575ee9a5",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineResumeTextParserTest.xml",
+      "sha256": "84b067bfe64731a9081b1be31126fcedd1ef9a1b516541e918952a91ea702f8a",
+      "tests": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.TailoringCreditSpendTest.xml",
+      "sha256": "48b7113ce9e8e886b0d636cb3292ad3ff32611ed7a11229e569f858d7695efea",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineGapMatcherTest.xml",
+      "sha256": "35e3bc4b6e884038cf79d503b04193e6181c40155c8305b21b4187f005fc6ff3",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.SetApplicationStatusUseCaseTest.xml",
+      "sha256": "85e6d91b4f8ef2d805a32742bf7a521b05dd6f32c62f66e78020df981b8cbb59",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineFabricationGuardTest.xml",
+      "sha256": "b93ce71e7a0dbd13eaa33d999de1a5dce370e5115b0d49381da22c97c50440f9",
+      "tests": 47,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.ProposeJobLabelUseCaseTest.xml",
+      "sha256": "273881abe1856ec16c91f2b603b68a893c3460df4c511ad340132521a4ae8591",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteAccountPendingWipeTest.xml",
+      "sha256": "aaf34cbb76c562454685f2095985825f5cff7cb27416c88a1d2ef371771ea6fb",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.AccountDataArchiveWriterSimplifiedFlowTest.xml",
+      "sha256": "cd6511ab540f5a1759e68b9fc4b7e599940348cecde8e413337d4d6b7b58fd96",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.onboarding.NextOnboardingStepUseCaseTest.xml",
+      "sha256": "60c7540226d67dc3ab500c1ac25bc052703b120b80438cd21eb019195ab28465",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.FactLineRendererTest.xml",
+      "sha256": "f3d2ddb2b5d73e7f0c73efa887ec13bb6202dae1bc77ba87fee1c874f4f72baa",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.TooLongBulletNeverUsedTest.xml",
+      "sha256": "c21207e10ba47fce9e1c39c1b8983ac9b7da75385543cd5a09c1618d9394039a",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflinePaymentGatewayStateTest.xml",
+      "sha256": "7f8cebb9a0222e89e95cd9b3700fece9a81e11aaf1cbc376e924832930f5279c",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.SkillLexiconTest.xml",
+      "sha256": "793b960b1224b1006262256df23bbb81fad4f644bc20173e732690515ea3c6d6",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.CreateApplicationPrefillLabelsTest.xml",
+      "sha256": "03d776a220b85152025e4d44be1a2c262e3dbd7302ddf2e76aaa4ba007085e1e",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.BulletSplitTest.xml",
+      "sha256": "03df1b285bf5156da5fd6d1ddfb9d21f9457e5fd02b8a5fc2a557fa77773d76a",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.AnalyzeJobUseCaseTest.xml",
+      "sha256": "2d10622f59e8e21fcbda3beba06b1d96a8a4856073de70d82f0a96d385867227",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.FactIdAllocatorTest.xml",
+      "sha256": "73b0bf7dcb0c401a3cadd8a2be0aebed9c970a723232bc4cee4c067ba0f55693",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.AddUserStatedFactsUseCaseTest.xml",
+      "sha256": "f5367bf26429a830d2f545d1270acfeef1d61cd56193c3935d139858f7f1f15b",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.coverage.ScreenForKeywordsTest.xml",
+      "sha256": "66eac28ad04e10b7dce95655a723233417f34fdeb7da2d2a1b4dc21ce187b5f8",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteAccountArtefactRestoreTest.xml",
+      "sha256": "ff29e4ea48fa238eeef5b48248be81dded615f27e96041b84541777a4fc5599b",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.AcceptChangesUseCaseTest.xml",
+      "sha256": "537f36f4f55817d015a23ac68af4a2bfa896650dfee3341490db15a8645dc55c",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fixtures.CanonicalFixtureSetTest.xml",
+      "sha256": "b1a1b96bbb6411584eef885b69e41c2d67c8cd0e8463be7775e1a5ece0c92c4c",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.FactBulletLimitTest.xml",
+      "sha256": "6a77bd6b73587a6f07d73a8186c9f6645955969c0a313bff965c703a3830b6d2",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.onboarding.ObserveStartDestinationUseCaseTest.xml",
+      "sha256": "fdf219b40d049a4467a2a83d1abf17123c909937a6358d956b4d1755ef53c3a9",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.ExportReadinessTest.xml",
+      "sha256": "fa9f39992dc550a6e90dbb5c64e5ab9f849c90db90b41f60cfd6f6f8d2a01781",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.TailorResumeUseCaseTest.xml",
+      "sha256": "51a623dca35b2cae3b3a5d778e7f671009ee607d8ea5ce708e8df2ab117ab1e9",
+      "tests": 41,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineAccountDataExporterTest.xml",
+      "sha256": "835e56183786f10f69957ca2434b4f086b9dbd9b06dd200f916450e5157a76a6",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.profile.RequiredGapsTest.xml",
+      "sha256": "b84e7d227886b20fc47f9c462fe7a71011ad603dde5e0781f8b87ba951919383",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.RequirementPhraseTest.xml",
+      "sha256": "5b9a4217a7b19836282a87035247d02141780223993f4da19560ceb95bbf1adf",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.coverage.KeywordCoverageCalculatorTest.xml",
+      "sha256": "9c2d6179d1a9b0431a406ecaa5c796940efbb1e61e03a0f537c3773c56663b67",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineRobustnessTest.xml",
+      "sha256": "84540543ace6ac89775d321133079ba8fbdfb685fd218aecd88bd1f8cfd877b5",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.sample.OfflineSampleDataControllerTest.xml",
+      "sha256": "61f4ddcbb72e1e6ba90bad5e0cc077ac977920803efcd4d68371c24628fe66f5",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteAccountExportedFilesTest.xml",
+      "sha256": "3c0c8c49f255acc8348ed2ce606ad242cdcaccb3d617529353d975695732dc98",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.UpdateBulletDecisionUseCaseTest.xml",
+      "sha256": "4ee465a4e90f89c4d5aad118e3ec6346bd4d8d79a6a738a4d97faf4c01031e98",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteAccountUseCaseTest.xml",
+      "sha256": "06d8b2f041b07a7126be7de5517b6855125e707a3eb6db2dfcc536fbdb96d625",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.AddUserStatedFactSkillProvenanceTest.xml",
+      "sha256": "02d8c5420c1f3560517416701f0691d33827900e964f318f369a3eedd046f23b",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.AccountCreditBalanceCachedTest.xml",
+      "sha256": "a2dc50a38f93ced33e00fb47ab7e886559c5f4e71bed7ffae4b4306b19905bc1",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.BulletRewriterTest.xml",
+      "sha256": "40a83f20c1ec8bfb3475845c477d1327f3ccb96c5040ea4c3ab86909997b96a6",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflinePaymentGatewayForcedScenarioTest.xml",
+      "sha256": "60e42e607a2c85c811b1cd9a9292a18d669464ba14e656d3dea2f885883cbe6a",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.onboarding.SaveImportedProfileUseCaseTest.xml",
+      "sha256": "3cbe6a807825ee93cca84329e385ed7e6c84a8438a29f1e5aa10d37b91571c6c",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.KeptJobDescriptionLabelsTest.xml",
+      "sha256": "1027b654135822f2e0eb2c1db44531f9943abe767babbf2eafdfcfd05f19bbbf",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.onboarding.MarkProfileReviewedUseCaseTest.xml",
+      "sha256": "4b2b2e3eac55565706cb26ab322bc88b13781e39538cc4b990068b7b5c9f5c83",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineEntryCapAcrossSectionsTest.xml",
+      "sha256": "a396387aa5669b9e695fdbbe5b596423c3fbdc4cb681bb0deca59b10197314cb",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineSignInGatewayExportFilesTest.xml",
+      "sha256": "252673872dc5e14c7fb4695695c4f467c2b7fe11591b40c76539566e69de2acd",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.AccountCreditBalanceTest.xml",
+      "sha256": "61b4a07d18a9ea373ecd3221e897feb4bf8eda97ce6f1d80ca7fd8c6408f041f",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.BulletLimitsTest.xml",
+      "sha256": "5ecbd682f21a5a36e6f92494a1665aadda2e09132167897c871e25d0166e9fe5",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.FactDisplayIdsTest.xml",
+      "sha256": "d46e4946c3dab08a8a5f05e718762172e2c09f118abc54b48c973e086110441d",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.export.ExportFileNameTest.xml",
+      "sha256": "747cf7b72928e3e95d3094e7dea52c95e5a94b2184c74abea446696fe8e8dd99",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineResumeTailorTest.xml",
+      "sha256": "c09687cda159ef4888d74ab4d02c6d0374f7cc634e913dda6cbf0a71b0347578",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.AddUserStatedFactUseCaseTest.xml",
+      "sha256": "30607762e4dbbac0bb3a82c0e0e129e250802705d13b8c7e609a2ce662fdfea1",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.KeywordsStatedInTest.xml",
+      "sha256": "9fbdfdcb156c13c373c5999e501ec147bd75679dc94d6c3a968be0eb83624c96",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteAccountEarlierAttemptTest.xml",
+      "sha256": "4ae34dea877048233ed7f0db43f38277520bb1242318cf0683dbc50683dae49d",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.gateway.OfflinePaymentGatewayContractTest.xml",
+      "sha256": "e39af8f7f8d984b4744fa04a58373e4033d53901b80d1becd25654bec127fade",
+      "tests": 38,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.ProfileEntryContinuesTest.xml",
+      "sha256": "6a456ec654361dddfc0e08d3f65220679247ecefc71cb20c11ebacaa986c0603",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.DeleteMyDataUseCaseTest.xml",
+      "sha256": "a854743115958dbd7325f8b2852aa1ce1978c677f23bdfda8026aefdbb8da7ac",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.offline.OfflineSignInGatewayStateTest.xml",
+      "sha256": "5cbd82a42b51ce9bb78df05896fdb7cd602d91339b56764b2de155a1eb5eeb2c",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.AccountDataArchiveWriterTest.xml",
+      "sha256": "89c4a37e1e36f32556b91490454f823f8be3afc40f95bcfb8842f751644e6672",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.account.CollectAccountDataUseCaseTest.xml",
+      "sha256": "d1ebbe71a06da584a6362f89e2b3be9fd6208c95ab08b903c693931a94b0d05c",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.fact.UserStatedSkillCountsTest.xml",
+      "sha256": "31880de2422a0eb56d1822f718264b35a597b4f59a38bb20c701b48138ca87ec",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/domain/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.domain.profile.ProfileCompletenessTest.xml",
+      "sha256": "09f7f5fd2707d7fafbda1316dc4a90114cde46612c66482b165ecab58f7ba18e",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/common/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.common.result.ResultKtTest.xml",
+      "sha256": "e549ef124aff250b065de7b6b6cc38437314c99651ca5daa1730d335a356462a",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/navigation/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.navigation.PendingToastTest.xml",
+      "sha256": "1cfc0bf6b7c582ba3920483c8472ab63edbcf1cadd1c976f32263fc6db411802",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/navigation/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.navigation.NavigatorTest.xml",
+      "sha256": "31936f3bc5cd64075905f3e93989e88b38d72ca6b03d71bf4401b5d8eaff9848",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/navigation/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.navigation.NavigatorRootTest.xml",
+      "sha256": "f4d508c924d683752451007149fd44f56c49e77955dad7ebb4aea305f598fcfd",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/navigation/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.navigation.NavigatorBackTest.xml",
+      "sha256": "b3730372c27ee00ed33d0e4f1076937bee8b8f58f604a4e4f1555d8903ad4bfa",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrTabBarTest.xml",
+      "sha256": "c1a4069de8e32e1104dd2c78ab632263499b7979c80c65e7d638a71aac439b4e",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrDocsValuesTest.xml",
+      "sha256": "a4d89e4dd8024b44065739027ba23e1d22287a15c96f71c77fd1dd31aa903792",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrStatusSheetTest.xml",
+      "sha256": "4f75d1d1b626015c35d0094547442c9a33397b307b16bdea5c07e0610b6cf4e7",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.TmrHeaderCollapseSettleTest.xml",
+      "sha256": "7034ff54591522062be0a417fe76e38aecdcacf10c0869d192f87ad0056c792d",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.TmrDisabledButtonTest.xml",
+      "sha256": "9596d1a5c0135ce814c23faeca17ecaa027870b97bc4b513783666889b20967e",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrScreenshotDevicesTest.xml",
+      "sha256": "3276a0343c1d93a2bca3d1c462888cdfcb58284be839708adc827bff3f1ebc67",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.TmrPaletteContrastTest.xml",
+      "sha256": "10fc6ad3886557505b4b03e2ab5d57deedcc78ed10c9955415b126dba7d5bbad",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrToastTouchTargetA11yTest.xml",
+      "sha256": "cb42fd73e3d9435916562b36dad194b0d0da08349a48efcc23f24dfc542740c5",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrSheetTitleA11yTest.xml",
+      "sha256": "797105c69803f359e93d05e36ec313c6e3cb1182f76ac69dea29aad3539a235d",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrChipStyleTest.xml",
+      "sha256": "0b3b7403b3740dde4f4cc84e8903eec21de18820ee317f26d685e7e2daf21b19",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrMotionReducedTest.xml",
+      "sha256": "585f90dffc133812f9b1d7ad6648866f8a74ecda58a0d843e8a9c0ea98abad64",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrBottomSheetTest.xml",
+      "sha256": "cff52c9437de408cb018e8cdbe2c181ade93f2fbfe85535684d609fa7d8f7cd5",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrCoverageDeltaTest.xml",
+      "sha256": "2db17e400782bd0c5033077cddc7b37918b73b3e52eb92670a887dfbe6c73a61",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrToastTest.xml",
+      "sha256": "78fe4af2c26f034d3a6687d2b3d374f6cd039bb028576f77952454f329ade20b",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrProgressRowStyleTest.xml",
+      "sha256": "0c692951bc158f8cec4ed207c9e4341ba9b38c91dc0d6fcccfc1a23aeee07587",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrChromeMotionTest.xml",
+      "sha256": "b446c3dd15fa17b4da7f745742dbf3bf9020bcc1be73fa5465d6a0df03c229c2",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrStepBarTest.xml",
+      "sha256": "436792c03d184bc985b2c7d42db4ac6598c4d721940a3d38c29403805f36c4c9",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrIdleMotionTest.xml",
+      "sha256": "39c58debf2aa82bc902865e5373c968b5f038dd46b6ec854e5c46eba5d00d789",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrPaigeShapesAndSpacingTest.xml",
+      "sha256": "abf189555aabb918accd0a9313710e8ed934dc592d6b3e7f0183f9bb25e1ae22",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrStoryBarsTest.xml",
+      "sha256": "8d37148813c8075422749b6012f194320051afaa27ab5f13ef041b8c320a00b1",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrPaigeTypographyTest.xml",
+      "sha256": "ad3c58611c7764f4da035f5e53511e1cd556c000d0fa63fc0a062daf779bc172",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrStatusBarLegendTest.xml",
+      "sha256": "36cbbd8b991f64f25cad95bc635b1dced99b5636d84f8a738971d52748635d7c",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.TmrA11ySemanticsTest.xml",
+      "sha256": "a568600bc33553447059675b3f223a9292b582b7631fc8f7d535068f59d2ce73",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.hero.TmrHeroScreenshotTest.xml",
+      "sha256": "c21dbd07aba76793da71ba7e27646ddb2093860abf8f8683f5c1ca381996960d",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrSectionLabelTest.xml",
+      "sha256": "ef07bb09e673c3a15f922a47b45e492f90fd67459005231fc259a1a15d20a196",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.TmrBoundaryContrastTest.xml",
+      "sha256": "3ad00f152b44fb1ba263a2171e0294b0654d93b27f9dcae3f4c08e0cec90fb79",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.TmrHeaderCollapseStateTest.xml",
+      "sha256": "edb1bef5654e123d4beb71e953b421725cd2000ef2b680375bcdb6318568cf96",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrChromeFontScaleChangeTest.xml",
+      "sha256": "da22369c3fe6bfba09558aa9ab988116dcd4466db790a078cb296c72b78d470b",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrChromeScreenshotTest.xml",
+      "sha256": "3f2e8f1e4749e0f4593760798a2736e2962c64f6cb724236729603a5463bae6d",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrFontResourcesTest.xml",
+      "sha256": "c59230f26daf41344ea367deb465c46666dd1882e28176048d0aa6d6671af151",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrStringsPolicyTest.xml",
+      "sha256": "fad3ea1c6c3d5f698fe2b925174253158c1cec1ac0b0af9f8fe0e5d120304abb",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrChromeWholeWordsA11yTest.xml",
+      "sha256": "12da128ad7d24613df2bedb5d3c6a555ddbf22f91561bb4cff81919bb6c5c5e2",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrStatusBarTest.xml",
+      "sha256": "c768a2505c7a4cfbff8fd56016fb01eec98fd2aa3cb5b26ee9a97061a0ae4934",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrToastTimeoutA11yTest.xml",
+      "sha256": "8f1bf033c56ce65bb3f1d8ba0fe3a7068ebda6e491a1b085da191796ee252078",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrPaigeColorValuesTest.xml",
+      "sha256": "6980e8f1b1cfceaa05f4daffa6292243c5f23e08f6571d12fa4564386fd7552f",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.hero.TmrHeroLargeFontScreenshotTest.xml",
+      "sha256": "26cbeb4c6f2964bde92adba348b970656c8a26c51822cda9772f704c718da4de",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrProgressRowsTest.xml",
+      "sha256": "fe2349e228fce84601e501c290103ec5dbdad6c2829fe254d1ebb6e316bd6722",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.input.TmrInputScreenshotTest.xml",
+      "sha256": "d5044a51ee2b06f21a4fc634ed720b407b54846dc93173bd0fae29064d635552",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrChromeSemanticsA11yTest.xml",
+      "sha256": "51e93b05d19bd7f09e1df5f892ef0e52658e9d1e2ca85ddcfea396d775fb04cf",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrToastBehaviourA11yTest.xml",
+      "sha256": "8386065f33e433273b6f6ff196b0cbd2c43f3f16c36878933cbfa1fd440ee283",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrProgressSpinnerMotionTest.xml",
+      "sha256": "e01d8a0764e1e4409ff50a545ab1cbd1f35ca84546e992d4ecaf3ca3a11fe74b",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrToastControllerTest.xml",
+      "sha256": "f91e8371f784a44b20ffe3f8f3e1946fa58752f6d46f32caa591dcbf7b3d59fa",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.input.TmrInputLargeFontScreenshotTest.xml",
+      "sha256": "ce3d844ed0e79f7410f45ad7c78351394557edf443fcc095ce3284f8339a4099",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrThemeDarkOnlyTest.xml",
+      "sha256": "6758d4475f664c5be55476308ca31bd4865790ac63ebb78fe5de138348e298bb",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrFileCardTest.xml",
+      "sha256": "803930b994420ed8156920be8a129b1e44e528635c01a97207bbe1023e266c0d",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrStatusChipTest.xml",
+      "sha256": "2ae3559beb9a0e7fe970074dba247a5963aca8efde06e0e97b71da102ea7f2ae",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrChromeGeometryA11yTest.xml",
+      "sha256": "af890a0e09cd960d473a93faf0d16abf8139d5c18aa8aa4f9ef003756e980d7d",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrResumePaperTest.xml",
+      "sha256": "dc198d998d267b31139aeeb304711123873d73dfa126840a03c4d74de7b76690",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.theme.TmrThemeScreenshotTest.xml",
+      "sha256": "6bce463ac3cbdf1312fbdedf5c551befe36c874cd6790e902e7f5f2ea433ed41",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrStatusChipLabelTest.xml",
+      "sha256": "fa50467b9eb5d1a445b245936b5962208cd17c3e0981077224ab30e60457fbe5",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrPaperColourTest.xml",
+      "sha256": "a371671d8177d7aabffee1d857162e7b4b85a88300106b0bb852c22bb1c64fad",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrContentFontScaleTest.xml",
+      "sha256": "e6f95dfbfebd1d97d0d9465619496b69e86def620f5221a4abea169150ad5667",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrChromeLargeTextA11yTest.xml",
+      "sha256": "512af8507cb66ff828f73e4e0bd2f8e63946e9ffd6ecfcd2de71ca22104ed757",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrChipsTest.xml",
+      "sha256": "543a5c63717a41773a2a9098a45bfacc42b527f55bcfe764cffb8f576eed8b4c",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrContentContrastTest.xml",
+      "sha256": "6d6cad51582e775ef17685f4b7fb0a262e042b414adf78811ac4057876c22c4a",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrSheetHostDismissSemanticsTest.xml",
+      "sha256": "2a1ecb83d929b4fd18fe98c98f1ff94150c00c7c35e7dc288bd838c57e5e1e56",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.hero.TmrHeroTest.xml",
+      "sha256": "293833a793fb55663b6c4eff8a64a066cf84db1c6476d89aab8034cffd175c88",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrTopBarTest.xml",
+      "sha256": "e1dc66b1fecd39104b2456d3f9d431f590231abd28c24ef7fc2f3d411d1b4fce",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.icon.TmrIconsTest.xml",
+      "sha256": "6ffe3c9f506b95a2168f87d5b8f253746908861a3a78d472fd891a94cef46553",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrSoonRowTest.xml",
+      "sha256": "842849594624194e947ff47ad0c6708d0aa71d085ce299d75696e2caf39f6d9b",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.TmrStatusBarIconsTest.xml",
+      "sha256": "f963b724c1700c3df31c6e87d290205634010d9a77c5026a1c2a34bbcc3c784f",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.chrome.TmrBottomSheetStatusBarTest.xml",
+      "sha256": "9345e390fb8607a0de50d09e9eccf1d7a0d26d2e332c9ce7b5a10345e8332238",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrListRowTest.xml",
+      "sha256": "3cb1b273a5bb649cf96e362bb0e5233a8caf48f0bca4f3b053473de54c920432",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.input.TmrInputTest.xml",
+      "sha256": "db3597039b4f6d9ad65330947034a3a5a34bb82a347f4757b00d9c82f0fddda0",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/designsystem/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.designsystem.component.content.TmrContentScreenshotTest.xml",
+      "sha256": "26f0b70747ef59d4986ed4a7ac1b226940b8cc75e630da7e3925073d81ac8d00",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.mock.MockStateJsonTest.xml",
+      "sha256": "407d015f570d1cec69bee1a87f0dd7def34ad748d7cb2a3278cc56f368457816",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.model.ContactUserStatedMapperTest.xml",
+      "sha256": "01cc08d8a670d1eba6163a8a03c2b19b1726d2566255544800dfcf47427ac9bd",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredTailoringReviewStateRepositoryTest.xml",
+      "sha256": "523f3cbea71fea7c5a6eb52ba4873eee36103202346d63373d1531de950d7117",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredResumeSettingsRepositoryTest.xml",
+      "sha256": "dcd9cd5870903fc5fc13616bfa386ff1b2365729b9cebadf68e41c3c6d404e5d",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredPendingAccountWipeTest.xml",
+      "sha256": "7cdbf4a10f2d03ebfeb71cf5a0aec6ea5f3a2a2582059554e34a15bacd0e7410",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredSessionGuestTest.xml",
+      "sha256": "4d469c5b6c3899a6f732fea78e196c41905bee4cdf3554290643d972c42ec94e",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.OfflineFirstProfileRepositoryContractTest.xml",
+      "sha256": "f2057af25e68d3690d889d59dcd6ff76e166f874df5fb6c9d9b9c02c44c55885",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.OfflineFirstApplicationRepositoryTest.xml",
+      "sha256": "622dccf39454c6947dfa949e04da76b4eae04566737e2e42ca4daf57a06d6fa5",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.OfflineFirstProfileRepositoryTest.xml",
+      "sha256": "b9c3e971dd9f3f3b9cc05a359c298f060a666eebfabe255e5c0dbc2f6b3e8a38",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.model.TailoredSummaryAndSkillsMapperTest.xml",
+      "sha256": "60dcbac2ae290956c172af167165da1b37bff0a5b3cb6cd92f5a1d2ee2f6124b",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.OfflineFirstCreditsRepositoryRemoteTest.xml",
+      "sha256": "b16feb9d0bd3983cdc873c83d5b5fbfb307cd25890353e76222f4031eabb56e9",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.model.UserStatedSkillsMapperTest.xml",
+      "sha256": "8e6f2c4931aab0743e5fb84209746815a4e8ad494f2a921490de0dd58c2eacf2",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.model.TailoredResumeRunIdMapperTest.xml",
+      "sha256": "f0385f75e9d3b41e8e6c9b9d52d092d98e7341afdd209ef63df5ee13eedefeca",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredSessionRepositoryTest.xml",
+      "sha256": "d7667d8ffdba451dfa1dca36ae275256f8e1c3ac559a3ce85343a6e877befbe9",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.di.CreditsRepositorySingletonTest.xml",
+      "sha256": "2a7322903a704d9424c2e0774478c72070011e6c1a3768832117255ede1c708a",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.mock.MockLatencyTest.xml",
+      "sha256": "985ed2b1c00c103b52025b909decb1b8b8d0a66eabcf1bb29c91702de4da6273",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.OfflineFirstCreditsRepositoryTest.xml",
+      "sha256": "6c3fccad8d9374538e2f03d275174d19557af38db417c36b45af5ff7c2ee2c00",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.account.LocalWorkCheckpointTest.xml",
+      "sha256": "8bfce7d7cc9f985bb038d9226d9951f3af15d0928e038f121dcb577a1c99bea7",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.model.ApplicationMappersTest.xml",
+      "sha256": "9c34ac5e51f88753c5e2f5b49eff1509736ba6cf330d3a8f0559f79c3f5a5e0a",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.OfflineFirstApplicationRepositoryContractTest.xml",
+      "sha256": "92df5422f9606eb4db1c7efcdb7aa6557aeb2339be671c1b3b6b9bb19752b8aa",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredPendingAccountWipePromoteTest.xml",
+      "sha256": "503f9063a756f0ebe5901624a801d0da38dd7d9e1cdb30252f4dd219e42fad67",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.model.GapAnalysisReasonAndQuestionMapperTest.xml",
+      "sha256": "e74c17451b0ab97988689f30118d8fb9179c253f974631c538e193af4d322c13",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.OfflineFirstApplicationRepositoryLegacyColumnsTest.xml",
+      "sha256": "87cef9256a96129a0799afe0ce610f8ed7c8cabd1fa18a82b67d7e90996396ba",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.model.ProfileMappersTest.xml",
+      "sha256": "f0d213ff31eeb5adf83300781d0c7af939bcdc0a4ffb377d45983f321351bece",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredContentReportRepositoryTest.xml",
+      "sha256": "881db3e1666c63fa1bbcafe4c2166deb3c71623fd4b659fb0d70e9fe2192e0d8",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredPendingAccountWipeUidTest.xml",
+      "sha256": "1fbe5cef1e9622658fd3e7e7e5f1ae47c8f58b706e99f2f8e5a16f51df4380cd",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.PendingReportQueueTest.xml",
+      "sha256": "df87105d767b404629a0bed712cc0093ebc01d3f7afb7c803d793a099b3d2f2f",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredPendingAccountWipeAtomicTest.xml",
+      "sha256": "7dde137ba0ac6566c7243fbbeab167f9403282880b5ad8057cafe8b8b83fa157",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.mock.DataStoreMockStateStoreTest.xml",
+      "sha256": "677130480d5d4d29b8fd10ab6df3a7de60ecc23690080ca959d56d2621006d68",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.mock.LegacyDataPurgeTest.xml",
+      "sha256": "95b8c421815e06203a560b2d596a68378a7df5321e7b40fac22f9266b2b724bc",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredExportHistoryRepositoryTest.xml",
+      "sha256": "7e667813bd8bc95d9b8c75e952cf58f14e724cb05bc9cb98fb0d38500914dbed",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.OfflineFirstApplicationRepositoryArtefactTest.xml",
+      "sha256": "19cab53c53a06c595148f5bd3bb33b76ffa84837128d4aa1a96c84a3b66195f7",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.account.LocalWorkFenceTest.xml",
+      "sha256": "4d5d420c9d07f8c93c4198ad77049d608fc1ee4cf067cd160291632d338e5a90",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/data/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.data.repository.StoredSessionRepositoryKeptFlagsTest.xml",
+      "sha256": "0dad7f9de2117b6999bfb074186774e8a5efb65526e5c8200db5396317029e26",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.LocalHandoffMigrationTest.xml",
+      "sha256": "7912cb325e5f5035a9d286032bab75bf60954343a8cd7c2e01c3fcd35526cd38",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.ContactFlagMigrationTest.xml",
+      "sha256": "4a7088dab54cac481c06110e591f3eff666a70aabfbea3d2912851e6e42527ce",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.CreditLedgerDaoTest.xml",
+      "sha256": "68d00f76b7a079446ffdeec0eb4f2c40114272642e514cb9a4edeee3a268105c",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.util.TailoredSummaryAndSkillsJsonTest.xml",
+      "sha256": "479cd1d5c7591031dceffecce0e2a2c89b7b21a2a665cda8a532cde4ee95b823",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.util.InstantConverterTest.xml",
+      "sha256": "839e15b7585e0bb8f00bafc8e8229b363b392bf99e2ed23a3024ff19ad505f9e",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.ProfileMigrationTest.xml",
+      "sha256": "9ecc546a70ed45c5f322e6f81cdf9270229e767836ccab8c07c43e7af04d682b",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.DatabaseModuleTest.xml",
+      "sha256": "11a4ea6400f0295eaacb6a3d08e7ead5e7b59578eac94c4876c7b37b369bb187",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.TmrDatabaseSchemaTest.xml",
+      "sha256": "380a1cf1b8e72d7bc165318c2ea5cbdd40cdb19313908e9f8e5a8d8a8bafc0e5",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.util.TailoredResumeRunIdJsonTest.xml",
+      "sha256": "471aed653e02f1cf9d656614efcdab2c8c458558d40ef3c23ef674a9c80f1445",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.util.JsonConvertersTest.xml",
+      "sha256": "5af0686b3363036d961ff935ad0f73f647b39e16e872ce01098d48ea80f81c70",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.json.GuardrailViolationDtoTest.xml",
+      "sha256": "07266b563d9ae244be0dda6dc00b8c88c65689954c0d7adb569dff7041756388",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/database/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.database.ReferralLedgerMigrationTest.xml",
+      "sha256": "aadd1022f30b17987c5febd87fd4907650628a8f92c04357f74b88ec7c364e5b",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.MappersTest.xml",
+      "sha256": "5e7d34fdce169f99264d91e432941c9b999ae8082f1f932bb2f48decfcd0fba3",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.ContractV2DecodeTest.xml",
+      "sha256": "b944d63ad7e3b7e3ddf523cec567904ff4779dd67cccb2f947ebf607366c4b40",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.AnswerMappingTest.xml",
+      "sha256": "bde64ddbb5c9779980065036efd974a6f96829ceedfea81fc454b2bdbd964a18",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.DtoRoundTripTest.xml",
+      "sha256": "c73477ef9ea70c9ab2528c9f5c77f78e73a9d0e58f63d81ba3e6325d3b7886d9",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.NoLoggingSourceTest.xml",
+      "sha256": "3888ae04b56a4f5f44c2b62017fa867aa321ef96e992125b7663c296515d1005",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.ReferralExportCompatibilityTest.xml",
+      "sha256": "ac9f1477ba598c9c5207085329d2efc3d27aff10d05c5139729439c48ee46aed",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.ConfirmedWithinLimitsTest.xml",
+      "sha256": "2453b005a679db78bf61ac5f9b88418ee14f81db47c977d56c0eae4fa7b016e1",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.SummaryFactsPayloadTest.xml",
+      "sha256": "9fa2e99e9f41424fbe9465213e8a67f943f0142af4a11843ee35f517f1c323c6",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.UserStatedSkillsPayloadTest.xml",
+      "sha256": "aa0e9a758033deaf487563f8d2c75f1d43156f133a706809b004f2dd070d3920",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.TailorMyResumeApiTest.xml",
+      "sha256": "4147eaa6b2bf4c854b9a043b3b389bfe51ac16b4b3f9369d0834c7eb545966cf",
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.AnalysisRequestJsonTest.xml",
+      "sha256": "02c1c0a9d6fa1a5244ca72bbb396f94452574f87f22429c9df3940dd3660da1c",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.WalletDtoTest.xml",
+      "sha256": "d5f165032f09254492ad9be99e8c5e1504b27a60ad4d8e01227c99e83f799c25",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.ConfirmedBulletCapPayloadTest.xml",
+      "sha256": "dc256c1ce0dd2d244316cf6293bb31f8c672754ba92306ad4b504af092bfc54d",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.AuthInterceptorAccountGoneTest.xml",
+      "sha256": "061b3436ebb06e77e87376f1981a3365d870988e881f37a208a1ab1db29050a2",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.UserAnswerFactsTest.xml",
+      "sha256": "765e51ee0d826486407b88e4a49e0ec1d9883c6cf677cdbb4462d92ac8147a92",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "core/network/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.core.network.ApiErrorTest.xml",
+      "sha256": "052c282c7109d05d3c6eef6471d24de39c76b37b301110050aeea2842c83103c",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.importresume.ContentResolverResumeTextSourceTest.xml",
+      "sha256": "470f4c7f35295098e5543d1ae55ea2b4425274d73f778a3f6cf4dc8d5328e3c4",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.GuestEntryViewModelTest.xml",
+      "sha256": "4cf024b67ac3231fb2d791e284bb71b8c522c5d0575a76cf19143afaa17f086d",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SignInScreenTest.xml",
+      "sha256": "2ee47edd2f72d538c8d48c98de26da452e70f3a474a57ca06c1f993f5c709bd3",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SlowSignInTest.xml",
+      "sha256": "b2dfcbcf8a53db62526a9c78692ff19e560742f8d197e7c5f6c470f94bdc2950",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.paste.PasteResumeViewModelTest.xml",
+      "sha256": "f498aca5d91aa1740d8c6fc919da949d0342c9eff64cd75c0a97304a82022f3b",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.upload.UploadNarrowScreenshotTest.xml",
+      "sha256": "48194c181445f412da3a7c450be468e12d20aabd5bf6540f456848dfe5d05a6d",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.upload.UploadNarrowLayoutTest.xml",
+      "sha256": "6ee814408256572451ff801a93d35ad48d27c9f833901efbe809a5be85499ccb",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.importresume.ResumeImportDraftTest.xml",
+      "sha256": "8ab40b08299ed7b8a0852d6649c196b4a64ab0ca1d4e2cd8c3c7cc20b094cf92",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.review.ReviewNarrowScreenshotTest.xml",
+      "sha256": "720a8519e76a5ef7b3058d63d90688ba4c1932431c74e35dce758eb3b35eb7fb",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.GuestTrialCopyTest.xml",
+      "sha256": "d1b3f43e5618e15c90cbb81913b17ceda086677573a86573b1fa93560f9df646",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.review.ReviewMapperTest.xml",
+      "sha256": "8ce679ec90adca4a7512ca68aa3ab30a514e9c9f50f19bc9134c5f47f56e32a4",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.upload.UploadViewModelTest.xml",
+      "sha256": "cff2be0e8601ef7fd73d32743eeab68eef0bedb3bbfbc92767c4e848d676412a",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.review.ReviewScreenshotTest.xml",
+      "sha256": "eb4815390af7b2c1b344ce8b1c570a67e365f137d0fab2f78093d37246359cb9",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SignInViewModelTest.xml",
+      "sha256": "73d234dcd7d39dc3157f2b8101fb5a1fdce22e4fbe88de69d975ba122a8e56da",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SignInRouteTest.xml",
+      "sha256": "e266d57ae0644d4020ea7520c34adeecf20aeb983c6e6ba827d95c2521d9f4cf",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.manual.ManualProfileScreenshotTest.xml",
+      "sha256": "9dff305179b40b6bdfd333cea3d46cb7ca4991915778c0181230c2b35cea3cb1",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SignInStoryStateTest.xml",
+      "sha256": "06f6e13be1fda6a7ba2abfde08d66ea17ad94a133feb47823f7439151746d657",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.upload.UploadErrorScreenshotTest.xml",
+      "sha256": "f9c8d3c83be5d56a4548ba46b0e97ab0865ca66cf182b6fe371681a86f4505ae",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.upload.UnreadableScreenTest.xml",
+      "sha256": "04bff81eac5dfbe3d87e02592c3c619c8aaad2cb1612daacf30db07d0a7e7a49",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.review.ReviewRouteNavigationTest.xml",
+      "sha256": "1bc84d4296f26852330dab065f87fb2748a6a2bd89849caa1309ce26c63df49e",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.GuestEntryScreenshotTest.xml",
+      "sha256": "094f4a1c113833fb8d24150ac4705aeea8a73132b402423a232f09be814607d9",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.navigation.OnboardingNavigationTest.xml",
+      "sha256": "2bbef0ca6d76f8024f6ab96e4d4183d12af1dc39b54102c4588c63a77b07a8da",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.paste.PasteResumeScreenshotTest.xml",
+      "sha256": "84f677b804acb019b2a6961c93a1a6d36eaceb9fce4b51fc2a64db57209136fa",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.navigation.OnboardingRealEntryHiltTest.xml",
+      "sha256": "3e177fb5d571616b4ee1d957046740e57fb5704595d3f9da59fd51b6f33b8f4f",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SignInResponsiveLayoutTest.xml",
+      "sha256": "ca87d917dac4e8b22ffb45886b3e480038d9fe2014cc94c0a92b5247deefb4b6",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.importresume.ResumeFileDescriptorTest.xml",
+      "sha256": "6e012ec92520f2c331dc5e34c718a2da4c8f80ab87895643bf88849f59b5c5d1",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.policy.ManifestNoStoragePermissionTest.xml",
+      "sha256": "02f7e008720c9438cb7015b37ae2206db739fc0afe83b588b03a0a14f090f8dc",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.navigation.SignInRealEntryWiringTest.xml",
+      "sha256": "a1baa28f6bb56d86d15d1de32ce1b18a9ca0fb254543e2c8827acfa4a5b2d1cf",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.reading.ReadingScreenshotTest.xml",
+      "sha256": "4b99579f42cef7cc4f155fd83dea36b5ed0af66266c058a263f162935004ab2c",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.review.ReviewViewModelTest.xml",
+      "sha256": "91cff44b98cf369dfdf12e068f862eaef932a14868cf5950bc0c66dc8535591b",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.review.ReviewScreenTest.xml",
+      "sha256": "e2bf6a7722515db082f58fa5775631365c54ada3ef737bdc8187d4ebf629f00a",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.upload.UnreadableViewModelTest.xml",
+      "sha256": "56fbd526365590a5e345c4c1b2c1098108a33cb229374596a872cd1f7bde48e6",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SignInNarrowScreenshotTest.xml",
+      "sha256": "b34de593de6758e3246002fb441b3e5c108e722c1fbc38dbd1c5ca87397cba72",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.reading.ReadingViewModelTest.xml",
+      "sha256": "263e7f647b490a1e2232ff370c69ad38da65fa2734fc1ec5e38922087effe093",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.reading.ReadingScreenTest.xml",
+      "sha256": "b9f1a3b25f05177390c42672ed01a55bf1d4d728b43886bae59ee10d653b8482",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.navigation.StartOverNavigationTest.xml",
+      "sha256": "7b7ca3a8a930edf6778b4cba8b406bece3d623e5b13bd9530dd0da1a695e0711",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.upload.UploadScreenTest.xml",
+      "sha256": "df460b513b269704910feff25719ca297e154605033f39c3964afb82e9d53cc8",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.review.ReviewLayoutTest.xml",
+      "sha256": "78a0f9d8a1bab38dbae195136050628dfa1461f362ea0bc94bf46aeaf3b0a296",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SignInScreenshotTest.xml",
+      "sha256": "fbc6b60b0c2894e93bf10f38c9ac8d91a89345c9dac40305578c09d435c6f9a5",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.manual.ManualProfileViewModelTest.xml",
+      "sha256": "032f8d350a3b062436452c852168e4140072a515328dae1c7524c1aa67a6e26e",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.upload.UnreadableFileNameLayoutTest.xml",
+      "sha256": "8c1e7a2e8addec8a336fe9a9352fce7e6e495eaa9b71f77535388cbf07ecbd2b",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SignInStringsTest.xml",
+      "sha256": "dd0e0253456e0ff0e4880b90bb4f75c3e27a34a2a9f7fd820e4d3e9de9d9eadf",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.policy.NoResumeTextLoggedTest.xml",
+      "sha256": "fc7de129d43e142412320ab53912328221e175396f7f4dfca04561ff6523b214",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.upload.UploadScreenshotTest.xml",
+      "sha256": "9fed3f73d606081c7c918b93deab7ca88ec0a5eb8b9dae084ec650f6e19c199b",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/onboarding/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.onboarding.impl.signin.SignInConstrainedScreenshotTest.xml",
+      "sha256": "14a83bed18a9fc4295afdcafc4f816b66e9a28140618d9d2a43296f046a49edf",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.ApplicationsNavigationTest.xml",
+      "sha256": "5eba555d58585d30ed38131138e9700e34baeb2a3b9641fc9f95583ac4c07455",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.ApplicationsCopyTest.xml",
+      "sha256": "92fe1e1ea8246d6f9f1ba7107b7ab5de4a2782b1bf068c79b96b2bdd75c68c11",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.navigation.ApplicationsRealEntryHiltTest.xml",
+      "sha256": "18e1b921caba894f115e1e549e83a4af3dcbb01591f7836f8344ffedb69a6e3d",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.ApplicationsViewModelTest.xml",
+      "sha256": "80636ea4bbbf285b5e98bd6de225761d0496ebb689ca63f041c4da174926af47",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.ApplicationsScreenshots.xml",
+      "sha256": "8e275ab3a1f27d987eff4aa8e4100053d3f7e88f16057f83b4815c6b22d13fee",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.detail.ApplicationDetailSaveSingleFlightTest.xml",
+      "sha256": "ece6f5ca720f4169fbea694af9f98ad053294b0a747375168f62f910b150a4d0",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.detail.ApplicationDetailViewModelTest.xml",
+      "sha256": "0b37581fabe89ca9d85644cccfdaee26138131865d2812c04125a58db5784d60",
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.ApplicationDetailDateLineTest.xml",
+      "sha256": "bdc18ce9e61f706a21a5ee21eae0515e57d9c8dfe9f0d590fdbe14e726667816",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.detail.ApplicationDetailNavigationTest.xml",
+      "sha256": "33bac09fe3e5d5470479ead44d884d1ca6cae7c406046d176aa2257a81164694",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/applications/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.applications.impl.ApplicationsHeaderLayoutTest.xml",
+      "sha256": "d42070016f599f4160075f80ad1d9e7ddaf266ed772dc530ba3e2e6d8ae796c4",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.settings.SupportMailTest.xml",
+      "sha256": "bc1e4e780770a78203e0b097da9e6115597d5e49fc5fc8c4b1261c7ed4fefbb8",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.settings.CreditBalanceSurfacesTest.xml",
+      "sha256": "a21d65da3a7cc1f33354fa7059475ea401d75727340468de10bc207873f34fd7",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.paywall.PaywallDemoGatewayTest.xml",
+      "sha256": "a87776d1f63770fa73da6e1796217c305028b2e7fc8cb4ab13f90b6a20666e68",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.paywall.PaymentFailedSheetTest.xml",
+      "sha256": "500c0c02e47bf6b7968c200ca9ab065d5ac10c7de2f61f09fd41ef2eb98f25df",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.settings.DeleteAccountSheetScreenshotTest.xml",
+      "sha256": "a06e31dba72e3f037c017b2360329fe2d8ddbe5abf17047b0153123c64655cce",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.credits.GuestTrialCopyTest.xml",
+      "sha256": "b8d7f15e140ac23c31c91c058c3e934baa357804260db395d5054d55ee0d6fda",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.credits.CreditsViewModelTest.xml",
+      "sha256": "f15cb43cf799d783a6d5de2cf46e8712945e1928e9362c3d15407fea0ba784e1",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.referrals.ReferralsViewModelTest.xml",
+      "sha256": "60b24252ee7b37e0b45ba734ce3b92e81ab8db8ec88a7c643b679ce6f724f88c",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.credits.CreditsScreenshotTests.xml",
+      "sha256": "8215425eeaaafbd9cb77b88a4ccac60fe0eecd9a842bad827f72cfff68d2eae3",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.delete.DeleteAccountViewModelTest.xml",
+      "sha256": "62e7c653aad4a71caf920c8556697c18c328927354b390de183d5767ad4bd37a",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.navigation.SettingsCreditsWiringTest.xml",
+      "sha256": "53dfb74e47f52a54587d6270194442477a2cb10c491b35934c410e13fdbc5fde",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.navigation.SettingsRealEntryWiringTest.xml",
+      "sha256": "18379e094618fa13bde97c934a65543b540cc9552f33d91936bdf602cd40124f",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.paywall.PaywallViewModelTest.xml",
+      "sha256": "5a67fff2c5c6e5e1169aa75f7af3c2708c729b508499db510243d48c61cc813a",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.settings.SettingsLargeFontScreenshotTest.xml",
+      "sha256": "ebc147f9698c1a02fe26277ac15eb8eb16bbf5edbe92c580098cbc4d4e80a2d5",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.paywall.PackPriceFormatterTest.xml",
+      "sha256": "6b190d9d0bd92c1705e6808bffdf6c77c05f8c15b80702a694ede838bddaa8ef",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.settings.SettingsScreenTest.xml",
+      "sha256": "3169132dbea1cfa2bb3cfa5a115996f7c7aaaa146c1a511d025410a7a4f4dd84",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.delete.DeleteConfirmationTest.xml",
+      "sha256": "d32dd124b159d38722d864a351dba91a9956bf54bb9878ed5cb5ce81dd93cc50",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.settings.SettingsDeletePreviewTest.xml",
+      "sha256": "ea3499bc4210844c742db2f1dd80d505d84671b95714d9471271f5071ee2e114",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.settings.SettingsScreenshotTest.xml",
+      "sha256": "5426fb66e666a21889bed87b215420cd80c1f65546b92077281e291ace619446",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.navigation.PaywallRouteWiringTest.xml",
+      "sha256": "40be1b84e2e1e5c9248e49d2f43df8631f261c6ef7862b68fda5439f90b41701",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.paywall.PaywallScreenshotTests.xml",
+      "sha256": "1f08079bc8ebfe1c900a48e51cc2b7f7b57c163e03d7e59268550dba59284a2f",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.delete.DeleteAccountSheetTest.xml",
+      "sha256": "98a6ad51ec01b074943258ae39e131757b4fd9473294adeea62a2ca179b2ff68",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.settings.SettingsViewModelTest.xml",
+      "sha256": "87327f0c9c282538d65f44e525987321096cdca2d5b05511f1db70af509fce3f",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.paywall.PaywallScreenTest.xml",
+      "sha256": "2095736f51654c184714f6392780ba40e3f7776c6a5eb70245cca71e770fd58a",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.referrals.ReferralsScreenshotTest.xml",
+      "sha256": "db91af8898a1d7fa5ad02b3faecde3f88fee797e2a7e8bf79c316085e47b47a1",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.credits.GuestCreditsViewModelTest.xml",
+      "sha256": "b7a2836c24f89dddbfb9de36a93f8582b8fd4272870e3425ac29b034159f2947",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.credits.CreditsHistoryMapperTest.xml",
+      "sha256": "80e32315a58811d74c28c04de1de59b367ee15c89bb8d14216015afd2c789554",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/settings/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.settings.impl.referrals.ReferralsInputPrivacyTest.xml",
+      "sha256": "191833d36ce2553201bb8d149a77ce57070076a8a05d8dc2953a24f21cc81c9d",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.question.QuickQuestionViewModelTest.xml",
+      "sha256": "d9131d30b6e27d4792ea608c557c435033f82c0322ab0a73299f377020863279",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.job.JobScreenshotTest.xml",
+      "sha256": "f932fe5db23f8086d7ad1661b05ab1a51646483180e28c8f0b51a21c5316088e",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.job.JobViewModelTest.xml",
+      "sha256": "abd2ec9c5cfb17e3eaff0dc1169caffdec48d964a5e4c6ef59ce1e477673062e",
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.job.JobScreenTest.xml",
+      "sha256": "c1a8c0f1f3f59f8088ed293cdc9e39babc6b311f84c98c0a291feccfdf99f772",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.navigation.ResultNavigationTest.xml",
+      "sha256": "bffcf664347d446a578ef1f9cc65668b75247b94f617ffe83acdf0a975708551",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.navigation.JobResultRealEntryTest.xml",
+      "sha256": "bd6f0dec10475a38795910b5a9aa8c091c594dd8740ad8fa1bcb727d4ca6dc9d",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.result.JobResultScreenshotTest.xml",
+      "sha256": "4245d92416803b966f65ceed0c5889c45fd841dcfc29d5884596168704a9aa4d",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.job.JobDraftStoreTest.xml",
+      "sha256": "220ce6711cbbbe0b061e288119227448466cb138480100fa70f329b36fdcb0cb",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.job.JobCopyTest.xml",
+      "sha256": "b372df3c34cabc97fee8c939fc6f14039354ccd11703899fc39dfeea93709d2b",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.joblink.JobLinkViewModelTest.xml",
+      "sha256": "7c29704817c3d0194652c9bb0787816f3d734bdb0d4dbc47449d1b37d28c4425",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.ResultCopyTest.xml",
+      "sha256": "66be80978aff05f46af53c7a0c59478fb6b452e0982596a486f5d87a53f65ea6",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.question.QuickQuestionScreenshotTest.xml",
+      "sha256": "20aace6854f3bfcac4c0e22706b8b95cad8d244127331d57e5cc83d837c2e35c",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.navigation.AnalysisEntryWiringTest.xml",
+      "sha256": "e3edc17a738ce90480bb82defd75959b46090b8bad488b1964227c884bdd3773",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/analysis/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.analysis.impl.result.JobResultViewModelTest.xml",
+      "sha256": "e81e1346f1b1a12bd4b1f97f37688941235b1a1bb1d2485a142932b525cce84e",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.ProfileLargeFontLayoutTest.xml",
+      "sha256": "036976a02a75d55719d09f187b87c0b8024a12988f49bcd12135b31fa0a7fd40",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.experience.EditRoleViewModelTest.xml",
+      "sha256": "a9a3147e23bc18aac3d13ff5ea3ece669d7b81ff7cb14f60ec4fe03eeb4edffb",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.EditorsScreenshotTest.xml",
+      "sha256": "3d1585534803d64ab9f18771849781b97327951a49348c13c5026ca9f5b153d0",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.experience.ExperienceDatesTest.xml",
+      "sha256": "2649c3ec089f6f877380f16ea3a3c10608a0f53f7e30ad351c33b39625f1eb5f",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.guidedform.ContactFieldValidatorTest.xml",
+      "sha256": "45f7eb3fdc1ac2d14a4aae3d06fa30f3e0a01c32aaf580aaae304e3b500248a5",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.skills.SkillsViewModelTest.xml",
+      "sha256": "8ed8ed485822eed416dbff09036f17116f4bfda568a1769767e34f9853f75589",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.listedit.ListEditViewModelTest.xml",
+      "sha256": "e4cf7ee9d92e1b069be555ef54fd49195f6cb01cb49ec24f0582c9b001f3818e",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.EditRoleScreenshotTest.xml",
+      "sha256": "588564f39884133a7832bd406d1769243d1250f6d7d1689158627eb96d1e1c0b",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.contact.EditContactViewModelTest.xml",
+      "sha256": "7fb7ffa465ddb796583828bcc5916ccb4329c53da09c00368faabea94594a759",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.overview.ProfileDestinationsTest.xml",
+      "sha256": "f18ad281cfcded6c11d8a651991b1a96c9d2968878d2f08cb9328a8d9d258c65",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.overview.ProfileInsetTest.xml",
+      "sha256": "776f29d2187ee75e3f2940fc6cac8ef0e13482dbdd1fc9b4ef73b1bb30932d3a",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.navigation.ProfileRealEntryWiringTest.xml",
+      "sha256": "a6a88b87ddd1e73dc275fe93910ed26590b263eee12b07a7ad534f5432bc51cb",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.ProfileScreenshotTest.xml",
+      "sha256": "4ca4922d6f3c38e023de4e94613b422e49ae58cb6a6a1470b4a3e3e4a412743f",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.EditorsScreenTest.xml",
+      "sha256": "b60876f503b1a1c04c11fffb43a208e9ed116161e0e280b064553441133c362a",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.EditorsLayoutTest.xml",
+      "sha256": "d634b7d68c357f9bd1b8c97be358aff80fdb0aa9d0e3d9671b23030c281c873a",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.overview.YearsOfExperienceTest.xml",
+      "sha256": "f9aa7fe170fb43811aad8c1a0355e2ae4869a047d0775040672247e4e85f7afc",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.overview.ProfileViewModelTest.xml",
+      "sha256": "21cc8ba12938ae55561ca4d858054b915a6f3445d6784ffe4fa111f59fb39dc5",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.experience.ExperienceViewModelTest.xml",
+      "sha256": "0cb6546b3de94e64340c55803c5feca504b261d117939b73a3bc765ac8695415",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/profile/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.profile.impl.ExperienceScreenshotTest.xml",
+      "sha256": "45d2e5fc70abe3213a3fed404929aa0e0704310b386aa6993e9bb6605f279565",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.result.TailoredViewModelTest.xml",
+      "sha256": "731dc0a30f349ef93857b626bce71e82ad50d32f19978973d1f63c0e2951e604",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.exported.ExportedViewModelTest.xml",
+      "sha256": "27fed3717318a041e71e7e00833184114f084ac13593d220c1340c89cd6081c0",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.result.TailorFailedScreenshotTest.xml",
+      "sha256": "69b02a278c0472722c9df17e8ca5ae38e9c70eb4edee71c9c416b622150d22b9",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.tailoring.TailoringRunnerRunIdTest.xml",
+      "sha256": "9492d869c2655b6698ba616f1c9654151e3292f3528bcac0a42511d9058706a6",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.navigation.TailorEntryKeysTest.xml",
+      "sha256": "50c4f17ae6f48674219e1d5585e9cab95f14bdbb0a968468784390cdcabdb8f4",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.HandEditBulletLegacyFieldsTest.xml",
+      "sha256": "5920b4dd1422993d1ab0a3290d1ac16733c68aac9b0dc8f705ff79bc910a30f5",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.tailoring.TailoringRunnerTest.xml",
+      "sha256": "0df553923850d44b307920f81c9c17982810bc518dfee78ad24d3e81f8ab61b9",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.tailoring.TailoringScreenshotTest.xml",
+      "sha256": "ae0ff98c8a685f57d1ec7ef474f39c757ae01d4b7fc7245812b68afdbc9750b1",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.navigation.TailoredEntryViewModelsTest.xml",
+      "sha256": "4eaa98e9f7cf4a63d2555c8b081d45eb6a5149cabeee5ab756ed510db5affa6c",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.TailorCopyTest.xml",
+      "sha256": "77aa8027750afd13d036d3693c31720c5616e80041338126333ffd4b9208f924",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.TailorViewModelTest.xml",
+      "sha256": "18ad82dc5583ac5bf89b56fba5c2d5f0e91d0048e1e607469e464f446cbb0891",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.export.ExportResumeUseCaseTest.xml",
+      "sha256": "0afa9334a442129b59f9014a143dc9e2896de2887ed91f6230827a77202f8d80",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.exported.ExportedScreenshots.xml",
+      "sha256": "8c600d8f96334b61453c84c796bc7ef7f4c6d6191e104dea56b2fd1110ad63b8",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.export.ResumePdfFitTest.xml",
+      "sha256": "e61b8e5a095a31a862362618934527f9e61b462412d500167b5ed437c80fe776",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.tailoring.TailoringViewModelTest.xml",
+      "sha256": "961bee9019f0984169c765fbe776daf0f83e6296f171dda028391835d40ae9da",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.edit.EditResumeViewModelTest.xml",
+      "sha256": "8e9d6ca5168f9fbaf89a4b4c9a9aab434dfa8be6443ae8cafedcc73f9d370d55",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.document.ReviewContinuationTest.xml",
+      "sha256": "626fa1205941c4c0e5f31e8767efbe95760624852bd882d659af4969ffcc78cd",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.TailorViewModelDecisionTest.xml",
+      "sha256": "e86adfcb7e3f2b0600cc343f79e40f267c2349ed441612275f44b5b8e0a0dbe7",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.result.TailoredPaperMapperTest.xml",
+      "sha256": "6e97d0df963fc210202fad8818222788fd929a8023af28af4d3d5c04b531e39a",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.result.ChangeCardMapperTest.xml",
+      "sha256": "96c37297ed37003a301dc288bb51ed42e5bb69d493d401db0c7ed223ae41da43",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.navigation.TailorRealEntryHiltTest.xml",
+      "sha256": "ede62f03c0d30b054b76b86326d27185681cc6d51cd6ed916f28fc14663d1729",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.tailoring.TailoringRowCopyTest.xml",
+      "sha256": "fe44d5fd8a358f6b74569fe41587876eaa8f305294d40a396a4a6815b5534a72",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.diff.WordDiffTest.xml",
+      "sha256": "1a6de4bfa6a560a19d46ba5ce772c7737be953d09f63f5d9cb633019e0635701",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.document.ResumeDocumentAssemblerTest.xml",
+      "sha256": "198de9ee8f4d0b0d3ecae138ff13cbfe495c382113b8ab11be307ca744e1177d",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.edit.EditResumeScreenshots.xml",
+      "sha256": "cafc9ac62ae305d86c2b8d0ff13bf847521be773bb0395a024ed54150337faa0",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.diff.WordDiffPunctuationTest.xml",
+      "sha256": "4561f57f542f06305657071a59ec1207c974623c39740e5aa1042f4909384216",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.navigation.TailorEntryRealWiringTest.xml",
+      "sha256": "3dd9c4b4e0c8da57fc077f68af959ac3b77d61446360e5bffd4dd5baa7a1c7fe",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.document.ResumeDocumentContinuationTest.xml",
+      "sha256": "b8aa1207fd738852f5bfbb41b94d751127fa1638bd9f4796f8beea56bad8fcd1",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.export.PaginationTest.xml",
+      "sha256": "a3627c981e156eee737878c51de0e46ee4a43751fd5bc05379a821f8a05f3fee",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.result.TailoredUndoTest.xml",
+      "sha256": "7fc5327782d5a64d4f14798dbd12de11a30b901c8112a7f009ff05d3ee5064a0",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.result.TailoredNoPerBulletTogglesTest.xml",
+      "sha256": "31b83feca650b95dd9204b8dc9741d3bfebc648716227f5827a1189487ab33c8",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.document.ReviewExportConsistencyTest.xml",
+      "sha256": "efe352f06bca3cfe413f8defa3dcf3ea386b280bdb63f59ff5f479f6ff6ba71a",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.export.PdfShareIntentTest.xml",
+      "sha256": "639e15196c216a87799913fe6fd773334b40ad1f4266c2683ab9c6c801367908",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.navigation.NavigateToTailoringTest.xml",
+      "sha256": "9b53194cc8cbe378715e93c18b42c7ca0a0047bc57d0099fbfeeb008ce1a349c",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.export.ExportedPdfIntentsImplTest.xml",
+      "sha256": "d6ec2b8706f0986120992517522a33a2bafededfc964ab9303294afbdbbf72df",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.result.TailorFailedNavigationTest.xml",
+      "sha256": "d78201fa1a772ef569588d440da4409d78e904f39cf5b7768bfbdcb89544d2f7",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.export.ExportDirectoryTest.xml",
+      "sha256": "9c7eb45303920791328206d7efb2ba67e91715c1c4aa4908bde506f982d32768",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.exported.ExportedRouteTest.xml",
+      "sha256": "45e411bcd9fb4f5cf2c1e161eaead316ea4ebf91b04bde59d682ca65adbf6d68",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "feature/tailor/impl/build/test-results/testDebugUnitTest/TEST-com.tailormyresume.feature.tailor.impl.result.TailoredScreenshotTest.xml",
+      "sha256": "180f6b183d9042321b91313a3326912fa8d6114c55c10d896cedcebe3031bf4b",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "inputIntegrity": {
+    "head": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+    "changedInputs": [],
+    "status": ""
+  }
+}

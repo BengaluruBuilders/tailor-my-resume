@@ -9,6 +9,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 internal sealed interface HistoryTitle {
+    data object ReferralReward : HistoryTitle
+    data object Unknown : HistoryTitle
     data object GoogleSignup : HistoryTitle
     data object GuestTrial : HistoryTitle
 
@@ -71,6 +73,8 @@ internal fun toHistoryRows(
 private fun CreditLedgerEntry.describe(
     applicationsById: Map<String, JobApplication>,
 ): Pair<HistoryTitle, HistoryDetail> = when (kind) {
+    CreditLedgerKind.REFERRAL_REWARD -> HistoryTitle.ReferralReward to HistoryDetail.None
+    CreditLedgerKind.UNKNOWN -> HistoryTitle.Unknown to HistoryDetail.None
     CreditLedgerKind.GOOGLE_SIGNUP -> HistoryTitle.GoogleSignup to HistoryDetail.None
     CreditLedgerKind.GUEST_TRIAL -> HistoryTitle.GuestTrial to HistoryDetail.None
     CreditLedgerKind.FREE_GRANT -> HistoryTitle.FreeFirstResume to HistoryDetail.Welcome

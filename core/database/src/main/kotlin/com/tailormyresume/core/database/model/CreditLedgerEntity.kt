@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.tailormyresume.core.model.CreditLedgerKind
 import kotlin.time.Instant
 
-@Entity(tableName = "credit_ledger")
+@Entity(tableName = "credit_ledger", indices = [androidx.room.Index(value = ["owner", "environment", "serverId"], unique = true)])
 data class CreditLedgerEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
@@ -14,4 +14,7 @@ data class CreditLedgerEntity(
     val applicationId: String?,
     val productId: String?,
     val createdAt: Instant,
+    val serverId: String? = null,
+    val owner: String? = null,
+    val environment: String? = null,
 )

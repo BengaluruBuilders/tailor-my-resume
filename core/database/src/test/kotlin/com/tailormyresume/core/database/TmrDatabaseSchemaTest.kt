@@ -16,14 +16,14 @@ class TmrDatabaseSchemaTest {
     val helper = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), TmrDatabase::class.java)
 
     @Test
-    fun versionIs5AndSchema5JsonIsCommitted() {
+    fun versionIs6AndSchema6JsonIsCommitted() {
         val database = createInMemoryTmrDatabase(RuntimeEnvironment.getApplication())
         try {
-            assertThat(database.openHelper.writableDatabase.version).isEqualTo(5)
+            assertThat(database.openHelper.writableDatabase.version).isEqualTo(6)
         } finally {
             database.close()
         }
 
-        helper.createDatabase("schema-5", 5).close()
+        helper.createDatabase("schema-6", 6).close()
     }
 }

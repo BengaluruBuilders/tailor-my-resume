@@ -13,6 +13,7 @@ data class CreditPolicyDto(
     val accountMode: String,
     val guestTrial: GuestTrialPolicyDto,
     val signupBonus: SignupBonusPolicyDto = SignupBonusPolicyDto("UNAVAILABLE"),
+    val referrals: ReferralOfferDto = ReferralOfferDto(),
 )
 
 @Serializable

@@ -42,6 +42,18 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface TailorMyResumeApi {
+    @GET("v1/tailormyresume/referrals/me")
+    suspend fun referrals(): com.tailormyresume.core.network.dto.ReferralReadResponse
+
+    @POST("v1/tailormyresume/referrals/code")
+    suspend fun referralCode(@Body body: com.tailormyresume.core.network.dto.ReferralCodeRequest): com.tailormyresume.core.network.dto.ReferralCodeResponse
+
+    @POST("v1/tailormyresume/referrals/challenges")
+    suspend fun referralChallenge(@Body body: GrantChallengeRequest): GrantChallengeResponse
+
+    @POST("v1/tailormyresume/referrals/attach")
+    suspend fun attachReferral(@Body body: com.tailormyresume.core.network.dto.ReferralAttachRequest): retrofit2.Response<com.tailormyresume.core.network.dto.ReferralAttachResponse>
+
     @POST("v1/tailormyresume/account/upgrade-intents")
     suspend fun prepareUpgrade(@Body body: UpgradeIntentRequest): UpgradeIntentDto
 

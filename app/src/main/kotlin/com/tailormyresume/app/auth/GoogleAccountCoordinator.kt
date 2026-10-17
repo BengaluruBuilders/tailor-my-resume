@@ -56,6 +56,7 @@ class GoogleAccountCoordinator @Inject constructor(
     private val uids: FirebaseUidProvider,
     private val clock: kotlin.time.Clock,
     @ApplicationScope private val scope: CoroutineScope,
+    private val referrals: com.tailormyresume.app.referrals.PrivateReferralStore? = null,
 ) : GoogleAccountGateway, AppStartTask {
     private val mutable = MutableStateFlow<GoogleAccountState>(GoogleAccountState.Idle)
     override val state: StateFlow<GoogleAccountState> = mutable
@@ -167,6 +168,7 @@ class GoogleAccountCoordinator @Inject constructor(
         journals.write(journal)
         apiResult { api.me() }.getOrThrow()
         if (previousId != user.uid) {
+            referrals?.clearAll()
             cleaner.clear()
             checkpoints.restore(user.uid, config.baseUrl)
         }
@@ -229,6 +231,7 @@ class GoogleAccountCoordinator @Inject constructor(
             return
         }
         withContext(NonCancellable) {
+            referrals?.transferForReview(journal.source, user.uid, config.baseUrl, user.mode.name, fence.ticket()) { check(uids.uid() == user.uid) }
             cleaner.clear()
             checkpoints.restore(user.uid, config.baseUrl)
             checkLive()
@@ -269,6 +272,7 @@ class GoogleAccountCoordinator @Inject constructor(
         if (journal != null && journal.phase in setOf("DIRECT_SWITCHING", "DIRECT_LINKED") && user.mode == AccountMode.GOOGLE) {
             fence.freeze()
             apiResult { api.me() }.getOrThrow()
+            referrals?.clearAll()
             cleaner.clear()
             checkpoints.restore(user.uid, config.baseUrl)
             val linked = journal.copy(source = user.uid, destination = user.uid, phase = "LINKED")

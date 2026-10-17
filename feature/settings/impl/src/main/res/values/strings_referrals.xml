@@ -1,0 +1,51 @@
+<resources>
+    <string name="feature_settings_impl_referral_deadline">Apply by %1$s</string>
+    <string name="feature_settings_impl_referral_title">Invite friends</string>
+    <string name="feature_settings_impl_referral_loading">Checking your referral status…</string>
+    <plurals name="feature_settings_impl_referral_offer">
+        <item quantity="one">Earn %1$d credit when a new friend signs in with Google and applies your code. Your friend receives no referral credits.</item>
+        <item quantity="other">Earn %1$d credits when a new friend signs in with Google and applies your code. Your friend receives no referral credits.</item>
+    </plurals>
+    <string name="feature_settings_impl_referral_unavailable">Referral rewards are unavailable right now. You can continue with your work.</string>
+    <string name="feature_settings_impl_referral_my_code">Your personal code</string>
+    <string name="feature_settings_impl_referral_copy">Copy code</string>
+    <string name="feature_settings_impl_referral_copied">Code copied</string>
+    <string name="feature_settings_impl_referral_create">Create my code</string>
+    <string name="feature_settings_impl_referral_stats">%1$s · %2$s</string>
+    <plurals name="feature_settings_impl_referral_friends">
+        <item quantity="one">%1$d friend credited</item>
+        <item quantity="other">%1$d friends credited</item>
+    </plurals>
+    <plurals name="feature_settings_impl_referral_earned">
+        <item quantity="one">%1$d credit earned</item>
+        <item quantity="other">%1$d credits earned</item>
+    </plurals>
+    <string name="feature_settings_impl_referral_entry">Have a referral code?</string>
+    <string name="feature_settings_impl_referral_optional">Optional. Apply a friend’s code after Google sign-in while your account is eligible. It never holds up your resume.</string>
+    <string name="feature_settings_impl_referral_saved_code">Saved code</string>
+    <string name="feature_settings_impl_referral_code">Referral code</string>
+    <string name="feature_settings_impl_referral_save">Save code</string>
+    <string name="feature_settings_impl_referral_replace">Replace saved code</string>
+    <string name="feature_settings_impl_referral_replace_prompt">You already have a saved code. Replace it only if you want to use this new code instead.</string>
+    <string name="feature_settings_impl_referral_clear">Clear saved code</string>
+    <string name="feature_settings_impl_referral_apply">Apply saved code</string>
+    <string name="feature_settings_impl_referral_reconfirm">Apply with updated offer</string>
+    <string name="feature_settings_impl_referral_review">Use this code for this account</string>
+    <string name="feature_settings_impl_referral_saved">Code saved privately on this device. It has not been applied.</string>
+    <string name="feature_settings_impl_referral_invalid">Check the full code for this app and environment, or clear it to continue.</string>
+    <string name="feature_settings_impl_referral_applied">Referral applied</string>
+    <string name="feature_settings_impl_referral_policy_changed">The referral offer changed. Review the current offer, then confirm again.</string>
+    <string name="feature_settings_impl_referral_read_only">Your account may already have a referral. Refresh to confirm its status. No new referral will be submitted.</string>
+    <string name="feature_settings_impl_referral_ineligible">This account can invite friends but cannot apply a referral code.</string>
+    <string name="feature_settings_impl_referral_expired">The time to apply a code has ended. You can keep working and invite friends.</string>
+    <string name="feature_settings_impl_referral_self">Use a friend’s code. You cannot apply your own code.</string>
+    <string name="feature_settings_impl_referral_conflict">This attempt needs review. Clear or explicitly replace the saved code before preparing another attempt.</string>
+    <string name="feature_settings_impl_referral_retry">We could not confirm this action. Refresh your status, then retry when available.</string>
+    <plurals name="feature_settings_impl_referral_wait">
+        <item quantity="one">Try again in %1$d second. Refresh to check the remaining time.</item>
+        <item quantity="other">Try again in %1$d seconds. Refresh to check the remaining time.</item>
+    </plurals>
+    <string name="feature_settings_impl_referral_refresh">Refresh referral status</string>
+    <string name="feature_settings_impl_referral_history">Referral reward</string>
+    <string name="feature_settings_impl_credit_update">Credit update</string>
+</resources>

@@ -1,0 +1,535 @@
+{
+  "contractVersion": "manual-referrals-v1",
+  "fixtureOnly": true,
+  "examples": [
+    {
+      "name": "issue-new-request",
+      "schema": "issueRequest",
+      "body": {
+        "requestId": "11111111-1111-4111-8111-111111111111"
+      }
+    },
+    {
+      "name": "challenge-request",
+      "schema": "challengeRequest",
+      "body": {
+        "operation": "REFERRAL_ATTACH",
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "policyVersion": "referral-local-v1",
+        "payloadDigest": "FIU_n59HjFHJ3HTWzMLIaEVepmb40SR02_RYHUvYg_s"
+      }
+    },
+    {
+      "name": "challenge-response",
+      "schema": "challengeResponse",
+      "httpStatus": 201,
+      "body": {
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "challenge": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+        "expiresAt": "2026-10-17T00:05:00Z",
+        "bindingVersion": 1,
+        "requestHash": "L079-sjpEzA28TrNZOp8Lk7Wn8K17fWOPToCDN-Zl6c"
+      }
+    },
+    {
+      "name": "attach-manual-request",
+      "schema": "attachRequest",
+      "body": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+        "source": "MANUAL",
+        "policyVersion": "referral-local-v1",
+        "continuity": null,
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      }
+    },
+    {
+      "name": "attach-link-request-future-entry",
+      "schema": "attachRequest",
+      "body": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+        "source": "LINK",
+        "policyVersion": "referral-local-v1",
+        "continuity": null,
+        "challengeId": "22222222-2222-4222-8222-222222222222",
+        "integrityToken": "synthetic-token-not-valid-in-any-environment"
+      }
+    },
+    {
+      "name": "attach-new",
+      "schema": "attachResponse",
+      "httpStatus": 201,
+      "body": {
+        "attachment": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "status": "ATTACHED",
+          "source": "MANUAL",
+          "attachedAt": "2026-10-17T00:01:00Z",
+          "reward": {
+            "recipient": "INVITER",
+            "amount": 5,
+            "status": "GRANTED",
+            "policyVersion": "referral-local-v1"
+          }
+        },
+        "reward": {
+          "recipient": "INVITER",
+          "amount": 5,
+          "status": "GRANTED",
+          "policyVersion": "referral-local-v1"
+        },
+        "replayed": false
+      }
+    },
+    {
+      "name": "attach-original-replay",
+      "schema": "attachResponse",
+      "httpStatus": 200,
+      "body": {
+        "attachment": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "status": "ATTACHED",
+          "source": "MANUAL",
+          "attachedAt": "2026-10-17T00:01:00Z",
+          "reward": {
+            "recipient": "INVITER",
+            "amount": 5,
+            "status": "GRANTED",
+            "policyVersion": "referral-local-v1"
+          }
+        },
+        "reward": {
+          "recipient": "INVITER",
+          "amount": 5,
+          "status": "GRANTED",
+          "policyVersion": "referral-local-v1"
+        },
+        "replayed": true
+      }
+    },
+    {
+      "name": "attach-same-code-new-key",
+      "schema": "attachResponse",
+      "httpStatus": 200,
+      "body": {
+        "attachment": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "status": "ATTACHED",
+          "source": "MANUAL",
+          "attachedAt": "2026-10-17T00:01:00Z",
+          "reward": {
+            "recipient": "INVITER",
+            "amount": 5,
+            "status": "GRANTED",
+            "policyVersion": "referral-local-v1"
+          }
+        },
+        "reward": {
+          "recipient": "INVITER",
+          "amount": 5,
+          "status": "GRANTED",
+          "policyVersion": "referral-local-v1"
+        },
+        "replayed": true
+      }
+    },
+    {
+      "name": "issue-new",
+      "schema": "issueResponse",
+      "httpStatus": 201,
+      "body": {
+        "code": {
+          "value": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+          "createdAt": "2026-10-17T00:00:00Z"
+        },
+        "shareUrl": null,
+        "offer": {
+          "status": "AVAILABLE",
+          "reason": "ELIGIBLE",
+          "version": "referral-local-v1",
+          "effectiveAt": "2026-10-17T00:00:00Z",
+          "expiresAt": "2026-10-18T00:00:00Z",
+          "rewardAmount": 5,
+          "codeIssuance": "AVAILABLE",
+          "attachmentEligibility": "ELIGIBLE",
+          "deadline": "2026-10-18T00:00:00Z",
+          "continuityMode": "OPTIONAL"
+        },
+        "replayed": false
+      }
+    },
+    {
+      "name": "issuer-own-status",
+      "schema": "meResponse",
+      "httpStatus": 200,
+      "body": {
+        "code": {
+          "value": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+          "createdAt": "2026-10-17T00:00:00Z"
+        },
+        "shareUrl": null,
+        "offer": {
+          "status": "AVAILABLE",
+          "reason": "ELIGIBLE",
+          "version": "referral-local-v1",
+          "effectiveAt": "2026-10-17T00:00:00Z",
+          "expiresAt": "2026-10-18T00:00:00Z",
+          "rewardAmount": 5,
+          "codeIssuance": "AVAILABLE",
+          "attachmentEligibility": "NOT_ELIGIBLE",
+          "deadline": null,
+          "continuityMode": "OPTIONAL"
+        },
+        "attachment": null,
+        "stats": {
+          "creditedCount": 2,
+          "earnedCredits": 12
+        }
+      }
+    },
+    {
+      "name": "issue-during-pause",
+      "schema": "issueResponse",
+      "httpStatus": 201,
+      "body": {
+        "code": {
+          "value": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+          "createdAt": "2026-10-17T00:00:00Z"
+        },
+        "shareUrl": null,
+        "offer": {
+          "status": "UNAVAILABLE",
+          "reason": "ADMISSIONS_DISABLED",
+          "version": "referral-local-v1",
+          "effectiveAt": "2026-10-17T00:00:00Z",
+          "expiresAt": "2026-10-18T00:00:00Z",
+          "rewardAmount": 5,
+          "codeIssuance": "AVAILABLE",
+          "attachmentEligibility": "ELIGIBLE",
+          "deadline": "2026-10-18T00:00:00Z",
+          "continuityMode": "NONE"
+        },
+        "replayed": false
+      }
+    },
+    {
+      "name": "guest-own-status",
+      "schema": "meResponse",
+      "httpStatus": 200,
+      "body": {
+        "code": null,
+        "shareUrl": null,
+        "offer": {
+          "status": "UNAVAILABLE",
+          "reason": "GOOGLE_REQUIRED",
+          "version": "referral-local-v1",
+          "effectiveAt": "2026-10-17T00:00:00Z",
+          "expiresAt": "2026-10-18T00:00:00Z",
+          "rewardAmount": 5,
+          "codeIssuance": "GOOGLE_REQUIRED",
+          "attachmentEligibility": "GOOGLE_REQUIRED",
+          "deadline": null,
+          "continuityMode": "NONE"
+        },
+        "attachment": null,
+        "stats": {
+          "creditedCount": 0,
+          "earnedCredits": 0
+        }
+      }
+    },
+    {
+      "name": "detached-invitee-own-status",
+      "schema": "meResponse",
+      "httpStatus": 200,
+      "body": {
+        "code": null,
+        "shareUrl": null,
+        "offer": {
+          "status": "AVAILABLE",
+          "reason": "ELIGIBLE",
+          "version": "referral-local-v1",
+          "effectiveAt": "2026-10-17T00:00:00Z",
+          "expiresAt": "2026-10-18T00:00:00Z",
+          "rewardAmount": 5,
+          "codeIssuance": "AVAILABLE",
+          "attachmentEligibility": "ATTACHED",
+          "deadline": "2026-10-18T00:00:00Z",
+          "continuityMode": "OPTIONAL"
+        },
+        "attachment": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "status": "ATTACHED",
+          "source": "MANUAL",
+          "attachedAt": "2026-10-17T00:01:00Z",
+          "reward": {
+            "recipient": "INVITER",
+            "amount": 5,
+            "status": "GRANTED",
+            "policyVersion": "referral-local-v1"
+          }
+        },
+        "stats": {
+          "creditedCount": 0,
+          "earnedCredits": 0
+        }
+      }
+    },
+    {
+      "name": "detached-invitee-export",
+      "schema": "exportReferrals",
+      "body": {
+        "code": null,
+        "attachment": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "status": "ATTACHED",
+          "source": "MANUAL",
+          "attachedAt": "2026-10-17T00:01:00Z",
+          "reward": {
+            "recipient": "INVITER",
+            "amount": 5,
+            "status": "GRANTED",
+            "policyVersion": "referral-local-v1"
+          }
+        },
+        "stats": {
+          "creditedCount": 0,
+          "earnedCredits": 0
+        }
+      }
+    },
+    {
+      "name": "invalid_input",
+      "schema": "errorResponse",
+      "httpStatus": 400,
+      "body": {
+        "error": {
+          "code": "INVALID_INPUT",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "referral_code_invalid",
+      "schema": "errorResponse",
+      "httpStatus": 400,
+      "body": {
+        "error": {
+          "code": "REFERRAL_CODE_INVALID",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "unauthenticated",
+      "schema": "errorResponse",
+      "httpStatus": 401,
+      "body": {
+        "error": {
+          "code": "UNAUTHENTICATED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "cross_app_token",
+      "schema": "errorResponse",
+      "httpStatus": 403,
+      "body": {
+        "error": {
+          "code": "CROSS_APP_TOKEN",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "google_required",
+      "schema": "errorResponse",
+      "httpStatus": 403,
+      "body": {
+        "error": {
+          "code": "GOOGLE_REQUIRED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "google_identity_rejected",
+      "schema": "errorResponse",
+      "httpStatus": 403,
+      "body": {
+        "error": {
+          "code": "GOOGLE_IDENTITY_REJECTED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "referral_ineligible",
+      "schema": "errorResponse",
+      "httpStatus": 403,
+      "body": {
+        "error": {
+          "code": "REFERRAL_INELIGIBLE",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "referral_activation_required",
+      "schema": "errorResponse",
+      "httpStatus": 409,
+      "body": {
+        "error": {
+          "code": "REFERRAL_ACTIVATION_REQUIRED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "referral_already_attached",
+      "schema": "errorResponse",
+      "httpStatus": 409,
+      "body": {
+        "error": {
+          "code": "REFERRAL_ALREADY_ATTACHED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "referral_self",
+      "schema": "errorResponse",
+      "httpStatus": 409,
+      "body": {
+        "error": {
+          "code": "REFERRAL_SELF",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "referral_window_expired",
+      "schema": "errorResponse",
+      "httpStatus": 409,
+      "body": {
+        "error": {
+          "code": "REFERRAL_WINDOW_EXPIRED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "account_deleted",
+      "schema": "errorResponse",
+      "httpStatus": 409,
+      "body": {
+        "error": {
+          "code": "ACCOUNT_DELETED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "policy_changed",
+      "schema": "errorResponse",
+      "httpStatus": 409,
+      "body": {
+        "error": {
+          "code": "POLICY_CHANGED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "idempotency_conflict",
+      "schema": "errorResponse",
+      "httpStatus": 409,
+      "body": {
+        "error": {
+          "code": "IDEMPOTENCY_CONFLICT",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "integrity_challenge_invalid",
+      "schema": "errorResponse",
+      "httpStatus": 409,
+      "body": {
+        "error": {
+          "code": "INTEGRITY_CHALLENGE_INVALID",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "integrity_rejected",
+      "schema": "errorResponse",
+      "httpStatus": 403,
+      "body": {
+        "error": {
+          "code": "INTEGRITY_REJECTED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "integrity_unavailable",
+      "schema": "errorResponse",
+      "httpStatus": 503,
+      "body": {
+        "error": {
+          "code": "INTEGRITY_UNAVAILABLE",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "identity_unavailable",
+      "schema": "errorResponse",
+      "httpStatus": 503,
+      "body": {
+        "error": {
+          "code": "IDENTITY_UNAVAILABLE",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "promotion_unavailable",
+      "schema": "errorResponse",
+      "httpStatus": 503,
+      "body": {
+        "error": {
+          "code": "PROMOTION_UNAVAILABLE",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "payload_too_large",
+      "schema": "errorResponse",
+      "httpStatus": 413,
+      "body": {
+        "error": {
+          "code": "PAYLOAD_TOO_LARGE",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    },
+    {
+      "name": "rate_limited",
+      "schema": "errorResponse",
+      "httpStatus": 429,
+      "body": {
+        "error": {
+          "code": "RATE_LIMITED",
+          "message": "Fixed synthetic fixture message."
+        }
+      }
+    }
+  ]
+}

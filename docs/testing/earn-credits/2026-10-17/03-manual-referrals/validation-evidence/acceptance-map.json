@@ -1,0 +1,342 @@
+{
+  "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+  "backend": "1794265b83139158dd3379618b7fd539bf7db45c",
+  "contractVersion": "manual-referrals-v1/namespace-1",
+  "caseCount": 46,
+  "cases": [
+    {
+      "id": "R03-01",
+      "scenario": "Qualified Google inviter issues code; eligible new Google invitee manually attaches",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:91](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L91); [BE:tailormyresume-referrals-namespace.test.ts:19](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-namespace.test.ts#L19)",
+      "scopeOrGap": "Real routes/local PG with synthetic Google/Admin/Integrity: one full5 inviter reward, invitee unchanged. Genuine device grant BLOCKED43."
+    },
+    {
+      "id": "R03-02",
+      "scenario": "Two different eligible invitees attach to same inviter",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:91](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L91)",
+      "scopeOrGap": "Two invitees, distinct opaque sources/ledger IDs, +10 inviter stats, invitee unchanged."
+    },
+    {
+      "id": "R03-03",
+      "scenario": "Google existing-account inviter versus existing-account invitee",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:255](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L255)",
+      "scopeOrGap": "Existing Google classification issues/replays own code while paused; cannot attach retroactively."
+    },
+    {
+      "id": "R03-04",
+      "scenario": "Guest pending candidate through same-UID Google link",
+      "disposition": "FIXTURE + DEVICE PARTIAL",
+      "evidence": "[FE:RemoteReferralGatewayTest:160](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L160); [device03/06](screenshots-manifest.json)",
+      "scopeOrGap": "Guest save/recreation/explicit no mutation observed; same-UID link/apply only fake-provider test, true link BLOCKED43."
+    },
+    {
+      "id": "R03-05",
+      "scenario": "All four routes missing/invalid auth, cross-app token/prefix, forged UID/amount fields",
+      "disposition": "FIXTURE PARTIAL",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:317](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L317); [BE:tailormyresume-referrals-namespace.test.ts:74](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-namespace.test.ts#L74)",
+      "scopeOrGap": "Missing auth/cross-app all four routes; query/extra owner/media/size on representative endpoints. Invalid-token/forged-amount permutations rely on shared auth/strict-schema implementation, not every route-specific assertion."
+    },
+    {
+      "id": "R03-06",
+      "scenario": "Guest/OTHER attempts code, challenge or attach",
+      "disposition": "FIXTURE PARTIAL",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:317](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L317)",
+      "scopeOrGap": "Code POST tests anonymous/password403; actorGuard shared by challenge/attach. Each provider on all three mutations is not separately asserted."
+    },
+    {
+      "id": "R03-07",
+      "scenario": "GET query/body and request/media-size malformed inputs",
+      "disposition": "FIXTURE PARTIAL",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:317](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L317)",
+      "scopeOrGap": "GET query rejected, code media/2048 limit asserted. Every GET-body/each route malformed bound combination not independently exercised."
+    },
+    {
+      "id": "R03-08",
+      "scenario": "Same-app other-user tries private read/export or body/path owner selection",
+      "disposition": "FIXTURE + REVIEW",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:317](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L317); [BE:tailormyresume-referrals-lifecycle.test.ts:35](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L35)",
+      "scopeOrGap": "Token-owned GET/export and strict no user selector; foreign owner extra rejected. No public user-selecting route."
+    },
+    {
+      "id": "R03-09",
+      "scenario": "ASCII case/outer whitespace normalization; malformed interior/Unicode/URL/foreign namespace",
+      "disposition": "FIXTURE + DEVICE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:39](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L39); [BE:tailormyresume-referrals-namespace.test.ts:74](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-namespace.test.ts#L74); [FE:RemoteReferralGatewayTest:160](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L160)",
+      "scopeOrGap": "Canonical vectors preserved; actual non-fixture full namespace saved. Client syntax acceptance is distinct from authoritative server scope rejection."
+    },
+    {
+      "id": "R03-10",
+      "scenario": "Forced payload collisions and concurrent owner issuance",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:referrals-shared.test.ts:228](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/referrals-shared.test.ts#L228); [BE:tailormyresume-referrals-namespace.test.ts:269](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-namespace.test.ts#L269)",
+      "scopeOrGap": "Bounded collision exhaustion and concurrent same-owner issue; concurrent namespaceA/B scope fence one winner. No live namespace choice."
+    },
+    {
+      "id": "R03-11",
+      "scenario": "Policy paused/exhausted with valid independent code config",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:255](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L255); [BE:tailormyresume-referrals.test.ts:663](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L663); [BE:tailormyresume-referrals-namespace.test.ts:185](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-namespace.test.ts#L185)",
+      "scopeOrGap": "Own code stable/recovered before current config/Admin; paused offer unavailable; mapping conflict closes new issue."
+    },
+    {
+      "id": "R03-12",
+      "scenario": "Missing activation, contradictory Admin subject/incarnation, metadata timeout/stale snapshot",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:394](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L394); [BE:tailormyresume-referrals.test.ts:861](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L861)",
+      "scopeOrGap": "Subject/incarnation/stale snapshot rejects; missing/unavailable activation read-only, explicit observation retains original anchor."
+    },
+    {
+      "id": "R03-13",
+      "scenario": "Signup grant previously refused but immutable qualifying activation valid",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:394](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L394)",
+      "scopeOrGap": "Signup503/zero grant does not bar independently qualifying referral; full reward once with original activation deadline."
+    },
+    {
+      "id": "R03-14",
+      "scenario": "Self, unknown/disabled/deleted/foreign code, existing/ambiguous or window boundary now==deadline",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:536](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L536); [BE:tailormyresume-referrals.test.ts:255](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L255); [BE:tailormyresume-referrals-namespace.test.ts:74](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-namespace.test.ts#L74)",
+      "scopeOrGap": "Self, unknown, disabled, window expiry, existing accounts and scoped foreign code negatives; no attachment reward."
+    },
+    {
+      "id": "R03-15",
+      "scenario": "Samekey same stable input after commit, policy/window/evidence expiry, pause, provider outage",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:178](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L178); [BE:tailormyresume-referrals.test.ts:663](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L663)",
+      "scopeOrGap": "Original committed receipt replay across paused/changed amount/expired window/evidence/Admin outage/config removal; counters/calls unchanged."
+    },
+    {
+      "id": "R03-16",
+      "scenario": "Samekey changed code/source/continuity",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals-adversarial.test.ts:102](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-adversarial.test.ts#L102)",
+      "scopeOrGap": "Committed changed-source conflict preserved; new real-route code/source/signal stable-input substitutions reject with complete persisted economics/challenge snapshots unchanged."
+    },
+    {
+      "id": "R03-17",
+      "scenario": "Newkey samecode versus differentcode after intact commit",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:178](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L178)",
+      "scopeOrGap": "New key/same code returns original MANUAL receipt; new key/different code409; no extra provider/counters."
+    },
+    {
+      "id": "R03-18",
+      "scenario": "Lost response then process recreation; operation-cache expires",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:178](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L178); [FE:RemoteReferralGatewayTest:195](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L195)",
+      "scopeOrGap": "Server operation/challenge rows removed then receipt replay; Android lost reply/recreated gateway GET clears private state. Actual reward processdeath BLOCKED43."
+    },
+    {
+      "id": "R03-19",
+      "scenario": "Change actor/app/env/action/key/code/source/signal/revision/challenge/hash; reuse activation/trial evidence",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals-adversarial.test.ts:102](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-adversarial.test.ts#L102)",
+      "scopeOrGap": "Actor/key/code/source/signal/revision/challenge/hash/action substitutions and actual trial/activation token-only plus challenge/token reuse reject. Namespace/app/environment negatives retained. Independent22/22 affected run."
+    },
+    {
+      "id": "R03-20",
+      "scenario": "Nullable signal, reused signal on unrelated eligible referral, shared network/model",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:91](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L91); [FE:RemoteReferralGatewayTest:135](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L135); [BE:tailormyresume-referrals.test.ts:749](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L749)",
+      "scopeOrGap": "Same signal used by two successful invitees; zero lifetime promotionSignals for referral; explicit null in both modes; trusted network finite counters."
+    },
+    {
+      "id": "R03-21",
+      "scenario": "Offer reward5 then current revision reward7 before uncommitted submit",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:479](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L479); [FE:RemoteReferralGatewayTest:236](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L236)",
+      "scopeOrGap": "Stale5\u21927 offer returns POLICY_CHANGED; client visibly needs second confirmation before token/fresh attempt."
+    },
+    {
+      "id": "R03-22",
+      "scenario": "Replay committed5 after amount7 or rollback revision",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:178](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L178)",
+      "scopeOrGap": "Original5 replay after paused amount7 preserves receipt/counters. General immutable revision rollback mechanism shared; no separate referral rollback top-up."
+    },
+    {
+      "id": "R03-23",
+      "scenario": "Concurrent same/different request keys for one invitee; two different inviter codes",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals-adversarial.test.ts:274](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-adversarial.test.ts#L274)",
+      "scopeOrGap": "Different-code/different-key Promise.all contest produces201/409, one full5 reward/attachment, loser unchanged/unconsumed, ownGET/winner200/loser409 recovery and exact persisted state unchanged."
+    },
+    {
+      "id": "R03-24",
+      "scenario": "Last5 capacity units with two invitees; remaining4 against advertised5",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals-adversarial.test.ts:340](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-adversarial.test.ts#L340)",
+      "scopeOrGap": "Advertised5 offered/challenge issued, then remaining4 before commit returns503; full economic/challenge snapshot unchanged. Existing exact-full-capacity race retained."
+    },
+    {
+      "id": "R03-25",
+      "scenario": "Reverse A->B and B->A plus deletion, signup/trial/tailoring settlement",
+      "disposition": "FIXTURE PARTIAL",
+      "evidence": "[BE:tailormyresume-referrals-lifecycle.test.ts:260](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L260); [BE:tailormyresume-referrals-lifecycle.test.ts:299](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L299); [BE:tailormyresume-referrals.test.ts:830](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L830)",
+      "scopeOrGap": "Reciprocal grants then concurrent deletes, deletion during lookup, referral/signup replay/tailoring settlement covered. All flows simultaneous in a single stress interleaving not claimed."
+    },
+    {
+      "id": "R03-26",
+      "scenario": "Inject sink failure after partial wallet write; crash before/after commit",
+      "disposition": "FIXTURE PARTIAL",
+      "evidence": "[BE:referrals-shared.test.ts:186](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/referrals-shared.test.ts#L186); [BE:tailormyresume-referrals.test.ts:178](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L178)",
+      "scopeOrGap": "Real sink partial wallet rollback and durable postcommit replay pass. No OS process-kill/crash injection; transaction atomicity/replay are scoped equivalent proof."
+    },
+    {
+      "id": "R03-27",
+      "scenario": "Independent actor/signal/network/campaign windows across API instances; failed grant",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:597](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L597); [BE:tailormyresume-referrals.test.ts:749](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L749)",
+      "scopeOrGap": "Finite actor/signal/network/campaign dimensions and fixed-window Retry-After, retained key rotation/expiry/erasure across service instances."
+    },
+    {
+      "id": "R03-28",
+      "scenario": "Invitee deletion after inviter reward spent/retained",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals-lifecycle.test.ts:128](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L128)",
+      "scopeOrGap": "Invitee erasure preserves inviter own economics/random receipt and spent credit; later survivor erasure cleans own receipt; capacity unchanged."
+    },
+    {
+      "id": "R03-29",
+      "scenario": "Inviter deletion after lost attachment reply",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals-lifecycle.test.ts:35](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L35); [FE:RemoteReferralGatewayTest:195](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L195)",
+      "scopeOrGap": "Inviter detachment removes code/foreignrefs/affected op/challenge rows; own ATTACHED recovery unchanged; Android clears pending evidence."
+    },
+    {
+      "id": "R03-30",
+      "scenario": "After detachment oldkey/originalcode, newkey/samecode, newkey/differentcode",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals-lifecycle.test.ts:35](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L35); [FE:RemoteReferralGatewayTest:217](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L217)",
+      "scopeOrGap": "Original/new key and malformed-but-structurally-valid code all409 before providers; GET own receipt; contradictory GET never retries."
+    },
+    {
+      "id": "R03-31",
+      "scenario": "Actor tombstone; beneficiary tombstone before rowsdetachment and exact committed replay",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals-lifecycle.test.ts:35](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L35); [BE:tailormyresume-referrals-lifecycle.test.ts:299](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L299)",
+      "scopeOrGap": "Actor tombstone always blocks; intact receipt replay200 while beneficiary deletion blocked in files step; fresh beneficiary deletion prevents grant."
+    },
+    {
+      "id": "R03-32",
+      "scenario": "Files/rows/Firebase failures and retry, internal recovery after Firebase deletion",
+      "disposition": "FIXTURE ONLY",
+      "evidence": "[BE:tailormyresume-referrals-lifecycle.test.ts:183](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L183); [BE:tailormyresume-referrals-lifecycle.test.ts:35](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L35)",
+      "scopeOrGap": "Rows-trigger and Firebase-port failure/retry/internal resume plus files failure preserve survivor. File/Firebase ports are synthetic; no cloud erasure acceptance."
+    },
+    {
+      "id": "R03-33",
+      "scenario": "Export intact and detached own account",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:91](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L91); [BE:tailormyresume-referrals-lifecycle.test.ts:35](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L35); [BE:tailormyresume-referrals-lifecycle.test.ts:128](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-lifecycle.test.ts#L128); [FE:ReferralExportCompatibilityTest:15](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/core/network/src/test/kotlin/com/tailormyresume/core/network/ReferralExportCompatibilityTest.kt#L15)",
+      "scopeOrGap": "Own full history/stable IDs/receipt archive roundtrip; no foreign UID/code/fingerprint in detached export."
+    },
+    {
+      "id": "R03-34",
+      "scenario": "Local dump/restore after detach/delete with consumed capacity",
+      "disposition": "FIXTURE LOCAL OPERATOR PROCEDURE",
+      "evidence": "[BE:tailormyresume-referrals-restore.test.ts:123](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-restore.test.ts#L123); [BE:tailormyresume-referrals-restore.test.ts:402](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals-restore.test.ts#L402)",
+      "scopeOrGap": "Actual pre-erasure backup restores intact edges/no tombstone; external later request/checkpoint replay with rows failure/retry detaches before route callback. Later-award stale0vs5/missing-records procedure refuses exposure. No production startup guard or recovery of unavailable journal claimed. Original post-detach test retained."
+    },
+    {
+      "id": "R03-35",
+      "scenario": "First pending candidate then second, explicitReplace/Clear, invalidcode during signup",
+      "disposition": "DEVICE + FIXTURE",
+      "evidence": "[FE:RemoteReferralGatewayTest:160](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L160); [FE:RemoteReferralGatewayTest:297](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L297); [screens03\u201309](screenshots-manifest.json)",
+      "scopeOrGap": "First candidate, Replace, Clear, full nonfixture namespace, actual process restart observed. Invalid input/freedom of signup fixture only; no nonempty draft in device setup."
+    },
+    {
+      "id": "R03-36",
+      "scenario": "Lostreply,503/429,policychanged,expiredchallenge, processdeath",
+      "disposition": "FIXTURE PARTIAL",
+      "evidence": "[FE:RemoteReferralGatewayTest:195](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L195); [FE:RemoteReferralGatewayTest:236](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L236); [FE:RemoteReferralGatewayTest:278](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L278)",
+      "scopeOrGap": "Lost reply/GET first, persisted429deadline/businesskey, changed offer and erased private token proven. Separate503/expiredchallenge gateway scenarios not located; service path reviewed."
+    },
+    {
+      "id": "R03-37",
+      "scenario": "Detached409 then GET succeeds/fails/contradicts",
+      "disposition": "FIXTURE",
+      "evidence": "[FE:RemoteReferralGatewayTest:195](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L195); [FE:RemoteReferralGatewayTest:217](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L217); [FE:ReferralsInputPrivacyTest:31](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/feature/settings/impl/src/test/kotlin/com/tailormyresume/feature/settings/impl/referrals/ReferralsInputPrivacyTest.kt#L31)",
+      "scopeOrGap": "Detached409 clears code-bearing journal/UI; GET failure readmarker; contradiction no reattach; saved-state restoration cannot restore typed/old code."
+    },
+    {
+      "id": "R03-38",
+      "scenario": "Account switch/signout/delete during attach/GET/history refresh and delayed responses",
+      "disposition": "FIXTURE + REVIEW",
+      "evidence": "[FE:RemoteReferralGatewayTest:247](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L247); [FE:RemoteReferralGatewayTest:264](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L264); [FE:OfflineFirstCreditsRepositoryRemoteTest:352](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/OfflineFirstCreditsRepositoryRemoteTest.kt#L352)",
+      "scopeOrGap": "During evidence owner-switch/erase fences tested; history owner scope/late refresh tests preserved; shared guard provider/generation checks source-reviewed. All network response interleavings not separately claimed."
+    },
+    {
+      "id": "R03-39",
+      "scenario": "Guest conflict to existingGoogle with pendingcode",
+      "disposition": "FIXTURE",
+      "evidence": "[FE:RemoteReferralGatewayTest:313](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L313)",
+      "scopeOrGap": "Guest conflict transfer quarantined; explicit eligible destination rebind; no blind attach. Actual Google conflict BLOCKED43."
+    },
+    {
+      "id": "R03-40",
+      "scenario": "Same-time referral ledger events, mixed legacy/unknown entries, wallet>100rowhistory",
+      "disposition": "FIXTURE",
+      "evidence": "[FE:OfflineFirstCreditsRepositoryRemoteTest:352](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/core/data/src/test/kotlin/com/tailormyresume/core/data/repository/OfflineFirstCreditsRepositoryRemoteTest.kt#L352); [FE:ReferralLedgerMigrationTest:15](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/core/database/src/test/kotlin/com/tailormyresume/core/database/ReferralLedgerMigrationTest.kt#L15)",
+      "scopeOrGap": "Room5\u21926 additive nullable scoped IDs/unique index preserves legacy rows; authoritative remote wallet/history tests and unknown decode; actual device ledger empty."
+    },
+    {
+      "id": "R03-41",
+      "scenario": "Invite/code normal and large text, keyboard, zero-credit original application return",
+      "disposition": "DEVICE + FIXTURE PARTIAL",
+      "evidence": "[screens01\u201311](screenshots-manifest.json); [FE:ReferralsScreenshotTest:1](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/feature/settings/impl/src/test/kotlin/com/tailormyresume/feature/settings/impl/referrals/ReferralsScreenshotTest.kt#L1)",
+      "scopeOrGap": "Normal/200% text, real keyboard, reachable actions, wallet/Applications return observed. Server personal copy and zero-credit existing-application return covered by fixtures; actual Google reward/spend unavailable."
+    },
+    {
+      "id": "R03-42",
+      "scenario": "Test-only second app amount7 nonGoogle event with identical UID and suffix in independentDB",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:referrals-shared.test.ts:113](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/referrals-shared.test.ts#L113)",
+      "scopeOrGap": "Second independent DB/nonGoogle7-unit transaction sink, identical UID/payload plus isolated scope/token; no registry activation."
+    },
+    {
+      "id": "R03-43",
+      "scenario": "Genuine staging Google/Integrity/admitted5 reward+spend device acceptance",
+      "disposition": "BLOCKED EXTERNAL",
+      "evidence": "[runtime](runtime-provenance.json); [staging handoff](../staging-handoff.md)",
+      "scopeOrGap": "Missing genuine Google/Integrity matching config/verdict/licensing/device evidence, closed admissions. TLS contact/provider fixtures do not substitute."
+    },
+    {
+      "id": "R03-44",
+      "scenario": "AppLinks/ShareURL/installreferrer, paymentretirement/pendingpurchase obligations",
+      "disposition": "EXCLUDED LATER SLICE",
+      "evidence": "[contract10.8](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/docs/BACKEND_CONTRACT.md#L1981)",
+      "scopeOrGap": "Links/App Links/owned domain/Play referrer slice04; remaining billing retirement and historical purchase obligations slice05. No whole-issue closure."
+    },
+    {
+      "id": "R03-45",
+      "scenario": "Invitee owns challenge while inviter receives generic promotion grant; guest/signup still single actor",
+      "disposition": "FIXTURE",
+      "evidence": "[BE:tailormyresume-referrals.test.ts:91](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/tailormyresume-referrals.test.ts#L91); [BE:referrals-shared.test.ts:186](https://github.com/BengaluruBuilders/apps-backend/blob/1794265b83139158dd3379618b7fd539bf7db45c/test/referrals-shared.test.ts#L186)",
+      "scopeOrGap": "Invitee challenge consumed once while inviter unrelated challenge untouched; full inviter sink/grant/ledger atomic; signals[] no lifetime device allocation. Shared guest/signup defaults unchanged."
+    },
+    {
+      "id": "R03-46",
+      "scenario": "Policy continuityMode NONE/OPTIONAL, paused/unavailable, passive/recovery reads versus explicitnewattach",
+      "disposition": "FIXTURE + DEVICE PASSIVE",
+      "evidence": "[FE:RemoteReferralGatewayTest:135](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L135); [FE:RemoteReferralGatewayTest:330](https://github.com/BengaluruBuilders/tailor-my-resume/blob/aa4b41726608c0a5b847fe80f543f01a37ffa130/app/src/test/kotlin/com/tailormyresume/app/referrals/RemoteReferralGatewayTest.kt#L330); [device](device-smoke.md)",
+      "scopeOrGap": "NONE/OPTIONAL explicitnull, no continuity reads, token only explicit fresh apply; no unavailable/passive/code/recovery signal evidence. Actual guest passive save only; admitted evidence BLOCKED43."
+    }
+  ],
+  "resolvedFindings": [
+    "R03-V001",
+    "R03-V002"
+  ],
+  "independentAffectedRun": {
+    "tests": 22,
+    "pass": 22,
+    "fail": 0,
+    "skip": 0,
+    "exit": 0
+  },
+  "currentVerdict": "ATTAINABLE_PREPUBLICATION_PASS_EXTERNAL_BLOCKED"
+}

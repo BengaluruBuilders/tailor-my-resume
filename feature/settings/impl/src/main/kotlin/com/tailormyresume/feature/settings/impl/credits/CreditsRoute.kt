@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.feature.settings.api.navigation.navigateToPaywall
+import com.tailormyresume.feature.settings.api.navigation.navigateToReferrals
 
 @Composable
 internal fun CreditsRoute(
@@ -27,5 +28,5 @@ internal fun CreditsRoute(
         lifecycle.addObserver(observer)
         onDispose { lifecycle.removeObserver(observer) }
     }
-    CreditsScreen(state = state, onBuyMore = onBuyMore, modifier = modifier, onCheckTrial = viewModel::onCheckTrial, onClaimTrial = viewModel::onClaimTrial, onGoogle = viewModel::onGoogleAccount)
+    CreditsScreen(state = state, onBuyMore = onBuyMore, modifier = modifier, onCheckTrial = viewModel::onCheckTrial, onClaimTrial = viewModel::onClaimTrial, onGoogle = viewModel::onGoogleAccount, onReferrals = navigator::navigateToReferrals)
 }

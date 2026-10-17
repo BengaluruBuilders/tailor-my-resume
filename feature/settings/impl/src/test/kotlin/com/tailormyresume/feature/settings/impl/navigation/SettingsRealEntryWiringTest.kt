@@ -101,6 +101,10 @@ class CacheDirAccountDataExporter(private val context: Context) : AccountDataExp
 object SettingsAppGatewayFakes {
     @Provides
     @Singleton
+    fun referrals(): com.tailormyresume.core.domain.ReferralGateway = com.tailormyresume.core.testing.gateway.TestReferralGateway()
+
+    @Provides
+    @Singleton
     fun google(): com.tailormyresume.core.domain.GoogleAccountGateway = com.tailormyresume.core.testing.gateway.TestGoogleAccountGateway()
 
     @Provides

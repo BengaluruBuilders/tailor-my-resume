@@ -8,6 +8,8 @@ data class CreditSnapshot(val balance: Int, val entries: List<CreditLedgerEntry>
 interface RemoteLedgerSource {
     val ownsLedger: Boolean
 
+    fun environment(): String = ""
+
     fun owner(): String?
 
     suspend fun fetch(): CreditSnapshot

@@ -1,6 +1,8 @@
 package com.tailormyresume.core.network.dto
 
 import com.tailormyresume.core.model.ReportedItemKind
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
@@ -22,6 +24,7 @@ data class ContentReportResponse(val report: ContentReportDto)
 @Serializable
 data class ExportUserDto(val id: String, val createdAt: String)
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class ServerExportDto(
     val generatedAt: String,
@@ -31,6 +34,8 @@ data class ServerExportDto(
     val unlocks: List<JsonElement>,
     val purchases: List<JsonElement>,
     val contentReports: List<JsonElement>,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val credits: List<CreditEntryDto>? = null,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val promotions: JsonElement? = null,
 )
 
 @Serializable

@@ -17,8 +17,10 @@ class SignOutCleaner @Inject constructor(
     private val store: MockStateStore,
     private val credits: CreditsRepository,
     private val exportedFiles: ExportedFiles = ExportedFiles.None,
+    private val referrals: com.tailormyresume.app.referrals.RemoteReferralGateway? = null,
 ) {
     suspend fun clear() {
+        referrals?.invalidate()
         payments.clearCredits()
         credits.clear()
         analysis.clear()

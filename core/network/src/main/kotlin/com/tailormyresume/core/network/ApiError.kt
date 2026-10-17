@@ -3,6 +3,13 @@ package com.tailormyresume.core.network
 import kotlinx.serialization.Serializable
 
 sealed interface ApiError {
+    data object ReferralCodeInvalid : ApiError
+    data object ReferralIneligible : ApiError
+    data object ReferralActivationRequired : ApiError
+    data object ReferralAlreadyAttached : ApiError
+    data object ReferralSelf : ApiError
+    data object ReferralWindowExpired : ApiError
+
     data object GoogleIdentityRejected : ApiError
     data object RecentGoogleAuthRequired : ApiError
     data object AccountLinkConflict : ApiError
@@ -58,6 +65,12 @@ internal data class ErrorEnvelope(val error: ErrorBody? = null)
 internal data class ErrorBody(val code: String? = null, val message: String? = null)
 
 internal fun apiErrorOf(httpStatus: Int, code: String?, retryAfterSeconds: Int?): ApiError = when (code) {
+    "REFERRAL_CODE_INVALID" -> ApiError.ReferralCodeInvalid
+    "REFERRAL_INELIGIBLE" -> ApiError.ReferralIneligible
+    "REFERRAL_ACTIVATION_REQUIRED" -> ApiError.ReferralActivationRequired
+    "REFERRAL_ALREADY_ATTACHED" -> ApiError.ReferralAlreadyAttached
+    "REFERRAL_SELF" -> ApiError.ReferralSelf
+    "REFERRAL_WINDOW_EXPIRED" -> ApiError.ReferralWindowExpired
     "GOOGLE_IDENTITY_REJECTED" -> ApiError.GoogleIdentityRejected
     "RECENT_GOOGLE_AUTH_REQUIRED" -> ApiError.RecentGoogleAuthRequired
     "ACCOUNT_LINK_CONFLICT" -> ApiError.AccountLinkConflict

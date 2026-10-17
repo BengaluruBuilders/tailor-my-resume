@@ -1,0 +1,282 @@
+{
+  "contractVersion": "manual-referrals-v1",
+  "implementationStatus": "PENDING_NOT_TEST_RESULTS",
+  "cases": [
+    {
+      "id": "R03-01",
+      "group": "journey",
+      "scenario": "Qualified Google inviter issues code; eligible new Google invitee manually attaches",
+      "expected": "201 code; 201 attach; inviter + configured5 free, one grant/ledger/capacity5; invitee unchanged; no tailoring/upload/AI/worker"
+    },
+    {
+      "id": "R03-02",
+      "group": "journey",
+      "scenario": "Two different eligible invitees attach to same inviter",
+      "expected": "Two opaque sources and full rewards; no constant-entitlement one-referral cap"
+    },
+    {
+      "id": "R03-03",
+      "group": "journey",
+      "scenario": "Google existing-account inviter versus existing-account invitee",
+      "expected": "Can issue stable code after observed classification; cannot retroqualify as new invitee"
+    },
+    {
+      "id": "R03-04",
+      "group": "journey",
+      "scenario": "Guest pending candidate through same-UID Google link",
+      "expected": "Capture/persist only while guest; Google fact enables optional attachment; no code issuance/reward before Google"
+    },
+    {
+      "id": "R03-05",
+      "group": "boundary",
+      "scenario": "All four routes missing/invalid auth, cross-app token/prefix, forged UID/amount fields",
+      "expected": "401/403/404 routing as existing; 400 strict extras; no writes/disclosure"
+    },
+    {
+      "id": "R03-06",
+      "group": "boundary",
+      "scenario": "Guest/OTHER attempts code, challenge or attach",
+      "expected": "403 GOOGLE_REQUIRED; own GET eligibility safe and read-only"
+    },
+    {
+      "id": "R03-07",
+      "group": "boundary",
+      "scenario": "GET query/body and request/media-size malformed inputs",
+      "expected": "400 INVALID_INPUT or413 bound; no grant or classification"
+    },
+    {
+      "id": "R03-08",
+      "group": "boundary",
+      "scenario": "Same-app other-user tries private read/export or body/path owner selection",
+      "expected": "No user-selecting route/field; only token own data; reject extra fields"
+    },
+    {
+      "id": "R03-09",
+      "group": "code",
+      "scenario": "ASCII case/outer whitespace normalization; malformed interior/Unicode/URL/foreign namespace",
+      "expected": "Equivalent canonical digest for allowed normalization; 400 invalid otherwise; never suffix resolve"
+    },
+    {
+      "id": "R03-10",
+      "group": "code",
+      "scenario": "Forced payload collisions and concurrent owner issuance",
+      "expected": "Retry max5; one winning active owner code; exhausted retries503; fresh random20 bytes each"
+    },
+    {
+      "id": "R03-11",
+      "group": "code",
+      "scenario": "Policy paused/exhausted with valid independent code config",
+      "expected": "Code creation/recovery available; offer UNAVAILABLE, no reward promise; code stable across revisions/keys"
+    },
+    {
+      "id": "R03-12",
+      "group": "identity",
+      "scenario": "Missing activation, contradictory Admin subject/incarnation, metadata timeout/stale snapshot",
+      "expected": "409 activation required or403 identity reject/503 outage; no guessed new account; no deadline reset"
+    },
+    {
+      "id": "R03-13",
+      "group": "identity",
+      "scenario": "Signup grant previously refused but immutable qualifying activation valid",
+      "expected": "Referral may qualify independently; no signup-grant prerequisite or extra signup/base award"
+    },
+    {
+      "id": "R03-14",
+      "group": "eligibility",
+      "scenario": "Self, unknown/disabled/deleted/foreign code, existing/ambiguous or window boundary now==deadline",
+      "expected": "409 self; 400 invalid code; 403 ineligible;409 expired; all zero writes"
+    },
+    {
+      "id": "R03-15",
+      "group": "idempotency",
+      "scenario": "Samekey same stable input after commit, policy/window/evidence expiry, pause, provider outage",
+      "expected": "200 original receipt, replayedtrue; no new external calls/counters/capacity/grant"
+    },
+    {
+      "id": "R03-16",
+      "group": "idempotency",
+      "scenario": "Samekey changed code/source/continuity",
+      "expected": "409 IDEMPOTENCY_CONFLICT while fingerprint retained; original success unchanged"
+    },
+    {
+      "id": "R03-17",
+      "group": "idempotency",
+      "scenario": "Newkey samecode versus differentcode after intact commit",
+      "expected": "200 original source/time/amount for same code;409 alreadyattached for other code; no new reward"
+    },
+    {
+      "id": "R03-18",
+      "group": "idempotency",
+      "scenario": "Lost response then process recreation; operation-cache expires",
+      "expected": "OwnGET confirms; durable attachment prevents second reward after cache expiry"
+    },
+    {
+      "id": "R03-19",
+      "group": "evidence",
+      "scenario": "Change actor/app/env/action/key/code/source/signal/revision/challenge/hash; reuse activation/trial evidence",
+      "expected": "No new grant;409 challenge invalid or403 integrity reject; isolated action binding"
+    },
+    {
+      "id": "R03-20",
+      "group": "evidence",
+      "scenario": "Nullable signal, reused signal on unrelated eligible referral, shared network/model",
+      "expected": "Null no empty identity; velocity only, no lifetime referral/device cap; no private lookup or shared-NAT identity ban"
+    },
+    {
+      "id": "R03-21",
+      "group": "policy",
+      "scenario": "Offer reward5 then current revision reward7 before uncommitted submit",
+      "expected": "409 POLICY_CHANGED; refreshed/reconfirmed7; same stable businesskey/digest, fresh challenge"
+    },
+    {
+      "id": "R03-22",
+      "group": "policy",
+      "scenario": "Replay committed5 after amount7 or rollback revision",
+      "expected": "Return original5 once; no topup/clawback; aggregate capacity unchanged"
+    },
+    {
+      "id": "R03-23",
+      "group": "concurrency",
+      "scenario": "Concurrent same/different request keys for one invitee; two different inviter codes",
+      "expected": "Exactly one attribution+full reward; samecode recovery200 or othercode409"
+    },
+    {
+      "id": "R03-24",
+      "group": "concurrency",
+      "scenario": "Last5 capacity units with two invitees; remaining4 against advertised5",
+      "expected": "Exactly one full5 winner for last5; no accepted/partial/zero for remaining4; rollback both sides on refusal"
+    },
+    {
+      "id": "R03-25",
+      "group": "concurrency",
+      "scenario": "Reverse A->B and B->A plus deletion, signup/trial/tailoring settlement",
+      "expected": "Sorted userlocks, stable subsequent locks; no deadlock, duplicate grant, overspend or resurrection"
+    },
+    {
+      "id": "R03-26",
+      "group": "atomicity",
+      "scenario": "Inject sink failure after partial wallet write; crash before/after commit",
+      "expected": "Rollback attachment/grant/ledger/capacity/challenge together beforecommit; recover original aftercommit"
+    },
+    {
+      "id": "R03-27",
+      "group": "rate",
+      "scenario": "Independent actor/signal/network/campaign windows across API instances; failed grant",
+      "expected": "Failed attempt counters persist separately; reward capacity rollback; 429 honest max-reset Retry-After; key/policy doesnot reset"
+    },
+    {
+      "id": "R03-28",
+      "group": "lifecycle",
+      "scenario": "Invitee deletion after inviter reward spent/retained",
+      "expected": "Remove identifying edge/foreign provenance; living inviter own grant/ledger/balance/totals survive; aggregate capacity nonreopening"
+    },
+    {
+      "id": "R03-29",
+      "group": "lifecycle",
+      "scenario": "Inviter deletion after lost attachment reply",
+      "expected": "Surviving invitee own ATTACHED receipt; code/ref/hash/affected op/challenge fingerprints gone; no new inviter/reattachment"
+    },
+    {
+      "id": "R03-30",
+      "group": "lifecycle",
+      "scenario": "After detachment oldkey/originalcode, newkey/samecode, newkey/differentcode",
+      "expected": "All structurallyvalid POST409 ALREADY_ATTACHED before code/policy/evidence; GET200 own original status; no foreign identity"
+    },
+    {
+      "id": "R03-31",
+      "group": "lifecycle",
+      "scenario": "Actor tombstone; beneficiary tombstone before rowsdetachment and exact committed replay",
+      "expected": "Actor always409 ACCOUNT_DELETED; intact committed replaymay200 without beneficiarywrite; fresh grant checksbothlive"
+    },
+    {
+      "id": "R03-32",
+      "group": "lifecycle",
+      "scenario": "Files/rows/Firebase failures and retry, internal recovery after Firebase deletion",
+      "expected": "Idempotent detach+erase before usercascade, valid survivor state; no resurrection/otheruser or otherapp loss"
+    },
+    {
+      "id": "R03-33",
+      "group": "lifecycle",
+      "scenario": "Export intact and detached own account",
+      "expected": "Owncode/status/date/source/reward/grants/fullhistory only; no counterpart UID/email/code/evidence/hash/token; no grant sideeffects"
+    },
+    {
+      "id": "R03-34",
+      "group": "lifecycle",
+      "scenario": "Local dump/restore after detach/delete with consumed capacity",
+      "expected": "Reconcile erasure/tombstones before serving; no restored identityedge/reattachment/capacity reopening"
+    },
+    {
+      "id": "R03-35",
+      "group": "android",
+      "scenario": "First pending candidate then second, explicitReplace/Clear, invalidcode during signup",
+      "expected": "No silentoverwrite; explicit newattempt; signup/drafts/ordinarywork continue"
+    },
+    {
+      "id": "R03-36",
+      "group": "android",
+      "scenario": "Lostreply,503/429,policychanged,expiredchallenge, processdeath",
+      "expected": "Stable key/input; durableretrydeadline; no rawtoken/signal; GET before mutation; reconfirm newoffer"
+    },
+    {
+      "id": "R03-37",
+      "group": "android",
+      "scenario": "Detached409 then GET succeeds/fails/contradicts",
+      "expected": "Success clears codebearingstate; failure read-only ownermarker; contradiction noautomaticattach retry"
+    },
+    {
+      "id": "R03-38",
+      "group": "android",
+      "scenario": "Account switch/signout/delete during attach/GET/history refresh and delayed responses",
+      "expected": "Cancel oldwork; UID/environment/provider/generation/erase fences; no candidate/wallet/history leak"
+    },
+    {
+      "id": "R03-39",
+      "group": "android",
+      "scenario": "Guest conflict to existingGoogle with pendingcode",
+      "expected": "No blindtransfer/submission; explicitreview/rebind only if destinationeligible; preserve section9 localwork ownership"
+    },
+    {
+      "id": "R03-40",
+      "group": "android",
+      "scenario": "Same-time referral ledger events, mixed legacy/unknown entries, wallet>100rowhistory",
+      "expected": "Stable distinct serverIDs through DTO/model/Room/UI; actualrecordedamount; authoritativewallet; unknownsafe; no destructiveDBreset"
+    },
+    {
+      "id": "R03-41",
+      "group": "android",
+      "scenario": "Invite/code normal and large text, keyboard, zero-credit original application return",
+      "expected": "Tmr components, optionalentry, servercopy/unavailablestate, reachableactions; no auto tailoring/spend"
+    },
+    {
+      "id": "R03-42",
+      "group": "reuse",
+      "scenario": "Test-only second app amount7 nonGoogle event with identical UID and suffix in independentDB",
+      "expected": "Samegenericservice+transactionsink; scopedtoken/code/namespace no crossapp/env reward; not productionregistry"
+    },
+    {
+      "id": "R03-43",
+      "group": "external",
+      "scenario": "Genuine staging Google/Integrity/admitted5 reward+spend device acceptance",
+      "expected": "BLOCKED until actual matching external config/verdicts/device evidence; fixture success never substitutes"
+    },
+    {
+      "id": "R03-44",
+      "group": "excluded",
+      "scenario": "AppLinks/ShareURL/installreferrer, paymentretirement/pendingpurchase obligations",
+      "expected": "Slice04/05 remaining acceptance; no invented origin, implementation claim or issueclosure"
+    },
+    {
+      "id": "R03-45",
+      "group": "atomicity",
+      "scenario": "Invitee owns challenge while inviter receives generic promotion grant; guest/signup still single actor",
+      "expected": "Only invitee challenge consumed in same transaction; inviter-owned unrelated challenge unchanged; referral velocity not lifetime trial signal allocation"
+    },
+    {
+      "id": "R03-46",
+      "group": "android",
+      "scenario": "Policy continuityMode NONE/OPTIONAL, paused/unavailable, passive/recovery reads versus explicitnewattach",
+      "expected": "No hiddenconfig guessing; NONE sendsnull without signal read; OPTIONAL permitsexplicitattempt only; nullalwaysvalid; no passive/code-issue/recovery collection or newdevicecap"
+    }
+  ]
+}

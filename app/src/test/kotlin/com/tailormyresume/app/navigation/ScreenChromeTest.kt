@@ -79,6 +79,7 @@ internal val CHROME_TABLE: List<ChromeRow> = listOf(
     ChromeRow(ListEditNavKey(ProfileListSection.SUMMARY), null, true, Back, "Profile", "Save"),
     ChromeRow(SettingsNavKey(), null, true, Back, "Profile", null),
     ChromeRow(CreditsNavKey(), null, true, Back, "Settings", null),
+    ChromeRow(com.tailormyresume.feature.settings.api.navigation.ReferralsNavKey, null, true, Back, "Settings", null),
     ChromeRow(PaywallNavKey(null), null, true, Close, null, null),
 )
 
@@ -95,8 +96,8 @@ class ScreenChromeTest {
     }
 
     @Test
-    fun chromeMatchesTTableForAll27Keys() {
-        assertThat(CHROME_TABLE).hasSize(27)
+    fun chromeMatchesTTableForAll28Keys() {
+        assertThat(CHROME_TABLE).hasSize(28)
         assertThat(CHROME_TABLE.map { it.key::class }).containsNoDuplicates()
 
         CHROME_TABLE.forEach { row ->

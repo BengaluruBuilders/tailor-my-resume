@@ -1,0 +1,151 @@
+{
+  "observedAt": "2026-10-17T11:14:29.549750+00:00",
+  "frontend": "aa4b41726608c0a5b847fe80f543f01a37ffa130",
+  "apkInputs": "27cc53d75f9833339976b6849c044e33b2d9f66a",
+  "backend": "06bcccf5625b6d92e5c016a5ffd11ebad87a49c0",
+  "apkSha256": "0e946b0b36e5b927b1ef59eb98d6629b16604af71ecc8aedb43b56ea4301ad1d",
+  "apkBytes": 6081450,
+  "apkDiffPaths": [
+    "docs/ARCHITECTURE.md"
+  ],
+  "endpointInDex": true,
+  "firebaseProjectInDex": true,
+  "actualTlsConnections": [
+    {
+      "event": "connected",
+      "label": "firebase-refresh",
+      "utc": "2026-10-17T11:07:05Z"
+    },
+    {
+      "event": "connected",
+      "label": "firebase-refresh",
+      "utc": "2026-10-17T11:07:05Z"
+    },
+    {
+      "event": "connected",
+      "label": "firebase-refresh",
+      "utc": "2026-10-17T11:07:07Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T11:07:07Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T11:07:07Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T11:07:07Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T11:10:34Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T11:11:01Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T11:11:01Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T11:11:25Z"
+    }
+  ],
+  "tunnelClosures": [
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 723,
+      "serverBytes": 505
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 723,
+      "serverBytes": 1444
+    },
+    {
+      "event": "closed",
+      "label": "firebase-refresh",
+      "clientBytes": 1546,
+      "serverBytes": 5332
+    },
+    {
+      "event": "closed",
+      "label": "firebase-refresh",
+      "clientBytes": 1546,
+      "serverBytes": 5419
+    },
+    {
+      "event": "closed",
+      "label": "firebase-refresh",
+      "clientBytes": 1546,
+      "serverBytes": 5578
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 1968,
+      "serverBytes": 3774
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 1551,
+      "serverBytes": 2055
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 627,
+      "serverBytes": 1505
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 1949,
+      "serverBytes": 1722
+    },
+    {
+      "event": "closed",
+      "label": "candidate",
+      "clientBytes": 2323,
+      "serverBytes": 5126
+    }
+  ],
+  "deniedCount": 205,
+  "tlsPreflight": {
+    "connectStatus": 200,
+    "httpHealth": 200,
+    "sslVerifyResult": 0,
+    "ca": "public PEM extracted from actual APK res/wC.pem"
+  },
+  "proxyInitial": {
+    "http_proxy": null,
+    "global_http_proxy_host": "10.0.2.2",
+    "global_http_proxy_port": "18765"
+  },
+  "proxyCleaned": {
+    "http_proxy": null,
+    "global_http_proxy_host": null,
+    "global_http_proxy_port": null
+  },
+  "fontScaleRestored": "1.0",
+  "googleAccountCount": 0,
+  "personalPhoneOperated": false,
+  "relayPid": 807572,
+  "emulatorPid": 806706,
+  "ownedProcessesAbsent": true,
+  "evidenceBoundary": "TLS passthrough, no termination or decoded request/token/provider acceptance. Fresh admitted referral reward/spend blocked."
+}

@@ -19,6 +19,7 @@ import com.tailormyresume.core.designsystem.component.chrome.LocalTmrSheetHost
 import com.tailormyresume.core.designsystem.component.chrome.LocalTmrToast
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.feature.settings.api.navigation.navigateToCredits
+import com.tailormyresume.feature.settings.api.navigation.navigateToReferrals
 import com.tailormyresume.feature.settings.impl.R
 import com.tailormyresume.feature.settings.impl.delete.DeleteAccountSheet
 import com.tailormyresume.feature.settings.impl.delete.DeleteAccountViewModel
@@ -67,6 +68,7 @@ internal fun SettingsRoute(
     val actions = remember(viewModel, deleteViewModel, navigator, sheetHost, toast, context) {
         SettingsActions(
             onCredits = navigator::navigateToCredits,
+            onReferrals = navigator::navigateToReferrals,
             onPageSize = viewModel::onPageSizeClicked,
             onFileName = viewModel::onFileNameClicked,
             onProductUpdates = viewModel::onProductUpdatesToggled,

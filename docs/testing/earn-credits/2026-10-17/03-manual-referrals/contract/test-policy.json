@@ -1,0 +1,39 @@
+{
+  "contractVersion": "manual-referrals-v1",
+  "fixtureOnly": true,
+  "productionAdmissions": "UNSET_OFF",
+  "appId": "tailormyresume",
+  "environment": "staging",
+  "scope": "[\"tailormyresume\",\"staging\",\"referral-reward\"]",
+  "version": "referral-local-v1",
+  "amount": 5,
+  "capacityCreditUnits": 100,
+  "activationWindowSeconds": 86400,
+  "source": "EXISTING_SECTION_9_ACTIVATION",
+  "namespace": "tailormyresume.staging",
+  "shareOrigin": null,
+  "codeRandomBytes": 20,
+  "collisionAttempts": 5,
+  "challengeTtlSeconds": 300,
+  "operationCacheSeconds": 2592000,
+  "decisionTtlSeconds": 604800,
+  "signalCounterTtlSeconds": 60,
+  "networkCounterTtlMaxSeconds": 3600,
+  "postDeletionForeignProvenanceRetentionSeconds": 0,
+  "fixtureVelocity": {
+    "windowSeconds": 60,
+    "actor": 5,
+    "signal": 10,
+    "network": 30,
+    "campaign": 100
+  },
+  "secondAppFixture": {
+    "appId": "fixture-app",
+    "environment": "isolated",
+    "scope": "[\"fixture-app\",\"isolated\",\"referral-reward\"]",
+    "namespace": "fixture-app.isolated",
+    "amount": 7,
+    "qualificationEvent": "VERIFIED_FIXTURE_EVENT",
+    "sink": "transaction-backed fixture balance+ledger; never production registry"
+  }
+}

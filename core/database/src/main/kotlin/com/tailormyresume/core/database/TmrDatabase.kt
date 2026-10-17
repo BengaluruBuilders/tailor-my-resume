@@ -22,7 +22,7 @@ import com.tailormyresume.core.database.util.JsonConverters
         JobApplicationEntity::class,
         CreditLedgerEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 @TypeConverters(

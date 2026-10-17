@@ -1,0 +1,23 @@
+{
+  "backendHead": "1794265b83139158dd3379618b7fd539bf7db45c",
+  "pid": 181059,
+  "cwd": "/home/codex/projects/tailormyresume-earn-credits/repo",
+  "gitStatus": "",
+  "inputs": 228,
+  "mismatches": [],
+  "manifestSha256": "1c3cb56e413b36123f8273f5e6fd75c122045256bd53d094672c1d3f6e610b5a",
+  "oldCandidate174517Absent": true,
+  "originalPidsPresent": [
+    114856,
+    55083,
+    28765,
+    40092
+  ],
+  "health": 200,
+  "unauthenticatedReferralGET": 401,
+  "sslVerifyResult": 0,
+  "endpoint": "https://abhishek-dubey-MS-7B16.local:20002/",
+  "tlsCA": "Public CA extracted from unchanged actual APK",
+  "runtimeCodeAndHarnessDiffFrom06bcccf": [],
+  "deviceEvidence": "Prior actual app contact/smoke remains labelled06bcccf; reused through byte-identical runtime source/config/harness and unchangedAPK, not relabelled as new device traffic."
+}

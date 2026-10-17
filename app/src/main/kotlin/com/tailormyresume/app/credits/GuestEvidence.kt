@@ -28,7 +28,7 @@ class StandardGuestEvidence @Inject constructor(
     @ApplicationContext private val context: Context,
     @Dispatcher(TmrDispatchers.IO) private val io: CoroutineDispatcher,
 ) : GuestEvidence {
-    // Explicit trial continuity, never tracking: https://developer.android.com/reference/android/provider/Settings.Secure#ANDROID_ID
+    // Explicit guest/base continuity only; referral uses null: https://developer.android.com/reference/android/provider/Settings.Secure#ANDROID_ID
     @SuppressLint("HardwareIds")
     override suspend fun continuity(): String = withContext(io) {
         val value = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)

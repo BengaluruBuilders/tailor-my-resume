@@ -9,17 +9,38 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.tailormyresume.app.ui.AppViewModel
 import com.tailormyresume.app.ui.BackTargetViewModel
 import com.tailormyresume.app.ui.TmrApp
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @javax.inject.Inject
     lateinit var google: com.tailormyresume.core.domain.GoogleAccountGateway
+
+    @javax.inject.Inject
+    lateinit var credits: com.tailormyresume.core.data.repository.CreditsRepository
+
+    @javax.inject.Inject
+    lateinit var wallet: com.tailormyresume.app.billing.WalletSource
+
+    @javax.inject.Inject
+    lateinit var uids: com.tailormyresume.core.domain.FirebaseUidProvider
+
+    override fun onResume() {
+        super.onResume()
+        if (uids.uid() != null) {
+            lifecycleScope.launch {
+                wallet.refreshOrCached()
+                credits.refresh()
+            }
+        }
+    }
 
     private val appViewModel: AppViewModel by viewModels()
     private val backTargetViewModel: BackTargetViewModel by viewModels()

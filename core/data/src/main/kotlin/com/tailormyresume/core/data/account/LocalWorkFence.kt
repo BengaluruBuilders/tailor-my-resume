@@ -13,6 +13,8 @@ import kotlin.coroutines.coroutineContext
 @Singleton
 class LocalWorkFence @Inject constructor() {
     private val generation = AtomicLong()
+    private val generations = kotlinx.coroutines.flow.MutableStateFlow(0L)
+    val changes: kotlinx.coroutines.flow.StateFlow<Long> = generations
     private val mutations = Mutex()
     private val dirty = mutableSetOf<Any>()
 
@@ -40,7 +42,7 @@ class LocalWorkFence @Inject constructor() {
 
     suspend fun freezeForErasure() = mutations.withLock {
         frozen = true
-        generation.incrementAndGet()
+        generations.value = generation.incrementAndGet()
     }
 
     fun context(ticket: Long): CoroutineContext = WorkTicket(this, ticket)
@@ -77,6 +79,6 @@ class LocalWorkFence @Inject constructor() {
     }
 
     fun invalidate() {
-        generation.incrementAndGet()
+        generations.value = generation.incrementAndGet()
     }
 }
