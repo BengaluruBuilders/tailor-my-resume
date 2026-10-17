@@ -71,6 +71,7 @@ class RemoteSignInGateway @Inject constructor(
             sessionRepository.observeAccount().first()?.let { sessionRepository.saveLastAccountId(it.id) }
             sessionRepository.signOut()
             cleaner.clear()
+            fence.release()
         }
     }
 

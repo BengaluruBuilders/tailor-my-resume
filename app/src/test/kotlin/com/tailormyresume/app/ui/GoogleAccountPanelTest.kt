@@ -18,6 +18,10 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class GoogleAccountPanelTest {
+    init {
+        com.tailormyresume.app.navigation.registerComposeActivity()
+    }
+
     @get:Rule val rule = createComposeRule()
 
     @Test fun independentServerOfferShowsOnlyTheAvailableGrantAndExplicitClaim() {

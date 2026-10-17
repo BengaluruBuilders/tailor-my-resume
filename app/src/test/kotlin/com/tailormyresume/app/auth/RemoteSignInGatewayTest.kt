@@ -143,6 +143,16 @@ class RemoteSignInGatewayTest {
     }
 
     @Test
+    fun completedSignOutReleasesDeletionFenceButOldWritersRemainInvalid() = runTest {
+        val fence = com.tailormyresume.core.data.account.LocalWorkFence()
+        val old = fence.ticket()
+        fence.freezeForErasure()
+        RemoteSignInGateway(completeConfig, credentials, firebase, server.api(), session, cleaner, fence = fence).signOut()
+        fence.check(fence.ticket())
+        assertThat(runCatching { fence.check(old) }.exceptionOrNull()).isInstanceOf(kotlinx.coroutines.CancellationException::class.java)
+    }
+
+    @Test
     fun noTokenOrEmailReachesTheConsole() = runTest {
         val captured = ByteArrayOutputStream()
         val originalOut = System.out
