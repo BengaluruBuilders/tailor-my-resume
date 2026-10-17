@@ -16,14 +16,14 @@ class PendingReportQueue @Inject constructor(private val store: MockStateStore) 
     private val mutex = Mutex()
     private val serializer = ListSerializer(ReportDto.serializer())
 
-    suspend fun add(report: ContentReport) = update { current ->
-        if (current.any { it.sameItemAs(report) }) current else current + report.toDto()
+    suspend fun add(report: ContentReport, owner: String? = null) = update { current ->
+        if (current.any { it.owner == owner && it.sameItemAs(report) }) current else current + report.toDto().copy(owner = owner)
     }
 
-    suspend fun remove(report: ContentReport) = update { current -> current.filterNot { it.sameItemAs(report) } }
+    suspend fun remove(report: ContentReport, owner: String? = null) = update { current -> current.filterNot { it.owner == owner && it.sameItemAs(report) } }
 
-    suspend fun pending(): List<ContentReport> =
-        mutex.withLock { store.readValue(KEY, serializer).orEmpty() }.mapNotNull(ReportDto::toModel)
+    suspend fun pending(owner: String? = null): List<ContentReport> =
+        mutex.withLock { store.readValue(KEY, serializer).orEmpty().filter { it.owner == owner } }.mapNotNull(ReportDto::toModel)
 
     suspend fun clear() = mutex.withLock { store.remove(KEY) }
 

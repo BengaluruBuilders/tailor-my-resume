@@ -68,6 +68,7 @@ class GoogleAccountCoordinator @Inject constructor(
             if (firebase.hasAnonymousSession()) linkGuest() else directSignIn()
         } catch (cancelled: CancellationException) {
             fence.release()
+            mutable.value = GoogleAccountState.Retry(canCancel = false)
             throw cancelled
         } catch (failure: Exception) {
             recoverable(failure)
@@ -138,9 +139,11 @@ class GoogleAccountCoordinator @Inject constructor(
         }
         val previousId = previous?.id ?: sessions.lastAccountId()
         previousId?.let { checkpoints.capture(it, config.baseUrl) }
-        val preparing = newJournal(previousId.orEmpty(), "DIRECT_GOOGLE").copy(phase = "DIRECT_SWITCHING")
+        var preparing = newJournal(previousId.orEmpty(), "DIRECT_GOOGLE").copy(phase = "DIRECT_SWITCHING")
         journals.write(preparing)
         val token = credential() ?: return cancelBeforeSwitch()
+        preparing = preparing.copy(destinationGoogleDigest = GoogleCredentialIdentity.digest(token))
+        journals.write(preparing)
         fence.invalidate()
         val outcome = firebase.signIn(token)
         val user = (outcome as? AuthOutcome.Success)?.value ?: run {
@@ -179,8 +182,10 @@ class GoogleAccountCoordinator @Inject constructor(
                 mutable.value = GoogleAccountState.Conflict(snapshot.profile != null, snapshot.applications.map { it.id to "${it.jobTitle} · ${it.company}" })
                 return@safely
             }
+            journal = journal.copy(destinationGoogleDigest = GoogleCredentialIdentity.digest(token))
+            journals.write(journal)
             fence.invalidate()
-        val outcome = firebase.signIn(token)
+            val outcome = firebase.signIn(token)
             val user = (outcome as? AuthOutcome.Success)?.value ?: throw IllegalStateException("Google sign-in is unavailable")
             check(user.uid != journal.source)
             journal = journal.copy(destination = user.uid, phase = "SWITCHED")
@@ -192,6 +197,7 @@ class GoogleAccountCoordinator @Inject constructor(
     private suspend fun completeConflict(original: UpgradeJournal, user: FirebaseUser) {
         var journal = original
         check(journal.destination == user.uid)
+        check(journal.destinationGoogleDigest == null || journal.destinationGoogleDigest == user.googleSubject?.let(GoogleCredentialIdentity::digestSubject))
         checkLive()
         val result = apiResult {
             api.completeUpgrade(UpgradeCompleteRequest(journal.completionKey, checkNotNull(journal.intentId), checkNotNull(journal.proof), "PRESERVE_LOCAL_WORK"))
@@ -320,7 +326,7 @@ class GoogleAccountCoordinator @Inject constructor(
 
     private suspend fun ownJournal(): UpgradeJournal? {
         val uid = uids.uid() ?: return null
-        val journal = journals.readFor(uid, config.baseUrl) ?: return null
+        val journal = journals.readFor(uid, config.baseUrl, firebase.currentUser()?.googleSubject?.let(GoogleCredentialIdentity::digestSubject)) ?: return null
         return journal.takeIf { it.source == uid || it.destination == uid || (it.destination == null && it.phase in setOf("SWITCHING", "DIRECT_SWITCHING")) }
     }
 
@@ -341,6 +347,7 @@ class GoogleAccountCoordinator @Inject constructor(
             action()
         } catch (cancelled: CancellationException) {
             fence.release()
+            mutable.value = GoogleAccountState.Retry(canCancel = false)
             throw cancelled
         } catch (failure: Exception) {
             recoverable(failure)

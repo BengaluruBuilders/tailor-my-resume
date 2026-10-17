@@ -37,6 +37,11 @@ class GooglePromotionClient @Inject constructor(
     private var displayed: CreditPolicyDto? = null
 
     suspend fun prepare(journal: UpgradeJournal, changed: Boolean = false): GoogleAccountState {
+        if (journal.proof == null && journal.intentId != null) {
+            val recovered = journal.copy(intentId = null, requestId = null, challengeId = null, attemptCommitted = false)
+            journals.write(recovered)
+            return prepare(recovered, changed)
+        }
         val uid = uids.uid()
         val generation = wallet.generation()
         val remaining = retryRemaining(journal)
@@ -73,7 +78,7 @@ class GooglePromotionClient @Inject constructor(
         if (!signupAvailable && !baseAvailable) return prepare(journal, changed = true)
         val uid = uids.uid()
         val generation = wallet.generation()
-        val wantsBase = journal.path == "DIRECT_GOOGLE" && (journal.requestedBase || baseAvailable)
+        val wantsBase = journal.path == "DIRECT_GOOGLE" && if (journal.requestId != null && !journal.attemptCommitted) journal.requestedBase else journal.requestedBase || baseAvailable
         val continuity = if (wantsBase) evidence.continuity() else null
         val intent = if (journal.proof != null) journal.intentId else null
         val digest = activationDigest(journal.path, intent, continuity)

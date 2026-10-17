@@ -1,5 +1,6 @@
 package com.tailormyresume.core.data.repository
 
+import com.tailormyresume.core.data.account.LocalWorkFence
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.mock.observeValue
 import com.tailormyresume.core.data.mock.readValue
@@ -18,6 +19,7 @@ import javax.inject.Singleton
 @Singleton
 class StoredResumeSettingsRepository @Inject constructor(
     private val store: MockStateStore,
+    private val workFence: LocalWorkFence = LocalWorkFence(),
 ) : ResumeSettingsRepository {
 
     private val mutex = Mutex()
@@ -25,7 +27,7 @@ class StoredResumeSettingsRepository @Inject constructor(
     override fun observeSettings(): Flow<ResumeSettings> =
         store.observeValue(SETTINGS_KEY, ResumeSettingsDto.serializer()).map { it?.toModel() ?: ResumeSettings() }
 
-    override suspend fun update(change: (ResumeSettings) -> ResumeSettings) {
+    override suspend fun update(change: (ResumeSettings) -> ResumeSettings) = workFence.mutate {
         mutex.withLock {
             val current = store.readValue(SETTINGS_KEY, ResumeSettingsDto.serializer())?.toModel() ?: ResumeSettings()
             store.writeValue(SETTINGS_KEY, ResumeSettingsDto.serializer(), change(current).toDto())

@@ -1,5 +1,6 @@
 package com.tailormyresume.core.data.repository
 
+import com.tailormyresume.core.data.account.LocalWorkFence
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.data.mock.observeValue
 import com.tailormyresume.core.data.mock.readValue
@@ -19,12 +20,13 @@ import kotlin.time.Instant
 @Singleton
 class StoredContentReportRepository @Inject constructor(
     private val store: MockStateStore,
+    private val workFence: LocalWorkFence = LocalWorkFence(),
 ) : ContentReportRepository {
 
     private val mutex = Mutex()
     private val serializer = ListSerializer(ReportDto.serializer())
 
-    override suspend fun report(report: ContentReport) {
+    override suspend fun report(report: ContentReport) = workFence.mutate {
         mutex.withLock {
             val key = keyOf(report.applicationId)
             val current = store.readValue(key, serializer).orEmpty()
@@ -54,6 +56,7 @@ internal data class ReportDto(
     val reportedAtMillis: Long,
     val itemText: String = "",
     val generationId: String? = null,
+    val owner: String? = null,
 ) {
     fun toModel(): ContentReport? {
         val kind = ReportedItemKind.entries.find { it.name == itemKind } ?: return null

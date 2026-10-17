@@ -10,7 +10,7 @@ import javax.inject.Singleton
 class AccountOperationGuard @Inject constructor(private val uids: FirebaseUidProvider, private val fence: LocalWorkFence) {
     data class Ticket(val owner: String?, val generation: Long)
 
-    fun capture(): Ticket = Ticket(uids.uid(), fence.ticket()).also(::check)
+    suspend fun capture(): Ticket = Ticket(uids.uid(), fence.currentTicket()).also(::check)
 
     fun check(ticket: Ticket) {
         fence.check(ticket.generation)

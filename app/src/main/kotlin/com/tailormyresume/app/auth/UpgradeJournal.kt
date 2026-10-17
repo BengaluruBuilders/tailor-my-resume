@@ -37,6 +37,7 @@ data class UpgradeJournal(
     val attemptCommitted: Boolean = false,
     val retryAtMillis: Long? = null,
     val profileChoiceConfirmed: Boolean = false,
+    val destinationGoogleDigest: String? = null,
 )
 
 @Singleton
@@ -61,11 +62,11 @@ class PrivateUpgradeStore @Inject constructor(
 
     suspend fun read(): UpgradeJournal? = withContext(io) { mutex.withLock { values().firstOrNull() } }
 
-    suspend fun readFor(owner: String, environment: String): UpgradeJournal? = withContext(io) {
+    suspend fun readFor(owner: String, environment: String, googleDigest: String? = null): UpgradeJournal? = withContext(io) {
         mutex.withLock {
             val candidates = values().filter { it.environment == environment }
             candidates.firstOrNull { it.source == owner || it.destination == owner }
-                ?: candidates.firstOrNull { it.destination == null && it.phase in setOf("SWITCHING", "DIRECT_SWITCHING") }
+                ?: candidates.firstOrNull { it.destination == null && googleDigest != null && it.destinationGoogleDigest == googleDigest && it.phase in setOf("SWITCHING", "DIRECT_SWITCHING") }
         }
     }
 

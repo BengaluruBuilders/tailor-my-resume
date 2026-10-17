@@ -154,7 +154,9 @@ internal class ExportedViewModel @AssistedInject constructor(
     private fun resolveIntent(build: suspend (String) -> Intent?, event: (Intent) -> ExportedEvent) {
         viewModelScope.launch(workFence.context(workTicket)) {
             if (state.value !is ExportedUiState.Ready) return@launch
+            workFence.check(workTicket)
             val intent = build(applicationId)
+            workFence.check(workTicket)
             eventChannel.send(intent?.let(event) ?: ExportedEvent.FileMissing)
         }
     }
@@ -191,7 +193,7 @@ internal class ExportedViewModel @AssistedInject constructor(
         var fundedByFree = false
         for (entry in sortedBy { it.createdAt }) {
             when (entry.kind) {
-                CreditLedgerKind.FREE_GRANT, CreditLedgerKind.GUEST_TRIAL -> freeBalance += entry.amount
+                CreditLedgerKind.FREE_GRANT, CreditLedgerKind.GUEST_TRIAL, CreditLedgerKind.GOOGLE_SIGNUP -> freeBalance += entry.amount
                 CreditLedgerKind.PURCHASE -> Unit
                 CreditLedgerKind.REFUND -> Unit
                 CreditLedgerKind.MIGRATION -> Unit

@@ -19,6 +19,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.net.URLEncoder
 import java.security.MessageDigest
@@ -57,7 +60,7 @@ class LocalWorkCheckpoint @Inject constructor(
             WorkSnapshot(owner, environment, database.profileDao().readProfile(), database.profileDao().readEntries(), apps, local)
         }
         val target = folder(owner, environment)
-        val files = File(target, "exports").also { it.mkdirs() }
+        val files = File(target, "exports").also { it.deleteRecursively(); it.mkdirs() }
         File(context.filesDir, "exports").takeIf { it.exists() }?.copyRecursively(files, overwrite = true)
         atomicWrite(File(target, "snapshot.json"), json.encodeToString(WorkSnapshot.serializer(), snapshot))
         snapshot
@@ -133,6 +136,7 @@ class LocalWorkCheckpoint @Inject constructor(
                 snapshot.local[prefix + old]?.let { store.write(prefix + new, it) }
             }
         }
+        mergeExportHistory(snapshot, mapping)
         if (store.read("session.keptJobDescription") == null) {
             snapshot.local["session.keptJobDescription"]?.let { store.write("session.keptJobDescription", it) }
         }
@@ -150,6 +154,20 @@ class LocalWorkCheckpoint @Inject constructor(
             val original = File(root, segment(old))
             if (original.exists()) original.copyRecursively(File(context.filesDir, "exports/${segment(new)}"), overwrite = true)
         }
+    }
+
+    private suspend fun mergeExportHistory(snapshot: WorkSnapshot, mapping: Map<String, String>) {
+        val old = snapshot.local["exports.history"] ?: return
+        val imported = json.parseToJsonElement(old).jsonArray.mapNotNull { element ->
+            val record = element.jsonObject
+            val id = mapping[record["applicationId"]?.jsonPrimitive?.content] ?: return@mapNotNull null
+            kotlinx.serialization.json.JsonObject(record + mapOf(
+                "applicationId" to kotlinx.serialization.json.JsonPrimitive(id),
+                "creditKind" to kotlinx.serialization.json.JsonNull,
+            ))
+        }
+        val current = store.read("exports.history")?.let { json.parseToJsonElement(it).jsonArray }.orEmpty()
+        store.write("exports.history", kotlinx.serialization.json.JsonArray((current + imported).distinct()).toString())
     }
 
     private suspend fun clearLocalKeys() {

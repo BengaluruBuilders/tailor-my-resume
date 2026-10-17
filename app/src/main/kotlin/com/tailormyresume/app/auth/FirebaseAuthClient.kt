@@ -45,7 +45,7 @@ class FirebaseAuthClient @Inject constructor(
 
     override suspend fun currentUser(): FirebaseUser? = withContext(io) {
         auth?.currentUser?.let { user ->
-            FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), if (user.isAnonymous) AccountMode.ANONYMOUS else AccountMode.GOOGLE)
+            FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), if (user.isAnonymous) AccountMode.ANONYMOUS else AccountMode.GOOGLE, user.providerData.firstOrNull { it.providerId == "google.com" }?.uid)
         }
     }
 
@@ -72,7 +72,7 @@ class FirebaseAuthClient @Inject constructor(
             user.reload().await()
             check(!user.isAnonymous && user.providerData.any { it.providerId == "google.com" })
             user.getIdToken(true).await()
-            AuthOutcome.Success(FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty()))
+            AuthOutcome.Success(FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), googleSubject = user.providerData.firstOrNull { it.providerId == "google.com" }?.uid))
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (failure: Exception) {
@@ -86,7 +86,7 @@ class FirebaseAuthClient @Inject constructor(
             val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
             val user = firebaseAuth.signInWithCredential(credential).await().user
                 ?: return@withContext AuthOutcome.Failure(AuthFailure.Failed)
-            AuthOutcome.Success(FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty()))
+            AuthOutcome.Success(FirebaseUser(user.uid, user.displayName.orEmpty(), user.email.orEmpty(), googleSubject = user.providerData.firstOrNull { it.providerId == "google.com" }?.uid))
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (failure: Exception) {

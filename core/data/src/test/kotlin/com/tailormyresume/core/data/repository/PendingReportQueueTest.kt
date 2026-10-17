@@ -16,6 +16,17 @@ class PendingReportQueueTest {
         ContentReport(applicationId, ReportedItemKind.REQUIREMENT, itemId, "text", Instant.fromEpochMilliseconds(1), generationId)
 
     @Test
+    fun destinationCannotFlushSourceReportsEvenBeforeGenericCleanup() = runTest {
+        queue.add(report(), owner = "A")
+        queue.add(report(), owner = "B")
+        assertThat(queue.pending("C")).isEmpty()
+        assertThat(queue.pending("B")).containsExactly(report())
+        queue.remove(report(), "B")
+        assertThat(queue.pending("A")).containsExactly(report())
+        assertThat(queue.pending("B")).isEmpty()
+    }
+
+    @Test
     fun aReportIsQueuedOnceAndKeepsItsGenerationId() = runTest {
         queue.add(report())
         queue.add(report())

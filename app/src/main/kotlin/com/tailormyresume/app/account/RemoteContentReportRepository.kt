@@ -23,6 +23,7 @@ class RemoteContentReportRepository @Inject constructor(
     private val queue: PendingReportQueue,
     private val api: TailorMyResumeApi,
     @ApplicationScope private val scope: CoroutineScope,
+    private val ownership: com.tailormyresume.app.auth.AccountOperationGuard? = null,
 ) : ContentReportRepository by local {
 
     private val flushMutex = Mutex()
@@ -32,15 +33,20 @@ class RemoteContentReportRepository @Inject constructor(
     }
 
     override suspend fun report(report: ContentReport) {
+        val ticket = ownership?.capture()
         local.report(report)
-        queue.add(report)
+        ticket?.let { ownership?.check(it) }
+        queue.add(report, ticket?.owner)
         scope.launch { flush() }
     }
 
     suspend fun flush() = flushMutex.withLock {
-        queue.pending().forEach { report ->
+        val ticket = ownership?.capture()
+        queue.pending(ticket?.owner).forEach { report ->
+            ticket?.let { ownership?.check(it) }
             val failure = apiResult { api.reportContent(report.toRequest()) }.exceptionOrNull()
-            if (failure == null || (failure as ApiException).error.isPermanent()) queue.remove(report)
+            ticket?.let { ownership?.check(it) }
+            if (failure == null || (failure as ApiException).error.isPermanent()) queue.remove(report, ticket?.owner)
         }
     }
 

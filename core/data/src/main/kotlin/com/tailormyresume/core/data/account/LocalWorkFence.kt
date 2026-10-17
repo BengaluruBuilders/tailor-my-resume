@@ -48,6 +48,23 @@ class LocalWorkFence @Inject constructor() {
         companion object Key : CoroutineContext.Key<WorkTicket>
     }
 
+    suspend fun currentTicket(): Long =
+        (coroutineContext[WorkTicket]?.takeIf { it.fence === this }?.generation ?: ticket()).also(::check)
+
+    suspend fun <T> protect(action: suspend () -> T): T {
+        val ticket = currentTicket()
+        val owner = Any()
+        synchronized(this) {
+            check(ticket)
+            dirty.add(owner)
+        }
+        try {
+            return action().also { check(ticket) }
+        } finally {
+            editing(owner, false)
+        }
+    }
+
     suspend fun <T> mutate(action: suspend () -> T): T = mutations.withLock {
         val ticket = coroutineContext[WorkTicket]?.takeIf { it.fence === this }?.generation ?: ticket()
         check(ticket)

@@ -26,7 +26,7 @@ sealed interface AuthOutcome<out T> {
     data class Failure(val failure: AuthFailure) : AuthOutcome<Nothing>
 }
 
-data class FirebaseUser(val uid: String, val displayName: String, val email: String, val mode: AccountMode = AccountMode.GOOGLE)
+data class FirebaseUser(val uid: String, val displayName: String, val email: String, val mode: AccountMode = AccountMode.GOOGLE, val googleSubject: String? = null)
 
 interface GoogleCredentialSource {
     suspend fun idToken(): AuthOutcome<String>

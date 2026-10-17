@@ -51,11 +51,13 @@ internal class JobLinkViewModel @Inject constructor(
             var cancelled = false
             try {
                 val job = importer.import(url)
+                workFence.check(workTicket)
                 draftStore.set(text = job.jobText, importedFrom = job.sourceHost)
             } catch (e: CancellationException) {
                 cancelled = true
                 throw e
             } catch (e: Exception) {
+                workFence.check(workTicket)
                 draftStore.markNotAJobPost()
             } finally {
                 state.update { it.copy(importing = false) }
