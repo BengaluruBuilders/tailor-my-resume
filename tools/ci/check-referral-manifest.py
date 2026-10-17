@@ -33,6 +33,6 @@ else:
     assert not views
 if args.variant == "debug":
     assert any(m.get(android + "name") == "android.app.shortcuts" for m in activities[0].findall("meta-data"))
-    assert any(a.get(android + "name") == "com.tailormyresume.app.debug.DebugScenarioActivity" for a in activities)
+    assert any(a.get(android + "name") == "com.tailormyresume.app.debug.DebugScenarioActivity" for a in application.findall("activity"))
 assert "${" not in args.manifest.read_text()
 print(json.dumps(dict(variant=args.variant, origin=args.origin, package=root.get("package"), mainActivityViewFilters=len(views), preservedVariantMetadata=True)))
