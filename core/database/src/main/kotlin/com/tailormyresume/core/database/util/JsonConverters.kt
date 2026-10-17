@@ -11,6 +11,13 @@ import kotlinx.serialization.builtins.serializer
 
 internal class JsonConverters {
     @TypeConverter
+    fun ledgerKindToString(kind: com.tailormyresume.core.model.CreditLedgerKind): String = kind.name
+
+    @TypeConverter
+    fun stringToLedgerKind(value: String): com.tailormyresume.core.model.CreditLedgerKind =
+        com.tailormyresume.core.model.CreditLedgerKind.entries.firstOrNull { it.name == value } ?: com.tailormyresume.core.model.CreditLedgerKind.UNKNOWN
+
+    @TypeConverter
     fun stringListToJson(value: List<String>): String =
         TmrJson.encode(ListSerializer(String.serializer()), value)
 

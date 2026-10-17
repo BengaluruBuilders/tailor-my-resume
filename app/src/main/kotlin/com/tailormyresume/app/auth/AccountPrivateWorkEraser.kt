@@ -17,10 +17,12 @@ class AccountPrivateWorkEraser @Inject constructor(
     private val journals: PrivateUpgradeStore,
     private val config: TailorMyResumeApiConfig,
     private val fence: LocalWorkFence,
+    private val referrals: com.tailormyresume.app.referrals.PrivateReferralStore? = null,
 ) {
     suspend fun erase() {
         val owner = pending.uid() ?: uids.uid() ?: sessions.observeAccount().first()?.id ?: sessions.lastAccountId() ?: return
         fence.freezeForErasure()
+        referrals?.eraseFor(owner, config.baseUrl)
         checkpoints.erase(owner, config.baseUrl)
         journals.eraseFor(owner, config.baseUrl)
     }

@@ -48,6 +48,7 @@ internal class SettingsActions(
     val onDeleteAccount: () -> Unit,
     val onSignOut: () -> Unit,
     val onGoogle: (() -> Unit)? = null,
+    val onReferrals: (() -> Unit)? = null,
 )
 
 @Composable
@@ -92,6 +93,9 @@ internal fun SettingsScreen(
                 showChevron = true,
                 showDivider = false,
             )
+        }
+        actions.onReferrals?.let { action ->
+            TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_title), action, Modifier.fillMaxWidth())
         }
         TmrSectionLabel(stringResource(R.string.feature_settings_impl_section_resume))
         SettingsGroup {

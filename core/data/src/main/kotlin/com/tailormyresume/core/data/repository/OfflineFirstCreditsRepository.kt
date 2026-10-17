@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,9 +27,11 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
     @ApplicationScope private val scope: CoroutineScope,
     private val remote: RemoteLedgerSource = NoRemoteLedger(),
 ) : CreditsRepository {
-    private class Held(val owner: String?, val snapshot: CreditSnapshot)
+    private class Held(val owner: String?, val snapshot: CreditSnapshot, val environment: String)
 
     private val held = MutableStateFlow<Held?>(null)
+    private val persistence = kotlinx.coroutines.sync.Mutex()
+    private val cached = MutableStateFlow<Held?>(null)
     private val lock = Any()
     private var generation = 0
 
@@ -36,7 +39,7 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
     private var refreshNeeded = false
 
     private fun remoteSnapshots(): Flow<CreditSnapshot> =
-        held.map { current -> current?.takeIf { it.owner == remote.owner() }?.snapshot ?: NO_SNAPSHOT }
+        held.map { current -> current?.takeIf { it.owner == remote.owner() && it.environment == remote.environment() }?.snapshot ?: NO_SNAPSHOT }
             .onStart { if (refreshNeeded) refresh() }
 
     override fun observeBalance(): Flow<Int> =
@@ -44,7 +47,7 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
 
     override fun observeKnownBalance(): Flow<Int?> =
         if (remote.ownsLedger) {
-            held.map { current -> current?.takeIf { it.owner == remote.owner() }?.snapshot?.balance }
+            held.map { current -> current?.takeIf { it.owner == remote.owner() && it.environment == remote.environment() }?.snapshot?.balance }
                 .onStart { if (refreshNeeded) refresh() }
         } else {
             observeBalance().map { it }
@@ -52,10 +55,20 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
 
     override fun observeLedger(): Flow<List<CreditLedgerEntry>> =
         if (remote.ownsLedger) {
-            remoteSnapshots().map { it.entries }
+            kotlinx.coroutines.flow.combine(held, cached) { live, disk ->
+                (live ?: disk)?.takeIf { it.owner == remote.owner() && it.environment == remote.environment() }?.snapshot?.entries.orEmpty()
+            }.onStart {
+                val owner = remote.owner()
+                val environment = remote.environment()
+                if (owner != null) persistence.withLock {
+                    val entries = creditLedgerDao.ownedEntries(owner, environment).map(CreditLedgerEntity::asExternalModel)
+                    if (owner == remote.owner() && environment == remote.environment()) cached.value = Held(owner, CreditSnapshot(0, entries), environment)
+                }
+                if (refreshNeeded) refresh()
+            }
         } else {
             creditLedgerDao.observeLedger()
-                .map { entities -> entities.map(CreditLedgerEntity::asExternalModel) }
+                .map { entities -> entities.filter { it.owner == null }.map(CreditLedgerEntity::asExternalModel) }
                 .flowOn(ioDispatcher)
         }
 
@@ -94,13 +107,19 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
             refreshNeeded = true
             return false
         }
-        return synchronized(lock) {
+        return persistence.withLock {
+            if (synchronized(lock) { started != generation || owner != remote.owner() }) return@withLock false
+            if (owner != null) {
+                creditLedgerDao.replaceOwned(owner, remote.environment(), snapshot.entries.map { it.asEntity().copy(owner = owner, environment = remote.environment(), serverId = it.id) })
+            }
+            synchronized(lock) {
             val stored = started == generation && owner == remote.owner()
             if (stored) {
-                held.value = Held(owner, snapshot)
+                held.value = Held(owner, snapshot, remote.environment())
                 refreshNeeded = false
             }
             stored
+            }
         }
     }
 
@@ -108,8 +127,9 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
         synchronized(lock) {
             generation++
             held.value = null
+            cached.value = null
         }
-        creditLedgerDao.clear()
+        persistence.withLock { creditLedgerDao.clear() }
     }
 
     override suspend fun removeForApplication(applicationId: String) = creditLedgerDao.deleteForApplication(applicationId)
@@ -125,9 +145,11 @@ private fun CreditLedgerEntry.asEntity() = CreditLedgerEntity(
     applicationId = applicationId,
     productId = productId,
     createdAt = createdAt,
+    serverId = id,
 )
 
 private fun CreditLedgerEntity.asExternalModel() = CreditLedgerEntry(
+    id = serverId,
     kind = kind,
     amount = amount,
     applicationId = applicationId,

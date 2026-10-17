@@ -28,6 +28,7 @@ class RemoteSignInGateway @Inject constructor(
     private val pendingWipe: PendingAccountWipe = PendingAccountWipe.None,
     private val upgrades: com.tailormyresume.core.domain.GoogleAccountGateway? = null,
     private val fence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
+    private val referralStore: com.tailormyresume.app.referrals.PrivateReferralStore? = null,
 ) : SignInGateway {
 
     override suspend fun currentAccount(): SignInAccount? = sessionRepository.observeAccount().first()
@@ -66,6 +67,7 @@ class RemoteSignInGateway @Inject constructor(
     override suspend fun signOut() {
         withContext(NonCancellable) {
             fence.invalidate()
+            referralStore?.clearAll()
             firebase.signOut()
             credentials.clearState()
             sessionRepository.observeAccount().first()?.let { sessionRepository.saveLastAccountId(it.id) }

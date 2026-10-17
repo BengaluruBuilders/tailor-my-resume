@@ -11,6 +11,7 @@ import com.tailormyresume.feature.settings.impl.paywall.PaywallRoute
 import com.tailormyresume.feature.settings.impl.settings.SettingsRoute
 
 fun EntryProviderScope<NavKey>.settingsEntry(navigator: Navigator) {
+    entry<com.tailormyresume.feature.settings.api.navigation.ReferralsNavKey> { com.tailormyresume.feature.settings.impl.referrals.ReferralsRoute() }
     entry<SettingsNavKey> { key -> SettingsRoute(navigator, showDeleteAccount = key.showDeleteAccount) }
     entry<CreditsNavKey> { CreditsRoute(navigator) }
     entry<PaywallNavKey> { key -> PaywallRoute(navigator, key.returnToApplicationId) }

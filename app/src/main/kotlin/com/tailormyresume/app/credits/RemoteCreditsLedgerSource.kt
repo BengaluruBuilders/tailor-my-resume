@@ -17,10 +17,13 @@ import kotlin.time.Instant
 class RemoteCreditsLedgerSource @Inject constructor(
     private val api: TailorMyResumeApi,
     private val uids: FirebaseUidProvider,
+    private val config: com.tailormyresume.core.network.TailorMyResumeApiConfig = com.tailormyresume.core.network.TailorMyResumeApiConfig(""),
 ) : RemoteLedgerSource {
     override val ownsLedger = true
 
     override fun owner(): String? = uids.uid()
+
+    override fun environment(): String = config.baseUrl
 
     override suspend fun fetch(): CreditSnapshot {
         val credits = apiResult { api.credits().credits }.getOrThrow()
@@ -29,6 +32,7 @@ class RemoteCreditsLedgerSource @Inject constructor(
 
     private fun toEntry(dto: CreditEntryDto): CreditLedgerEntry? {
         val kind = when (dto.kind) {
+            LedgerKind.REFERRAL_REWARD -> CreditLedgerKind.REFERRAL_REWARD
             LedgerKind.WELCOME -> CreditLedgerKind.FREE_GRANT
             LedgerKind.GOOGLE_SIGNUP -> CreditLedgerKind.GOOGLE_SIGNUP
             LedgerKind.GUEST_TRIAL -> CreditLedgerKind.GUEST_TRIAL

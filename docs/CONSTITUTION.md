@@ -23,7 +23,7 @@ These rules come from the core promise in `docs/PRD.md`: "We never invent anythi
 | I.2 | The candidate decides. Every suggestion starts as `PENDING`. Nothing reaches an export without an explicit accept. | `UpdateBulletDecisionUseCaseTest`, `TailorViewModelTest` |
 | I.3 | UI copy never claims an ATS score, an ATS pass, or a job, interview, or placement guarantee. Say "keyword coverage" and "readable by common ATS parsers" (PRD 6.4, 7). | Policy I.3 on `res/values*/*.xml` |
 | I.4 | No API key, token, or private key goes into the app or the repository. Model credentials live on the backend only. | Policy I.4; gitleaks |
-| I.5 | Candidate data leaves the device only to the TailorMyResume backend (`apps-backend`): the staging deployment in the `debug` and `staging` build types, the prod deployment in the `release` build type. The app has one HTTP stack: OkHttp, Retrofit, and kotlinx.serialization. Firebase Auth, Credential Manager (Google sign-in), Google Play Billing, and direct Google Play Integrity Standard requests solely for explicit guest promotional admission under `docs/BACKEND_CONTRACT.md` section 8 are allowed. Backups stay off. Analytics, crash, and ad SDKs stay forbidden. | Policy I.5: `INTERNET` only in `app/src/main/AndroidManifest.xml`, no `allowBackup="true"`, no analytics, crash, or ad library, network libraries only in `core:network` or `:app`; Dependency Guard (`dependencyGuard`) locks the release classpath |
+| I.5 | Candidate data leaves the device only to the TailorMyResume backend (`apps-backend`): the staging deployment in the `debug` and `staging` build types, the prod deployment in the `release` build type. The app has one HTTP stack: OkHttp, Retrofit, and kotlinx.serialization. Firebase Auth, Credential Manager (Google sign-in), Google Play Billing, and direct Google Play Integrity Standard requests only for an explicit protected guest admission (`GUEST_TRIAL`, section 8), Google activation including its explicitly requested protected base subaction (`GOOGLE_ACTIVATION`, section 9), or referral attachment (`REFERRAL_ATTACH`, section 10) under `docs/BACKEND_CONTRACT.md` are allowed. Backups stay off. Analytics, crash, and ad SDKs stay forbidden. | Policy I.5: `INTERNET` only in `app/src/main/AndroidManifest.xml`, no `allowBackup="true"`, no analytics, crash, or ad library, network libraries only in `core:network` or `:app`; Dependency Guard (`dependencyGuard`) locks the release classpath |
 
 ## Article II — Architecture
 
@@ -161,7 +161,7 @@ Adopted under Article VII in the PR that adds the `demo` and `prod` flavours.
 | Flavours `demo` and `prod` (dimension `backend`, `:app` only, III.5) | `demo` keeps the offline behaviour and the developer menu with no `INTERNET` permission. `prod` adds the permission through `app/src/prod/AndroidManifest.xml`. | Policy I.5; `assembleDemoRelease` and `assembleProdRelease` in CI |
 | Build types replace the flavours (2026-10-14) | The owner removed the `demo` and `prod` flavours. `debug` and `staging` use the staging backend, `release` the prod backend. `INTERNET` is declared in `app/src/main/AndroidManifest.xml`. `staging` is always signed with the debug key (the V.7 exception) and is never published. | Policy I.5 and V.7; `assembleRelease` in CI |
 | Dependency Guard | Closes the Dependency Guard row of the ledger. Any new release dependency in either flavour fails until the baseline in `app/dependencies/` is updated on purpose. | `dependencyGuard` in `tools/ci/verify-local.sh` |
-| Transitive libraries kept in `release` (review of 2026-10-08) | `com.google.android.datatransport:*` comes from Play Billing 9.1.0, whose own classes call it for Google's billing telemetry; no manifest switch disables it and Billing needs it at runtime. `com.google.android.recaptcha:recaptcha` and `com.google.android.play:integrity` come from `firebase-auth` 24.2.0, whose `FirebaseAuth` and `internal/zza` classes reference them; they are not removable. reCAPTCHA remains unused by the app's sign-in flows. Integrity is now also called directly for explicit guest promotional admission, as permitted by the 2026-10-17 amendment below. All of these talk to Google, not to a third party. `firebase_data_collection_default_enabled=false` in `app/src/main/AndroidManifest.xml` turns off Firebase's default data collection. | Dependency Guard baseline |
+| Transitive libraries kept in `release` (review of 2026-10-08) | `com.google.android.datatransport:*` comes from Play Billing 9.1.0, whose own classes call it for Google's billing telemetry; no manifest switch disables it and Billing needs it at runtime. `com.google.android.recaptcha:recaptcha` and `com.google.android.play:integrity` come from `firebase-auth` 24.2.0, whose `FirebaseAuth` and `internal/zza` classes reference them; they are not removable. reCAPTCHA remains unused by the app's sign-in flows. Integrity is also called directly for explicit GUEST_TRIAL (section 8), GOOGLE_ACTIVATION including explicitly requested protected base (section 9), and REFERRAL_ATTACH (section 10), under the proposed limited extension below; the earlier guest-only wording did not cover section 9. All of these talk to Google, not to a third party. `firebase_data_collection_default_enabled=false` in `app/src/main/AndroidManifest.xml` turns off Firebase's default data collection. | Dependency Guard baseline |
 | Transitive libraries removed from `prod` | `play-services-location` and `play-services-places-placereport` were declared by Play Billing, but no Billing class references them (class scan of `billing-9.1.0.aar`). `app/build.gradle.kts` excludes them. | Dependency Guard baseline |
 
 
@@ -177,3 +177,27 @@ Terms/Data Safety approval, Firebase anonymous-provider setup, Play licensing, s
 registration, or genuine integrity verdicts. Missing configuration keeps new admission unavailable.
 Official references: [Standard requests](https://developer.android.com/google/play/integrity/standard)
 and [ANDROID_ID](https://developer.android.com/reference/android/provider/Settings.Secure#ANDROID_ID).
+
+### Proposed Article VII amendment — 2026-10-17, explicit protected action evidence
+
+This unmerged proposal corrects the section 9 documentation gap and adds only section 10 attachment.
+The previous I.5 and dependency ledger authorized guest Integrity alone; they did not cover Google activation.
+Human review is required before merge. No live admission, disclosure, retention policy or provider acceptance is approved here.
+
+| Item | Why | Gate |
+|---|---|---|
+| Direct Integrity only for GUEST_TRIAL (8), GOOGLE_ACTIVATION including explicitly requested protected base (9), and REFERRAL_ATTACH (10) | Reuse the resolved Integrity library and separate action bindings. Send only the exact server-issued opaque requestHash to Google, never raw Android ID, candidate content or added identifiers. Evidence cannot cross actions. No new SDK, dependency baseline or network exception. | Review; existing constitution policy, Dependency Guard and lint; GuestEvidenceTest, RemoteGuestTrialGatewayTest, GooglePromotionClientTest, RemoteReferralGatewayTest. |
+| Limited Android-ID purposes and accessor rationale | Explicit guest/base allocation only (8/9), plus optional finite independent referral request-velocity counters (10). Referral scope separates app/environment/key version from guest allocation and signup identity. It is not authentication, unique-person identity, a permanent fingerprint or a lifetime device/signup/referral entitlement cap. Current Android referral requests choose the contract-permitted null signal in NONE and OPTIONAL modes and never call the accessor. | Review; existing accessor-scoped HardwareIds suppression and lint; RemoteReferralGatewayTest verifies null in either mode and zero continuity reads. |
+
+No policy, wallet, history, referral status/code display, code creation or recovery-only path collects
+Integrity or Android ID. Raw signals/tokens never enter journals, logs or exports. Server counters have
+contract-defined finite expiry, rotation, erasure and export handling, with separate account, optional
+signal, network and campaign dimensions, no combined fingerprint and no deleted-identity retention.
+Guest allocation records are not referral denial records. No live numeric TTL, threshold or capacity is
+adopted. Fixture values remain fixtures. The original guest amendment above remains historical.
+
+Existing gates do not enforce every purpose; Review checks the actual data path. Deterministic gateway
+tests cover passive/recovery no-collection, explicit attempts, exact hash, action separation, null signal,
+owner/erasure fences and unavailable admission. Backend tests own finite counters and scope isolation.
+Genuine provider/package/certificate/licensing evidence, live disclosure/Terms/Data Safety, retention,
+erasure and campaign approval remain BLOCKED. This candidate is not ready for merge.
