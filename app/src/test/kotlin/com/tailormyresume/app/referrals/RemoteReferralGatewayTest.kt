@@ -303,7 +303,8 @@ class RemoteReferralGatewayTest {
         guest = true
         original.save(CODE)
         store.transferForReview(uid, "destination", server.url("/").toString(), "GOOGLE", fence.ticket()) { }
-        uid = "destination"; guest = false
+        uid = "destination"
+        guest = false
         val destination = client(store)
         destination.refresh()
         assertThat(content(destination).reviewRequired).isTrue()

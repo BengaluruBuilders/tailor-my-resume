@@ -23,10 +23,10 @@ import com.tailormyresume.core.network.dto.ReferralOfferDto
 import com.tailormyresume.core.network.dto.ReferralReadResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -123,7 +123,13 @@ class RemoteReferralGateway @Inject constructor(
                 guest = uids.isAnonymous(),
                 reviewRequired = journal.reviewFrom != null,
                 attached = journal.phase == "ATTACHED",
-                message = if (journal.phase == "ATTACHED") ReferralMessage.Applied else if (journal.phase == "READ_ONLY") ReferralMessage.ReadOnly else ReferralMessage.Unavailable,
+                message = if (journal.phase == "ATTACHED") {
+                    ReferralMessage.Applied
+                } else if (journal.phase == "READ_ONLY") {
+                    ReferralMessage.ReadOnly
+                } else {
+                    ReferralMessage.Unavailable
+                },
             )
             return
         }

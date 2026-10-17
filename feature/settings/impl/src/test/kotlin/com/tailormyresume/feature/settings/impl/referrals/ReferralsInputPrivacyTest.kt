@@ -1,0 +1,46 @@
+package com.tailormyresume.feature.settings.impl.referrals
+
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.junit4.StateRestorationTester
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.tailormyresume.core.designsystem.theme.TmrTheme
+import com.tailormyresume.core.domain.ReferralMessage
+import com.tailormyresume.core.domain.ReferralUiState
+import com.tailormyresume.core.screenshot.TmrTestDevices
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
+class ReferralsInputPrivacyTest {
+    @get:Rule val rule = createComposeRule()
+
+    @Test
+    fun readOnlyTransitionAndSavedStateRestorationCannotRestoreTypedOrSavedCode() {
+        val state = mutableStateOf<ReferralUiState>(ReferralUiState.Content(candidate = "synthetic-saved-code", canAttach = true))
+        val actions = ReferralActions({}, {}, { _, _ -> }, {}, {}, {}, {}, {})
+        val restoration = StateRestorationTester(rule)
+        restoration.setContent { TmrTheme { ReferralsScreen(state.value, actions) } }
+        rule.onNodeWithContentDescription("Referral code").performScrollTo().performTextInput("synthetic-unsaved-code")
+        rule.runOnIdle { state.value = ReferralUiState.Content(message = ReferralMessage.ReadOnly) }
+        rule.onNodeWithContentDescription("Referral code").assertDoesNotExist()
+        rule.onNodeWithText("synthetic-saved-code").assertDoesNotExist()
+        rule.onNodeWithText("synthetic-unsaved-code").assertDoesNotExist()
+        restoration.emulateSavedInstanceStateRestore()
+        rule.onNodeWithContentDescription("Referral code").assertDoesNotExist()
+        rule.onNodeWithText("synthetic-saved-code").assertDoesNotExist()
+        rule.onNodeWithText("synthetic-unsaved-code").assertDoesNotExist()
+        rule.runOnIdle { state.value = ReferralUiState.Content() }
+        rule.onNodeWithContentDescription("Referral code").performScrollTo().assertTextEquals("")
+    }
+}

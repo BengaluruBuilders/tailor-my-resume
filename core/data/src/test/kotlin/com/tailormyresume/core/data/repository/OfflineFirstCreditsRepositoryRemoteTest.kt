@@ -9,13 +9,13 @@ import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -348,6 +348,7 @@ class OfflineFirstCreditsRepositoryRemoteTest {
     fun refreshConfirmedIsTrueWithoutFetchingInDemo() = runTest {
         assertThat(repository(NoRemoteLedger()).refreshConfirmed()).isTrue()
     }
+
     @Test fun persistedHistoryKeepsStableIdsScopeAndServerBalancesWithoutDeletingEconomicRows() = runTest {
         val ledger = database.creditLedgerDao()
         ledger.insert(com.tailormyresume.core.database.model.CreditLedgerEntity(kind = CreditLedgerKind.FREE_GRANT, amount = 2, applicationId = null, productId = null, createdAt = Instant.fromEpochMilliseconds(0)))
@@ -369,5 +370,4 @@ class OfflineFirstCreditsRepositoryRemoteTest {
         restored.clear()
         assertThat(ledger.ownedEntries("uid-1", "")).isEmpty()
     }
-
 }

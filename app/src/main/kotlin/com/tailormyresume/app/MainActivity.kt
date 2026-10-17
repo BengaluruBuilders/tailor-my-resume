@@ -10,12 +10,12 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import com.tailormyresume.app.ui.AppViewModel
 import com.tailormyresume.app.ui.BackTargetViewModel
 import com.tailormyresume.app.ui.TmrApp
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -34,9 +34,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (uids.uid() != null) lifecycleScope.launch {
-            wallet.refreshOrCached()
-            credits.refresh()
+        if (uids.uid() != null) {
+            lifecycleScope.launch {
+                wallet.refreshOrCached()
+                credits.refresh()
+            }
         }
     }
 
