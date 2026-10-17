@@ -1,0 +1,25 @@
+Validation	Run npm run check	﻿2026-10-17T08:59:58.1655492Z ##[group]Run npm run check
+Validation	Run npm run check	2026-10-17T08:59:58.1655688Z ^[[36;1mnpm run check^[[0m
+Validation	Run npm run check	2026-10-17T08:59:58.1668239Z shell: /usr/bin/bash -e {0}
+Validation	Run npm run check	2026-10-17T08:59:58.1668399Z env:
+Validation	Run npm run check	2026-10-17T08:59:58.1668935Z   TEST_DATABASE_URL: ***127.0.0.1:5432/postgres
+Validation	Run npm run check	2026-10-17T08:59:58.1669122Z ##[endgroup]
+Validation	Run npm run check	2026-10-17T08:59:58.2227566Z 
+Validation	Run npm run check	2026-10-17T08:59:58.2227919Z > check
+Validation	Run npm run check	2026-10-17T08:59:58.2228343Z > npm run typecheck && npm run lint && npm run format:check && npm run boundaries && npm test
+Validation	Run npm run check	2026-10-17T08:59:58.2228590Z 
+Validation	Run npm run check	2026-10-17T08:59:58.2770928Z 
+Validation	Run npm run check	2026-10-17T08:59:58.2771265Z > typecheck
+Validation	Run npm run check	2026-10-17T08:59:58.2771445Z > tsc --noEmit
+Validation	Run npm run check	2026-10-17T08:59:58.2771536Z 
+Validation	Run npm run check	2026-10-17T09:00:01.5050914Z 
+Validation	Run npm run check	2026-10-17T09:00:01.5051228Z > lint
+Validation	Run npm run check	2026-10-17T09:00:01.5051465Z > eslint . --max-warnings 0
+Validation	Run npm run check	2026-10-17T09:00:01.5051595Z 
+Validation	Run npm run check	2026-10-17T09:00:07.9240088Z 
+Validation	Run npm run check	2026-10-17T09:00:07.9240890Z /home/aibuilders.guest/actions-runner/_work/apps-backend/apps-backend/docs/testing/earn-credits/2026-10-17/02-google-signup/validation-evidence/backend-dump-restore-fixture.ts
+Validation	Run npm run check	2026-10-17T09:00:07.9242615Z   0:0  error  Parsing error: /home/aibuilders.guest/actions-runner/_work/apps-backend/apps-backend/docs/testing/earn-credits/2026-10-17/02-google-signup/validation-evidence/backend-dump-restore-fixture.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+Validation	Run npm run check	2026-10-17T09:00:07.9243470Z 
+Validation	Run npm run check	2026-10-17T09:00:07.9243738Z ✖ 1 problem (1 error, 0 warnings)
+Validation	Run npm run check	2026-10-17T09:00:07.9243868Z 
+Validation	Run npm run check	2026-10-17T09:00:08.0093502Z ##[error]Process completed with exit code 1.

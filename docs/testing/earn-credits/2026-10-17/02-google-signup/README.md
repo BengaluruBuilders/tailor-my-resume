@@ -2,6 +2,14 @@
 
 This evidence bundle records the independent validation of the exact candidate pair below. Implementation checks and the attainable closed-admission device smoke passed; genuine external acceptance remains blocked. These PRs are intentionally draft and not ready for merge.
 
+## Final publication revalidation
+
+The later independent audit [resolved GS02-PUB-001](publication-revalidation.md): the backend evidence fixture was kept byte-identical and archived as `.ts.txt`, so the normal lint gate no longer treats it as executable TypeScript. No source, test, lint, tsconfig, or gate change was made. The historical [initial publication audit](post-publication.md) retains the original failure; [fixer resolution](publication-fix-resolution.md) records the repair steps without claiming its own verdict.
+
+On final backend PR head `4e954057173fd6a25576708450c864fd31d17c19`, Validation and Secret scan both passed. Validation recorded `npm run check` at 721/721 tests, zero failures/cancellations/skips, including the real `pg_dump` archive case. Frontend PR head `4a297db54a88eaa2771c03b6776cd7df8e0dc43e` remains unchanged: its full workflow is overall CANCELLED because an older Constitution job was replaced, while all code shards and the full combined check passed; the replacement run succeeded with code-specific jobs skipped. Do not describe the cancelled full run as a whole-run PASS. The same independent validator completed a bounded post-publication smoke against the unchanged tested APK and closed-admission backend.
+
+This publication finding is resolved and attainable post-publication checks pass. External acceptance remains BLOCKED: genuine Google link/direct/conflict/recovery, authoritative Play Integrity, approved live policy/admissions, real grants/spending, and release acceptance are unproven. Both PRs remain open, draft, unmerged, and not ready for merge. See the [frozen publication audit and evidence manifest](publication-revalidation-evidence/manifest.json), the [original CI failure evidence](post-publication-evidence/backend-ci-publication-failure.log), the [repair inventory](publication-fix-evidence/manifest.json), and the [updated file-hash inventory](publication-manifest.json).
+
 | Item | Tested identity |
 |---|---|
 | Frontend source | `01cfb637e26ca075df78892a352b8b7c62e8531d` |
@@ -36,7 +44,7 @@ The [validator's complete captions](revalidation-evidence/captions.md) and [unch
 
 ## Backend route, transaction and restore evidence
 
-Backend behavior is evidenced by the final source SHA, independent fixture/database evidence and required-check summary, not by these UI images. Review [backend activation tests](https://github.com/BengaluruBuilders/apps-backend/blob/ba0993ada6055ef61dd000327e0617418755b58b/test/tailormyresume-activation.test.ts), [activation transaction implementation](https://github.com/BengaluruBuilders/apps-backend/blob/ba0993ada6055ef61dd000327e0617418755b58b/src/apps/tailormyresume/activation.ts), and the [PostgreSQL restore/deletion fixture](validation-evidence/backend-dump-restore-fixture.ts) with its [result](validation-evidence/backend-dump-restore-summary.json). The [prepared backend check manifest](backend-check-evidence/evidence-manifest.json) identifies each summarized asset and its hash.
+Backend behavior is evidenced by the final source SHA, independent fixture/database evidence and required-check summary, not by these UI images. Review [backend activation tests](https://github.com/BengaluruBuilders/apps-backend/blob/ba0993ada6055ef61dd000327e0617418755b58b/test/tailormyresume-activation.test.ts), [activation transaction implementation](https://github.com/BengaluruBuilders/apps-backend/blob/ba0993ada6055ef61dd000327e0617418755b58b/src/apps/tailormyresume/activation.ts), and the [PostgreSQL restore/deletion fixture](validation-evidence/backend-dump-restore-fixture.ts) with its [result](validation-evidence/backend-dump-restore-summary.json). The [original prepared backend check manifest](backend-check-evidence/evidence-manifest.json) retains the tested-source evidence; final published-head CI is recorded by the [backend final report](publication-revalidation.md).
 
 The backend changes add migrations `0013` and `0014`. The PR includes the narrow proposed Constitution rule-3 capability exception for token-derived destination identity and capability-resolved source identity; it remains subject to human review and does not permit caller-selected body/path UIDs or a general exception.
 

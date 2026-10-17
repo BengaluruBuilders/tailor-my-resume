@@ -1,0 +1,48 @@
+{
+  "testedFrontend": "01cfb637e26ca075df78892a352b8b7c62e8531d",
+  "testedBackend": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "publishedFrontend": "4a297db54a88eaa2771c03b6776cd7df8e0dc43e",
+  "publishedBackend": "2f36f59f83bc414aeb4f8546e721ab1a12101963",
+  "installedApkSha256": "b174910dedae7fdb590113a2bdce87cc4bc106564c2b6908a55f5c63ddcb5bff",
+  "installedBytes": 6032782,
+  "device": "TmrGuestValidator emulator5582 Android16 API36 Google APIs x86_64",
+  "agentDeviceVersion": "0.21.28",
+  "smoke": "PASS closed-admission Google panel/recheck/back/synthetic profile; genuine Google/Integrity/reward/spend remains BLOCKED",
+  "connections": [
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T09:04:47Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T09:04:48Z"
+    },
+    {
+      "event": "connected",
+      "label": "candidate",
+      "utc": "2026-10-17T09:04:48Z"
+    }
+  ],
+  "relay": "bounded allowlist TLS passthrough; original APK CA/hostname; no TLS termination",
+  "initialProxyThisBoot": [
+    "10.0.2.2:18765",
+    ""
+  ],
+  "intendedPreTaskProxy": [
+    "null",
+    "null"
+  ],
+  "restoredProxyReadbacks": [
+    "null",
+    "null"
+  ],
+  "proxyCleanup": "deleted both keys, settled, read twice and sync before emulator shutdown; no reboot-persistence test",
+  "emulatorSession": "89342",
+  "emulatorExit": 0,
+  "relaySession": "48965",
+  "relayPid": 724480,
+  "relayExit": 143,
+  "personalPixelOperated": false
+}

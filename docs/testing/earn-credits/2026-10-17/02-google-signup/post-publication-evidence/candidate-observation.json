@@ -1,0 +1,17 @@
+{
+  "observedAt": "2026-10-17T09:06:34.528Z",
+  "counts": {
+    "users": 0,
+    "promotion_policies": 0,
+    "promotion_grants": 0,
+    "tailormyresume_wallets": 0,
+    "tailormyresume_credit_ledger": 0,
+    "tailormyresume_google_activations": 0,
+    "tailormyresume_upgrade_intents": 0,
+    "tailormyresume_activation_operations": 0
+  },
+  "userCreationDates": {
+    "first": null,
+    "last": null
+  }
+}

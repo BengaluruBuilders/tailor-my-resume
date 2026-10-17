@@ -1,0 +1,6 @@
+Validation	Run npm run check	2026-10-17T09:21:38.0033078Z ✔ a real pg_dump produces a custom-format archive (43.917616ms)
+Validation	Run npm run check	2026-10-17T09:22:31.1505630Z ℹ tests 721
+Validation	Run npm run check	2026-10-17T09:22:31.1505941Z ℹ pass 721
+Validation	Run npm run check	2026-10-17T09:22:31.1506087Z ℹ fail 0
+Validation	Run npm run check	2026-10-17T09:22:31.1506234Z ℹ cancelled 0
+Validation	Run npm run check	2026-10-17T09:22:31.1506395Z ℹ skipped 0

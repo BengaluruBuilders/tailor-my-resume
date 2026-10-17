@@ -1,0 +1,31 @@
+{
+  "backendHead": "4e954057173fd6a25576708450c864fd31d17c19",
+  "testedBackend": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "frontendHead": "4a297db54a88eaa2771c03b6776cd7df8e0dc43e",
+  "base": "69797ec759f3493b6d4f5d6912a82b1429e30fdb",
+  "nonDocsDelta": [],
+  "originalCheckedPaths": 223,
+  "originalSourceMismatches": [],
+  "inventoryAssets": 11,
+  "inventoryMismatches": [],
+  "fixtureBytes": 6103,
+  "fixtureSha256": "1851abe84eeba3378722356c712044cabffc77f1e8f3af0d4110a440300d6688",
+  "fixtureByteIdentical": true,
+  "relativeLinksChecked": 8,
+  "brokenLinks": [],
+  "actualPrDiffPaths": 46,
+  "actualPrDiffMatchesLocal": true,
+  "requiredLogSha256": "5da5ed7346f2d70cf5656112d0b6fb61f45d5cd43cd3000ef0190205d5da8b07",
+  "actualRequiredLogLines": [
+    "> typecheck",
+    "> lint",
+    "> format:check",
+    "> boundaries",
+    "\u2714 a real pg_dump produces a custom-format archive (63.980347ms)",
+    "\u2139 tests 721",
+    "\u2139 pass 721",
+    "\u2139 fail 0",
+    "\u2139 cancelled 0",
+    "\u2139 skipped 0"
+  ]
+}

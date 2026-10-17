@@ -1,0 +1,64 @@
+{
+  "publishedFrontend": "4a297db54a88eaa2771c03b6776cd7df8e0dc43e",
+  "publishedBackend": "2f36f59f83bc414aeb4f8546e721ab1a12101963",
+  "testedFrontend": "01cfb637e26ca075df78892a352b8b7c62e8531d",
+  "testedBackend": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "apkSha256": "b174910dedae7fdb590113a2bdce87cc4bc106564c2b6908a55f5c63ddcb5bff",
+  "verdict": "FAIL GS02-PUB-001 backend evidence packaging CI failure; unaffected head/base/hash/link/smoke checks pass; external acceptance remains BLOCKED",
+  "files": {
+    "01-google-offer-recheck.png": {
+      "bytes": 103365,
+      "sha256": "33543ff5ecba77ac8b1a07a41cc57d69fb5664ccf97d450a44ca3a72be6826ad"
+    },
+    "02-synthetic-profile-preserved.png": {
+      "bytes": 90144,
+      "sha256": "33599df4b3c5f7b701f4bd3ebe55788adb347e95080ddff1c438182296a6e156"
+    },
+    "backend-ci-publication-failure.log": {
+      "bytes": 2363,
+      "sha256": "6a61da061bae4e8f1ab49d472a0cdddafd0a77f22aa839f02e2a52679a36e1ec"
+    },
+    "backend-pr.json": {
+      "bytes": 242,
+      "sha256": "1d483f0c3e8c61f162c2964883a4e9325b9c54a35c80217a517076b53df984b0"
+    },
+    "backend-secret-ci.json": {
+      "bytes": 407,
+      "sha256": "cfce997b4e190a11430c12456cfa9358dc685c02de676a8dc84278870e144a3a"
+    },
+    "backend-validation-ci.json": {
+      "bytes": 406,
+      "sha256": "1bdd9bb32ab8616d71c87eca68ba4ce5f14f3fd38cf687f65333ffa022558d22"
+    },
+    "candidate-observation.json": {
+      "bytes": 407,
+      "sha256": "fe82cddc4756a1f46e9c86cc5bc5c748e3c511fc386bfcf04a79d2101f21fe5d"
+    },
+    "captions.md": {
+      "bytes": 1377,
+      "sha256": "4fe9fa13e1336e01234180b41079f551fca545f5a3d872e4b4a2a43683d76054"
+    },
+    "frontend-full-ci.json": {
+      "bytes": 10907,
+      "sha256": "6c251657d4bbedf427c99b3b6ee842059d18c3529d0f40652e9f72543786557a"
+    },
+    "frontend-pr.json": {
+      "bytes": 242,
+      "sha256": "992f38bdfa3020e39c15c0a8effae0fc2a2f463c1c9a6aeb0dd36829d8ae8863"
+    },
+    "frontend-replacement-ci.json": {
+      "bytes": 3351,
+      "sha256": "58a80097d4aad132f36f2817a5aef3853f155f4eea18395b61a5d778865648dd"
+    },
+    "publication-integrity-summary.json": {
+      "bytes": 977,
+      "sha256": "e63661bb9350a15d3eeeb593402c641166ea4e716bdae5fd805d81f23eaf1883"
+    },
+    "smoke-summary.json": {
+      "bytes": 1519,
+      "sha256": "f02844762d6944966c026d6e13026de676f9ff73278b540e4dba8cafddd97620"
+    }
+  },
+  "reportSha256": "deb66421ca561e54b32dbadd268e0622dfc0ced0e8ac9f753baabc3cf5fa8009",
+  "publication": "local independent finding/evidence; validator did not commit/push"
+}

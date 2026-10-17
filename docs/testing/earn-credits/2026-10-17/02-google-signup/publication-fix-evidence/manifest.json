@@ -1,0 +1,32 @@
+{
+  "finding": "GS02-PUB-001",
+  "correctiveAttempts": 2,
+  "assets": [
+    {
+      "path": "backend-required-check-final.log.gz",
+      "bytes": 23563,
+      "sha256": "424ef2c8429ff852316832b843e870a0625cf08bbf8a08fa313ade694af5602e"
+    },
+    {
+      "path": "pg_dump-launcher.sh.txt",
+      "bytes": 160,
+      "sha256": "dd0a573a3b829620147651b1d6fe2ab64558573a8880bc52fc07798a6ed77ede"
+    },
+    {
+      "path": "tmr-slice02-publication-backup-environment.log.gz",
+      "bytes": 846,
+      "sha256": "472edad2cf51b818388edce498b1f1b9ce6338116015dbce1986c32f1397203b"
+    },
+    {
+      "path": "tmr-slice02-publication-repair1-check-unsandboxed.log.gz",
+      "bytes": 23877,
+      "sha256": "544ca766bff47bcad4b918f0e8f6b9d9b5735a97579a5e07be51d3a243138e9d"
+    },
+    {
+      "path": "tmr-slice02-publication-repair1-check.log.gz",
+      "bytes": 12120,
+      "sha256": "59873dab877068ee39cee763cc6186c94c91b4d80f91762c6967b102eb3ca8fc"
+    }
+  ],
+  "note": "Earlier mixed invocation log is incomplete/contaminated, never passing evidence. The uncontaminated first run is terminal 720 pass/1 fail/0 skip; final run721 pass/0 fail/0 skip. All fixtures/logs use isolated synthetic test data."
+}

@@ -1,0 +1,27 @@
+# GS02-PUB-001 publication repair
+
+Status: **fix published; independent verification pending**. Fresh publication fixer only; no self-issued independent verdict or slice completion. Corrective-attempt allowance used: **2 of 2** (packaging repair1; local tool-environment correction2). No next slice was started.
+
+## Finding and change
+
+The preserved [failed CI log](post-publication-evidence/backend-ci-publication-failure.log) establishes that original backend head `2f36f59f83bc414aeb4f8546e721ab1a12101963` passed tsc, then failed ESLint project-service discovery on the archived `docs/testing/earn-credits/2026-10-17/02-google-signup/validation-evidence/backend-dump-restore-fixture.ts`. No application defect was diagnosed.
+
+Backend [repair commit `4e954057173fd6a25576708450c864fd31d17c19`](https://github.com/BengaluruBuilders/apps-backend/commit/4e954057173fd6a25576708450c864fd31d17c19) renames that archive to `.ts.txt` with **100% identical contents**: 6,103 bytes, SHA256 `1851abe84eeba3378722356c712044cabffc77f1e8f3af0d4110a440300d6688`. It updates the backend index and all11 assets in its publication inventory and adds successful required-check evidence/summary. No application, test, migration, configuration, lint, tsconfig or gate change. Git comparison outside docs against tested source `ba0993ada6055ef61dd000327e0617418755b58b` was empty. Backend worktree clean after commit/push.
+
+Frontend remains `4a297db54a88eaa2771c03b6776cd7df8e0dc43e`, executable tested SHA `01cfb637e26ca075df78892a352b8b7c62e8531d`. Its separate archived fixture and local relative links remain valid, so no frontend commit was needed. Historical immutable publication links stay historical. Contract remains `google-activation-v1-rate-limit-1`.
+
+## Actual checks and environment
+
+- Two earlier check invocations overlapped in one log. Sandbox EPERM output and the overlapping invocation are **incomplete/contaminated**, never PASS. Owned duplicates were stopped; process inspection confirmed one final check only. Evidence is retained in [the local repair inventory](publication-fix-evidence/manifest.json).
+- First uncontaminated unchanged `npm run check`, session37057: terminal **exit1**, tests721/pass720/fail1/skip0. Types, lint, formatting and boundaries passed. Sole failure: real pg_dump archive. The relocated PostgreSQL18 binary needs a shared-library path, but existing `pgDumpEnvironment` deliberately passes only PATH/PG settings. No repository change or skip was introduced.
+- Environment correction2 uses the [task-local launcher](publication-fix-evidence/pg_dump-launcher.sh.txt), exporting the relocated library path then execing the **actual** PostgreSQL18 binary. Version `pg_dump (PostgreSQL) 18.6 (Ubuntu 18.6-0ubuntu0.26.04.1)`; binary SHA256 `276bee795df0a420e5ffb35949620d18bb0a5e9ef9373fcc5a59b58d151cd921`; launcher SHA256 `dd0a573a3b829620147651b1d6fe2ab64558573a8880bc52fc07798a6ed77ede`. The private test env was sourced without printing it; PostgreSQL remained loopback55437. No credential or service change.
+- Existing focused `node --test test/backup.test.ts`: **PASS19/19**, fail0, skip0; real custom archive included.
+- Final unchanged `npm run check`, session59546: terminal **exit0**, **721/721 passed, zero failures/cancellations/skips**, test duration91,174.861842ms. Types, lint, formatting and boundaries passed. [Complete compressed final log](publication-fix-evidence/backend-required-check-final.log.gz); [published summary](https://github.com/BengaluruBuilders/apps-backend/blob/4e954057173fd6a25576708450c864fd31d17c19/docs/testing/earn-credits/2026-10-17/02-google-signup/backend-check-evidence/publication-fix-check-summary.json). Evidence-only summary/log additions followed the completed check; no executable bytes changed.
+
+No Android build/emulator or redundant journey smoke ran. The prior post-publication APK smoke `b174910dedae7fdb590113a2bdce87cc4bc106564c2b6908a55f5c63ddcb5bff` and unaffected independent source evidence may be reused by the validator with the new docs-only head mapping. Real Google, authoritative Integrity, live admissions/grants/spending and release acceptance remain **BLOCKED**.
+
+## Publication and handoff
+
+Normal non-force push succeeded to `codex/earn-02-google-signup`. [Backend PR125](https://github.com/BengaluruBuilders/apps-backend/pull/125) was read back **OPEN/draft**, head `4e954057173fd6a25576708450c864fd31d17c19`, base `codex/earn-01-guest-trial` (`69797ec759f3493b6d4f5d6912a82b1429e30fdb` unchanged). PR body now uses new immutable evidence links, preserves the original tested pair/failure history, and states independent repair review pending. [Frontend PR407](https://github.com/BengaluruBuilders/tailor-my-resume/pull/407) was not mutated.
+
+At handoff, new-head [Validation run39020724416](https://github.com/BengaluruBuilders/apps-backend/actions/runs/39020724416) is **IN_PROGRESS**; same-head [Secret scan39020724533](https://github.com/BengaluruBuilders/apps-backend/actions/runs/39020724533) is terminal **SUCCESS**. Validator owns watching the live Validation handle and independently checking exact head/diff/inert fixture bytes, all updated asset inventory/link identities and the affected required gate. No deployment, production operation, push to default branch, merge or auto-merge occurred. No owned long local check remains live; all existing API/database/user services were preserved.

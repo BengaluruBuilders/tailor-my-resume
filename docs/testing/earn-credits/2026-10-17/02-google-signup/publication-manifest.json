@@ -1,21 +1,56 @@
 {
   "testedFrontendSha": "01cfb637e26ca075df78892a352b8b7c62e8531d",
   "testedBackendSha": "ba0993ada6055ef61dd000327e0617418755b58b",
+  "frontendPublishedHeadBeforeFinalAudit": "4a297db54a88eaa2771c03b6776cd7df8e0dc43e",
+  "backendFinalPublishedHead": "4e954057173fd6a25576708450c864fd31d17c19",
   "contractRevision": "google-activation-v1-rate-limit-1",
   "contractSha256": "2143cac25a92c6b0b9a26c5b65932f638f20373c76f1c7048785b44ba244391a",
-  "validatorReportSha256": "2b50901fde8e4bfe65f9f996f967a47f3a40265b8f6a9995190bc00ea5200df8",
-  "validatorEvidenceManifestSha256": "fcca1127a8ba0f4af90645c859ab131bf42f35a3be6ffb2238ad88db980eef13",
-  "assetCount": 37,
+  "finalPublicationFinding": "GS02-PUB-001 RESOLVED; attainable post-publication checks PASS; external acceptance BLOCKED",
+  "publicationRevalidationReportSha256": "2036d85cfadb24cc1a28358fdb7b4f1b3c6003e7e1b77b16c1b8bab253a2c364",
+  "publicationRevalidationEvidenceManifestSha256": "bd45862e94e53eeadf2b743a8c09191ef523c9bcd4d1e9684ac96b1a69f93cac",
+  "historicalInitialFailureReportSha256": "deb66421ca561e54b32dbadd268e0622dfc0ced0e8ac9f753baabc3cf5fa8009",
+  "fixResolutionSha256": "ec548ff75c926ba8cf2cc3246ff3fc5cd29166cfe6f6709ec660427712d5dc51",
+  "assetCount": 73,
   "assets": [
     {
       "path": "02-google-signup/README.md",
-      "bytes": 7481,
-      "sha256": "a812a781ac2ce763c62e99635420523cfa6efe93b1dd1fd1f54c45970d673612"
+      "bytes": 9517,
+      "sha256": "931824dd0521ccc77c242a01ddf4ebf7a9dd6b2a0c53d4d11bb709ece047a0e9"
     },
     {
-      "path": "02-google-signup/revalidation.md",
-      "bytes": 15824,
-      "sha256": "2b50901fde8e4bfe65f9f996f967a47f3a40265b8f6a9995190bc00ea5200df8"
+      "path": "02-google-signup/acceptance.md",
+      "bytes": 9984,
+      "sha256": "75b52bd8d98f454d1ce4f730a06e2bfc57df7fbb023033f551862d591d9173ac"
+    },
+    {
+      "path": "02-google-signup/backend-check-evidence/backend-check-summary.json",
+      "bytes": 2306,
+      "sha256": "f2de8354b0698f612d58d891c4a4637c0675afa2183cad59d2a4d38c1978559c"
+    },
+    {
+      "path": "02-google-signup/backend-check-evidence/backend-required-check-memory.csv",
+      "bytes": 1408,
+      "sha256": "d903f593ab1e614c62ce12c6c8092e7cb7b782806addf4b9ae847cf37decda72"
+    },
+    {
+      "path": "02-google-signup/backend-check-evidence/backend-required-check-repair1.log.gz",
+      "bytes": 23596,
+      "sha256": "20bb462e53d60f0ab011ca35466255834a14752a4455cc1570ccc6da947253be"
+    },
+    {
+      "path": "02-google-signup/backend-check-evidence/backend-shared-repair1.log",
+      "bytes": 581,
+      "sha256": "f94f72ba647906fecf1fb4f75106bebc001716e300958a72967b501088ce8cbe"
+    },
+    {
+      "path": "02-google-signup/backend-check-evidence/evidence-manifest.json",
+      "bytes": 1579,
+      "sha256": "0dc56c65c397b5c9f8945983253d5bcb1e8210c9fd1d78e7e781bbd0a81d410e"
+    },
+    {
+      "path": "02-google-signup/decisions.md",
+      "bytes": 28249,
+      "sha256": "9eee87340268dfbcc24188ae38cc5557e5a7baafa896ba1c5170fa228ddc6854"
     },
     {
       "path": "02-google-signup/findings.md",
@@ -23,14 +58,179 @@
       "sha256": "c1d2c6636fae2a6ab255eae2cd21f3148d8d441c215f650f2bc6f670637178da"
     },
     {
+      "path": "02-google-signup/fixtures/README.md",
+      "bytes": 1592,
+      "sha256": "9ab01da3c9cb4ea6be0f7aa69782aa3dfc4a350261808da39101f068c125a761"
+    },
+    {
+      "path": "02-google-signup/fixtures/generate-fixtures.py",
+      "bytes": 16294,
+      "sha256": "aa8b7a15953308ab0fd20ba56500ebe6a210fe0fdbb48f1790fafd00bcfdf829"
+    },
+    {
+      "path": "02-google-signup/fixtures/hash-vectors.json",
+      "bytes": 9488,
+      "sha256": "0ebb5843e17aab7e31080326731f81b34bc0cb9f10536d8e76c394f6864712a8"
+    },
+    {
+      "path": "02-google-signup/fixtures/policy.json",
+      "bytes": 1519,
+      "sha256": "b6b86a8e3ac0187d9b8508bb73d5809c432462365c49a54857e237a62b8cd2cc"
+    },
+    {
+      "path": "02-google-signup/fixtures/requests.json",
+      "bytes": 6998,
+      "sha256": "565638bf18edc9b5973a40d031717227b6b948cfcc9b461613a688425204b690"
+    },
+    {
+      "path": "02-google-signup/fixtures/responses.json",
+      "bytes": 21191,
+      "sha256": "6102f17a80e74f8c62e8386549be78c9fb970529b3198f79d5f84cd186927e24"
+    },
+    {
       "path": "02-google-signup/frontend-handoff.md",
       "bytes": 13553,
       "sha256": "99f697dce4f3c5bdf21fb45b154fbbdad7b09315391530ad526546f0c1c117ba"
     },
     {
-      "path": "external-gate-decision.md",
-      "bytes": 6942,
-      "sha256": "7cb1e0ffde357e5a5e2c51ab0ac88335db4d4839e8c7af876983bae2367d78fe"
+      "path": "02-google-signup/post-publication-evidence/01-google-offer-recheck.png",
+      "bytes": 103365,
+      "sha256": "33543ff5ecba77ac8b1a07a41cc57d69fb5664ccf97d450a44ca3a72be6826ad"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/02-synthetic-profile-preserved.png",
+      "bytes": 90144,
+      "sha256": "33599df4b3c5f7b701f4bd3ebe55788adb347e95080ddff1c438182296a6e156"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/backend-ci-publication-failure.log",
+      "bytes": 2363,
+      "sha256": "6a61da061bae4e8f1ab49d472a0cdddafd0a77f22aa839f02e2a52679a36e1ec"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/backend-pr.json",
+      "bytes": 242,
+      "sha256": "1d483f0c3e8c61f162c2964883a4e9325b9c54a35c80217a517076b53df984b0"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/backend-secret-ci.json",
+      "bytes": 407,
+      "sha256": "cfce997b4e190a11430c12456cfa9358dc685c02de676a8dc84278870e144a3a"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/backend-validation-ci.json",
+      "bytes": 406,
+      "sha256": "1bdd9bb32ab8616d71c87eca68ba4ce5f14f3fd38cf687f65333ffa022558d22"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/candidate-observation.json",
+      "bytes": 407,
+      "sha256": "fe82cddc4756a1f46e9c86cc5bc5c748e3c511fc386bfcf04a79d2101f21fe5d"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/captions.md",
+      "bytes": 1377,
+      "sha256": "4fe9fa13e1336e01234180b41079f551fca545f5a3d872e4b4a2a43683d76054"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/frontend-full-ci.json",
+      "bytes": 10907,
+      "sha256": "6c251657d4bbedf427c99b3b6ee842059d18c3529d0f40652e9f72543786557a"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/frontend-pr.json",
+      "bytes": 242,
+      "sha256": "992f38bdfa3020e39c15c0a8effae0fc2a2f463c1c9a6aeb0dd36829d8ae8863"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/frontend-replacement-ci.json",
+      "bytes": 3351,
+      "sha256": "58a80097d4aad132f36f2817a5aef3853f155f4eea18395b61a5d778865648dd"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/manifest.json",
+      "bytes": 2577,
+      "sha256": "ee4f1709801a1e7bc422953061f77f743c90bc08ae21a63e50269fb3c2e6425d"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/publication-integrity-summary.json",
+      "bytes": 977,
+      "sha256": "e63661bb9350a15d3eeeb593402c641166ea4e716bdae5fd805d81f23eaf1883"
+    },
+    {
+      "path": "02-google-signup/post-publication-evidence/smoke-summary.json",
+      "bytes": 1519,
+      "sha256": "f02844762d6944966c026d6e13026de676f9ff73278b540e4dba8cafddd97620"
+    },
+    {
+      "path": "02-google-signup/post-publication.md",
+      "bytes": 12995,
+      "sha256": "deb66421ca561e54b32dbadd268e0622dfc0ced0e8ac9f753baabc3cf5fa8009"
+    },
+    {
+      "path": "02-google-signup/publication-fix-evidence/backend-required-check-final.log.gz",
+      "bytes": 23563,
+      "sha256": "424ef2c8429ff852316832b843e870a0625cf08bbf8a08fa313ade694af5602e"
+    },
+    {
+      "path": "02-google-signup/publication-fix-evidence/manifest.json",
+      "bytes": 1204,
+      "sha256": "5c7fbc7b5a333e10bb356fd2af44ea8f18557516485b85e22399b718f7eec04d"
+    },
+    {
+      "path": "02-google-signup/publication-fix-evidence/pg_dump-launcher.sh.txt",
+      "bytes": 160,
+      "sha256": "dd0a573a3b829620147651b1d6fe2ab64558573a8880bc52fc07798a6ed77ede"
+    },
+    {
+      "path": "02-google-signup/publication-fix-evidence/tmr-slice02-publication-backup-environment.log.gz",
+      "bytes": 846,
+      "sha256": "472edad2cf51b818388edce498b1f1b9ce6338116015dbce1986c32f1397203b"
+    },
+    {
+      "path": "02-google-signup/publication-fix-evidence/tmr-slice02-publication-repair1-check-unsandboxed.log.gz",
+      "bytes": 23877,
+      "sha256": "544ca766bff47bcad4b918f0e8f6b9d9b5735a97579a5e07be51d3a243138e9d"
+    },
+    {
+      "path": "02-google-signup/publication-fix-evidence/tmr-slice02-publication-repair1-check.log.gz",
+      "bytes": 12120,
+      "sha256": "59873dab877068ee39cee763cc6186c94c91b4d80f91762c6967b102eb3ca8fc"
+    },
+    {
+      "path": "02-google-signup/publication-fix-resolution.md",
+      "bytes": 5403,
+      "sha256": "ec548ff75c926ba8cf2cc3246ff3fc5cd29166cfe6f6709ec660427712d5dc51"
+    },
+    {
+      "path": "02-google-signup/publication-revalidation-evidence/backend-ci-test-lines.txt",
+      "bytes": 482,
+      "sha256": "0706cc44b8292dacb0f3230efe88e32f58be88e1353b969ab32a3766086d2002"
+    },
+    {
+      "path": "02-google-signup/publication-revalidation-evidence/backend-secret-ci.json",
+      "bytes": 384,
+      "sha256": "380a0ed8581c5242bf66b715464178df2196bdf54203abe12e9b6e9498c1f8f4"
+    },
+    {
+      "path": "02-google-signup/publication-revalidation-evidence/backend-validation-ci.json",
+      "bytes": 1339,
+      "sha256": "e86cb498bc5ed1e2b3b61b481c448561081c64d749401ba24b2093b2970c3401"
+    },
+    {
+      "path": "02-google-signup/publication-revalidation-evidence/manifest.json",
+      "bytes": 1241,
+      "sha256": "bd45862e94e53eeadf2b743a8c09191ef523c9bcd4d1e9684ac96b1a69f93cac"
+    },
+    {
+      "path": "02-google-signup/publication-revalidation-evidence/repair-integrity-summary.json",
+      "bytes": 1034,
+      "sha256": "724441c5b7d845339e70ac9435cf8610e54af80714e98d784b8b29a25f4be7af"
+    },
+    {
+      "path": "02-google-signup/publication-revalidation.md",
+      "bytes": 6894,
+      "sha256": "2036d85cfadb24cc1a28358fdb7b4f1b3c6003e7e1b77b16c1b8bab253a2c364"
     },
     {
       "path": "02-google-signup/revalidation-evidence/01-preserved-app-after-upgrade.png",
@@ -133,6 +333,11 @@
       "sha256": "190d207bf5591c028b708d13c0f68b8308fdf954842dfad3dfec6ba356b57827"
     },
     {
+      "path": "02-google-signup/revalidation.md",
+      "bytes": 15824,
+      "sha256": "2b50901fde8e4bfe65f9f996f967a47f3a40265b8f6a9995190bc00ea5200df8"
+    },
+    {
       "path": "02-google-signup/validation-evidence/backend-dump-restore-fixture.ts",
       "bytes": 6103,
       "sha256": "1851abe84eeba3378722356c712044cabffc77f1e8f3af0d4110a440300d6688"
@@ -168,29 +373,9 @@
       "sha256": "15628b6321ce7270227675f76b2ad38d7ed327d5bacd2a47bcf558d6c1f71ea1"
     },
     {
-      "path": "02-google-signup/backend-check-evidence/backend-check-summary.json",
-      "bytes": 2306,
-      "sha256": "f2de8354b0698f612d58d891c4a4637c0675afa2183cad59d2a4d38c1978559c"
-    },
-    {
-      "path": "02-google-signup/backend-check-evidence/backend-required-check-memory.csv",
-      "bytes": 1408,
-      "sha256": "d903f593ab1e614c62ce12c6c8092e7cb7b782806addf4b9ae847cf37decda72"
-    },
-    {
-      "path": "02-google-signup/backend-check-evidence/backend-required-check-repair1.log.gz",
-      "bytes": 23596,
-      "sha256": "20bb462e53d60f0ab011ca35466255834a14752a4455cc1570ccc6da947253be"
-    },
-    {
-      "path": "02-google-signup/backend-check-evidence/backend-shared-repair1.log",
-      "bytes": 581,
-      "sha256": "f94f72ba647906fecf1fb4f75106bebc001716e300958a72967b501088ce8cbe"
-    },
-    {
-      "path": "02-google-signup/backend-check-evidence/evidence-manifest.json",
-      "bytes": 1579,
-      "sha256": "0dc56c65c397b5c9f8945983253d5bcb1e8210c9fd1d78e7e781bbd0a81d410e"
+      "path": "external-gate-decision.md",
+      "bytes": 6942,
+      "sha256": "7cb1e0ffde357e5a5e2c51ab0ac88335db4d4839e8c7af876983bae2367d78fe"
     }
   ]
 }
