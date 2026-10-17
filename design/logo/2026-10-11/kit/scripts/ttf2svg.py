@@ -191,14 +191,14 @@ def main():
     try:
         b = open(a.font, "rb").read()
     except OSError as e:
-        sys.exit("error: cannot read font: %s" % e)
+        raise SystemExit("error: cannot read font: %s" % e)
     tables = {}
     for i in range(u16(b, 4)):
         o = 12 + 16 * i
         tables[b[o:o + 4].decode("latin-1")] = (u32(b, o + 8), u32(b, o + 12))
     for t in ("head", "maxp", "hhea", "hmtx", "loca", "cmap", "glyf"):
         if t not in tables:
-            sys.exit("error: font has no '%s' table (requires TrueType glyf outlines)" % t)
+            raise SystemExit("error: font has no '%s' table (requires TrueType glyf outlines)" % t)
     o, _ = tables["head"]
     upem = u16(b, o + 18)
     ilf = i16(b, o + 50)
@@ -211,7 +211,7 @@ def main():
     glyf = tables["glyf"][0]
     sub = cmap_subtable(b, tables["cmap"][0])
     if sub is None:
-        sys.exit("error: no usable cmap subtable (formats 4 or 12)")
+        raise SystemExit("error: no usable cmap subtable (formats 4 or 12)")
 
     def lookup(cp):
         if u16(b, sub) == 4:
@@ -230,7 +230,7 @@ def main():
     for ch in a.text:
         gid = lookup(ord(ch))
         if gid is None:
-            sys.exit("error: character U+%04X ('%s') not in cmap" % (ord(ch), ch))
+            raise SystemExit("error: character U+%04X ('%s') not in cmap" % (ord(ch), ch))
         for ct in contours(b, glyf, loca, gid):
             contour_path(ct, a.x + pen, a.baseline, sc, d)
         aw = advance(gid)
