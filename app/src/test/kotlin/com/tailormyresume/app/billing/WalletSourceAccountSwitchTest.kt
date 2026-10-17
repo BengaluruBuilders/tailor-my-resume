@@ -20,7 +20,8 @@ class WalletSourceAccountSwitchTest {
     private val server = MockWebServer().apply { start() }
     private val api = tailormyresumeApi(TailorMyResumeApiConfig(server.url("/").toString()), tailormyresumeOkHttpClient(FixedToken), tailormyresumeJson())
     private val account = SwitchableUid("uid-1")
-    private val source = WalletSource(api, account)
+    private val fence = com.tailormyresume.core.data.account.LocalWorkFence()
+    private val source = WalletSource(api, account, fence)
     private val gateway = RemoteAccountWallet(api, source, account)
 
     @After
@@ -61,6 +62,19 @@ class WalletSourceAccountSwitchTest {
         account.value = "uid-2"
         held.release()
 
+        assertThat(refresh.await().isFailure).isTrue()
+        assertThat(source.cached).isNull()
+    }
+
+    @Test
+    fun anAnswerFromBeforeAnAccountRoundTripCannotEnterTheSameUidCache() = runBlocking<Unit> {
+        val held = HeldAnswer(walletAnswer(purchased = 4)).also { server.dispatcher = it }
+        val refresh = async(Dispatchers.Default) { runCatching { source.refresh() } }
+        held.awaitRequest()
+        account.value = "uid-2"
+        fence.invalidate()
+        account.value = "uid-1"
+        held.release()
         assertThat(refresh.await().isFailure).isTrue()
         assertThat(source.cached).isNull()
     }

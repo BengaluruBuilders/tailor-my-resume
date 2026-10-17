@@ -68,6 +68,7 @@ class HistoricalPurchaseSettlement @Inject constructor(
         val account = sessions.observeAccount().first()
         val verified = firebase.currentUser()
         guard.check(actor.ticket)
+        if (actor.generation != synchronized(reposts) { generation }) throw CancellationException("Settlement session changed")
         if (account?.mode != AccountMode.GOOGLE || account.id != actor.ticket.owner || uids.isAnonymous() ||
             verified?.uid != account.id || verified.mode != AccountMode.GOOGLE || verified.googleSubject.isNullOrBlank()
         ) {

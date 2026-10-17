@@ -1,5 +1,6 @@
 package com.tailormyresume.app.billing
 
+import com.tailormyresume.core.data.account.LocalWorkFence
 import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.network.TailorMyResumeApi
 import com.tailormyresume.core.network.apiResult
@@ -14,13 +15,15 @@ import javax.inject.Singleton
 class WalletSource @Inject constructor(
     private val api: TailorMyResumeApi,
     private val uids: FirebaseUidProvider = FirebaseUidProvider { null },
+    private val workFence: LocalWorkFence = LocalWorkFence(),
 ) {
-    private class Held(val uid: String?, val wallet: WalletDto)
+    private class Held(val uid: String?, val workTicket: Long, val wallet: WalletDto)
 
     private val state = MutableStateFlow<Held?>(null)
     private val lock = Any()
     private var generation = 0
     private var owner: String? = uids.uid()
+    private var workGeneration: Long = workFence.ticket()
 
     val wallet: Flow<WalletDto?> get() = state.map { held -> held.ownedNow() }
 
@@ -46,7 +49,7 @@ class WalletSource @Inject constructor(
 
     fun update(wallet: WalletDto, started: Int): Boolean = synchronized(lock) {
         dropIfAccountChanged()
-        (started == generation).also { current -> if (current) state.value = Held(uids.uid(), wallet) }
+        (started == generation).also { current -> if (current) state.value = Held(uids.uid(), workFence.ticket(), wallet) }
     }
 
     fun clear() {
@@ -58,12 +61,14 @@ class WalletSource @Inject constructor(
 
     private fun dropIfAccountChanged() {
         val current = uids.uid()
-        if (owner != current) {
+        val currentWork = workFence.ticket()
+        if (owner != current || workGeneration != currentWork) {
+            workGeneration = currentWork
             owner = current
             generation++
             state.value = null
         }
     }
 
-    private fun Held?.ownedNow(): WalletDto? = this?.takeIf { it.uid == uids.uid() }?.wallet
+    private fun Held?.ownedNow(): WalletDto? = this?.takeIf { it.uid == uids.uid() && it.workTicket == workFence.ticket() }?.wallet
 }
