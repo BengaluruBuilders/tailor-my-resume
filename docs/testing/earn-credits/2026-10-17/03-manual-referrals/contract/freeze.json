@@ -1,0 +1,20 @@
+{
+  "contractVersion": "manual-referrals-v1",
+  "contractSha256": "09507f4e322e72e7e34ecf4797dca8bc89178d2c33cdb1280142b025c58dc3a0",
+  "predecessorContractSha256": "2143cac25a92c6b0b9a26c5b65932f638f20373c76f1c7048785b44ba244391a",
+  "frontendPredecessor": "ca4fcade751fc0c18c5cd5eb02128933700888a4",
+  "backendPredecessor": "4e954057173fd6a25576708450c864fd31d17c19",
+  "files": {
+    "docs/BACKEND_CONTRACT.md": "09507f4e322e72e7e34ecf4797dca8bc89178d2c33cdb1280142b025c58dc3a0",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/README.md": "a63b8f15a95b8233cf5353367db37b6c10bb686afe6d20167d2f932de8d4c39e",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/acceptance-matrix.json": "1d1df44da5ae45f34c1690d4181fdbcaca662d3229e425807db243a23cf7845e",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/examples.json": "75f171402a98c88b823a1822ff05adb01df793f15c70f565d6ff5394586b9d6f",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/negative-shapes.json": "f8fa76e40072dac0b019238c7a6442fec3c957d952da74a382a50a8fe469725e",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/schemas.json": "01ae1eacfca21f4825b6ff09ea3a4dc2f5d7a2b6c9ded227f822b9ae1651da76",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/test-policy.json": "1702db22aeb0eaeefe4841f3b5ed17649f5968fa82a4d0b6393b6f3761245460",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/vectors.json": "b2d8cf637280d512d073e4e657d8547d2c46184564e9aefab1033e7520f89b79",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/verify-fixtures.py": "f9931f877c9be633fab5cf2a34db3d69fb550e05233800cf6840c4724b8b219e",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/lifecycle-decision.md": "a4b927182b342b7440c7ad26e8274984930b0fb45de7e8d15b1a8cde33f59862",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/constitution-decision.md": "2b0f4b5fd6531fcb7d34cf862e88e28359157942970fda63e6e0cd1f1adf6428"
+  }
+}

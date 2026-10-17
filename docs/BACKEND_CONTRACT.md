@@ -1631,3 +1631,368 @@ No live settings change here. Backend owner must propose a narrow constitution r
 for capability-resolved source locks under token-derived destination auth, same app/environment,
 sorted locks, no arbitrary source reads or content/economic transfer. This contract describes
 the proposal; it does not silently amend governing backend documents.
+
+## 10. Manual referrals — manual-referrals-v1
+
+Status: frozen contract manual-referrals-v1, 2026-10-17. Both implementation writers must record
+agreement on the final file hash before application implementation. This section extends sections 8/9; their bytes, grants, canonical
+vectors and security/recovery rules remain unchanged. Admissions remain off. The observable
+journey is a qualified Google inviter issuing a code, a newly activated eligible Google invitee
+attaching it manually once, and the inviter seeing the complete configured reward in wallet/history.
+The invitee receives no referral credit. No tailoring, upload, AI, payment or worker triggers this award.
+
+### 10.1 Ownership and foundation mapping
+
+Use existing `core/promotions/{schema,service}.ts` for immutable policies, aggregate capacity,
+challenge/operation/counter storage and transaction-aware grants; `core/accounts/service.ts`
+`withLiveUsers` for sorted locks; TMR `activation-{schema,state,security}.ts` for the existing first
+Google fact/provider/incarnation; and TMR wallet/ledger/export adapters. Add a generic opt-in
+`core/referrals` service/schema. Core imports no TMR code and takes injected qualification,
+evidence and transaction-backed reward ports. Another app may use a non-Google event and another
+amount/sink in an isolated test composition; it is not registered or enabled in production.
+
+Existing promotion grants are unique on `(scope,userId,entitlement)`. The fixed trial/signup
+entitlements cannot represent several inviter rewards. Extend the generic commit seam additively
+to accept a server-derived stable entitlement per referral, such as `referral:<random receipt UUID>`.
+Its unique source is the durable attachment receipt, independent of policy revision and request key.
+Never put a UID, provider subject, code, HMAC or their derivation in a surviving source string.
+Do not change existing guest-trial/google-signup scope or uniqueness. The sink receives the same
+SQL transaction and cannot open/commit another transaction, call a provider or switch databases.
+It adds free credits and exactly one unique grant-linked REFERRAL_REWARD ledger entry.
+Existing commitPromotionGrant also consumes a challenge using the beneficiary user ID and checks
+lifetime promotion signal allocation. For referrals, the invitee owns the challenge and the inviter
+owns the grant. Extend the generic seam to keep those identities distinct; do not consume an
+inviter challenge or pass referral velocity signals into lifetime trial-allocation uniqueness.
+Consume the invitee challenge exactly once in the attachment transaction; velocity remains separate.
+
+TMR adapter qualification uses the section 9 activation row and its original `referralDeadline`.
+Do not add a second first-activation table, classify from wallet values, reset the anchor on login,
+reinstall or policy publication, or require a signup grant to have succeeded. An existing Google
+account with a recorded activation/classification may invite but cannot become an eligible new
+invitee. If no activation fact exists, Android reconciles with section 9 observation; referral GET
+never creates/classifies a fact. Guests may keep a pending candidate; they cannot issue/attach.
+
+New code issuance and uncommitted attachment require section 9 verified Google token shape,
+matching Admin provider subject/incarnation, timeout <=10s outside SQL locks, and metadata snapshot
+age <= the existing configured <=30s bound at commit. Token refresh alone is sufficient for token
+freshness; no new recent-authentication ceremony is imposed. Committed own recovery requires
+valid Google token/provider shape and live actor, with no new Admin or Integrity call.
+
+### 10.2 Routes, bounds and response shapes
+
+All paths below are under `/v1/tailormyresume`. Firebase auth, `X-App-Id`, configured deployment
+environment, prefix isolation and live-account guards apply. No user ID is accepted anywhere.
+JSON objects are strict and bodies bounded before parsing; GET accepts no query parameters/body.
+All responses carry `Cache-Control: no-store`. UUID/version/digest constraints are section 8.3.
+
+| Route | Access / maximum body | Success |
+|---|---|---|
+| GET `/referrals/me` | Anonymous, Google, OTHER / none | 200 `{code,shareUrl,offer,attachment,stats}` |
+| POST `/referrals/code` | Google with recorded activation / 2048 bytes | `{requestId}`; 201 newly issued / 200 existing `{code,shareUrl,offer,replayed}` |
+| POST `/referrals/challenges` | Google / 2048 bytes | `{operation:"REFERRAL_ATTACH",requestId,policyVersion,payloadDigest}`; 201 section 8.3 challenge response |
+| POST `/referrals/attach` | Google / 16384 bytes | Strict attachment body below; 201 new / 200 existing matching committed attachment `{attachment,reward,replayed}` |
+
+`GET /referrals/attribution` and plural POST `/referrals/attributions` in older plans were provisional;
+they are not introduced. GET `/referrals/me` owns both read states, and singular `/attach` is the one
+mutation for MANUAL and future LINK. No public inviter lookup or landing route is added.
+
+```text
+code = null | {value:string,createdAt:UTC ISO}
+shareUrl = null | configured allowlisted HTTPS URL
+stats = {creditedCount:nonnegative safe integer,earnedCredits:nonnegative safe integer}
+attachment = null | {id:UUID,status:"ATTACHED",source:"MANUAL"|"LINK",attachedAt:UTC ISO,
+                    reward:{recipient:"INVITER",amount:positive integer,status:"GRANTED",policyVersion:version}}
+reward = attachment.reward
+```
+
+GET returns only the caller's code, current offer, own attachment and own aggregate earned counts.
+An invitee never receives inviter UID, code-owner details, wallet, grant ID or ledger ID. Stats count
+committed own rewards, including detached receipts after invitee deletion, and their actual amounts.
+They are not a public list of invitees. `shareUrl` is null until the app/environment owned origin,
+path and associations are approved/configured; no synthetic deployed origin. Slice03 exposes
+copyable code/manual entry. URL sharing, App Links, landing and install-referrer runtime are slice04.
+
+POST code has no policy precondition because it creates no award. With valid independent code
+configuration, Google qualification and live account it may issue/recover a code while rewarded
+admissions are paused/exhausted. Its offer must state unavailable and promise no reward then.
+One personal active code per `(scope,owner)` is stable across request keys and policy revisions.
+`replayed` is false only for new creation, true when returning existing code. Existing code recovery
+precedes Admin/admission checks after token/live ownership; no code rotation/replacement API here.
+Unknown/disabled missing code is not silently regenerated on ordinary GET.
+
+### 10.3 Coherent referral policy
+
+Extend `GET /credits/policy`'s `policy.referrals` additively from `{status:"UNAVAILABLE"}` to `offer`
+below. GET referrals/me and POST code return exactly the same referral offer shape/snapshot.
+Do not replace top-level guest or signup revision fields; referral revision is independently scoped.
+
+```text
+offer = {status:"AVAILABLE"|"UNAVAILABLE",reason:offerReason,
+         version:version|null,effectiveAt:UTC ISO|null,expiresAt:UTC ISO|null,
+         rewardAmount:positive integer|null,continuityMode:"NONE"|"OPTIONAL",
+         codeIssuance:"AVAILABLE"|"GOOGLE_REQUIRED"|"ACTIVATION_REQUIRED"|"UNAVAILABLE",
+         attachmentEligibility:"ELIGIBLE"|"ATTACHED"|"EXPIRED"|"NOT_ELIGIBLE"|"UNAVAILABLE"|"GOOGLE_REQUIRED",
+         deadline:UTC ISO|null}
+offerReason = "ELIGIBLE"|"GOOGLE_REQUIRED"|"ACTIVATION_REQUIRED"|"EXISTING_ACCOUNT"|
+              "AMBIGUOUS_HISTORY"|"RECOVERY_EXPIRED"|"ALREADY_ATTACHED"|"WINDOW_EXPIRED"|
+              "POLICY_UNAVAILABLE"|"ADMISSIONS_DISABLED"|"CAMPAIGN_EXHAUSTED"
+```
+
+`status` describes whether this actor can advertise earning as an inviter now. Existing qualified
+Google inviters may have AVAILABLE with `attachmentEligibility:NOT_ELIGIBLE`; new Google actors
+may have AVAILABLE/ELIGIBLE. Guests have UNAVAILABLE/GOOGLE_REQUIRED. Missing activation has
+UNAVAILABLE/ACTIVATION_REQUIRED. Existing attachment takes eligibility precedence; otherwise use
+the unchanged section 9 classification/deadline. Missing usable referral policy makes offer
+UNAVAILABLE, nullable metadata/amount null; a coherent paused/exhausted policy may retain its
+amount/version but UI must not advertise it as earnable. Amount never comes from Android.
+A usable policy has effectiveAt <= now < expiresAt and positive bounded amount <=1,000,000;
+capacity <=1,000,000,000 credit units and wallet overflow checks. The exact scope literal for referral policies, challenges, operations, fingerprints, counters and
+code/attachment ownership is compact JSON `[appId,environment,"referral-reward"]`. One active immutable revision in
+SQL per that scope; configuration is validated and explicitly opt-in.
+
+Attach supplies the displayed `offer.version`, never an amount. On usable revision mismatch return
+409 POLICY_CHANGED, refresh and explicitly reconfirm current offer before fresh challenge/retry of
+the same business key/input. Missing unusable policy is 503 PROMOTION_UNAVAILABLE. No silent new
+award at a different amount. Already committed attachments return original amount/time/revision
+before current offer/pause/expiry/capacity/evidence checks. Revision/rollback never tops up,
+claws back, renews eligibility or makes a second reward. Rollback publishes a new tracked revision.
+Fixture window 24h/capacity 100/reward 5 are deterministic tests only; live choices remain unset.
+No monthly cap or lifetime device referral/signup cap is adopted.
+
+### 10.4 Code canonicalization and business identity
+
+A full code is `<appNamespace>.<environmentNamespace>.<payload>`. Each namespace is a configured
+lowercase `^[a-z][a-z0-9-]{0,31}$` token with an explicit app/environment mapping. Payload is 20
+cryptographically random bytes encoded as 32 lowercase RFC4648 base32 characters `[a-z2-7]`
+(160 random bits; no padding, separators, UID, timestamp or sequential identifier).
+Example fixture namespace is `tailormyresume.staging`, not a new live setting.
+
+Raw input is 1..256 ASCII characters. Trim only outer ASCII SP/TAB/CR/LF; lowercase only ASCII
+A-Z; then require the exact full three-part grammar, maximum 98 canonical characters. Reject
+interior whitespace, Unicode, percent escapes, URLs, extra parts, `0/1/8/9` in payload and wrong
+scope. Never strip a namespace or resolve another environment by suffix. A syntactically valid
+candidate is not proof that a code exists. Creation tries at most 5 independently generated
+payloads on unique collisions, then 503 PROMOTION_UNAVAILABLE; concurrent same-owner creation
+returns one winning code. Namespace mapping cannot be changed silently for existing codes.
+
+```json
+{"requestId":"11111111-1111-4111-8111-111111111111","code":"tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567","source":"MANUAL","policyVersion":"referral-local-v1","continuity":null,"challengeId":"22222222-2222-4222-8222-222222222222","integrityToken":"synthetic-token-not-valid-in-any-environment"}
+```
+
+`source` is exactly MANUAL or LINK; slice03 Android submits MANUAL. `continuity` is required and
+null or the section 9 strict ANDROID_ID object. It provides independent velocity evidence only;
+it does not allocate another trial or establish one-person/one-device referral entitlement.
+The offer exposes continuityMode (a capability, not a threshold): NONE means send null and do
+not read the signal; OPTIONAL permits collecting it only during an explicit new attachment attempt.
+Null is accepted in either mode; the server cannot secretly require a nonnull referral signal.
+Unavailable offer uses NONE. Never collect Integrity or Android ID on policy/wallet/history/status/
+code display, code issuance or recovery-only paths. Missing signal stays explicit null, never a
+common empty counter identity. Policy cannot silently
+require a new device cap. Keep raw signal only during the request, never in journals/logs/exports.
+Integrity token is 1..12000 characters; only challengeId is echoed, never the secret.
+
+Canonical bytes are UTF-8 compact JSON arrays with fixed order, no spaces/newline/escaping changes:
+
+```text
+payload = ["TMR_REFERRAL_ATTACH_PAYLOAD_V1",canonicalCode,source,continuity?.type??"",continuity?.value??""]
+payloadDigest = base64url-no-padding(SHA256(payload bytes))
+binding = ["TMR_PROMOTION_BINDING_V1",appId,environment,authenticatedUid,"REFERRAL_ATTACH",requestId,payloadDigest,policyVersion,challengeId,challenge]
+requestHash = base64url-no-padding(SHA256(binding bytes))
+```
+
+Fingerprint stored server-side is the section 9 `TMR_OPERATION_FINGERPRINT_V1` scope+actor+digest
+construction. Policy/challenge/token are excluded from business identity. Same actor/action/key
+with changed canonical code, source or continuity is 409 IDEMPOTENCY_CONFLICT. Outer whitespace
+or ASCII case alone does not change identity. Refreshed evidence/revision keeps key/input.
+A changed code/source/signal requires an explicit new attempt; it cannot evade durable attachment.
+Server computes challenge hash; Android sends that returned hash to the existing injected Integrity
+port. Keep existing package/cert/licensing/baseline/freshness checks, 5-minute maximum challenge TTL
+and policy-expiry bound. Challenge binds scope/live actor/action/key/digest/revision. Evidence for
+GUEST_TRIAL/GOOGLE_ACTIVATION cannot authorize attachment, nor can attachment authorize those grants.
+
+### 10.5 Commit, replay, counters and concurrency
+
+After auth/strict parse/Google provider shape, acquire actor live guard, check stored same-key
+fingerprint and committed own receipt. Matching recovery returns 200 `replayed:true`; another key
+with the same still-resolvable committed code returns the original attachment with 200 and true,
+regardless of changed source/evidence on that new key. A different code/inviter returns 409
+REFERRAL_ALREADY_ATTACHED, without counterparty detail. The original source remains unchanged.
+No network call, challenge issuance, counter or capacity charge is needed for committed recovery.
+Unknown/disabled/foreign code is 400 REFERRAL_CODE_INVALID before new reward evaluation; never
+reveal which private account existed. New self-referral is 409 REFERRAL_SELF.
+
+For new work, validate current policy and immutable activation/deadline; verify Admin/Integrity
+outside SQL locks. Discover beneficiary server-side from full scoped code, then start a new
+transaction using `withLiveUsers` for deduplicated lexical UID order (actor and beneficiary).
+Never add an earlier user lock inside a single-user transaction. Recheck both tombstones,
+code owner/enabled state, activation/incarnation/deadline (`now < deadline`), request/attachment,
+policy and evidence under locks. Then acquire referral-source, purpose-signal/counter and promotion
+scope locks in documented stable order after all user locks, consistent across attach/deletion.
+No external call while locks are held. Reciprocal A→B/B→A cannot deadlock or award twice.
+
+The successful transaction inserts attribution + opaque stable receipt, generic grant, unique
+ledger entry and free-credit increment, full capacity amount, operation result, and consumed
+challenge together. SQL constraints enforce unique invitee attachment and grant/source/ledger
+links. There is no accepted/pending/zero/partial attribution. Sink failure, exception, deletion
+race or insufficient capacity rolls all reward writes back. Both invitees competing for the last
+5 units cannot both commit. Original committed amount survives policy changes and lost replies.
+
+Use separate durable actor, optional purpose-scoped signal, trusted network and campaign velocity
+dimensions for code issuance, challenge issuance and new attachment. Reuse existing ingress/key
+rotation semantics; scopes/actions separate these from guest/signup counters. Failed new attempts
+count even when the grant transaction rolls back; committed replay counts zero. Separate attempt
+transaction is not reward liability; no capacity reservation survives a failed award. Do not fold
+signal+network into identity or deny a person permanently for shared NAT/model. Account-specific
+counters erase with their owner; short network/campaign counters retain only aggregate expiring
+provenance. Snapshot/disclose reason category/retention, no raw signals or thresholds in API.
+
+429 RATE_LIMITED is whole-operation failure with no attachment/grant; Retry-After is the ceiling
+of the latest reset among exceeded applicable fixed windows (minimum 1), including route throttle
+when applicable. Android waits until that deadline and explicitly retries the same uncommitted
+key/input with fresh challenge; creating a key or refreshing policy does not bypass counters.
+Unavailable identity/Integrity is retryable 503, never guessed eligibility or permanent fraud.
+
+### 10.6 Stable errors and Android recovery
+
+| Status/code | Behavior |
+|---|---|
+| 400 INVALID_INPUT / REFERRAL_CODE_INVALID | Invalid strict shape / malformed, unknown, disabled or foreign code; correct/clear explicitly |
+| 401 existing auth errors / 403 CROSS_APP_TOKEN | No resource disclosure or mutations |
+| 403 GOOGLE_REQUIRED / GOOGLE_IDENTITY_REJECTED | Guest/OTHER or contradictory provider; reconcile identity |
+| 403 REFERRAL_INELIGIBLE | Existing/ambiguous/recovery-expired durable classification; ordinary use continues |
+| 409 REFERRAL_ACTIVATION_REQUIRED | No frozen qualifying fact; reconcile observation, refresh state |
+| 409 REFERRAL_ALREADY_ATTACHED / REFERRAL_SELF / REFERRAL_WINDOW_EXPIRED | No replacement/new reward; recover own status / correct input / explain deadline |
+| 409 ACCOUNT_DELETED | Actor or required beneficiary deleted/deleting; never recreate wallet |
+| 409 POLICY_CHANGED / IDEMPOTENCY_CONFLICT / INTEGRITY_CHALLENGE_INVALID | Refresh+reconfirm offer / preserve original input / fresh evidence as above |
+| 403 INTEGRITY_REJECTED / 503 INTEGRITY_UNAVAILABLE / IDENTITY_UNAVAILABLE / PROMOTION_UNAVAILABLE | No reward; existing wallet and signup/work remain usable |
+| 413 PAYLOAD_TOO_LARGE / 429 RATE_LIMITED | Bound input / retain candidate and honor Retry-After |
+
+Keep the existing `{error:{code,message}}` envelope. Android branches on code. No error or retry
+message promises an award or exposes the inviter. Self/invalid/expired code never reverses signup.
+
+Persist first syntactically valid pending candidate across process recreation, onboarding and
+same-UID Google upgrade. A later candidate cannot silently overwrite it; explicit Replace/Clear
+must precede a new attempt. Before first send durably bind environment+UID+provider/generation,
+canonical code, source, requestId, displayed revision, continuity digest (not raw signal), phase,
+challenge handle and retry deadline. Retain stable business input; if current signal differs,
+stop and explicitly reprepare rather than send a changed digest with the same key. Never persist
+Integrity tokens/challenge secrets. On uncertain/lost replies reconcile own GET first before any mutation retry. If not attached,
+retry the original key/input before collecting new evidence, preserving committed recovery. POLICY_CHANGED requires visible refresh/reconfirmation.
+
+An unbound guest candidate follows only that guest's proven same-UID link. Existing-Google conflict
+switch must not automatically submit it to the destination; offer explicit review/rebind if that
+destination is eligible, otherwise clear it. Preserve the existing section 9 work-choice journal,
+Room handoff, local pointer scrubbing and owner-transfer rules. Never merge wallets or use a
+referral as evidence to transfer work. Clear account-owned candidate/attempt/cache on sign-out,
+delete or unrelated switch; cancel coroutines and reject late responses using UID+environment+
+provider/generation fences before durable writes, wallet/history updates or navigation. Erase
+fences prevent in-flight jobs restoring deleted state.
+
+Invite friends and optional code entry use current dark Paige Tmr fields/buttons/sheet/toast
+patterns; copy comes from current server offer. Keep large-text/keyboard actions reachable. Use
+neutral copy when unavailable, and never auto-tailor/spend after receipt or wallet refresh.
+Inviter foreground/screen-entry refresh obtains own wallet and `/credits`. Render REFERRAL_REWARD
+as its original positive amount with stable server ledger ID through DTO/model/Room/history.
+Same-time grants remain distinct. Preserve guest/signup, legacy WELCOME/PURCHASE/TAILORING/REFUND/
+MIGRATION, unknown-kind tolerance, free-before-purchased spend and zero-credit job recovery.
+History is capped at 100 on ordinary reads; wallet counters remain balance authority. Extend
+persisted enum decoding without destructive reset. Current remote snapshots are in memory and
+Room credit_ledger has only a local Long ID; its mapping drops server string IDs. Slice03 must
+carry nullable stable server IDs through persisted mappings with a tested additive Room migration,
+committed schema and nullable unique server-ID/owner association (including environment). Preserve
+legacy local IDs/rows and deterministic fallback keys, refuse cross-owner persisted reads, clear
+account-owned snapshots on erasure/switch, and never use destructive migration fallback. Local
+application deletion must not remove server economic history or mutate wallet balances.
+Remaining payment retirement and historical purchase obligations belong to slice05.
+
+### 10.7 Lifecycle and privacy
+
+Ship lifecycle with schema. Keep caller-owned attached status/receipt separate from identifying
+cross-user edge. Invitee deletion erases its activation, code-bearing requests/fingerprints,
+challenge/counters/signals and identifying attribution edge/provenance. The living inviter retains
+its own legitimate balance, grant, ledger ID/time/amount/revision and detached nonidentifying reward
+receipt; do not cascade inviter economics through invitee. Delete any receipt→invitee FK/UID/code
+or hidden derived source. Inviter deletion disables/removes code and owned wallet/grants/ledger,
+erases edge/provenance; living invitee retains its own ATTACHED receipt/time/source/reward snapshot,
+without counterparty identity and with no reattachment. Deleting either party never replenishes
+aggregate consumed capacity. Deleting the survivor later erases its remaining own receipt.
+
+Erasure takes precedence after the rows-erasure/detachment transaction commits: erase foreign
+code/reference/hash and affected code-bearing operation/challenge/decision fingerprints. Every
+subsequent structurally valid attach POST returns 409 REFERRAL_ALREADY_ATTACHED before code,
+policy, evidence or new operation/challenge state, including original key/code and another code.
+GET returns 200 with the own ATTACHED receipt. Do not expose a counterpartyDeleted flag or imply
+that the submitted code matched. Before detachment, exact committed replay may return 200 while
+inviter deletion is pending: no beneficiary write is needed. The actor must always be live;
+actor tombstone overrides recovery. Serialize replay and rows-detachment so snapshots are whole.
+
+On lost response/process recovery Android reconciles GET before any mutation retry. ATTACHED
+confirms the account status, not which pending code won. Clear all pending code/key/digest/evidence
+and show Referral applied only from server confirmation. On REFERRAL_ALREADY_ATTACHED, stop
+mutation retries, clear code-bearing state and reconcile GET. If GET fails, retain only an
+owner-scoped read-only reconciliation marker. A contradictory nonattached GET is a consistency
+failure; never auto-retry or create another key. UID/environment/provider/generation and erase
+fences also apply to this read-only marker. This resolves the bounded lifecycle decision adopted
+by the orchestrator; see the slice03 lifecycle-decision.md handoff.
+
+Deletion records a tombstone under the existing user lock, then rows cleanup discovers counterpart
+edges and acquires all necessary user locks in lexical order before detaching in the same rows
+transaction. It cannot use live-only `withLiveUsers` to erase the already-tombstoned target; use
+accounts-owned sorted erasure helper with explicit target authorization and live-survivor recheck.
+Re-read edges under locks; if discovery changed, retry without reversing lock order. No app import
+in core accounts. Expose a narrow generic lifecycle port or core-referral erase service before
+`delete(users)` cascade. Existing rows step currently only calls eraseAiUsage; cascade alone fails.
+Concurrent reciprocal attach/delete and survivor delete/delete must finish without orphaning,
+reviving a wallet or dropping a survivor reward. Partial files/rows/Firebase failures resume using
+the durable deletion job, including after Firebase erasure without a client token.
+
+Export additively extends existing `export.promotions` with `referrals:{code,attachment,stats}`
+using the exact own shapes above (no share URL/offer required). Existing own activation/grants/full
+ledger remain. Add stable ledger `id` additively to exported credits. Export never creates a code,
+fact or award. Exclude counterpart UID/email, raw/hashed code provenance belonging to erased
+counterpart, provider/device/network HMACs, counter details, tokens, proofs and internal decisions. Live own-code export does not include
+the code that a caller used to attach to somebody else.
+Only issuer exports its own live code. Backup/restore must retain aggregate consumed totals and
+reconcile deletion tombstones/detachment before serving restored reads or new grants; an old
+backup must not resurrect erased edges, reset lifetime attachment or reopen capacity. Document
+operational reconciliation; prove local dump/restore + delete/retry in disposable fixture database.
+
+Backend must propose the narrow rule-3 server-resolved beneficiary and rule-9 survivor-ownership
+exception for human review in the governing PR; no arbitrary user lookup or cross-app transfer.
+This contract does not silently amend constitution/architecture or authorize live retention.
+
+### 10.8 Acceptance, dependency and activation boundary
+
+Canonical/schema fixtures and the case matrix are under
+`docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/`. They are deterministic examples,
+not real Google/Integrity evidence or activation values. Preserve section 8/9 fixture hashes.
+Cover actual routes/services with real local Postgres, fake external providers, a second isolated
+non-Google app/sink, concurrent/replay/policy/capacity/sink/deletion/export cases, plus Android
+pending/retry/switch/history and normal/large-text screen tests. Required implementation gates are
+backend npm run check and Android tools/ci/verify-local.sh; this contract-only phase runs fixtures,
+whitespace and policy checks, with no Gradle/npm/emulator/remote work.
+
+Partial issue ownership: backend #122 manual endpoints/atomicity/lifecycle and #120 reusable core;
+#54 action evidence/counters/capacity. Android #405 manual entry/code/pending state, and #404 only
+integrated REFERRAL_REWARD history/balance/owner safety. These issues remain open; #405 link/share/
+App Links/Play Referrer belongs to slice04 and #404 remaining payment retirement to slice05.
+Actual GitHub bodies were read 2026-10-17. Provisional plural routes are reconciled by 10.2.
+
+Frontend Article VII proposal is also required: current I.5 permits direct Integrity solely for
+section 8 guest admission, leaving a genuine section 9 wording gap. Frontend writer must propose
+the narrow extension naming only GUEST_TRIAL (8), GOOGLE_ACTIVATION including explicitly requested
+protected base (9), and REFERRAL_ATTACH (10), with unchanged action bindings, opaque requestHash
+only to Google, optional finite referral-velocity purpose, passive/recovery no-collection tests,
+and existing policy/Dependency Guard/lint gates plus Review. No new SDK or expanded suppression/
+baseline is authorized. See constitution-decision.md for exact wording and accessor rationale.
+This contract preserves section 9 behavior and prepares an unmerged governing-document proposal;
+human review before merge and genuine live disclosure/provider/retention gates remain required.
+
+Dependencies: exact slice02 FE ca4fcade751fc0c18c5cd5eb02128933700888a4 (draft PR407), BE
+4e954057173fd6a25576708450c864fd31d17c19 (draft PR125), both open/unmerged. Slice02 attainable
+publication audit PASS does not prove full Google/Integrity/admitted-grant/spend acceptance.
+Genuine matching staging Google/Integrity configuration, signed device evidence, live campaign
+capacity/window/retention/namespace/ingress decisions and human-reviewed rule proposals remain
+BLOCKED activation gates. Share origin/domain/associations/Play install proof remains slice04
+BLOCKED. Coding may continue under external-gate-decision.md; no mocked PASS/live fallback,
+deployment, migration against remote data, activation, merge or production policy change here.
