@@ -108,7 +108,7 @@ internal class ListEditViewModel @AssistedInject constructor(
     )
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val profile = profileRepository.observeProfile().filterNotNull().first()
             items.compareAndSet(null, initialItems(profile))
         }
@@ -161,7 +161,7 @@ internal class ListEditViewModel @AssistedInject constructor(
     fun save() {
         if (finished || busy) return
         busy = true
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 write()
             } finally {

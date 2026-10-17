@@ -8,7 +8,10 @@ import com.tailormyresume.core.common.network.TmrDispatchers
 import com.tailormyresume.core.data.mock.MockStateStore
 import com.tailormyresume.core.database.TmrDatabase
 import com.tailormyresume.core.database.model.JobApplicationEntity
+import com.tailormyresume.core.database.model.LocalAccountOwnerEntity
 import com.tailormyresume.core.database.model.LocalHandoffEntity
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import com.tailormyresume.core.database.model.ProfileEntity
 import com.tailormyresume.core.database.model.ProfileEntryEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -43,6 +46,9 @@ class LocalWorkCheckpoint @Inject constructor(
 
     suspend fun capture(owner: String, environment: String): WorkSnapshot = withContext(io) {
         val snapshot = database.withTransaction {
+            val held = database.localHandoffDao().owner()
+            check(held == null || (held.owner == owner && held.environment == environment))
+            database.localHandoffDao().setOwner(LocalAccountOwnerEntity(owner = owner, environment = environment))
             val apps = database.jobApplicationDao().readAll()
             val keys = LOCAL_KEYS + apps.flatMap { app ->
                 listOf("tailor.edited.${app.id}", "tailor.regenerations.${app.id}", "reports.content.${app.id}", "prep.plan.${app.id}")
@@ -66,12 +72,16 @@ class LocalWorkCheckpoint @Inject constructor(
     suspend fun restore(owner: String, environment: String) = withContext(io) {
         val snapshot = read(owner, environment)
         database.withTransaction {
-            database.profileDao().deleteProfile()
-            database.jobApplicationDao().deleteAll()
-            database.creditLedgerDao().clear()
-            if (snapshot != null) {
-                snapshot.profile?.let { database.profileDao().replaceProfile(it, snapshot.entries) }
-                snapshot.applications.forEach { database.jobApplicationDao().upsertApplication(it) }
+            val held = database.localHandoffDao().owner()
+            if (held?.owner != owner || held.environment != environment) {
+                database.profileDao().deleteProfile()
+                database.jobApplicationDao().deleteAll()
+                database.creditLedgerDao().clear()
+                if (snapshot != null) {
+                    snapshot.profile?.let { database.profileDao().replaceProfile(it, snapshot.entries) }
+                    snapshot.applications.forEach { database.jobApplicationDao().upsertApplication(it) }
+                }
+                database.localHandoffDao().setOwner(LocalAccountOwnerEntity(owner = owner, environment = environment))
             }
         }
         clearLocalKeys()
@@ -91,20 +101,33 @@ class LocalWorkCheckpoint @Inject constructor(
     ) = withContext(io) {
         val snapshot = checkNotNull(read(source, environment))
         val selected = snapshot.applications.filter { it.id in applicationIds }
-        val mapping = selected.associate { it.id to importedId(handoff, it.id) }
-        stageFiles(snapshot, mapping)
-        database.withTransaction {
+        val serializer = MapSerializer(String.serializer(), String.serializer())
+        val mapping = database.withTransaction {
+            val held = checkNotNull(database.localHandoffDao().owner())
+            check(held.owner == destination && held.environment == environment)
             val previous = database.localHandoffDao().find(handoff)
-            if (previous == null) {
-                if (useProfile) snapshot.profile?.let { database.profileDao().replaceProfile(it, snapshot.entries) }
-                selected.forEach { app ->
-                    database.jobApplicationDao().upsertApplication(detached(app, mapping.getValue(app.id)))
-                }
-                database.localHandoffDao().insert(LocalHandoffEntity(handoff, destination))
+            if (previous != null) {
+                check(previous.destination == destination && previous.source == source)
+                json.decodeFromString(serializer, previous.mapping)
             } else {
-                check(previous.destination == destination)
+                val allocated = mutableMapOf<String, String>()
+                selected.forEach { app ->
+                    val candidate = importedId(handoff, app.id)
+                    var id = candidate
+                    var suffix = 0
+                    while (database.jobApplicationDao().getApplication(id) != null || id in allocated.values) {
+                        suffix++
+                        id = "$candidate-$suffix"
+                    }
+                    allocated[app.id] = id
+                }
+                if (useProfile) snapshot.profile?.let { database.profileDao().replaceProfile(it, snapshot.entries) }
+                selected.forEach { app -> database.jobApplicationDao().upsertApplication(detached(app, allocated.getValue(app.id))) }
+                database.localHandoffDao().insert(LocalHandoffEntity(handoff, destination, source, json.encodeToString(serializer, allocated)))
+                allocated
             }
         }
+        stageFiles(snapshot, mapping)
         mapping.forEach { (old, new) ->
             listOf("tailor.edited.", "tailor.regenerations.").forEach { prefix ->
                 snapshot.local[prefix + old]?.let { store.write(prefix + new, it) }
@@ -118,6 +141,7 @@ class LocalWorkCheckpoint @Inject constructor(
 
     suspend fun erase(owner: String, environment: String) = withContext(io) {
         folder(owner, environment).deleteRecursively()
+        database.localHandoffDao().erase(owner)
     }
 
     private fun stageFiles(snapshot: WorkSnapshot, mapping: Map<String, String>) {
@@ -158,7 +182,7 @@ class LocalWorkCheckpoint @Inject constructor(
     private fun detached(app: JobApplicationEntity, id: String): JobApplicationEntity = app.copy(
         id = id,
         gapAnalysis = app.gapAnalysis?.copy(generationId = null),
-        tailoredResume = app.tailoredResume?.copy(runId = null, bullets = app.tailoredResume.bullets.map { it.copy(generationId = null) }),
+        tailoredResume = app.tailoredResume?.let { resume -> resume.copy(runId = null, bullets = resume.bullets.map { it.copy(generationId = null) }) },
     )
 
     private companion object {

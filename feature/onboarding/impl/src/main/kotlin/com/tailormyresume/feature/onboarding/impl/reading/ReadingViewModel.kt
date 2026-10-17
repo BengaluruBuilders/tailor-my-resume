@@ -47,7 +47,7 @@ internal class ReadingViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val workTicket = workFence.ticket()
-    private val scope = CoroutineScope(SupervisorJob() + io)
+    private val scope = CoroutineScope(SupervisorJob() + io + workFence.context(workTicket))
 
     private val eventChannel = Channel<ReadingEvent>(Channel.BUFFERED)
 

@@ -66,7 +66,7 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
     fun onContinue() {
         val choice = picked.value
         if (choice == null) {
-            viewModelScope.launch { eventChannel.send(QuickQuestionEvent.ToastPickAnswer) }
+            viewModelScope.launch(workFence.context(workTicket)) { eventChannel.send(QuickQuestionEvent.ToastPickAnswer) }
             return
         }
         val answerDetail = if (choice.takesDetail) detail.value.trim() else ""
@@ -78,7 +78,7 @@ internal class QuickQuestionViewModel @AssistedInject constructor(
     private fun saveThenForward(choice: QuickChoice?, answerDetail: String, forwardEvenIfUnsaved: Boolean) {
         if (forwarding) return
         forwarding = true
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val saved = save(choice, answerDetail)
             if (saved || forwardEvenIfUnsaved) {
                 workFence.editing(this, false)

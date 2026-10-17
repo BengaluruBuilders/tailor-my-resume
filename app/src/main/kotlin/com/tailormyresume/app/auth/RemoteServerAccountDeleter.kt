@@ -7,13 +7,13 @@ import com.tailormyresume.core.network.TailorMyResumeApi
 import com.tailormyresume.core.network.apiResult
 import javax.inject.Inject
 
-class RemoteServerAccountDeleter @Inject constructor(private val api: TailorMyResumeApi) : ServerAccountDeleter {
+class RemoteServerAccountDeleter @Inject constructor(private val api: TailorMyResumeApi, private val privateWork: AccountPrivateWorkEraser? = null) : ServerAccountDeleter {
     override val deletesRemoteData = true
 
     override suspend fun delete(): Result<Unit> = apiResult { api.deleteMe() }
-        .map { }
+        .map { privateWork?.erase(); Unit }
         .recoverCatching { failure ->
-            if ((failure as? ApiException)?.error == ApiError.AccountDeleted) Unit else throw failure
+            if ((failure as? ApiException)?.error == ApiError.AccountDeleted) { privateWork?.erase(); Unit } else throw failure
         }
 
     override fun mayHaveReachedServer(failure: Throwable): Boolean = when (val error = (failure as? ApiException)?.error) {
@@ -25,7 +25,7 @@ class RemoteServerAccountDeleter @Inject constructor(private val api: TailorMyRe
     override suspend fun isClosed(): Result<Boolean> = apiResult { api.me() }.fold(
         onSuccess = { Result.success(false) },
         onFailure = { failure ->
-            if ((failure as? ApiException)?.error == ApiError.AccountDeleted) Result.success(true) else Result.failure(failure)
+            if ((failure as? ApiException)?.error == ApiError.AccountDeleted) { privateWork?.erase(); Result.success(true) } else Result.failure(failure)
         },
     )
 

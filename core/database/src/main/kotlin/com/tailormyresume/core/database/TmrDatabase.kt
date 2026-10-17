@@ -16,6 +16,7 @@ import com.tailormyresume.core.database.util.JsonConverters
 @Database(
     entities = [
         com.tailormyresume.core.database.model.LocalHandoffEntity::class,
+        com.tailormyresume.core.database.model.LocalAccountOwnerEntity::class,
         ProfileEntity::class,
         ProfileEntryEntity::class,
         JobApplicationEntity::class,

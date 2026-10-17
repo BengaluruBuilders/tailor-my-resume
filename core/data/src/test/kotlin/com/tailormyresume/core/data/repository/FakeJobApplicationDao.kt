@@ -13,6 +13,10 @@ class FakeJobApplicationDao : JobApplicationDao {
 
     private val entities = MutableStateFlow<Map<String, JobApplicationEntity>>(emptyMap())
 
+    override suspend fun readAll(): List<JobApplicationEntity> = entities.value.values.toList()
+
+    override suspend fun deleteAll() { entities.value = emptyMap() }
+
     override fun observeApplications(): Flow<List<JobApplicationEntity>> =
         entities.map { saved ->
             saved.values.sortedWith(

@@ -61,7 +61,7 @@ interface TailorMyResumeApi {
     suspend fun activationChallenge(@Body body: ActivationChallengeRequest): GrantChallengeResponse
 
     @POST("v1/tailormyresume/account/activate")
-    suspend fun activateGoogle(@Body body: GoogleActivationRequest): GoogleActivationResponse
+    suspend fun activateGoogle(@Body body: GoogleActivationRequest): retrofit2.Response<GoogleActivationResponse>
 
     @GET("v1/tailormyresume/credits/policy")
     suspend fun creditPolicy(): CreditPolicyResponse

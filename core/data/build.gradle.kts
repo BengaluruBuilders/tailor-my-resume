@@ -22,6 +22,7 @@ dependencies {
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.serialization.json)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.room.runtime)
 
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.truth)

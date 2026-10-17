@@ -98,7 +98,7 @@ internal class EditRoleViewModel @AssistedInject constructor(
     )
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val profile = profileRepository.observeProfile().filterNotNull().first()
             if (draft.value != null) return@launch
             val entry = entryId?.let { id ->
@@ -144,7 +144,7 @@ internal class EditRoleViewModel @AssistedInject constructor(
     private fun singleFlight(action: suspend () -> Unit) {
         if (finished || busy) return
         busy = true
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 action()
             } finally {

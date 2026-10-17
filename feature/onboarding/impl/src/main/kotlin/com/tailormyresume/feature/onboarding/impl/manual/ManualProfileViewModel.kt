@@ -75,7 +75,7 @@ internal class ManualProfileViewModel @Inject constructor(
     }
 
     private fun refreshFromProfile() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val account = sessionRepository.observeAccount().first()
             val profile = profileRepository.observeProfile().first()
             val entries = profile?.entries.orEmpty()
@@ -127,7 +127,7 @@ internal class ManualProfileViewModel @Inject constructor(
     fun onContinue() {
         if (!saving.compareAndSet(false, true)) return
         val current = state.value
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 val idsBefore = profileRepository.observeProfile().first()?.entries.orEmpty().map { it.id }.toSet()
                 workFence.check(workTicket)

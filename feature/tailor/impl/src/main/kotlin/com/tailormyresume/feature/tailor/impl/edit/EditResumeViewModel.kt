@@ -95,7 +95,7 @@ internal class EditResumeViewModel @AssistedInject constructor(
     }
 
     fun onSave() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 saveMutex.withLock {
                     val current = drafts.value

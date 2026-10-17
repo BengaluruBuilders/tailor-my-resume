@@ -22,8 +22,12 @@
     <string name="google_account_profile_choice">If a profile is saved for this Google account on this device, this choice replaces it. Turn this off to keep that profile.</string>
     <string name="google_account_existing_continue">Switch and keep selected work</string>
     <string name="google_account_keep_guest">Keep using this guest account</string>
+    <string name="google_account_profile_collision">Choose the profile to use. Your guest profile is %1$s. A profile named %2$s is already saved for this Google account on this device. Both remain protected until you choose.</string>
+    <string name="google_account_use_guest_profile">Use guest profile</string>
+    <string name="google_account_use_existing_profile">Keep existing Google profile</string>
     <plurals name="google_account_signup_offer"><item quantity="one">Add %d credit for an eligible first Google signup.</item><item quantity="other">Add %d credits for an eligible first Google signup.</item></plurals>
     <plurals name="google_account_base_offer"><item quantity="one">A separate eligible trial offers %d credit. The device trial check still applies.</item><item quantity="other">A separate eligible trial offers %d credits. The device trial check still applies.</item></plurals>
     <plurals name="google_account_signup_received"><item quantity="one">Google signup: %d credit added.</item><item quantity="other">Google signup: %d credits added.</item></plurals>
     <plurals name="google_account_base_received"><item quantity="one">Trial: %d credit added.</item><item quantity="other">Trial: %d credits added.</item></plurals>
+    <plurals name="google_account_retry_delay"><item quantity="one">Wait %d second before trying the remaining offer again.</item><item quantity="other">Wait %d seconds before trying the remaining offer again.</item></plurals>
 </resources>

@@ -95,7 +95,7 @@ internal class JobViewModel @Inject constructor(
 
     init {
         draftStore.clearLink()
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             draftStore.draft.filterNotNull().collect { applyDraft(draftStore.consume()) }
         }
     }
@@ -119,7 +119,7 @@ internal class JobViewModel @Inject constructor(
             notAJobPost.value = true
             return
         }
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             percent.value = 0
             val tickerJob = launch {
                 progressTicker.percents().collect { step ->

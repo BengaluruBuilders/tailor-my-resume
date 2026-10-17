@@ -20,6 +20,7 @@ internal class OfflineFirstApplicationRepository @Inject constructor(
     private val clock: Clock,
     private val cleanup: ApplicationCleanup,
     @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ApplicationRepository {
 
     override fun observeApplications(): Flow<List<JobApplication>> =
@@ -33,10 +34,10 @@ internal class OfflineFirstApplicationRepository @Inject constructor(
             .flowOn(ioDispatcher)
 
     override suspend fun upsertApplication(application: JobApplication) =
-        jobApplicationDao.upsertKeepingLegacyColumns(application.asEntity())
+        workFence.mutate { jobApplicationDao.upsertKeepingLegacyColumns(application.asEntity()) }
 
     override suspend fun updateStatus(id: String, status: ApplicationStatus) =
-        jobApplicationDao.updateStatus(id = id, status = status, updatedAt = clock.now())
+        workFence.mutate { jobApplicationDao.updateStatus(id = id, status = status, updatedAt = clock.now()) }
 
     override suspend fun deleteApplication(id: String) {
         clearArtefacts(id)

@@ -71,7 +71,7 @@ internal class SkillsViewModel @Inject constructor(
     )
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val profile = profileRepository.observeProfile().filterNotNull().first()
             draft.compareAndSet(null, SkillsDraft(profile.skills))
         }
@@ -88,7 +88,7 @@ internal class SkillsViewModel @Inject constructor(
     fun save() {
         if (finished || busy) return
         busy = true
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 write()
             } finally {

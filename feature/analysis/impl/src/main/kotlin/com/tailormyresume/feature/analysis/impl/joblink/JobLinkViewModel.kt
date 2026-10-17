@@ -47,7 +47,7 @@ internal class JobLinkViewModel @Inject constructor(
             return
         }
         state.update { it.copy(importing = true) }
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             var cancelled = false
             try {
                 val job = importer.import(url)

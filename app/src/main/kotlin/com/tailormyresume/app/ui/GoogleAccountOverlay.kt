@@ -48,6 +48,7 @@ internal fun GoogleAccountOverlay(gateway: GoogleAccountGateway, modifier: Modif
         onCancel = { scope.launch { gateway.cancel() } },
         onClose = { scope.launch { gateway.dismiss() } },
         onConflict = { profile, apps -> scope.launch { gateway.continueConflict(profile, apps) } },
+        onProfileChoice = { useGuest -> scope.launch { gateway.chooseProfile(useGuest) } },
         modifier = modifier,
     )
 }
@@ -61,6 +62,7 @@ internal fun GoogleAccountPanel(
     onClose: () -> Unit,
     onConflict: (Boolean, Set<String>) -> Unit,
     modifier: Modifier = Modifier,
+    onProfileChoice: (Boolean) -> Unit = {},
 ) {
     Column(
         modifier.fillMaxSize().background(TmrTheme.colors.background).testTag("google-account-panel")
@@ -79,6 +81,7 @@ internal fun GoogleAccountPanel(
                 state.signup?.let { Body(pluralStringResource(R.plurals.google_account_signup_offer, it, it)) }
                 state.base?.let { Body(pluralStringResource(R.plurals.google_account_base_offer, it, it)) }
                 if (state.signup == null && state.base == null) Body(stringResource(R.string.google_account_neutral))
+                state.retryAfterSeconds?.let { Body(pluralStringResource(R.plurals.google_account_retry_delay, it, it)) }
                 if (state.changed) Body(stringResource(R.string.google_account_offer_changed))
                 if (state.canClaim || !state.google) {
                     TmrPrimaryButton(stringResource(if (state.google) R.string.google_account_claim else R.string.google_account_continue_google), onClaim, Modifier.fillMaxWidth())
@@ -87,8 +90,14 @@ internal fun GoogleAccountPanel(
                 TmrSecondaryButton(stringResource(R.string.google_account_close), onClose, Modifier.fillMaxWidth())
             }
             is GoogleAccountState.Conflict -> ConflictChoices(state, onConflict, onCancel)
+            is GoogleAccountState.ProfileChoice -> {
+                Body(stringResource(R.string.google_account_profile_collision, state.guestName, state.destinationName))
+                TmrPrimaryButton(stringResource(R.string.google_account_use_guest_profile), { onProfileChoice(true) }, Modifier.fillMaxWidth())
+                TmrSecondaryButton(stringResource(R.string.google_account_use_existing_profile), { onProfileChoice(false) }, Modifier.fillMaxWidth())
+            }
             is GoogleAccountState.Retry -> {
                 Body(stringResource(R.string.google_account_retry_body))
+                state.retryAfterSeconds?.let { Body(pluralStringResource(R.plurals.google_account_retry_delay, it, it)) }
                 TmrPrimaryButton(stringResource(R.string.google_account_retry), onRetry, Modifier.fillMaxWidth())
                 if (state.canCancel) TmrSecondaryButton(stringResource(R.string.google_account_close), onClose, Modifier.fillMaxWidth())
             }
@@ -97,6 +106,7 @@ internal fun GoogleAccountPanel(
                 state.signup?.let { Body(pluralStringResource(R.plurals.google_account_signup_received, it, it)) }
                 state.base?.let { Body(pluralStringResource(R.plurals.google_account_base_received, it, it)) }
                 TmrPrimaryButton(stringResource(R.string.google_account_close), onClose, Modifier.fillMaxWidth())
+                state.retryAfterSeconds?.let { Body(pluralStringResource(R.plurals.google_account_retry_delay, it, it)) }
                 if (!state.preservedWork) TmrSecondaryButton(stringResource(R.string.google_account_check_remaining), onRetry, Modifier.fillMaxWidth())
             }
             GoogleAccountState.Idle -> Unit

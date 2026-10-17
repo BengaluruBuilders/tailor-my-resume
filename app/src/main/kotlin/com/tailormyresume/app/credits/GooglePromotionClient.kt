@@ -22,6 +22,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Clock
 import kotlin.time.Instant
+import kotlin.time.Duration.Companion.seconds
 
 @Singleton
 class GooglePromotionClient @Inject constructor(
@@ -38,10 +39,12 @@ class GooglePromotionClient @Inject constructor(
     suspend fun prepare(journal: UpgradeJournal, changed: Boolean = false): GoogleAccountState {
         val uid = uids.uid()
         val generation = wallet.generation()
+        val remaining = retryRemaining(journal)
+        if (remaining != null && !journal.attemptCommitted) return GoogleAccountState.Retry(true, remaining)
         if (journal.requestId != null && journal.challengeId != null && !journal.attemptCommitted) {
-            val replay = apiResult { api.activateGoogle(request(journal, signal(journal), "committed-recovery")) }
+            val replay = apiResult { activate(request(journal, signal(journal), "committed-recovery")) }
             ensureOwner(uid, generation)
-            if (replay.isSuccess) return finish(journal, replay.getOrThrow(), generation)
+            if (replay.isSuccess) return finish(journal, replay.getOrThrow().first, generation, replay.getOrThrow().second)
             val error = (replay.exceptionOrNull() as? ApiException)?.error
             if (error !in setOf(ApiError.IntegrityChallengeInvalid, ApiError.IntegrityRejected, ApiError.PolicyChanged)) {
                 throw checkNotNull(replay.exceptionOrNull())
@@ -61,6 +64,7 @@ class GooglePromotionClient @Inject constructor(
     }
 
     suspend fun claim(journal: UpgradeJournal): GoogleAccountState {
+        retryRemaining(journal)?.let { return GoogleAccountState.Retry(true, it) }
         val policy = displayed ?: return prepare(journal, changed = true)
         val signup = policy.signupBonus
         val base = signup.baseTrial
@@ -94,19 +98,32 @@ class GooglePromotionClient @Inject constructor(
         journals.write(pending)
         val token = evidence.token(challenge.requestHash)
         ensureOwner(uid, generation)
-        val result = apiResult { api.activateGoogle(request(pending, continuity, token)) }.getOrThrow()
+        val result = apiResult { activate(request(pending, continuity, token)) }.getOrThrow()
         ensureOwner(uid, generation)
-        return finish(pending, result, generation)
+        return finish(pending, result.first, generation, result.second)
     }
 
-    private suspend fun finish(journal: UpgradeJournal, result: GoogleActivationResponse, generation: Int): GoogleAccountState {
+    private suspend fun finish(journal: UpgradeJournal, result: GoogleActivationResponse, generation: Int, retryAfterSeconds: Int?): GoogleAccountState {
         check(wallet.update(result.wallet, generation))
-        journals.write(journal.copy(attemptCommitted = true, phase = "LINKED"))
+        val limited = result.signupBonus.reason == "RATE_LIMITED" || result.baseTrial.reason == "RATE_LIMITED"
+        val wait = if (limited) retryAfterSeconds?.takeIf { it > 0 } ?: 60 else null
+        journals.write(journal.copy(attemptCommitted = true, phase = "LINKED", retryAtMillis = wait?.let { (clock.now() + it.seconds).toEpochMilliseconds() }))
         credits.refresh()
         return GoogleAccountState.Complete(
             result.grants.firstOrNull { it.kind == "GOOGLE_SIGNUP" && result.signupBonus.status == "GRANTED" && !result.replayed }?.amount,
             result.grants.firstOrNull { it.kind == "GUEST_TRIAL" && result.baseTrial.status == "GRANTED" && !result.replayed }?.amount,
+            retryAfterSeconds = wait,
         )
+    }
+
+    private suspend fun activate(body: GoogleActivationRequest): Pair<GoogleActivationResponse, Int?> {
+        val response = api.activateGoogle(body)
+        if (!response.isSuccessful) throw retrofit2.HttpException(response)
+        return checkNotNull(response.body()) to response.headers()["Retry-After"]?.toIntOrNull()?.takeIf { it > 0 }
+    }
+
+    private fun retryRemaining(journal: UpgradeJournal): Int? = journal.retryAtMillis?.let { deadline ->
+        ((deadline - clock.now().toEpochMilliseconds() + 999) / 1000).coerceAtMost(Int.MAX_VALUE.toLong()).toInt().takeIf { it > 0 }
     }
 
     private fun request(journal: UpgradeJournal, continuity: String?, token: String) = GoogleActivationRequest(
@@ -133,7 +150,8 @@ class GooglePromotionClient @Inject constructor(
         val validBase = journal.path == "DIRECT_GOOGLE" && signup.baseTrial?.status == "AVAILABLE" && validTime(policy.effectiveAt, policy.expiresAt)
         val signupAmount = signup.amount?.takeIf { validSignup && it > 0 }
         val baseAmount = signup.baseTrial?.amount?.takeIf { validBase && it > 0 }
-        return GoogleAccountState.Offer(signupAmount, baseAmount, signupAmount != null || baseAmount != null, changed)
+        val wait = retryRemaining(journal)
+        return GoogleAccountState.Offer(signupAmount, baseAmount, wait == null && (signupAmount != null || baseAmount != null), changed, retryAfterSeconds = wait)
     }
 
     private fun validTime(start: String?, end: String?): Boolean =

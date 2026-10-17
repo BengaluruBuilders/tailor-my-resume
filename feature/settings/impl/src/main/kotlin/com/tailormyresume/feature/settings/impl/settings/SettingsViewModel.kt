@@ -35,9 +35,12 @@ internal class SettingsViewModel @Inject constructor(
     private val exportAccountData: ExportAccountDataUseCase,
     private val signInGateway: SignInGateway,
     private val google: com.tailormyresume.core.domain.GoogleAccountGateway? = null,
+    private val workFence: com.tailormyresume.core.data.account.LocalWorkFence = com.tailormyresume.core.data.account.LocalWorkFence(),
 ) : ViewModel() {
+    private val workTicket = workFence.ticket()
 
-    fun onGoogleAccount() { viewModelScope.launch { google?.open() } }
+
+    fun onGoogleAccount() { viewModelScope.launch(workFence.context(workTicket)) { google?.open() } }
 
     val uiState: StateFlow<SettingsUiState> = combine(
         sessionRepository.observeAccount(),
@@ -67,7 +70,7 @@ internal class SettingsViewModel @Inject constructor(
     private val signingOut = MutableStateFlow(false)
 
     fun onPageSizeClicked() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             resumeSettingsRepository.update { settings ->
                 settings.copy(pageSize = if (settings.pageSize == PageSize.A4) PageSize.LETTER else PageSize.A4)
             }
@@ -75,7 +78,7 @@ internal class SettingsViewModel @Inject constructor(
     }
 
     fun onFileNameClicked() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             resumeSettingsRepository.update { settings ->
                 settings.copy(fileNameFormat = settings.fileNameFormat.next())
             }
@@ -83,7 +86,7 @@ internal class SettingsViewModel @Inject constructor(
     }
 
     fun onProductUpdatesToggled() {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             resumeSettingsRepository.update { settings ->
                 settings.copy(productUpdates = !settings.productUpdates)
             }
@@ -92,7 +95,7 @@ internal class SettingsViewModel @Inject constructor(
 
     fun onDownloadMyData() {
         if (!preparingData.compareAndSet(expect = false, update = true)) return
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 eventChannel.send(SettingsEvent.ShareArchive(exportAccountData().file))
             } catch (cancellation: CancellationException) {
@@ -107,7 +110,7 @@ internal class SettingsViewModel @Inject constructor(
 
     fun onSignOut() {
         if (!signingOut.compareAndSet(expect = false, update = true)) return
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val signedOut = withContext(NonCancellable) {
                 try {
                     signInGateway.signOut()

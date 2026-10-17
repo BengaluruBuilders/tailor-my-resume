@@ -88,7 +88,7 @@ internal class EditContactViewModel @Inject constructor(
     )
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             val profile = profileRepository.observeProfile().filterNotNull().first()
             draft.compareAndSet(null, profile.toDraft())
         }
@@ -109,7 +109,7 @@ internal class EditContactViewModel @Inject constructor(
     fun save() {
         if (finished || busy) return
         busy = true
-        viewModelScope.launch {
+        viewModelScope.launch(workFence.context(workTicket)) {
             try {
                 write()
             } finally {
