@@ -49,4 +49,6 @@ internal sealed interface JobResultEvent {
     data class QuickQuestion(val applicationId: String) : JobResultEvent
 
     data class Tailor(val applicationId: String) : JobResultEvent
+
+    data object CreditCheckFailed : JobResultEvent
 }

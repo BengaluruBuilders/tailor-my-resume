@@ -82,11 +82,15 @@ internal fun DeleteAccountSheetContent(
             color = colors.text,
         )
         Text(
-            text = stringResource(
-                R.string.feature_settings_impl_delete_body,
+            text = state.unusedCredits?.let { credits ->
+                stringResource(
+                    R.string.feature_settings_impl_delete_body,
+                    pluralStringResource(R.plurals.feature_settings_impl_delete_resumes, state.applications, state.applications),
+                    pluralStringResource(R.plurals.feature_settings_impl_delete_credits, credits, credits),
+                )
+            } ?: stringResource(
+                R.string.feature_settings_impl_delete_body_credits_unknown,
                 pluralStringResource(R.plurals.feature_settings_impl_delete_resumes, state.applications, state.applications),
-                state.unusedCredits?.let { pluralStringResource(R.plurals.feature_settings_impl_delete_credits, it, it) }
-                    ?: stringResource(R.string.feature_settings_impl_delete_credits_unknown),
             ),
             style = typography.bodySmall,
             color = colors.textSecondary,

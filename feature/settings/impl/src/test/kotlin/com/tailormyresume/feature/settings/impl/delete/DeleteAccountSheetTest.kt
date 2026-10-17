@@ -86,6 +86,25 @@ class DeleteAccountSheetTest {
     }
 
     @Test
+    fun anUnknownCreditCountReadsAsAGrammaticalSentence() {
+        rule.setContent {
+            TmrTheme {
+                DeleteAccountSheetContent(
+                    contentState(applications = 3, unusedCredits = null),
+                    onTextChanged = {},
+                    onDelete = {},
+                    onKeep = {},
+                )
+            }
+        }
+
+        rule.onNodeWithText(
+            "This removes your profile, 3 tailored resumes and your application history. " +
+                "Any unused credits will be lost. This can't be undone.",
+        ).assertIsDisplayed()
+    }
+
+    @Test
     fun deleteButtonDoesNothingUntilConfirmed() {
         var deletes = 0
         var state by mutableStateOf(contentState(typed = "DELET", canDelete = false))
@@ -206,7 +225,7 @@ class DeleteAccountSheetTest {
 
     private fun contentState(
         applications: Int = 3,
-        unusedCredits: Int = 2,
+        unusedCredits: Int? = 2,
         typed: String = "",
         canDelete: Boolean = false,
     ) = DeleteAccountUiState.Content(

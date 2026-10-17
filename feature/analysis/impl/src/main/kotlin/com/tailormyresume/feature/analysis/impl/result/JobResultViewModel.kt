@@ -50,10 +50,12 @@ internal class JobResultViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val credits = state.credits ?: creditsRepository.balanceAfterRefreshIfUnknown()
             val event = when {
-                credits != null && credits <= 0 -> JobResultEvent.Paywall(applicationId)
+                credits == null -> JobResultEvent.CreditCheckFailed
+                credits <= 0 -> JobResultEvent.Paywall(applicationId)
                 state.asksQuestion -> JobResultEvent.QuickQuestion(applicationId)
                 else -> JobResultEvent.Tailor(applicationId)
             }
+            if (event == JobResultEvent.CreditCheckFailed) tailorTapped = false
             eventChannel.send(event)
         }
     }

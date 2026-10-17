@@ -11,6 +11,7 @@ internal fun TailoringRoute(
     viewModel: TailoringViewModel,
     onDone: () -> Unit,
     onFailed: () -> Unit,
+    onNoCredit: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val outcome by viewModel.outcome.collectAsStateWithLifecycle()
@@ -19,6 +20,7 @@ internal fun TailoringRoute(
         when (outcome) {
             TailoringOutcome.Done -> onDone()
             TailoringOutcome.Failed -> onFailed()
+            TailoringOutcome.NoCredit -> onNoCredit()
             null -> Unit
         }
     }

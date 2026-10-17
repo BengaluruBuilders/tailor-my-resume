@@ -12,7 +12,6 @@
         <item quantity="other">%1$d left</item>
     </plurals>
     <string name="feature_settings_impl_credits_unknown">—</string>
-    <string name="feature_settings_impl_delete_credits_unknown">any unused credits</string>
     <string name="feature_settings_impl_page_size">Page size</string>
     <string name="feature_settings_impl_page_a4" translatable="false">A4</string>
     <string name="feature_settings_impl_page_letter">Letter</string>
@@ -38,6 +37,7 @@
     <string name="feature_settings_impl_share_chooser">Share your data</string>
     <string name="feature_settings_impl_delete_title">Delete your account?</string>
     <string name="feature_settings_impl_delete_body">This removes your profile, %1$s and your application history. Your %2$s will be lost. This can\'t be undone.</string>
+    <string name="feature_settings_impl_delete_body_credits_unknown">This removes your profile, %1$s and your application history. Any unused credits will be lost. This can\'t be undone.</string>
     <plurals name="feature_settings_impl_delete_resumes">
         <item quantity="one">%1$d tailored resume</item>
         <item quantity="other">%1$d tailored resumes</item>

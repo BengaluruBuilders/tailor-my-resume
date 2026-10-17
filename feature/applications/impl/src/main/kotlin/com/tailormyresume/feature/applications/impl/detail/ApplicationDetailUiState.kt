@@ -33,6 +33,8 @@ internal sealed interface ApplicationDetailEvent {
 
     data object ComingSoon : ApplicationDetailEvent
 
+    data object CreditCheckFailed : ApplicationDetailEvent
+
     data class StatusSet(val status: ApplicationStatus) : ApplicationDetailEvent
 
     data class OpenQuickQuestion(val applicationId: String) : ApplicationDetailEvent

@@ -27,6 +27,7 @@
     <string name="feature_applications_impl_prep_questions">Get prep questions</string>
     <string name="feature_applications_impl_cover_letter">Write a cover letter</string>
     <string name="feature_applications_impl_status_set">Status set to %1$s</string>
+    <string name="feature_applications_impl_credit_check_failed">Couldn\'t check your credits. Try again.</string>
     <string name="feature_applications_impl_coming_soon">Coming soon</string>
     <string name="feature_applications_impl_file_missing">Couldn\'t find the PDF</string>
     <string name="feature_applications_impl_open_failed">No app can open PDFs</string>

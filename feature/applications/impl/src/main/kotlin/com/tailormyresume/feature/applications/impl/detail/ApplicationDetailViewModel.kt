@@ -90,7 +90,8 @@ internal class ApplicationDetailViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val credits = creditsRepository.balanceAfterRefreshIfUnknown()
             val event = when {
-                credits != null && credits <= 0 -> ApplicationDetailEvent.OpenPaywall(applicationId)
+                credits == null -> ApplicationDetailEvent.CreditCheckFailed
+                credits <= 0 -> ApplicationDetailEvent.OpenPaywall(applicationId)
                 hasQuestion() -> ApplicationDetailEvent.OpenQuickQuestion(applicationId)
                 else -> ApplicationDetailEvent.StartTailoring(applicationId)
             }

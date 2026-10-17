@@ -10,6 +10,7 @@ internal class JobResultNavigation(private val navigator: Navigator) {
         when (event) {
             is JobResultEvent.Paywall -> navigator.navigateToPaywall(event.applicationId)
             is JobResultEvent.QuickQuestion -> navigator.navigateToQuickQuestion(event.applicationId)
+            JobResultEvent.CreditCheckFailed -> Unit
             is JobResultEvent.Tailor -> navigator.navigateToTailoring(event.applicationId)
         }
     }

@@ -20,6 +20,8 @@ internal sealed interface TailoringOutcome {
     data object Done : TailoringOutcome
 
     data object Failed : TailoringOutcome
+
+    data object NoCredit : TailoringOutcome
 }
 
 private const val PROGRESS_STEP_MILLIS = 40L
@@ -53,6 +55,11 @@ internal class TailoringViewModel @AssistedInject constructor(
                     ramp.cancel()
                     progressState.value = PROGRESS_COMPLETE
                     outcomeState.value = TailoringOutcome.Done
+                }
+
+                TailoringResult.NoCredit -> {
+                    ramp.cancel()
+                    outcomeState.value = TailoringOutcome.NoCredit
                 }
 
                 is TailoringResult.Failure -> {

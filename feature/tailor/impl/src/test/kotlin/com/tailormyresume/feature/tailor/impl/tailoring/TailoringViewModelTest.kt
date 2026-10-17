@@ -2,6 +2,8 @@ package com.tailormyresume.feature.tailor.impl.tailoring
 
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.designsystem.component.content.TmrProgressState
+import com.tailormyresume.core.domain.AiException
+import com.tailormyresume.core.domain.AiFailure
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.model.CandidateProfile
@@ -27,6 +29,7 @@ import com.tailormyresume.feature.tailor.impl.testBullet
 import com.tailormyresume.feature.tailor.impl.testProfile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -73,7 +76,7 @@ class TailoringViewModelTest {
         profileRepository.sendProfile(profile)
     }
 
-    private fun fakeTailor(tailorMillis: Long, failing: Boolean): ResumeTailor = object : ResumeTailor {
+    private fun fakeTailor(tailorMillis: Long, failing: Boolean, failure: Exception? = null): ResumeTailor = object : ResumeTailor {
         override suspend fun tailor(
             profile: CandidateProfile,
             job: JobDescription,
@@ -83,16 +86,17 @@ class TailoringViewModelTest {
             runId: String,
         ): TailoredResume {
             delay(tailorMillis)
+            failure?.let { throw it }
             if (failing) error("tailor failed")
             return TailoredResume(bullets = emptyList())
         }
     }
 
-    private fun runner(tailorMillis: Long, failing: Boolean): TailoringRunner = TailoringRunner(
+    private fun runner(tailorMillis: Long, failing: Boolean, failure: Exception? = null): TailoringRunner = TailoringRunner(
         applicationRepository = applicationRepository,
         profileRepository = profileRepository,
         creditsRepository = creditsRepository,
-        tailorResume = TailorResumeUseCase(fakeTailor(tailorMillis, failing), CleanFabricationGuard),
+        tailorResume = TailorResumeUseCase(fakeTailor(tailorMillis, failing, failure), CleanFabricationGuard),
         clock = clock,
         dispatcher = dispatcher,
     )
@@ -174,6 +178,22 @@ class TailoringViewModelTest {
                 TmrProgressState.Done,
             )
             .inOrder()
+    }
+
+    @Test
+    fun aServerNoCreditEmitsNoCreditOutcomeNotFailed() = runTest(dispatcher) {
+        seed()
+        val viewModel = TailoringViewModel(
+            runner = runner(tailorMillis = 0, failing = false, failure = AiException(AiFailure.NoCredit)),
+            applicationRepository = applicationRepository,
+            applicationId = "app-1",
+            runId = "run-1",
+        )
+        collectUiState(viewModel)
+        runCurrent()
+
+        assertThat(viewModel.outcome.value).isEqualTo(TailoringOutcome.NoCredit)
+        assertThat(creditsRepository.observeLedger().first()).isEmpty()
     }
 
     @Test

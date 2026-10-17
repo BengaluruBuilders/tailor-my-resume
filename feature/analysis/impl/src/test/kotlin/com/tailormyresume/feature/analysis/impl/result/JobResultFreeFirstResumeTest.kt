@@ -106,12 +106,15 @@ class JobResultFreeFirstResumeTest {
     }
 
     @Test
-    fun aBalanceThatStaysUnknownNeverOpensThePaywall() = runBlocking<Unit> {
+    fun aBalanceThatStaysUnknownToastsAndStaysSoTailorWorksAgain() = runBlocking<Unit> {
         credits.sendUnknown()
         val viewModel = viewModel()
         readyState(viewModel)
 
         viewModel.events.test {
+            viewModel.onTailor()
+            assertThat(awaitItem()).isEqualTo(JobResultEvent.CreditCheckFailed)
+            credits.revealOnRefresh(listOf(welcomeGrant()))
             viewModel.onTailor()
             assertThat(awaitItem()).isEqualTo(JobResultEvent.Tailor(ResultTestData.APP_ID))
         }

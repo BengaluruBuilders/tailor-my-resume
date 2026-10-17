@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.domain.SignInOutcome
 import com.tailormyresume.core.domain.TailoringCreditSpend
+import com.tailormyresume.core.domain.account.WelcomeCreditGrant
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.testing.mock.TestMockStateStore
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
@@ -42,6 +43,27 @@ class WelcomeCreditGrantTest {
         gateway().signIn()
         grant.grantOnce()
 
+        assertThat(kinds()).containsExactly(CreditLedgerKind.FREE_GRANT)
+    }
+
+    @Test
+    fun aDeathBetweenTheGrantAndTheSaveLeavesNoAccountAndTheRetryGrantsOnce() = runTest {
+        val session = TestSessionRepository()
+        val dyingGrant = object : WelcomeCreditGrant {
+            override suspend fun grantOnce() {
+                grant.grantOnce()
+                check(session.observeAccount().first() == null)
+                error("process died")
+            }
+        }
+
+        runCatching { OfflineSignInGateway(session, NoMockLatency, TestMockStateStore(), welcomeGrant = dyingGrant).signIn() }
+        assertThat(session.observeAccount().first()).isNull()
+        assertThat(kinds()).containsExactly(CreditLedgerKind.FREE_GRANT)
+
+        OfflineSignInGateway(session, NoMockLatency, TestMockStateStore(), welcomeGrant = grant).signIn()
+
+        assertThat(session.observeAccount().first()).isNotNull()
         assertThat(kinds()).containsExactly(CreditLedgerKind.FREE_GRANT)
     }
 

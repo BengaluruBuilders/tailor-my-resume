@@ -64,10 +64,10 @@ class RetailorUnknownBalanceTest {
     }
 
     @Test
-    fun aBalanceThatStaysUnknownLetsTheServerDecideInsteadOfOpeningThePaywall() = runTest {
+    fun aBalanceThatStaysUnknownToastsInsteadOfTailoringOrOpeningThePaywall() = runTest {
         credits.sendUnknown()
 
-        assertThat(retailorEvent()).isEqualTo(ApplicationDetailEvent.StartTailoring("kb"))
+        assertThat(retailorEvent()).isEqualTo(ApplicationDetailEvent.CreditCheckFailed)
     }
 
     @Test

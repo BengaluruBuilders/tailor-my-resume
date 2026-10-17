@@ -20,6 +20,7 @@ import com.tailormyresume.feature.tailor.impl.result.TailorFailedNavigation
 import com.tailormyresume.feature.tailor.impl.result.TailorFailedScreen
 import com.tailormyresume.feature.tailor.impl.result.TailoredRoute
 import com.tailormyresume.feature.tailor.impl.result.TailoredViewModel
+import com.tailormyresume.feature.tailor.impl.tailoring.TailoringNavigation
 import com.tailormyresume.feature.tailor.impl.tailoring.TailoringRoute
 import com.tailormyresume.feature.tailor.impl.tailoring.TailoringViewModel
 
@@ -40,6 +41,7 @@ fun EntryProviderScope<NavKey>.tailorEntry(navigator: Navigator) {
                 factory.create(key.applicationId, key.runId)
             },
             onDone = { navigator.replace(TailoredNavKey(key.applicationId, key.scenario)) },
+            onNoCredit = { TailoringNavigation(navigator, key.applicationId).noCredit() },
             onFailed = { navigator.replace(TailorFailedNavKey(key.applicationId, key.runId, key.scenario)) },
         )
     }

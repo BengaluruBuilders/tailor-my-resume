@@ -1,6 +1,8 @@
 package com.tailormyresume.feature.tailor.impl.tailoring
 
 import com.google.common.truth.Truth.assertThat
+import com.tailormyresume.core.domain.AiException
+import com.tailormyresume.core.domain.AiFailure
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
@@ -123,6 +125,16 @@ class TailoringRunnerTest {
         assertThat(result).isInstanceOf(TailoringResult.Failure::class.java)
         assertThat(creditsRepository.observeLedger().first()).isEmpty()
         assertThat(applicationRepository.observeApplication("app-1").first()).isEqualTo(before)
+    }
+
+    @Test
+    fun aServerNoCreditIsItsOwnOutcomeAndRecordsNoSpend() = runTest(dispatcher) {
+        seed()
+
+        val result = runner { throw AiException(AiFailure.NoCredit) }("app-1", "run-1")
+
+        assertThat(result).isEqualTo(TailoringResult.NoCredit)
+        assertThat(creditsRepository.observeLedger().first()).isEmpty()
     }
 
     @Test

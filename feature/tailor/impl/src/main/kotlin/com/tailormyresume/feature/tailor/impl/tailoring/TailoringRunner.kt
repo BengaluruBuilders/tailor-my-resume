@@ -5,9 +5,11 @@ import com.tailormyresume.core.common.network.TmrDispatchers
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
+import com.tailormyresume.core.domain.AiFailure
 import com.tailormyresume.core.domain.TailorResumeUseCase
 import com.tailormyresume.core.domain.TailoringCreditSpend
 import com.tailormyresume.core.domain.coverage.KeywordCoverageCalculator
+import com.tailormyresume.core.domain.isAiFailure
 import com.tailormyresume.core.model.CreditLedgerKind
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -18,6 +20,8 @@ import kotlin.time.Clock
 
 internal sealed interface TailoringResult {
     data object Success : TailoringResult
+
+    data object NoCredit : TailoringResult
 
     data class Failure(val cause: Throwable) : TailoringResult
 }
@@ -66,6 +70,6 @@ internal class TailoringRunner @Inject constructor(
     } catch (cancelled: CancellationException) {
         throw cancelled
     } catch (failure: Exception) {
-        TailoringResult.Failure(failure)
+        if (failure.isAiFailure(AiFailure.NoCredit)) TailoringResult.NoCredit else TailoringResult.Failure(failure)
     }
 }

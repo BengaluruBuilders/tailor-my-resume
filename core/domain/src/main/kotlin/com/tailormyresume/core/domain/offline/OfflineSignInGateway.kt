@@ -41,8 +41,8 @@ class OfflineSignInGateway @Inject constructor(
                 if (store.readValue(PAYMENT_STATE_KEY, PaymentState.serializer())?.closed == true) {
                     store.remove(PAYMENT_STATE_KEY)
                 }
-                sessionRepository.saveAccount(account)
                 welcomeGrant.grantOnce()
+                sessionRepository.saveAccount(account)
                 SignInResult.SignedIn(account)
             }
             SignInOutcome.Cancelled -> SignInResult.Cancelled

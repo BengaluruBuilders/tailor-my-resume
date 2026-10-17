@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="feature_analysis_impl_result_credit_check_failed">Couldn\'t check your credits. Try again.</string>
     <string name="feature_analysis_impl_result_backed">We only use what\'s backed by your experience.</string>
     <string name="feature_analysis_impl_result_screen_for">What they screen for · %1$d</string>
     <string name="feature_analysis_impl_result_legend_have">In your resume</string>
