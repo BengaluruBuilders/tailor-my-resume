@@ -1,0 +1,40 @@
+{
+  "contractVersion": "referral-links-v1",
+  "contractSha256": "5f1ee690c0a0ff7aed487f468400a4181a4298286210e492e18887cd9fa6f803",
+  "predecessorContractSha256": "66db09b4ccb06e8224a4c039c491a4e90dec434f56ee78aab478c0a5bb293add",
+  "predecessorContractBytes": 138550,
+  "frontendPredecessor": "893503c8c85573a064eb5fc640fc37e6b76a3558",
+  "backendPredecessor": "afad417c716a61f98cd757313e11d8086a1bd07b",
+  "files": {
+    "docs/BACKEND_CONTRACT.md": "5f1ee690c0a0ff7aed487f468400a4181a4298286210e492e18887cd9fa6f803",
+    "docs/testing/earn-credits/2026-10-17/04-referral-links/link-flow-decision.md": "877e2d979d594c25b37c20ccbd1872bdd161cf6a65a1f10575f810cd798b2a37",
+    "docs/testing/earn-credits/2026-10-17/04-referral-links/contract/README.md": "b78f4b62006c08eb86cccac6a77c746ea1fb92b738ae1b2e76d309c2d0817cb9",
+    "docs/testing/earn-credits/2026-10-17/04-referral-links/contract/acceptance-matrix.json": "7af7e4c4f95fc49654a8ff78c5bdc9886727d2a64a3ca4aa1b733ae5779942e4",
+    "docs/testing/earn-credits/2026-10-17/04-referral-links/contract/examples.json": "09bb0e53a42d14bc33ef58154bc69dac8b8b0786c70cee0f098a158de29693c7",
+    "docs/testing/earn-credits/2026-10-17/04-referral-links/contract/negative-shapes.json": "2552b4f17b0eec5205bf293d29787e3cea9664832a48e6c916c7dc18ae3c2414",
+    "docs/testing/earn-credits/2026-10-17/04-referral-links/contract/schemas.json": "ddc88f5ae602cff3b5b3e35963b4dbd2f0f71a05f1e4fa8956f56c54c2120294",
+    "docs/testing/earn-credits/2026-10-17/04-referral-links/contract/transport-vectors.json": "1b67b87034ef1b2eece8dd7c8b809aa52d53796fdacc716706d2a2ecb79aa8c7",
+    "docs/testing/earn-credits/2026-10-17/04-referral-links/contract/verify-fixtures.py": "ed900d1c70c4ce45eb557c0014803daad4d3db82f129872c8584aacb53dea033"
+  },
+  "unchangedPredecessorFixtures": {
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/README.md": "a63b8f15a95b8233cf5353367db37b6c10bb686afe6d20167d2f932de8d4c39e",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/acceptance-matrix.json": "1d1df44da5ae45f34c1690d4181fdbcaca662d3229e425807db243a23cf7845e",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/examples.json": "75f171402a98c88b823a1822ff05adb01df793f15c70f565d6ff5394586b9d6f",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/freeze.json": "0d4878c86324d02a328f999c264c0bd18a73cb30b29a16953ab89cf12bac1ff8",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/negative-shapes.json": "f8fa76e40072dac0b019238c7a6442fec3c957d952da74a382a50a8fe469725e",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/schemas.json": "01ae1eacfca21f4825b6ff09ea3a4dc2f5d7a2b6c9ded227f822b9ae1651da76",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/test-policy.json": "1702db22aeb0eaeefe4841f3b5ed17649f5968fa82a4d0b6393b6f3761245460",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/vectors.json": "b2d8cf637280d512d073e4e657d8547d2c46184564e9aefab1033e7520f89b79",
+    "docs/testing/earn-credits/2026-10-17/03-manual-referrals/contract/verify-fixtures.py": "f9931f877c9be633fab5cf2a34db3d69fb550e05233800cf6840c4724b8b219e",
+    "docs/testing/earn-credits/2026-10-17/01-guest-trial/fixtures/generate-fixtures.py": "b223d29e32ad4b823e6df0157247a3405fc3ac864461dd56183a74ec7dfa1e8b",
+    "docs/testing/earn-credits/2026-10-17/01-guest-trial/fixtures/hash-vectors.json": "5fac1cb5b2037699e517018fd52b74cd33a501cb86013ccb01d7677fefcededc",
+    "docs/testing/earn-credits/2026-10-17/01-guest-trial/fixtures/http-cases.json": "4a0bcdd49b9b170c840d53b483c6d36c295289d3ecd64a47e9994e9d5461ae02",
+    "docs/testing/earn-credits/2026-10-17/01-guest-trial/fixtures/request-schemas.json": "daab3b625b4f630d178669159f61f2caaa632ac571998a79f82f006971a2526a",
+    "docs/testing/earn-credits/2026-10-17/02-google-signup/fixtures/README.md": "9ab01da3c9cb4ea6be0f7aa69782aa3dfc4a350261808da39101f068c125a761",
+    "docs/testing/earn-credits/2026-10-17/02-google-signup/fixtures/generate-fixtures.py": "aa8b7a15953308ab0fd20ba56500ebe6a210fe0fdbb48f1790fafd00bcfdf829",
+    "docs/testing/earn-credits/2026-10-17/02-google-signup/fixtures/hash-vectors.json": "0ebb5843e17aab7e31080326731f81b34bc0cb9f10536d8e76c394f6864712a8",
+    "docs/testing/earn-credits/2026-10-17/02-google-signup/fixtures/policy.json": "b6b86a8e3ac0187d9b8508bb73d5809c432462365c49a54857e237a62b8cd2cc",
+    "docs/testing/earn-credits/2026-10-17/02-google-signup/fixtures/requests.json": "565638bf18edc9b5973a40d031717227b6b948cfcc9b461613a688425204b690",
+    "docs/testing/earn-credits/2026-10-17/02-google-signup/fixtures/responses.json": "6102f17a80e74f8c62e8386549be78c9fb970529b3198f79d5f84cd186927e24"
+  }
+}

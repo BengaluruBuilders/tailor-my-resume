@@ -1,0 +1,175 @@
+{
+  "contractVersion": "referral-links-v1",
+  "fixtureOnly": true,
+  "origin": "https://referrals-staging.example.invalid",
+  "packageName": "com.tailormyresume.app.staging",
+  "apiEnvironmentInvariant": "Code namespace/URL/referrer never chooses API host/project/app/environment.",
+  "urlValid": [
+    {
+      "name": "canonical",
+      "raw": "https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+      "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+      "source": "LINK"
+    },
+    {
+      "name": "uppercase-code",
+      "raw": "https://referrals-staging.example.invalid/r/TAILORMYRESUME.STAGING.ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",
+      "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+      "source": "LINK"
+    },
+    {
+      "name": "foreign-code-keeps-current-api",
+      "raw": "https://referrals-staging.example.invalid/r/otherapp.production.abcdefghijklmnopqrstuvwxyz234567",
+      "code": "otherapp.production.abcdefghijklmnopqrstuvwxyz234567",
+      "source": "LINK"
+    }
+  ],
+  "urlInvalid": [
+    {
+      "name": "http",
+      "raw": "http://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "suffix-host",
+      "raw": "https://referrals-staging.example.invalid.evil.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "foreign-host",
+      "raw": "https://other.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "userinfo",
+      "raw": "https://user@referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "default-explicit-port",
+      "raw": "https://referrals-staging.example.invalid:443/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "fragment",
+      "raw": "https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567#x"
+    },
+    {
+      "name": "query",
+      "raw": "https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567?amount=5"
+    },
+    {
+      "name": "trailing-slash",
+      "raw": "https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567/"
+    },
+    {
+      "name": "extra-path",
+      "raw": "https://referrals-staging.example.invalid/r/x/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "dot-path",
+      "raw": "https://referrals-staging.example.invalid/r/../r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "encoded-code",
+      "raw": "https://referrals-staging.example.invalid/r/%74ailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "encoded-slash",
+      "raw": "https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567%2F"
+    },
+    {
+      "name": "backslash",
+      "raw": "https://referrals-staging.example.invalid/r\\tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "control",
+      "raw": "https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567\n"
+    },
+    {
+      "name": "unicode",
+      "raw": "https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567\u00e9"
+    },
+    {
+      "name": "overlong",
+      "raw": "https://referrals-staging.example.invalid/r/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "name": "bad-payload",
+      "raw": "https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234568"
+    },
+    {
+      "name": "empty",
+      "raw": "https://referrals-staging.example.invalid/r/"
+    }
+  ],
+  "referrerValid": [
+    {
+      "name": "inner-canonical",
+      "raw": "tmr_referral=tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+      "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+      "source": "LINK"
+    },
+    {
+      "name": "inner-uppercase",
+      "raw": "tmr_referral=TAILORMYRESUME.STAGING.ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",
+      "code": "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567",
+      "source": "LINK"
+    },
+    {
+      "name": "foreign-code-keeps-current-api",
+      "raw": "tmr_referral=otherapp.production.abcdefghijklmnopqrstuvwxyz234567",
+      "code": "otherapp.production.abcdefghijklmnopqrstuvwxyz234567",
+      "source": "LINK"
+    }
+  ],
+  "referrerInvalid": [
+    {
+      "name": "outer-encoded",
+      "raw": "tmr_referral%3Dtailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "encoded-value",
+      "raw": "tmr_referral=%74ailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "double-encoded",
+      "raw": "tmr_referral=%2574ailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "duplicate",
+      "raw": "tmr_referral=tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567&tmr_referral=tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "extra-key",
+      "raw": "tmr_referral=tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567&package=evil"
+    },
+    {
+      "name": "unknown-key",
+      "raw": "code=tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "nested-url",
+      "raw": "tmr_referral=https://referrals-staging.example.invalid/r/tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "plus",
+      "raw": "tmr_referral=+tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
+    },
+    {
+      "name": "control",
+      "raw": "tmr_referral=tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567\n"
+    },
+    {
+      "name": "extra-equals",
+      "raw": "tmr_referral=tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567="
+    },
+    {
+      "name": "unicode",
+      "raw": "tmr_referral=tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567\u00e9"
+    },
+    {
+      "name": "overlong",
+      "raw": "tmr_referral=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "name": "empty",
+      "raw": "tmr_referral="
+    }
+  ]
+}
