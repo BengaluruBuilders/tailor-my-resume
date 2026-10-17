@@ -1,6 +1,5 @@
 package com.tailormyresume.app.referrals
 
-import com.tailormyresume.app.BuildConfig
 import com.tailormyresume.app.auth.AccountOperationGuard
 import com.tailormyresume.app.auth.FirebaseSessionClient
 import com.tailormyresume.app.billing.WalletSource
@@ -177,7 +176,7 @@ class RemoteReferralGateway @Inject constructor(
         offer.expiresAt?.let { Instant.parse(it) > clock.now() } == true
 
     override suspend fun save(code: String, replace: Boolean) = run { owner ->
-        val normalized = canonicalReferralCode(code, if (BuildConfig.DEBUG || BuildConfig.BUILD_TYPE == "staging") "staging" else "production")
+        val normalized = canonicalReferralCode(code)
         val current = read(owner)
         when {
             current.phase in setOf("READ_ONLY", "ATTACHED", "SENT") -> refresh(owner)

@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -87,8 +88,9 @@ internal fun ReferralsScreen(state: ReferralUiState, actions: ReferralActions, m
             Text(stringResource(R.string.feature_settings_impl_referral_loading), style = TmrTheme.typography.body, color = TmrTheme.colors.textSecondary)
             return@Column
         }
+        val reward = content.reward
         Text(
-            stringResource(if (content.reward != null) R.string.feature_settings_impl_referral_offer else R.string.feature_settings_impl_referral_unavailable, content.reward ?: 0),
+            if (reward != null) pluralStringResource(R.plurals.feature_settings_impl_referral_offer, reward, reward) else stringResource(R.string.feature_settings_impl_referral_unavailable),
             style = TmrTheme.typography.body,
             color = TmrTheme.colors.textSecondary,
         )
@@ -99,7 +101,9 @@ internal fun ReferralsScreen(state: ReferralUiState, actions: ReferralActions, m
         } else if (content.canIssue) {
             TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_create), actions.issue, Modifier.fillMaxWidth(), enabled = !content.busy)
         }
-        Text(stringResource(R.string.feature_settings_impl_referral_stats, content.creditedCount, content.earnedCredits), style = TmrTheme.typography.caption, color = TmrTheme.colors.textMuted)
+        Text(stringResource(R.string.feature_settings_impl_referral_stats,
+            pluralStringResource(R.plurals.feature_settings_impl_referral_friends, if (content.creditedCount == 1L) 1 else 2, content.creditedCount),
+            pluralStringResource(R.plurals.feature_settings_impl_referral_earned, if (content.earnedCredits == 1L) 1 else 2, content.earnedCredits)), style = TmrTheme.typography.caption, color = TmrTheme.colors.textMuted)
         if (content.attached) {
             Text(stringResource(R.string.feature_settings_impl_referral_applied), style = TmrTheme.typography.body, color = TmrTheme.colors.lime)
         } else if (content.message != ReferralMessage.ReadOnly) {
@@ -113,7 +117,7 @@ internal fun ReferralsScreen(state: ReferralUiState, actions: ReferralActions, m
             Text(stringResource(content.message.text()), style = TmrTheme.typography.body, color = TmrTheme.colors.textSecondary)
         }
         content.retryAfterSeconds?.let { seconds ->
-            Text(stringResource(R.string.feature_settings_impl_referral_wait, seconds), style = TmrTheme.typography.caption, color = TmrTheme.colors.textSecondary)
+            Text(pluralStringResource(R.plurals.feature_settings_impl_referral_wait, seconds, seconds), style = TmrTheme.typography.caption, color = TmrTheme.colors.textSecondary)
         }
         if (content.guest) TmrSecondaryButton(stringResource(R.string.feature_settings_impl_google_account), actions.google, Modifier.fillMaxWidth(), enabled = !content.busy)
         TmrTextButton(stringResource(R.string.feature_settings_impl_referral_refresh), actions.refresh, Modifier.fillMaxWidth(), enabled = !content.busy)

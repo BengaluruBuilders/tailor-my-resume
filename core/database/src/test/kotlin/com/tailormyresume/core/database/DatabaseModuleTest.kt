@@ -39,7 +39,7 @@ class DatabaseModuleTest {
         val database = DatabaseModule.providesTmrDatabase(RuntimeEnvironment.getApplication())
         try {
             val version = database.openHelper.writableDatabase.version
-            assertThat(version).isEqualTo(5)
+            assertThat(version).isEqualTo(6)
             database.openHelper.writableDatabase.query("SELECT name FROM sqlite_master WHERE type = 'table'").use { cursor ->
                 val tables = buildSet { while (cursor.moveToNext()) add(cursor.getString(0)) }
                 assertThat(tables).containsAtLeast("local_handoffs", "local_account_owner", "profile", "job_applications")

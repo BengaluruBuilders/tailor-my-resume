@@ -16,10 +16,10 @@ class NavKeyCatalogTest {
     private val allNavKeys: List<NavKey> = CHROME_TABLE.map { it.key }
 
     @Test
-    fun exactlyTwentySevenKeysAndNoDeletedKeys() {
-        assertThat(allNavKeys).hasSize(27)
+    fun exactlyTwentyEightKeysAndNoDeletedKeys() {
+        assertThat(allNavKeys).hasSize(28)
         assertThat(allNavKeys.map { it::class }).containsNoDuplicates()
-        assertThat(sourceKeyDeclarations()).isEqualTo(27)
+        assertThat(sourceKeyDeclarations()).isEqualTo(28)
 
         listOf(
             "com.tailormyresume.feature.onboarding.api.navigation.ImportResumeNavKey",

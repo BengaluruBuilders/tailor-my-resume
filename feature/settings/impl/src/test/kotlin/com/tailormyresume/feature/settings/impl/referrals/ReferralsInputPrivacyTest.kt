@@ -7,6 +7,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performClick
+import com.google.common.truth.Truth.assertThat
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.tailormyresume.core.designsystem.theme.TmrTheme
@@ -43,4 +45,14 @@ class ReferralsInputPrivacyTest {
         rule.runOnIdle { state.value = ReferralUiState.Content() }
         rule.onNodeWithContentDescription("Referral code").performScrollTo().assertTextEquals("")
     }
+    @Test
+    fun nonFixtureReturnedCodeIsCopiedWithoutNamespaceRewrite() {
+        val code = "resume-demo.preview-2.abcdefghijklmnopqrstuvwxyz234567"
+        var copied: String? = null
+        val actions = ReferralActions({}, {}, { _, _ -> }, {}, {}, {}, {}) { copied = it }
+        rule.setContent { TmrTheme { ReferralsScreen(ReferralUiState.Content(code = code, attached = true), actions) } }
+        rule.onNodeWithText("Copy code").performScrollTo().performClick()
+        assertThat(copied).isEqualTo(code)
+    }
+
 }

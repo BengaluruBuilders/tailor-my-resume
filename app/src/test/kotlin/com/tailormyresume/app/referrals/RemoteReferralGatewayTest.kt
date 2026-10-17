@@ -51,6 +51,8 @@ class RemoteReferralGatewayTest {
     private var guest = false
     private var version = "referral-local-v1"
     private var available = true
+    private var codeAvailable = true
+    private var ownCode: String? = null
     private var continuityMode = "NONE"
     private var attached = false
     private var getFailure = false
@@ -91,7 +93,7 @@ class RemoteReferralGatewayTest {
         AccountOperationGuard(identity, fence), journal, evidence, WalletSource(api, identity), TestCreditsRepository(), clock, scope,
     )
     private fun content(client: RemoteReferralGateway) = client.state.value as ReferralUiState.Content
-    private fun offer() = """{"status":"${if (available) "AVAILABLE" else "UNAVAILABLE"}","reason":"ELIGIBLE","version":"$version","effectiveAt":"2026-10-16T00:00:00Z","expiresAt":"2026-10-18T00:00:00Z","rewardAmount":13,"continuityMode":"$continuityMode","codeIssuance":"AVAILABLE","attachmentEligibility":"${if (attached) "ATTACHED" else "ELIGIBLE"}","deadline":"2026-10-18T00:00:00Z"}"""
+    private fun offer() = """{"status":"${if (available) "AVAILABLE" else "UNAVAILABLE"}","reason":"ELIGIBLE","version":"$version","effectiveAt":"2026-10-16T00:00:00Z","expiresAt":"2026-10-18T00:00:00Z","rewardAmount":13,"continuityMode":"$continuityMode","codeIssuance":"${if (codeAvailable) "AVAILABLE" else "UNAVAILABLE"}","attachmentEligibility":"${if (attached) "ATTACHED" else "ELIGIBLE"}","deadline":"2026-10-18T00:00:00Z"}"""
     private fun receipt() = """{"id":"33333333-3333-4333-8333-333333333333","status":"ATTACHED","source":"MANUAL","attachedAt":"2026-10-17T00:00:00Z","reward":{"recipient":"INVITER","amount":13,"status":"GRANTED","policyVersion":"referral-local-v1"}}"""
     init {
         server.dispatcher = object : Dispatcher() {
@@ -104,10 +106,10 @@ class RemoteReferralGatewayTest {
                     } else {
                         jsonResponse(
                             200,
-                            """{"code":null,"shareUrl":null,"offer":${offer()},"attachment":${if (attached) receipt() else "null"},"stats":{"creditedCount":2,"earnedCredits":26}}""",
+                            """{"code":${ownCode?.let { """{"value":"$it","createdAt":"2026-10-17T00:00:00Z"}""" } ?: "null"},"shareUrl":null,"offer":${offer()},"attachment":${if (attached) receipt() else "null"},"stats":{"creditedCount":2,"earnedCredits":26}}""",
                         )
                     }
-                    "/v1/tailormyresume/referrals/code" -> jsonResponse(201, """{"code":{"value":"$CODE","createdAt":"2026-10-17T00:00:00Z"},"shareUrl":null,"offer":${offer()},"replayed":false}""")
+                    "/v1/tailormyresume/referrals/code" -> { ownCode = CODE; jsonResponse(201, """{"code":{"value":"$CODE","createdAt":"2026-10-17T00:00:00Z"},"shareUrl":null,"offer":${offer()},"replayed":false}""") }
                     "/v1/tailormyresume/referrals/challenges" -> jsonResponse(201, """{"challengeId":"22222222-2222-4222-8222-222222222222","challenge":"opaque","expiresAt":"2026-10-17T00:05:00Z","bindingVersion":1,"requestHash":"$HASH"}""")
                     "/v1/tailormyresume/referrals/attach" -> postFailure?.let { errorResponse(postStatus, it).setHeader("Retry-After", "11") } ?: run {
                         attached = true
@@ -130,6 +132,7 @@ class RemoteReferralGatewayTest {
     @Test fun optionalAndNoneUseNullAndPassiveReadsNeverCollectEvidence() = runTest {
         for (mode in listOf("NONE", "OPTIONAL")) {
             attached = false
+            ownCode = null
             continuityMode = mode
             val freshStore = createStore()
             freshStore.clearAll()
@@ -137,6 +140,7 @@ class RemoteReferralGatewayTest {
             client.refresh()
             client.save(CODE)
             client.issue()
+            assertThat(content(client).code).isEqualTo(CODE)
             assertThat(tokenCalls).isEqualTo(if (mode == "NONE") 0 else 1)
             client.apply()
             assertThat(content(client).attached).isTrue()
@@ -165,7 +169,12 @@ class RemoteReferralGatewayTest {
         val recovered = client(createStore())
         recovered.refresh()
         assertThat(content(recovered).candidate).isEqualTo(CODE)
+        val pending = checkNotNull(store.read(uid, server.url("/").toString()))
+        assertThat(pending.environment).isEqualTo(server.url("/").toString())
         recovered.apply()
+        val sent = Json.parseToJsonElement(requests("/attach").single()).jsonObject
+        assertThat(sent.getValue("code").jsonPrimitive.content).isEqualTo(CODE)
+        assertThat(sent.getValue("source").jsonPrimitive.content).isEqualTo("MANUAL")
         assertThat(content(recovered).attached).isTrue()
     }
 
@@ -314,9 +323,36 @@ class RemoteReferralGatewayTest {
         destination.apply()
         assertThat(requests("/attach")).hasSize(1)
     }
+
+    @Test fun missingConfigurationRetainsForeignSyntacticCandidateWithoutEvidenceOrMutation() = runTest {
+        available = false; codeAvailable = false; guest = true
+        val client = client()
+        val foreign = "foreign-app.other-environment.abcdefghijklmnopqrstuvwxyz234567"
+        client.save(foreign); client.apply(); client.issue()
+        guest = false
+        val restored = client(createStore())
+        restored.refresh(); restored.apply(); restored.issue()
+        assertThat(content(restored).candidate).isEqualTo(foreign)
+        assertThat(requests("/attach")).isEmpty()
+        assertThat(requests("/code")).isEmpty()
+        assertThat(requests("/challenges")).isEmpty()
+        assertThat(tokenCalls).isEqualTo(0)
+        assertThat(signalReads).isEqualTo(0)
+    }
+    @Test fun serverRejectsForeignScopeWithoutChangingFixedDestinationOrClaimingApplied() = runTest {
+        postFailure = "REFERRAL_CODE_INVALID"; postStatus = 400
+        val client = client()
+        val foreign = "foreign-app.other-environment.abcdefghijklmnopqrstuvwxyz234567"
+        client.save(foreign); client.apply()
+        assertThat(content(client).attached).isFalse()
+        assertThat(content(client).message).isEqualTo(ReferralMessage.Invalid)
+        assertThat(content(client).candidate).isEqualTo(foreign)
+        assertThat(Json.parseToJsonElement(requests("/attach").single()).jsonObject.getValue("code").jsonPrimitive.content).isEqualTo(foreign)
+        assertThat(paths.map { it.first }.all { it.startsWith("/v1/tailormyresume/") }).isTrue()
+    }
     companion object {
-        const val CODE = "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
-        const val OTHER = "tailormyresume.staging.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        const val CODE = "resume-demo.preview-2.abcdefghijklmnopqrstuvwxyz234567"
+        const val OTHER = "resume-demo.preview-2.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         const val HASH = "L079-sjpEzA28TrNZOp8Lk7Wn8K17fWOPToCDN-Zl6c"
     }
 }
