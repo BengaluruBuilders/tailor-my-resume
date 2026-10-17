@@ -39,6 +39,9 @@ import dagger.multibindings.IntoSet
 @InstallIn(SingletonComponent::class)
 interface SignInBindings {
     @Binds
+    fun bindInstallReferrer(impl: com.tailormyresume.app.referrals.OfficialInstallReferrerSource): com.tailormyresume.app.referrals.InstallReferrerSource
+
+    @Binds
     fun bindReferralGateway(impl: com.tailormyresume.app.referrals.RemoteReferralGateway): com.tailormyresume.core.domain.ReferralGateway
 
     @Binds
