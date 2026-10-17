@@ -22,6 +22,10 @@ import kotlin.coroutines.resumeWithException
 interface GuestEvidence {
     suspend fun continuity(): String
     suspend fun token(requestHash: String): String
+    suspend fun foregroundToken(requestHash: String, active: () -> Boolean): String {
+        check(active())
+        return token(requestHash)
+    }
 }
 
 class StandardGuestEvidence @Inject constructor(
@@ -35,7 +39,12 @@ class StandardGuestEvidence @Inject constructor(
         requireNotNull(value?.takeIf(::usableAndroidId)) { "Trial verification is unavailable" }
     }
 
-    override suspend fun token(requestHash: String): String = withContext(io) {
+    override suspend fun token(requestHash: String): String = requestToken(requestHash) { true }
+
+    override suspend fun foregroundToken(requestHash: String, active: () -> Boolean): String = requestToken(requestHash, active)
+
+    private suspend fun requestToken(requestHash: String, active: () -> Boolean): String = withContext(io) {
+        check(active())
         val project = BuildConfig.TAILORMYRESUME_PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER.toLongOrNull()
             ?.takeIf { it > 0 } ?: error("Trial verification is not configured")
         require(Regex("[A-Za-z0-9_-]{43}").matches(requestHash))
@@ -43,6 +52,7 @@ class StandardGuestEvidence @Inject constructor(
         val provider = manager.prepareIntegrityToken(
             StandardIntegrityManager.PrepareIntegrityTokenRequest.builder().setCloudProjectNumber(project).build(),
         ).awaitIntegrity()
+        check(active())
         provider.request(
             StandardIntegrityManager.StandardIntegrityTokenRequest.builder().setRequestHash(requestHash).build(),
         ).awaitIntegrity().token()

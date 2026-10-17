@@ -81,6 +81,7 @@ fun TmrApp(
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
     google: com.tailormyresume.core.domain.GoogleAccountGateway? = null,
+    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
 ) {
     val stores = rememberRootViewModelStores()
     LaunchedEffect(rootState) {
@@ -92,12 +93,13 @@ fun TmrApp(
                 AppRootState.Loading -> Unit
                 is AppRootState.Ready -> TmrAccountRoot(
                     ready = rootState,
+                    referrals = referrals,
                     hasHome = hasHome,
                     entryProvider = entryProvider,
                 )
             }
             PendingToastHost()
-            google?.let { GoogleAccountOverlay(it) }
+            google?.let { GoogleAccountOverlay(it, referrals = referrals) }
         }
     }
 }
@@ -116,6 +118,7 @@ internal fun PendingToastHost() {
 @Composable
 internal fun TmrAccountRoot(
     ready: AppRootState.Ready,
+    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
     modifier: Modifier = Modifier,
     hasHome: () -> Boolean = { false },
     entryProvider: ((Navigator) -> (NavKey) -> NavEntry<NavKey>)? = null,
@@ -123,6 +126,7 @@ internal fun TmrAccountRoot(
     key(ready.accountId) {
         TmrRoot(
             root = AccountRoot(ready.accountId),
+            referrals = referrals,
             startKey = ready.start.navKey(),
             modifier = modifier,
             hasHome = hasHome,
@@ -141,6 +145,7 @@ private fun StartDestination.navKey(): NavKey = when (this) {
 internal fun TmrRoot(
     root: AccountRoot,
     startKey: NavKey,
+    referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
     modifier: Modifier = Modifier,
     initialKeys: () -> List<NavKey> = PendingNavigation::consume,
     hasHome: () -> Boolean = { false },
@@ -156,6 +161,12 @@ internal fun TmrRoot(
                         if (key.isTopLevelDestination()) navigator.root(key) else navigator.navigate(key)
                     }
                 }
+            }
+        }
+        val requests by (referrals?.routeRequests ?: remember { kotlinx.coroutines.flow.MutableStateFlow(0L) }).collectAsStateWithLifecycle()
+        LaunchedEffect(requests, root.accountId) {
+            if (requests > 0 && root.accountId != null && navigationState.currentKey != com.tailormyresume.feature.settings.api.navigation.ReferralsNavKey) {
+                navigator.navigate(com.tailormyresume.feature.settings.api.navigation.ReferralsNavKey)
             }
         }
         if (entryProvider == null) {

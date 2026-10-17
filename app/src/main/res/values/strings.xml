@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TailorMyResume</string>
+    <string name="referral_pending">Referral code saved: %1$s</string>
+    <string name="referral_offer">An eligible referral may earn the inviter %1$d credits. Offer %2$s. Check availability in the app.</string>
+    <string name="referral_neutral">Continue with Google to check the current referral offer.</string>
+    <string name="referral_clear">Clear referral code</string>
+    <string name="referral_deadline">Referral deadline: %1$s</string>
 </resources>

@@ -34,8 +34,16 @@ import com.tailormyresume.core.domain.GoogleAccountState
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun GoogleAccountOverlay(gateway: GoogleAccountGateway, modifier: Modifier = Modifier) {
+internal fun GoogleAccountOverlay(gateway: GoogleAccountGateway, modifier: Modifier = Modifier, referrals: com.tailormyresume.core.domain.ReferralGateway? = null) {
     val state by gateway.state.collectAsStateWithLifecycle()
+    val referral by (referrals?.entry ?: remember { kotlinx.coroutines.flow.MutableStateFlow(com.tailormyresume.core.domain.ReferralEntryState()) }).collectAsStateWithLifecycle()
+    val request by (referrals?.routeRequests ?: remember { kotlinx.coroutines.flow.MutableStateFlow(0L) }).collectAsStateWithLifecycle()
+    androidx.compose.runtime.LaunchedEffect(referral.candidate, referral.version, state, request) {
+        if (state != GoogleAccountState.Idle) referral.candidate?.let { code ->
+            androidx.compose.runtime.withFrameNanos { }
+            referrals?.displayed(code, referral.version)
+        }
+    }
     if (state == GoogleAccountState.Idle) return
     val scope = rememberCoroutineScope()
     BackHandler {
@@ -61,6 +69,8 @@ internal fun GoogleAccountOverlay(gateway: GoogleAccountGateway, modifier: Modif
             onConflict = { profile, apps -> scope.launch { gateway.continueConflict(profile, apps) } },
             onProfileChoice = { useGuest -> scope.launch { gateway.chooseProfile(useGuest) } },
             modifier = modifier,
+            referral = referral,
+            onClearReferral = { scope.launch { referrals?.clearEntry() } },
         )
     }
 }
@@ -75,6 +85,8 @@ internal fun GoogleAccountPanel(
     onConflict: (Boolean, Set<String>) -> Unit,
     modifier: Modifier = Modifier,
     onProfileChoice: (Boolean) -> Unit = {},
+    referral: com.tailormyresume.core.domain.ReferralEntryState = com.tailormyresume.core.domain.ReferralEntryState(),
+    onClearReferral: () -> Unit = {},
 ) {
     Column(
         modifier.fillMaxSize().background(TmrTheme.colors.background).testTag("google-account-panel")
@@ -82,6 +94,13 @@ internal fun GoogleAccountPanel(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(stringResource(R.string.google_account_title), style = TmrTheme.typography.headline, color = TmrTheme.colors.text)
+        referral.candidate?.let { code ->
+            Body(stringResource(R.string.referral_pending, code))
+            val amount = referral.reward
+            Body(if (amount != null && referral.version != null) stringResource(R.string.referral_offer, amount, referral.version) else stringResource(R.string.referral_neutral))
+            referral.deadline?.let { Body(stringResource(R.string.referral_deadline, it)) }
+            TmrSecondaryButton(stringResource(R.string.referral_clear), onClearReferral, Modifier.fillMaxWidth(), enabled = state !is GoogleAccountState.Busy)
+        }
         when (state) {
             GoogleAccountState.Busy -> Body(stringResource(R.string.google_account_working))
             GoogleAccountState.SaveEdits -> {

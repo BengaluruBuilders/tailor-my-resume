@@ -17,11 +17,11 @@ class ReferralLinksTest {
         listOf("url" to links::parseUrl, "referrer" to { raw: String -> links.parseReferrer(raw) }).forEach { (type, parse) ->
             fixture.getValue("${type}Valid").jsonArray.forEach {
                 val value = it.jsonObject
-                assertThat(parse(value.getValue("raw").jsonPrimitive.content)).named(value.getValue("name").jsonPrimitive.content).isEqualTo(value.getValue("code").jsonPrimitive.content)
+                assertThat(parse(value.getValue("raw").jsonPrimitive.content)).isEqualTo(value.getValue("code").jsonPrimitive.content)
             }
             fixture.getValue("${type}Invalid").jsonArray.forEach {
                 val value = it.jsonObject
-                assertThat(parse(value.getValue("raw").jsonPrimitive.content)).named(value.getValue("name").jsonPrimitive.content).isNull()
+                assertThat(parse(value.getValue("raw").jsonPrimitive.content)).isNull()
             }
         }
     }

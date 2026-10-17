@@ -45,4 +45,7 @@
     <string name="feature_onboarding_impl_guest_continue">Continue as guest</string>
     <string name="feature_onboarding_impl_guest_changed">The trial offer changed. Review the current offer before continuing.</string>
     <string name="feature_onboarding_impl_guest_signin_unavailable">Guest sign-in is temporarily unavailable. Retry to continue.</string>
+    <string name="feature_onboarding_impl_referral_pending">Referral code saved: %1$s</string>
+    <string name="feature_onboarding_impl_referral_check">Continue with Google to check the current referral offer.</string>
+    <string name="feature_onboarding_impl_referral_clear">Clear referral code</string>
 </resources>

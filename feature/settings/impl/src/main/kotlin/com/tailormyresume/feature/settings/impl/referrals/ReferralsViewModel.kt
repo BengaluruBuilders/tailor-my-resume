@@ -28,4 +28,7 @@ internal class ReferralsViewModel @Inject constructor(private val referrals: Ref
     fun apply() = act { referrals.apply() }
     fun review() = act { referrals.acceptTransfer() }
     fun google() = act { google.open() }
+    val routeRequests = referrals.routeRequests
+    fun displayed(code: String, version: String?) { viewModelScope.launch { referrals.displayed(code, version) } }
+    suspend fun share() = referrals.share()
 }

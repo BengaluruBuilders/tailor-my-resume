@@ -104,6 +104,13 @@ internal fun SignInRoute(
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val referral by viewModel.referralEntry.collectAsStateWithLifecycle()
+    LaunchedEffect(referral.candidate, referral.version) {
+        referral.candidate?.let { code ->
+            androidx.compose.runtime.withFrameNanos { }
+            viewModel.referralDisplayed(code, referral.version)
+        }
+    }
     val toast = LocalTmrToast.current
     val message = stringResource(R.string.feature_onboarding_impl_signin_cancelled)
     val retry = stringResource(R.string.feature_onboarding_impl_signin_retry)
@@ -124,6 +131,8 @@ internal fun SignInRoute(
         onTryGuest = viewModel::onTryGuest,
         onClaimTrial = viewModel::onClaimTrial,
         onContinueGuest = viewModel::onContinueGuest,
+        referral = referral,
+        onClearReferral = viewModel::clearReferral,
     )
 }
 
@@ -136,6 +145,8 @@ internal fun SignInScreen(
     onTryGuest: () -> Unit = {},
     onClaimTrial: () -> Unit = {},
     onContinueGuest: () -> Unit = {},
+    referral: com.tailormyresume.core.domain.ReferralEntryState = com.tailormyresume.core.domain.ReferralEntryState(),
+    onClearReferral: () -> Unit = {},
 ) {
     val spec = SignInStories[story.index]
     Box(
@@ -151,6 +162,13 @@ internal fun SignInScreen(
                 story = story,
                 modifier = Modifier.weight(1f),
             )
+            referral.candidate?.let { code ->
+                Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.feature_onboarding_impl_referral_pending, code), style = TmrTheme.typography.caption, color = TmrTheme.colors.ink)
+                    Text(stringResource(R.string.feature_onboarding_impl_referral_check), style = TmrTheme.typography.caption, color = TmrTheme.colors.ink)
+                    com.tailormyresume.core.designsystem.component.input.TmrTextButton(stringResource(R.string.feature_onboarding_impl_referral_clear), onClearReferral, Modifier.fillMaxWidth(), enabled = uiState != SignInUiState.SigningIn)
+                }
+            }
             if (uiState is SignInUiState.GuestOffer || uiState is SignInUiState.GuestResult || uiState == SignInUiState.PreparingGuest) {
                 GuestActions(uiState, onTryGuest, onClaimTrial, onContinueGuest, onContinueWithGoogle)
             } else {

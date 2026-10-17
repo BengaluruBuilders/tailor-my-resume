@@ -25,7 +25,7 @@ sealed interface ReferralUiState {
     ) : ReferralUiState
 }
 
-data class ReferralEntryState(val candidate: String? = null, val reward: Int? = null, val version: String? = null)
+data class ReferralEntryState(val candidate: String? = null, val reward: Int? = null, val version: String? = null, val deadline: String? = null)
 data class ReferralShare(val code: String, val url: String?, val reward: Int?, val version: String?)
 
 enum class ReferralMessage { None, Unavailable, Saved, Invalid, ReplaceRequired, Applied, PolicyChanged, Retry, ReadOnly, Conflict, Ineligible, Expired, Self, SignalChanged }

@@ -57,6 +57,7 @@ class GoogleAccountCoordinator @Inject constructor(
     private val clock: kotlin.time.Clock,
     @ApplicationScope private val scope: CoroutineScope,
     private val referrals: com.tailormyresume.app.referrals.PrivateReferralStore? = null,
+    private val referralGateway: com.tailormyresume.app.referrals.RemoteReferralGateway? = null,
 ) : GoogleAccountGateway, AppStartTask {
     private val mutable = MutableStateFlow<GoogleAccountState>(GoogleAccountState.Idle)
     override val state: StateFlow<GoogleAccountState> = mutable
@@ -66,7 +67,10 @@ class GoogleAccountCoordinator @Inject constructor(
         mutable.value = GoogleAccountState.Busy
         try {
             checkLive()
-            if (firebase.hasAnonymousSession()) linkGuest() else directSignIn()
+            val referralAction = referralGateway?.googleStarting()
+            val result = if (firebase.hasAnonymousSession()) linkGuest() else directSignIn()
+            if (result is SignInResult.SignedIn) referralGateway?.googleContinued(referralAction)
+            result
         } catch (cancelled: CancellationException) {
             if (!switched(ownJournal()) && pendingWipe.state() == PendingWipeState.NONE) fence.release()
             mutable.value = GoogleAccountState.Retry(canCancel = false)
@@ -83,7 +87,8 @@ class GoogleAccountCoordinator @Inject constructor(
         safely("CLAIM") {
             checkLive()
             if (firebase.hasAnonymousSession()) {
-                linkGuest()
+                val referralAction = referralGateway?.googleStarting()
+                if (linkGuest() is SignInResult.SignedIn) referralGateway?.googleContinued(referralAction)
             } else {
                 val journal = ownJournal() ?: newJournal(checkNotNull(uids.uid()), "DIRECT_GOOGLE").also { journals.write(it) }
                 if (journal.recentAuthRecovery != null) {
@@ -143,6 +148,7 @@ class GoogleAccountCoordinator @Inject constructor(
     }
 
     private suspend fun directSignIn(): SignInResult {
+        val preserveUnboundReferral = firebase.currentUser() == null
         val previous = sessions.observeAccount().first()
         try {
             fence.freeze()
@@ -168,7 +174,7 @@ class GoogleAccountCoordinator @Inject constructor(
         journals.write(journal)
         apiResult { api.me() }.getOrThrow()
         if (previousId != user.uid) {
-            referrals?.clearAll()
+            referrals?.clearAll(preserveInbox = preserveUnboundReferral)
             cleaner.clear()
             checkpoints.restore(user.uid, config.baseUrl)
         }

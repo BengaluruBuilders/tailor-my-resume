@@ -26,6 +26,7 @@ internal data class ReferralJournal(
     val source: String = "MANUAL",
     val requestId: String? = null,
     val revision: String? = null,
+    val requiresConfirmation: Boolean = false,
     val payloadDigest: String? = null,
     val phase: String = "CANDIDATE",
     val challengeId: String? = null,

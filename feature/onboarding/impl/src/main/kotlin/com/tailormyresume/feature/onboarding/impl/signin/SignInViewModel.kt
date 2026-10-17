@@ -23,12 +23,17 @@ import kotlin.coroutines.cancellation.CancellationException
 internal class SignInViewModel @Inject constructor(
     private val gateway: SignInGateway,
     private val guests: GuestTrialGateway = UnavailableGuestTrial,
+    private val referrals: com.tailormyresume.core.domain.ReferralGateway? = null,
 ) : ViewModel() {
 
     private val state = MutableStateFlow<SignInUiState>(SignInUiState.Ready)
     private var guestJob: kotlinx.coroutines.Job? = null
 
     val uiState: StateFlow<SignInUiState> = state.asStateFlow()
+    val referralEntry: StateFlow<com.tailormyresume.core.domain.ReferralEntryState> = referrals?.entry ?: MutableStateFlow(com.tailormyresume.core.domain.ReferralEntryState())
+    init { viewModelScope.launch { referrals?.refresh() } }
+    fun clearReferral() { viewModelScope.launch { referrals?.clearEntry() } }
+    fun referralDisplayed(code: String, version: String?) { viewModelScope.launch { referrals?.displayed(code, version) } }
 
     private val cancelledEvents = Channel<Unit>(Channel.BUFFERED)
 

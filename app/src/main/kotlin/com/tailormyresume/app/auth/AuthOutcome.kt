@@ -37,6 +37,8 @@ interface GoogleCredentialSource {
 interface FirebaseSessionClient {
     suspend fun currentUser(): FirebaseUser? = null
 
+    suspend fun initializedUser(): FirebaseUser? = currentUser()
+
     suspend fun linkGoogle(googleIdToken: String): AuthOutcome<FirebaseUser> = AuthOutcome.Failure(AuthFailure.NotConfigured)
 
     suspend fun refreshGoogle(): AuthOutcome<FirebaseUser> = AuthOutcome.Failure(AuthFailure.NotConfigured)
