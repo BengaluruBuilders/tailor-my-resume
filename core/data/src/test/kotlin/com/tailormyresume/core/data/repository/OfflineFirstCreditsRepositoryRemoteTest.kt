@@ -9,6 +9,9 @@ import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
@@ -46,6 +49,7 @@ private class ScriptedRemote(var owner: String? = "uid-1") : RemoteLedgerSource 
 class OfflineFirstCreditsRepositoryRemoteTest {
     private lateinit var database: TmrDatabase
     private val remote = ScriptedRemote()
+    private val ownedScopes = mutableListOf<CoroutineScope>()
 
     @Before
     fun createDatabase() {
@@ -56,7 +60,7 @@ class OfflineFirstCreditsRepositoryRemoteTest {
     fun closeDatabase() = database.close()
 
     private fun repository(source: RemoteLedgerSource = remote) =
-        OfflineFirstCreditsRepository(database.creditLedgerDao(), UnconfinedTestDispatcher(), CoroutineScope(UnconfinedTestDispatcher()), source)
+        OfflineFirstCreditsRepository(database.creditLedgerDao(), UnconfinedTestDispatcher(), CoroutineScope(UnconfinedTestDispatcher()).also(ownedScopes::add), source)
 
     private fun entry(kind: CreditLedgerKind, amount: Int, day: Int) =
         CreditLedgerEntry(kind, amount, null, null, Instant.parse("2026-10-%02dT09:00:00Z".format(day)))

@@ -8,6 +8,8 @@ import javax.inject.Singleton
 
 @Singleton
 class AccountOperationGuard @Inject constructor(private val uids: FirebaseUidProvider, private val fence: LocalWorkFence) {
+    val generations: kotlinx.coroutines.flow.StateFlow<Long> get() = fence.changes
+
     data class Ticket(val owner: String?, val generation: Long)
 
     suspend fun capture(): Ticket = Ticket(uids.uid(), fence.currentTicket()).also(::check)

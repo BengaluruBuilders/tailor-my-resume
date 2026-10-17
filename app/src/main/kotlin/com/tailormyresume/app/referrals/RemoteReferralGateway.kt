@@ -24,6 +24,9 @@ import com.tailormyresume.core.network.dto.ReferralReadResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -44,12 +47,16 @@ class RemoteReferralGateway @Inject constructor(
     private val wallet: WalletSource,
     private val credits: CreditsRepository,
     private val clock: Clock,
+    @com.tailormyresume.core.common.network.di.ApplicationScope private val scope: kotlinx.coroutines.CoroutineScope,
 ) : ReferralGateway {
     private val mutable = MutableStateFlow<ReferralUiState>(ReferralUiState.Loading)
-    override val state: StateFlow<ReferralUiState> = mutable
     private val mutex = Mutex()
     private var shown: ReferralOfferDto? = null
     private var shownOwner: String? = null
+    private var shownGeneration = -1L
+    override val state: StateFlow<ReferralUiState> = combine(mutable, guard.generations) { value, generation ->
+        if (shownOwner == uids.uid() && generation == shownGeneration) value else ReferralUiState.Loading
+    }.stateIn(scope, SharingStarted.Eagerly, ReferralUiState.Loading)
     private var readSucceeded = false
     private var lastError: ApiError? = null
     private data class Owner(val ticket: AccountOperationGuard.Ticket, val provider: String, val epoch: Long)
@@ -90,6 +97,7 @@ class RemoteReferralGateway @Inject constructor(
             mutable.value = ReferralUiState.Loading
         }
         shownOwner = owner.ticket.owner
+        shownGeneration = owner.ticket.generation
         try {
             mutable.value = content().copy(busy = true)
             action(owner)
@@ -114,7 +122,8 @@ class RemoteReferralGateway @Inject constructor(
                 candidate = journal.code,
                 guest = uids.isAnonymous(),
                 reviewRequired = journal.reviewFrom != null,
-                message = if (journal.phase == "READ_ONLY") ReferralMessage.ReadOnly else ReferralMessage.Unavailable,
+                attached = journal.phase == "ATTACHED",
+                message = if (journal.phase == "ATTACHED") ReferralMessage.Applied else if (journal.phase == "READ_ONLY") ReferralMessage.ReadOnly else ReferralMessage.Unavailable,
             )
             return
         }

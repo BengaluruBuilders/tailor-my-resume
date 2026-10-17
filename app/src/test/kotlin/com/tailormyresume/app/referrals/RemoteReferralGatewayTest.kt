@@ -20,6 +20,8 @@ import com.tailormyresume.core.model.AccountMode
 import com.tailormyresume.core.network.TailorMyResumeApiConfig
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -44,6 +46,7 @@ class RemoteReferralGatewayTest {
     private val server = MockWebServer().apply { start() }
     private val api = server.api()
     private val fence = LocalWorkFence()
+    private val scope = CoroutineScope(UnconfinedTestDispatcher())
     private var uid = "invitee"
     private var guest = false
     private var version = "referral-local-v1"
@@ -85,7 +88,7 @@ class RemoteReferralGatewayTest {
     private fun createStore() = PrivateReferralStore(context, UnconfinedTestDispatcher()).also { store = it }
     private fun client(journal: PrivateReferralStore = createStore()) = RemoteReferralGateway(
         api, TailorMyResumeApiConfig(server.url("/").toString()), identity, identity,
-        AccountOperationGuard(identity, fence), journal, evidence, WalletSource(api, identity), TestCreditsRepository(), clock,
+        AccountOperationGuard(identity, fence), journal, evidence, WalletSource(api, identity), TestCreditsRepository(), clock, scope,
     )
     private fun content(client: RemoteReferralGateway) = client.state.value as ReferralUiState.Content
     private fun offer() = """{"status":"${if (available) "AVAILABLE" else "UNAVAILABLE"}","reason":"ELIGIBLE","version":"$version","effectiveAt":"2026-10-16T00:00:00Z","expiresAt":"2026-10-18T00:00:00Z","rewardAmount":13,"continuityMode":"$continuityMode","codeIssuance":"AVAILABLE","attachmentEligibility":"${if (attached) "ATTACHED" else "ELIGIBLE"}","deadline":"2026-10-18T00:00:00Z"}"""
@@ -118,6 +121,7 @@ class RemoteReferralGatewayTest {
     }
 
     @After fun close() {
+        scope.cancel()
         server.shutdown()
         File(context.filesDir, "manual-referrals").deleteRecursively()
     }
@@ -239,6 +243,7 @@ class RemoteReferralGatewayTest {
             client.apply()
         } catch (_: CancellationException) { }
         assertThat(requests("/attach")).isEmpty()
+        assertThat(client.state.value).isEqualTo(ReferralUiState.Loading)
         val other = client(createStore())
         other.refresh()
         assertThat(content(other).candidate).isNull()
