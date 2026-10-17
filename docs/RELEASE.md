@@ -87,11 +87,11 @@ release APK was checked to exclude both the local CA and the LAN endpoint.
 
 ## Firebase projects and local configuration
 
-There are two environments and three Android build types:
+There are two environments and four Android build types:
 
 | Environment | Build types | Firebase project ID | Android package |
 |---|---|---|---|
-| Staging | `debug`, `staging` | `tailormy-resume-staging` | `com.tailormyresume.app.staging` |
+| Staging | `debug`, `staging`, `stagingPlay` | `tailormy-resume-staging` | `com.tailormyresume.app.staging` |
 | Production | `release` | `tailormyresume-app` | `com.tailormyresume.app` |
 
 Register each package in its own Firebase project. Under Authentication, Sign-in method, enable
@@ -191,3 +191,52 @@ artifacts are implementation evidence only. The official Install Referrer 2.2 ad
 connection in every path. A minimal consumed marker survives account cleanup; terminal capture and
 consumption are atomic. Transient failures allow at most three foreground collection attempts,
 with manual code entry immediately available. No remote service or live origin is activated here.
+
+## Staging Play internal testing
+
+`stagingPlay` is a separate minified build for the staging app's **internal testing track only**.
+It uses package `com.tailormyresume.app.staging`, label `TMR Staging`, the same staging Firebase,
+referral and Integrity Gradle properties, and `src/localStaging/res` with the same narrowly scoped
+LAN CA. It has release dependency fallbacks and no developer console. Existing `debug` and
+`staging` remain debug-signed and unpublished. Production `release` settings and workflow are unchanged.
+
+Before any `stagingPlay` artifact build, all five staging backend inputs must be present. Its identity
+guard additionally requires Firebase project `tailormy-resume-staging`, Android app ID and web OAuth
+client from project `496155242121`, and
+`tailormyresumeStagingPlayIntegrityCloudProjectNumber=496155242121`. The API must use HTTPS at the
+existing exact workstation hostname or LAN IP, port `20002` (managed staging) or `8443` (earlier
+staging proxy), with no path except `/`, credentials, query or fragment. A DHCP/endpoint/project
+change requires a reviewed guard and trust-configuration update. Production values cannot substitute.
+
+Provide all four dedicated staging upload settings outside the repository, as environment variables
+or user Gradle properties: `TMR_STAGING_UPLOAD_KEYSTORE_FILE`, `TMR_STAGING_UPLOAD_STORE_PASSWORD`,
+`TMR_STAGING_UPLOAD_KEY_ALIAS`, `TMR_STAGING_UPLOAD_KEY_PASSWORD`. The keystore must exist and must
+be a dedicated staging key; never reuse the production upload key or debug key. The build rejects
+missing/partial settings, a missing file, the configured production/debug file path, or the debug
+alias. Distinct paths alone cannot prove distinct private keys: the owner must verify the public
+certificate against existing signers. These settings never supply `release` signing. No key creation,
+credential transfer or upload automation is part of this preparation.
+
+After those prerequisites and a monotonic staging version code are configured:
+
+```bash
+./gradlew :app:bundleStagingPlay -PTMR_VERSION_CODE=<unused-staging-version-code>
+```
+
+Inspect `app/build/outputs/bundle/stagingPlay/app-stagingPlay.aab` with the Android bundle tools and
+JDK signature tools. Verify package, version, staging API/Firebase/Integrity values, disabled cleartext,
+LAN-only trust configuration and intended upload certificate before an upload. The configuration
+checks and their synthetic file fixtures do not establish a valid signed artifact.
+
+A reviewer must select the staging app and **internal testing**, never a production track. No source
+check can prove a human's Play track selection; this repository has no upload task. Complete any
+required Play legal declarations with the owner's action-time confirmation. Capture the actual
+**Play app-signing** certificate after enrollment; it can differ from the upload certificate. Register
+that public certificate in staging Firebase and the strict staging backend certificate allowlist before
+runtime testing. A build does not prove Play recognition, licensing, device integrity or credit grants.
+Keep reward admission closed until all existing strict activation gates pass.
+
+The current Pixel contains valuable debug-signed staging data. A Play certificate difference blocks
+an ordinary update of this same package. **Do not uninstall, clear data, reset, sign out or replace that
+installation to test this build.** Use a suitable separate device/install context, or retain the blocker
+until a concrete preservation path is authorized.
