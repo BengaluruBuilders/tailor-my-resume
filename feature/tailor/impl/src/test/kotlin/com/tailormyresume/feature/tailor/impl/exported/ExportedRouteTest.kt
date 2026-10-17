@@ -18,7 +18,7 @@ import com.tailormyresume.core.domain.SetApplicationStatusUseCase
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
@@ -71,7 +71,7 @@ class ExportedRouteTest {
         return ExportedViewModel(
             applicationRepository = applicationRepository,
             creditsRepository = TestCreditsRepository(),
-            creditBalance = testAccountCreditBalance(TestPaymentGateway().withFreeCredits(0)),
+            creditBalance = testAccountCreditBalance(TestAccountWallet().withFreeCredits(0)),
             exportResume = ExportResumeUseCase(
                 applicationRepository,
                 profileRepository,

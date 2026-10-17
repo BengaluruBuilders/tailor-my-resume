@@ -2,11 +2,11 @@ package com.tailormyresume.core.domain.account
 
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.CreditsRepository
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -18,7 +18,7 @@ class AccountCreditBalanceCachedTest {
 
     @Test
     fun cachedCreditsNeverCallsEntitlement() = runTest {
-        val gateway = EntitlementCountingGateway(TestPaymentGateway().withFreeCredits(3))
+        val gateway = EntitlementCountingGateway(TestAccountWallet().withFreeCredits(3))
         val balance = AccountCreditBalance(gateway, ledger(3))
 
         assertThat(balance.cachedCredits()).isEqualTo(3)
@@ -31,7 +31,7 @@ class AccountCreditBalanceCachedTest {
             override fun observeKnownBalance() = flowOf<Int?>(null)
             override suspend fun refreshConfirmed() = false
         }
-        val balance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(4), credits)
+        val balance = AccountCreditBalance(TestAccountWallet().withFreeCredits(4), credits)
 
         assertThat(balance.cachedCredits()).isNull()
         assertFailsWith<IllegalStateException> { balance.unusedCredits() }
@@ -40,7 +40,7 @@ class AccountCreditBalanceCachedTest {
     @Test
     fun cachedCreditsReadsTheObservedEntitlement() = runTest {
         val balance = AccountCreditBalance(
-            paymentGateway = TestPaymentGateway().withFreeCredits(2),
+            paymentGateway = TestAccountWallet().withFreeCredits(2),
             creditsRepository = ledger(2),
         )
 
@@ -53,8 +53,8 @@ private fun ledger(credits: Int) = TestCreditsRepository().apply {
 }
 
 private class EntitlementCountingGateway(
-    private val delegate: PaymentGateway,
-) : PaymentGateway by delegate {
+    private val delegate: AccountWallet,
+) : AccountWallet by delegate {
 
     var entitlementCalls = 0
 

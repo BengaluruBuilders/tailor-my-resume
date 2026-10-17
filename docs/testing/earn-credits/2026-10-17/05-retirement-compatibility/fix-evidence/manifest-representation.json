@@ -1,0 +1,34 @@
+{
+  "finding": "R05-F01",
+  "status": "fixed pending independent validation",
+  "originalPublishedHead": "61466b771f9d8904faeeb84e9a2dfd438819a1b1",
+  "unchangedExecutableHead": "6b4a55b1d1bb9c9bd7e02e027de9967d97032235",
+  "backendPublishedHead": "d8dbeeb2f2790d6adfc51c7e73ae984df3014345",
+  "originalManifestSerializationSha256": "cbe0027944a51ced1041df0d644b5cc78a36ef4d1821c6813779dac56999b5de",
+  "readableManifestPresentationSha256": "1d071c0aa253a9de1844b81e53054451f5583c990c73e163f52af8a972a87478",
+  "entryCount": 2357,
+  "semanticEntryDifferences": 0,
+  "checkedWorktreeInputMismatches": 0,
+  "gitBlobHashMatches": 2356,
+  "gitBlobDifferenceExplanation": "gradlew.bat checkout has CRLF line endings; its checked worktree bytes match the original input digest. No input was rewritten.",
+  "originalPinnedScannerFindingCounts": {
+    "generic-api-key": 34,
+    "sentry-access-token": 4
+  },
+  "repairAttempts": 1,
+  "failedRepairScannerAttempts": 0,
+  "preResolutionEquivalentMerge": "d5612ad5d9d4297aec3e183ae183710330203d76",
+  "preResolutionFullScannerExitCode": 0,
+  "positiveControl": {
+    "kind": "inert generated synthetic fixture in isolated temporary repository",
+    "expectedExitCode": 1,
+    "actualExitCode": 1,
+    "detectedRules": [
+      "sentry-access-token"
+    ]
+  },
+  "scannerBinarySha256": "88f91962aa2f93ac6ab281d553b9e125f5197bbbce38f9f2437f7299c32e5509",
+  "unchangedBaseConfigSha256": "b79e0516cd8216ecf3f9d68aa8bd1919584faf91ceef40118ebfe4bf1d02f4cd",
+  "originalLogsPreserved": true,
+  "independentVerdict": "pending"
+}

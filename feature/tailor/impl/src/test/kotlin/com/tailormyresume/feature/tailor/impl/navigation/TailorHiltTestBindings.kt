@@ -4,14 +4,14 @@ import com.tailormyresume.core.data.repository.ContentReportRepository
 import com.tailormyresume.core.data.repository.NoRemoteLedger
 import com.tailormyresume.core.data.repository.RemoteLedgerSource
 import com.tailormyresume.core.data.repository.StoredContentReportRepository
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.GapAnalysis
 import com.tailormyresume.core.model.JobDescription
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.TailoredResume
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.feature.tailor.api.ExportedPdfIntents
 import com.tailormyresume.feature.tailor.impl.document.AndroidResumeHeadings
 import com.tailormyresume.feature.tailor.impl.document.ResumeHeadings
@@ -51,7 +51,7 @@ internal abstract class TailorHiltTestBindings {
 
     companion object {
         @Provides
-        fun providePaymentGateway(): PaymentGateway = TestPaymentGateway()
+        fun provideAccountWallet(): AccountWallet = TestAccountWallet()
 
         @Provides
         fun provideResumeTailor(): ResumeTailor = object : ResumeTailor {

@@ -1,0 +1,89 @@
+{
+  "frontend": {
+    "inputs": 2357,
+    "manifestSha256": "cbe0027944a51ced1041df0d644b5cc78a36ef4d1821c6813779dac56999b5de",
+    "mismatches": [],
+    "head": "e6208203d888bd8995a8cef36155e7c8ff7fa6e9"
+  },
+  "backend": {
+    "inputs": 248,
+    "manifestSha256": "b3dc82118e5ec79d40dd0f01bab3723ec73e2509d3a204cb9f776f687a87de23",
+    "mismatches": [],
+    "head": "694ec866da51d64c0f766dc95989daec891ee84d"
+  },
+  "frontendGate": {
+    "commit": "6b4a55b1d1bb9c9bd7e02e027de9967d97032235",
+    "exit": 0,
+    "junitTotals": {
+      "tests": 2708,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "junitSuiteCount": 486,
+    "testTasks": {
+      ":build-logic:convention:test": "NO-SOURCE",
+      ":core:model:test": "UP-TO-DATE",
+      ":core:common:testDebugUnitTest": "UP-TO-DATE",
+      ":core:database:testDebugUnitTest": "UP-TO-DATE",
+      ":core:designsystem:testDebugUnitTest": "UP-TO-DATE",
+      ":core:domain:testDebugUnitTest": "UP-TO-DATE",
+      ":core:navigation:testDebugUnitTest": "UP-TO-DATE",
+      ":core:network:testDebugUnitTest": "UP-TO-DATE",
+      ":core:screenshot:testDebugUnitTest": "NO-SOURCE",
+      ":core:testing:testDebugUnitTest": "UP-TO-DATE",
+      ":feature:analysis:api:testDebugUnitTest": "NO-SOURCE",
+      ":core:data:testDebugUnitTest": "EXECUTED",
+      ":feature:applications:api:testDebugUnitTest": "NO-SOURCE",
+      ":feature:analysis:impl:testDebugUnitTest": "EXECUTED",
+      ":feature:onboarding:api:testDebugUnitTest": "NO-SOURCE",
+      ":app:testDebugUnitTest": "EXECUTED",
+      ":feature:applications:impl:testDebugUnitTest": "EXECUTED",
+      ":feature:profile:api:testDebugUnitTest": "NO-SOURCE",
+      ":feature:onboarding:impl:testDebugUnitTest": "EXECUTED",
+      ":feature:settings:api:testDebugUnitTest": "NO-SOURCE",
+      ":feature:profile:impl:testDebugUnitTest": "EXECUTED",
+      ":feature:tailor:api:testDebugUnitTest": "NO-SOURCE",
+      ":feature:settings:impl:testDebugUnitTest": "EXECUTED",
+      ":feature:tailor:impl:testDebugUnitTest": "EXECUTED"
+    },
+    "skippedTasks": [
+      ":build-logic:convention:checkKotlinGradlePluginConfigurationErrors",
+      ":core:model:checkKotlinGradlePluginConfigurationErrors",
+      ":app:lintVitalReportRelease",
+      ":app:lintVitalRelease"
+    ],
+    "finalGradleInvocation": {
+      "tasks": 2065,
+      "executed": 272,
+      "fromCache": 14,
+      "upToDate": 1779,
+      "seconds": 211
+    },
+    "junitNote": "Preserved final 486 JUnit XML reports: 2708 tests, zero failures/errors/skips. Some unchanged unit tasks were UP-TO-DATE; per-task outcomes and XML mtimes/hashes disclose this. Do not claim all 2708 tests reexecuted.",
+    "sourceScan": {
+      "result": "PASS",
+      "before": "8a2c02e8b1298ac60d473bda4fca995da962a4ea",
+      "after": "6b4a55b1d1bb9c9bd7e02e027de9967d97032235",
+      "script": "tools/ci/scan-secrets.sh",
+      "gitleaks": "8.30.1",
+      "logSha256": "fe7b8d378869a33e0f4e0545647247f69017e02b62e6137ab9d80334456117f6"
+    },
+    "logHasBuildSuccess": true
+  },
+  "required-check.log": {
+    "sha256": "eb48e93ed8e462ef6dfa83781b268b76d1590dc1da910fc3d088591d2fc7b8b2"
+  },
+  "history-scan.log": {
+    "sha256": "15b2c6b05c3794a343469d2fb84f813ffeaa48e25833340f372b2c16b5e8452e"
+  },
+  "evidenceOnlyFE": [
+    "A\tdocs/testing/earn-credits/2026-10-17/05-retirement-compatibility/frontend-artifact.json",
+    "A\tdocs/testing/earn-credits/2026-10-17/05-retirement-compatibility/frontend-checks.json",
+    "A\tdocs/testing/earn-credits/2026-10-17/05-retirement-compatibility/frontend-handoff.md",
+    "A\tdocs/testing/earn-credits/2026-10-17/05-retirement-compatibility/frontend-source-inputs.json"
+  ],
+  "apk": {
+    "sha256": "45114bd6f2d909bddf66f3d2934ca2ca6945f9e73961a5a7be5fcc96bccb7023"
+  }
+}

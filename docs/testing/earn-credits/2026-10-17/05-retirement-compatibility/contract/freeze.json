@@ -1,0 +1,18 @@
+{
+  "revision": "retirement-compatibility-v1",
+  "status": "FROZEN",
+  "date": "2026-10-17",
+  "authority": "Root accepted retirement, discovery, classification and saved-state clarification; frontend_slice05 and backend_slice05 explicitly agreed all five exact hashes. Root released freeze and scoped commit.",
+  "preparationStatusOverride": "This freeze supersedes embedded DRAFT/preparation status in the exact agreed contract and README. Their bytes remain unchanged to preserve explicit implementer agreement.",
+  "frontendParent": "8a2c02e8b1298ac60d473bda4fca995da962a4ea",
+  "backendParent": "f93dab758daeeee992b82fb9bc64855c216e40fc",
+  "predecessorContractSha256": "5f1ee690c0a0ff7aed487f468400a4181a4298286210e492e18887cd9fa6f803",
+  "files": {
+    "docs/BACKEND_CONTRACT.md": "7c9fd14ba1d47b41eb4d32aa50d1ec8c4d2d83493961ce1e6c737c4b51ffc7ff",
+    "docs/testing/earn-credits/2026-10-17/05-retirement-compatibility/contract/README.md": "34c530e372f7673ebc097adcd62a59bb7fdb16f50d7d9555e71f66d833cd904c",
+    "docs/testing/earn-credits/2026-10-17/05-retirement-compatibility/contract/acceptance-matrix.json": "0e80060597b406b4976542a09df93e311e147ce0031bd66f161466b96212e45b",
+    "docs/testing/earn-credits/2026-10-17/05-retirement-compatibility/contract/compatibility-cases.json": "09068733894ceefb7378abd5b54355b037f43476c61b840f195c6361ede7dd95",
+    "docs/testing/earn-credits/2026-10-17/05-retirement-compatibility/contract/cost-cases.json": "562d24e51c06bac6eb549e1f09aec4230b92196f1fc22da16d39547b423630f6"
+  },
+  "externalAcceptance": "BLOCKED; inherit prior gates; no deployment, live amount/cutoff, store change or merge authority."
+}

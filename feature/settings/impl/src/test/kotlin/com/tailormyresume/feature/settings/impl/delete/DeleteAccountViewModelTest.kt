@@ -4,11 +4,11 @@ import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.PendingWipeState
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.account.AccountWipeFinisher
 import com.tailormyresume.core.navigation.PendingToast
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.util.MainDispatcherRule
 import com.tailormyresume.feature.settings.impl.R
 import kotlinx.coroutines.CompletableDeferred
@@ -230,7 +230,7 @@ class DeleteAccountViewModelTest {
     @Test
     fun serverClosedRecoveryFinishesWithoutAKnownWallet() = runTest {
         val unknown = PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false)
-        val gateway = object : PaymentGateway by TestPaymentGateway() {
+        val gateway = object : AccountWallet by TestAccountWallet() {
             override fun observeEntitlement() = flowOf(unknown)
             override suspend fun entitlement(): PurchaseEntitlement = error("closed account")
         }

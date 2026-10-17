@@ -9,7 +9,7 @@ class MockLatencyTest {
 
     @Test
     fun noLatencyTakesNoTime() = runTest {
-        NoMockLatency.await(MockOperation.PURCHASE)
+        NoMockLatency.await(MockOperation.SIGN_IN)
 
         assertThat(currentTime).isEqualTo(0)
     }

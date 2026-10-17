@@ -11,6 +11,9 @@ fun backFallback(
     current: NavKey,
     hasHome: Boolean,
 ): NavKey? {
+    (current as? com.tailormyresume.feature.settings.api.navigation.CreditsNavKey)?.returnToApplicationId?.let { applicationId ->
+        return com.tailormyresume.feature.applications.api.navigation.ApplicationDetailNavKey(applicationId)
+    }
     if (current is SignInNavKey) return null
     val target: NavKey = if (hasHome) DefaultApplicationsNavKey else UploadNavKey()
     return target.takeIf { it::class != current::class }

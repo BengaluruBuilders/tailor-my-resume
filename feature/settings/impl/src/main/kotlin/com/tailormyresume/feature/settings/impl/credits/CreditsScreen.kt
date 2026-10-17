@@ -25,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tailormyresume.core.designsystem.component.TmrDivider
 import com.tailormyresume.core.designsystem.component.content.TmrCard
@@ -44,7 +43,7 @@ private val RowMinHeight = 68.dp
 private val BalanceGap = 16.dp
 
 @Composable
-internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifier: Modifier = Modifier, onCheckTrial: () -> Unit = {}, onClaimTrial: () -> Unit = {}, onGoogle: (() -> Unit)? = null, onReferrals: (() -> Unit)? = null) {
+internal fun CreditsScreen(state: CreditsUiState, modifier: Modifier = Modifier, onCheckTrial: () -> Unit = {}, onClaimTrial: () -> Unit = {}, onGoogle: (() -> Unit)? = null, onReferrals: (() -> Unit)? = null) {
     val content = state as? CreditsUiState.Content ?: return
     val spacing = TmrTheme.spacing
     LazyColumn(
@@ -60,9 +59,9 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
             )
         }
         item(key = "balance") {
-            BalanceCard(credits = content.credits, onBuyMore = onBuyMore, canPurchase = content.canPurchase, modifier = Modifier.padding(bottom = spacing.md))
+            BalanceCard(credits = content.credits, modifier = Modifier.padding(bottom = spacing.md))
         }
-        if (!content.canPurchase) {
+        if (content.isGuest) {
             item(key = "guest-trial") {
                 GuestTrialCard(content.trial, onCheckTrial, onClaimTrial)
             }
@@ -72,7 +71,7 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
                 TmrSecondaryButton(stringResource(R.string.feature_settings_impl_google_account), onGoogle, Modifier.fillMaxWidth().padding(vertical = spacing.md))
             }
         }
-        onReferrals?.let { action ->
+        onReferrals?.takeIf { !content.isGuest }?.let { action ->
             item(key = "referrals") { TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_title), action, Modifier.fillMaxWidth().padding(bottom = spacing.md)) }
         }
         item(key = "history-label") {
@@ -84,32 +83,12 @@ internal fun CreditsScreen(state: CreditsUiState, onBuyMore: () -> Unit, modifie
         itemsIndexed(content.history, key = { _, row -> row.key }) { index, row ->
             HistoryRow(row = row, first = index == 0, last = index == content.history.lastIndex)
         }
-        if (content.canPurchase) {
-            item(key = "receipts") {
-                Text(
-                    text = stringResource(R.string.feature_settings_impl_credits_receipts),
-                    style = TmrTheme.typography.caption,
-                    color = TmrTheme.colors.textMuted,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(top = spacing.md),
-                )
-            }
-        }
     }
 }
 
 @Composable
-private fun BalanceCard(credits: Int?, onBuyMore: () -> Unit, modifier: Modifier = Modifier, canPurchase: Boolean = true) {
-    TmrCard(modifier = modifier) {
-        BalanceHero(credits = credits)
-        if (canPurchase) {
-            TmrPrimaryButton(
-                label = stringResource(R.string.feature_settings_impl_credits_buy_more),
-                onClick = onBuyMore,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
+private fun BalanceCard(credits: Int?, modifier: Modifier = Modifier) {
+    TmrCard(modifier = modifier) { BalanceHero(credits = credits) }
 }
 
 @Composable

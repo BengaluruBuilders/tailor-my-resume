@@ -15,20 +15,13 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import okhttp3.mockwebserver.MockWebServer
 
 internal class FakePlayBilling : PlayBilling {
-    var products = mapOf("application_pack_5" to PlayProduct("5 applications", 149_000_000, "INR"))
-    var purchaseResult: PlayPurchaseResult = PlayPurchaseResult.Failed
     var owned = emptyList<PlayPurchase>()
+    var queries = 0
     override val unsolicitedPurchases = MutableSharedFlow<PlayPurchase>(extraBufferCapacity = 8)
-    var launchedWith: Pair<String, String>? = null
-
-    override suspend fun productDetails(productId: String) = products[productId]
-
-    override suspend fun launchPurchase(productId: String, obfuscatedAccountId: String): PlayPurchaseResult {
-        launchedWith = productId to obfuscatedAccountId
-        return purchaseResult
+    override suspend fun ownedPurchases(): List<PlayPurchase> {
+        queries++
+        return owned
     }
-
-    override suspend fun ownedPurchases() = owned
 }
 
 internal fun idleScope() = CoroutineScope(StandardTestDispatcher())
@@ -65,7 +58,7 @@ internal fun MockWebServer.signOutCleaner(): SignOutCleaner {
     val store = TestMockStateStore()
     val api = api()
     return SignOutCleaner(
-        RemotePaymentGateway(api, WalletSource(api), FakePlayBilling(), FakeUid("uid-1"), idleScope(), TestCreditsRepository()),
+        RemoteAccountWallet(api, WalletSource(api), FakeUid("uid-1")),
         RemoteJobAnalysisSource(api, NoMatcher),
         PendingReportQueue(store),
         store,

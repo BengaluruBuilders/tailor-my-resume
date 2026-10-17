@@ -41,7 +41,7 @@ The current look follows `docs/AVVIO_REDESIGN.md`. `docs/DESIGN_SYSTEM.md` holds
 | `:core:navigation` | library | NiA `Navigator` and `NavigationState` pattern. `PendingNavigation` holds keys to push when the main root opens |
 | `:core:database` | library + room + hilt | Room DB, entities, DAOs, type converters. It holds the profile and the applications |
 | `:core:data` | library + hilt | Repository interfaces and offline-first implementations. `SessionRepository` and `ExportHistoryRepository` store their state in `MockStateStore` (DataStore). `ConnectivityMonitor` reports the network state |
-| `:core:domain` | library + hilt | JD analysis, gap match, tailoring, fabrication guard, resume text parser, cover letter, prep questions, fact validation, use cases. Gateways: `SignInGateway`, `PaymentGateway`, `AccountDataExporter`, `SampleDataController` |
+| `:core:domain` | library + hilt | JD analysis, gap match, tailoring, fabrication guard, resume text parser, cover letter, prep questions, fact validation, use cases. Gateways: `SignInGateway`, `AccountWallet`, `AccountDataExporter`, `SampleDataController` |
 | `:core:network` | library + hilt | The one HTTP stack (I.5): OkHttp, Retrofit, kotlinx.serialization. `TailorMyResumeApi` (one function per route of `docs/BACKEND_CONTRACT.md`), the DTOs and their pure mappers to `core:model`, the `X-App-Id` and bearer interceptors with one 401 retry, the sealed `ApiError`, `apiResult`, and `IdTokenProvider`. `:app` adds it as `implementation`, and no other module declares a network library |
 | `:core:testing` | library | Test repositories and gateways, contract tests, `MainDispatcherRule`, test data |
 | `:core:screenshot` | library | Roborazzi screenshot helpers and test devices |
@@ -300,9 +300,9 @@ the prototype screens and the optional Invite friends screen added by manual-ref
 | `SkillsNavKey` | `feature/profile/api` | Skills |
 | `ListEditNavKey(section)` | `feature/profile/api` | Summary, Education or Achievements (`ProfileListSection`) |
 | `SettingsNavKey` | `feature/settings/api` | Settings |
-| `CreditsNavKey` | `feature/settings/api` | Credits |
+| `CreditsNavKey(returnToApplicationId?)` | `feature/settings/api` | Credits and provider-aware earning; back returns without tailoring or spending |
 | `ReferralsNavKey` | `feature/settings/api` | Invite friends and optional manual code entry |
-| `PaywallNavKey(returnToApplicationId?)` | `feature/settings/api` | Paywall; after a purchase it replaces itself with Quick question when the id is set, else goes back |
+| `LegacyPaymentNavKey(returnToApplicationId?)` | `feature/settings/api` | Decode-only old serialized key; immediately redirects to Credits, with no sale screen or new navigation helper |
 
 Every key carries an optional `DebugScenario` from `core:model`, defaulting to `DebugScenario.DEFAULT`. That is the
 only mechanism for forcing a screen into a loading, empty, offline, error or partial state. A screenshot test can
@@ -330,8 +330,8 @@ list below shows what each feature injects today.
 | Feature | Injects |
 |---|---|
 | `onboarding` | `SessionRepository`, `ProfileRepository`, `SignInGateway`, `UsageAllowance`, `ConnectivityMonitor`, `NextOnboardingStepUseCase`, `ProposeJobLabelUseCase`, `DiscardJobDraftsUseCase` |
-| `analysis` | `SessionRepository`, `ProfileRepository`, `PrepPlanRepository`, `ContentReportRepository`, `UsageAllowance`, `PaymentGateway`, `AnalyzeJobUseCase`, `AddUserStatedFactUseCase`, `CreateApplicationUseCase` |
-| `tailor` | `ApplicationRepository`, `ProfileRepository`, `TailoringReviewStateRepository`, `ContentReportRepository`, `ExportHistoryRepository`, `PaymentGateway`, `ConnectivityMonitor` |
+| `analysis` | `SessionRepository`, `ProfileRepository`, `PrepPlanRepository`, `ContentReportRepository`, `UsageAllowance`, `AccountWallet`, `AnalyzeJobUseCase`, `AddUserStatedFactUseCase`, `CreateApplicationUseCase` |
+| `tailor` | `ApplicationRepository`, `ProfileRepository`, `TailoringReviewStateRepository`, `ContentReportRepository`, `ExportHistoryRepository`, `AccountWallet`, `ConnectivityMonitor` |
 | `profile` | `ProfileRepository`, `AddUserStatedFactsUseCase`, `FactIdAllocator`, `ConnectivityMonitor` |
 | `applications` | `ApplicationRepository`, `ProfileRepository`, `ExportHistoryRepository`, `PrepPlanRepository`, `ContentReportRepository` |
 | `settings` | `SignInGateway`, `SessionRepository`, `ApplicationRepository`, `ExportHistoryRepository`, `DeleteAccountUseCase`, `ExportAccountDataUseCase` |
@@ -387,3 +387,9 @@ submission and keeps the same durable business key for explicit reconfirmation. 
 referrer callbacks cannot acquire fresh evidence. Account cleanup and generation/erase checks cancel
 late capture, responses and foreground permission. Own GET and committed replay remain the recovery
 path; no attribution grants, spends or tailors locally.
+
+## Historical settlement after sale retirement
+
+`AccountWallet` exposes wallet entitlement, historical purchase reads and local cache clearing. Features do not receive purchase, product catalogue, restore or unlock ports. `RemoteAccountWallet` reuses `WalletSource` and fences returned history by UID and account work generation. Server wallet balance stays authoritative, including purchased credits; the display ledger is not summed to reconstruct it.
+
+`HistoricalPurchaseSettlement` is app-internal. `PurchaseRestorer` starts it only for the current verified Google account. It queries owned Play purchases, accepts completion notifications, reposts historical PURCHASED tokens and retries transient failures. Pending Play states grant nothing. Account changes invalidate retries; canceled or stale work cannot post or apply another owner's result. Google Play Billing 9.1 remains required for these query/listener obligations. Product details and billing launches are absent. The server verifies tokens and consumes purchases; backend routes and original product IDs remain compatible.

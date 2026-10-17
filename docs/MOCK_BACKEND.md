@@ -6,7 +6,7 @@ for screenshot tests and the Dev console
 (`app/src/main/kotlin/.../di`, Constitution I.5 as amended, `docs/BACKEND_CONTRACT.md`). No UI code changes.
 
 Remote in the app: `SignInGateway`, `ResumeTextParser`, `AnalyzeJobUseCase`, `ResumeTailor`,
-`PrepQuestionSource`, `CoverLetterSource`, `PaymentGateway`, `UsageAllowance`, `ContentReportRepository`,
+`PrepQuestionSource`, `CoverLetterSource`, `AccountWallet`, `UsageAllowance`, `ContentReportRepository`,
 `AccountDataExporter`, and account deletion. `RemoteContentReportRepository` saves the report locally, then
 posts it; a post that fails with a retryable error stays in `PendingReportQueue` and is sent on the next
 app start. `RemoteAccountDataExporter` adds `server.json`, or a placeholder when the fetch fails. Everything
@@ -52,7 +52,7 @@ A feature must change these things. Each item names the API.
    `ProposeJobLabelUseCase(rawText)`.
 10. Deleting an application. `ApplicationRepository.deleteApplication` now also clears the prep plan, the
     reports, and the review state. Keep `ExportHistoryRepository.clearFor`.
-11. Sign out and delete account. Sign out keeps the credits. `PaymentGateway.clearCredits()` closes the credit
+11. Sign out and delete account. Sign out keeps the credits. `AccountWallet.clearCredits()` closes the credit
     account. After an account deletion the next sign-in starts with the free credit. A screen must not
     cache the old credit count.
 12. Share the last export. The workspace calls `navigator.navigateToShareLastExport(applicationId)` (module
@@ -370,51 +370,11 @@ enum class SignInFailureReason { NetworkUnavailable, ProviderUnavailable }
 - Test fake: `TestSignInGateway(sessionRepository = TestSessionRepository(), store = TestMockStateStore())` with the same hooks. Contract: `SignInGatewayContractTest`.
 - Real implementation: run the Google sign-in flow. Save the account with `SessionRepository.saveAccount`. In `signOut()`, end the provider session and call `SessionRepository.signOut()`.
 
-### `PaymentGateway`
+### `AccountWallet`
 
-```kotlin
-interface PaymentGateway {
-    suspend fun packs(): List<ApplicationPack>
-    suspend fun purchase(packId: String): PurchaseResult
-    suspend fun entitlement(): PurchaseEntitlement
-    fun observeEntitlement(): Flow<PurchaseEntitlement>
-    suspend fun purchaseHistory(): List<PurchaseRecord>
-    fun observePurchaseHistory(): Flow<List<PurchaseRecord>>
-    suspend fun restorePurchases(): PurchaseEntitlement
-    suspend fun unlock(applicationId: String): CreditSpend
-    suspend fun clearCredits(): PurchaseEntitlement
-}
-```
+The wallet port exposes `entitlement`, `observeEntitlement`, `purchaseHistory`, `observePurchaseHistory` and `clearCredits`. It has no catalogue, purchase, restore or unlock method. `RemoteAccountWallet` uses server wallet/history and owner-generation checks. `OfflineAccountWallet` and `TestAccountWallet` preserve deterministic wallet/history fixtures, with `withFreeCredits`, `withHistoricalPurchase` and `spendFixtureCredit` helpers for tests/sample data only. Historical product IDs decode old saved fixture state; there are no prices or sellable pack models.
 
-```kotlin
-data class ApplicationPack(id, name, credits, priceInPaise, currencyCode, creditsExpire)
-data class PurchaseEntitlement(freeCredits: Int, purchasedCredits: Int, pendingPackIds: List<String>)
-enum class PurchaseState { PENDING, COMPLETED }
-data class PurchaseRecord(packId: String, orderId: String, purchasedAt: Instant, state: PurchaseState)
-sealed interface CreditSpend {
-    data class Spent(val entitlement: PurchaseEntitlement, val kind: CreditKind = CreditKind.FREE) : CreditSpend
-    data object NoCreditLeft : CreditSpend
-}
-```
-
-Rules:
-
-- `observeEntitlement()` is the one source for the credits pill. Use it on every screen that shows credits.
-- `purchaseHistory()` lists the newest purchase first. Only completed and pending purchases are listed.
-- `unlock(applicationId)` spends a free credit first, once per application. `Spent.kind` tells which kind paid, and is `null` for a repeat. Pass it to `ExportRecord.creditKind`.
-- `clearCredits()` closes the credit account: zero credits, no pending pack, no history. A fresh install has one free credit. `clearCredits()` marks the account as closed. The next `SignInGateway.signIn()` after a closed account starts again with the free credit. `signOut()` alone keeps the credits.
-- The pack ids are `ApplicationPack.APPLICATION_PACK_FIVE`. Never read prices or names from constants. Call `packs()`.
-- The new members have default bodies so old test doubles still compile. A real implementation must override all of them.
-
-Mock details:
-
-- Class `OfflinePaymentGateway` (`@Singleton`). The catalogue is in `MockPackCatalogue` (same package `com.tailormyresume.core.domain.offline`). Only tests and the mock read `MockPackCatalogue`.
-- Every purchase succeeds unless a hook says otherwise. Hooks: `withOutcome(packId, PurchaseOutcome)`, `withFailureReason(reason)`, `withFreeCredits(n)`. `withFreeCredits` only applies before the first saved state.
-- A pending purchase gets one `PENDING` record. A later completed purchase of the same pack turns that record into `COMPLETED`.
-- Order ids look like `mock-order-<id>`.
-- Binding: `DomainModule.bindPaymentGateway`.
-- Test fake: `TestPaymentGateway(store = TestMockStateStore(), clock = TestClock())` with the same hooks. Contract: `PaymentGatewayContractTest`.
-- Real implementation: wrap Play Billing. Acknowledge every purchase. Return the order id from the purchase token. Put a server check behind `entitlement()`.
+The actual balance comes from `CreditsRepository.observeKnownBalance`, with null representing unavailable. Purchase history remains available for account export. A local clear drops cached wallet/history; it never revokes server credits. Historical reconciliation belongs to the app-only settlement adapter, not the mock or any feature-facing port. The backend consumes verified purchases.
 
 ### `NextOnboardingStepUseCase` and `OnboardingStep`
 
@@ -513,7 +473,7 @@ How the settings feature must adopt it:
 1. Delete `SettingsDataExportWriter`. Keep `SettingsExportFileStore`, `SettingsFileProvider`, and `createSettingsShareIntent`.
 2. Inject `ExportAccountDataUseCase` in `YourDataViewModel`. Call it when the data is ready to share.
 3. Share `AccountDataArchive.file` with the FileProvider. The file sits in `cacheDir/data-exports`, so the existing `file_paths` entry may need that folder name. Check the provider paths.
-4. Show the purchase list from `PaymentGateway.observePurchaseHistory()`. Remove the text "This build of TailorMyResume takes no payment".
+4. Show the purchase list from `AccountWallet.observePurchaseHistory()`. Remove the text "This build of TailorMyResume takes no payment".
 5. Remove the fake step delays in `YourDataViewModel`. Show the real wait. The mock already waits 700 ms.
 
 ### `SampleDataController`
@@ -548,7 +508,7 @@ interface SampleDataController {
 `reset()` returns the app to a fresh install: no session, no profile, no application, no export, one free credit.
 
 The dataset is one file: `core/domain/src/main/kotlin/com/tailormyresume/core/domain/sample/SampleDataSet.kt`.
-The controller is in `core:domain`, not `core:data`, because it uses `AnalyzeJobUseCase`, `TailorResumeUseCase`, and `PaymentGateway`. `core:data` cannot see them.
+The controller is in `core:domain`, not `core:data`, because it uses `AnalyzeJobUseCase`, `TailorResumeUseCase`, and `AccountWallet`. `core:data` cannot see them.
 
 - Mock: `OfflineSampleDataController`. It always uses the offline payment gateway and the offline analysis and tailoring sources. In every build type it never opens a Play purchase and never calls the backend.
 - Binding: `DomainModule.provideSampleDataController` (`@Singleton`).
@@ -571,10 +531,8 @@ Inject the type. Hilt provides it. All calls below are `suspend` unless noted.
 | Record consent | `SessionRepository`, `Clock` | `sessionRepository.recordConsent(ConsentRecord(purposes, clock.now(), ConsentRecord.CURRENT_NOTICE_VERSION))`. Then `nextOnboardingStep()` |
 | Read consent | `SessionRepository` | `sessionRepository.observeConsent()` |
 | Mark onboarding complete | `SessionRepository` | `sessionRepository.markOnboardingComplete()`. Call it after the first application is created |
-| Read credits | `PaymentGateway` | `paymentGateway.observeEntitlement()` gives a `Flow<PurchaseEntitlement>`. Use `totalCredits` for the pill |
-| Show packs | `PaymentGateway` | `paymentGateway.packs()` |
-| Buy a pack | `PaymentGateway` | `paymentGateway.purchase(pack.id)` gives `PurchaseResult.Completed`, `Pending`, `Cancelled`, or `Failed` |
-| Show purchases | `PaymentGateway` | `paymentGateway.observePurchaseHistory()` |
+| Read credits | `AccountWallet` | `paymentGateway.observeEntitlement()` gives a `Flow<PurchaseEntitlement>`. Use `totalCredits` for the pill |
+| Show purchases | `AccountWallet` | `paymentGateway.observePurchaseHistory()` |
 | Check or count a daily analysis or free tailoring | `UsageAllowance` | `usageAllowance.observeAnalysesLeft()` (Paste JD), `consumeAnalysis()` (Gap analysis, on success), `consumeFreeTailoring()` |
 | Discard the drafts of an old job description | `DiscardJobDraftsUseCase` | `discardJobDrafts(previousKeptJob)` |
 | Add or tick a prep item | `PrepPlanRepository` | `prepPlanRepository.add(applicationId, PrepPlanItem(id, text))`, `setDone(...)` |
@@ -583,7 +541,6 @@ Inject the type. Hilt provides it. All calls below are `suspend` unless noted.
 | Add the words for one requirement ("I have this") | `AddUserStatedFactUseCase` | `addUserStatedFact(requirement, statement)`. The fact gets a `U-` id |
 | Propose company and role from a pasted job description | `ProposeJobLabelUseCase` | `proposeJobLabel(rawText)` gives `JobLabelProposal(role, company)` |
 | Show a fact id | `FactDisplayIds` (object) | `FactDisplayIds.forBulletId(bulletId, entries)`, `FactDisplayIds.of(entry, entries)` |
-| Spend a credit | `PaymentGateway` | `paymentGateway.unlock(applicationId)` gives `CreditSpend.Spent(entitlement, kind)` or `CreditSpend.NoCreditLeft` |
 | Record an export | `ExportHistoryRepository` | After a `Spent` result: `exportHistoryRepository.record(ExportRecord(applicationId, format, fileName, clock.now(), spend.kind))` |
 | Show the exported state | `ExportHistoryRepository` | `exportHistoryRepository.observeExports(applicationId)`. The state is "exported" when the list is not empty |
 | Know if the device is online | `ConnectivityMonitor` | `connectivityMonitor.isOnline` (a `Flow<Boolean>`) |
@@ -607,7 +564,7 @@ Use the fakes from `core:testing`. Do not use a mocking library.
 | `ExportHistoryRepository` | `TestExportHistoryRepository` | `ExportHistoryRepositoryContractTest` |
 | `ConnectivityMonitor` | `TestConnectivityMonitor` | `ConnectivityMonitorContractTest` |
 | `SignInGateway` | `TestSignInGateway` | `SignInGatewayContractTest` |
-| `PaymentGateway` | `TestPaymentGateway` | `PaymentGatewayContractTest` |
+| `AccountWallet` | `TestAccountWallet` | `AccountWalletContractTest` |
 | `AccountDataExporter` | `TestAccountDataExporter` | `AccountDataExporterContractTest` |
 | `SampleDataController` | `TestSampleDataController` | `SampleDataControllerContractTest` |
 | `UsageAllowance` | `TestUsageAllowance` | `UsageAllowanceContractTest` |

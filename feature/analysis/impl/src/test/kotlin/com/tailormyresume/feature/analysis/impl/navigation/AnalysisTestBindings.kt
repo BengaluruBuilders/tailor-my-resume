@@ -3,15 +3,15 @@ package com.tailormyresume.feature.analysis.impl.navigation
 import com.tailormyresume.core.data.repository.ContentReportRepository
 import com.tailormyresume.core.data.repository.NoRemoteLedger
 import com.tailormyresume.core.data.repository.RemoteLedgerSource
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.ImportedJob
 import com.tailormyresume.core.domain.JobAnalysisResult
 import com.tailormyresume.core.domain.JobAnalysisSource
 import com.tailormyresume.core.domain.JobImporter
-import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.model.CandidateProfile
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestContentReportRepository
 import dagger.Module
 import dagger.Provides
@@ -42,7 +42,7 @@ object AnalysisTestBindings {
 
     @Provides
     @Singleton
-    fun paymentGateway(): PaymentGateway = TestPaymentGateway().withFreeCredits(0)
+    fun paymentGateway(): AccountWallet = TestAccountWallet().withFreeCredits(0)
 
     @Provides
     fun remoteLedgerSource(): RemoteLedgerSource = NoRemoteLedger()

@@ -42,5 +42,5 @@ internal sealed interface ApplicationDetailEvent {
 
     data class ReviewTailoredResume(val applicationId: String) : ApplicationDetailEvent
 
-    data class OpenPaywall(val applicationId: String) : ApplicationDetailEvent
+    data class EarnCredits(val applicationId: String) : ApplicationDetailEvent
 }

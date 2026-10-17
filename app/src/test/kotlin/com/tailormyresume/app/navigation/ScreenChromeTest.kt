@@ -31,7 +31,6 @@ import com.tailormyresume.feature.profile.api.navigation.ProfileListSection
 import com.tailormyresume.feature.profile.api.navigation.ProfileNavKey
 import com.tailormyresume.feature.profile.api.navigation.SkillsNavKey
 import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
-import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
 import com.tailormyresume.feature.tailor.api.navigation.EditResumeNavKey
 import com.tailormyresume.feature.tailor.api.navigation.ExportedNavKey
@@ -80,7 +79,6 @@ internal val CHROME_TABLE: List<ChromeRow> = listOf(
     ChromeRow(SettingsNavKey(), null, true, Back, "Profile", null),
     ChromeRow(CreditsNavKey(), null, true, Back, "Settings", null),
     ChromeRow(com.tailormyresume.feature.settings.api.navigation.ReferralsNavKey, null, true, Back, "Settings", null),
-    ChromeRow(PaywallNavKey(null), null, true, Close, null, null),
 )
 
 @RunWith(AndroidJUnit4::class)
@@ -96,8 +94,8 @@ class ScreenChromeTest {
     }
 
     @Test
-    fun chromeMatchesTTableForAll28Keys() {
-        assertThat(CHROME_TABLE).hasSize(28)
+    fun chromeMatchesTableForAll27Destinations() {
+        assertThat(CHROME_TABLE).hasSize(27)
         assertThat(CHROME_TABLE.map { it.key::class }).containsNoDuplicates()
 
         CHROME_TABLE.forEach { row ->

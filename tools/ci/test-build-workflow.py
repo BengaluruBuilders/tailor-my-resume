@@ -66,6 +66,7 @@ def main():
     release_config = jobs["release-config"]
     release_run = job_run(release_config)
     failures += expect("tools/ci/test-release-config.sh" in release_run, "release configuration runs checks")
+    failures += expect("tools/ci/test-staging-play-config.sh" in release_run, "release configuration runs staging Play checks")
     failures += expect(":app:dependencyGuard -PwarningsAsErrors=true" in release_run, "release configuration verifies dependency guard")
     failures += expect("org.gradle.daemon=true" in release_run, "release configuration enables daemon")
     failures += expect("./gradlew --stop" in release_run, "release configuration stops daemon")

@@ -16,7 +16,7 @@ import com.tailormyresume.core.model.TailoredResume
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
@@ -25,7 +25,7 @@ import com.tailormyresume.feature.analysis.api.navigation.JobResultNavKey
 import com.tailormyresume.feature.applications.api.navigation.ApplicationDetailNavKey
 import com.tailormyresume.feature.applications.impl.grant
 import com.tailormyresume.feature.applications.impl.prototypeApplication
-import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
+import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoredNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoringNavKey
 import org.junit.Rule
@@ -71,7 +71,7 @@ class ApplicationDetailNavigationTest {
         if (credits > 0) creditsRepository.sendLedger(listOf(grant(credits)))
         val viewModel = ApplicationDetailViewModel(
             applicationRepository = applicationRepository,
-            creditBalance = AccountCreditBalance(TestPaymentGateway().withFreeCredits(0), creditsRepository),
+            creditBalance = AccountCreditBalance(TestAccountWallet().withFreeCredits(0), creditsRepository),
             setApplicationStatus = SetApplicationStatusUseCase(applicationRepository, TestClock()),
             tailorResume = TailorResumeUseCase(OfflineResumeTailor(), AllowAllFabricationGuard),
             exportedPdfIntents = FakeExportedPdfIntents(),
@@ -114,7 +114,7 @@ class ApplicationDetailNavigationTest {
         composeRule.onNodeWithText("Re-tailor with profile changes").performClick()
         composeRule.waitForIdle()
 
-        assertThat(stack.last()).isEqualTo(PaywallNavKey(returnToApplicationId = "kb"))
+        assertThat(stack.last()).isEqualTo(CreditsNavKey(returnToApplicationId = "kb"))
     }
 
     @Test

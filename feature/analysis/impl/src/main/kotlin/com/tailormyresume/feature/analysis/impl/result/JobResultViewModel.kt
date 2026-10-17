@@ -62,7 +62,7 @@ internal class JobResultViewModel @AssistedInject constructor(
                     return@launch
                 }
                 when {
-                    credits <= 0 -> JobResultEvent.Paywall(applicationId)
+                    credits <= 0 -> JobResultEvent.EarnCredits(applicationId)
                     state.asksQuestion -> JobResultEvent.QuickQuestion(applicationId)
                     else -> JobResultEvent.Tailor(applicationId)
                 }

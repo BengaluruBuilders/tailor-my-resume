@@ -1,0 +1,55 @@
+{
+  "source": "actual signed staging runtime; no test renders",
+  "screenshots": [
+    {
+      "file": "screenshots/pixel-default-upgrade.png",
+      "sha256": "23ab83b6a729e65b24cad5d8c124f37a41dfc4959b4483b35ba84db2d61153ee",
+      "bytes": 142364,
+      "publicationCandidate": true,
+      "privacyChecked": true,
+      "caption": "Actual Pixel7Pro default staging upgrade preserves the existing empty resume import screen; package/signer checked and install-r succeeded. No account/data mutation.",
+      "frontendExecutable": "6b4a55b1d1bb9c9bd7e02e027de9967d97032235",
+      "backend": "694ec866da51d64c0f766dc95989daec891ee84d"
+    },
+    {
+      "file": "screenshots/emulator-credits.png",
+      "sha256": "3375fbc12c2875422622fdf2773b7a05694efc17dd7684c676fe91ee7e14525a",
+      "bytes": 72515,
+      "publicationCandidate": true,
+      "privacyChecked": true,
+      "caption": "Actual signed staging Credits shows zero credits with guest/account earning entry and history; no new-sale or manual-restore controls. Existing synthetic guest.",
+      "frontendExecutable": "6b4a55b1d1bb9c9bd7e02e027de9967d97032235",
+      "backend": "694ec866da51d64c0f766dc95989daec891ee84d"
+    },
+    {
+      "file": "screenshots/emulator-trial-unavailable.png",
+      "sha256": "4358bf73f4c48383fc85000bc61c05b08bef492afb189908ee3b34d42d37561e",
+      "bytes": 91929,
+      "publicationCandidate": true,
+      "privacyChecked": true,
+      "caption": "Actual Check guest trial result is neutral temporarily unavailable; zero balance/work retained. No claim or reward occurred.",
+      "frontendExecutable": "6b4a55b1d1bb9c9bd7e02e027de9967d97032235",
+      "backend": "694ec866da51d64c0f766dc95989daec891ee84d"
+    },
+    {
+      "file": "screenshots/emulator-offers-retry.png",
+      "sha256": "33543ff5ecba77ac8b1a07a41cc57d69fb5664ccf97d450a44ca3a72be6826ad",
+      "bytes": 103365,
+      "publicationCandidate": true,
+      "privacyChecked": true,
+      "caption": "Actual Check offers again remains neutral unavailable and usable; timed action correlates with exact candidate contact, not decoded response/reward proof.",
+      "frontendExecutable": "6b4a55b1d1bb9c9bd7e02e027de9967d97032235",
+      "backend": "694ec866da51d64c0f766dc95989daec891ee84d"
+    },
+    {
+      "file": "screenshots/emulator-draft-recreated.png",
+      "sha256": "c6fc11b600d3d412a774c9d8e9c1c302a3da0adc4e44559dc53b71d6082e05d9",
+      "bytes": 81219,
+      "publicationCandidate": true,
+      "privacyChecked": true,
+      "caption": "Actual synthetic unsent editor text survives landscape/portrait Activity rotation. Text was then cleared; no Analyze/paid call. Does not prove process-death persistence.",
+      "frontendExecutable": "6b4a55b1d1bb9c9bd7e02e027de9967d97032235",
+      "backend": "694ec866da51d64c0f766dc95989daec891ee84d"
+    }
+  ]
+}

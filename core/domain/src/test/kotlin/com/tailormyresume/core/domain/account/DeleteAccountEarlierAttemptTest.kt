@@ -6,7 +6,7 @@ import com.tailormyresume.core.data.repository.PendingAccountWipe
 import com.tailormyresume.core.data.repository.PendingWipeState
 import com.tailormyresume.core.domain.SignInAccount
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
@@ -53,7 +53,7 @@ class DeleteAccountEarlierAttemptTest {
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
         serverAccountDeleter = deleter,
-        creditBalance = testAccountCreditBalance(TestPaymentGateway().withFreeCredits(2)),
+        creditBalance = testAccountCreditBalance(TestAccountWallet().withFreeCredits(2)),
         latency = NoMockLatency,
         creditsRepository = TestCreditsRepository(),
         resumeSettingsRepository = TestResumeSettingsRepository(),

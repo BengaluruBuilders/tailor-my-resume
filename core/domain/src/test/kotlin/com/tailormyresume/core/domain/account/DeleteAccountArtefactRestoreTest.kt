@@ -8,7 +8,7 @@ import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.data.sampleApplication
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
@@ -37,7 +37,7 @@ class DeleteAccountArtefactRestoreTest {
         sessionRepository = TestSessionRepository(),
         signInGateway = TestSignInGateway(TestSessionRepository()),
         serverAccountDeleter = OfflineServerAccountDeleter(),
-        creditBalance = testAccountCreditBalance(TestPaymentGateway().withFreeCredits(2)),
+        creditBalance = testAccountCreditBalance(TestAccountWallet().withFreeCredits(2)),
         latency = NoMockLatency,
         creditsRepository = TestCreditsRepository(),
         resumeSettingsRepository = TestResumeSettingsRepository(),

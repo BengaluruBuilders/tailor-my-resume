@@ -19,7 +19,7 @@ import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
 import com.tailormyresume.core.designsystem.theme.TmrTheme
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.navigation.ChromeActions
@@ -27,11 +27,11 @@ import com.tailormyresume.core.navigation.LocalChromeActions
 import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.feature.analysis.api.navigation.JobResultNavKey
 import com.tailormyresume.feature.analysis.api.navigation.QuickQuestionNavKey
 import com.tailormyresume.feature.analysis.impl.ResultTestData
-import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
+import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoringNavKey
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -79,7 +79,7 @@ class JobResultRealEntryTest {
     lateinit var applicationRepository: ApplicationRepository
 
     @Inject
-    lateinit var paymentGateway: PaymentGateway
+    lateinit var paymentGateway: AccountWallet
 
     @Inject
     lateinit var creditsRepository: CreditsRepository
@@ -98,7 +98,7 @@ class JobResultRealEntryTest {
         runBlocking {
             applicationRepository.upsertApplication(ResultTestData.application())
             profileRepository.saveProfile(ResultTestData.profile)
-            (paymentGateway as TestPaymentGateway).withFreeCredits(3)
+            (paymentGateway as TestAccountWallet).withFreeCredits(3)
             creditsRepository.clear()
             creditsRepository.record(CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, 3, null, null, Instant.parse("2026-10-12T09:00:00Z")))
         }
@@ -133,7 +133,7 @@ class JobResultRealEntryTest {
 
     @Test
     fun tapTailorWithNoCreditsOpensPaywall() {
-        (paymentGateway as TestPaymentGateway).withFreeCredits(0)
+        (paymentGateway as TestAccountWallet).withFreeCredits(0)
         runBlocking { creditsRepository.clear() }
         show(JobResultNavKey(ResultTestData.APP_ID))
         awaitText(TAILOR)
@@ -141,7 +141,7 @@ class JobResultRealEntryTest {
         composeRule.onNodeWithText(TAILOR).performClick()
         composeRule.waitForIdle()
 
-        assertThat(state.stack.last()).isEqualTo(PaywallNavKey(returnToApplicationId = ResultTestData.APP_ID))
+        assertThat(state.stack.last()).isEqualTo(CreditsNavKey(returnToApplicationId = ResultTestData.APP_ID))
     }
 
     @Test

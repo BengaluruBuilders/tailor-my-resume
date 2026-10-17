@@ -1,7 +1,6 @@
 package com.tailormyresume.feature.settings.impl.credits
 
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import org.junit.Test
@@ -60,7 +59,7 @@ class CreditsHistoryMapperTest {
 
     @Test
     fun purchaseRowNeverShowsTodaysPlayPrice() {
-        val entry = CreditLedgerEntry(CreditLedgerKind.PURCHASE, 5, null, ApplicationPack.APPLICATION_PACK_FIVE, Instant.parse("2026-10-05T09:00:00Z"))
+        val entry = CreditLedgerEntry(CreditLedgerKind.PURCHASE, 5, null, "application_pack_5", Instant.parse("2026-10-05T09:00:00Z"))
 
         val row = rows(entries = listOf(entry)).single()
 

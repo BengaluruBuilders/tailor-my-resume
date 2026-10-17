@@ -10,7 +10,7 @@ import com.tailormyresume.feature.analysis.api.navigation.QuickQuestionNavKey
 import com.tailormyresume.feature.analysis.impl.question.QuickQuestionNavigation
 import com.tailormyresume.feature.analysis.impl.result.JobResultEvent
 import com.tailormyresume.feature.analysis.impl.result.JobResultNavigation
-import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
+import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoredNavKey
 import com.tailormyresume.feature.tailor.api.navigation.TailoringNavKey
 import org.junit.Test
@@ -26,8 +26,8 @@ class ResultNavigationTest {
     @Test
     fun paywallCarriesTheApplicationToReturnTo() {
         val navigator = navigatorOver(JobResultNavKey(APP))
-        JobResultNavigation(navigator).handle(JobResultEvent.Paywall(APP))
-        assertThat(navigator.state.stack.last()).isEqualTo(PaywallNavKey(returnToApplicationId = APP))
+        JobResultNavigation(navigator).handle(JobResultEvent.EarnCredits(APP))
+        assertThat(navigator.state.stack.last()).isEqualTo(CreditsNavKey(returnToApplicationId = APP))
     }
 
     @Test

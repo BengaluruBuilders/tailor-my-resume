@@ -2,7 +2,7 @@ package com.tailormyresume.feature.settings.impl.delete
 
 import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.data.repository.PendingWipeState
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.domain.account.AccountWipeFinisher
 import com.tailormyresume.core.domain.account.DeleteAccountUseCase
@@ -11,7 +11,7 @@ import com.tailormyresume.core.domain.account.FinishPendingAccountWipeUseCase
 import com.tailormyresume.core.domain.account.ServerAccountDeleter
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.data.sampleApplication
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
@@ -46,7 +46,7 @@ internal class DeleteFixture(
     private val applications: Int = 3,
     private val credits: Int = 2,
     val deleter: RecordingServerAccountDeleter = RecordingServerAccountDeleter(),
-    private val payment: PaymentGateway = TestPaymentGateway().withFreeCredits(credits),
+    private val payment: AccountWallet = TestAccountWallet().withFreeCredits(credits),
     private val finisher: AccountWipeFinisher = AccountWipeFinisher.None,
 ) {
     val applicationRepository = TestApplicationRepository()

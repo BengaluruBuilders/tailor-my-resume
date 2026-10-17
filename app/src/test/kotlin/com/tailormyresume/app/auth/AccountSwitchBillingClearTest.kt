@@ -2,14 +2,9 @@ package com.tailormyresume.app.auth
 
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.app.ai.RemoteJobAnalysisSource
-import com.tailormyresume.app.billing.FakePlayBilling
-import com.tailormyresume.app.billing.PlayPurchase
-import com.tailormyresume.app.billing.PlayPurchaseResult
-import com.tailormyresume.app.billing.PlayPurchaseState
-import com.tailormyresume.app.billing.RemotePaymentGateway
+import com.tailormyresume.app.billing.RemoteAccountWallet
 import com.tailormyresume.app.billing.SwitchableUid
 import com.tailormyresume.app.billing.WalletSource
-import com.tailormyresume.app.billing.idleScope
 import com.tailormyresume.core.data.repository.PendingReportQueue
 import com.tailormyresume.core.testing.mock.TestMockStateStore
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
@@ -30,8 +25,7 @@ class AccountSwitchBillingClearTest {
     private val server = MockWebServer().apply { start() }
     private val api = server.api()
     private val account = SwitchableUid("uid-0")
-    private val billing = FakePlayBilling()
-    private val payments = RemotePaymentGateway(api, WalletSource(api, account), billing, account, idleScope(), TestCreditsRepository())
+    private val payments = RemoteAccountWallet(api, WalletSource(api, account), account)
     private val session = TestSessionRepository()
     private val store = TestMockStateStore()
     private val cleaner = SignOutCleaner(payments, RemoteJobAnalysisSource(api, NoMatcher), PendingReportQueue(store), store, TestCreditsRepository())
@@ -56,8 +50,6 @@ class AccountSwitchBillingClearTest {
 
     private suspend fun holdAPackAndCacheHistoryForUid0() {
         server.dispatcher = routes
-        billing.purchaseResult = PlayPurchaseResult.Done(PlayPurchase(PACK, "token-1", PlayPurchaseState.PENDING))
-        payments.purchase(PACK)
         payments.purchaseHistory()
     }
 
@@ -86,7 +78,7 @@ class AccountSwitchBillingClearTest {
 
         gateway().signIn()
 
-        assertThat(pendingPacks()).containsExactly(PACK)
+        assertThat(pendingPacks()).isEmpty()
         assertThat(cachedHistory()).hasSize(1)
     }
 

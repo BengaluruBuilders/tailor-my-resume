@@ -37,11 +37,12 @@ forbid_ungrounded_comments() {
 forbid_debug_signing_outside_staging() {
   local matches
   matches="$(awk '
-    /create\("staging"\)[[:space:]]*\{/ { staging = 1; depth = 0 }
+    /create\("staging(Play)?"\)[[:space:]]*\{/ { staging = 1; play = ($0 ~ /"stagingPlay"/); depth = 0 }
     {
       line = $0
-      allowed = staging && line ~ /signingConfigs\.getByName\("debug"\)/
-      if (line ~ /signingConfigs\.(named|getByName)\(/ && line !~ /signingConfigs\.(named|getByName)\("upload"\)/ && !allowed) {
+      allowed = staging && ((!play && line ~ /signingConfigs\.getByName\("debug"\)/) ||
+        (play && line ~ /signingConfigs\.getByName\("stagingUpload"\)/))
+      if (line ~ /signingConfigs\.(named|getByName)\(/ && (line !~ /signingConfigs\.(named|getByName)\("upload"\)/ || (staging && play)) && !allowed) {
         print FILENAME ":" FNR ":" line
       }
       if (staging) {
@@ -51,7 +52,7 @@ forbid_debug_signing_outside_staging() {
     }
   ' app/build.gradle.kts)"
   if [[ -n "$matches" ]]; then
-    echo "::error title=Constitution V.7::Only the staging build type may use the debug key. Every other signing config must name the upload key directly."
+    echo "::error title=Constitution V.7::Only the staging build type may use the debug key. Only stagingPlay may name stagingUpload. Every other signing config must name the upload key directly."
     echo "$matches"
     echo
     failures=$((failures + 1))

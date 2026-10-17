@@ -23,7 +23,11 @@ import com.tailormyresume.core.testing.mock.TestMockStateStore
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestPendingAccountWipe
 import com.tailormyresume.core.testing.repository.TestSessionRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -88,6 +92,92 @@ class GoogleAccountCoordinatorTest {
         db.close()
         server.shutdown()
         listOf("account-work", "account-upgrades", "exports").forEach { File(context.filesDir, it).deleteRecursively() }
+    }
+
+    @Test fun navigationCancellationAfterDirectPublicationExposesRetryAndPreservesWork() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        firebase.user = FirebaseUser("A", "A", "a@example.com", googleSubject = "google-B")
+        var navigating = true
+        val navigation = object : com.tailormyresume.core.data.repository.SessionRepository by sessions {
+            override suspend fun saveAccount(account: SignInAccount) {
+                sessions.saveAccount(account)
+                if (navigating) {
+                    navigating = false
+                    currentCoroutineContext().cancel(CancellationException("Sign-in screen removed"))
+                }
+            }
+        }
+        val coordinator = coordinator(checkpoints, journals, navigation)
+        val operation = launch { coordinator.signIn() }
+        operation.join()
+        assertThat(operation.isCancelled).isTrue()
+        assertThat(coordinator.state.value).isEqualTo(GoogleAccountState.Retry(canCancel = true))
+        assertThat(sessions.observeAccount().first()?.id).isEqualTo("B")
+        assertThat(journals.read()?.phase).isEqualTo("LINKED")
+        assertThat(checkpoints.read("A", environment)?.profile?.fullName).isEqualTo("Guest")
+        fence.check(fence.ticket())
+        availableObservation()
+        coordinator.retry()
+        assertThat(coordinator.state.value).isInstanceOf(GoogleAccountState.Offer::class.java)
+        assertThat(firebase.switches).isEqualTo(1)
+        assertThat(requests("/activate")).isEmpty()
+    }
+
+    @Test fun navigationCancellationAfterSameUidLinkReleasesFenceWithoutLosingJournalOrWork() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        firebase.conflict = false
+        var navigating = true
+        val navigation = object : com.tailormyresume.core.data.repository.SessionRepository by sessions {
+            override suspend fun saveAccount(account: SignInAccount) {
+                sessions.saveAccount(account)
+                if (navigating) {
+                    navigating = false
+                    currentCoroutineContext().cancel(CancellationException("Sign-in screen removed"))
+                }
+            }
+        }
+        val coordinator = coordinator(checkpoints, journals, navigation)
+        val operation = launch { coordinator.signIn() }
+        operation.join()
+        assertThat(operation.isCancelled).isTrue()
+        assertThat(coordinator.state.value).isEqualTo(GoogleAccountState.Retry(canCancel = true))
+        assertThat(sessions.observeAccount().first()?.id).isEqualTo("A")
+        assertThat(journals.read()?.phase).isEqualTo("LINKED")
+        assertThat(db.profileDao().readProfile()?.fullName).isEqualTo("Guest")
+        fence.check(fence.ticket())
+        assertThat(firebase.switches).isEqualTo(0)
+        assertThat(requests("/activate")).isEmpty()
+    }
+
+    @Test fun cancellationDuringConflictCompletionKeepsFenceAndRecoverableJournal() = runTest {
+        val io = UnconfinedTestDispatcher(testScheduler)
+        val checkpoints = LocalWorkCheckpoint(context, db, store, io)
+        val journals = PrivateUpgradeStore(context, io)
+        guest()
+        checkpoints.capture("A", environment)
+        val original = switchedJournal()
+        journals.write(original)
+        firebase.user = FirebaseUser("B", "B", "b@example.com", googleSubject = "google-B")
+        fence.freeze()
+        firebase.beforeCurrent = {
+            firebase.beforeCurrent = {}
+            currentCoroutineContext().cancel(CancellationException("Account screen removed"))
+        }
+        val coordinator = coordinator(checkpoints, journals)
+        val operation = launch { coordinator.open() }
+        operation.join()
+        assertThat(operation.isCancelled).isTrue()
+        assertThat(coordinator.state.value).isEqualTo(GoogleAccountState.Retry(canCancel = false))
+        assertThat(journals.read()).isEqualTo(original)
+        assertThat(db.profileDao().readProfile()?.fullName).isEqualTo("Guest")
+        assertThat(sessions.observeAccount().first()?.id).isEqualTo("A")
+        assertThat(runCatching { fence.check(fence.ticket()) }.isFailure).isTrue()
     }
 
     @Test fun conflictCheckpointsBeforeAnyGoogleSwitchAndCancellationKeepsGuestWork() = runTest {
@@ -414,10 +504,14 @@ class GoogleAccountCoordinatorTest {
         sessions.saveAccount(SignInAccount("A", "", "", AccountMode.ANONYMOUS))
     }
 
-    private fun kotlinx.coroutines.test.TestScope.coordinator(checkpoints: LocalWorkCheckpoint, journals: PrivateUpgradeStore): GoogleAccountCoordinator {
+    private fun kotlinx.coroutines.test.TestScope.coordinator(
+        checkpoints: LocalWorkCheckpoint,
+        journals: PrivateUpgradeStore,
+        sessionRepository: com.tailormyresume.core.data.repository.SessionRepository = sessions,
+    ): GoogleAccountCoordinator {
         val wallet = WalletSource(api, firebase)
         return GoogleAccountCoordinator(
-            firebase, credentials, api, TailorMyResumeApiConfig(environment), sessions, journals,
+            firebase, credentials, api, TailorMyResumeApiConfig(environment), sessionRepository, journals,
             checkpoints, fence, pending, server.signOutCleaner(),
             GooglePromotionClient(
                 api,
@@ -443,7 +537,11 @@ class GoogleAccountCoordinatorTest {
         var beforeReauth: suspend () -> Unit = {}
         override fun uid() = user.uid
         override fun isAnonymous() = user.mode == AccountMode.ANONYMOUS
-        override suspend fun currentUser() = user
+        var beforeCurrent: suspend () -> Unit = {}
+        override suspend fun currentUser(): FirebaseUser {
+            beforeCurrent()
+            return user
+        }
         override suspend fun linkGoogle(googleIdToken: String): AuthOutcome<FirebaseUser> = if (conflict) {
             AuthOutcome.Failure(AuthFailure.CredentialConflict)
         } else {

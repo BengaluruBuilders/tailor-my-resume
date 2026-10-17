@@ -14,7 +14,7 @@ import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.core.testing.data.PrototypeFixtures
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
@@ -53,7 +53,7 @@ class ApplicationsNavigationTest {
         if (withApplications) applicationRepository.sendApplications(scenario.applications)
         val viewModel = ApplicationsViewModel(
             applicationRepository,
-            AccountCreditBalance(TestPaymentGateway().withFreeCredits(0), creditsRepository),
+            AccountCreditBalance(TestAccountWallet().withFreeCredits(0), creditsRepository),
             profileRepository,
         )
         composeRule.setContent { TmrTheme { ApplicationsRoute(viewModel, navigator) } }

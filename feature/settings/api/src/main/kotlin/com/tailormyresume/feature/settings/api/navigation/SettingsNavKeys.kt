@@ -3,6 +3,7 @@ package com.tailormyresume.feature.settings.api.navigation
 import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.core.model.DebugScenario
 import com.tailormyresume.core.navigation.Navigator
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -14,10 +15,12 @@ data class SettingsNavKey(
 @Serializable
 data class CreditsNavKey(
     val scenario: DebugScenario = DebugScenario.defaultValue,
+    val returnToApplicationId: String? = null,
 ) : NavKey
 
 @Serializable
-data class PaywallNavKey(
+@SerialName("com.tailormyresume.feature.settings.api.navigation.PaywallNavKey")
+data class LegacyPaymentNavKey(
     val returnToApplicationId: String? = null,
     val scenario: DebugScenario = DebugScenario.defaultValue,
 ) : NavKey
@@ -39,6 +42,6 @@ fun Navigator.navigateToCredits() {
     navigate(CreditsNavKey())
 }
 
-fun Navigator.navigateToPaywall(returnToApplicationId: String? = null) {
-    navigate(PaywallNavKey(returnToApplicationId))
+fun Navigator.navigateToEarnCredits(applicationId: String) {
+    navigate(CreditsNavKey(returnToApplicationId = applicationId))
 }

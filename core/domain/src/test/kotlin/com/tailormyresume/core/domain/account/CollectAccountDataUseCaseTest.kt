@@ -1,7 +1,6 @@
 package com.tailormyresume.core.domain.account
 
 import com.google.common.truth.Truth.assertThat
-import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.domain.FakeApplicationRepository
 import com.tailormyresume.core.domain.FakeProfileRepository
 import com.tailormyresume.core.model.CreditLedgerEntry
@@ -11,7 +10,7 @@ import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.account.TestAccountDataExporter
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.data.sampleApplication
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestExportHistoryRepository
 import com.tailormyresume.core.testing.repository.TestResumeSettingsRepository
@@ -26,7 +25,7 @@ class CollectAccountDataUseCaseTest {
     private val profiles = FakeProfileRepository(canonicalCandidateProfile)
     private val applications = FakeApplicationRepository()
     private val exports = TestExportHistoryRepository()
-    private val payments = TestPaymentGateway()
+    private val payments = TestAccountWallet()
     private val clock = TestClock()
     private val credits = TestCreditsRepository()
     private val resumeSettings = TestResumeSettingsRepository()
@@ -45,7 +44,7 @@ class CollectAccountDataUseCaseTest {
     fun theSnapshotHoldsEverythingTheAccountOwns() = runTest {
         session.saveAccount(SignInAccount.localAccount)
         applications.upsertApplication(sampleApplication)
-        payments.purchase(ApplicationPack.APPLICATION_PACK_FIVE)
+        payments.withHistoricalPurchase("application_pack_5")
 
         val data = collect()
 

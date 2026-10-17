@@ -14,11 +14,11 @@ import com.tailormyresume.core.domain.IdGenerator
 import com.tailormyresume.core.domain.JobDescriptionAnalyzer
 import com.tailormyresume.core.domain.LocalAnalyzer
 import com.tailormyresume.core.domain.TailorResumeUseCase
+import com.tailormyresume.core.domain.offline.OfflineAccountWallet
 import com.tailormyresume.core.domain.offline.OfflineFabricationGuard
 import com.tailormyresume.core.domain.offline.OfflineGapMatcher
 import com.tailormyresume.core.domain.offline.OfflineJobAnalysisSource
 import com.tailormyresume.core.domain.offline.OfflineJobDescriptionAnalyzer
-import com.tailormyresume.core.domain.offline.OfflinePaymentGateway
 import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.domain.offline.UuidIdGenerator
 import com.tailormyresume.core.domain.sample.OfflineSampleDataController
@@ -56,7 +56,7 @@ internal abstract class DomainModule {
             profileRepository: ProfileRepository,
             applicationRepository: ApplicationRepository,
             exportHistoryRepository: ExportHistoryRepository,
-            paymentGateway: OfflinePaymentGateway,
+            paymentGateway: OfflineAccountWallet,
             analysisSource: OfflineJobAnalysisSource,
             resumeTailor: OfflineResumeTailor,
             fabricationGuard: FabricationGuard,

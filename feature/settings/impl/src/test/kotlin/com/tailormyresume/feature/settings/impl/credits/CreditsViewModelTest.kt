@@ -4,11 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.domain.account.AccountCreditBalance
 import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
-import com.tailormyresume.feature.settings.impl.paywall.RecordingCreditsRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -24,7 +23,7 @@ class CreditsViewModelTest {
 
     private val applications = TestApplicationRepository()
     private val ledger = TestCreditsRepository()
-    private val payment = TestPaymentGateway().withFreeCredits(3)
+    private val payment = TestAccountWallet().withFreeCredits(3)
 
     private fun viewModel(credits: com.tailormyresume.core.data.repository.CreditsRepository = ledger) =
         CreditsViewModel(credits, AccountCreditBalance(payment, credits), applications)

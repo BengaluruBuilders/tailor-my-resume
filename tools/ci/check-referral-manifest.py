@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("manifest", type=Path)
-parser.add_argument("--variant", choices=["debug", "staging"], required=True)
+parser.add_argument("--variant", choices=["debug", "staging", "stagingPlay"], required=True)
 parser.add_argument("--origin", required=True, help="Exact synthetic origin, or empty for disabled")
 args = parser.parse_args()
 android = "{http://schemas.android.com/apk/res/android}"

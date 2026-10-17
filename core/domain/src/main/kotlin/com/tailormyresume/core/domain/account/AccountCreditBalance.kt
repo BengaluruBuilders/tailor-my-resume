@@ -1,7 +1,7 @@
 package com.tailormyresume.core.domain.account
 
 import com.tailormyresume.core.data.repository.CreditsRepository
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class AccountCreditBalance @Inject constructor(
-    private val paymentGateway: PaymentGateway,
+    private val paymentGateway: AccountWallet,
     private val creditsRepository: CreditsRepository,
 ) {
 

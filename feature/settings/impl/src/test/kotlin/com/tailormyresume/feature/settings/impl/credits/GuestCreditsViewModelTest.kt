@@ -6,8 +6,8 @@ import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.domain.GuestTrialOffer
 import com.tailormyresume.core.domain.GuestTrialResult
 import com.tailormyresume.core.domain.account.AccountCreditBalance
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.TestGuestTrialGateway
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
@@ -24,7 +24,7 @@ class GuestCreditsViewModelTest {
         override fun uid() = "guest"
         override fun isAnonymous() = true
     }
-    private fun subject() = CreditsViewModel(credits, AccountCreditBalance(TestPaymentGateway(), credits), TestApplicationRepository(), uid, guests)
+    private fun subject() = CreditsViewModel(credits, AccountCreditBalance(TestAccountWallet(), credits), TestApplicationRepository(), uid, guests)
 
     @Test fun guestCanRetryUnavailableOfferWithoutLosingBalanceOrOpeningPurchases() = runTest {
         guests.offer = GuestTrialOffer.Unavailable()
@@ -33,7 +33,7 @@ class GuestCreditsViewModelTest {
             awaitItem()
             subject.onCheckTrial()
             val unavailable = expectMostRecentItem() as CreditsUiState.Content
-            assertThat(unavailable.canPurchase).isFalse()
+            assertThat(unavailable.isGuest).isTrue()
             assertThat(unavailable.trial).isEqualTo(CreditsTrialState.Offer(GuestTrialOffer.Unavailable()))
             guests.offer = GuestTrialOffer.Available(8)
             subject.onResume()

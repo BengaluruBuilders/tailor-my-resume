@@ -47,7 +47,7 @@ internal sealed interface JobResultUiState {
 }
 
 internal sealed interface JobResultEvent {
-    data class Paywall(val applicationId: String) : JobResultEvent
+    data class EarnCredits(val applicationId: String) : JobResultEvent
 
     data class QuickQuestion(val applicationId: String) : JobResultEvent
 

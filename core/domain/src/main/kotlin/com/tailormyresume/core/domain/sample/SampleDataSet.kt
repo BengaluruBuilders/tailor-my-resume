@@ -1,6 +1,5 @@
 package com.tailormyresume.core.domain.sample
 
-import com.tailormyresume.core.domain.ApplicationPack
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CandidateProfile
 import com.tailormyresume.core.model.EntryCategory
@@ -33,7 +32,7 @@ internal object SampleDataSet {
 
     val account: SignInAccount = SignInAccount.localAccount
 
-    const val PURCHASED_PACK_ID = ApplicationPack.APPLICATION_PACK_FIVE
+    const val PURCHASED_PACK_ID = "application_pack_5"
 
     val profile = CandidateProfile(
         fullName = "Priya Deshmukh",

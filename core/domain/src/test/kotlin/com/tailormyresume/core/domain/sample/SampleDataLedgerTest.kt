@@ -4,11 +4,11 @@ import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.domain.AnalyzeJobUseCase
 import com.tailormyresume.core.domain.TailorResumeUseCase
+import com.tailormyresume.core.domain.offline.OfflineAccountWallet
 import com.tailormyresume.core.domain.offline.OfflineFabricationGuard
 import com.tailormyresume.core.domain.offline.OfflineGapMatcher
 import com.tailormyresume.core.domain.offline.OfflineJobAnalysisSource
 import com.tailormyresume.core.domain.offline.OfflineJobDescriptionAnalyzer
-import com.tailormyresume.core.domain.offline.OfflinePaymentGateway
 import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.testing.mock.TestMockStateStore
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
@@ -26,7 +26,7 @@ class SampleDataLedgerTest {
 
     private val store = TestMockStateStore()
     private val clock = TestClock()
-    private val payments = OfflinePaymentGateway(store, NoMockLatency, clock, TestIdGenerator("order"))
+    private val payments = OfflineAccountWallet(store, NoMockLatency, clock, TestIdGenerator("order"))
     private val credits = TestCreditsRepository()
     private val controller = OfflineSampleDataController(
         store = store,

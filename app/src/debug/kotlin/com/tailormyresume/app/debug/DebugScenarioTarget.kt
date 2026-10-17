@@ -37,7 +37,7 @@ enum class DebugScenarioTarget(
 
     val needsSampleJob: Boolean get() = this == Analysis
 
-    val forcesPayment: Boolean get() = this == Credits
+    val forcesWallet: Boolean get() = this == Credits
 
     fun navKey(scenario: DebugScenario): NavKey = when (this) {
         SignIn -> SignInNavKey(scenario = scenario)

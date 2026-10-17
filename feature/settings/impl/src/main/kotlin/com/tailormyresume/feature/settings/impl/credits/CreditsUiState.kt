@@ -6,7 +6,7 @@ import com.tailormyresume.core.domain.GuestTrialResult
 internal sealed interface CreditsUiState {
     data object Loading : CreditsUiState
 
-    data class Content(val credits: Int?, val history: List<CreditsHistoryRow>, val canPurchase: Boolean = true, val trial: CreditsTrialState = CreditsTrialState.Idle) : CreditsUiState
+    data class Content(val credits: Int?, val history: List<CreditsHistoryRow>, val isGuest: Boolean = false, val trial: CreditsTrialState = CreditsTrialState.Idle) : CreditsUiState
 }
 
 internal sealed interface CreditsTrialState {

@@ -6,11 +6,11 @@ import com.tailormyresume.core.domain.AnalyzeJobUseCase
 import com.tailormyresume.core.domain.ExportCheck
 import com.tailormyresume.core.domain.ExportReadiness
 import com.tailormyresume.core.domain.TailorResumeUseCase
+import com.tailormyresume.core.domain.offline.OfflineAccountWallet
 import com.tailormyresume.core.domain.offline.OfflineFabricationGuard
 import com.tailormyresume.core.domain.offline.OfflineGapMatcher
 import com.tailormyresume.core.domain.offline.OfflineJobAnalysisSource
 import com.tailormyresume.core.domain.offline.OfflineJobDescriptionAnalyzer
-import com.tailormyresume.core.domain.offline.OfflinePaymentGateway
 import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.BulletDecision
@@ -36,7 +36,7 @@ class OfflineSampleDataControllerTest : SampleDataControllerContractTest() {
     private val applications = TestApplicationRepository()
     private val exports = TestExportHistoryRepository()
     private val clock = TestClock()
-    private val payments = OfflinePaymentGateway(store, NoMockLatency, clock, TestIdGenerator("order"))
+    private val payments = OfflineAccountWallet(store, NoMockLatency, clock, TestIdGenerator("order"))
     private val controller = OfflineSampleDataController(
         store = store,
         sessionRepository = session,

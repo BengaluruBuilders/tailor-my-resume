@@ -1,0 +1,157 @@
+{
+  "syntheticOnly": true,
+  "purchase": {
+    "request": {
+      "productId": "application_pack_5",
+      "purchaseToken": "synthetic-not-valid-at-Play"
+    },
+    "first": {
+      "status": 201,
+      "body": {
+        "purchase": {
+          "orderId": "GPA.synthetic-05",
+          "productId": "application_pack_5",
+          "creditsGranted": 5,
+          "purchasedAt": "2026-10-10T09:12:00Z",
+          "state": "COMPLETED"
+        },
+        "wallet": {
+          "credits": 5,
+          "freeCredits": 0,
+          "purchasedCredits": 5,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        }
+      }
+    },
+    "repeat": {
+      "status": 200,
+      "body": {
+        "purchase": {
+          "orderId": "GPA.synthetic-05",
+          "productId": "application_pack_5",
+          "creditsGranted": 5,
+          "purchasedAt": "2026-10-10T09:12:00Z",
+          "state": "COMPLETED"
+        },
+        "wallet": {
+          "credits": 5,
+          "freeCredits": 0,
+          "purchasedCredits": 5,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        }
+      }
+    },
+    "failures": [
+      {
+        "status": 409,
+        "code": "PURCHASE_PENDING"
+      },
+      {
+        "status": 502,
+        "code": "PLAY_UNAVAILABLE"
+      },
+      {
+        "status": 403,
+        "code": "FORBIDDEN"
+      },
+      {
+        "status": 403,
+        "code": "GOOGLE_REQUIRED"
+      }
+    ]
+  },
+  "ledger": {
+    "serverBalance": 9,
+    "entries": [
+      {
+        "id": "same-time-original-1",
+        "kind": "WELCOME",
+        "amount": 1
+      },
+      {
+        "id": "same-time-original-2",
+        "kind": "GOOGLE_SIGNUP",
+        "amount": 5
+      },
+      {
+        "id": "same-time-original-3",
+        "kind": "REFERRAL_REWARD",
+        "amount": 5
+      },
+      {
+        "id": "same-time-original-4",
+        "kind": "FUTURE_KIND",
+        "amount": 2
+      }
+    ],
+    "currentClientOmittedIds": [
+      "same-time-original-4"
+    ],
+    "retainedPreAcquisitionClientOmittedIds": [
+      "same-time-original-2",
+      "same-time-original-3",
+      "same-time-original-4"
+    ],
+    "expectedBalanceForBoth": 9,
+    "note": "Entries are representative subset, not a balance reconstruction; unknown kinds omitted, never relabeled."
+  },
+  "uncappedExport": {
+    "credits": {
+      "balance": 101,
+      "entries": {
+        "deterministicExpansion": {
+          "count": 101,
+          "idFormat": "legacy-ledger-{index:03d}",
+          "indexRange": [
+            0,
+            100
+          ],
+          "firstKind": "MIGRATION",
+          "remainingKind": "WELCOME",
+          "amountEach": 1,
+          "applicationId": null,
+          "productId": null,
+          "createdAt": "2026-10-10T09:12:00Z"
+        }
+      }
+    },
+    "purchases": [
+      {
+        "orderId": "GPA.synthetic-05",
+        "productId": "application_pack_5",
+        "creditsGranted": 5,
+        "purchasedAt": "2026-10-10T09:12:00Z",
+        "state": "COMPLETED"
+      }
+    ],
+    "expectedLedgerCount": 101,
+    "displayLedgerMaximum": 100,
+    "note": "Compact fixture recipe: expand101 entries before endpoint assertion; this recipe is not an HTTP response schema."
+  },
+  "classification": {
+    "syntheticOnly": true,
+    "cases": [
+      {
+        "evidence": "trusted creation before accepted cutoff",
+        "expected": "EXISTING"
+      },
+      {
+        "evidence": "unprovable or expired recovery",
+        "expected": "AMBIGUOUS"
+      },
+      {
+        "evidence": "trusted direct-new within accepted window; all evidence validated",
+        "expected": "existing direct-new decision path; no automatic fixture award"
+      }
+    ],
+    "pauseResumeInvariant": "original observedAt/anchor/source/deadline retained; unavailable configuration may recover eligibility without resetting original facts or top-up"
+  }
+}

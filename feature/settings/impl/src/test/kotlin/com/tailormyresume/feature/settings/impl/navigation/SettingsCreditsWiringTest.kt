@@ -15,7 +15,7 @@ import com.tailormyresume.core.model.CreditLedgerEntry
 import com.tailormyresume.core.model.CreditLedgerKind
 import com.tailormyresume.core.screenshot.TmrTestDevices
 import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
-import com.tailormyresume.feature.settings.api.navigation.PaywallNavKey
+import com.tailormyresume.feature.settings.api.navigation.ReferralsNavKey
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -70,16 +70,16 @@ class SettingsCreditsWiringTest {
     fun creditsEntryShowsTheLedgerFromTheRepository() {
         harness.waitFor { composeRule.onAllNodesWithText("Free first resume").fetchSemanticsNodes().isNotEmpty() }
 
-        composeRule.onNodeWithText("Buy more").assertExists()
+        composeRule.onNodeWithText("Invite friends").assertExists()
     }
 
     @Test
-    fun buyMoreOpensPaywallWithNullReturn() {
-        harness.waitFor { composeRule.onAllNodesWithText("Buy more").fetchSemanticsNodes().isNotEmpty() }
+    fun inviteOpensReferrals() {
+        harness.waitFor { composeRule.onAllNodesWithText("Invite friends").fetchSemanticsNodes().isNotEmpty() }
 
-        composeRule.onNodeWithText("Buy more").performScrollTo().performClick()
+        composeRule.onNodeWithText("Invite friends").performScrollTo().performClick()
         composeRule.waitForIdle()
 
-        assertThat(harness.state.stack.last()).isEqualTo(PaywallNavKey(null))
+        assertThat(harness.state.stack.last()).isEqualTo(ReferralsNavKey)
     }
 }

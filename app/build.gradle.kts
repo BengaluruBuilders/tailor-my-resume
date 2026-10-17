@@ -1,3 +1,5 @@
+import java.net.URI
+
 plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.tailormyresume.android.application)
@@ -34,6 +36,13 @@ val uploadKeyAlias = releaseSetting("TMR_UPLOAD_KEY_ALIAS")
 val uploadKeyPassword = releaseSetting("TMR_UPLOAD_KEY_PASSWORD")
 val hasUploadSigning =
     listOf(uploadKeystoreFile, uploadStorePassword, uploadKeyAlias, uploadKeyPassword).all { it != null }
+
+val stagingUploadKeystoreFile = releaseSetting("TMR_STAGING_UPLOAD_KEYSTORE_FILE")
+val stagingUploadStorePassword = releaseSetting("TMR_STAGING_UPLOAD_STORE_PASSWORD")
+val stagingUploadKeyAlias = releaseSetting("TMR_STAGING_UPLOAD_KEY_ALIAS")
+val stagingUploadKeyPassword = releaseSetting("TMR_STAGING_UPLOAD_KEY_PASSWORD")
+val hasStagingUploadSigning =
+    listOf(stagingUploadKeystoreFile, stagingUploadStorePassword, stagingUploadKeyAlias, stagingUploadKeyPassword).all { it != null }
 
 val prodBackendProperties =
     listOf(
@@ -115,6 +124,14 @@ android {
     testOptions.unitTests.isIncludeAndroidResources = true
 
     signingConfigs {
+        if (hasStagingUploadSigning) {
+            create("stagingUpload") {
+                storeFile = file(stagingUploadKeystoreFile!!)
+                storePassword = stagingUploadStorePassword
+                keyAlias = stagingUploadKeyAlias
+                keyPassword = stagingUploadKeyPassword
+            }
+        }
         if (hasUploadSigning) {
             create("upload") {
                 storeFile = file(uploadKeystoreFile!!)
@@ -139,6 +156,12 @@ android {
                 prodBackendProperties.map { providers.gradleProperty(it).getOrElse("") },
             )
         }
+        create("stagingPlay") {
+            shrinkWithR8(getDefaultProguardFile("proguard-android-optimize.txt"))
+            matchingFallbacks += "release"
+            if (hasStagingUploadSigning) signingConfig = signingConfigs.getByName("stagingUpload")
+            stagingBuildConfig()
+        }
         create("staging") {
             shrinkWithR8(getDefaultProguardFile("proguard-android-optimize.txt"))
             matchingFallbacks += "release"
@@ -148,7 +171,7 @@ android {
     }
 
     sourceSets {
-        listOf("debug", "staging", "release").forEach { variant ->
+        listOf("debug", "staging", "stagingPlay", "release").forEach { variant ->
             val property = if (variant == "release") "tailormyresumeReferralOrigin" else "tailormyresumeStagingReferralOrigin"
             if (referralOrigin(property).isNotEmpty()) {
                 val original = layout.projectDirectory.file("src/$variant/AndroidManifest.xml")
@@ -181,6 +204,7 @@ android {
         }
         getByName("debug").res.srcDir("src/localStaging/res")
         getByName("staging").res.srcDir("src/localStaging/res")
+        getByName("stagingPlay").res.srcDir("src/localStaging/res")
     }
 
     packaging {
@@ -196,6 +220,45 @@ val verifyUploadSigning by tasks.registering {
         check(ready) {
             "Release bundles must be signed with the upload key. Set TMR_UPLOAD_KEYSTORE_FILE, " +
                 "TMR_UPLOAD_STORE_PASSWORD, TMR_UPLOAD_KEY_ALIAS and TMR_UPLOAD_KEY_PASSWORD. See docs/RELEASE.md."
+        }
+    }
+}
+
+val verifyStagingUploadSigning = tasks.register("verifyStagingUploadSigning") {
+    val ready = hasStagingUploadSigning
+    val keyFile = stagingUploadKeystoreFile?.let { file(it).canonicalFile }
+    val productionKeyFile = uploadKeystoreFile?.let { file(it).canonicalFile }
+    val debugKeyFile = android.signingConfigs.findByName("debug")?.storeFile?.canonicalFile
+    val alias = stagingUploadKeyAlias
+    doLast {
+        check(ready) {
+            "Staging Play artifacts require dedicated TMR_STAGING_UPLOAD_KEYSTORE_FILE, " +
+                "TMR_STAGING_UPLOAD_STORE_PASSWORD, TMR_STAGING_UPLOAD_KEY_ALIAS and TMR_STAGING_UPLOAD_KEY_PASSWORD. See docs/RELEASE.md."
+        }
+        check(keyFile?.isFile == true && keyFile != productionKeyFile && keyFile != debugKeyFile && alias != "androiddebugkey") {
+            "Staging Play requires an existing dedicated staging upload keystore, separate from production and debug signing."
+        }
+    }
+}
+
+val verifyStagingPlayIdentity = tasks.register("verifyStagingPlayIdentity") {
+    val api = providers.gradleProperty("tailormyresumeStagingApiBaseUrl").getOrElse("")
+    val project = providers.gradleProperty("tailormyresumeStagingFirebaseProjectId").getOrElse("")
+    val appId = providers.gradleProperty("tailormyresumeStagingFirebaseAppId").getOrElse("")
+    val clientId = providers.gradleProperty("tailormyresumeStagingWebClientId").getOrElse("")
+    val integrityProject = integrityProjectNumber("tailormyresumeStagingPlayIntegrityCloudProjectNumber")
+    doLast {
+        val uri = runCatching { URI(api) }.getOrNull()
+        check(uri != null && uri.scheme == "https" &&
+            uri.host?.lowercase() in listOf("abhishek-dubey-ms-7b16.local", "192.168.88.15") &&
+            uri.port in listOf(8443, 20002) && uri.path in listOf("", "/") &&
+            uri.userInfo == null && uri.query == null && uri.fragment == null) {
+            "Staging Play requires the approved LAN HTTPS staging API; production and other endpoints are forbidden."
+        }
+        check(project == "tailormy-resume-staging" && appId.startsWith("1:496155242121:android:") &&
+            clientId.startsWith("496155242121-") && clientId.endsWith(".apps.googleusercontent.com") &&
+            integrityProject == "496155242121") {
+            "Staging Play requires Firebase and Play Integrity project 496155242121 (tailormy-resume-staging)."
         }
     }
 }
@@ -218,6 +281,7 @@ tasks.configureEach {
     when (name) {
         "bundleRelease" -> dependsOn(verifyUploadSigning, verifyProdBackendConfig)
         "preStagingBuild" -> dependsOn(verifyStagingBackendConfig)
+        "preStagingPlayBuild" -> dependsOn(verifyStagingBackendConfig, verifyStagingPlayIdentity, verifyStagingUploadSigning)
     }
 }
 

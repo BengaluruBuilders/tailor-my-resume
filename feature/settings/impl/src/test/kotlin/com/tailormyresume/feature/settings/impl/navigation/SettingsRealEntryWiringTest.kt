@@ -29,7 +29,7 @@ import com.tailormyresume.core.designsystem.component.chrome.TmrSheetHostState
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastHost
 import com.tailormyresume.core.designsystem.component.chrome.TmrToastState
 import com.tailormyresume.core.designsystem.theme.TmrTheme
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.account.AccountData
 import com.tailormyresume.core.domain.account.AccountDataArchive
@@ -44,7 +44,7 @@ import com.tailormyresume.core.navigation.NavigationState
 import com.tailormyresume.core.navigation.Navigator
 import com.tailormyresume.core.navigation.PendingToast
 import com.tailormyresume.core.screenshot.TmrTestDevices
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.repository.TestContentReportRepository
 import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
@@ -131,7 +131,7 @@ object SettingsAppGatewayFakes {
 
     @Provides
     @Singleton
-    fun paymentGateway(): PaymentGateway = TestPaymentGateway()
+    fun paymentGateway(): AccountWallet = TestAccountWallet()
 
     @Provides
     fun contentReportRepository(): ContentReportRepository = TestContentReportRepository()

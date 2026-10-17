@@ -3,8 +3,8 @@ package com.tailormyresume.feature.analysis.impl.result
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.CreditsRepository
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.FabricationGuard
-import com.tailormyresume.core.domain.PaymentGateway
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.TailorResumeUseCase
@@ -21,7 +21,7 @@ import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.MatchStatus
 import com.tailormyresume.core.model.QuickAnswer
 import com.tailormyresume.core.model.RequirementMatch
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.repository.TestProfileRepository
@@ -43,7 +43,7 @@ class JobResultViewModelTest {
     val main = MainDispatcherRule()
 
     private val applicationRepository = TestApplicationRepository()
-    private val paymentGateway = TestPaymentGateway().withFreeCredits(0)
+    private val paymentGateway = TestAccountWallet().withFreeCredits(0)
     private val creditsRepository = TestCreditsRepository()
 
     @Test
@@ -163,7 +163,7 @@ class JobResultViewModelTest {
             viewModel.onShown()
             assertThat(readyState(viewModel).credits).isEqualTo(0)
             viewModel.onTailor()
-            assertThat(awaitItem()).isEqualTo(JobResultEvent.Paywall(ResultTestData.APP_ID))
+            assertThat(awaitItem()).isEqualTo(JobResultEvent.EarnCredits(ResultTestData.APP_ID))
         }
     }
 
@@ -189,7 +189,7 @@ class JobResultViewModelTest {
             quickAnswer = QuickAnswer(ResultTestData.STAKEHOLDER_ID, "A_FEW_TIMES", ResultTestData.STAKEHOLDER_DETAIL),
         )
 
-        assertTailorEvent(ResultTestData.application(), credits = 0, JobResultEvent.Paywall(ResultTestData.APP_ID))
+        assertTailorEvent(ResultTestData.application(), credits = 0, JobResultEvent.EarnCredits(ResultTestData.APP_ID))
         assertTailorEvent(ResultTestData.application(), credits = 1, JobResultEvent.QuickQuestion(ResultTestData.APP_ID))
         assertTailorEvent(
             ResultTestData.application(question = null),
@@ -214,7 +214,7 @@ class JobResultViewModelTest {
     @Test
     fun unknownBalanceDoesNotPromptAPurchase() = runTest {
         seed()
-        val gateway = object : PaymentGateway by paymentGateway {
+        val gateway = object : AccountWallet by paymentGateway {
             override fun observeEntitlement() = flowOf(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
         }
         val unknownCredits = object : CreditsRepository by creditsRepository {
@@ -232,7 +232,7 @@ class JobResultViewModelTest {
     @Test
     fun unfinishedRequestTailorsWhenTheBalanceIsUnknown() = runTest {
         seed()
-        val gateway = object : PaymentGateway by paymentGateway {
+        val gateway = object : AccountWallet by paymentGateway {
             override fun observeEntitlement() = flowOf(PurchaseEntitlement(0, 0, emptyList(), hasKnownBalance = false))
         }
         val unknownCredits = object : CreditsRepository by creditsRepository {
@@ -319,7 +319,7 @@ class JobResultViewModelTest {
     }
 
     private fun TestScope.viewModel(
-        gateway: PaymentGateway = paymentGateway,
+        gateway: AccountWallet = paymentGateway,
         balance: AccountCreditBalance = AccountCreditBalance(gateway, creditsRepository),
         hasUnfinishedRequest: Boolean = false,
     ) = JobResultViewModel(

@@ -1,11 +1,8 @@
 package com.tailormyresume.feature.settings.impl.credits
 
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.screenshot.TmrTestDevices
@@ -29,7 +26,7 @@ class CreditsScreenshotTests {
     @get:Rule
     val rule = createComposeRule()
 
-    private var buyMoreTaps = 0
+    private var inviteTaps = 0
 
     @Test
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
@@ -39,10 +36,10 @@ class CreditsScreenshotTests {
                 CreditsUiState.Content(
                     credits = 0,
                     history = emptyList(),
-                    canPurchase = false,
+                    isGuest = true,
                     trial = CreditsTrialState.Offer(com.tailormyresume.core.domain.GuestTrialOffer.Available(7)),
                 ),
-                onBuyMore = {},
+                onReferrals = {},
             )
         }
         rule.onNodeWithText("Get 7 trial credits").performClick()
@@ -53,14 +50,14 @@ class CreditsScreenshotTests {
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
     fun creditsReturningPrototype() {
         rule.setTmrContent(TmrTestDevices.prototype) {
-            CreditsScreen(returningCreditsState(), onBuyMore = { buyMoreTaps += 1 })
+            CreditsScreen(returningCreditsState(), onReferrals = { inviteTaps += 1 })
         }
 
         rule.assertTexts(
             "Credits",
             "3",
             "credits left. They never expire.",
-            "Buy more",
+            "Invite friends",
             "History",
             "Free first resume",
             "Welcome · 2 Oct",
@@ -70,42 +67,39 @@ class CreditsScreenshotTests {
             "Northwind GCC · 8 Oct",
             "+5",
             "−1",
-            "Receipts go to the email of your Google Play account",
         )
         rule.assertNoTruncatedText()
         rule.capture("credits_returning", TmrTestDevices.prototype)
-        rule.onNodeWithText("Buy more").performClick()
-        assertThat(buyMoreTaps).isEqualTo(1)
+        rule.onNodeWithText("Invite friends").performClick()
+        assertThat(inviteTaps).isEqualTo(1)
     }
 
     @Test
     @Config(qualifiers = NARROW_QUALIFIERS)
     fun creditsReturningNarrow() {
-        rule.setTmrContent(NARROW_DEVICE) { CreditsScreen(returningCreditsState(), onBuyMore = {}) }
+        rule.setTmrContent(NARROW_DEVICE) { CreditsScreen(returningCreditsState(), onReferrals = {}) }
 
         rule.assertNoTruncatedText()
         rule.assertNoWordBrokenAcrossLines()
         rule.capture("credits_returning", NARROW_DEVICE)
-        rule.onNodeWithTag(CREDITS_LIST_TAG).performScrollToNode(hasText("Receipts go to the email of your Google Play account"))
-        rule.assertTexts("Receipts go to the email of your Google Play account")
         rule.assertNoTruncatedText()
     }
 
     @Test
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
-    fun creditsWithNoHistoryStillOffersBuyMore() {
+    fun creditsWithNoHistoryOffersEarning() {
         rule.setTmrContent(TmrTestDevices.prototype) {
-            CreditsScreen(CreditsUiState.Content(credits = 0, history = emptyList()), onBuyMore = {})
+            CreditsScreen(CreditsUiState.Content(credits = 0, history = emptyList()), onReferrals = {})
         }
 
-        rule.assertTexts("0", "Buy more", "Receipts go to the email of your Google Play account")
+        rule.assertTexts("0", "Invite friends")
     }
 
     @Test
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
     fun singleCreditCaptionIsSingular() {
         rule.setTmrContent(TmrTestDevices.prototype) {
-            CreditsScreen(CreditsUiState.Content(credits = 1, history = emptyList()), onBuyMore = {})
+            CreditsScreen(CreditsUiState.Content(credits = 1, history = emptyList()), onReferrals = {})
         }
 
         rule.assertTexts("1", "credit left. It never expires.")
@@ -115,7 +109,7 @@ class CreditsScreenshotTests {
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)
     fun twoDigitBalanceSitsBesideItsCaption() {
         rule.setTmrContent(TmrTestDevices.prototype) {
-            CreditsScreen(CreditsUiState.Content(credits = 30, history = emptyList()), onBuyMore = {})
+            CreditsScreen(CreditsUiState.Content(credits = 30, history = emptyList()), onReferrals = {})
         }
 
         val number = rule.onNodeWithText("30").fetchSemanticsNode().boundsInRoot

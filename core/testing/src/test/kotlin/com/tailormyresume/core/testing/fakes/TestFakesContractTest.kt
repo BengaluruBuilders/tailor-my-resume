@@ -6,14 +6,14 @@ import com.tailormyresume.core.data.repository.ContentReportRepository
 import com.tailormyresume.core.data.repository.ExportHistoryRepository
 import com.tailormyresume.core.data.repository.SessionRepository
 import com.tailormyresume.core.data.repository.TailoringReviewStateRepository
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.SignInGateway
 import com.tailormyresume.core.domain.account.AccountDataExporter
 import com.tailormyresume.core.testing.account.AccountDataExporterContractTest
 import com.tailormyresume.core.testing.account.TestAccountDataExporter
-import com.tailormyresume.core.testing.gateway.PaymentGatewayContractTest
+import com.tailormyresume.core.testing.gateway.AccountWalletContractTest
 import com.tailormyresume.core.testing.gateway.SignInGatewayContractTest
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.mock.MockStateStoreContractTest
 import com.tailormyresume.core.testing.mock.TestMockStateStore
@@ -55,8 +55,8 @@ class TestAccountDataExporterContractTest : AccountDataExporterContractTest() {
     override fun createExporter(): AccountDataExporter = TestAccountDataExporter()
 }
 
-class TestPaymentGatewayContractTest : PaymentGatewayContractTest() {
-    override fun createPaymentGateway(): PaymentGateway = TestPaymentGateway()
+class TestAccountWalletContractTest : AccountWalletContractTest() {
+    override fun createAccountWallet(): AccountWallet = TestAccountWallet()
 }
 
 class TestSignInGatewayContractTest : SignInGatewayContractTest() {

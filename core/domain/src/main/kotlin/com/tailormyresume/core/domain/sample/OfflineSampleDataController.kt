@@ -10,8 +10,7 @@ import com.tailormyresume.core.domain.AnalyzeJobUseCase
 import com.tailormyresume.core.domain.CreditSpend
 import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.domain.TailorResumeUseCase
-import com.tailormyresume.core.domain.offline.MockPackCatalogue
-import com.tailormyresume.core.domain.offline.OfflinePaymentGateway
+import com.tailormyresume.core.domain.offline.OfflineAccountWallet
 import com.tailormyresume.core.domain.onboarding.NextOnboardingStepUseCase
 import com.tailormyresume.core.domain.onboarding.OnboardingStep
 import com.tailormyresume.core.model.BulletDecision
@@ -32,7 +31,7 @@ class OfflineSampleDataController(
     private val profileRepository: ProfileRepository,
     private val applicationRepository: ApplicationRepository,
     private val exportHistoryRepository: ExportHistoryRepository,
-    private val paymentGateway: OfflinePaymentGateway,
+    private val paymentGateway: OfflineAccountWallet,
     private val analyzeJob: AnalyzeJobUseCase,
     private val tailorResume: TailorResumeUseCase,
     private val clock: Clock,
@@ -44,7 +43,7 @@ class OfflineSampleDataController(
         reset()
         val now = clock.now()
         signInSampleCandidate()
-        paymentGateway.purchase(SampleDataSet.PURCHASED_PACK_ID)
+        paymentGateway.withHistoricalPurchase(SampleDataSet.PURCHASED_PACK_ID)
         recordGrantAndPurchase(now)
         SampleDataSet.applications.forEach { plan -> applicationRepository.upsertApplication(build(plan, now)) }
         SampleDataSet.exports.forEach { plan -> recordExport(plan, now) }
@@ -112,13 +111,12 @@ class OfflineSampleDataController(
     private fun TailoredBullet.decidedAs(decision: BulletDecision) = copy(decision = decision)
 
     private suspend fun recordGrantAndPurchase(now: Instant) {
-        val pack = MockPackCatalogue.all.single { it.id == SampleDataSet.PURCHASED_PACK_ID }
         credits?.record(CreditLedgerEntry(CreditLedgerKind.FREE_GRANT, 1, null, null, now - 30.days))
-        credits?.record(CreditLedgerEntry(CreditLedgerKind.PURCHASE, pack.credits, null, pack.id, now - 20.days))
+        credits?.record(CreditLedgerEntry(CreditLedgerKind.PURCHASE, 5, null, SampleDataSet.PURCHASED_PACK_ID, now - 20.days))
     }
 
     private suspend fun recordExport(plan: SampleExportPlan, now: Instant) {
-        val spend = paymentGateway.unlock(plan.applicationId)
+        val spend = paymentGateway.spendFixtureCredit(plan.applicationId)
         if ((spend as? CreditSpend.Spent)?.kind != null) {
             credits?.record(CreditLedgerEntry(CreditLedgerKind.SPEND, -1, plan.applicationId, null, now - plan.exportedDaysAgo.days))
         }

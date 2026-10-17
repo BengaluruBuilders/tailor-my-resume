@@ -6,12 +6,8 @@ import com.tailormyresume.core.data.mock.MockOperation
 import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.data.repository.ApplicationRepository
 import com.tailormyresume.core.data.repository.ProfileRepository
-import com.tailormyresume.core.domain.ApplicationPack
-import com.tailormyresume.core.domain.CreditSpend
-import com.tailormyresume.core.domain.PaymentGateway
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.PurchaseEntitlement
-import com.tailormyresume.core.domain.PurchaseFailureReason
-import com.tailormyresume.core.domain.PurchaseResult
 import com.tailormyresume.core.domain.offline.OfflineServerAccountDeleter
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.CandidateProfile
@@ -22,7 +18,7 @@ import com.tailormyresume.core.model.JobApplication
 import com.tailormyresume.core.model.SignInAccount
 import com.tailormyresume.core.testing.data.canonicalCandidateProfile
 import com.tailormyresume.core.testing.data.sampleApplication
-import com.tailormyresume.core.testing.gateway.TestPaymentGateway
+import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.gateway.TestSignInGateway
 import com.tailormyresume.core.testing.gateway.testAccountCreditBalance
 import com.tailormyresume.core.testing.mock.TestMockStateStore
@@ -115,9 +111,9 @@ class DeleteAccountUseCaseTest {
     @Test
     fun theNextSignInAfterDeletionStartsWithTheFreeCredit() = runTest {
         val store = TestMockStateStore()
-        val payment = TestPaymentGateway(store = store)
+        val payment = TestAccountWallet(store = store)
         val signIn = TestSignInGateway(session, store)
-        payment.purchase(ApplicationPack.APPLICATION_PACK_FIVE)
+        payment.withHistoricalPurchase("application_pack_5")
         val useCase = DeleteAccountUseCase(
             exportHistoryRepository = exportHistory,
             sessionRepository = session,
@@ -239,7 +235,7 @@ class DeleteAccountUseCaseTest {
     fun aFailureWhileClosingTheAccountNeverClaimsTheDataIsIntact() = runTest {
         applications.value = fourApplications()
         profile.value = canonicalCandidateProfile
-        val useCase = useCase(gateway = ThrowingPaymentGateway())
+        val useCase = useCase(gateway = ThrowingAccountWallet())
 
         val result = useCase()
 
@@ -264,7 +260,7 @@ class DeleteAccountUseCaseTest {
 
     @Test
     fun anUnreachableWalletFallsBackToTheCachedCreditsInsteadOfCrashing() = runTest {
-        val gateway = object : PaymentGateway by gatewayWith(credits = 4) {
+        val gateway = object : AccountWallet by gatewayWith(credits = 4) {
             override suspend fun entitlement(): PurchaseEntitlement = throw java.io.IOException("offline")
 
             override fun observeEntitlement(): Flow<PurchaseEntitlement> = flowOf(PurchaseEntitlement(0, 3, emptyList()))
@@ -344,7 +340,7 @@ class DeleteAccountUseCaseTest {
         creditKind = CreditKind.FREE,
     )
 
-    private fun useCase(gateway: PaymentGateway, latency: MockLatency = NoMockLatency): DeleteAccountUseCase = DeleteAccountUseCase(
+    private fun useCase(gateway: AccountWallet, latency: MockLatency = NoMockLatency): DeleteAccountUseCase = DeleteAccountUseCase(
         exportHistoryRepository = exportHistory,
         sessionRepository = session,
         signInGateway = TestSignInGateway(session),
@@ -369,7 +365,7 @@ class DeleteAccountUseCaseTest {
         sampleApplication.copy(id = "application-$index", status = ApplicationStatus.SAVED)
     }
 
-    private fun gatewayWith(credits: Int): PaymentGateway = BalancePaymentGateway(
+    private fun gatewayWith(credits: Int): AccountWallet = BalanceAccountWallet(
         PurchaseEntitlement(
             freeCredits = credits,
             purchasedCredits = 0,
@@ -431,29 +427,13 @@ private class RecordingProfileRepository(
     }
 }
 
-private class BalancePaymentGateway(
+private class BalanceAccountWallet(
     entitlement: PurchaseEntitlement,
-) : PaymentGateway {
+) : AccountWallet {
 
     private var current: PurchaseEntitlement = entitlement
 
-    override suspend fun packs(): List<ApplicationPack> = emptyList()
-
-    override suspend fun purchase(packId: String): PurchaseResult = PurchaseResult.Failed(
-        reason = PurchaseFailureReason.PurchaseUnavailable,
-        entitlement = current,
-    )
-
     override suspend fun entitlement(): PurchaseEntitlement = current
-
-    override suspend fun restorePurchases(): PurchaseEntitlement = current
-
-    override suspend fun unlock(applicationId: String): CreditSpend = if (current.totalCredits > 0) {
-        current = current.copy(freeCredits = current.freeCredits - 1)
-        CreditSpend.Spent(current)
-    } else {
-        CreditSpend.NoCreditLeft
-    }
 
     override suspend fun clearCredits(): PurchaseEntitlement {
         current = PurchaseEntitlement(freeCredits = 0, purchasedCredits = 0, pendingPackIds = emptyList())
@@ -461,21 +441,13 @@ private class BalancePaymentGateway(
     }
 }
 
-private class ThrowingPaymentGateway : PaymentGateway {
-
-    override suspend fun packs(): List<ApplicationPack> = throw IllegalStateException("no packs")
-
-    override suspend fun purchase(packId: String): PurchaseResult = throw IllegalStateException("no purchase")
+private class ThrowingAccountWallet : AccountWallet {
 
     override suspend fun entitlement(): PurchaseEntitlement = PurchaseEntitlement(
         freeCredits = 4,
         purchasedCredits = 0,
         pendingPackIds = emptyList(),
     )
-
-    override suspend fun restorePurchases(): PurchaseEntitlement = entitlement()
-
-    override suspend fun unlock(applicationId: String): CreditSpend = throw IllegalStateException("no credit service")
 
     override suspend fun clearCredits(): PurchaseEntitlement = throw IllegalStateException("no credit service")
 }

@@ -1,0 +1,62 @@
+{
+  "frontendSha": "6b4a55b1d1bb9c9bd7e02e027de9967d97032235",
+  "backendSha": "694ec866da51d64c0f766dc95989daec891ee84d",
+  "artifact": "/home/abhishek-dubey/code/BengaluruBuilders/TailorMyResume/.validation-runtime/slice05-android-apk/6b4a55b1d1bb9c9bd7e02e027de9967d97032235/artifacts/tmr-slice05-staging-default-6b4a55b1.apk",
+  "sha256": "45114bd6f2d909bddf66f3d2934ca2ca6945f9e73961a5a7be5fcc96bccb7023",
+  "size": 6060178,
+  "signerSha256": "cd42a070ed44e41b40e5d8c8b24b26c0df70a7e97f3aa33da405b38984ce549c",
+  "package": "com.tailormyresume.app.staging",
+  "packageVersionLine": "package: name='com.tailormyresume.app.staging' versionCode='1' versionName='0.1.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'",
+  "referralOrigin": "",
+  "apiBaseUrl": "https://abhishek-dubey-MS-7B16.local:20002/",
+  "firebaseProject": "tailormy-resume-staging",
+  "otherClientFieldsPresent": true,
+  "dexApiAndFirebaseVerified": true,
+  "dexFixtureOriginPresent": false,
+  "mainActivityViewFilters": 0,
+  "sourceManifestSha256": "5510e158801189fb793bc43b214605f070704e833e61b694c6be274d99bc62ca",
+  "limitation": "default-disabled signed staging APK; no public links enabled",
+  "sameClientConfigurationInBothApkDex": null,
+  "buildResources": {
+    "samples": 59,
+    "minMemAvailable": 6030393344,
+    "minDiskFree": 396066025472,
+    "minTmpQuotaHeadroom": 1339124736,
+    "maxOwnedJvmRss": 5063909376,
+    "heapCaps": [
+      "-Xmx1g",
+      "-Xmx2g"
+    ]
+  },
+  "ownedJvmCleanup": [
+    {
+      "pid": 982700,
+      "cmd": "/home/abhishek-dubey/.gradle/jdks/eclipse_adoptium-25-amd64-linux.2/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED --add-opens=java.base/java.time=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow --enable-native-access=ALL-UNNAMED -XX:HeapDumpPath=/home/abhishek-dubey/code/BengaluruBuilders/TailorMyResume/.validation-runtime/slice05-android-apk/6b4a55b1d1bb9c9bd7e02e027de9967d97032235/logs -Xmx2g -Dfile.encoding=UTF-8 -Djava.io.tmpdir=/home/abhishek-dubey/code/BengaluruBuilders/TailorMyResume/.validation-runtime/slice05-android-apk/6b4a55b1d1bb9c9bd7e02e027de9967d97032235/tmp -Duser.country -Duser.language=en -Duser.variant -cp /home/abhishek-dubey/.gradle/wrapper/dists/gradle-9.8.0-bin/3m7h6ceboy5k31n8kzwzuxssm/gradle-9.8.0/lib/gradle-daemon-main-9.8.0.jar -javaagent:/home/abhishek-dubey/.gradle/wrapper/dists/gradle-9.8.0-bin/3m7h6ceboy5k31n8kzwzuxssm/gradle-9.8.0/lib/agents/gradle-instrumentation-agent-9.8.0.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 9.8.0 ",
+      "cpuBefore": [
+        "116541",
+        "3369"
+      ],
+      "idleTransition": "2026-10-17T21:20:14.791+0530 [INFO] [org.gradle.launcher.daemon.server.DaemonRegistryUpdater] Marking the daemon as idle, address: [114e9763-8122-473c-b5e8-900e5cb00b58 port:41927, addresses:[localhost/127.0.0.1]]",
+      "cpuAfter": [
+        "116542",
+        "3369"
+      ],
+      "cpuDeltaTicks": 1,
+      "aliveAfter": false
+    },
+    {
+      "pid": 983063,
+      "cmd": "/home/abhishek-dubey/.gradle/jdks/eclipse_adoptium-25-amd64-linux.2/bin/java -cp /home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-build-tools-compat/2.4.20/d49fbc8ac11501c5a281c0b463b88614b2172573/kotlin-build-tools-compat-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-build-tools-impl/2.4.20/c1db40b59e7aa400e7c6591b1c1287a3a0f6758e/kotlin-build-tools-impl-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-tooling-core/2.4.20/a92e365882e147d1054b6245d2aa822cbaa77ad6/kotlin-tooling-core-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-build-tools-cri-impl/2.4.20/2e483805df7476e4a073f5903362a838a7a45f7a/kotlin-build-tools-cri-impl-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-runner/2.4.20/ab6ac68e6cdd53492e6e169d2876b0f709482814/kotlin-compiler-runner-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.4.20/23b042894dcabe39edd0f8bd30b7be0f25fe9933/kotlin-compiler-embeddable-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-build-tools-api/2.4.20/846d16ddb9652941ac68fe45dad92524358f0b89/kotlin-build-tools-api-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-client/2.4.20/ff8a2f364913825a2e630ad9114dc5a6ec9a67f9/kotlin-daemon-client-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.4.20/94c1451890d164aed65d43b3db0b7ecef7c183e7/kotlin-stdlib-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.4.20/c5d2fe2964e557067ce970573bbc7ffa74f57cf4/kotlin-script-runtime-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.4.20/6216c8108a609251b8314bcc0f0ef7eb48e3b67a/kotlin-daemon-embeddable-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar -Djava.awt.headless=true -Djava.rmi.server.hostname=127.0.0.1 -Xmx1g -XX:ReservedCodeCacheSize=320m -ea -Dkotlin.daemon.custom.run.files.path.for.tests=/home/abhishek-dubey/.local/share/kotlin/daemon -Djava.io.tmpdir=/home/abhishek-dubey/code/BengaluruBuilders/TailorMyResume/.validation-runtime/slice05-android-apk/6b4a55b1d1bb9c9bd7e02e027de9967d97032235/tmp -Dtmr.slice05.build=slice05-default-6b4a55b1 -XX:HeapDumpPath=/home/abhishek-dubey/code/BengaluruBuilders/TailorMyResume/.validation-runtime/slice05-android-apk/6b4a55b1d1bb9c9bd7e02e027de9967d97032235/logs -XX:+UseCodeCacheFlushing -XX:+UseParallelGC -Dkotlin.daemon.initiator.marker.file=/home/abhishek-dubey/code/BengaluruBuilders/TailorMyResume/.validation-runtime/slice05-android-apk/6b4a55b1d1bb9c9bd7e02e027de9967d97032235/tmp/kotlin-compiler-client-216161732152491245-is-running --add-exports java.base/sun.nio.ch=ALL-UNNAMED org.jetbrains.kotlin.daemon.KotlinCompileDaemon --daemon-logsPath /home/abhishek-dubey/code/BengaluruBuilders/TailorMyResume/.validation-runtime/slice05-android-apk/6b4a55b1d1bb9c9bd7e02e027de9967d97032235/tmp --daemon-logsFileSizeLimit=1048576 --daemon-logsFileCountLimit=3 --daemon-runFilesPath /home/abhishek-dubey/.local/share/kotlin/daemon --daemon-autoshutdownIdleSeconds=7200 --daemon-compilerClasspath /home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-build-tools-compat/2.4.20/d49fbc8ac11501c5a281c0b463b88614b2172573/kotlin-build-tools-compat-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-build-tools-impl/2.4.20/c1db40b59e7aa400e7c6591b1c1287a3a0f6758e/kotlin-build-tools-impl-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-tooling-core/2.4.20/a92e365882e147d1054b6245d2aa822cbaa77ad6/kotlin-tooling-core-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-build-tools-cri-impl/2.4.20/2e483805df7476e4a073f5903362a838a7a45f7a/kotlin-build-tools-cri-impl-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-runner/2.4.20/ab6ac68e6cdd53492e6e169d2876b0f709482814/kotlin-compiler-runner-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.4.20/23b042894dcabe39edd0f8bd30b7be0f25fe9933/kotlin-compiler-embeddable-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-build-tools-api/2.4.20/846d16ddb9652941ac68fe45dad92524358f0b89/kotlin-build-tools-api-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-client/2.4.20/ff8a2f364913825a2e630ad9114dc5a6ec9a67f9/kotlin-daemon-client-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.4.20/94c1451890d164aed65d43b3db0b7ecef7c183e7/kotlin-stdlib-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.4.20/c5d2fe2964e557067ce970573bbc7ffa74f57cf4/kotlin-script-runtime-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.6.10/1cbe9c92c12a94eea200d23c2bbaedaf3daf5132/kotlin-reflect-1.6.10.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.4.20/6216c8108a609251b8314bcc0f0ef7eb48e3b67a/kotlin-daemon-embeddable-2.4.20.jar:/home/abhishek-dubey/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core-jvm/1.8.0/ac1dc37a30a93150b704022f8d895ee1bd3a36b3/kotlinx-coroutines-core-jvm-1.8.0.jar ",
+      "cpuBefore": [
+        "20791",
+        "629"
+      ],
+      "cpuAfter": [
+        "20791",
+        "629"
+      ],
+      "cpuDeltaTicks": 0,
+      "aliveAfter": false
+    }
+  ]
+}

@@ -72,8 +72,7 @@ class GoogleAccountCoordinator @Inject constructor(
             if (result is SignInResult.SignedIn) referralGateway?.googleContinued(referralAction)
             result
         } catch (cancelled: CancellationException) {
-            if (!switched(ownJournal()) && pendingWipe.state() == PendingWipeState.NONE) fence.release()
-            mutable.value = GoogleAccountState.Retry(canCancel = false)
+            recoverCancellation()
             throw cancelled
         } catch (failure: Exception) {
             recoverable(failure)
@@ -425,12 +424,17 @@ class GoogleAccountCoordinator @Inject constructor(
         try {
             action()
         } catch (cancelled: CancellationException) {
-            if (!switched(ownJournal() ?: protectedJournal) && pendingWipe.state() == PendingWipeState.NONE) fence.release()
-            mutable.value = GoogleAccountState.Retry(canCancel = false)
+            recoverCancellation(protectedJournal)
             throw cancelled
         } catch (failure: Exception) {
             recoverable(failure, operation, protectedJournal)
         }
+    }
+
+    private suspend fun recoverCancellation(protectedJournal: UpgradeJournal? = null) = withContext(NonCancellable) {
+        val blocked = switched(ownJournal() ?: protectedJournal) || pendingWipe.state() != PendingWipeState.NONE
+        if (!blocked) fence.release()
+        mutable.value = GoogleAccountState.Retry(canCancel = !blocked)
     }
 
     private fun preparationUnavailable(failure: Throwable): Boolean = when ((failure as? ApiException)?.error) {
