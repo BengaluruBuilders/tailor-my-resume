@@ -6,11 +6,11 @@ import com.tailormyresume.core.domain.AnalyzeJobUseCase
 import com.tailormyresume.core.domain.ExportCheck
 import com.tailormyresume.core.domain.ExportReadiness
 import com.tailormyresume.core.domain.TailorResumeUseCase
+import com.tailormyresume.core.domain.offline.OfflineAccountWallet
 import com.tailormyresume.core.domain.offline.OfflineFabricationGuard
 import com.tailormyresume.core.domain.offline.OfflineGapMatcher
 import com.tailormyresume.core.domain.offline.OfflineJobAnalysisSource
 import com.tailormyresume.core.domain.offline.OfflineJobDescriptionAnalyzer
-import com.tailormyresume.core.domain.offline.OfflineAccountWallet
 import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.model.ApplicationStatus
 import com.tailormyresume.core.model.BulletDecision

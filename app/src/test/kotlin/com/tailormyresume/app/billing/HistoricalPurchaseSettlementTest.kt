@@ -43,8 +43,12 @@ class HistoricalPurchaseSettlementTest {
         override fun signOut() = Unit
     }
 
-    @After fun tearDown() { server.shutdown() }
-    private suspend fun google() { sessions.saveAccount(SignInAccount("uid-1", "", "")) }
+    @After fun tearDown() {
+        server.shutdown()
+    }
+    private suspend fun google() {
+        sessions.saveAccount(SignInAccount("uid-1", "", ""))
+    }
     private fun subject(scope: kotlinx.coroutines.CoroutineScope) = HistoricalPurchaseSettlement(api, wallet, billing, uids, sessions, firebase, AccountOperationGuard(uids, fence), scope, credits)
     private fun answer(code: Int = 201, body: String = purchaseJson(walletJson(free = 0, purchased = 5))) {
         server.enqueue(MockResponse().setResponseCode(code).setBody(body))

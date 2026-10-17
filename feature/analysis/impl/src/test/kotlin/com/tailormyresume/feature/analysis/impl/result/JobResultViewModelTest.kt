@@ -3,8 +3,8 @@ package com.tailormyresume.feature.analysis.impl.result
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.data.repository.CreditsRepository
-import com.tailormyresume.core.domain.FabricationGuard
 import com.tailormyresume.core.domain.AccountWallet
+import com.tailormyresume.core.domain.FabricationGuard
 import com.tailormyresume.core.domain.PurchaseEntitlement
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.TailorResumeUseCase

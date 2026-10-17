@@ -70,7 +70,9 @@ class HistoricalPurchaseSettlement @Inject constructor(
         guard.check(actor.ticket)
         if (account?.mode != AccountMode.GOOGLE || account.id != actor.ticket.owner || uids.isAnonymous() ||
             verified?.uid != account.id || verified.mode != AccountMode.GOOGLE || verified.googleSubject.isNullOrBlank()
-        ) throw CancellationException("Settlement needs the current Google account")
+        ) {
+            throw CancellationException("Settlement needs the current Google account")
+        }
     }
 
     private suspend fun post(purchase: PlayPurchase, actor: Actor): Boolean {

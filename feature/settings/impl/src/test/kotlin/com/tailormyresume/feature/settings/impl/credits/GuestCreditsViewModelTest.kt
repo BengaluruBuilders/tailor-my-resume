@@ -6,8 +6,8 @@ import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.domain.GuestTrialOffer
 import com.tailormyresume.core.domain.GuestTrialResult
 import com.tailormyresume.core.domain.account.AccountCreditBalance
-import com.tailormyresume.core.testing.gateway.TestGuestTrialGateway
 import com.tailormyresume.core.testing.gateway.TestAccountWallet
+import com.tailormyresume.core.testing.gateway.TestGuestTrialGateway
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule

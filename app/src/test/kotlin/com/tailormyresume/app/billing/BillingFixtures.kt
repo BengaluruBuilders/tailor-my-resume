@@ -18,7 +18,10 @@ internal class FakePlayBilling : PlayBilling {
     var owned = emptyList<PlayPurchase>()
     var queries = 0
     override val unsolicitedPurchases = MutableSharedFlow<PlayPurchase>(extraBufferCapacity = 8)
-    override suspend fun ownedPurchases(): List<PlayPurchase> { queries++; return owned }
+    override suspend fun ownedPurchases(): List<PlayPurchase> {
+        queries++
+        return owned
+    }
 }
 
 internal fun idleScope() = CoroutineScope(StandardTestDispatcher())

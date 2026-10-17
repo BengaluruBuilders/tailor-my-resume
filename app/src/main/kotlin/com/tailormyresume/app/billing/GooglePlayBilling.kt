@@ -36,7 +36,6 @@ class GooglePlayBilling @Inject constructor(
         val query = QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build()
         return client.queryPurchasesAsync(query).purchasesList.flatMap { it.toPlayPurchases() }
     }
-
 }
 
 internal fun BillingResult.isOk() = responseCode == BillingClient.BillingResponseCode.OK

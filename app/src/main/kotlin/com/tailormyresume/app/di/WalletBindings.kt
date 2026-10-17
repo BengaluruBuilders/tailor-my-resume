@@ -1,8 +1,8 @@
 package com.tailormyresume.app.di
 
 import com.tailormyresume.app.AppStartTask
-import com.tailormyresume.app.billing.GooglePlayBilling
 import com.tailormyresume.app.billing.AccountWalletOverride
+import com.tailormyresume.app.billing.GooglePlayBilling
 import com.tailormyresume.app.billing.PlayBilling
 import com.tailormyresume.app.billing.PurchaseRestorer
 import com.tailormyresume.app.billing.RemoteAccountWallet

@@ -18,7 +18,6 @@ import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestApplicationRepository
 import com.tailormyresume.core.testing.repository.TestCreditsRepository
 import com.tailormyresume.core.testing.util.MainDispatcherRule
-import com.tailormyresume.core.testing.util.TestClock
 import com.tailormyresume.feature.settings.impl.credits.CreditsScreen
 import com.tailormyresume.feature.settings.impl.credits.CreditsViewModel
 import com.tailormyresume.feature.settings.impl.delete.DeleteAccountSheetContent

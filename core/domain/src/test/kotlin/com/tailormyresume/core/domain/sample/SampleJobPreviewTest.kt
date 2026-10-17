@@ -5,11 +5,11 @@ import com.tailormyresume.core.data.mock.NoMockLatency
 import com.tailormyresume.core.domain.AnalyzeJobUseCase
 import com.tailormyresume.core.domain.FirebaseUidProvider
 import com.tailormyresume.core.domain.TailorResumeUseCase
+import com.tailormyresume.core.domain.offline.OfflineAccountWallet
 import com.tailormyresume.core.domain.offline.OfflineFabricationGuard
 import com.tailormyresume.core.domain.offline.OfflineGapMatcher
 import com.tailormyresume.core.domain.offline.OfflineJobAnalysisSource
 import com.tailormyresume.core.domain.offline.OfflineJobDescriptionAnalyzer
-import com.tailormyresume.core.domain.offline.OfflineAccountWallet
 import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.domain.onboarding.NextOnboardingStepUseCase
 import com.tailormyresume.core.domain.onboarding.OnboardingStep

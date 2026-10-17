@@ -3,11 +3,11 @@ package com.tailormyresume.feature.analysis.impl.navigation
 import com.tailormyresume.core.data.repository.ContentReportRepository
 import com.tailormyresume.core.data.repository.NoRemoteLedger
 import com.tailormyresume.core.data.repository.RemoteLedgerSource
+import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.ImportedJob
 import com.tailormyresume.core.domain.JobAnalysisResult
 import com.tailormyresume.core.domain.JobAnalysisSource
 import com.tailormyresume.core.domain.JobImporter
-import com.tailormyresume.core.domain.AccountWallet
 import com.tailormyresume.core.domain.ResumeTailor
 import com.tailormyresume.core.domain.offline.OfflineResumeTailor
 import com.tailormyresume.core.model.CandidateProfile

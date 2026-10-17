@@ -3,7 +3,6 @@ package com.tailormyresume.app.billing
 import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.model.AccountMode
 import com.tailormyresume.core.model.SignInAccount
-import com.tailormyresume.core.testing.gateway.TestAccountWallet
 import com.tailormyresume.core.testing.repository.TestSessionRepository
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest

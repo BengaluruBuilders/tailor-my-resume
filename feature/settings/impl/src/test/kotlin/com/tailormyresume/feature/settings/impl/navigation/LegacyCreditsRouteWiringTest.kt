@@ -36,8 +36,12 @@ class LegacyCreditsRouteWiringTest {
             shadowOf(application.packageManager).addActivityIfNotPresent(ComponentName(application, SettingsEntryHostActivity::class.java))
         }
     }
+
     @get:Rule val rules: RuleChain = RuleChain.outerRule(hilt).around(register).around(compose)
-    @Before fun setUp() { hilt.inject() }
+
+    @Before fun setUp() {
+        hilt.inject()
+    }
 
     @Test fun restoredLegacyKeyRedirectsWithoutStartingTailoringAndBackKeepsTheApplication() {
         val legacy = Json.decodeFromString<LegacyPaymentNavKey>("""{"returnToApplicationId":"saved-application"}""")

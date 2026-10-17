@@ -1,5 +1,6 @@
 package com.tailormyresume.feature.settings.impl.navigation
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.tailormyresume.core.navigation.Navigator
@@ -7,7 +8,6 @@ import com.tailormyresume.feature.settings.api.navigation.CreditsNavKey
 import com.tailormyresume.feature.settings.api.navigation.LegacyPaymentNavKey
 import com.tailormyresume.feature.settings.api.navigation.SettingsNavKey
 import com.tailormyresume.feature.settings.impl.credits.CreditsRoute
-import androidx.compose.runtime.LaunchedEffect
 import com.tailormyresume.feature.settings.impl.settings.SettingsRoute
 
 fun EntryProviderScope<NavKey>.settingsEntry(navigator: Navigator) {
