@@ -75,7 +75,8 @@ class GooglePromotionClient @Inject constructor(
     suspend fun resumeClaim(journal: UpgradeJournal): GoogleAccountState {
         val result = prepare(journal)
         if (result !is GoogleAccountState.Offer || !result.canClaim || result.changed) return result
-        val pending = checkNotNull(journals.readFor(checkNotNull(uids.uid()), journal.environment))
+        val owner = uids.uid()
+        val pending = checkNotNull(journals.readFor(checkNotNull(owner), journal.environment))
         val signup = checkNotNull(displayed).signupBonus
         val signupVersion = signup.grantPolicyVersion ?: signup.version
         val baseVersion = if (pending.requestedBase) signup.baseTrial?.grantPolicyVersion ?: signup.baseTrial?.version else null
