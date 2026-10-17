@@ -1,0 +1,52 @@
+{
+  "candidate": {
+    "frontend": "13aa4fef53057036c52fa25aa475e7a1ab303d83",
+    "backend": "69797ec759f3493b6d4f5d6912a82b1429e30fdb",
+    "contractCommit": "3c9ff77f82fc7a1c9a394c8431bc07a40f1af8df",
+    "apkSha256": "cd0082b09855dba860b73ad6e44bd9e0b39977ffd5cbd7ddc7dae5c9b918e4fa",
+    "variant": "staging",
+    "endpoint": "https://abhishek-dubey-MS-7B16.local:20002/"
+  },
+  "files": {
+    "01-guest-entry.png": {
+      "bytes": 190711,
+      "sha256": "f2e87e7c65bf196578307573066b98f1ea4a47a53ff8dc92be41c85bddaef3a4"
+    },
+    "02-guest-unavailable-before-routing.png": {
+      "bytes": 140022,
+      "sha256": "f136a45907891ed3d41b60515987f5b386f591c364e7ad7e7b3753a6d2abecdf"
+    },
+    "03-guest-retry.mp4": {
+      "bytes": 926738,
+      "sha256": "ed537d9cac636126ca4978a1564887278b5ec268cf1d2e12458d5917fc59bdfb"
+    },
+    "04-guest-retry-result.png": {
+      "bytes": 140269,
+      "sha256": "d08ef543aa0e38d06e7cd9d4c63bd08b02fb7c135e53b1ca58a2526fc1a25ea5"
+    },
+    "https-transport.log": {
+      "bytes": 156,
+      "sha256": "6c6472976229773ca8ac232cd08266280193a5636ca4966a69b54f6264bd6496"
+    },
+    "restore-rehearsal.log": {
+      "bytes": 564,
+      "sha256": "252f15a626ff8832bdbcb0c6bda3f8e60921977b39af237e4494f9a1cd4c3b88"
+    },
+    "runtime-observations.json": {
+      "bytes": 3224,
+      "sha256": "592b761a099e95026a835562badca682defedc1ac85972f3c3a22f9e74c8207d"
+    },
+    "targeted-backend.log": {
+      "bytes": 6929,
+      "sha256": "b536c2c32c19401c526b94d3d8f819b80da4417bd2054f7c281db3c1d626f5e5"
+    },
+    "restore-rehearsal.mjs.txt": {
+      "bytes": 4962,
+      "sha256": "df0914adce2cd731ffb8b3f10c27f87298f28b6b9487dac732dbeef45087f1f0",
+      "originalName": "restore-rehearsal.mjs",
+      "originalBytes": 4962,
+      "originalSha256": "df0914adce2cd731ffb8b3f10c27f87298f28b6b9487dac732dbeef45087f1f0",
+      "note": "Byte-for-byte copy stored with .txt extension so GitHub treats the validation fixture as non-executable evidence."
+    }
+  }
+}

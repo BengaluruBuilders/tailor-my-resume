@@ -1,0 +1,4 @@
+{"status":"ok"}
+HTTP 200
+{"error":{"code":"UNAUTHENTICATED","message":"Authorization header must carry the Firebase ID token as a Bearer token."}}
+HTTP 401

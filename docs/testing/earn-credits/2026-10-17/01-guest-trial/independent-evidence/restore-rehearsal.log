@@ -1,0 +1,4 @@
+PASS: actual candidate migrations/schema and all 11 table snapshots survive custom-format pg_dump/pg_restore
+PASS: manual re-erasure after old-backup restore removes every attributable promotion/wallet edge, retains other synthetic owner and consumed capacity=4, retries safely, blocks resurrection
+Archive SHA256: bd6da09915d0c8107bcaee958bd6e6bf0e056e4121382071e82a640e3bcbf712
+Provider substitutions: synthetic Firebase authentication/creation time, injected deterministic Integrity verifier, no-op synthetic file/Firebase deletion. Not real platform evidence.

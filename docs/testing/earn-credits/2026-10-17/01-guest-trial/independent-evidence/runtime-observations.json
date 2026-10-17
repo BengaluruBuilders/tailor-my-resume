@@ -1,0 +1,77 @@
+{
+  "runDate": "2026-10-17",
+  "frontend": "13aa4fef53057036c52fa25aa475e7a1ab303d83",
+  "backend": "69797ec759f3493b6d4f5d6912a82b1429e30fdb",
+  "contractCommit": "3c9ff77f82fc7a1c9a394c8431bc07a40f1af8df",
+  "contractSha256": "b76d2202bf1e76f25dfec6191e2b3e2d04cb9dbb419deccfa33979444071a2a6",
+  "apkSha256": "cd0082b09855dba860b73ad6e44bd9e0b39977ffd5cbd7ddc7dae5c9b918e4fa",
+  "variant": "staging",
+  "package": "com.tailormyresume.app.staging",
+  "firebaseProject": "tailormy-resume-staging",
+  "endpoint": "https://abhishek-dubey-MS-7B16.local:20002/",
+  "servingPolicy": "none; zero policy rows; admissions closed",
+  "fixturePolicy": "guest-local-v1; amount2; capacity100; isolated disposable local databases",
+  "physicalDevice": {
+    "model": "Pixel 7 Pro",
+    "android": "17",
+    "sdk": 37,
+    "signerMatched": true,
+    "candidateInstalled": false,
+    "reason": "existing staging app already foreground in a non-sign-in screen; replacing/restarting against a different empty candidate DB could alter authoritative wallet/history caches and session work; no reset, signout, uninstall, install or app-driving action"
+  },
+  "emulator": {
+    "name": "TmrGuestValidator",
+    "serial": "emulator-5582",
+    "android": "16",
+    "sdk": 36,
+    "systemImage": "system-images/android-36/google_apis/x86_64",
+    "userdata": "new from immutable SDK image; no original userdata copied",
+    "agentDeviceVersion": "0.21.28",
+    "session": "tmr-guest-validator",
+    "closed": true,
+    "ownedEmulatorStopped": true,
+    "originalAvdUntouched": true
+  },
+  "observedAuthentication": {
+    "attempt": "real anonymous signup via actual app; independent REST diagnostic uses same private staging BuildConfig",
+    "restStatus": 400,
+    "providerError": "ADMIN_ONLY_OPERATION",
+    "identityCreated": false,
+    "persistedFirebaseUserObserved": false,
+    "candidateAuthenticatedAppRequest": "BLOCKED; not observed"
+  },
+  "observedRouting": {
+    "googleInternetReachable": true,
+    "workstationIpReachable": true,
+    "emulatorLocalHostnameResolution": false,
+    "temporaryHostsBind": "executed only in disposable emulator, mapping verified192.168.88.15; resolver still reports unknown host",
+    "tlsBypass": false,
+    "curlTransport": "PASS only using explicit resolve with original CA and hostname; not app contact"
+  },
+  "candidateDatabaseAggregateObservation": {
+    "observedUTC": "2026-10-17T05:38:13.889Z",
+    "users": 0,
+    "policies": 0,
+    "grants": 0
+  },
+  "sourceManifestVerification": {
+    "paths": 110,
+    "mismatches": 0
+  },
+  "backendTargeted": {
+    "tests": 61,
+    "passed": 61,
+    "failed": 0,
+    "skipped": 0
+  },
+  "restore": {
+    "tablesCompared": 11,
+    "actualCandidateDeletionService": true,
+    "externalDeletionPorts": "no-op synthetic file/Firebase ports",
+    "capacityRetained": 4,
+    "otherSyntheticOwnerBalanceRetained": 2,
+    "guard": "ACCOUNT_DELETED"
+  },
+  "scope": "runtime observations transcribed from actual tool outputs; no credentials, tokens, identifiers or private resume data retained",
+  "approvalReview": "initial emulator routing command never executed because review timed out; one smaller bounded retry executed, no permanent permission blocker"
+}
