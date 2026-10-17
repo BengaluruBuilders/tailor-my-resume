@@ -50,7 +50,7 @@ class ReferralsInputPrivacyTest {
     fun nonFixtureReturnedCodeIsCopiedWithoutNamespaceRewrite() {
         val code = "resume-demo.preview-2.abcdefghijklmnopqrstuvwxyz234567"
         var copied: String? = null
-        val actions = ReferralActions({}, {}, { _, _ -> }, {}, {}, {}, {}) { copied = it }
+        val actions = ReferralActions({}, {}, { _, _ -> }, {}, {}, {}, {}, copy = { copied = it })
         rule.setContent { TmrTheme { ReferralsScreen(ReferralUiState.Content(code = code, attached = true), actions) } }
         rule.onNodeWithText("Copy code").performScrollTo().performClick()
         assertThat(copied).isEqualTo(code)

@@ -26,7 +26,7 @@ import org.robolectric.annotation.GraphicsMode
 class ReferralsScreenshotTest {
     @get:Rule val rule = createComposeRule()
     private var copies = 0
-    private val actions = ReferralActions({}, {}, { _, _ -> }, {}, {}, {}, {}) { copies++ }
+    private val actions = ReferralActions({}, {}, { _, _ -> }, {}, {}, {}, {}, copy = { copies++ })
 
     @Test
     @Config(qualifiers = TmrTestDevices.PROTOTYPE_QUALIFIERS)

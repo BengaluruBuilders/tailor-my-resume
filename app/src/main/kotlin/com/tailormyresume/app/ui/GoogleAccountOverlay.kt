@@ -97,7 +97,8 @@ internal fun GoogleAccountPanel(
         referral.candidate?.let { code ->
             Body(stringResource(R.string.referral_pending, code))
             val amount = referral.reward
-            Body(if (amount != null && referral.version != null) stringResource(R.string.referral_offer, amount, referral.version) else stringResource(R.string.referral_neutral))
+            val version = referral.version
+            Body(if (amount != null && version != null) stringResource(R.string.referral_offer, amount, version) else stringResource(R.string.referral_neutral))
             referral.deadline?.let { Body(stringResource(R.string.referral_deadline, it)) }
             TmrSecondaryButton(stringResource(R.string.referral_clear), onClearReferral, Modifier.fillMaxWidth(), enabled = state !is GoogleAccountState.Busy)
         }
