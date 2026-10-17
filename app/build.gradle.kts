@@ -1,3 +1,5 @@
+import java.net.URI
+
 plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.tailormyresume.android.application)
@@ -222,7 +224,7 @@ val verifyUploadSigning by tasks.registering {
     }
 }
 
-val verifyStagingUploadSigning by tasks.registering {
+val verifyStagingUploadSigning = tasks.register("verifyStagingUploadSigning") {
     val ready = hasStagingUploadSigning
     val keyFile = stagingUploadKeystoreFile?.let { file(it).canonicalFile }
     val productionKeyFile = uploadKeystoreFile?.let { file(it).canonicalFile }
@@ -239,14 +241,14 @@ val verifyStagingUploadSigning by tasks.registering {
     }
 }
 
-val verifyStagingPlayIdentity by tasks.registering {
+val verifyStagingPlayIdentity = tasks.register("verifyStagingPlayIdentity") {
     val api = providers.gradleProperty("tailormyresumeStagingApiBaseUrl").getOrElse("")
     val project = providers.gradleProperty("tailormyresumeStagingFirebaseProjectId").getOrElse("")
     val appId = providers.gradleProperty("tailormyresumeStagingFirebaseAppId").getOrElse("")
     val clientId = providers.gradleProperty("tailormyresumeStagingWebClientId").getOrElse("")
     val integrityProject = integrityProjectNumber("tailormyresumeStagingPlayIntegrityCloudProjectNumber")
     doLast {
-        val uri = runCatching { java.net.URI(api) }.getOrNull()
+        val uri = runCatching { URI(api) }.getOrNull()
         check(uri != null && uri.scheme == "https" &&
             uri.host?.lowercase() in listOf("abhishek-dubey-ms-7b16.local", "192.168.88.15") &&
             uri.port in listOf(8443, 20002) && uri.path in listOf("", "/") &&
