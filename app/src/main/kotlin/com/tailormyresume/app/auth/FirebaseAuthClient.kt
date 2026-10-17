@@ -50,9 +50,13 @@ class FirebaseAuthClient @Inject constructor(
                 override fun onAuthStateChanged(auth: FirebaseAuth) {
                     auth.removeAuthStateListener(this)
                     val user = auth.currentUser
-                    if (continuation.isActive) continuation.resume(user?.let {
-                        FirebaseUser(it.uid, it.displayName.orEmpty(), it.email.orEmpty(), if (it.isAnonymous) AccountMode.ANONYMOUS else AccountMode.GOOGLE, it.providerData.firstOrNull { provider -> provider.providerId == "google.com" }?.uid)
-                    })
+                    if (continuation.isActive) {
+                        continuation.resume(
+                            user?.let {
+                                FirebaseUser(it.uid, it.displayName.orEmpty(), it.email.orEmpty(), if (it.isAnonymous) AccountMode.ANONYMOUS else AccountMode.GOOGLE, it.providerData.firstOrNull { provider -> provider.providerId == "google.com" }?.uid)
+                            },
+                        )
+                    }
                 }
             }
             continuation.invokeOnCancellation { firebaseAuth.removeAuthStateListener(listener) }

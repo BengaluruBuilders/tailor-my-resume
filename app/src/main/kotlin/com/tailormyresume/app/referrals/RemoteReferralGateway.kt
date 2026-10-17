@@ -6,10 +6,10 @@ import com.tailormyresume.app.billing.WalletSource
 import com.tailormyresume.app.credits.GuestEvidence
 import com.tailormyresume.core.data.repository.CreditsRepository
 import com.tailormyresume.core.domain.FirebaseUidProvider
-import com.tailormyresume.core.domain.ReferralGateway
 import com.tailormyresume.core.domain.ReferralEntryState
-import com.tailormyresume.core.domain.ReferralShare
+import com.tailormyresume.core.domain.ReferralGateway
 import com.tailormyresume.core.domain.ReferralMessage
+import com.tailormyresume.core.domain.ReferralShare
 import com.tailormyresume.core.domain.ReferralUiState
 import com.tailormyresume.core.network.ApiError
 import com.tailormyresume.core.network.ApiException
@@ -23,12 +23,12 @@ import com.tailormyresume.core.network.dto.ReferralCodeRequest
 import com.tailormyresume.core.network.dto.ReferralOfferDto
 import com.tailormyresume.core.network.dto.ReferralReadResponse
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
@@ -53,6 +53,7 @@ class RemoteReferralGateway @Inject constructor(
     private val links: ReferralLinks = ReferralLinks(),
     private val installReferrer: InstallReferrerSource = InstallReferrerSource { InstallReferrerResult.Terminal(null) },
     private val foreground: com.tailormyresume.app.auth.ForegroundActivity = com.tailormyresume.app.auth.ForegroundActivity { null },
+    private val googleAccounts: dagger.Lazy<com.tailormyresume.app.auth.GoogleAccountCoordinator>? = null,
 ) : ReferralGateway {
     private val mutable = MutableStateFlow<ReferralUiState>(ReferralUiState.Loading)
     private val mutex = Mutex()
@@ -154,17 +155,25 @@ class RemoteReferralGateway @Inject constructor(
         val actionEpoch = foregroundEpoch
         val epoch = store.epoch()
         mutex.withLock {
-            if (epoch != store.epoch()) return@withLock
+            if (epoch != store.epoch()) return
             store.capture(code, config.baseUrl, epoch)
-            val user = firebase.initializedUser()
+        }
+        val user = firebase.initializedUser()
+        val accountReady = user == null || uids.isAnonymous() || googleAccounts?.get()?.prepareReferralEntry() != false
+        mutex.withLock {
             if (epoch != store.epoch()) return@withLock
             if (user == null) {
                 entryMutable.value = ReferralEntryState(store.inbox(config.baseUrl))
             } else {
                 execute { owner ->
-                    val candidate = bind(owner)
+                    var candidate = bind(owner)
                     refresh(owner)
-                    if (actionEpoch == foregroundEpoch && !uids.isAnonymous() && candidate.code == code && candidate.source == "LINK" && candidate.requestId == null && candidate.reviewFrom == null && candidate.phase == "CANDIDATE" && !candidate.requiresConfirmation) {
+                    if (accountReady && !uids.isAnonymous() && candidate.source == "LINK" && shown?.codeIssuance == "ACTIVATION_REQUIRED") {
+                        observe(owner, candidate)
+                        refresh(owner)
+                        candidate = read(owner)
+                    }
+                    if (accountReady && actionEpoch == foregroundEpoch && !uids.isAnonymous() && candidate.code == code && candidate.source == "LINK" && candidate.requestId == null && candidate.reviewFrom == null && candidate.phase == "CANDIDATE" && !candidate.requiresConfirmation) {
                         automatic = Automatic(owner, code)
                         routes.value++
                     }
@@ -189,7 +198,10 @@ class RemoteReferralGateway @Inject constructor(
                 if (user == null) {
                     entryMutable.value = ReferralEntryState(store.inbox(config.baseUrl))
                 } else {
-                    execute { owner -> bind(owner); refresh(owner) }
+                    execute { owner ->
+                        bind(owner)
+                        refresh(owner)
+                    }
                 }
             }
         } catch (cancelled: CancellationException) {
@@ -287,7 +299,8 @@ class RemoteReferralGateway @Inject constructor(
         if (response.isFailure) {
             entryMutable.value = ReferralEntryState(journal.code?.takeIf { journal.source == "LINK" && journal.reviewFrom == null })
             mutable.value = ReferralUiState.Content(
-                candidateSource = journal.source, candidate = journal.code,
+                candidateSource = journal.source,
+                candidate = journal.code,
                 guest = uids.isAnonymous(),
                 reviewRequired = journal.reviewFrom != null,
                 attached = journal.phase == "ATTACHED",
@@ -353,7 +366,7 @@ class RemoteReferralGateway @Inject constructor(
     override suspend fun save(code: String, replace: Boolean) = run { owner ->
         val normalized = canonicalReferralCode(code)
         automatic = null
-        val current = read(owner)
+        val current = bind(owner)
         when {
             current.phase in setOf("READ_ONLY", "ATTACHED", "SENT") -> refresh(owner)
             normalized == null -> mutable.value = content().copy(busy = false, message = ReferralMessage.Invalid)

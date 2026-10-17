@@ -16,11 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,6 +42,7 @@ import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.ReferralMessage
 import com.tailormyresume.core.domain.ReferralUiState
 import com.tailormyresume.feature.settings.impl.R
+import kotlinx.coroutines.launch
 
 internal class ReferralActions(
     val refresh: () -> Unit,
@@ -190,7 +190,15 @@ private fun ReferralEntry(content: ReferralUiState.Content, actions: ReferralAct
                     TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_review), actions.review, Modifier.fillMaxWidth(), enabled = !content.busy)
                 } else {
                     TmrPrimaryButton(
-                        stringResource(if (content.message == ReferralMessage.PolicyChanged) R.string.feature_settings_impl_referral_reconfirm else if (content.candidateSource == "LINK") R.string.feature_settings_impl_referral_continue else R.string.feature_settings_impl_referral_apply),
+                        stringResource(
+                            if (content.message == ReferralMessage.PolicyChanged) {
+                                R.string.feature_settings_impl_referral_reconfirm
+                            } else if (content.candidateSource == "LINK") {
+                                R.string.feature_settings_impl_referral_continue
+                            } else {
+                                R.string.feature_settings_impl_referral_apply
+                            },
+                        ),
                         actions.apply,
                         Modifier.fillMaxWidth(),
                         enabled = !content.busy && content.canAttach && content.retryAfterSeconds == null,

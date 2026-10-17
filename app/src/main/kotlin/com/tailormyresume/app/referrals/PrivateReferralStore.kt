@@ -208,5 +208,4 @@ class PrivateReferralStore @Inject constructor(
     internal suspend fun dismissInbox() = withContext(io) {
         mutex.withLock { saveInstallation(installation().copy(code = null, environment = null, consumed = true)) }
     }
-
 }

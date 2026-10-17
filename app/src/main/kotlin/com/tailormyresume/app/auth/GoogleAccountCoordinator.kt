@@ -377,6 +377,14 @@ class GoogleAccountCoordinator @Inject constructor(
         mutable.value = GoogleAccountState.Idle
     }
 
+    internal suspend fun prepareReferralEntry(): Boolean = mutex.withLock {
+        val previous = mutable.value
+        safely { reconcile() }
+        val ready = mutable.value is GoogleAccountState.Offer || mutable.value is GoogleAccountState.Complete || mutable.value == GoogleAccountState.Idle
+        if (ready && previous == GoogleAccountState.Idle) mutable.value = previous
+        ready
+    }
+
     override fun start() {
         scope.launch {
             if (journals.read() != null) open()

@@ -76,7 +76,10 @@ class RemoteReferralGatewayTest {
         override fun uid() = uid.takeIf { authPresent }
         override fun isAnonymous() = guest
         override suspend fun currentUser() = if (authPresent) FirebaseUser(uid, "", "", if (guest) AccountMode.ANONYMOUS else AccountMode.GOOGLE, if (guest) null else "provider-$uid") else null
-        override suspend fun initializedUser(): FirebaseUser? { initialized(); return currentUser() }
+        override suspend fun initializedUser(): FirebaseUser? {
+            initialized()
+            return currentUser()
+        }
         override suspend fun signIn(googleIdToken: String): AuthOutcome<FirebaseUser> = error("No Google flow in fixture")
         override fun signOut() = Unit
     }

@@ -29,7 +29,12 @@ class GoogleAccountPanelTest {
         rule.setContent {
             TmrTheme {
                 GoogleAccountPanel(
-                    GoogleAccountState.Offer(null, null, false), {}, {}, {}, {}, { _, _ -> },
+                    GoogleAccountState.Offer(null, null, false),
+                    {},
+                    {},
+                    {},
+                    {},
+                    { _, _ -> },
                     referral = com.tailormyresume.core.domain.ReferralEntryState("tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567", 13, "referral-v2", "2026-10-18T00:00:00Z"),
                     onClearReferral = { clears++ },
                 )

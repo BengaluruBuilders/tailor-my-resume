@@ -39,9 +39,11 @@ internal fun GoogleAccountOverlay(gateway: GoogleAccountGateway, modifier: Modif
     val referral by (referrals?.entry ?: remember { kotlinx.coroutines.flow.MutableStateFlow(com.tailormyresume.core.domain.ReferralEntryState()) }).collectAsStateWithLifecycle()
     val request by (referrals?.routeRequests ?: remember { kotlinx.coroutines.flow.MutableStateFlow(0L) }).collectAsStateWithLifecycle()
     androidx.compose.runtime.LaunchedEffect(referral.candidate, referral.version, state, request) {
-        if (state != GoogleAccountState.Idle) referral.candidate?.let { code ->
-            androidx.compose.runtime.withFrameNanos { }
-            referrals?.displayed(code, referral.version)
+        if (state != GoogleAccountState.Idle) {
+            referral.candidate?.let { code ->
+                androidx.compose.runtime.withFrameNanos { }
+                referrals?.displayed(code, referral.version)
+            }
         }
     }
     if (state == GoogleAccountState.Idle) return
