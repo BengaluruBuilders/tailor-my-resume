@@ -6,7 +6,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-/** Local routing hint only; Firebase still validates the credential before any account handoff. */
 internal object GoogleCredentialIdentity {
     fun digest(token: String): String {
         val payload = token.split('.').getOrNull(1) ?: error("Google credential is unavailable")
