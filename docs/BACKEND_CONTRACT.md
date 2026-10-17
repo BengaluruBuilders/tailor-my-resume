@@ -1193,7 +1193,8 @@ contract-only commit; implementations run their repository gates and focused tra
 
 ## 9. Google activation and conflict recovery — google-activation-v1
 
-Status: frozen for slice02 implementer agreement, 2026-10-17. Both implementers must record
+Status: frozen for slice02 implementer agreement, 2026-10-17; independent rate-limit clarification
+`google-activation-v1-rate-limit-1`. Both implementers must record
 agreement before application implementation. This extends v2 + guest-trial-v1. Section 8 and its
 canonical fixtures stay byte-for-byte unchanged. Production admissions remain off. Issues: backend #121; Android #403.
 
@@ -1312,14 +1313,16 @@ closes both new grants while preserving first observed facts. Signup revision ow
 capacity/admission; optional base names trial amount/capacity/admission. A paused or absent signup
 campaign is not missing classification config. Sources/outcomes remain separate. Used signal, legacy base refusal, absent/paused/
 exhausted base policy cannot silently refuse eligible +5. There is no +2 fallback for unavailable
-base. Symmetrically, available protected base may grant when signup campaign is absent/paused/
+base. The same independence applies to each source's bounded attempt admission (9.5).
+Symmetrically, available protected base may grant when signup campaign is absent/paused/
 exhausted: return base GRANTED and signup UNAVAILABLE, preserving eligible pending signup.
 If a requested revision for an uncommitted available subaction differs from its usable current
 revision (including null when now available), return 409 POLICY_CHANGED before **any new award**.
 Unavailable campaign has null revision if absent, or its acknowledged version if present/paused;
 never guess amount. A committed subaction binds its original receipt revision and bypasses its
 current policy, leaving only new work subject to current rules. Return 200 when at least one new
-requested award commits, or for durable business refusal/receipt recovery. Use 503
+requested award commits, or for durable business refusal/complete requested receipt recovery. Use 429
+RATE_LIMITED under 9.5 when no new award commits and a requested new source is rate-blocked. Use 503
 PROMOTION_UNAVAILABLE when no requested new award can proceed solely because required campaigns
 are temporarily unavailable, or shared classification/security prerequisites are missing. Refresh/reconfirm revised offers and obtain fresh evidence with the same
 stable business key. A committed replay returns original receipts/current wallet before current
@@ -1451,6 +1454,7 @@ change provenance; repeated calls preserve firstGoogleObservedAt.
 | Unprovable history / expired durable recovery | NOT_ELIGIBLE / AMBIGUOUS_HISTORY, RECOVERY_EXPIRED |
 | Base signal allocated elsewhere | NOT_ELIGIBLE / SIGN_IN_REQUIRED; no old owner data |
 | Unusable signup or base campaign | UNAVAILABLE / POLICY_UNAVAILABLE, ADMISSIONS_DISABLED, CAMPAIGN_EXHAUSTED |
+| Independently rate-limited new signup or direct base | UNAVAILABLE / RATE_LIMITED (activate outcome only; policy GET unchanged) |
 | No base / linked guest | NOT_ATTEMPTED / EVIDENCE_NOT_PROVIDED, GUEST_LINK |
 | Historical direct base refusal | NOT_ELIGIBLE / LEGACY_ACCOUNT |
 
@@ -1465,6 +1469,37 @@ fact remains durable when later admission fails; no failed economic transaction 
 capacity unit admits one full configured award; no partial amounts. Durable ineligible fact
 prevents later key/policy/auth reclassification. Do not cache temporary unavailability as success;
 retry retains original qualifying event/deadline even if bonus admission occurs later.
+
+For uncommitted requested sources, evaluate independent bounded attempt admission: signup uses
+its actor/network/campaign counters, with no device cap; direct base reuses existing trial
+actor/continuity/network/campaign counters and scope. A source's limit blocks only that source:
+base rate limiting cannot abort eligible signup, and signup rate limiting cannot abort eligible
+base. Count refused attempts in bounded independent transactions as 8.6 requires; no new key,
+policy, challenge or alternate path resets those counters or changes recorded continuity.
+Never treat network load shedding as duplicate-person proof. Common ingress/whole-action and
+challenge-issuance limits remain whole-operation 429; shared auth/live-user/classification,
+identity, challenge/binding, revision and Integrity prerequisites remain mandatory for both.
+A partial source result cannot mask a common security failure, provider outage or SQL failure.
+
+When at least one new award commits and another requested source is rate-limited, return 200
+with that source UNAVAILABLE/RATE_LIMITED and a positive integer Retry-After header in seconds
+(60 if unknown; the maximum advised wait if multiple source limits apply). The JSON outcome
+shape is unchanged. Persist the partial operation's immutable sub-outcome/receipt snapshot;
+same-key replay returns it with current wallet, bypassing fresh counters/provider calls, and
+still carries a positive Retry-After if its snapshot contains RATE_LIMITED (60 if unknown).
+Android retains the retry deadline and waits before an explicit new-key/fresh-challenge attempt
+for only the missing grant; policy refresh is not evidence that a counter reset.
+
+If no new award commits and at least one otherwise eligible requested new source is rate-blocked,
+return whole-operation 429 RATE_LIMITED with positive Retry-After, including when its counterpart
+is unavailable, ineligible or already granted. Do not consume the challenge, allocate a signal,
+charge capacity, create a grant/ledger/wallet increment or commit a successful operation snapshot.
+Retain independent bounded attempts and already durable observation/classification/continuity
+facts. Retry the same stable key/payload with fresh evidence after the delay. Recovering a
+counterpart receipt alone cannot freeze unresolved rate-blocked new work as a 200 partial success.
+Complete requested receipt recovery and durable all-ineligible classifications remain 200;
+campaign-only temporary unavailability remains 503 under 9.2. Previously committed receipts,
+balances and eligibility anchor/deadline remain intact in every case.
 
 Order: auth/app/live + strict body → stable fingerprint/committed recovery → existing lifetime
 receipt/fact → current revision snapshot → bounded Admin/Integrity outside SQL locks → common

@@ -3,6 +3,7 @@ import argparse
 import base64
 import hashlib
 import json
+from copy import deepcopy
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -128,6 +129,18 @@ def generate():
                     signupBonus=dict(status='NOT_ELIGIBLE', reason='EXISTING_ACCOUNT'),
                     baseTrial=dict(status='NOT_ATTEMPTED', reason='EVIDENCE_NOT_PROVIDED'),
                     referralEligibility=dict(status='NOT_ELIGIBLE', deadline=None))
+    base_limited = outcome(5, 'DIRECT_GOOGLE', 'UNAVAILABLE', 'RATE_LIMITED')
+    signup_limited = deepcopy(base_first)
+    signup_limited['signupBonus']['reason'] = 'RATE_LIMITED'
+    limited_replay = deepcopy(base_limited)
+    limited_replay.update(wallet=wallet(4), replayed=True)
+    limited_headers = {'Cache-Control': 'no-store', 'Retry-After': '60'}
+    http_examples = dict(
+        baseRateLimited=dict(status=200, headers=limited_headers, body=base_limited),
+        signupRateLimited=dict(status=200, headers=limited_headers, body=signup_limited),
+        partialRateLimitedReplayAfterSpend=dict(status=200, headers=limited_headers, body=limited_replay),
+        noNewGrantRateLimited=dict(status=429, headers=limited_headers,
+            body=dict(error=dict(code='RATE_LIMITED', message='Synthetic fixed message.'))))
     responses = dict(revision=REV, syntheticOnly=True, examples=dict(
         prepared=dict(intentId=INTENT, createdAt=AT, expiresAt='2026-10-17T00:05:00Z', state='PREPARED'),
         statusPrepared=dict(intent=dict(id=INTENT, state='PREPARED', createdAt=AT,
@@ -142,6 +155,7 @@ def generate():
         committedReplayAfterSpendAndPause=replay, existingGoogle=existing,
         conflict=dict(wallet=wallet(9, 3), completion=dict(kind='EXISTING_ACCOUNT', disposition='PRESERVE_LOCAL_WORK',
                       creditsTransferred=0, purchasesTransferred=False, runningJobsTransferred=False), replayed=False)),
+        httpExamples=http_examples,
         errors=[dict(status=status, body=dict(error=dict(code=code, message='Synthetic fixed message.')))
                 for status, code in [(403, 'GOOGLE_REQUIRED'), (403, 'GUEST_REQUIRED'),
                                      (403, 'GOOGLE_IDENTITY_REJECTED'), (403, 'RECENT_GOOGLE_AUTH_REQUIRED'),
@@ -185,6 +199,24 @@ def validate(files):
     assert examples['guestTwoToSeven']['wallet']['credits'] == 2 + 5
     assert examples['directUnused']['wallet']['credits'] == 2 + 5
     assert examples['directUsedSignal']['wallet']['credits'] == 5
+    http_examples = files['responses.json']['httpExamples']
+    for sample in http_examples.values():
+        assert int(sample['headers']['Retry-After']) > 0
+        assert sample['headers']['Cache-Control'] == 'no-store'
+    base_limited = http_examples['baseRateLimited']['body']
+    signup_limited = http_examples['signupRateLimited']['body']
+    limited_replay = http_examples['partialRateLimitedReplayAfterSpend']['body']
+    assert base_limited['wallet']['credits'] == 5
+    assert [g['kind'] for g in base_limited['grants']] == ['GOOGLE_SIGNUP']
+    assert base_limited['baseTrial'] == dict(status='UNAVAILABLE', reason='RATE_LIMITED')
+    assert signup_limited['wallet']['credits'] == 2
+    assert [g['kind'] for g in signup_limited['grants']] == ['GUEST_TRIAL']
+    assert signup_limited['signupBonus'] == dict(status='UNAVAILABLE', reason='RATE_LIMITED')
+    assert limited_replay['replayed'] is True and limited_replay['wallet']['credits'] == 4
+    for field in ['activation', 'grants', 'signupBonus', 'baseTrial', 'referralEligibility']:
+        assert limited_replay[field] == base_limited[field]
+    assert http_examples['noNewGrantRateLimited']['status'] == 429
+    assert http_examples['noNewGrantRateLimited']['body']['error']['code'] == 'RATE_LIMITED'
     for sample in examples.values():
         if 'wallet' in sample:
             w = sample['wallet']

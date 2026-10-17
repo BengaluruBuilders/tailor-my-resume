@@ -501,6 +501,168 @@
       "replayed": false
     }
   },
+  "httpExamples": {
+    "baseRateLimited": {
+      "status": 200,
+      "headers": {
+        "Cache-Control": "no-store",
+        "Retry-After": "60"
+      },
+      "body": {
+        "wallet": {
+          "credits": 5,
+          "freeCredits": 5,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        },
+        "activation": {
+          "source": "DIRECT_GOOGLE",
+          "eligibility": "ELIGIBLE",
+          "reason": "ELIGIBLE",
+          "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+          "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+          "referralDeadline": "2026-10-18T00:00:00Z"
+        },
+        "grants": [
+          {
+            "id": "33333333-3333-4333-8333-333333333333",
+            "kind": "GOOGLE_SIGNUP",
+            "amount": 5,
+            "createdAt": "2026-10-17T00:01:00Z",
+            "policyVersion": "signup-local-v1"
+          }
+        ],
+        "signupBonus": {
+          "status": "GRANTED",
+          "reason": "ELIGIBLE"
+        },
+        "baseTrial": {
+          "status": "UNAVAILABLE",
+          "reason": "RATE_LIMITED"
+        },
+        "referralEligibility": {
+          "status": "ELIGIBLE",
+          "deadline": "2026-10-18T00:00:00Z"
+        },
+        "replayed": false
+      }
+    },
+    "signupRateLimited": {
+      "status": 200,
+      "headers": {
+        "Cache-Control": "no-store",
+        "Retry-After": "60"
+      },
+      "body": {
+        "wallet": {
+          "credits": 2,
+          "freeCredits": 2,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        },
+        "activation": {
+          "source": "DIRECT_GOOGLE",
+          "eligibility": "ELIGIBLE",
+          "reason": "ELIGIBLE",
+          "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+          "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+          "referralDeadline": "2026-10-18T00:00:00Z"
+        },
+        "grants": [
+          {
+            "id": "55555555-5555-4555-8555-555555555555",
+            "kind": "GUEST_TRIAL",
+            "amount": 2,
+            "createdAt": "2026-10-17T00:01:00Z",
+            "policyVersion": "guest-local-v1"
+          }
+        ],
+        "signupBonus": {
+          "status": "UNAVAILABLE",
+          "reason": "RATE_LIMITED"
+        },
+        "baseTrial": {
+          "status": "GRANTED",
+          "reason": "ELIGIBLE"
+        },
+        "referralEligibility": {
+          "status": "ELIGIBLE",
+          "deadline": "2026-10-18T00:00:00Z"
+        },
+        "replayed": false
+      }
+    },
+    "partialRateLimitedReplayAfterSpend": {
+      "status": 200,
+      "headers": {
+        "Cache-Control": "no-store",
+        "Retry-After": "60"
+      },
+      "body": {
+        "wallet": {
+          "credits": 4,
+          "freeCredits": 4,
+          "purchasedCredits": 0,
+          "analysesLeftToday": 20,
+          "freeTailoringsLeftToday": 0,
+          "day": "2026-10-17",
+          "resetsAt": "2026-10-17T18:30:00Z",
+          "unlockedApplicationIds": []
+        },
+        "activation": {
+          "source": "DIRECT_GOOGLE",
+          "eligibility": "ELIGIBLE",
+          "reason": "ELIGIBLE",
+          "eligibilityAnchorAt": "2026-10-17T00:00:00Z",
+          "firstGoogleObservedAt": "2026-10-17T00:01:00Z",
+          "referralDeadline": "2026-10-18T00:00:00Z"
+        },
+        "grants": [
+          {
+            "id": "33333333-3333-4333-8333-333333333333",
+            "kind": "GOOGLE_SIGNUP",
+            "amount": 5,
+            "createdAt": "2026-10-17T00:01:00Z",
+            "policyVersion": "signup-local-v1"
+          }
+        ],
+        "signupBonus": {
+          "status": "GRANTED",
+          "reason": "ELIGIBLE"
+        },
+        "baseTrial": {
+          "status": "UNAVAILABLE",
+          "reason": "RATE_LIMITED"
+        },
+        "referralEligibility": {
+          "status": "ELIGIBLE",
+          "deadline": "2026-10-18T00:00:00Z"
+        },
+        "replayed": true
+      }
+    },
+    "noNewGrantRateLimited": {
+      "status": 429,
+      "headers": {
+        "Cache-Control": "no-store",
+        "Retry-After": "60"
+      },
+      "body": {
+        "error": {
+          "code": "RATE_LIMITED",
+          "message": "Synthetic fixed message."
+        }
+      }
+    }
+  },
   "errors": [
     {
       "status": 403,

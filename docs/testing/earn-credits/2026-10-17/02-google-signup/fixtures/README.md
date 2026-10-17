@@ -10,6 +10,8 @@ policy. Do not select fake verifiers from HTTP fields or enable a real environme
   absent signup campaign; deliberately invalid unions/unknown fields for implementer tests.
 - `responses.json`: independent grants in both directions, base-first/signup-first recovery,
   committed snapshot replay with current post-spend wallet, and conflict with no transfer.
+  `httpExamples` separately wraps the unchanged JSON bodies with HTTP status/headers for
+  independent source rate limits, immutable partial replay and whole-operation 429.
 
 Run `python3 generate-fixtures.py --check` in this directory. It reproduces four JSON files and
 checks vector bytes/hashes/negative mutations and balance arithmetic. This is fixture consistency,
