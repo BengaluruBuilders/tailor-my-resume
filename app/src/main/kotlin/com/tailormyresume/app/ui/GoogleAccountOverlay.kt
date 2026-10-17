@@ -63,7 +63,6 @@ internal fun GoogleAccountOverlay(gateway: GoogleAccountGateway, modifier: Modif
             modifier = modifier,
         )
     }
-
 }
 
 @Composable

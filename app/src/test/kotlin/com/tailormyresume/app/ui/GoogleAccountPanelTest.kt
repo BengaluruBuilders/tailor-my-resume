@@ -36,8 +36,11 @@ class GoogleAccountPanelTest {
         var cancellations = 0
         rule.setContent {
             TmrTheme {
-                panel(GoogleAccountState.Conflict(false, listOf("app-A" to "Role A", "app-B" to "Role B")),
-                    onConflict = { _, selected -> continued = selected }, onCancel = { cancellations++ })
+                panel(
+                    GoogleAccountState.Conflict(false, listOf("app-A" to "Role A", "app-B" to "Role B")),
+                    onConflict = { _, selected -> continued = selected },
+                    onCancel = { cancellations++ },
+                )
             }
         }
         rule.onNodeWithText("Keep using this guest account").performScrollTo().performClick()
