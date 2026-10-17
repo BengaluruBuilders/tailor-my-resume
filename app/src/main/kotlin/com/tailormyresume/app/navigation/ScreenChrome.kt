@@ -81,7 +81,7 @@ fun chromeFor(
         is EditRoleNavKey -> bar(title = R.string.shell_title_experience, action = ChromeAction.Save)
         is EditContactNavKey, is ListEditNavKey -> bar(title = R.string.shell_title_profile, action = ChromeAction.Save)
         is SkillsNavKey -> bar(title = R.string.shell_title_profile, action = ChromeAction.Done)
-        is CreditsNavKey -> bar(title = R.string.shell_title_settings)
+        is CreditsNavKey, is com.tailormyresume.feature.settings.api.navigation.ReferralsNavKey -> bar(title = R.string.shell_title_settings)
 
         is SignInNavKey, is ApplicationsNavKey, is ProfileNavKey -> NO_CHROME
         else -> NO_CHROME

@@ -80,6 +80,29 @@ class PrivateReferralStore @Inject constructor(
     internal suspend fun clear(owner: String, environment: String) = withContext(io) {
         mutex.withLock { file(owner, environment).delete() }
     }
+    internal suspend fun transferForReview(source: String, destination: String, environment: String, provider: String, generation: Long, checkOwner: () -> Unit) = withContext(io) {
+        mutex.withLock {
+            checkOwner()
+            val sourceFile = file(source, environment)
+            val destinationFile = file(destination, environment)
+            val current = if (destinationFile.baseFile.exists()) destinationFile.openRead().use { json.decodeFromString<ReferralJournal>(it.reader().readText()) } else null
+            val candidate = if (sourceFile.baseFile.exists()) sourceFile.openRead().use { json.decodeFromString<ReferralJournal>(it.reader().readText()) } else null
+            if (current == null && candidate?.code != null) {
+                val review = ReferralJournal(destination, environment, provider, generation, code = candidate.code, reviewFrom = source)
+                val stream = destinationFile.startWrite()
+                try {
+                    stream.write(json.encodeToString(ReferralJournal.serializer(), review).toByteArray())
+                    checkOwner()
+                    destinationFile.finishWrite(stream)
+                } catch (failure: Exception) {
+                    destinationFile.failWrite(stream)
+                    throw failure
+                }
+            }
+            synchronized(this@PrivateReferralStore) { epoch++ }
+            directory().listFiles().orEmpty().filter { it.name != destinationFile.baseFile.name }.forEach { it.delete() }
+        }
+    }
     suspend fun clearAll() {
         synchronized(this) { epoch++ }
         withContext(io) { mutex.withLock { directory().listFiles().orEmpty().forEach { it.delete() } } }

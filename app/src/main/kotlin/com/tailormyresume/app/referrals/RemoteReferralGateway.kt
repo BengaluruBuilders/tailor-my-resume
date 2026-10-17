@@ -70,6 +70,11 @@ class RemoteReferralGateway @Inject constructor(
         val uid = checkNotNull(owner.ticket.owner)
         val stored = store.read(uid, config.baseUrl)
         check(owner)
+        if (stored != null && stored.provider != owner.provider && stored.requestId != null) {
+            val marker = ReferralJournal(uid, config.baseUrl, owner.provider, owner.ticket.generation, phase = "READ_ONLY")
+            write(owner, marker)
+            return marker
+        }
         return stored ?: ReferralJournal(uid, config.baseUrl, owner.provider, owner.ticket.generation)
     }
     private suspend fun write(owner: Owner, value: ReferralJournal) {
@@ -136,7 +141,7 @@ class RemoteReferralGateway @Inject constructor(
             code = result.code?.value, candidate = journal.code, reward = result.offer.rewardAmount?.takeIf { available },
             creditedCount = result.stats.creditedCount, earnedCredits = result.stats.earnedCredits,
             canIssue = result.offer.codeIssuance in setOf("AVAILABLE", "ACTIVATION_REQUIRED"), guest = uids.isAnonymous(), attached = result.attachment?.status == "ATTACHED",
-            canAttach = available && result.offer.attachmentEligibility == "ELIGIBLE" && journal.phase != "READ_ONLY" && journal.reviewFrom == null,
+            canAttach = available && result.offer.attachmentEligibility == "ELIGIBLE" && journal.phase !in setOf("READ_ONLY", "REQUIRES_NEW") && journal.reviewFrom == null,
             deadline = result.offer.deadline, reviewRequired = journal.reviewFrom != null,
             message = if (message != ReferralMessage.None) {
                 message

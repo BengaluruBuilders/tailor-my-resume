@@ -231,19 +231,7 @@ class GoogleAccountCoordinator @Inject constructor(
             return
         }
         withContext(NonCancellable) {
-            val candidate = referrals?.read(journal.source, config.baseUrl)
-            referrals?.clearAll()
-            if (candidate?.code != null) {
-                referrals?.write(
-                    candidate.copy(
-                        owner = user.uid, provider = user.mode.name, generation = fence.ticket(), requestId = null,
-                        revision = null, payloadDigest = null, challengeId = null, phase = "CANDIDATE", retryAt = null, reviewFrom = journal.source,
-                    ),
-                    checkNotNull(referrals).epoch(),
-                ) {
-                    check(uids.uid() == user.uid)
-                }
-            }
+            referrals?.transferForReview(journal.source, user.uid, config.baseUrl, user.mode.name, fence.ticket()) { check(uids.uid() == user.uid) }
             cleaner.clear()
             checkpoints.restore(user.uid, config.baseUrl)
             checkLive()

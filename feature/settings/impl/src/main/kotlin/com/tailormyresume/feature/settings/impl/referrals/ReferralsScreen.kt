@@ -18,7 +18,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -93,9 +92,10 @@ internal fun ReferralsScreen(state: ReferralUiState, actions: ReferralActions, m
             style = TmrTheme.typography.body,
             color = TmrTheme.colors.textSecondary,
         )
-        if (content.code != null) {
-            TmrReadOnlyField(content.code, stringResource(R.string.feature_settings_impl_referral_my_code))
-            TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_copy), { actions.copy(content.code) }, Modifier.fillMaxWidth(), enabled = !content.busy)
+        val personalCode = content.code
+        if (personalCode != null) {
+            TmrReadOnlyField(personalCode, stringResource(R.string.feature_settings_impl_referral_my_code))
+            TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_copy), { actions.copy(personalCode) }, Modifier.fillMaxWidth(), enabled = !content.busy)
         } else if (content.canIssue) {
             TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_create), actions.issue, Modifier.fillMaxWidth(), enabled = !content.busy)
         }
@@ -122,12 +122,12 @@ internal fun ReferralsScreen(state: ReferralUiState, actions: ReferralActions, m
 
 @Composable
 private fun ReferralEntry(content: ReferralUiState.Content, actions: ReferralActions) {
-    var draft by rememberSaveable { mutableStateOf("") }
+    var draft by remember(content.guest, content.reviewRequired, content.candidate) { mutableStateOf("") }
     TmrCard {
         Column(verticalArrangement = Arrangement.spacedBy(TmrTheme.spacing.sm)) {
             Text(stringResource(R.string.feature_settings_impl_referral_entry), style = TmrTheme.typography.bodyLarge, color = TmrTheme.colors.text)
             Text(stringResource(R.string.feature_settings_impl_referral_optional), style = TmrTheme.typography.caption, color = TmrTheme.colors.textSecondary)
-            if (content.candidate != null) TmrReadOnlyField(content.candidate, stringResource(R.string.feature_settings_impl_referral_saved_code))
+            content.candidate?.let { TmrReadOnlyField(it, stringResource(R.string.feature_settings_impl_referral_saved_code)) }
             TmrTextField(
                 draft,
                 { if (it.length <= 256) draft = it },

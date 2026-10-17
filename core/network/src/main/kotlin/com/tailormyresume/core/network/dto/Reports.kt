@@ -31,6 +31,8 @@ data class ServerExportDto(
     val unlocks: List<JsonElement>,
     val purchases: List<JsonElement>,
     val contentReports: List<JsonElement>,
+    val credits: List<CreditEntryDto> = emptyList(),
+    val promotions: JsonElement? = null,
 )
 
 @Serializable

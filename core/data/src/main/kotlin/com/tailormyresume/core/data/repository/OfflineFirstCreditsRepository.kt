@@ -95,6 +95,7 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
 
     override suspend fun refreshConfirmed(): Boolean {
         if (!remote.ownsLedger) return true
+        val environment = remote.environment()
         val (started, owner) = synchronized(lock) {
             val current = remote.owner()
             held.update { it?.takeIf { held -> held.owner == current } }
@@ -110,14 +111,14 @@ internal class OfflineFirstCreditsRepository @Inject constructor(
             return false
         }
         return persistence.withLock {
-            if (synchronized(lock) { started != generation || owner != remote.owner() }) return@withLock false
+            if (synchronized(lock) { started != generation || owner != remote.owner() || environment != remote.environment() }) return@withLock false
             if (owner != null) {
-                creditLedgerDao.replaceOwned(owner, remote.environment(), snapshot.entries.map { it.asEntity().copy(owner = owner, environment = remote.environment(), serverId = it.id) })
+                creditLedgerDao.replaceOwned(owner, environment, snapshot.entries.map { it.asEntity().copy(owner = owner, environment = environment, serverId = it.id) })
             }
             synchronized(lock) {
-                val stored = started == generation && owner == remote.owner()
+                val stored = started == generation && owner == remote.owner() && environment == remote.environment()
                 if (stored) {
-                    held.value = Held(owner, snapshot, remote.environment())
+                    held.value = Held(owner, snapshot, environment)
                     refreshNeeded = false
                 }
                 stored

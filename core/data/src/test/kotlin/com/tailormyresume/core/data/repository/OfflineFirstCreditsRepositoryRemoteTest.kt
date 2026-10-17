@@ -341,4 +341,26 @@ class OfflineFirstCreditsRepositoryRemoteTest {
     fun refreshConfirmedIsTrueWithoutFetchingInDemo() = runTest {
         assertThat(repository(NoRemoteLedger()).refreshConfirmed()).isTrue()
     }
+    @Test fun persistedHistoryKeepsStableIdsScopeAndServerBalancesWithoutDeletingEconomicRows() = runTest {
+        val ledger = database.creditLedgerDao()
+        ledger.insert(com.tailormyresume.core.database.model.CreditLedgerEntity(kind = CreditLedgerKind.FREE_GRANT, amount = 2, applicationId = null, productId = null, createdAt = Instant.fromEpochMilliseconds(0)))
+        val reward = entry(CreditLedgerKind.REFERRAL_REWARD, 13, 3).copy(id = "reward-a")
+        val second = reward.copy(id = "reward-b")
+        remote.snapshot = CreditSnapshot(7, listOf(reward, second))
+        val first = repository()
+        first.refresh()
+        assertThat(ledger.ownedEntries("uid-1", "").map { it.serverId }).containsExactly("reward-a", "reward-b")
+        assertThat(ledger.observeLedger().first().filter { it.owner == null }).hasSize(1)
+        val restored = repository()
+        assertThat(restored.observeLedger().first().map { it.id }).containsExactly("reward-a", "reward-b")
+        assertThat(restored.observeKnownBalance().first()).isNull()
+        first.removeForApplication("any")
+        assertThat(ledger.ownedEntries("uid-1", "")).hasSize(2)
+        remote.owner = "uid-2"
+        assertThat(repository().observeLedger().first()).isEmpty()
+        assertThat(ledger.ownedEntries("uid-1", "")).hasSize(2)
+        restored.clear()
+        assertThat(ledger.ownedEntries("uid-1", "")).isEmpty()
+    }
+
 }

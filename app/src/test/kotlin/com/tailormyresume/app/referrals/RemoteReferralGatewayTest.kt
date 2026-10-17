@@ -127,7 +127,9 @@ class RemoteReferralGatewayTest {
         for (mode in listOf("NONE", "OPTIONAL")) {
             attached = false
             continuityMode = mode
-            val client = client()
+            val freshStore = createStore()
+            freshStore.clearAll()
+            val client = client(freshStore)
             client.refresh()
             client.save(CODE)
             client.issue()
@@ -289,6 +291,22 @@ class RemoteReferralGatewayTest {
         assertThat(content(client).candidate).isNull()
         store.clearAll()
         assertThat(store.read(uid, server.url("/").toString())).isNull()
+    }
+
+    @Test fun conflictCandidateRequiresExplicitRebindAndCannotReplaceDestinationCandidate() = runTest {
+        val original = client()
+        guest = true
+        original.save(CODE)
+        store.transferForReview(uid, "destination", server.url("/").toString(), "GOOGLE", fence.ticket()) { }
+        uid = "destination"; guest = false
+        val destination = client(store)
+        destination.refresh()
+        assertThat(content(destination).reviewRequired).isTrue()
+        destination.apply()
+        assertThat(requests("/attach")).isEmpty()
+        destination.acceptTransfer()
+        destination.apply()
+        assertThat(requests("/attach")).hasSize(1)
     }
     companion object {
         const val CODE = "tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"
