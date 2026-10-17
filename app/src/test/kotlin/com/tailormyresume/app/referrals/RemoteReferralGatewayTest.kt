@@ -109,7 +109,10 @@ class RemoteReferralGatewayTest {
                             """{"code":${ownCode?.let { """{"value":"$it","createdAt":"2026-10-17T00:00:00Z"}""" } ?: "null"},"shareUrl":null,"offer":${offer()},"attachment":${if (attached) receipt() else "null"},"stats":{"creditedCount":2,"earnedCredits":26}}""",
                         )
                     }
-                    "/v1/tailormyresume/referrals/code" -> { ownCode = CODE; jsonResponse(201, """{"code":{"value":"$CODE","createdAt":"2026-10-17T00:00:00Z"},"shareUrl":null,"offer":${offer()},"replayed":false}""") }
+                    "/v1/tailormyresume/referrals/code" -> {
+                        ownCode = CODE
+                        jsonResponse(201, """{"code":{"value":"$CODE","createdAt":"2026-10-17T00:00:00Z"},"shareUrl":null,"offer":${offer()},"replayed":false}""")
+                    }
                     "/v1/tailormyresume/referrals/challenges" -> jsonResponse(201, """{"challengeId":"22222222-2222-4222-8222-222222222222","challenge":"opaque","expiresAt":"2026-10-17T00:05:00Z","bindingVersion":1,"requestHash":"$HASH"}""")
                     "/v1/tailormyresume/referrals/attach" -> postFailure?.let { errorResponse(postStatus, it).setHeader("Retry-After", "11") } ?: run {
                         attached = true
@@ -325,13 +328,19 @@ class RemoteReferralGatewayTest {
     }
 
     @Test fun missingConfigurationRetainsForeignSyntacticCandidateWithoutEvidenceOrMutation() = runTest {
-        available = false; codeAvailable = false; guest = true
+        available = false
+        codeAvailable = false
+        guest = true
         val client = client()
         val foreign = "foreign-app.other-environment.abcdefghijklmnopqrstuvwxyz234567"
-        client.save(foreign); client.apply(); client.issue()
+        client.save(foreign)
+        client.apply()
+        client.issue()
         guest = false
         val restored = client(createStore())
-        restored.refresh(); restored.apply(); restored.issue()
+        restored.refresh()
+        restored.apply()
+        restored.issue()
         assertThat(content(restored).candidate).isEqualTo(foreign)
         assertThat(requests("/attach")).isEmpty()
         assertThat(requests("/code")).isEmpty()
@@ -339,11 +348,14 @@ class RemoteReferralGatewayTest {
         assertThat(tokenCalls).isEqualTo(0)
         assertThat(signalReads).isEqualTo(0)
     }
+
     @Test fun serverRejectsForeignScopeWithoutChangingFixedDestinationOrClaimingApplied() = runTest {
-        postFailure = "REFERRAL_CODE_INVALID"; postStatus = 400
+        postFailure = "REFERRAL_CODE_INVALID"
+        postStatus = 400
         val client = client()
         val foreign = "foreign-app.other-environment.abcdefghijklmnopqrstuvwxyz234567"
-        client.save(foreign); client.apply()
+        client.save(foreign)
+        client.apply()
         assertThat(content(client).attached).isFalse()
         assertThat(content(client).message).isEqualTo(ReferralMessage.Invalid)
         assertThat(content(client).candidate).isEqualTo(foreign)

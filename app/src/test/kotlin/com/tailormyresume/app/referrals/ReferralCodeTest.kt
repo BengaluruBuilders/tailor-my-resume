@@ -30,15 +30,23 @@ class ReferralCodeTest {
             }
         }
     }
+
     @Test fun configuredPrefixesRemainWholeAndDoNotChangeCanonicalIdentity() {
         val code = "resume-demo.preview-2.abcdefghijklmnopqrstuvwxyz234567"
         assertThat(canonicalReferralCode(" \t${code.uppercase(java.util.Locale.ROOT)}\r\n")).isEqualTo(code)
         assertThat(canonicalReferralCode("foreign-app.other-environment.abcdefghijklmnopqrstuvwxyz234567")).isNotNull()
         assertThat(referralDigest(code)).isNotEqualTo(referralDigest("tailormyresume.staging.abcdefghijklmnopqrstuvwxyz234567"))
-        listOf("https://example.invalid/$code", "$code.extra", code.replace('.', '/'), "é$code", "a.b.abc", " ".repeat(257) + code,
-            "1resume.preview-2.abcdefghijklmnopqrstuvwxyz234567", "a".repeat(33) + ".b.abcdefghijklmnopqrstuvwxyz234567").forEach {
+        listOf(
+            "https://example.invalid/$code",
+            "$code.extra",
+            code.replace('.', '/'),
+            "é$code",
+            "a.b.abc",
+            " ".repeat(257) + code,
+            "1resume.preview-2.abcdefghijklmnopqrstuvwxyz234567",
+            "a".repeat(33) + ".b.abcdefghijklmnopqrstuvwxyz234567",
+        ).forEach {
             assertThat(canonicalReferralCode(it)).isNull()
         }
     }
-
 }

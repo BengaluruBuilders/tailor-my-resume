@@ -1,9 +1,9 @@
 package com.tailormyresume.core.network.dto
 
 import com.tailormyresume.core.model.ReportedItemKind
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 @Serializable

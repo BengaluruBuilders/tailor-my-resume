@@ -21,8 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -101,9 +101,15 @@ internal fun ReferralsScreen(state: ReferralUiState, actions: ReferralActions, m
         } else if (content.canIssue) {
             TmrSecondaryButton(stringResource(R.string.feature_settings_impl_referral_create), actions.issue, Modifier.fillMaxWidth(), enabled = !content.busy)
         }
-        Text(stringResource(R.string.feature_settings_impl_referral_stats,
-            pluralStringResource(R.plurals.feature_settings_impl_referral_friends, if (content.creditedCount == 1L) 1 else 2, content.creditedCount),
-            pluralStringResource(R.plurals.feature_settings_impl_referral_earned, if (content.earnedCredits == 1L) 1 else 2, content.earnedCredits)), style = TmrTheme.typography.caption, color = TmrTheme.colors.textMuted)
+        Text(
+            stringResource(
+                R.string.feature_settings_impl_referral_stats,
+                pluralStringResource(R.plurals.feature_settings_impl_referral_friends, if (content.creditedCount == 1L) 1 else 2, content.creditedCount),
+                pluralStringResource(R.plurals.feature_settings_impl_referral_earned, if (content.earnedCredits == 1L) 1 else 2, content.earnedCredits),
+            ),
+            style = TmrTheme.typography.caption,
+            color = TmrTheme.colors.textMuted,
+        )
         if (content.attached) {
             Text(stringResource(R.string.feature_settings_impl_referral_applied), style = TmrTheme.typography.body, color = TmrTheme.colors.lime)
         } else if (content.message != ReferralMessage.ReadOnly) {

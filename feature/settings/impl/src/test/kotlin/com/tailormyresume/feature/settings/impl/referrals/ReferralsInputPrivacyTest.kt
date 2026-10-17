@@ -6,11 +6,11 @@ import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
-import com.google.common.truth.Truth.assertThat
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.tailormyresume.core.designsystem.theme.TmrTheme
 import com.tailormyresume.core.domain.ReferralMessage
 import com.tailormyresume.core.domain.ReferralUiState
@@ -45,6 +45,7 @@ class ReferralsInputPrivacyTest {
         rule.runOnIdle { state.value = ReferralUiState.Content() }
         rule.onNodeWithContentDescription("Referral code").performScrollTo().assertTextEquals("")
     }
+
     @Test
     fun nonFixtureReturnedCodeIsCopiedWithoutNamespaceRewrite() {
         val code = "resume-demo.preview-2.abcdefghijklmnopqrstuvwxyz234567"
@@ -54,5 +55,4 @@ class ReferralsInputPrivacyTest {
         rule.onNodeWithText("Copy code").performScrollTo().performClick()
         assertThat(copied).isEqualTo(code)
     }
-
 }
