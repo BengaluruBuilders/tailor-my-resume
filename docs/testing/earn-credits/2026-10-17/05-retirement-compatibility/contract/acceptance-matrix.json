@@ -1,0 +1,105 @@
+{
+  "revision": "retirement-compatibility-v1-draft",
+  "cases": [
+    {
+      "id": "R05-01",
+      "scope": "frontend",
+      "assertion": "No sale/product-detail/launch/manual-restore surface or port; obsolete serialized payment key may decode only to redirect immediately to credits/application preserving draft; no sales destination is reachable"
+    },
+    {
+      "id": "R05-02",
+      "scope": "frontend",
+      "assertion": "Zero-credit earn gate returns to application; back spends nothing; existing tailoring recovers first"
+    },
+    {
+      "id": "R05-03",
+      "scope": "integration",
+      "assertion": "Google startup discovers paid-but-unposted PURCHASED token; one historical grant"
+    },
+    {
+      "id": "R05-04",
+      "scope": "integration",
+      "assertion": "Pending token grants nothing; listener or next startup completion settles once"
+    },
+    {
+      "id": "R05-05",
+      "scope": "integration",
+      "assertion": "Transient repost then duplicate/token-order replay grants once; consume failure retries without another grant"
+    },
+    {
+      "id": "R05-06",
+      "scope": "frontend",
+      "assertion": "Account switch/sign-out cancels jobs and clears caches; late old-actor replies cannot apply"
+    },
+    {
+      "id": "R05-07",
+      "scope": "frontend",
+      "assertion": "Anonymous/other session never queries/reposts purchases; wallet/link/navigation survive settlement failure"
+    },
+    {
+      "id": "R05-08",
+      "scope": "integration",
+      "assertion": "Legacy/new/unknown kinds preserve original IDs/amounts and authoritative balance; consumed history/export remain; >100 entries uncapped export; retained old client omits unknown rows without balance loss; activation compatible-client gate"
+    },
+    {
+      "id": "R05-09",
+      "scope": "backend",
+      "assertion": "Old-client packs/purchase shapes/statuses retained; wrong UID/product/token/app/deleting account denied"
+    },
+    {
+      "id": "R05-10",
+      "scope": "backend",
+      "assertion": "Pause guest, signup and referral admissions independently: no new affected award, committed replay/current wallet/spend, linking, export/deletion and historical settlement survive; activation observation/deadline immutable"
+    },
+    {
+      "id": "R05-11",
+      "scope": "backend",
+      "assertion": "Known historical, ambiguous and direct-new classification guards before reward; observedAt/anchor/source stable across pause/retry; unavailable configuration may recover eligibility; bounded resumable read-only synthetic rehearsal gives no grants/balance writes or authoritative Firebase claim"
+    },
+    {
+      "id": "R05-12",
+      "scope": "backend",
+      "assertion": "Optional cap absent preserves behavior; zero/negative/fractional configured cap invalid; structured/chat forward optional field"
+    },
+    {
+      "id": "R05-13",
+      "scope": "backend",
+      "assertion": "Exact monetary boundary admits, one over denies before provider/attempt; call quota and app cap independent"
+    },
+    {
+      "id": "R05-14",
+      "scope": "backend",
+      "assertion": "Same-user concurrent last capacity admits one; distinct users independent under shared app cap"
+    },
+    {
+      "id": "R05-15",
+      "scope": "backend",
+      "assertion": "Pending/released/succeeded/failed/unknown/stale accounting matches existing committed-cost function; double settlement inert"
+    },
+    {
+      "id": "R05-16",
+      "scope": "backend",
+      "assertion": "UTC creation day survives late settlement; next day independent; lowering cap changes only future admission"
+    },
+    {
+      "id": "R05-17",
+      "scope": "backend",
+      "assertion": "Erased usage remains app spend without charging surviving UID; deletion race cannot admit; other app behavior unchanged"
+    },
+    {
+      "id": "R05-18",
+      "scope": "release",
+      "assertion": "Read-only classification and compatible pause/rollback rehearsal covers historical welcome/partly-spent/purchased/MIGRATION, pending tailoring/consume and >100 export; no mutating backfill/live cutoff/down migration; recall explicitly disabled unsupported"
+    },
+    {
+      "id": "R05-19",
+      "scope": "validation",
+      "assertion": "Exact candidate pair passes required repo gates and bounded independent integration; publish only with honest external blockers"
+    },
+    {
+      "id": "R05-20",
+      "scope": "external",
+      "assertion": "Genuine Google/Integrity/Play/link/store/landing/cost activation evidence remains BLOCKED unless actually obtained"
+    }
+  ]
+}

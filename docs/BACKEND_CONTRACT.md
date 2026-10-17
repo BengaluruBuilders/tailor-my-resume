@@ -2242,3 +2242,135 @@ foreground LINK/Google-continuation REFERRAL_ATTACH operations and official inst
 Keep passive/recovery no-evidence and no extra Android-ID collection; retain existing action binding,
 strict verifier, policy/Dependency Guard/lint gates and human PR review before merge. This section
 does not silently amend governing documents or authorize live collection/hosting/publication.
+
+
+## 12. Payment retirement and historical compatibility — retirement-compatibility-v1
+
+Status: DRAFT for slice05 agreement, 2026-10-17. The coordinating owner accepted the slice05
+retirement-decision.md scope. Final freeze requires discovery reconciliation and both implementers'
+agreement. This additive section supersedes conflicting client implementation descriptions in
+sections 4.6/4.7/8, without changing their HTTP request/response shapes or historical obligations.
+Sections 8–11's grant, provider, policy, replay, ownership and lifecycle rules remain in force.
+
+### 12.1 Retire sale surfaces; preserve owned settlement
+
+The new Android client exposes no buy/pack selection, payment destination, payment sheet or restore
+purchases action. Zero-credit entry uses the existing earn-credits gate and preserves the application
+return destination. Dismiss/back neither starts tailoring nor spends credits. Recover an already
+submitted tailoring before rejecting for insufficient balance. Obsolete saved payment navigation
+must resolve to a valid credits/application destination without discarding drafts. A decode-only
+serialization alias may retain the old payment key name/fields solely to redirect immediately to
+that valid destination. It exposes no sale screen, purchase action, payment navigation helper or
+launch port and cannot initiate a new payment.
+
+Extract wallet/balance read, observe and cache-clear behavior from feature-facing payment APIs;
+retain historical purchase/history reads for display and account export. The new client does not
+query ProductDetails or launch a Billing flow. History uses original server IDs, kinds, signed amounts
+and product IDs; historical pack price lookup is no longer required. Keep WELCOME, MIGRATION,
+PURCHASE, REFUND, TAILORING, GUEST_TRIAL, GOOGLE_SIGNUP and REFERRAL_REWARD readable. Do not
+recalculate balances from the at-most-100-row display ledger or rewrite historical events. Full account
+export remains uncapped and includes historical purchases. Retained older clients leniently decode
+unknown reward kinds but omit those rows while keeping the server balance authoritative. Do not
+mislabel rewards as WELCOME/PURCHASE or invent an unagreed compatibility projection. Activation
+requires a compatible Android release; old-client omission is a documented limitation.
+
+Retain a minimal app-internal settlement adapter with Billing connection, owned-purchase queries
+and unsolicited completion listener. At verified Google-session startup, query owned purchases and
+post PURCHASED obligations to the existing POST /purchases. A pending token earns nothing until
+Play reports PURCHASED; completion can arrive through the listener or next startup query. Consumed
+purchases remain visible through server history even when absent from Play's owned list. The
+backend cannot discover a paid-but-unposted token, so its consume-retry worker alone is insufficient.
+Retain the used Billing dependency and its dependency-guard entries while this adapter requires it.
+
+Scope asynchronous work and cache application to app/environment, verified Google UID and session
+generation; retain wallet-generation fencing. Anonymous/other sessions never query or repost
+purchases. Sign-out/account switch cancels stale jobs and clears owned caches; late old-owner
+responses cannot update a new owner's balance/history or navigation. Transient settlement failure
+must preserve retryable obligations and must not break wallet reads, linking or normal navigation.
+No feature-facing purchase launch or manual restore port survives merely to support settlement.
+
+### 12.2 Existing HTTP and economic compatibility
+
+No endpoint, body key, response field, stable error or ledger kind is removed. GET /packs and GET/POST
+/purchases remain compatible for installed old clients. Keep historical product IDs, package-specific
+Play verification, hashed UID binding, token/order uniqueness, live-user/deletion checks and the
+Google-only purchase submission rule. Keep first-post 201 and committed-repeat 200 with the same
+Purchase and Wallet shapes. Retain existing PURCHASE_PENDING, PURCHASE_INVALID, PLAY_UNAVAILABLE,
+FORBIDDEN and GOOGLE_REQUIRED behavior. Duplicate/replayed obligations grant once, with no implicit
+welcome grant; a failed consume preserves the grant and is retried through the existing same-token
+path and tailormyresume_consume_retry worker. The client never consumes a purchase itself.
+
+Pausing promotional admissions does not reject legitimate historical settlement or committed grant
+recovery, remove existing credit spending, or block own history/export/deletion. Reinstallation and
+app updates do not reset balances or historical classification. Legacy/ambiguous accounts remain
+closed to new-user grants under sections 8/9; no automatic signup top-up or balance backfill is added.
+Other apps' routes, policies and economic data retain existing behavior.
+
+This retires new-client sale initiation only. No store product change, live cutoff, grace deadline,
+HTTP sales-disabled rejection, deletion of purchase tables, or claim that store sales are disabled
+is part of this slice. Full Billing/old-route removal needs a later measured decision covering unknown
+unposted tokens, pending completions, old installed clients and applicable Play obligations.
+
+### 12.3 Optional per-user monetary AI admission bound
+
+Add optional positive integer micro-USD dailyUserCostCapMicroUsd to per-app AiConfig and ReserveInput.
+Omission preserves existing behavior. Forward it through both structured and chat reservation paths;
+TMR's generic AI routes remain forbidden. No public request/response field or numeric live value is
+introduced. Existing call quota, app monetary cap and credit admission still apply independently.
+
+For a new reservation, under the existing live-user lock, sum only that UID's committed ai_usage cost
+in the app database whose createdAt lies in the current UTC [day start, next day start). Reuse
+committedCostAtMicroUsd(now), not credits or campaign capacity. Admit equality; reject when the sum
+plus the proposed full reservation exceeds the configured limit. Preserve user-lock then app-budget-
+lock ordering. A rejection returns existing 429 BUDGET_EXCEEDED and {error:{code,message}}, creates
+no usage attempt and starts no provider call. Android branches on code, never exact message text.
+
+Pending counts the full reservation. Unknown uses existing conservative accounting until the
+existing ten-minute stale-input reconciliation; known success/failure uses actual cost, released
+uses zero. Settlement/recovery stays idempotent and does not create a second allowance or usage row.
+A reservation belongs to its UTC creation day even when settled after midnight. Lowering a cap
+blocks future reservations as needed without cancelling or rewriting previous attempts. This is
+admission using the existing estimate, not a retroactive guarantee about provider-reported actual cost.
+
+Erasure removes user usage and preserves existing aggregate aiErasedSpend for the app cap. Do not
+attribute that aggregate to surviving users or create a retained per-user tombstone/schema. Active
+deletion still rejects reservations. No perpetual per-person enforcement across deleted/recreated
+identities is promised. No app registry activation, quota/app-cap change or paid evaluation is implied.
+
+### 12.4 Focused acceptance and release boundary
+
+The finite acceptance matrix and synthetic cost cases are in
+`docs/testing/earn-credits/2026-10-17/05-retirement-compatibility/contract/`. Reuse prior slices' unchanged
+security/lifecycle evidence with exact revision and scope, then independently validate the actual
+slice05 pair. Required repository gates remain Android tools/ci/verify-local.sh and backend npm run
+check, with focused settlement, owner-switch, history/recovery and real-Postgres monetary concurrency
+checks. Contract fixtures alone are not runtime proof.
+
+Keep admission defaults closed without complete platform/policy prerequisites. Rollback pauses new
+admissions while preserving committed receipts, current balances/spend, owned recovery, settlement,
+exports and deletion. Use schema-compatible code/config rollback; no destructive down migration or
+old binary restoring implicit welcome grants. Document actual conservative classification and activation/rollback procedures against existing code.
+Historical Google accounts must be classified ineligible before any new reward can commit. The
+existing trusted request-time classifier enforces this even for an account with no activation row;
+absence of a row is never evidence of new eligibility. Slice05 adds bounded resumable read-only
+synthetic inventory/rehearsal and documents why no mutating classification backfill is currently
+required. Local inputs and counts are fixture evidence only. Before production reward activation,
+separately authorized authoritative same-project Firebase and backend inventory must establish that
+known historical accounts are covered by the approved cutoff and conservative guard, with unresolved
+history closed; retain reviewed counts/provenance and reconcile exceptions before enabling admissions.
+If that inventory demonstrates a real need to persist additional historical classifications, design
+a separately reviewed measured, resumable, idempotent marking operation then, without grants, balance
+changes or rewriting settled facts. Original observedAt/anchor/source remain stable across pause and
+retry; unavailable configuration can recover eligibility when corrected, without resetting those facts.
+No live rollout command or data migration is authorized by this contract.
+
+Optional device recall has no implemented adapter/outbox and is unsupported/disabled. The baseline
+does not rely on it; do not claim recall retry/crash evidence. Enabling it requires separate verified
+access, bit ownership and implementation/lifecycle evidence.
+
+Carry every prior external gate forward. Real Google/Integrity, Play pending/unposted completion,
+configured App Links/install attribution, original configured-origin landing publication coupling,
+operational retention/classification rehearsal, live cap sizing and provider-cost/abuse measurement
+remain unproven until their actual evidence exists. Fixture integration must name provider substitutions.
+Published drafts may show independently checked coding with external acceptance blocked under the
+accepted external-gate decision; they remain unmerged and not ready for release or activation.

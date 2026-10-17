@@ -1,0 +1,36 @@
+{
+  "unit": "micro-USD",
+  "syntheticOnly": true,
+  "cap": 100,
+  "cases": [
+    {
+      "committed": 60,
+      "reservation": 40,
+      "allowed": true
+    },
+    {
+      "committed": 60,
+      "reservation": 41,
+      "allowed": false
+    },
+    {
+      "committed": 100,
+      "reservation": 1,
+      "allowed": false
+    },
+    {
+      "cap": null,
+      "committed": 100,
+      "reservation": 1,
+      "allowed": "subject to unchanged quota and app cap"
+    }
+  ],
+  "accounting": {
+    "pending": "full reserved",
+    "unknown": "existing committedCostAtMicroUsd(now), including stale input reconciliation",
+    "succeeded": "known actual",
+    "failed": "known actual",
+    "released": 0
+  },
+  "utcBoundary": "createdAt day, not settlement day"
+}
